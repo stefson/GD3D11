@@ -157,46 +157,45 @@ public:
 	virtual XRESULT DrawWorldMesh(bool noTextures = false){return XR_SUCCESS;};
 
 	/** Draws the static VOBs */
-	virtual XRESULT DrawVOBs(bool noTextures=false){return XR_SUCCESS;};
+	virtual XRESULT DrawVOBs(bool noTextures=false) { return XR_SUCCESS; }
 
 	/** Draws the sky using the GSky-Object */
-	virtual XRESULT DrawSky(){return XR_SUCCESS;};
+	virtual XRESULT DrawSky() { return XR_SUCCESS; }
 
 	/** Called when a key got pressed */
-	virtual XRESULT OnKeyDown(unsigned int key){return XR_SUCCESS;};
+	virtual XRESULT OnKeyDown(unsigned int key) { return XR_SUCCESS; }
 
 	/** Returns the current resolution */
-	virtual INT2 GetResolution(){return INT2(0,0);};
-	virtual INT2 GetBackbufferResolution(){return GetResolution();};
+	virtual INT2 GetResolution() { return INT2(0,0); }
+	virtual INT2 GetBackbufferResolution() { return GetResolution(); }
 	
 	/** Returns the data of the backbuffer */
-	virtual void GetBackbufferData(byte** data, int& pixelsize){};
+	virtual void GetBackbufferData(byte** data, int& pixelsize) {}
 
 	/** Returns the textures drawn this frame */
-	virtual const std::set<zCTexture*> GetFrameTextures(){return std::set<zCTexture*>();};
+	virtual const std::set<zCTexture*> GetFrameTextures() { return std::set<zCTexture*>(); }
 
 	/** Draws a fullscreenquad, copying the given texture to the viewport */
-	virtual void DrawQuad(INT2 position, INT2 size){};
+	virtual void DrawQuad(INT2 position, INT2 size) {}
 
 	/** Draws a single VOB */
-	virtual void DrawVobSingle(VobInfo* vob){};
+	virtual void DrawVobSingle(VobInfo* vob) {}
 
 	/** Message-Callback for the main window */
-	virtual LRESULT OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam){return 0;};
+	virtual LRESULT OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) { return 0; }
 
 	/** Called when a vob was removed from the world */
-	virtual XRESULT OnVobRemovedFromWorld(zCVob* vob){return XR_SUCCESS;};
+	virtual XRESULT OnVobRemovedFromWorld(zCVob* vob) { return XR_SUCCESS; }
 
 	/** Reloads shaders */
-	virtual XRESULT ReloadShaders(){return XR_SUCCESS;};
+	virtual XRESULT ReloadShaders() { return XR_SUCCESS; }
 
 	/** Draws the water surfaces */
-	virtual void DrawWaterSurfaces(){};
+	virtual void DrawWaterSurfaces() {}
 
 	/** Handles an UI-Event */
-	virtual void OnUIEvent(EUIEvent uiEvent){};
+	virtual void OnUIEvent(EUIEvent uiEvent) {}
 
 	/** Draws particle effects */
-	virtual void DrawFrameParticles(std::map<zCTexture*, std::vector<ParticleInstanceInfo>>& particles, std::map<zCTexture*, ParticleRenderInfo>& info){};
+	virtual void DrawFrameParticles(std::map<zCTexture*, std::vector<ParticleInstanceInfo>>& particles, std::map<zCTexture*, ParticleRenderInfo>& info) {}
 };
-

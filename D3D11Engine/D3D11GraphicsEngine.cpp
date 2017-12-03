@@ -2967,32 +2967,32 @@ void D3D11GraphicsEngine::DrawWorldAround(const D3DXVECTOR3& position,
 	}
 
 
-	if (Engine::GAPI->GetRendererState()->RendererSettings.DrawVOBs)
-	{
+	if (Engine::GAPI->GetRendererState()->RendererSettings.DrawVOBs) {
 		// Draw visible vobs here
 		std::list<VobInfo*> rndVob;
 
 		// construct new renderedvob list or fake one
-		if (!renderedVobs || renderedVobs->empty())
-		{
-			for (size_t i=0;i<drawnSections.size();i++)
-			{
-				for (auto it = drawnSections[i]->Vobs.begin(); it != drawnSections[i]->Vobs.end(); ++it)
-				{
-					if (!(*it)->VisualInfo)
+		if (!renderedVobs || renderedVobs->empty()) {
+			for (size_t i = 0; i < drawnSections.size(); i++) {
+				for (auto it = drawnSections[i]->Vobs.begin(); it != drawnSections[i]->Vobs.end(); ++it) {
+					if (!(*it)->VisualInfo) {
 						continue; // Seems to happen in Gothic 1
+					}
 
-					if (!(*it)->Vob->GetShowMainVisual())
+					if (!(*it)->Vob->GetShowVisual()) {
 						continue;
+					}
 
 					// Check vob range
 					float dist = D3DXVec3Length(&(position - (*it)->LastRenderPosition));
-					if (dist > range)
+					if (dist > range) {
 						continue;
+					}
 
 					// Check for inside vob. Don't render inside-vobs when the light is outside and vice-versa.
-					if (!(*it)->IsIndoorVob && indoor || (*it)->IsIndoorVob && !indoor)
+					if (!(*it)->IsIndoorVob && indoor || (*it)->IsIndoorVob && !indoor) {
 						continue;
+					}
 
 					rndVob.push_back((*it));
 				}
@@ -3004,38 +3004,26 @@ void D3D11GraphicsEngine::DrawWorldAround(const D3DXVECTOR3& position,
 
 		// At this point eiter renderedVobs or rndVob is filled with something
 		std::list<VobInfo*>& rl = renderedVobs != nullptr ? *renderedVobs : rndVob;
-		for (std::list<VobInfo*>::iterator it = rl.begin(); it != rl.end(); ++it)
-		{
-			
-
+		for (std::list<VobInfo*>::iterator it = rl.begin(); it != rl.end(); ++it) {
 			// Bind per-instance buffer
 			((D3D11ConstantBuffer *)(*it)->VobConstantBuffer)->BindToVertexShader(1);
 
 			// Draw the vob
-			for (std::map<zCMaterial *, std::vector<MeshInfo*>>::iterator itm = (*it)->VisualInfo->Meshes.begin(); itm != (*it)->VisualInfo->Meshes.end();itm++)
-			{
-				if ((*itm).first && (*itm).first->GetTexture())
-				{
-					if ((*itm).first->GetAlphaFunc() != zMAT_ALPHA_FUNC_FUNC_NONE || 
-						(*itm).first->GetAlphaFunc() != zMAT_ALPHA_FUNC_FUNC_MAT_DEFAULT)
-					{
-						if ((*itm).first->GetTexture()->CacheIn(0.6f) == zRES_CACHED_IN)
-						{
+			for (std::map<zCMaterial *, std::vector<MeshInfo*>>::iterator itm = (*it)->VisualInfo->Meshes.begin(); itm != (*it)->VisualInfo->Meshes.end(); ++itm) {
+				if ((*itm).first && (*itm).first->GetTexture()) {
+					if ((*itm).first->GetAlphaFunc() != zMAT_ALPHA_FUNC_FUNC_NONE || (*itm).first->GetAlphaFunc() != zMAT_ALPHA_FUNC_FUNC_MAT_DEFAULT) {
+						if ((*itm).first->GetTexture()->CacheIn(0.6f) == zRES_CACHED_IN) {
 							(*itm).first->GetTexture()->Bind(0);
 						}
-					}else
-					{
+					} else {
 						DistortionTexture->BindToPixelShader(0);
 					}
 				}
-
-				for (unsigned int i=0;i<(*itm).second.size();i++)
-				{
+				for (unsigned int i = 0; i < (*itm).second.size(); i++) {
 					Engine::GraphicsEngine->DrawVertexBufferIndexed((*itm).second[i]->MeshVertexBuffer, (*itm).second[i]->MeshIndexBuffer, (*itm).second[i]->Indices.size());
 				}
 			}
 		}
-
 
 		// Vobs have this differently
 		Engine::GAPI->GetRendererState()->RasterizerState.FrontCounterClockwise = !Engine::GAPI->GetRendererState()->RasterizerState.FrontCounterClockwise;
@@ -3048,55 +3036,56 @@ void D3D11GraphicsEngine::DrawWorldAround(const D3DXVECTOR3& position,
 	Engine::GAPI->GetRendererState()->RasterizerState.FrontCounterClockwise = true;
 	Engine::GAPI->GetRendererState()->RasterizerState.SetDirty();
 
-	if (Engine::GAPI->GetRendererState()->RendererSettings.DrawMobs)
-	{
+	if (Engine::GAPI->GetRendererState()->RendererSettings.DrawMobs) {
 		// Draw visible vobs here
 		std::list<SkeletalVobInfo*> rndVob;
 
 		// construct new renderedvob list or fake one
-		if (!renderedMobs || renderedMobs->empty())
-		{
-			for (std::list<SkeletalVobInfo *>::iterator it = Engine::GAPI->GetSkeletalMeshVobs().begin(); it != Engine::GAPI->GetSkeletalMeshVobs().end(); ++it)
-			{
-				if (!(*it)->VisualInfo)
+		if (!renderedMobs || renderedMobs->empty()) {
+			for (std::list<SkeletalVobInfo *>::iterator it = Engine::GAPI->GetSkeletalMeshVobs().begin(); it != Engine::GAPI->GetSkeletalMeshVobs().end(); ++it) {
+				if (!(*it)->VisualInfo) {
 					continue; // Seems to happen in Gothic 1
+				}
+
+				if (!(*it)->Vob->GetShowVisual()) {
+					continue;
+				}
 
 				// Check vob range
 				float dist = D3DXVec3Length(&(position - (*it)->Vob->GetPositionWorld()));
-				if (dist > range)
+				if (dist > range) {
 					continue;
+				}
 
 				// Check for inside vob. Don't render inside-vobs when the light is outside and vice-versa.
-				if (!(*it)->Vob->IsIndoorVob() && indoor || (*it)->Vob->IsIndoorVob() && !indoor)
+				if (!(*it)->Vob->IsIndoorVob() && indoor || (*it)->Vob->IsIndoorVob() && !indoor) {
 					continue;
+				}
 
 				// Assume everything that doesn't have a skeletal-mesh won't move very much
 				// This applies to usable things like chests, chairs, beds, etc
-				if (!((SkeletalMeshVisualInfo *)(*it)->VisualInfo)->SkeletalMeshes.empty())
+				if (!((SkeletalMeshVisualInfo *)(*it)->VisualInfo)->SkeletalMeshes.empty()) {
 					continue;
+				}
 
 				rndVob.push_back((*it));
 			}
 
-			if (renderedMobs)
+			if (renderedMobs) {
 				*renderedMobs = rndVob;
+			}
 		}
 
 		// At this point eiter renderedMobs or rndVob is filled with something
 		std::list<SkeletalVobInfo*>& rl = renderedMobs != nullptr ? *renderedMobs : rndVob;
-		for (std::list<SkeletalVobInfo*>::iterator it = rl.begin(); it != rl.end(); ++it)
-		{
+		for (std::list<SkeletalVobInfo*>::iterator it = rl.begin(); it != rl.end(); ++it) {
 			Engine::GAPI->DrawSkeletalMeshVob((*it), FLT_MAX);
 		}
-
 	}
-	if (Engine::GAPI->GetRendererState()->RendererSettings.DrawSkeletalMeshes)
-	{
+	if (Engine::GAPI->GetRendererState()->RendererSettings.DrawSkeletalMeshes) {
 		// Draw animated skeletal meshes if wanted
-		if (renderNPCs)
-		{
-			for (std::list<SkeletalVobInfo *>::iterator it = Engine::GAPI->GetAnimatedSkeletalMeshVobs().begin(); it != Engine::GAPI->GetAnimatedSkeletalMeshVobs().end(); ++it)
-			{
+		if (renderNPCs) {
+			for (std::list<SkeletalVobInfo *>::iterator it = Engine::GAPI->GetAnimatedSkeletalMeshVobs().begin(); it != Engine::GAPI->GetAnimatedSkeletalMeshVobs().end(); ++it) {
 				if (!(*it)->VisualInfo)
 					continue; // Seems to happen in Gothic 1
 
@@ -3546,8 +3535,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced()
 	Engine::GAPI->GetViewMatrix(&view);
 	Engine::GAPI->SetViewTransform(view);
 
-	if (Engine::GAPI->GetRendererState()->RendererSettings.WireframeVobs)
-	{
+	if (Engine::GAPI->GetRendererState()->RendererSettings.WireframeVobs) {
 		Engine::GAPI->GetRendererState()->RasterizerState.Wireframe = true;
 	}
 
@@ -3565,12 +3553,10 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced()
 	static std::vector<VobLightInfo *> lights;
 	static std::vector<SkeletalVobInfo *> mobs;
 	
-	if (Engine::GAPI->GetRendererState()->RendererSettings.DrawVOBs || 
-		Engine::GAPI->GetRendererState()->RendererSettings.EnableDynamicLighting)
-	{
-		if (!Engine::GAPI->GetRendererState()->RendererSettings.FixViewFrustum ||
-			(Engine::GAPI->GetRendererState()->RendererSettings.FixViewFrustum && vobs.empty()))
+	if (Engine::GAPI->GetRendererState()->RendererSettings.DrawVOBs || Engine::GAPI->GetRendererState()->RendererSettings.EnableDynamicLighting) {
+		if (!Engine::GAPI->GetRendererState()->RendererSettings.FixViewFrustum || (Engine::GAPI->GetRendererState()->RendererSettings.FixViewFrustum && vobs.empty())) {
 			Engine::GAPI->CollectVisibleVobs(vobs, lights, mobs);
+		}
 	}
 
 	// Need to collect alpha-meshes to render them laterdy
@@ -4782,8 +4768,7 @@ D3D11ENGINE_RENDER_STAGE D3D11GraphicsEngine::GetRenderingStage()
 }
 
 /** Draws a single VOB */
-void D3D11GraphicsEngine::DrawVobSingle(VobInfo* vob)
-{
+void D3D11GraphicsEngine::DrawVobSingle(VobInfo* vob) {
 	//vob->UpdateVobConstantBuffer();
 	//vob->VobConstantBuffer->BindToVertexShader(1);
 

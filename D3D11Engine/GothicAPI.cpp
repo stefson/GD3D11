@@ -2897,8 +2897,9 @@ void GothicAPI::CollectVisibleVobs(std::vector<VobInfo *>& vobs, std::vector<Vob
 
 	zCBspBase* rootBsp = tree->GetRootNode();
 	BspInfo* root = &BspLeafVobLists[rootBsp];
-	if (zCCamera::GetCamera())
+	if (zCCamera::GetCamera()) {
 		zCCamera::GetCamera()->Activate();
+	}
 
 	/*for (auto it = VobMap.begin(); it != VobMap.end(); ++it)
 	{
@@ -2923,22 +2924,16 @@ void GothicAPI::CollectVisibleVobs(std::vector<VobInfo *>& vobs, std::vector<Vob
 	std::list<VobInfo*> removeList; // FIXME: This should not be needed!
 
 	// Add visible dynamically added vobs
-	for (std::list<VobInfo*>::iterator it = DynamicallyAddedVobs.begin(); it != DynamicallyAddedVobs.end(); ++it)
-	{
-		// Get distance to this vob
-		float dist = D3DXVec3Length(&(camPos - (*it)->Vob->GetPositionWorld()));
+	if (Engine::GAPI->GetRendererState()->RendererSettings.DrawVOBs) {
+		for (std::list<VobInfo*>::iterator it = DynamicallyAddedVobs.begin(); it != DynamicallyAddedVobs.end(); ++it) {
+			// Get distance to this vob
+			float dist = D3DXVec3Length(&(camPos - (*it)->Vob->GetPositionWorld()));
 
-		if (Engine::GAPI->GetRendererState()->RendererSettings.DrawVOBs)
-		{
 			// Draw, if in range
-			if ((*it)->VisualInfo && ((dist < vobIndoorDist && (*it)->IsIndoorVob) || 
-				(dist < vobOutdoorSmallDist && (*it)->VisualInfo->MeshSize < vobSmallSize) || 
-				(dist < vobOutdoorDist)))
-			{
+			if ((*it)->VisualInfo && ((dist < vobIndoorDist && (*it)->IsIndoorVob) || (dist < vobOutdoorSmallDist && (*it)->VisualInfo->MeshSize < vobSmallSize) || (dist < vobOutdoorDist))) {
 #ifdef BUILD_GOTHIC_1_08k
 				// FIXME: This is sometimes nullptr, suggesting that the Vob is invalid. Why does this happen?
-				if (!(*it)->VobConstantBuffer)
-				{
+				if (!(*it)->VobConstantBuffer) {
 					removeList.push_back((*it));
 					continue;
 				}
@@ -2947,6 +2942,10 @@ void GothicAPI::CollectVisibleVobs(std::vector<VobInfo *>& vobs, std::vector<Vob
 				//if (memcmp(&(*it)->LastRenderPosition, (*it)->Vob->GetPositionWorld(), sizeof(D3DXVECTOR3)) != 0)
 				{
 
+				}
+
+				if (!(*it)->Vob->GetShowVisual()) {
+					continue;
 				}
 
 				VobInstanceInfo vii;
@@ -2968,8 +2967,7 @@ void GothicAPI::CollectVisibleVobs(std::vector<VobInfo *>& vobs, std::vector<Vob
 
 #ifdef BUILD_GOTHIC_1_08k
 	// FIXME: See above for info on this
-	for (auto it = removeList.begin();it!=removeList.end();++it)
-	{
+	for (auto it = removeList.cbegin(); it != removeList.cend(); ++it) {
 		RegisteredVobs.insert((*it)->Vob); // This vob isn't in this set anymore, but still in DynamicallyAddedVobs??
 		OnRemovedVob((*it)->Vob, oCGame::GetGame()->_zCSession_world);
 	}
@@ -3215,8 +3213,7 @@ static void CVVH_AddNotDrawnVobToList(std::vector<SkeletalVobInfo *>& target, st
 }
 
 /** Recursive helper function to draw collect the vobs */
-void GothicAPI::CollectVisibleVobsHelper(BspInfo* base, zTBBox3D boxCell, int clipFlags, std::vector<VobInfo *>& vobs, std::vector<VobLightInfo *>& lights, std::vector<SkeletalVobInfo *>& mobs)
-{
+void GothicAPI::CollectVisibleVobsHelper(BspInfo * base, zTBBox3D boxCell, int clipFlags, std::vector<VobInfo *> & vobs, std::vector<VobLightInfo *> & lights, std::vector<SkeletalVobInfo *> & mobs) {
 	float vobIndoorDist = Engine::GAPI->GetRendererState()->RendererSettings.IndoorVobDrawRadius;
 	float vobOutdoorDist = Engine::GAPI->GetRendererState()->RendererSettings.OutdoorVobDrawRadius;
 	float vobOutdoorSmallDist = Engine::GAPI->GetRendererState()->RendererSettings.OutdoorSmallVobDrawRadius;
@@ -3224,17 +3221,13 @@ void GothicAPI::CollectVisibleVobsHelper(BspInfo* base, zTBBox3D boxCell, int cl
 	float visualFXDrawRadius = Engine::GAPI->GetRendererState()->RendererSettings.VisualFXDrawRadius;
 	D3DXVECTOR3 camPos = Engine::GAPI->GetCameraPosition();
 
-	while(base->OriginalNode)
-	{
+	while (base->OriginalNode) {
 		// Check for occlusion-culling
-		if (Engine::GAPI->GetRendererState()->RendererSettings.EnableOcclusionCulling && 
-			!base->OcclusionInfo.VisibleLastFrame)
-		{
+		if (Engine::GAPI->GetRendererState()->RendererSettings.EnableOcclusionCulling && !base->OcclusionInfo.VisibleLastFrame) {
 			return;
 		}
 
-		if (clipFlags>0) 
-		{
+		if (clipFlags > 0)  {
 			float yMaxWorld = Engine::GAPI->GetLoadedWorldInfo()->BspTree->GetRootNode()->BBox3D.Max.y;
 
 			zTBBox3D nodeBox = base->OriginalNode->BBox3D;
@@ -3243,35 +3236,31 @@ void GothicAPI::CollectVisibleVobsHelper(BspInfo* base, zTBBox3D boxCell, int cl
 			nodeBox.Max.y = nodeYMax;
 
 			float dist = Toolbox::ComputePointAABBDistance(camPos, base->OriginalNode->BBox3D.Min, base->OriginalNode->BBox3D.Max);
-			if (dist < vobOutdoorDist)
-			{
+			if (dist < vobOutdoorDist) {
 				zTCam_ClipType nodeClip;
-				if (!Engine::GAPI->GetRendererState()->RendererSettings.EnableOcclusionCulling)
+				if (!Engine::GAPI->GetRendererState()->RendererSettings.EnableOcclusionCulling) {
 					nodeClip = zCCamera::GetCamera()->BBox3DInFrustum(nodeBox, clipFlags);
-				else
+				} else {
 					nodeClip = (zTCam_ClipType)base->OcclusionInfo.LastCameraClipType; // If we are using occlusion-clipping, this test has already been done
+				}
 				
 				//float dist = D3DXVec3Length(&(base->BBox3D.Min - camPos));
 
-				if (nodeClip==ZTCAM_CLIPTYPE_OUT) 
+				if (nodeClip == ZTCAM_CLIPTYPE_OUT) {
 					return; // Nothig to see here. Discard this node and the subtree}
-			}else
-			{
+				}
+			} else {
 				// Too far
 				return;
 			}
 		}
 
-
-
-		if (base->OriginalNode->IsLeaf())
-		{
+		if (base->OriginalNode->IsLeaf()) {
 			//Engine::GraphicsEngine->GetLineRenderer()->AddAABBMinMax(base->OriginalNode->BBox3D.Min, base->OriginalNode->BBox3D.Max, D3DXVECTOR4(1,1,0,1));
 
 			// Check if this leaf is inside the frustum
 			bool insideFrustum = true;
-			if (clipFlags > 0) 
-			{
+			if (clipFlags > 0) {
 				/*zTCam_ClipType nodeClip;
 				if (!Engine::GAPI->GetRendererState()->RendererSettings.EnableOcclusionCulling)
 					nodeClip = zCCamera::GetCamera()->BBox3DInFrustum(base->OriginalNode->BBox3D, clipFlags);
@@ -3295,28 +3284,24 @@ void GothicAPI::CollectVisibleVobsHelper(BspInfo* base, zTBBox3D boxCell, int cl
 			float dist = Toolbox::ComputePointAABBDistance(camPos, base->OriginalNode->BBox3D.Min, base->OriginalNode->BBox3D.Max);
 			// float dist = D3DXVec3Length(&(base->BBox3D.Min - camPos));
 
-			if (insideFrustum)
-			{
-				if (Engine::GAPI->GetRendererState()->RendererSettings.DrawVOBs)
-				{
-					if (dist < vobIndoorDist)
+			if (insideFrustum) {
+				if (Engine::GAPI->GetRendererState()->RendererSettings.DrawVOBs) {
+					if (dist < vobIndoorDist) {
 						CVVH_AddNotDrawnVobToList(vobs, listA, vobIndoorDist);
-
-					if (dist < vobOutdoorSmallDist)
-						CVVH_AddNotDrawnVobToList(vobs, listB, vobOutdoorSmallDist);
-				}
-
-				if (dist < vobOutdoorDist)
-				{
-					if (Engine::GAPI->GetRendererState()->RendererSettings.DrawVOBs)
-					{
-						CVVH_AddNotDrawnVobToList(vobs, listC, vobOutdoorDist);
 					}
 
+					if (dist < vobOutdoorSmallDist) {
+						CVVH_AddNotDrawnVobToList(vobs, listB, vobOutdoorSmallDist);
+					}
 				}
 
-				if (Engine::GAPI->GetRendererState()->RendererSettings.DrawMobs && dist < vobOutdoorSmallDist)
-				{
+				if (dist < vobOutdoorDist) {
+					if (Engine::GAPI->GetRendererState()->RendererSettings.DrawVOBs) {
+						CVVH_AddNotDrawnVobToList(vobs, listC, vobOutdoorDist);
+					}
+				}
+
+				if (Engine::GAPI->GetRendererState()->RendererSettings.DrawMobs && dist < vobOutdoorSmallDist) {
 					CVVH_AddNotDrawnVobToList(mobs, listD, vobOutdoorDist);
 
 					/*if (RendererState.RendererSettings.EnableDynamicLighting)
@@ -3330,27 +3315,24 @@ void GothicAPI::CollectVisibleVobsHelper(BspInfo* base, zTBBox3D boxCell, int cl
 				}
 			}
 
-			if (RendererState.RendererSettings.EnableDynamicLighting && insideFrustum)
-			{
+			if (RendererState.RendererSettings.EnableDynamicLighting && insideFrustum) {
 				// Add dynamic lights
 				float minDynamicUpdateLightRange = Engine::GAPI->GetRendererState()->RendererSettings.MinLightShadowUpdateRange;
 				D3DXVECTOR3 playerPosition = Engine::GAPI->GetPlayerVob() != nullptr ? Engine::GAPI->GetPlayerVob()->GetPositionWorld() : D3DXVECTOR3(FLT_MAX, FLT_MAX, FLT_MAX);
 
 				// Take cameraposition if we are freelooking
-				if (zCCamera::IsFreeLookActive())
+				if (zCCamera::IsFreeLookActive()) {
 					playerPosition = Engine::GAPI->GetCameraPosition();
+				}
 
-				for (int i=0;i<leaf->LightVobList.NumInArray;i++)
-				{
+				for (int i = 0; i < leaf->LightVobList.NumInArray; i++) {
 					float lightCameraDist = D3DXVec3Length(&(Engine::GAPI->GetCameraPosition() - leaf->LightVobList.Array[i]->GetPositionWorld()));
-					if (lightCameraDist + leaf->LightVobList.Array[i]->GetLightRange() < visualFXDrawRadius)
-					{
+					if (lightCameraDist + leaf->LightVobList.Array[i]->GetLightRange() < visualFXDrawRadius) {
 						zCVobLight* v = leaf->LightVobList.Array[i];
 						VobLightInfo** vi = &VobLightMap[leaf->LightVobList.Array[i]];
 
 						// Check if we already have this light
-						if (!*vi)
-						{
+						if (!*vi) {
 							// Add if not. This light must have been added during gameplay
 							*vi = new VobLightInfo;
 							(*vi)->Vob = leaf->LightVobList.Array[i];
@@ -3360,8 +3342,7 @@ void GothicAPI::CollectVisibleVobsHelper(BspInfo* base, zTBBox3D boxCell, int cl
 								Engine::GraphicsEngine->CreateShadowedPointLight(&(*vi)->LightShadowBuffers, *vi, true); // Also flag as dynamic
 						}
 
-						if (!(*vi)->VisibleInRenderPass && (*vi)->Vob->IsEnabled())
-						{
+						if (!(*vi)->VisibleInRenderPass && (*vi)->Vob->IsEnabled() && (*vi)->Vob->GetShowVisual()) {
 							(*vi)->VisibleInRenderPass = true;
 
 							//D3DXVECTOR3 mid = base->BBox3D.Min * 0.5f + base->BBox3D.Max * 0.5f;
@@ -3371,8 +3352,7 @@ void GothicAPI::CollectVisibleVobsHelper(BspInfo* base, zTBBox3D boxCell, int cl
 
 							// Update the lights shadows if: Light is dynamic or full shadow-updates are set
 							if (RendererState.RendererSettings.EnablePointlightShadows >= GothicRendererSettings::PLS_FULL
-								|| (RendererState.RendererSettings.EnablePointlightShadows >= GothicRendererSettings::PLS_UPDATE_DYNAMIC && !(*vi)->Vob->IsStatic()))
-							{
+								|| (RendererState.RendererSettings.EnablePointlightShadows >= GothicRendererSettings::PLS_UPDATE_DYNAMIC && !(*vi)->Vob->IsStatic())) {
 								// Now check for distances, etc
 								if ( (*vi)->Vob->GetLightRange() > minDynamicUpdateLightRange 
 									&& lightPlayerDist < (*vi)->Vob->GetLightRange() * 1.5f)
@@ -3381,16 +3361,14 @@ void GothicAPI::CollectVisibleVobsHelper(BspInfo* base, zTBBox3D boxCell, int cl
 							// Render it
 							lights.push_back(*vi);
 						}
-					}else
-					{
+					} else {
 						//Engine::GraphicsEngine->GetLineRenderer()->AddPointLocator(leaf->LightVobList.Array[i]->GetPositionWorld(), 10.0f, D3DXVECTOR4(0,1,0,1));
 					}
 				}
 			}
 			
 			return;
-		}else
-		{
+		} else {
 			zCBspNode* node = (zCBspNode *)base->OriginalNode;
 
 			int	planeAxis = node->PlaneSignbits;
@@ -3399,10 +3377,8 @@ void GothicAPI::CollectVisibleVobsHelper(BspInfo* base, zTBBox3D boxCell, int cl
 			boxCell.Max.y	= node->BBox3D.Min.y;
 
 			zTBBox3D tmpbox = boxCell;
-			if (D3DXVec3Dot(&node->Plane.Normal, &GetCameraPosition()) > node->Plane.Distance)
-			{ 
-				if (node->Front) 
-				{
+			if (D3DXVec3Dot(&node->Plane.Normal, &GetCameraPosition()) > node->Plane.Distance) { 
+				if (node->Front) {
 					((float *)&tmpbox.Min)[planeAxis] = node->Plane.Distance;
 					CollectVisibleVobsHelper(base->Front, tmpbox, clipFlags, vobs, lights, mobs);
 				}
@@ -3410,10 +3386,8 @@ void GothicAPI::CollectVisibleVobsHelper(BspInfo* base, zTBBox3D boxCell, int cl
 				((float *)&boxCell.Max)[planeAxis] = node->Plane.Distance;
 				base = base->Back;
 
-			} else 
-			{
-				if (node->Back ) 
-				{
+			} else {
+				if (node->Back) {
 					((float *)&tmpbox.Max)[planeAxis] = node->Plane.Distance;
 					CollectVisibleVobsHelper(base->Back, tmpbox, clipFlags, vobs, lights, mobs);
 				}
