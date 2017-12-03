@@ -70,9 +70,6 @@
     <Filter Include="Librarys\Ocean">
       <UniqueIdentifier>{c785e8ae-b3cf-484f-a21b-448b1a0deee3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\GAPI\Update">
-      <UniqueIdentifier>{10f4b86e-92b5-45f4-be3c-a1e2d9895e30}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\D2D\Views\Editor">
       <UniqueIdentifier>{bbb9a900-54fc-4e56-9cb6-9b7d93f6b1e6}</UniqueIdentifier>
     </Filter>
@@ -544,9 +541,6 @@
     <ClInclude Include="oCSpawnManager.h">
       <Filter>ZenGin\Classes</Filter>
     </ClInclude>
-    <ClInclude Include="UpdateCheck.h">
-      <Filter>Engine\GAPI\Update</Filter>
-    </ClInclude>
     <ClInclude Include="AlignedAllocator.h">
       <Filter>Librarys</Filter>
     </ClInclude>
@@ -591,12 +585,6 @@
     </ClInclude>
     <ClInclude Include="SV_ProgressBar.h">
       <Filter>Engine\D2D\Views\Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="D2DContentDownloadDialog.h">
-      <Filter>Engine\D2D\Views</Filter>
-    </ClInclude>
-    <ClInclude Include="FileDownloader.h">
-      <Filter>Engine\GAPI</Filter>
     </ClInclude>
     <ClInclude Include="XUnzip.h">
       <Filter>Librarys</Filter>
@@ -845,9 +833,6 @@
     <ClCompile Include="D2DSettingsDialog.cpp">
       <Filter>Engine\D2D\Views</Filter>
     </ClCompile>
-    <ClCompile Include="UpdateCheck.cpp">
-      <Filter>Engine\GAPI\Update</Filter>
-    </ClCompile>
     <ClCompile Include="D3D11PFX_SMAA.cpp">
       <Filter>Engine\D3D11\PFX\Effects</Filter>
     </ClCompile>
@@ -877,12 +862,6 @@
     </ClCompile>
     <ClCompile Include="SV_ProgressBar.cpp">
       <Filter>Engine\D2D\Views\Controls</Filter>
-    </ClCompile>
-    <ClCompile Include="D2DContentDownloadDialog.cpp">
-      <Filter>Engine\D2D\Views</Filter>
-    </ClCompile>
-    <ClCompile Include="FileDownloader.cpp">
-      <Filter>Engine\GAPI</Filter>
     </ClCompile>
     <ClCompile Include="XUnzip.cpp">
       <Filter>Librarys</Filter>

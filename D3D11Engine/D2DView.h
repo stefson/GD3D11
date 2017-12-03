@@ -105,8 +105,6 @@ public:
 	/** Returns the editor panel */
 	D2DEditorView* GetEditorPanel(){return EditorView;}
 
-	/** Runs the content downloader to download missing normalmaps for example */
-	void RunContentDownloader();
 protected:
 
 	/** Create resources */

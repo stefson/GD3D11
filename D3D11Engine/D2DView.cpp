@@ -6,7 +6,6 @@
 #include "D2DSettingsDialog.h"
 #include "Engine.h"
 #include "GothicAPI.h"
-#include "D2DContentDownloadDialog.h"
 #include "ModSpecific.h"
 
 #pragma comment(lib, "d2d1.lib")
@@ -355,33 +354,6 @@ HRESULT D2DView::InitResources()
 	
 
 	return XR_SUCCESS;
-}
-
-/** Runs the content downloader to download missing normalmaps for example */
-void D2DView::RunContentDownloader()
-{
-#ifdef BUILD_GOTHIC_1_08k
-	return;
-#endif
-
-	std::list<DownloadJob> jobs;
-	
-	// Make sure this folder exists
-	CreateDirectory("system\\GD3D11\\textures\\replacements", NULL);
-
-	// Check for original game normalmaps
-	if (!ModSpecific::NormalmapPackageInstalled(ModSpecific::NRMPACK_ORIGINAL))
-		jobs.push_back(DownloadJob(std::string(ModSpecific::NRMPACK_ORIGINAL) + ".zip", 
-		"system\\GD3D11\\textures\\replacements\\"));
-
-	// Check for the current mods normalmaps
-	if (!ModSpecific::NormalmapPackageInstalled(ModSpecific::GetModNormalmapPackName()) && 
-		ModSpecific::GetModNormalmapPackName() != std::string(ModSpecific::NRMPACK_ORIGINAL))
-		jobs.push_back(DownloadJob(std::string(ModSpecific::GetModNormalmapPackName()) + ".zip", 
-		"system\\GD3D11\\textures\\replacements\\" + ModSpecific::GetModNormalmapPackName()));
-
-	// This is registered here and deletes itself when the game closes
-	D2DContentDownloadDialog* downloader = new D2DContentDownloadDialog(this, MainSubView, EDL_Normalmaps_Find, jobs);
 }
 
 /** Draws the view */

@@ -31,7 +31,6 @@
 #include "zCMeshSoftSkin.h"
 #include "GOcean.h"
 #include "zCVobLight.h"
-#include "UpdateCheck.h"
 #include "zCQuadMark.h"
 #include "zCOption.h"
 #include "zCRndD3D.h"
@@ -153,31 +152,25 @@ GothicAPI::~GothicAPI() {
 }
 
 /** Called when the game starts */
-void GothicAPI::OnGameStart()
-{
+void GothicAPI::OnGameStart() {
 	LoadMenuSettings(MENU_SETTINGS_FILE);
 
 	LogInfo() << "Running with Commandline: " << zCOption::GetOptions()->GetCommandline();
 
 	// Get forced resolution from commandline
 	std::string res = zCOption::GetOptions()->ParameterValue("ZRES");
-	if (!res.empty())
-	{
+	if (!res.empty()) {
 		std::string x = res.substr(0, res.find_first_of(','));
 		std::string y = res.substr(res.find_first_of(',') + 1);
-		RendererState.RendererSettings.LoadedResolution.x = atoi(x.c_str());
-		RendererState.RendererSettings.LoadedResolution.y = atoi(y.c_str());
+		RendererState.RendererSettings.LoadedResolution.x = std::stoi(x);
+		RendererState.RendererSettings.LoadedResolution.y = std::stoi(y);
 
 		LogInfo() << "Forcing resolution via zRes-Commandline to: " << RendererState.RendererSettings.LoadedResolution.toString(); 
 	}
 
-	if (RendererState.RendererSettings.EnableAutoupdates && !zCOption::GetOptions()->IsParameter("XNOUPDATE"))
-		UpdateCheck::RunUpdater();
-
 #ifdef PUBLIC_RELEASE
-
 #ifndef BUILD_GOTHIC_1_08k
-	// See if the user correctly onstalled the normalmaps
+	// See if the user correctly installed the normalmaps
 	CheckNormalmapFilesOld();
 #endif
 #endif

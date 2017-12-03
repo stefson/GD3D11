@@ -644,22 +644,7 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame()
 	Engine::GAPI->GetRendererState()->RendererInfo.Timing.StartTotal();
 
 	static bool s_firstFrame = true;
-	if (s_firstFrame)
-	{
-		// Check for normalmaps here, next release won't be using this file at all anyways...
-		if (!ModSpecific::NormalmapPackageInstalled(ModSpecific::NRMPACK_ORIGINAL) || 
-			!ModSpecific::NormalmapPackageInstalled(ModSpecific::GetModNormalmapPackName()))
-		{
-			LogInfo() << "Normalmaps missing, downloading now...";
-
-			CreateMainUIView();
-
-			if (UIView)
-			{
-				// Download missing content
-				UIView->RunContentDownloader();
-			}
-		}
+	if (s_firstFrame) {
 	}
 
 	s_firstFrame = false;
