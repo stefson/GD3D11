@@ -16,6 +16,7 @@ GSky::GSky() {
 	SkyDome = nullptr;
 	SkyPlane = nullptr;
 	CloudTexture = nullptr;
+	NightTexture = nullptr;
 
 	Atmosphere.Kr = 0.0075f;
 	Atmosphere.Km = 0.0010f;
