@@ -100,7 +100,7 @@ public:
 		Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(start, 0xFF0000FF), LineVertex(end, 0xFFFFFFFF));
 #endif
 
-		if(Engine::GAPI->GetLoadedWorldInfo()->CustomWorldLoaded)
+		if (Engine::GAPI->GetLoadedWorldInfo()->CustomWorldLoaded)
 		{
 			zCBspBase* base = (zCBspBase*)thisptr;
 			BspInfo* newNode = Engine::GAPI->GetNewBspNode(base);
@@ -135,7 +135,7 @@ public:
 		// Get our version of this node
 		//Engine::GAPI->Get
 
-		if(Engine::GAPI->GetLoadedWorldInfo()->CustomWorldLoaded)
+		if (Engine::GAPI->GetLoadedWorldInfo()->CustomWorldLoaded)
 		{
 
 	#ifdef DEBUG_SHOW_COLLISION
@@ -174,7 +174,7 @@ public:
 		Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(start, 0xFF0000FF), LineVertex(end, 0xFFFFFFFF));
 #endif
 
-		if(Engine::GAPI->GetLoadedWorldInfo()->CustomWorldLoaded)
+		if (Engine::GAPI->GetLoadedWorldInfo()->CustomWorldLoaded)
 		{
 			zCBspBase* base = (zCBspBase*)thisptr;
 			BspInfo* newNode = Engine::GAPI->GetNewBspNode(base);
@@ -203,7 +203,7 @@ public:
 	
 	static int __fastcall hooked_zCBspBaseCollectPolysInBBox3D(void* thisptr, const zTBBox3D& bbox, zCPolygon **& polyList, int& numFound)
 	{
-		if(Engine::GAPI->GetLoadedWorldInfo()->CustomWorldLoaded)
+		if (Engine::GAPI->GetLoadedWorldInfo()->CustomWorldLoaded)
 		{
 			Engine::GAPI->CollectPolygonsInAABB(bbox, polyList, numFound);
 			//HookedFunctions::OriginalFunctions.original_zCBspBaseCollectPolysInBBox3D(thisptr, bbox, polyList, numFound);
@@ -282,7 +282,7 @@ public:
 	{
 		HookedFunctions::OriginalFunctions.original_zCBspTreeAddVob(thisptr, vob);
 
-		if(vob->GetVisual())
+		if (vob->GetVisual())
 		{
 			//LogInfo() << vob->GetVisual()->GetFileExtension(0);
 			//Engine::GAPI->OnAddVob(vob);
@@ -337,7 +337,7 @@ public:
 			}
 		}
 
-		/*if(nodeBase->IsLeaf())
+		/*if (nodeBase->IsLeaf())
 		{
 			zCBspLeaf* leaf = (zCBspLeaf *)nodeBase;
 

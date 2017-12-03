@@ -76,12 +76,12 @@ public:
 private:
         void Reallocate(const int nSize)
         {
-                if(nSize == 0)
+                if (nSize == 0)
                         return;
 
                 T* pArray = new T[this->NumAlloc+nSize];
 
-                if(this->NumInArray > 0)
+                if (this->NumInArray > 0)
                 {
                         for(int i = 0; i < this->NumInArray; i++)
                                 pArray[i] = array[i];
@@ -113,7 +113,7 @@ public:
         */
         const T& operator [] (const unsigned int pos) const
         {
-                if((int)pos <= this->NumInArray)
+                if ((int)pos <= this->NumInArray)
                         return this->Array[pos];
         };
 
@@ -121,7 +121,7 @@ public:
         */
         T& operator [] (const unsigned int pos)
         {
-                if((int)pos <= this->NumInArray)
+                if ((int)pos <= this->NumInArray)
                         return this->Array[pos];
         };
 
@@ -131,7 +131,7 @@ public:
         {
                 this->NumAlloc        = 0;
                 this->NumInArray      = 0;
-                if(this->Array != NULL)
+                if (this->Array != NULL)
                 {
                         delete[] this->Array;
                         this->Array = NULL;
@@ -150,7 +150,7 @@ public:
         */
         void PushBack(const T& in)
         {
-                if((this->NumInArray + 1) > this->NumAlloc) // -- PB throws around with memory. But we don't, so we use the allocated space and don't allocate more and more memory... (memory leak!?)
+                if ((this->NumInArray + 1) > this->NumAlloc) // -- PB throws around with memory. But we don't, so we use the allocated space and don't allocate more and more memory... (memory leak!?)
                         Reallocate(1);
 
                 this->Array[this->NumInArray++] = in;
@@ -168,7 +168,7 @@ public:
         */
         void PushBackFast(const T& in)
         {
-                if((this->NumInArray + 1) > this->NumAlloc) // -- Let's throw around with memory like PB does for performance's sake.
+                if ((this->NumInArray + 1) > this->NumAlloc) // -- Let's throw around with memory like PB does for performance's sake.
                         Reallocate(this->NumAlloc*2);
 
                 this->Array[this->NumInArray++] = in;
@@ -178,7 +178,7 @@ public:
         */
         const T& GetItem(const unsigned int pos)
         {
-                if((pos <= this->NumInArray) && (pos <= this->NumAlloc))
+                if ((pos <= this->NumInArray) && (pos <= this->NumAlloc))
                         return this->Array[pos];
         };
 

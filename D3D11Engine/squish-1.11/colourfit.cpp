@@ -37,10 +37,10 @@ ColourFit::ColourFit( ColourSet const* colours, int flags )
 void ColourFit::Compress( void* block )
 {
 	bool isDxt1 = ( ( m_flags & kDxt1 ) != 0 );
-	if( isDxt1 )
+	if ( isDxt1 )
 	{
 		Compress3( block );
-		if( !m_colours->IsTransparent() )
+		if ( !m_colours->IsTransparent() )
 			Compress4( block );
 	}
 	else

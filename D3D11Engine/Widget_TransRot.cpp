@@ -126,10 +126,10 @@ bool Widget_TransRot::IsActive()
 /** Renders the widget */
 void Widget_TransRot::RenderWidget()
 {
-	if(ActiveWidget == WTR_None)
+	if (ActiveWidget == WTR_None)
 		DoHoverTest(Engine::GAPI->GetOutputWindow());
 
-	if(ActiveWidget != WTR_None)
+	if (ActiveWidget != WTR_None)
 	{
 		D3DXVECTOR2 delta = GetMouseDelta();
 		switch(ActiveWidget)
@@ -170,12 +170,12 @@ void Widget_TransRot::OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 	{
 	case WM_LBUTTONDOWN:
 		ActiveWidget = ActiveSelection;
-		if(ActiveWidget != WTR_None)
+		if (ActiveWidget != WTR_None)
 			SetMouseVisibility(false);
 		break;
 
 	case WM_LBUTTONUP:
-		if(ActiveWidget != WTR_None)
+		if (ActiveWidget != WTR_None)
 			SetMouseVisibility(true);
 
 		ActiveWidget = WTR_None;		
@@ -227,7 +227,7 @@ void Widget_TransRot::DoHoverTest(HWND hw)
 
 	ActiveSelection = WTR_None;
 
-	if(TransXDist < Dist)
+	if (TransXDist < Dist)
 	{
 		TransLines[0]->SetShader(SelectedShader);
 		Arrows[0]->SetSolidShader(SelectedShader);
@@ -235,7 +235,7 @@ void Widget_TransRot::DoHoverTest(HWND hw)
 
 		ActiveSelection = WTR_TransX;
 		//StartValue = (*Targets.begin())->GetLocation()->x;
-	}else if(TransYDist < Dist)
+	}else if (TransYDist < Dist)
 	{
 		TransLines[1]->SetShader(SelectedShader);
 		Arrows[1]->SetSolidShader(SelectedShader);
@@ -243,7 +243,7 @@ void Widget_TransRot::DoHoverTest(HWND hw)
 
 		ActiveSelection = WTR_TransY;
 		//StartValue = (*Targets.begin())->GetLocation()->y;
-	}else if(TransZDist < Dist)
+	}else if (TransZDist < Dist)
 	{
 		TransLines[2]->SetShader(SelectedShader);
 		Arrows[2]->SetSolidShader(SelectedShader);
@@ -254,21 +254,21 @@ void Widget_TransRot::DoHoverTest(HWND hw)
 	}
 
 	// Rotation
-	/*if(RotXDist < Dist)
+	/*if (RotXDist < Dist)
 	{
 		Prim = &TransRotWidget.RotX;
 		Dist = RotXDist;
 		//StartValue = D3DXToDegree((*Targets.begin())->GetRotation()->x);
 	}
 
-	if(RotYDist < Dist)
+	if (RotYDist < Dist)
 	{
 		Prim = &TransRotWidget.RotY;
 		Dist = RotYDist;
 		//StartValue = D3DXToDegree((*Targets.begin())->GetRotation()->y);
 	}
 
-	if(RotZDist < Dist)
+	if (RotZDist < Dist)
 	{
 		Prim = &TransRotWidget.RotZ;
 		Dist = RotZDist;

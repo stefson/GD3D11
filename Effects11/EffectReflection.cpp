@@ -142,7 +142,7 @@ ID3DX11EffectVariable * CEffect::CreatePooledVariableMemberInterface(TTopLevelVa
     }
 
     // is this annotation or runtime data?
-    if( pTopLevelEntity->pEffect->IsReflectionData(pTopLevelEntity) )
+    if ( pTopLevelEntity->pEffect->IsReflectionData(pTopLevelEntity) )
     {
         assert( pTopLevelEntity->pEffect->IsReflectionData(Data.pGeneric) );
         IsAnnotation = true;
@@ -151,7 +151,7 @@ ID3DX11EffectVariable * CEffect::CreatePooledVariableMemberInterface(TTopLevelVa
     {
         // if the heap is empty, we are still loading the Effect, and thus creating a member for a variable initializer
         // ex. Interface myInt = myClassArray[2];
-        if( pTopLevelEntity->pEffect->m_Heap.GetSize() > 0 )
+        if ( pTopLevelEntity->pEffect->m_Heap.GetSize() > 0 )
         {
             assert( pTopLevelEntity->pEffect->IsRuntimeData(pTopLevelEntity) );
             if (!pTopLevelEntity->pType->IsObjectType(EOT_String))
@@ -178,7 +178,7 @@ ID3DX11EffectVariable * CEffect::CreatePooledVariableMemberInterface(TTopLevelVa
     pNewMember->IsSingleElement = IsSingleElement;
     pNewMember->pTopLevelEntity = pTopLevelEntity;
 
-    if( IsSingleElement && pMember->pMemberData )
+    if ( IsSingleElement && pMember->pMemberData )
     {
         assert( !IsAnnotation );
         // This is an element of a global variable array
@@ -441,7 +441,7 @@ HRESULT SType::GetDescHelper(_Out_ D3DX11_EFFECT_TYPE_DESC *pDesc, _In_ bool IsS
         pDesc->Rows = 0;
         pDesc->Columns = 0;
         pDesc->Members = StructType.Members;
-        if( StructType.ImplementsInterface )
+        if ( StructType.ImplementsInterface )
         {
             pDesc->Class = D3D_SVC_INTERFACE_CLASS;
         }
@@ -1206,7 +1206,7 @@ HRESULT SConstantBuffer::SetConstantBuffer(_In_ ID3D11Buffer *pConstantBuffer)
     // Replace all references to the old shader block with this one
     pEffect->ReplaceCBReference(this, pConstantBuffer);
 
-    if( !IsUserManaged )
+    if ( !IsUserManaged )
     {
         // Save original cbuffer in case we UndoSet
         assert( pMemberData[0].Type == MDT_Buffer );
@@ -1258,7 +1258,7 @@ HRESULT SConstantBuffer::UndoSetConstantBuffer()
         VH(D3DERR_INVALIDCALL);
     }
 
-    if( !IsUserManaged )
+    if ( !IsUserManaged )
     {
         return S_FALSE;
     }
@@ -1288,7 +1288,7 @@ HRESULT SConstantBuffer::SetTextureBuffer(_In_ ID3D11ShaderResourceView *pTextur
         VH(D3DERR_INVALIDCALL);
     }
 
-    if( !IsUserManaged )
+    if ( !IsUserManaged )
     {
         // Save original cbuffer and tbuffer in case we UndoSet
         assert( pMemberData[0].Type == MDT_Buffer );
@@ -1345,7 +1345,7 @@ HRESULT SConstantBuffer::UndoSetTextureBuffer()
         VH(D3DERR_INVALIDCALL);
     }
 
-    if( !IsUserManaged )
+    if ( !IsUserManaged )
     {
         return S_FALSE;
     }
@@ -1370,7 +1370,7 @@ lExit:
 
 bool SPassBlock::IsValid()
 {
-    if( HasDependencies )
+    if ( HasDependencies )
         return pEffect->ValidatePassBlock( this );
     return InitiallyValid;
 }
@@ -1400,7 +1400,7 @@ HRESULT SPassBlock::GetDesc(_Out_ D3DX11_PASS_DESC *pDesc)
         pEffect->EvaluateAssignment(pAssignment);
     }
 
-    if( BackingStore.pVertexShaderBlock && BackingStore.pVertexShaderBlock->pInputSignatureBlob )
+    if ( BackingStore.pVertexShaderBlock && BackingStore.pVertexShaderBlock->pInputSignatureBlob )
     {
         // pInputSignatureBlob can be null if we're setting a nullptr VS "SetVertexShader( nullptr )"
         pDesc->pIAInputSignature = (uint8_t*)BackingStore.pVertexShaderBlock->pInputSignatureBlob->GetBufferPointer();
@@ -1748,11 +1748,11 @@ lExit:
 
 bool STechnique::IsValid()
 { 
-    if( HasDependencies )
+    if ( HasDependencies )
     {
         for( size_t i = 0; i < PassCount; i++ )
         {
-            if( !((SPassBlock*)pPasses)[i].IsValid() )
+            if ( !((SPassBlock*)pPasses)[i].IsValid() )
                 return false;
         }
         return true;
@@ -1844,11 +1844,11 @@ lExit:
 
 bool SGroup::IsValid()
 { 
-    if( HasDependencies )
+    if ( HasDependencies )
     {
         for( size_t i = 0; i < TechniqueCount; i++ )
         {
-            if( !((STechnique*)pTechniques)[i].IsValid() )
+            if ( !((STechnique*)pTechniques)[i].IsValid() )
                 return false;
         }
         return true;
@@ -2071,11 +2071,11 @@ ID3DX11EffectTechnique * CEffect::GetTechniqueByIndex(_In_ uint32_t Index)
 {
     static LPCSTR pFuncName = "ID3DX11Effect::GetTechniqueByIndex";
 
-    if( Index < m_TechniqueCount )
+    if ( Index < m_TechniqueCount )
     {
         for( size_t i=0; i < m_GroupCount; i++ )
         {
-            if( Index < m_pGroups[i].TechniqueCount )
+            if ( Index < m_pGroups[i].TechniqueCount )
             {
                 return (ID3DX11EffectTechnique *)(m_pGroups[i].pTechniques + Index);
             }
@@ -2105,14 +2105,14 @@ ID3DX11EffectTechnique * CEffect::GetTechniqueByName(_In_z_ LPCSTR Name)
         return &g_InvalidTechnique;
     }
 
-    if( FAILED( strcpy_s( NameCopy, MAX_GROUP_TECHNIQUE_SIZE, Name ) ) )
+    if ( FAILED( strcpy_s( NameCopy, MAX_GROUP_TECHNIQUE_SIZE, Name ) ) )
     {
         DPF( 0, "Group|Technique name has a length greater than %u.", MAX_GROUP_TECHNIQUE_SIZE );
         return &g_InvalidTechnique;
     }
 
     char* pDelimiter = strchr( NameCopy, '|' );
-    if( pDelimiter == nullptr )
+    if ( pDelimiter == nullptr )
     {
         if ( m_pNullGroup == nullptr )
         {
@@ -2139,7 +2139,7 @@ ID3DX11EffectGroup * CEffect::GetGroupByIndex(_In_ uint32_t Index)
 {
     static LPCSTR pFuncName = "ID3DX11Effect::GetGroupByIndex";
 
-    if( Index < m_GroupCount )
+    if ( Index < m_GroupCount )
     {
         return (ID3DX11EffectGroup *)(m_pGroups + Index);
     }

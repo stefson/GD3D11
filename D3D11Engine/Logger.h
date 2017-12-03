@@ -18,19 +18,19 @@ __declspec( selectany ) std::string LOGFILE;
 #ifdef BLERGH__
 //#if defined(DEBUG) || defined(_DEBUG)
 /** Checks for errors and logs them, HRESULT hr needs to be declared */
-#define LE(x) { hr = (x); if(FAILED(hr)){LogError() << L#x << L" failed: " << DXGetErrorDescription(hr); }/*else{ LogInfo() << L#x << L" Succeeded."; }*/ }
+#define LE(x) { hr = (x); if (FAILED(hr)){LogError() << L#x << L" failed: " << DXGetErrorDescription(hr); }/*else{ LogInfo() << L#x << L" Succeeded."; }*/ }
 
 /** Returns hr if failed (HRESULT-function, hr needs to be declared)*/
-#define LE_R(x) { hr = (x); if(FAILED(hr)){LogError() << L#x << L" failed: " << DXGetErrorDescription(hr); return hr;} }
+#define LE_R(x) { hr = (x); if (FAILED(hr)){LogError() << L#x << L" failed: " << DXGetErrorDescription(hr); return hr;} }
 
 /** Returns nothing if failed (void-function)*/
-#define LE_RV(x) { hr = (x); if(FAILED(hr)){LogError() << L#x << L" failed: " << DXGetErrorDescription(hr); return;} }
+#define LE_RV(x) { hr = (x); if (FAILED(hr)){LogError() << L#x << L" failed: " << DXGetErrorDescription(hr); return;} }
 
 /** Returns false if failed (bool-function) */
-#define LE_RB(x) { hr = (x); if(FAILED(hr)){LogError() << L#x << L" failed: " << DXGetErrorDescription(hr); return false;} }
+#define LE_RB(x) { hr = (x); if (FAILED(hr)){LogError() << L#x << L" failed: " << DXGetErrorDescription(hr); return false;} }
 
 /** throws an exceptopn if failed (HRESULT-function) */
-#define LE_THROW(x) { hr = (x); if(FAILED(hr)){LogError() << L#x << L" failed: " << DXGetErrorDescription(hr); UT::ThrowIfFailed(hr);} }
+#define LE_THROW(x) { hr = (x); if (FAILED(hr)){LogError() << L#x << L" failed: " << DXGetErrorDescription(hr); UT::ThrowIfFailed(hr);} }
 
 #define ErrorBox(Msg) MessageBox(NULL,Msg,L"Error!",MB_OK|MB_ICONERROR|MB_TOPMOST)
 #define InfoBox(Msg) MessageBox(NULL,Msg,L"Info!",MB_OK|MB_ICONASTERISK|MB_TOPMOST)
@@ -38,19 +38,19 @@ __declspec( selectany ) std::string LOGFILE;
 
 #else
 
-#define XLE(x) { XRESULT xr = (x); if(xr != XRESULT::XR_SUCCESS){ LogError() << ##x << " failed with code: " << xr << " (" + Toolbox::MakeErrorString(xr) + ")";}}
+#define XLE(x) { XRESULT xr = (x); if (xr != XRESULT::XR_SUCCESS){ LogError() << ##x << " failed with code: " << xr << " (" + Toolbox::MakeErrorString(xr) + ")";}}
 
 /** Checks for errors and logs them, HRESULT hr needs to be declared */
-#define LE(x) { hr = (x); if(FAILED(hr)){LogError() << "failed with code: " << hr << "!"; }/*else{ LogInfo() << L#x << L" Succeeded."; }*/ }
+#define LE(x) { hr = (x); if (FAILED(hr)){LogError() << "failed with code: " << hr << "!"; }/*else{ LogInfo() << L#x << L" Succeeded."; }*/ }
 
 /** Returns hr if failed (HRESULT-function, hr needs to be declared)*/
-#define LE_R(x) { hr = (x); if(FAILED(hr)){LogError() << "failed with code: " << hr << "!"; return hr;} }
+#define LE_R(x) { hr = (x); if (FAILED(hr)){LogError() << "failed with code: " << hr << "!"; return hr;} }
 
 /** Returns nothing if failed (void-function)*/
-#define LE_RV(x) { hr = (x); if(FAILED(hr)){LogError() << "failed with code: " << hr << "!"; return;} }
+#define LE_RV(x) { hr = (x); if (FAILED(hr)){LogError() << "failed with code: " << hr << "!"; return;} }
 
 /** Returns false if failed (bool-function) */
-#define LE_RB(x) { hr = (x); if(FAILED(hr)){LogError() << "failed with code: " << hr << "!"; return false;} }
+#define LE_RB(x) { hr = (x); if (FAILED(hr)){LogError() << "failed with code: " << hr << "!"; return false;} }
 
 #define ErrorBox(Msg) MessageBoxA(NULL,Msg,"Error!",MB_OK|MB_ICONERROR|MB_TOPMOST)
 #define InfoBox(Msg) MessageBoxA(NULL,Msg,"Info!",MB_OK|MB_ICONASTERISK|MB_TOPMOST)
@@ -100,7 +100,7 @@ namespace LogCache
 			FILE* f;
 			f = fopen(LOGFILE.c_str(),"a");
 
-			//if(MAX_LOG_MESSAGES_TO_CACHE > 5)
+			//if (MAX_LOG_MESSAGES_TO_CACHE > 5)
 			//	fputs(" --- Log-Cache flush! --- \n", f);
 
 			// Write down all the data we have
@@ -126,7 +126,7 @@ class Log
 public:
 	Log(const char* Type,const  char* File, int Line,const  char* Function, bool bIncludeInfo=false, UINT MessageBox=0 )
 	{
-		if(bIncludeInfo)
+		if (bIncludeInfo)
 		{
 			Info << Type << ": ["<< File << "("<<Line<<"), "<<Function<<"]: "; 
 		}else
@@ -176,7 +176,7 @@ public:
 		FILE* f;
 		f = fopen(LOGFILE.c_str(),"a");
 
-		if(f)
+		if (f)
 		{
 			
 			fputs(Info.str().c_str(),f);
@@ -187,7 +187,7 @@ public:
 			fclose(f);
 		}
 
-		/*if(strnicmp(Info.str().c_str(), "Error", sizeof("Error")) == 0)
+		/*if (strnicmp(Info.str().c_str(), "Error", sizeof("Error")) == 0)
 		{
 			LastErrorMessage = Info.str() + Message.str();
 		}*/
@@ -196,7 +196,7 @@ public:
 		LogCache::Cache.push_back(Info.str() + Message.str() + "\n");
 
 		// Flush data if the cache is full
-		if(LogCache::Cache.size() >= MAX_LOG_MESSAGES_TO_CACHE)
+		if (LogCache::Cache.size() >= MAX_LOG_MESSAGES_TO_CACHE)
 			LogCache::LogFlush::FlushData();*/
 
 		switch(MessageBoxStyle)

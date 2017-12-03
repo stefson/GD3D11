@@ -150,7 +150,7 @@ public:
 		static float s_masterTimeLast = 0.0f;
 
 		// Add the delta of this frame so the time won't be wrapped between 0 and 1
-		if(GetMasterTimeReal() < s_masterTimeLast)
+		if (GetMasterTimeReal() < s_masterTimeLast)
 			s_contMasterTime += GetMasterTimeReal() - (s_masterTimeLast - 1.0f); // Make sure we still get the actual delta and dont wrap back
 		else
 			s_contMasterTime += GetMasterTimeReal() - s_masterTimeLast;
@@ -192,19 +192,16 @@ public:
 	}
 
 	/** Returns the sun position in world coords */
-	D3DXVECTOR3 GetSunWorldPosition(float timeScale = 1.0f)
-	{
-		/*if(!GetSun())
+	D3DXVECTOR3 GetSunWorldPosition(float timeScale = 1.0f) {
+		/*if (!GetSun())
 		{
 			return D3DXVECTOR3(0,0,0);
 		}*/
 
 		//float angle = GetMasterTime() * 2.0f * (float)D3DX_PI; // Get mastertime into rad, 0 and 12 are now at the horizon, 18 is in the sky
 		//angle += (float)D3DX_PI * 0.5f; // 12 is now in the sky, 18 horizon
-
-
-
-		float angle = ((GetMasterTime() * timeScale - 0.3f) * 1.25f + 0.5f) * 2.0f * (180.0f * (float)D3DX_PI / 180.0f);
+		float angle = ((GetMasterTime() * timeScale - 0.3f) * 1.25f + 0.5f) * 2.0f * (float)D3DX_PI;
+		LogInfo() << "Time: " << GetMasterTime() << ", angle: " << angle;
 
 		D3DXVECTOR3 sunPos = D3DXVECTOR3(-60, 0, 100);
 		D3DXVec3Normalize(&sunPos, &sunPos);
@@ -225,10 +222,9 @@ public:
 		XCALL(GothicMemoryLocations::zCSkyController_Outdoor::SetCameraLocationHint);
 	}
 
-
 	/*zCSkyLayer* GetSkyLayers(int i)
 	{
-		if(i==0)
+		if (i==0)
 			return (zCSkyLayer*)THISPTR_OFFSET(GothicMemoryLocations::zCSkyController_Outdoor::Offset_SkyLayer1);
 		else
 			return (zCSkyLayer*)THISPTR_OFFSET(GothicMemoryLocations::zCSkyController_Outdoor::Offset_SkyLayer2);
@@ -242,7 +238,7 @@ public:
 
 	zCSkyState* GetSkyState(int i)
 	{
-		if(i==0)
+		if (i==0)
 			return *(zCSkyState**)THISPTR_OFFSET(GothicMemoryLocations::zCSkyController_Outdoor::Offset_SkyLayerState0);
 		else
 			return *(zCSkyState**)THISPTR_OFFSET(GothicMemoryLocations::zCSkyController_Outdoor::Offset_SkyLayerState1);
@@ -309,12 +305,12 @@ public:
 
 		D3DXVECTOR3 c;
 
-		if(IsNight())
+		if (IsNight())
 			c = D3DXVECTOR3(1.0f, 1.0f, 1.0f);
 		else
 			c = sky->GetMasterState()->DomeColor1;
 
-		if((sky->GetMasterTime() >= 0.35f) && (sky->GetMasterTime() <= 0.65f) && GetLayerChannel() == 1)
+		if ((sky->GetMasterTime() >= 0.35f) && (sky->GetMasterTime() <= 0.65f) && GetLayerChannel() == 1)
 			c = 0.5f * (c + D3DXVECTOR3(1.0f, 1.0f, 1.0f));
 
 		return float3(c);

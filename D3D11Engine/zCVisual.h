@@ -30,7 +30,7 @@ public:
 	{
 		hook_infunc
 		// Notify the world
-		if(Engine::GAPI)
+		if (Engine::GAPI)
 			Engine::GAPI->OnVisualDeleted((zCVisual *)thisptr);
 
 		HookedFunctions::OriginalFunctions.original_zCVisualDestructor(thisptr);
@@ -41,7 +41,7 @@ public:
 	/** File extension this visual uses. Handy for finding out what class this is */
 	const char* GetFileExtension(int i)
 	{
-		if(__GetFileExtension(i))
+		if (__GetFileExtension(i))
 			return __GetFileExtension(i)->ToChar();
 
 		return "";
@@ -68,15 +68,15 @@ public:
 		{
 			std::string ext = extv[i];
 
-			if(ext == ".3DS")
+			if (ext == ".3DS")
 				return VT_PROGMESHPROTO;
-			else if(ext == ".MMS")
+			else if (ext == ".MMS")
 				return VT_MORPHMESH;
-			else if(ext == ".MDS" || ext == ".ASC")
+			else if (ext == ".MDS" || ext == ".ASC")
 				return VT_MODEL;
-			else if(ext == ".PFX")
+			else if (ext == ".PFX")
 				return VT_PARTICLE_FX;
-			else if(ext == ".TGA")
+			else if (ext == ".TGA")
 				return VT_DECAL;
 		}
 

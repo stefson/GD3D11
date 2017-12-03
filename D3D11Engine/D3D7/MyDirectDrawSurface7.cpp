@@ -29,7 +29,7 @@ MyDirectDrawSurface7::MyDirectDrawSurface7()
 
 	// Check for test-bind mode to figure out what zCTexture-Object we are associated with
 	std::string bound;
-	if(Engine::GAPI->IsInTextureTestBindMode(bound))
+	if (Engine::GAPI->IsInTextureTestBindMode(bound))
 	{
 		Engine::GAPI->SetTextureTestBindMode(false, "");
 		return;
@@ -77,16 +77,16 @@ D3D11Texture* MyDirectDrawSurface7::GetFxMap()
 /** Binds this texture */
 void MyDirectDrawSurface7::BindToSlot(int slot)
 {
-	if(!IsReady)
+	if (!IsReady)
 	{
 		Engine::GraphicsEngine->UnbindTexture(0);
 		return; // Don't bind half-loaded textures!
 	}
 
-	if(EngineTexture) // Needed sometimes
+	if (EngineTexture) // Needed sometimes
 		EngineTexture->BindToPixelShader(slot);
 
-	if(Normalmap)
+	if (Normalmap)
 	{
 		Normalmap->BindToPixelShader(slot + 1);
 		Normalmap->BindToVertexShader(0);
@@ -100,31 +100,31 @@ void MyDirectDrawSurface7::BindToSlot(int slot)
 /** Loads additional resources if possible */
 void MyDirectDrawSurface7::LoadAdditionalResources(zCTexture* ownedTexture)
 {
-	if(!GothicTexture)
+	if (!GothicTexture)
 	{
 		GothicTexture = ownedTexture;
 		TextureName = GothicTexture->GetNameWithoutExt();	
 
 		// Find texture type
-		if(Toolbox::StringContainsOneOf(TextureName, LEAF_SUBSTR, ARRAYSIZE(LEAF_SUBSTR)))
+		if (Toolbox::StringContainsOneOf(TextureName, LEAF_SUBSTR, ARRAYSIZE(LEAF_SUBSTR)))
 			TextureType = ETextureType::TX_LEAF;
 
 		Engine::GAPI->AddSurface(TextureName, this);
 	}
 
-	if(Normalmap)
+	if (Normalmap)
 	{
 		delete Normalmap;
 		Normalmap = NULL;
 	}
 
-	if(FxMap)
+	if (FxMap)
 	{
 		delete FxMap;
 		FxMap = NULL;
 	}
 
-	if(!TextureName.size() || Normalmap || FxMap)
+	if (!TextureName.size() || Normalmap || FxMap)
 		return;
 
 	D3D11Texture* fxMapTexture = NULL;
@@ -136,13 +136,13 @@ void MyDirectDrawSurface7::LoadAdditionalResources(zCTexture* ownedTexture)
 	{
 		std::string normalmap = "system\\GD3D11\\textures\\replacements\\" + nrmFolder + "\\" + TextureName + "_normal.dds";
 
-		if(Toolbox::FileExists(normalmap))
+		if (Toolbox::FileExists(normalmap))
 		{
 			// Create the texture object this is linked with
 		
 			Engine::GraphicsEngine->CreateTexture(&nrmmapTexture);
 	
-			if(XR_SUCCESS != nrmmapTexture->Init(normalmap))
+			if (XR_SUCCESS != nrmmapTexture->Init(normalmap))
 			{
 				delete nrmmapTexture;
 				nrmmapTexture = NULL;
@@ -161,12 +161,12 @@ void MyDirectDrawSurface7::LoadAdditionalResources(zCTexture* ownedTexture)
 	{
 		std::string fxMap = "system\\GD3D11\\textures\\replacements\\" + nrmFolder + "\\" + TextureName + "_fx.dds";
 
-		if(Toolbox::FileExists(fxMap))
+		if (Toolbox::FileExists(fxMap))
 		{
 			// Create the texture object this is linked with
 			Engine::GraphicsEngine->CreateTexture(&fxMapTexture);
 	
-			if(XR_SUCCESS != fxMapTexture->Init(fxMap))
+			if (XR_SUCCESS != fxMapTexture->Init(fxMap))
 			{
 				delete fxMapTexture;
 				fxMapTexture = NULL;
@@ -205,7 +205,7 @@ ULONG MyDirectDrawSurface7::Release()
 	ULONG uRet = refCount;
 	DebugWriteTex("IDirectDrawSurface7(%p)::Release( %i )");
 
-	if(uRet == 0)
+	if (uRet == 0)
 	{
 		delete this;
 	}
@@ -273,7 +273,7 @@ HRESULT MyDirectDrawSurface7::GetAttachedSurface( LPDDSCAPS2 lpDDSCaps2, LPDIREC
 {
 	DebugWriteTex("IDirectDrawSurface7(%p)::GetAttachedSurface()");
 
-	if(attachedSurfaces.empty())
+	if (attachedSurfaces.empty())
 		return E_FAIL;
 
 	*lplpDDAttachedSurface = attachedSurfaces[0];
@@ -368,7 +368,7 @@ HRESULT MyDirectDrawSurface7::Lock( LPRECT lpDestRect, LPDDSURFACEDESC2 lpDDSurf
 	*lpDDSurfaceDesc = OriginalSurfaceDesc;
 
 	// This has to be a backbuffer-copy
-	if((LockType & DDLOCK_READONLY) != 0 && LockType != DDLOCK_READONLY) // Gothic uses DDLOCK_READONLY + some other flags for getting the framebuffer. DDLOCK_READONLY only is for movie playback. 
+	if ((LockType & DDLOCK_READONLY) != 0 && LockType != DDLOCK_READONLY) // Gothic uses DDLOCK_READONLY + some other flags for getting the framebuffer. DDLOCK_READONLY only is for movie playback. 
 	{
 		// Assume 32-bit
 		byte* data;
@@ -395,7 +395,7 @@ HRESULT MyDirectDrawSurface7::Lock( LPRECT lpDestRect, LPDDSURFACEDESC2 lpDDSurf
 		return S_OK;
 	}
 
-	if(!EngineTexture)
+	if (!EngineTexture)
 		return S_OK;
 
 	// Check for 16-bit surface. We allocate the texture as 32-bit, so we need to divide the size by two for that
@@ -407,14 +407,14 @@ HRESULT MyDirectDrawSurface7::Lock( LPRECT lpDestRect, LPDDSURFACEDESC2 lpDDSurf
 	int bpp = redBits + greenBits + blueBits + alphaBits;
 	int divisor = 1;
 
-	if(bpp == 16)
+	if (bpp == 16)
 		divisor = 2;
 
-	if(bpp == 24)
+	if (bpp == 24)
 	{
 		// Handle movie frame,
 		// don't deallocate the memory after unlock, since only the changing parts in videos will get updated
-		if(!LockedData)
+		if (!LockedData)
 			LockedData = new unsigned char[EngineTexture->GetSizeInBytes(0) / divisor];
 
 	}else
@@ -438,7 +438,7 @@ HRESULT MyDirectDrawSurface7::Unlock( LPRECT lpRect )
 	DebugWriteTex("IDirectDrawSurface7(%p)::Unlock()");
 
 	// This has to be a backbuffer-copy
-	if((LockType & DDLOCK_READONLY) != 0 && LockType != DDLOCK_READONLY)
+	if ((LockType & DDLOCK_READONLY) != 0 && LockType != DDLOCK_READONLY)
 	{
 		// Clean up
 		delete[] LockedData;
@@ -448,7 +448,7 @@ HRESULT MyDirectDrawSurface7::Unlock( LPRECT lpRect )
 	}
 
 	// Textureslot 7 is filled only on load-time. This is used to get the zCTexture from this Surface.
-	if(Engine::GAPI->GetBoundTexture(7) != NULL)
+	if (Engine::GAPI->GetBoundTexture(7) != NULL)
 	{
 		// Comming from LoadResourceData
 		LoadAdditionalResources(Engine::GAPI->GetBoundTexture(7));
@@ -462,7 +462,7 @@ HRESULT MyDirectDrawSurface7::Unlock( LPRECT lpRect )
 
 	int bpp = redBits + greenBits + blueBits + alphaBits;
 
-	if(bpp == 16)
+	if (bpp == 16)
 	{
 		// Convert
 		unsigned char* dst = new unsigned char[EngineTexture->GetSizeInBytes(0)];
@@ -483,7 +483,7 @@ HRESULT MyDirectDrawSurface7::Unlock( LPRECT lpRect )
 			dst[4*i+3] = 255;
 		}
 
-		if(Engine::GAPI->GetMainThreadID() != GetCurrentThreadId())
+		if (Engine::GAPI->GetMainThreadID() != GetCurrentThreadId())
 		{
 			EngineTexture->UpdateDataDeferred(dst, 0);
 			Engine::GAPI->AddFrameLoadedTexture(this);
@@ -513,7 +513,7 @@ HRESULT MyDirectDrawSurface7::Unlock( LPRECT lpRect )
 
 
 		// DDS-Texture
-		if((OriginalSurfaceDesc.ddpfPixelFormat.dwFlags & DDPF_FOURCC) == DDPF_FOURCC)
+		if ((OriginalSurfaceDesc.ddpfPixelFormat.dwFlags & DDPF_FOURCC) == DDPF_FOURCC)
 		{
 			switch(OriginalSurfaceDesc.ddpfPixelFormat.dwFourCC)
 			{
@@ -544,7 +544,7 @@ HRESULT MyDirectDrawSurface7::Unlock( LPRECT lpRect )
 
 		
 
-		if(bpp == 24)
+		if (bpp == 24)
 		{
 			/*unsigned char* dst = new unsigned char[OriginalSurfaceDesc.dwWidth * OriginalSurfaceDesc.dwHeight * 4];
 
@@ -575,7 +575,7 @@ HRESULT MyDirectDrawSurface7::Unlock( LPRECT lpRect )
 			INT2 vidRes = Engine::GAPI->GetRendererState()->RendererInfo.PlayingMovieResolution;
 
 			// Catch unset resolution 
-			if(vidRes.x == 0 || vidRes.y == 0)
+			if (vidRes.x == 0 || vidRes.y == 0)
 				vidRes = Engine::GraphicsEngine->GetResolution();
 
 			D3DXVECTOR2 mid = D3DXVECTOR2(Engine::GraphicsEngine->GetResolution().x / 2, Engine::GraphicsEngine->GetResolution().y / 2);
@@ -607,7 +607,7 @@ HRESULT MyDirectDrawSurface7::Unlock( LPRECT lpRect )
 		}else
 		{
 			// No conversion needed
-			if(Engine::GAPI->GetMainThreadID() != GetCurrentThreadId())
+			if (Engine::GAPI->GetMainThreadID() != GetCurrentThreadId())
 			{
 				EngineTexture->UpdateDataDeferred(LockedData, 0);
 				Engine::GAPI->AddFrameLoadedTexture(this);			
@@ -621,7 +621,7 @@ HRESULT MyDirectDrawSurface7::Unlock( LPRECT lpRect )
 		}
 	}
 
-	if(bpp != 24)
+	if (bpp != 24)
 	{
 		// Clean up if not a movie frame
 		delete[] LockedData;
@@ -721,7 +721,7 @@ HRESULT MyDirectDrawSurface7::SetSurfaceDesc( LPDDSURFACEDESC2 lpDDSurfaceDesc, 
 	OriginalSurfaceDesc = *lpDDSurfaceDesc;
 
 	// Check if this is the rendertarget or something else we dont need
-	if(lpDDSurfaceDesc->dwWidth == 0)
+	if (lpDDSurfaceDesc->dwWidth == 0)
 	{
 		return S_OK;
 	}
@@ -752,7 +752,7 @@ HRESULT MyDirectDrawSurface7::SetSurfaceDesc( LPDDSURFACEDESC2 lpDDSurfaceDesc, 
 	case 0:
 		{
 			// DDS-Texture
-			if((lpDDSurfaceDesc->ddpfPixelFormat.dwFlags & DDPF_FOURCC) == DDPF_FOURCC)
+			if ((lpDDSurfaceDesc->ddpfPixelFormat.dwFlags & DDPF_FOURCC) == DDPF_FOURCC)
 			{
 				switch(lpDDSurfaceDesc->ddpfPixelFormat.dwFourCC)
 				{
@@ -777,7 +777,7 @@ HRESULT MyDirectDrawSurface7::SetSurfaceDesc( LPDDSURFACEDESC2 lpDDSurfaceDesc, 
 
 	// Find out mip-level count
 	unsigned int mipMapCount = 1;
-	if(lpDDSurfaceDesc->ddsCaps.dwCaps & DDSCAPS_MIPMAP)
+	if (lpDDSurfaceDesc->ddsCaps.dwCaps & DDSCAPS_MIPMAP)
 	{
 		mipMapCount = lpDDSurfaceDesc->dwMipMapCount;
 	}

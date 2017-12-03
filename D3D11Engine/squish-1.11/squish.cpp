@@ -43,11 +43,11 @@ static int FixFlags( int flags )
 	int extra = flags & kWeightColourByAlpha;
 	
 	// set defaults
-	if( method != kDxt3 && method != kDxt5 )
+	if ( method != kDxt3 && method != kDxt5 )
 		method = kDxt1;
-	if( fit != kColourRangeFit )
+	if ( fit != kColourRangeFit )
 		fit = kColourClusterFit;
-	if( metric != kColourMetricUniform )
+	if ( metric != kColourMetricUniform )
 		metric = kColourMetricPerceptual;
 		
 	// done
@@ -68,20 +68,20 @@ void CompressMasked( u8 const* rgba, int mask, void* block, int flags )
 	// get the block locations
 	void* colourBlock = block;
 	void* alphaBock = block;
-	if( ( flags & ( kDxt3 | kDxt5 ) ) != 0 )
+	if ( ( flags & ( kDxt3 | kDxt5 ) ) != 0 )
 		colourBlock = reinterpret_cast< u8* >( block ) + 8;
 
 	// create the minimal point set
 	ColourSet colours( rgba, mask, flags );
 	
 	// check the compression type and compress colour
-	if( colours.GetCount() == 1 )
+	if ( colours.GetCount() == 1 )
 	{
 		// always do a single colour fit
 		SingleColourFit fit( &colours, flags );
 		fit.Compress( colourBlock );
 	}
-	else if( ( flags & kColourRangeFit ) != 0 || colours.GetCount() == 0 )
+	else if ( ( flags & kColourRangeFit ) != 0 || colours.GetCount() == 0 )
 	{
 		// do a range fit
 		RangeFit fit( &colours, flags );
@@ -95,9 +95,9 @@ void CompressMasked( u8 const* rgba, int mask, void* block, int flags )
 	}
 	
 	// compress alpha separately if necessary
-	if( ( flags & kDxt3 ) != 0 )
+	if ( ( flags & kDxt3 ) != 0 )
 		CompressAlphaDxt3( rgba, mask, alphaBock );
-	else if( ( flags & kDxt5 ) != 0 )
+	else if ( ( flags & kDxt5 ) != 0 )
 		CompressAlphaDxt5( rgba, mask, alphaBock );
 }
 
@@ -109,16 +109,16 @@ void Decompress( u8* rgba, void const* block, int flags )
 	// get the block locations
 	void const* colourBlock = block;
 	void const* alphaBock = block;
-	if( ( flags & ( kDxt3 | kDxt5 ) ) != 0 )
+	if ( ( flags & ( kDxt3 | kDxt5 ) ) != 0 )
 		colourBlock = reinterpret_cast< u8 const* >( block ) + 8;
 
 	// decompress colour
 	DecompressColour( rgba, colourBlock, ( flags & kDxt1 ) != 0 );
 
 	// decompress alpha separately if necessary
-	if( ( flags & kDxt3 ) != 0 )
+	if ( ( flags & kDxt3 ) != 0 )
 		DecompressAlphaDxt3( rgba, alphaBock );
-	else if( ( flags & kDxt5 ) != 0 )
+	else if ( ( flags & kDxt5 ) != 0 )
 		DecompressAlphaDxt5( rgba, alphaBock );
 }
 
@@ -160,7 +160,7 @@ void CompressImage( u8 const* rgba, int width, int height, void* blocks, int fla
 					int sy = y + py;
 					
 					// enable if we're in the image
-					if( sx < width && sy < height )
+					if ( sx < width && sy < height )
 					{
 						// copy the rgba value
 						u8 const* sourcePixel = rgba + 4*( width*sy + sx );
@@ -214,7 +214,7 @@ void DecompressImage( u8* rgba, int width, int height, void const* blocks, int f
 					// get the target location
 					int sx = x + px;
 					int sy = y + py;
-					if( sx < width && sy < height )
+					if ( sx < width && sy < height )
 					{
 						u8* targetPixel = rgba + 4*( width*sy + sx );
 						

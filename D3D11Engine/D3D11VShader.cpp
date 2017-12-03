@@ -76,7 +76,7 @@ HRESULT D3D11VShader::CompileShaderFromFile(const CHAR* szFileName, LPCSTR szEnt
 	}
 	if (pErrorBlob)
 	{
-		/*if(Engine->SwapchainCreated())
+		/*if (Engine->SwapchainCreated())
 		Engine->GetConsole()->PostConsoleMessage((char*)pErrorBlob->GetBufferPointer());
 		else
 		LogWarnBox() << (char*)pErrorBlob->GetBufferPointer() << "\n\n (You can ignore the next error from Gothic about too small video memory!)";
@@ -102,7 +102,7 @@ XRESULT D3D11VShader::LoadShader(const char* vertexShader, int layout, std::vect
 
 
 	// Compile shader
-	if(FAILED(CompileShaderFromFile(vertexShader, "VSMain", "vs_4_0", &vsBlob, makros)))
+	if (FAILED(CompileShaderFromFile(vertexShader, "VSMain", "vs_4_0", &vsBlob, makros)))
 	{
 		return XR_FAILED;
 	}

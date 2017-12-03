@@ -133,7 +133,7 @@ public:
 	{
 		hook_infunc
 		// Notify the world
-		if(Engine::GAPI)
+		if (Engine::GAPI)
 			Engine::GAPI->OnParticleFXDeleted((zCParticleFX *)thisptr);
 
 		HookedFunctions::OriginalFunctions.original_zCParticleFXDestructor(thisptr);
@@ -148,7 +148,7 @@ public:
 
 	static float SinSmooth(float value)
 	{
-		if(value < 0.5f) 
+		if (value < 0.5f) 
 			return SinEase(value * 2);
 		else		  
 			return 1.0f - SinEase((value - 0.5f) * 2);

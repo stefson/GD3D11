@@ -39,7 +39,7 @@ public:
 
 		HookedFunctions::OriginalFunctions.original_zCVobEndMovement(thisptr);
 
-		if(Engine::GAPI)
+		if (Engine::GAPI)
 			Engine::GAPI->OnVobMoved((zCVob *)thisptr);
 
 		hook_outfunc
@@ -51,7 +51,7 @@ public:
 
 		HookedFunctions::OriginalFunctions.original_zCVobEndMovement(thisptr, transformChanged);
 
-		if(Engine::GAPI && transformChanged)
+		if (Engine::GAPI && transformChanged)
 			Engine::GAPI->OnVobMoved((zCVob *)thisptr);
 
 		hook_outfunc
@@ -64,7 +64,7 @@ public:
 		hook_infunc
 
 		// Notify the world. We are doing this here for safety so nothing possibly deleted remains in our world.
-		if(Engine::GAPI)
+		if (Engine::GAPI)
 			Engine::GAPI->OnRemovedVob((zCVob *)thisptr, ((zCVob *)thisptr)->GetHomeWorld());
 
 		HookedFunctions::OriginalFunctions.original_zCVobDestructor(thisptr);
@@ -80,7 +80,7 @@ public:
 		HookedFunctions::OriginalFunctions.original_zCVobSetVisual(thisptr, visual);
 
 		// Notify the world
-		if(Engine::GAPI)
+		if (Engine::GAPI)
 			Engine::GAPI->OnSetVisual((zCVob*)thisptr);
 
 		hook_outfunc
@@ -99,7 +99,7 @@ public:
 	{
 		zCVisual* visual = GetMainVisual();
 
-		if(!visual)
+		if (!visual)
 			visual = GetClassHelperVisual();
 
 		return visual;
@@ -187,7 +187,7 @@ public:
 	/** Returns whether this vob is currently in an indoor-location or not */
 	bool IsIndoorVob()
 	{
-		if(!GetGroundPoly())
+		if (!GetGroundPoly())
 			return false;
 
 		return GetGroundPoly()->GetLightmap() != NULL;

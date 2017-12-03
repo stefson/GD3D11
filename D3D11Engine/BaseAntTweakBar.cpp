@@ -335,7 +335,7 @@ XRESULT BaseAntTweakBar::Init()
 /** On window message */
 LRESULT BaseAntTweakBar::OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	if(IsActive)
+	if (IsActive)
 		return TwEventWin(hWnd, msg, wParam, lParam);
 
 	return true;
@@ -346,7 +346,7 @@ void BaseAntTweakBar::SetActive(bool value)
 {
 	IsActive = value;
 
-	if(IsActive)
+	if (IsActive)
 	{
 		//InitTextureSettingsBar();
 	}
@@ -360,14 +360,14 @@ bool BaseAntTweakBar::GetActive()
 /** Draws the bars */
 void BaseAntTweakBar::Draw()
 {
-	if(IsActive)
+	if (IsActive)
 	{
 		TwDraw();
 
 		// Check texture name
-		/*if(LastFrameActiveMaterialInfo != ActiveMaterialInfo)
+		/*if (LastFrameActiveMaterialInfo != ActiveMaterialInfo)
 		{
-			if(ActiveMaterialInfo)
+			if (ActiveMaterialInfo)
 			{
 				// Update the bar
 				UpdateTextureSettingsBar();
@@ -377,12 +377,12 @@ void BaseAntTweakBar::Draw()
 		}
 
 		// Check for change
-		if(TS_Active)
+		if (TS_Active)
 		{
-			if(ActiveMaterialInfo)
+			if (ActiveMaterialInfo)
 			{
 				// Check for a change
-				if(memcmp(&TS_OldMaterialInfo, &TS_FrameTexturesInfos[ActiveMaterialInfo].Info->buffer, sizeof(MaterialInfo)) != 0)
+				if (memcmp(&TS_OldMaterialInfo, &TS_FrameTexturesInfos[ActiveMaterialInfo].Info->buffer, sizeof(MaterialInfo)) != 0)
 				{
 					TS_FrameTexturesInfos[ActiveMaterialInfo].Info->WriteToFile(TS_FrameTexturesInfos[ActiveMaterialInfo].Name);
 					TS_OldMaterialInfo = *TS_FrameTexturesInfos[ActiveMaterialInfo].Info;
@@ -391,7 +391,7 @@ void BaseAntTweakBar::Draw()
 				}
 			}
 
-			if(ActiveMaterialInfo && TS_FrameTexturesInfos[ActiveMaterialInfo].Texture)
+			if (ActiveMaterialInfo && TS_FrameTexturesInfos[ActiveMaterialInfo].Texture)
 			{
 				const int previewSize = 512;
 				const int previewDownscale = 2;
@@ -456,7 +456,7 @@ void BaseAntTweakBar::InitTextureSettingsBar()
 	std::string enumDef = "";
 
 	const std::set<zCTexture *>& frameTextures = Engine::GraphicsEngine->GetFrameTextures();
-	if(!frameTextures.size())
+	if (!frameTextures.size())
 		return;
 
 	for(std::set<zCTexture *>::const_iterator it = frameTextures.begin(); it != frameTextures.end(); it++)
@@ -475,13 +475,13 @@ void BaseAntTweakBar::InitTextureSettingsBar()
 
 		TS_FrameTexturesInfos.push_back(TS_TextureInfo(e[i].Info, e[i].Name, e[i].Texture));
 
-		if(e[i].Name == TS_PreferredTexture)
+		if (e[i].Name == TS_PreferredTexture)
 		{
 			prefTexIdx = i;
 			ActiveMaterialInfo = i;
 		}
 
-		if(i != e.size() - 1)
+		if (i != e.size() - 1)
 			enumDef += ", ";
 	}
 

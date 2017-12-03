@@ -58,7 +58,7 @@ bool WidgetContainer::IsWidgetClicked()
 {
 	for(auto it = Widgets.begin(); it != Widgets.end(); it++)
 	{
-		if((*it)->IsActive())
+		if ((*it)->IsActive())
 			return true;
 	}
 

@@ -60,7 +60,7 @@ bool D2DDialog::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wParam, LPAR
 	case WM_LBUTTONDOWN:
 		{
 			POINT p = D2DView::GetCursorPosition();
-			if(PointInsideRect(p, D2D1::RectF(clientRectAbs.left, clientRectAbs.top, clientRectAbs.right, clientRectAbs.top + DIALOG_HEADER_SIZE)))
+			if (PointInsideRect(p, D2D1::RectF(clientRectAbs.left, clientRectAbs.top, clientRectAbs.right, clientRectAbs.top + DIALOG_HEADER_SIZE)))
 			{
 				DraggingWindow = true;
 				WindowDragOffset = D2D1::Point2F(p.x - clientRectAbs.left, p.y - clientRectAbs.top);
@@ -70,7 +70,7 @@ bool D2DDialog::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wParam, LPAR
 		break;
 
 	case WM_MOUSEMOVE:
-		if(DraggingWindow)
+		if (DraggingWindow)
 		{
 			POINT p = D2DView::GetCursorPosition();
 
@@ -80,7 +80,7 @@ bool D2DDialog::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wParam, LPAR
 		break;
 
 	case WM_LBUTTONUP:
-		if(DraggingWindow)
+		if (DraggingWindow)
 		{
 			DraggingWindow = false;
 			return false;
@@ -100,7 +100,7 @@ SV_Button* D2DDialog::AddButton(const std::string& caption, SV_ButtonPressedCall
 	button->SetPressedCallback(callback, userdata);
 	button->SetCaption(caption);
 
-	if(!Buttons.empty())
+	if (!Buttons.empty())
 		button->AlignLeftTo(Buttons.back(), 5);
 
 	Buttons.push_back(button);

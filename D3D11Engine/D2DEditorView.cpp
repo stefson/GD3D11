@@ -347,7 +347,7 @@ void D2DEditorView::Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime)
 	// If the editor is not open, dont draw it. Slide it in otherwise.
 
 	std::wstring str;
-	if(!Engine::GAPI->GetRendererState()->RendererSettings.DisableWatermark)
+	if (!Engine::GAPI->GetRendererState()->RendererSettings.DisableWatermark)
 	{
 		// Draw GD3D11-Text
 		str = (L"Development preview\n" + Toolbox::ToWideChar(VERSION_STRING));
@@ -359,10 +359,10 @@ void D2DEditorView::Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime)
 
 	D2D1_POINT_2F p;
 	p.y = 0;
-	if(!IsEnabled)
+	if (!IsEnabled)
 	{
 #ifdef PUBLIC_RELEASE
-		if(deltaTime == 0.0f) // Don't show it in menus
+		if (deltaTime == 0.0f) // Don't show it in menus
 			p.x = -(MainPanel->GetSize().width + 50.0f);
 		else
 #endif
@@ -384,7 +384,7 @@ void D2DEditorView::Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime)
 
 
 	// Draw subviews
-	if(IsEnabled || MainPanel->GetPosition().x + 40.0f > -MainPanel->GetSize().width)
+	if (IsEnabled || MainPanel->GetPosition().x + 40.0f > -MainPanel->GetSize().width)
 	{
 		// Draw mode-text
 		switch(Mode)
@@ -431,41 +431,41 @@ void D2DEditorView::Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime)
 /** Updates the editor */
 void D2DEditorView::Update(float deltaTime)
 {
-	if(!IsEnabled || Engine::AntTweakBar->GetActive())
+	if (!IsEnabled || Engine::AntTweakBar->GetActive())
 		return;
 
 	Widgets->Render();
 
-	if(Selection.SelectedMesh)
+	if (Selection.SelectedMesh)
 	{
 		VisualizeMeshInfo(Selection.SelectedMesh, D3DXVECTOR4(1,0,0,1));
 	}
 
-	if(Selection.SelectedVegetationBox)
+	if (Selection.SelectedVegetationBox)
 	{
-		if(Selection.SelectedVegetationBox)
+		if (Selection.SelectedVegetationBox)
 			Selection.SelectedVegetationBox->VisualizeGrass(D3DXVECTOR4(1,0,0,1));
 	}
 
-	if(IsMouseInsideEditorWindow() || Widgets->IsWidgetClicked())
+	if (IsMouseInsideEditorWindow() || Widgets->IsWidgetClicked())
 	{
 		return;
 	}
 
-	if(!MMovedAfterClick)
+	if (!MMovedAfterClick)
 	{
-		if(Mode == EM_PLACE_VEGETATION)
+		if (Mode == EM_PLACE_VEGETATION)
 		{
 			DoVegetationPlacement();
-		}else if(Mode == EM_SELECT_POLY || Mode == EM_IDLE)
+		}else if (Mode == EM_SELECT_POLY || Mode == EM_IDLE)
 		{
 			DoSelection();
-		}else if(Mode == EM_REMOVE_VEGETATION)
+		}else if (Mode == EM_REMOVE_VEGETATION)
 		{
 			DoVegetationRemove();
 		}
 
-	}else if(!Keys[VK_CONTROL])
+	}else if (!Keys[VK_CONTROL])
 	{
 		// Clicked and moving
 		DoEditorMovement();
@@ -482,9 +482,9 @@ void D2DEditorView::DoVegetationRemove()
 
 	float removeRange = 250.0f * (1.0f + MMWDelta * 0.01f);
 
-	if(Selection.SelectedVegetationBox)
+	if (Selection.SelectedVegetationBox)
 	{
-		if(Engine::GAPI->TraceWorldMesh(Engine::GAPI->GetCameraPosition(), wDir, hit, NULL, hitTri))
+		if (Engine::GAPI->TraceWorldMesh(Engine::GAPI->GetCameraPosition(), wDir, hit, NULL, hitTri))
 		{
 			D3DXVECTOR4 p;
 			D3DXVec3Cross((D3DXVECTOR3 *)&p, &(hitTri[1] - hitTri[0]), &(hitTri[2] - hitTri[0]));
@@ -494,12 +494,12 @@ void D2DEditorView::DoVegetationRemove()
 			D3DXVECTOR4 c;
 
 			// Do this when only Mouse1 and CTRL are pressed
-			if(MButtons[0] && !MButtons[1] && !MButtons[2] && Keys[VK_CONTROL])
+			if (MButtons[0] && !MButtons[1] && !MButtons[2] && Keys[VK_CONTROL])
 			{
 				Selection.SelectedVegetationBox->RemoveVegetationAt(hit, removeRange);
 
 				// Delete if empty
-				if(Selection.SelectedVegetationBox->IsEmpty())
+				if (Selection.SelectedVegetationBox->IsEmpty())
 				{
 					Engine::GAPI->RemoveVegetationBox(Selection.SelectedVegetationBox);
 					Selection.SelectedVegetationBox = NULL;
@@ -527,11 +527,11 @@ void D2DEditorView::DoVegetationPlacement()
 
 	// Check for restricted by texture
 	std::string* rtp = NULL;
-	if(VegRestrictByTextureCheckBox->GetChecked())
+	if (VegRestrictByTextureCheckBox->GetChecked())
 		rtp = &TracedTexture;
 
 	// Trace the worldmesh from the cursor
-	if(Engine::GAPI->TraceWorldMesh(Engine::GAPI->GetCameraPosition(), wDir, hit, rtp, hitTri))
+	if (Engine::GAPI->TraceWorldMesh(Engine::GAPI->GetCameraPosition(), wDir, hit, rtp, hitTri))
 	{
 		// Update the position if successful
 		DraggedBoxCenter = hit;
@@ -550,7 +550,7 @@ GVegetationBox* D2DEditorView::FindVegetationFromMeshInfo(MeshInfo* info)
 {
 	for(std::list<GVegetationBox *>::const_iterator it = Engine::GAPI->GetVegetationBoxes().begin(); it != Engine::GAPI->GetVegetationBoxes().end();it++)
 	{
-		if((*it)->GetWorldMeshPart() == info)
+		if ((*it)->GetWorldMeshPart() == info)
 			return (*it);
 	}
 
@@ -578,7 +578,7 @@ void D2DEditorView::DoSelection()
 
 	// Trace mesh-less vegetationboxes
 	TracedVegetationBox = TraceVegetationBoxes(Engine::GAPI->GetCameraPosition(), wDir);
-	if(TracedVegetationBox)
+	if (TracedVegetationBox)
 	{			
 		TracedVegetationBox->VisualizeGrass(D3DXVECTOR4(1,1,1,1));
 		return;
@@ -596,11 +596,11 @@ void D2DEditorView::DoSelection()
 	float lenWorld = D3DXVec3Length(&(Engine::GAPI->GetCameraPosition()-hitWorld));
 
 	// Check world hit
-	if(lenWorld < lenVob && lenWorld < lenSkel)
+	if (lenWorld < lenVob && lenWorld < lenSkel)
 	{
 		TracedPosition = hitWorld;
 
-		if(SelectTrianglesOnlyCheckBox->GetChecked())
+		if (SelectTrianglesOnlyCheckBox->GetChecked())
 		{
 			memcpy(SelectedTriangle, hitTri, sizeof(SelectedTriangle));
 
@@ -613,9 +613,9 @@ void D2DEditorView::DoSelection()
 		{
 			// Try to find a vegetationbox for this mesh
 			TracedVegetationBox = FindVegetationFromMeshInfo(hitMesh);
-			if(TracedVegetationBox)
+			if (TracedVegetationBox)
 			{
-				if(Selection.SelectedVegetationBox != TracedVegetationBox)
+				if (Selection.SelectedVegetationBox != TracedVegetationBox)
 					TracedVegetationBox->VisualizeGrass(D3DXVECTOR4(1,1,1,1));
 				return; // Vegetation has priority over mesh
 			}
@@ -623,7 +623,7 @@ void D2DEditorView::DoSelection()
 			TracedMesh = hitMesh;
 			TracedMaterial = hitMaterial;
 			
-			if(Selection.SelectedMesh != TracedMesh)
+			if (Selection.SelectedMesh != TracedMesh)
 				VisualizeMeshInfo(hitMesh);
 		}
 
@@ -631,21 +631,21 @@ void D2DEditorView::DoSelection()
 	}
 
 	// Check skeletal hit
-	if(tSkelVob && lenSkel < lenVob && lenSkel < lenWorld)
+	if (tSkelVob && lenSkel < lenVob && lenSkel < lenWorld)
 	{
 		TracedSkeletalVobInfo = tSkelVob;
 		Engine::GraphicsEngine->GetLineRenderer()->AddAABBMinMax(TracedSkeletalVobInfo->Vob->GetBBoxLocal().Min + TracedSkeletalVobInfo->Vob->GetPositionWorld(), 
 									TracedSkeletalVobInfo->Vob->GetBBoxLocal().Max + TracedSkeletalVobInfo->Vob->GetPositionWorld(),
 									D3DXVECTOR4(1,1,1,1));
 
-		if(!TracedSkeletalVobInfo->VisualInfo->Meshes.empty())
+		if (!TracedSkeletalVobInfo->VisualInfo->Meshes.empty())
 			TracedMaterial = (*TracedSkeletalVobInfo->VisualInfo->Meshes.begin()).first;
 
 		return;
 	}
 
 	// Check vob hit
-	if(tVob && lenVob < lenSkel && lenVob < lenWorld)
+	if (tVob && lenVob < lenSkel && lenVob < lenWorld)
 	{
 		TracedVobInfo = tVob;
 		Engine::GraphicsEngine->GetLineRenderer()->AddAABBMinMax(TracedVobInfo->Vob->GetBBoxLocal().Min + TracedVobInfo->Vob->GetPositionWorld(), 
@@ -654,7 +654,7 @@ void D2DEditorView::DoSelection()
 		
 		TracedMaterial = hitMaterialVob;
 
-		if(Selection.SelectedVobInfo != TracedVobInfo && hitMaterialVob)
+		if (Selection.SelectedVobInfo != TracedVobInfo && hitMaterialVob)
 		{
 			D3DXMATRIX world; D3DXMatrixTranspose(&world,  TracedVobInfo->Vob->GetWorldMatrixPtr());
 			VisualizeMeshInfo(TracedVobInfo->VisualInfo->Meshes[hitMaterialVob][0], D3DXVECTOR4(1,1,1,1), false, &world);
@@ -681,7 +681,7 @@ void D2DEditorView::VisualizeMeshInfo(MeshInfo* m, const D3DXVECTOR4& color, boo
 		edge[1] = m->Vertices[m->Indices[i+1]].TexCoord2.x;
 		edge[2] = m->Vertices[m->Indices[i+2]].TexCoord2.x;
 
-		if(world)
+		if (world)
 		{
 			D3DXVec3TransformCoord(&tri[0], &tri[0], world);
 			D3DXVec3TransformCoord(&tri[1], &tri[1], world);
@@ -692,7 +692,7 @@ void D2DEditorView::VisualizeMeshInfo(MeshInfo* m, const D3DXVECTOR4& color, boo
 		//D3DXVECTOR3 nrm = Toolbox::ComputeNormal(tri[0], tri[1], tri[2]);
 		//Engine::GraphicsEngine->GetLineRenderer()->AddTriangle(tri[0] + nrm, tri[1] + nrm, tri[2] + nrm, color);
 
-		if(showBounds)
+		if (showBounds)
 		{
 			Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(tri[0], D3DXVECTOR4(1,edge[0],0,1)), LineVertex(tri[1], D3DXVECTOR4(1,edge[1],0,1)));
 			Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(tri[0], D3DXVECTOR4(1,edge[0],0,1)), LineVertex(tri[1], D3DXVECTOR4(1,edge[1],0,1)));
@@ -710,20 +710,20 @@ void D2DEditorView::VisualizeMeshInfo(MeshInfo* m, const D3DXVECTOR4& color, boo
 void D2DEditorView::OnMouseButtonDown(int button)
 {
 	// Catch clicks inside the editor window
-	if(IsMouseInsideEditorWindow())
+	if (IsMouseInsideEditorWindow())
 	{
 		return;
 	}
 
 	// If nothing is pressed right now, reset the moved state
-	if(!MButtons[0] && !MButtons[1] && !MButtons[2])
+	if (!MButtons[0] && !MButtons[1] && !MButtons[2])
 	{
 		MMovedAfterClick = false;
 
 		GetCursorPos(&CStartMousePosition);
 
 		// Set capture for this buttondown
-		if(!GetCapture())
+		if (!GetCapture())
 			SetCapture(Engine::GAPI->GetOutputWindow());
 	}
 
@@ -736,22 +736,22 @@ void D2DEditorView::OnMouseButtonUp(int button)
 {
 	MButtons[button] = false; // Release is possible anywhere
 
-	if(GetCapture()) // Release mouse capture, if there was any
+	if (GetCapture()) // Release mouse capture, if there was any
 		ReleaseCapture();
 
 	// Catch clicks inside the editor window
-	if(IsMouseInsideEditorWindow())
+	if (IsMouseInsideEditorWindow())
 	{
 		return;
 	}
 
 	// If nothing is pressed right now, reset the moved state
-	if(!MButtons[0] && !MButtons[1] && !MButtons[2])
+	if (!MButtons[0] && !MButtons[1] && !MButtons[2])
 	{
-		if(MMovedAfterClick)
+		if (MMovedAfterClick)
 		{
 			// Show cursor again
-			if(MPrevCursor)
+			if (MPrevCursor)
 				SetCursor(MPrevCursor);
 
 			// Restore mouse position after dragging
@@ -762,13 +762,13 @@ void D2DEditorView::OnMouseButtonUp(int button)
 	}
 
 	// Catch clicks inside the editor window
-	if(IsMouseInsideEditorWindow())
+	if (IsMouseInsideEditorWindow())
 	{
 		return;
 	}
 
 	// Check for click
-	if(!(MButtons[0] || MButtons[1] || MButtons[2]) && !MMovedAfterClick)
+	if (!(MButtons[0] || MButtons[1] || MButtons[2]) && !MMovedAfterClick)
 	{
 		OnMouseClick(button);
 	}else // This was a drag
@@ -780,19 +780,19 @@ void D2DEditorView::OnMouseButtonUp(int button)
 
 void D2DEditorView::OnMouseClick(int button)
 {
-	if(button == 0)
+	if (button == 0)
 	{
 		SelectionTabControl->SetActiveTab("Selection/Texture"); // Default
 
-		if(Keys[VK_SHIFT])
+		if (Keys[VK_SHIFT])
 		{
 			LogInfo() << "Setting player position to: " << float3(TracedPosition).toString();
 			Engine::GAPI->SetPlayerPosition(TracedPosition + D3DXVECTOR3(0, 500.0f, 0));
-		}else if(Mode == EM_PLACE_VEGETATION)
+		}else if (Mode == EM_PLACE_VEGETATION)
 		{
 			// Place the currently dragged vegetationbox
 			PlaceDraggedVegetationBox();
-		}else if(Mode == EM_SELECT_POLY || Mode == EM_IDLE)
+		}else if (Mode == EM_SELECT_POLY || Mode == EM_IDLE)
 		{
 			// Reset selection and apply what ever has the most priority
 			MMWDelta = 0;
@@ -803,7 +803,7 @@ void D2DEditorView::OnMouseClick(int button)
 			SelectedVegSizeSlider->SetValue(1.0f);
 
 			
-			if(TracedVobInfo)
+			if (TracedVobInfo)
 			{
 				Selection.SelectedVobInfo = TracedVobInfo;
 				Selection.SelectedMaterial = TracedMaterial;
@@ -818,7 +818,7 @@ void D2DEditorView::OnMouseClick(int button)
 				Widgets->ClearSelection();
 				Widgets->AddSelection(TracedVobInfo);
 
-			}else if(TracedSkeletalVobInfo)
+			}else if (TracedSkeletalVobInfo)
 			{
 				Selection.SelectedSkeletalVob = TracedSkeletalVobInfo;
 
@@ -832,7 +832,7 @@ void D2DEditorView::OnMouseClick(int button)
 
 				Widgets->ClearSelection();
 				Widgets->AddSelection(TracedSkeletalVobInfo);
-			}else if(TracedVegetationBox)
+			}else if (TracedVegetationBox)
 			{
 				Selection.SelectedVegetationBox = TracedVegetationBox;
 
@@ -855,7 +855,7 @@ void D2DEditorView::OnMouseClick(int button)
 		}
 	}
 
-	if(button == 1)
+	if (button == 1)
 	{
 		POINT p; GetCursorPos(&p);
 		DWORD lp = (p.y << 16) | p.x;
@@ -870,7 +870,7 @@ void D2DEditorView::OnMouseClick(int button)
 void D2DEditorView::UpdateSelectionPanel()
 {
 	// Update selection panel
-	if(Selection.SelectedMaterial && Selection.SelectedMaterial->GetTexture())
+	if (Selection.SelectedMaterial && Selection.SelectedMaterial->GetTexture())
 	{
 		// Select preferred texture for the texture settings
 		Engine::AntTweakBar->SetPreferredTextureForSettings(Selection.SelectedMaterial->GetTexture()->GetNameWithoutExt());
@@ -879,10 +879,10 @@ void D2DEditorView::UpdateSelectionPanel()
 		// Update thumbnail
 		MyDirectDrawSurface7* surface = Engine::GAPI->GetSurface(Selection.SelectedMaterial->GetTexture()->GetNameWithoutExt());
 
-		if(surface)
+		if (surface)
 		{
 			ID3D11Texture2D* thumb = ((D3D11Texture*)surface->GetEngineTexture())->GetThumbnail();
-			if(!thumb)
+			if (!thumb)
 			{
 				XLE(((D3D11Texture*)surface->GetEngineTexture())->CreateThumbnail());
 				thumb = ((D3D11Texture*)surface->GetEngineTexture())->GetThumbnail();
@@ -891,18 +891,18 @@ void D2DEditorView::UpdateSelectionPanel()
 		}
 	}
 
-	if(Selection.SelectedMesh)
+	if (Selection.SelectedMesh)
 	{
 		WorldMeshInfo* info = (WorldMeshInfo *)Selection.SelectedMesh;
 		MaterialInfo* mi;
 		
-		if(Selection.SelectedMaterial)
+		if (Selection.SelectedMaterial)
 			mi = Engine::GAPI->GetMaterialInfoFrom(Selection.SelectedMaterial->GetTexture());
 		else
 			mi = NULL;
 
 		// Get settings from MI, if possible
-		if(mi)
+		if (mi)
 		{
 			SelectedTexDisplacementSlider->GetSlider()->SetValue(mi->TextureTesselationSettings.buffer.VT_DisplacementStrength);
 			SelectedMeshRoundnessSlider->GetSlider()->SetValue(mi->TextureTesselationSettings.buffer.VT_Roundness);
@@ -919,13 +919,13 @@ void D2DEditorView::UpdateSelectionPanel()
 
 void D2DEditorView::OnMouseWheel(int delta)
 {
-	if(Selection.SelectedVegetationBox)
+	if (Selection.SelectedVegetationBox)
 	{
 		// Adjust size of grassblades if not in removing-mode
-		if(Mode == EM_IDLE)
+		if (Mode == EM_IDLE)
 		{
 			Selection.SelectedVegetationBox->ApplyUniformScaling(delta < 0 ? 0.9f : 1.1f);
-		}else if(Mode == EM_REMOVE_VEGETATION)
+		}else if (Mode == EM_REMOVE_VEGETATION)
 		{
 			// Resizing the BBox of the remove-brush is handled elsewhere
 		}
@@ -934,7 +934,7 @@ void D2DEditorView::OnMouseWheel(int delta)
 
 void D2DEditorView::ResetEditorCamera()
 {
-	if(!oCGame::GetGame() || !oCGame::GetGame()->_zCSession_camVob)
+	if (!oCGame::GetGame() || !oCGame::GetGame()->_zCSession_camVob)
 		return;
 
 	// Save current camera-matrix
@@ -985,12 +985,12 @@ void D2DEditorView::DoEditorMovement()
 	D3DXMatrixIdentity(&rot);
 	
 
-	if(!MButtons[0] && MButtons[1]) // Rightclick -> Rotate only
+	if (!MButtons[0] && MButtons[1]) // Rightclick -> Rotate only
 	{
 		CPitch += diff.y * rSpeed;
 		CYaw += diff.x * rSpeed;
 
-	}else if(MButtons[0] && !MButtons[1]) // Leftclick -> Rotate yaw and move xz
+	}else if (MButtons[0] && !MButtons[1]) // Leftclick -> Rotate yaw and move xz
 	{
 		D3DXVECTOR2 fwd2d = D3DXVECTOR2(sinf(CYaw), cosf(CYaw));
 
@@ -999,7 +999,7 @@ void D2DEditorView::DoEditorMovement()
 
 		// Rotate yaw only
 		CYaw += diff.x * rSpeed;
-	}else if(MButtons[0] && MButtons[1]) // Both, move sideways
+	}else if (MButtons[0] && MButtons[1]) // Both, move sideways
 	{
 		D3DXVECTOR3 fwd = D3DXVECTOR3(sinf(CYaw), 0, cosf(CYaw));
 
@@ -1037,7 +1037,7 @@ bool D2DEditorView::IsMouseInsideEditorWindow()
 	POINT p = D2DView::GetCursorPosition();
 
 	// Catch clicks inside the editor window
-	if(D2DSubView::PointInsideRect(D2D1::Point2F((float)p.x, (float)p.y), MainPanel->GetRect()))
+	if (D2DSubView::PointInsideRect(D2D1::Point2F((float)p.x, (float)p.y), MainPanel->GetRect()))
 	{
 		return true;
 	}
@@ -1051,11 +1051,11 @@ GVegetationBox* D2DEditorView::PlaceDraggedVegetationBox()
 	SetEditorMode(EM_IDLE);
 
 	GVegetationBox::EShape shape = GVegetationBox::S_Box;
-	if(VegCircularShapeCheckBox->GetChecked())
+	if (VegCircularShapeCheckBox->GetChecked())
 		shape = GVegetationBox::S_Circle;
 
 	GVegetationBox* box = new GVegetationBox;
-	if(XR_SUCCESS == box->InitVegetationBox(DraggedBoxCenter + DraggedBoxMinLocal * (1 + MMWDelta), DraggedBoxCenter + DraggedBoxMaxLocal * (1 + MMWDelta),
+	if (XR_SUCCESS == box->InitVegetationBox(DraggedBoxCenter + DraggedBoxMinLocal * (1 + MMWDelta), DraggedBoxCenter + DraggedBoxMaxLocal * (1 + MMWDelta),
 		"", 1.0f, 1.0f, TracedTexture, shape))
 	{
 		Engine::GAPI->AddVegetationBox(box);
@@ -1073,7 +1073,7 @@ GVegetationBox* D2DEditorView::PlaceDraggedVegetationBox()
 bool D2DEditorView::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wParam, LPARAM lParam, const D2D1_RECT_F& clientRectAbs)
 {
 	// Don't do anything if the AntTweakBar is open
-	if(Engine::AntTweakBar->GetActive())
+	if (Engine::AntTweakBar->GetActive())
 		return true;
 
 	bool enableEditorPanel = zCOption::GetOptions()->IsParameter("XEnableEditorPanel");
@@ -1085,9 +1085,9 @@ bool D2DEditorView::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wParam, 
 
 	// Always allow opening/closing the editor
 #ifdef BUILD_SPACER
-	if(msg == WM_KEYDOWN && (wParam == VK_F1 || wParam == 'O') && !zCOption::GetOptions()->IsParameter("XNoDevMenu"))
+	if (msg == WM_KEYDOWN && (wParam == VK_F1 || wParam == 'O') && !zCOption::GetOptions()->IsParameter("XNoDevMenu"))
 #else
-	if(msg == WM_KEYDOWN && (wParam == VK_F1))
+	if (msg == WM_KEYDOWN && (wParam == VK_F1))
 #endif
 	{
 		if (!enableEditorPanel)
@@ -1096,7 +1096,7 @@ bool D2DEditorView::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wParam, 
 		IsEnabled = !IsEnabled;
 		Engine::GAPI->GetRendererState()->RendererSettings.DisableWatermark = false;
 
-		if(IsEnabled)
+		if (IsEnabled)
 		{
 			// Enable free-cam, the easy way
 			oCGame::GetGame()->TestKey(GOTHIC_KEY_F6);
@@ -1117,11 +1117,11 @@ bool D2DEditorView::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wParam, 
 	}
 
 	// Don't process any messages when disabled
-	if(!IsEnabled)
+	if (!IsEnabled)
 		return true;
 
-	if(IsEnabled)
-		if(!D2DSubView::OnWindowMessage(hWnd, msg, wParam, lParam, clientRectAbs))
+	if (IsEnabled)
+		if (!D2DSubView::OnWindowMessage(hWnd, msg, wParam, lParam, clientRectAbs))
 			return false;
 
 	switch(msg)
@@ -1137,15 +1137,15 @@ bool D2DEditorView::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wParam, 
 			break;
 
 		case VK_SPACE:
-			if(Selection.SelectedMesh)
+			if (Selection.SelectedMesh)
 			{
 				SmoothMesh((WorldMeshInfo *)Selection.SelectedMesh, true);
 
-				if(Selection.SelectedMaterial && Selection.SelectedMaterial->GetTexture())
+				if (Selection.SelectedMaterial && Selection.SelectedMaterial->GetTexture())
 				{
 					MaterialInfo* info = Engine::GAPI->GetMaterialInfoFrom(Selection.SelectedMaterial->GetTexture());
 
-					if(info)
+					if (info)
 					{
 						// Set the offline-tesselation factor
 						info->TextureTesselationSettings.buffer.VT_TesselationFactor = 2;
@@ -1165,14 +1165,14 @@ bool D2DEditorView::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wParam, 
 		break;
 
 	case WM_MOUSEMOVE:
-		if((MButtons[0] || MButtons[1] || MButtons[2]) && !MMovedAfterClick && !Keys[VK_CONTROL])
+		if ((MButtons[0] || MButtons[1] || MButtons[2]) && !MMovedAfterClick && !Keys[VK_CONTROL])
 		{
 			MMovedAfterClick = true;
 
 			// Hide cursor during movement
 			MPrevCursor = SetCursor(NULL);
 
-			//if(Mode != EM_???)
+			//if (Mode != EM_???)
 			{
 				RECT r;
 				GetWindowRect(Engine::GAPI->GetOutputWindow(), &r);
@@ -1230,7 +1230,7 @@ void D2DEditorView::SetEditorMode(EditorMode mode)
 void D2DEditorView::OnDelete()
 {
 	// Find out what we have selected
-	if(Selection.SelectedVegetationBox)
+	if (Selection.SelectedVegetationBox)
 	{
 		// Delete all attachments to this mesh
 		Engine::GAPI->RemoveVegetationBox(Selection.SelectedVegetationBox);
@@ -1239,7 +1239,7 @@ void D2DEditorView::OnDelete()
 		return;
 	}
 
-	if(Selection.SelectedMesh && Selection.SelectedMaterial && Selection.SelectedMaterial->GetTexture())
+	if (Selection.SelectedMesh && Selection.SelectedMaterial && Selection.SelectedMaterial->GetTexture())
 	{
 		// Find the section of this mesh
 		D3DXVECTOR3 avgPos = (*Selection.SelectedMesh->Vertices[0].Position.toD3DXVECTOR3() + 
@@ -1263,7 +1263,7 @@ void D2DEditorView::AddVegButtonPressed(SV_Button* sender, void* userdata)
 
 	v->MMWDelta = 0;
 
-	if(v->Mode != EM_IDLE)
+	if (v->Mode != EM_IDLE)
 	{
 		LogWarn() << "Editor must be in idle-state before you can add a vegetation-volume!";
 		return;
@@ -1280,16 +1280,16 @@ GVegetationBox* D2DEditorView::TraceVegetationBoxes(const D3DXVECTOR3& wPos, con
 
 	for(std::list<GVegetationBox *>::const_iterator it = Engine::GAPI->GetVegetationBoxes().begin(); it != Engine::GAPI->GetVegetationBoxes().end();it++)
 	{
-		if((*it)->GetWorldMeshPart())
+		if ((*it)->GetWorldMeshPart())
 			continue; // Only take the usual boxes
 
 		D3DXVECTOR3 bbMin, bbMax;
 		(*it)->GetBoundingBox(&bbMin, &bbMax);
 
 		float t;
-		if(Toolbox::IntersectBox(bbMin, bbMax, wPos, wDir, t))
+		if (Toolbox::IntersectBox(bbMin, bbMax, wPos, wDir, t))
 		{
-			if(t < nearest)
+			if (t < nearest)
 			{
 				b = (*it);
 				nearest = t;
@@ -1305,12 +1305,12 @@ void D2DEditorView::FillVegButtonPressed(SV_Button* sender, void* userdata)
 {
 	D2DEditorView* v = (D2DEditorView *)userdata;
 
-	if(v->Selection.SelectedMesh && !v->FindVegetationFromMeshInfo(v->Selection.SelectedMesh))
+	if (v->Selection.SelectedMesh && !v->FindVegetationFromMeshInfo(v->Selection.SelectedMesh))
 	{
 		LogInfo() << "Filling selected mesh with vegetation";
 
 		GVegetationBox* box = new GVegetationBox;
-		if(XR_SUCCESS == box->InitVegetationBox(v->Selection.SelectedMesh, "", 1.0f, 1.0f, v->Selection.SelectedMaterial->GetTexture()))
+		if (XR_SUCCESS == box->InitVegetationBox(v->Selection.SelectedMesh, "", 1.0f, 1.0f, v->Selection.SelectedMaterial->GetTexture()))
 		{
 			Engine::GAPI->AddVegetationBox(box);
 			//v->Selection.SelectedVegetationBox = box;
@@ -1328,10 +1328,10 @@ void D2DEditorView::MainTabSwitched(SV_TabControl* sender, void* userdata)
 
 	//v->SetEditorMode(D2DEditorView::EM_SELECT_POLY);
 
-	/*if(sender->GetActiveTab() == "Selection")
+	/*if (sender->GetActiveTab() == "Selection")
 	{
 		v->SetEditorMode(D2DEditorView::EM_SELECT_POLY);
-	}else if(sender->GetActiveTab() == "Vegetation")
+	}else if (sender->GetActiveTab() == "Vegetation")
 	{
 		v->SetEditorMode(D2DEditorView::EM_PLACE_VEGETATION);
 	}else
@@ -1347,7 +1347,7 @@ void D2DEditorView::RemoveVegButtonPressed(SV_Button* sender, void* userdata)
 
 	v->MMWDelta = 0;
 
-	if(v->Mode != EM_REMOVE_VEGETATION)
+	if (v->Mode != EM_REMOVE_VEGETATION)
 	{
 		v->SetEditorMode(EM_REMOVE_VEGETATION);
 		sender->SetCaption("Stop rem.");
@@ -1388,7 +1388,7 @@ void D2DEditorView::VegetationAmountSliderChanged(SV_Slider* sender, void* userd
 {
 	D2DEditorView* v = (D2DEditorView *)userdata;
 
-	if(v->Selection.SelectedVegetationBox)
+	if (v->Selection.SelectedVegetationBox)
 	{
 		D3DXVECTOR3 min, max;
 		v->Selection.SelectedVegetationBox->GetBoundingBox(&min, &max);
@@ -1402,7 +1402,7 @@ void D2DEditorView::VegetationScaleSliderChanged(SV_Slider* sender, void* userda
 {
 	D2DEditorView* v = (D2DEditorView *)userdata;
 
-	if(v->Selection.SelectedVegetationBox)
+	if (v->Selection.SelectedVegetationBox)
 	{
 		v->Selection.SelectedVegetationBox->ApplyUniformScaling(1 + (sender->GetValue() - v->VegLastUniformScale));
 		v->VegLastUniformScale = sender->GetValue();
@@ -1413,31 +1413,31 @@ void D2DEditorView::TextureSettingsSliderChanged(SV_Slider* sender, void* userda
 {
 	D2DEditorView* v = (D2DEditorView *)userdata;
 
-	if(v->Selection.SelectedMaterial && v->Selection.SelectedMaterial->GetTexture())
+	if (v->Selection.SelectedMaterial && v->Selection.SelectedMaterial->GetTexture())
 	{
 		MaterialInfo* info = Engine::GAPI->GetMaterialInfoFrom(v->Selection.SelectedMaterial->GetTexture());
 		
-		if(sender == v->SelectedTexNrmStrSlider->GetSlider())
+		if (sender == v->SelectedTexNrmStrSlider->GetSlider())
 		{
 			info->buffer.NormalmapStrength = sender->GetValue();
-		}else if(sender == v->SelectedTexSpecIntensSlider->GetSlider())
+		}else if (sender == v->SelectedTexSpecIntensSlider->GetSlider())
 		{
 			info->buffer.SpecularIntensity = sender->GetValue();
-		}else if(sender == v->SelectedTexSpecPowerSlider->GetSlider())
+		}else if (sender == v->SelectedTexSpecPowerSlider->GetSlider())
 		{
 			info->buffer.SpecularPower = sender->GetValue();
-		}else if(sender == v->SelectedTexDisplacementSlider->GetSlider() && v->Selection.SelectedMesh)
+		}else if (sender == v->SelectedTexDisplacementSlider->GetSlider() && v->Selection.SelectedMesh)
 		{
 			WorldMeshInfo* mesh = (WorldMeshInfo *)v->Selection.SelectedMesh; // FIXME: Make this nicer
 			mesh->TesselationSettings.buffer.VT_DisplacementStrength = sender->GetValue();
 			mesh->TesselationSettings.UpdateConstantbuffer();
 
 			info->TextureTesselationSettings.buffer.VT_DisplacementStrength = sender->GetValue();
-		}else if(sender == v->SelectedMeshTessAmountSlider->GetSlider() && v->Selection.SelectedMesh)
+		}else if (sender == v->SelectedMeshTessAmountSlider->GetSlider() && v->Selection.SelectedMesh)
 		{
 			WorldMeshInfo* mesh = (WorldMeshInfo *)v->Selection.SelectedMesh; // FIXME: Make this nicer
 
-			if(!mesh->MeshIndexBufferPNAEN)
+			if (!mesh->MeshIndexBufferPNAEN)
 			{
 				// Apply tesselation for all meshes using this material, don't tesselate yet
 				Engine::GAPI->ApplyTesselationSettingsForAllMeshPartsUsing(info, sender->GetValue() > 1.0f ? 2 : 1);
@@ -1447,7 +1447,7 @@ void D2DEditorView::TextureSettingsSliderChanged(SV_Slider* sender, void* userda
 			mesh->TesselationSettings.UpdateConstantbuffer();
 
 			info->TextureTesselationSettings.buffer.VT_TesselationFactor = sender->GetValue();
-		}else if(sender == v->SelectedMeshRoundnessSlider->GetSlider() && v->Selection.SelectedMesh)
+		}else if (sender == v->SelectedMeshRoundnessSlider->GetSlider() && v->Selection.SelectedMesh)
 		{
 			WorldMeshInfo* mesh = (WorldMeshInfo *)v->Selection.SelectedMesh; // FIXME: Make this nicer
 			mesh->TesselationSettings.buffer.VT_Roundness = sender->GetValue();
@@ -1456,7 +1456,7 @@ void D2DEditorView::TextureSettingsSliderChanged(SV_Slider* sender, void* userda
 			info->TextureTesselationSettings.buffer.VT_Roundness = sender->GetValue();
 		}
 		
-		/*else if(sender == v->SelectedTexSpecModulationSlider->GetSlider())
+		/*else if (sender == v->SelectedTexSpecModulationSlider->GetSlider())
 		{
 			//info->buffer.NormalmapStrength = sender->GetValue();
 		}*/
@@ -1484,7 +1484,7 @@ void D2DEditorView::SmoothMesh(WorldMeshInfo* mesh, bool tesselate)
 	MeshModifier::DropTexcoords(vxOld, ixOld, mesh->Vertices, mesh->Indices);*/
 
 	// Tesselate if the outcome would still be in 16-bit range
-	if(tesselate && mesh->Vertices.size() + (mesh->Indices.size() / 3) < 0x0000FFFF)
+	if (tesselate && mesh->Vertices.size() + (mesh->Indices.size() / 3) < 0x0000FFFF)
 	{
 		std::vector<ExVertexStruct> meshTess;
 		for(unsigned int i=0;i<mesh->Indices.size();i+=3)
@@ -1518,7 +1518,7 @@ void D2DEditorView::SmoothMesh(WorldMeshInfo* mesh, bool tesselate)
 	//WorldConverter::GenerateVertexNormals(mesh->Vertices, mesh->Indices);
 
 	MeshModifier::ComputePNAEN18Indices(mesh->Vertices, mesh->Indices, mesh->IndicesPNAEN, true, true);
-	if(mesh->Vertices.size() >= 0xFFFF)
+	if (mesh->Vertices.size() >= 0xFFFF)
 	{
 		// Too large
 		return;
@@ -1552,17 +1552,17 @@ void D2DEditorView::SmoothMesh(WorldMeshInfo* mesh, bool tesselate)
 XRESULT D2DEditorView::OnVobRemovedFromWorld(zCVob* vob)
 {
 	bool reset = false;
-	if(TracedSkeletalVobInfo && TracedSkeletalVobInfo->Vob == vob)
+	if (TracedSkeletalVobInfo && TracedSkeletalVobInfo->Vob == vob)
 	{
 		TracedSkeletalVobInfo = NULL;
 	}
 
-	if(TracedVobInfo && TracedVobInfo->Vob == vob)
+	if (TracedVobInfo && TracedVobInfo->Vob == vob)
 	{
 		TracedVobInfo = NULL;
 	}
 
-	if( (Selection.SelectedSkeletalVob && Selection.SelectedSkeletalVob->Vob == vob) ||
+	if ( (Selection.SelectedSkeletalVob && Selection.SelectedSkeletalVob->Vob == vob) ||
 		(Selection.SelectedVobInfo && Selection.SelectedVobInfo->Vob == vob))
 	{
 		Selection.Reset();

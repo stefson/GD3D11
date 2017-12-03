@@ -40,8 +40,8 @@ EditorLinePrimitive::~EditorLinePrimitive(void)
 {
 	delete[] Vertices;
 	delete[] SolidVertices;
-	if(PrimVB)PrimVB->Release();
-	if(SolidPrimVB)SolidPrimVB->Release();
+	if (PrimVB)PrimVB->Release();
+	if (SolidPrimVB)SolidPrimVB->Release();
 }
 
 /** Deletes all content */
@@ -49,8 +49,8 @@ void EditorLinePrimitive::DeleteContent()
 {
 	delete[] Vertices;
 	delete[] SolidVertices;
-	if(PrimVB)PrimVB->Release();
-	if(SolidPrimVB)SolidPrimVB->Release();
+	if (PrimVB)PrimVB->Release();
+	if (SolidPrimVB)SolidPrimVB->Release();
 }
 
 /** Creates a grid of lines */
@@ -302,7 +302,7 @@ HRESULT EditorLinePrimitive::CreateSolidPrimitive(LineVertex* PrimVerts, UINT Nu
 
 	// Clean up previous data
 	delete[] SolidVertices;
-	if(SolidPrimVB)SolidPrimVB->Release();
+	if (SolidPrimVB)SolidPrimVB->Release();
 
 	// Copy over the new data
 	SolidVertices = new LineVertex[NumVertices];
@@ -604,13 +604,13 @@ float EditorLinePrimitive::IntersectPrimitive(D3DXVECTOR3* RayOrigin, D3DXVECTOR
 
 		//float Dist = IntersectLineSegment(&Origin, &Dir, Vertices[i].Position.toD3DXVECTOR3(), Vertices[i+1].Position.toD3DXVECTOR3(), Epsilon);
 		float Dist = IntersectLineSegment(RayOrigin, RayDirection, &vx[0], &vx[1], Epsilon);
-		if(Dist < Shortest || Shortest == -1)
+		if (Dist < Shortest || Shortest == -1)
 		{
 			Shortest = Dist / Scale.x;
 		}
 	}
 
-	if(NumSolidVertices>0)
+	if (NumSolidVertices>0)
 	{
 		FLOAT fBary1, fBary2;
 		FLOAT fDist;
@@ -624,15 +624,15 @@ float EditorLinePrimitive::IntersectPrimitive(D3DXVECTOR3* RayOrigin, D3DXVECTOR
 			D3DXVECTOR3 v2 = *SolidVertices[i + 2].Position.toD3DXVECTOR3();
 
 			// Check if the pick ray passes through this point
-			if( IntersectTriangle( &Origin, &Dir, v0, v1, v2,
+			if ( IntersectTriangle( &Origin, &Dir, v0, v1, v2,
 				&fDist, &fBary1, &fBary2 ) )
 			{
-				if( fDist < Shortest  || Shortest == -1)
+				if ( fDist < Shortest  || Shortest == -1)
 				{
 					NumIntersections++;
 					Shortest=0;
 								
-					//if( NumIntersections == MAX_INTERSECTIONS )
+					//if ( NumIntersections == MAX_INTERSECTIONS )
 					//	break;
 				}
 			}
@@ -658,7 +658,7 @@ bool EditorLinePrimitive::IntersectTriangle( const D3DXVECTOR3* orig, const D3DX
     FLOAT det = D3DXVec3Dot( &edge1, &pvec );
 
     D3DXVECTOR3 tvec;
-    if( det > 0 )
+    if ( det > 0 )
     {
         tvec = (*orig) - v0;
     }
@@ -668,12 +668,12 @@ bool EditorLinePrimitive::IntersectTriangle( const D3DXVECTOR3* orig, const D3DX
         det = -det;
     }
 
-    if( det < 0.0001f )
+    if ( det < 0.0001f )
         return FALSE;
 
     // Calculate U parameter and test bounds
     *u = D3DXVec3Dot( &tvec, &pvec );
-    if( *u < 0.0f || *u > det )
+    if ( *u < 0.0f || *u > det )
         return FALSE;
 
     // Prepare to test V parameter
@@ -682,7 +682,7 @@ bool EditorLinePrimitive::IntersectTriangle( const D3DXVECTOR3* orig, const D3DX
 
     // Calculate V parameter and test bounds
     *v = D3DXVec3Dot( dir, &qvec );
-    if( *v < 0.0f || *u + *v > det )
+    if ( *v < 0.0f || *u + *v > det )
         return FALSE;
 
     // Calculate t, scale parameters, ray intersects triangle
@@ -821,10 +821,10 @@ void EditorLinePrimitive::RecalcTransforms()
 
 	D3DXVECTOR3 DeltaRot = Rotation - RotationMatrixAngles;
 
-	if(Rotation != D3DXVECTOR3(0,0,0))
+	if (Rotation != D3DXVECTOR3(0,0,0))
 	{
 		// Calculate matrix with the new angles
-		if(bLocalRotation)
+		if (bLocalRotation)
 		{
 			D3DXVECTOR3 Up(0,1,0);
 			D3DXVECTOR3 Front(1,0,0);
@@ -860,7 +860,7 @@ void EditorLinePrimitive::RecalcTransforms()
 		}
 
 		RotationMatrixAngles = Rotation;
-	}else if(!bJustUseRotationMatrix)
+	}else if (!bJustUseRotationMatrix)
 	{
 		// Reset matrix to identity (Todo: ROTATION! Ò.ó Y U NO WORK!? (As I want))
 		D3DXMatrixIdentity(&RotationMatrix);
@@ -954,22 +954,22 @@ void EditorLinePrimitive::RenderVertexBuffer(ID3D11Buffer* VB, UINT NumVertices,
 
 HRESULT EditorLinePrimitive::RenderPrimitive(int Pass)
 {
-	if(!PrimShader && !SolidPrimShader)
+	if (!PrimShader && !SolidPrimShader)
 	{
 		return E_FAIL;
 	}
 
-	if(bHidden)
+	if (bHidden)
 	{
 		return S_OK;
 	}
 
-	if(NumVertices > 0 && PrimShader)
+	if (NumVertices > 0 && PrimShader)
 	{
 		RenderVertexBuffer(PrimVB, NumVertices, PrimShader, PrimitiveTopology, Pass);
 	}
 
-	if(NumSolidVertices > 0 && SolidPrimShader)
+	if (NumSolidVertices > 0 && SolidPrimShader)
 	{
 		RenderVertexBuffer(SolidPrimVB, NumSolidVertices, SolidPrimShader, SolidPrimitiveTopology, Pass);
 	}

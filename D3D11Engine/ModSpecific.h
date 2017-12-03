@@ -1,6 +1,6 @@
 #pragma once
-#include "pch.h"
-#include "zCOption.h"
+
+#include <string>
 
 /** List of mods which supply a normalmap-package */ // TODO: Don't hardcode this!
 enum ELoadedMod
@@ -11,10 +11,8 @@ enum ELoadedMod
 	LM_Odyssee = 4
 };
 
+namespace ModSpecific {
 
-
-namespace ModSpecific
-{
 	__declspec(selectany) const char* NRMPACK_ORIGINAL = "Normalmaps_Original";
 	__declspec(selectany) const char* NRMPACK_VURT = "Normalmaps_Vurt";
 	__declspec(selectany) const char* NRMPACK_LHIVER = "Normalmaps_LHiver";
@@ -25,4 +23,5 @@ namespace ModSpecific
 
 	/** Checks whether the given normalmap-package is installed or not */
 	bool NormalmapPackageInstalled(const std::string& package);
-};
+
+}

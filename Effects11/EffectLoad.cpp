@@ -246,7 +246,7 @@ HRESULT CEffectHeap::AddDataInternal(_In_reads_bytes_(dwSize) const void *pData,
     *ppPointer = m_pData + m_dwSize;
     assert(*ppPointer == AlignToPowerOf2(*ppPointer, c_DataAlignment));
 
-    if( bCopyData )
+    if ( bCopyData )
     {
         memcpy(*ppPointer, pData, dwSize);
     }
@@ -381,7 +381,7 @@ HRESULT CEffect::LoadEffect(const void *pEffectBuffer, uint32_t cbEffectBuffer)
     VH( loader.LoadEffect(this, pEffectBuffer, cbEffectBuffer) );
 
 lExit:
-    if( FAILED( hr ) )
+    if ( FAILED( hr ) )
     {
         // Release here because m_pShaderBlocks may still be in loader.m_BulkHeap if loading failed before we reallocated the memory
         ReleaseShaderRefection();
@@ -572,7 +572,7 @@ HRESULT CEffectLoader::FixupInterfacePointer(_Inout_ SInterface **ppInterface, _
     if (*ppInterface != &g_NullInterface && *ppInterface != nullptr)
     {
         size_t index = *ppInterface - m_pOldInterfaces;
-        if(index < m_OldInterfaceCount)
+        if (index < m_OldInterfaceCount)
         {
             assert( index * sizeof(SInterface) == ((size_t)*ppInterface - (size_t)m_pOldInterfaces) );
             *ppInterface = m_pEffect->m_pInterfaces + index;
@@ -582,7 +582,7 @@ HRESULT CEffectLoader::FixupInterfacePointer(_Inout_ SInterface **ppInterface, _
             VBD( CheckBackgroundInterfaces, "Internal loading error: invalid interface pointer." );
             for( index=0; index < m_BackgroundInterfaces.GetSize(); index++ )
             {
-                if( *ppInterface == m_BackgroundInterfaces[ (uint32_t)index ] )
+                if ( *ppInterface == m_BackgroundInterfaces[ (uint32_t)index ] )
                 {
                     // The interfaces m_BackgroundInterfaces were concatenated to the original ones in m_pEffect->m_pInterfaces
                     *ppInterface = m_pEffect->m_pInterfaces + (m_OldInterfaceCount + index);
@@ -698,18 +698,18 @@ HRESULT CEffectLoader::FixupVariablePointer(_Inout_ SGlobalVariable **ppVar)
     HRESULT hr = S_OK;
     size_t index = *ppVar - m_pOldVars;
 
-    if( index < m_pEffect->m_VariableCount )
+    if ( index < m_pEffect->m_VariableCount )
     {
         assert( index * sizeof(SGlobalVariable) == ((size_t)*ppVar - (size_t)m_pOldVars) );
         *ppVar = m_pEffect->m_pVariables + index;
     }
-    else if( m_pvOldMemberInterfaces )
+    else if ( m_pvOldMemberInterfaces )
     {
         // When cloning, m_pvOldMemberInterfaces may be non-nullptr, and *ppVar may point to a variable in it.
         const size_t Members = m_pvOldMemberInterfaces->GetSize();
         for( index=0; index < Members; index++ )
         {
-            if( (ID3DX11EffectVariable*)(*m_pvOldMemberInterfaces)[ (uint32_t)index] == (ID3DX11EffectVariable*)*ppVar )
+            if ( (ID3DX11EffectVariable*)(*m_pvOldMemberInterfaces)[ (uint32_t)index] == (ID3DX11EffectVariable*)*ppVar )
             {
                 break;
             }
@@ -724,7 +724,7 @@ lExit:
 HRESULT CEffectLoader::FixupGroupPointer(_Inout_ SGroup **ppGroup)
 {
     HRESULT hr = S_OK;
-    if( *ppGroup != nullptr )
+    if ( *ppGroup != nullptr )
     {
         size_t index = *ppGroup - m_pOldGroups;
         assert( index * sizeof(SGroup) == ((size_t)*ppGroup - (size_t)m_pOldGroups) );
@@ -738,12 +738,12 @@ lExit:
 static HRESULT GetEffectVersion( _In_ uint32_t effectFileTag, _Out_ DWORD* pVersion )
 {
     assert( pVersion != nullptr );
-    if( !pVersion )
+    if ( !pVersion )
         return E_FAIL;
 
     for( size_t i = 0; i < _countof(g_EffectVersions); i++ )
     {
-        if( g_EffectVersions[i].m_Tag == effectFileTag )
+        if ( g_EffectVersions[i].m_Tag == effectFileTag )
         {
             *pVersion = g_EffectVersions[i].m_Version;
             return S_OK;
@@ -794,13 +794,13 @@ HRESULT CEffectLoader::LoadEffect(CEffect *pEffect, const void *pEffectBuffer, u
     VHD( m_msStructured.Read((void**) &m_pHeader, sizeof(*m_pHeader)), "pEffectBuffer is too small." );
 
     // Verify the version
-    if( FAILED( hr = GetEffectVersion( m_pHeader->Tag, &m_Version ) ) )
+    if ( FAILED( hr = GetEffectVersion( m_pHeader->Tag, &m_Version ) ) )
     {
         DPF(0, "Effect version is unrecognized.  This runtime supports fx_5_0 to %s.", g_EffectVersions[_countof(g_EffectVersions)-1].m_pName );
         VH( hr );
     }
 
-    if( m_pHeader->RequiresPool() || m_pHeader->Pool.cObjectVariables > 0 || m_pHeader->Pool.cNumericVariables > 0 )
+    if ( m_pHeader->RequiresPool() || m_pHeader->Pool.cObjectVariables > 0 || m_pHeader->Pool.cNumericVariables > 0 )
     {
         DPF(0, "Effect11 does not support EffectPools." );
         VH( E_FAIL );
@@ -1056,12 +1056,12 @@ HRESULT CEffectLoader::LoadTypeAndAddToPool(SType **ppType, uint32_t  dwOffset)
             // Determine if this type implements an interface
             VHD( m_msUnstructured.Read(&oBaseClassType), "Invalid pEffectBuffer: cannot read base class type." );
             VHD( m_msUnstructured.Read(&cInterfaces), "Invalid pEffectBuffer: cannot read interfaces." );
-            if( cInterfaces > 0 )
+            if ( cInterfaces > 0 )
             {
                 temporaryType.StructType.ImplementsInterface = 1;
                 temporaryType.StructType.HasSuperClass = ( oBaseClassType > 0 ) ? 1 : 0;
             }
-            else if( oBaseClassType > 0 )
+            else if ( oBaseClassType > 0 )
             {
                 // Get parent type and copy its ImplementsInterface
                 SType* pBaseClassType;
@@ -1546,7 +1546,7 @@ HRESULT CEffectLoader::LoadAssignments( uint32_t Assignments, SAssignment **ppAs
         }
 
         uint32_t lhsStride;
-        if( g_lvGeneral[psAssignments[i].iState].m_Stride > 0 )
+        if ( g_lvGeneral[psAssignments[i].iState].m_Stride > 0 )
             lhsStride = g_lvGeneral[psAssignments[i].iState].m_Stride;
         else
             lhsStride = pAssignment->DataSize;
@@ -1566,7 +1566,7 @@ HRESULT CEffectLoader::LoadAssignments( uint32_t Assignments, SAssignment **ppAs
             VHD( m_msUnstructured.ReadAtOffset(psAssignments[i].oInitializer, sizeof(uint32_t), (void**) &pNumConstants), "Invalid pEffectBuffer: cannot read NumConstants." );
             VHD( m_msUnstructured.Read((void **)&pConstants, sizeof(SBinaryConstant) * (*pNumConstants)), "Invalid pEffectBuffer: cannot read constants." );
 
-            if(pAssignment->IsObjectAssignment())
+            if (pAssignment->IsObjectAssignment())
             {
                 // make sure this is a nullptr assignment
                 VBD( *pNumConstants == 1 && (pConstants[0].Type == EST_Int || pConstants[0].Type == EST_UInt) && pConstants[0].iValue == 0,
@@ -1789,7 +1789,7 @@ HRESULT CEffectLoader::LoadAssignments( uint32_t Assignments, SAssignment **ppAs
 
             C_ASSERT( offsetof(SBinaryAssignment::SInlineShader,oShader) == offsetof(SBinaryShaderData5,oShader) );
             C_ASSERT( offsetof(SBinaryAssignment::SInlineShader,oSODecl) == offsetof(SBinaryShaderData5,oSODecls) );
-            if( psAssignments[i].AssignmentType == ECAT_InlineShader )
+            if ( psAssignments[i].AssignmentType == ECAT_InlineShader )
             {
                 VHD( m_msUnstructured.ReadAtOffset(psAssignments[i].oInitializer, sizeof(*psInlineShader), (void**) &psInlineShader),
                      "Invalid pEffectBuffer: cannot read inline shader." );
@@ -1841,7 +1841,7 @@ HRESULT CEffectLoader::LoadAssignments( uint32_t Assignments, SAssignment **ppAs
             
             case ELHS_GeometryShaderBlock:
                 pShaderBlock->pVT = &g_vtGS;
-                if( psAssignments[i].AssignmentType == ECAT_InlineShader )
+                if ( psAssignments[i].AssignmentType == ECAT_InlineShader )
                 {
                     if (psInlineShader->oSODecl)
                     {
@@ -1892,7 +1892,7 @@ HRESULT CEffectLoader::LoadAssignments( uint32_t Assignments, SAssignment **ppAs
                 VHD( E_FAIL, "Internal loading error: invalid shader type."  );
             }
 
-            if( psAssignments[i].AssignmentType == ECAT_InlineShader5 )
+            if ( psAssignments[i].AssignmentType == ECAT_InlineShader5 )
             {
                 pShaderBlock->pReflectionData->InterfaceParameterCount = psInlineShader5->cInterfaceBindings;
                 VH( GetInterfaceParametersAndAddToReflection( psInlineShader5->cInterfaceBindings, psInlineShader5->oInterfaceBindings, &pShaderBlock->pReflectionData->pInterfaceParameters ) );
@@ -1949,7 +1949,7 @@ HRESULT CEffectLoader::LoadObjectVariables()
         pVar->pCB = nullptr;
         pVar->ExplicitBindPoint = psBlock->ExplicitBindPoint;
 
-        if( pType->IsStateBlockObject() )
+        if ( pType->IsStateBlockObject() )
         {
             pVar->MemberDataOffsetPlus4 = m_pEffect->m_MemberDataCount * sizeof(SMemberDataPointer) + 4;
             m_pEffect->m_MemberDataCount += std::max<uint32_t>(pType->Elements,1);
@@ -2317,7 +2317,7 @@ HRESULT CEffectLoader::LoadInterfaceVariables()
                 SGlobalVariable *pCIVariable = m_pEffect->FindVariableByName(pClassInstanceName);
                 VBD( pCIVariable != nullptr, "Loading error: cannot find class instance for interface initializer." );
                 VBD( pCIVariable->pType->IsClassInstance(), "Loading error: variable type mismatch for interface initializer." );
-                if( pInterfaceInit->ArrayIndex == (uint32_t)-1 )
+                if ( pInterfaceInit->ArrayIndex == (uint32_t)-1 )
                 {
                     VBD( pCIVariable->pType->Elements == 0, "Loading error: array mismatch for interface initializer." );
                     pVar->Data.pInterface[i].pClassInstance = (SClassInstanceGlobalVariable*)pCIVariable;
@@ -2361,7 +2361,7 @@ HRESULT CEffectLoader::LoadGroups()
         VN( pGroup->pTechniques = PRIVATENEW STechnique[pGroup->TechniqueCount] );
         VHD( GetStringAndAddToReflection(psGroup->oName, &pGroup->pName), "Invalid pEffectBuffer: cannot read group name." );
 
-        if( pGroup->pName == nullptr )
+        if ( pGroup->pName == nullptr )
         {
             VBD( m_pEffect->m_pNullGroup == nullptr, "Internal loading error: multiple nullptr groups." );
             m_pEffect->m_pNullGroup = pGroup;
@@ -2537,7 +2537,7 @@ HRESULT CEffectLoader::GrabShaderData(SShaderBlock *pShaderBlock)
         return hr;
 
     // Since we have the shader desc, let's find out if this is a nullptr GS
-    if( D3D11_SHVER_GET_TYPE( ShaderDesc.Version ) == D3D11_SHVER_VERTEX_SHADER && pShaderBlock->GetShaderType() == EOT_GeometryShader )
+    if ( D3D11_SHVER_GET_TYPE( ShaderDesc.Version ) == D3D11_SHVER_VERTEX_SHADER && pShaderBlock->GetShaderType() == EOT_GeometryShader )
     {
         pShaderBlock->pReflectionData->IsNullGS = true;
     }
@@ -2682,7 +2682,7 @@ HRESULT CEffectLoader::GrabShaderData(SShaderBlock *pShaderBlock)
 
             if ( pRange->last != bindPoint )
             {
-                if( eRange != ER_UnorderedAccessView )
+                if ( eRange != ER_UnorderedAccessView )
                 {
                     // No we can't. Begin a new range by setting rangeCount to 0 and triggering the next IF
                     rangeCount = 0;
@@ -2767,7 +2767,7 @@ HRESULT CEffectLoader::GrabShaderData(SShaderBlock *pShaderBlock)
 
     uint32_t NumInterfaces = pShaderBlock->pReflectionData->pReflection->GetNumInterfaceSlots();
     uint32_t CurInterfaceParameter = 0;
-    if( NumInterfaces > 0 )
+    if ( NumInterfaces > 0 )
     {
         assert( ShaderDesc.ConstantBuffers > 0 );
 
@@ -2777,7 +2777,7 @@ HRESULT CEffectLoader::GrabShaderData(SShaderBlock *pShaderBlock)
             VN( pCB );
             D3D11_SHADER_BUFFER_DESC CBDesc;
             VHD( pCB->GetDesc( &CBDesc ), "Internal loading error: cannot get CB desc." );
-            if( CBDesc.Type != D3D11_CT_INTERFACE_POINTERS )
+            if ( CBDesc.Type != D3D11_CT_INTERFACE_POINTERS )
             {
                 continue;
             }
@@ -2799,16 +2799,16 @@ HRESULT CEffectLoader::GrabShaderData(SShaderBlock *pShaderBlock)
                 bindPoint = InterfaceDesc.StartOffset;
                 size = InterfaceDesc.Size;
 
-                if( bindPoint == (uint32_t)-1 )
+                if ( bindPoint == (uint32_t)-1 )
                 {
                     continue;
                 }
 
                 assert( InterfaceDesc.uFlags & D3D11_SVF_INTERFACE_POINTER );
-                if( InterfaceDesc.uFlags & D3D11_SVF_INTERFACE_PARAMETER )
+                if ( InterfaceDesc.uFlags & D3D11_SVF_INTERFACE_PARAMETER )
                 {
                     // This interface pointer is a parameter to the shader
-                    if( pShaderBlock->pReflectionData->InterfaceParameterCount == 0 )
+                    if ( pShaderBlock->pReflectionData->InterfaceParameterCount == 0 )
                     {
                         // There may be no interface parameters in this shader if it was compiled but had no interfaced bound to it.
                         // The shader cannot be set (correctly) in any pass.
@@ -2823,7 +2823,7 @@ HRESULT CEffectLoader::GrabShaderData(SShaderBlock *pShaderBlock)
                         ++CurInterfaceParameter;
                         SGlobalVariable *pParent = m_pEffect->FindVariableByName(pInterfaceInfo->pName);
                         VBD( pParent != nullptr, "Loading error: cannot find parent type." );
-                        if( pInterfaceInfo->Index == (uint32_t)-1 )
+                        if ( pInterfaceInfo->Index == (uint32_t)-1 )
                         {
                             pVariable = pParent;
                             VariableElements = pVariable->pType->Elements;
@@ -2846,16 +2846,16 @@ HRESULT CEffectLoader::GrabShaderData(SShaderBlock *pShaderBlock)
                     VariableElements = pVariable->pType->Elements;
                 }
                 VBD( size <= std::max<uint32_t>(1, VariableElements), "Loading error: interface array size mismatch." );
-                if( pVariable->pType->IsInterface() )
+                if ( pVariable->pType->IsInterface() )
                 {
                     pInterface = pVariable->Data.pInterface;
                 }
-                else if( pVariable->pType->IsClassInstance() )
+                else if ( pVariable->pType->IsClassInstance() )
                 {
                     // For class instances, we create background interfaces which point to the class instance.  This is done so
                     // the shader can always expect SInterface dependencies, rather than a mix of SInterfaces and class instances
                     VN( pInterface = PRIVATENEW SInterface[size] );
-                    if( VariableElements == 0 )
+                    if ( VariableElements == 0 )
                     {
                         assert( size == 1 );
                         pInterface[0].pClassInstance = (SClassInstanceGlobalVariable*)pVariable;
@@ -2901,7 +2901,7 @@ HRESULT CEffectLoader::GrabShaderData(SShaderBlock *pShaderBlock)
                     pRange = &( (*pvRange)[0] );
                 }
 
-                if( bindPoint < pRange->last )
+                if ( bindPoint < pRange->last )
                 {
                     // add interfaces into the range that already exists
                     VBD( bindPoint + size < pRange->last, "Internal loading error: range overlap." );
@@ -3085,7 +3085,7 @@ HRESULT CEffectLoader::BuildShaderBlock(SShaderBlock *pShaderBlock)
     VH( GrabShaderData( pShaderBlock ) );
 
     // Grab input signatures for VS
-    if( EOT_VertexShader == pShaderBlock->GetShaderType() )
+    if ( EOT_VertexShader == pShaderBlock->GetShaderType() )
     {
         assert( pShaderBlock->pInputSignatureBlob == nullptr );
         VHD( D3DGetBlobPart( pShaderBlock->pReflectionData->pBytecode, pShaderBlock->pReflectionData->BytecodeLength, 
@@ -3195,7 +3195,7 @@ HRESULT CEffectLoader::InitializeReflectionDataAndMoveStrings( uint32_t KnownSiz
     // Get byte counts
     cbStrings = m_pEffect->m_StringCount * sizeof( SString );
 
-    if( KnownSize )
+    if ( KnownSize )
     {
         m_ReflectionMemory = KnownSize;
     }
@@ -3291,7 +3291,7 @@ HRESULT CEffectLoader::ReallocateReflectionData( bool Cloning )
         }
     }
 
-    if( !Cloning )
+    if ( !Cloning )
     {
         // When not cloning, every member in m_pMemberInterfaces is from a global variable, so we can take pName and pSemantic
         // from the parent variable, which were updated above
@@ -3347,7 +3347,7 @@ template<class T> HRESULT CEffectLoader::ReallocateBlockAssignments(T* &pBlocks,
             uint32_t  cbDeps;
 
             // When cloning, convert pointers back into offsets
-            if( pOldBlocks )
+            if ( pOldBlocks )
             {
                 T *pOldBlock = &pOldBlocks[i];
                 pAssignment->Destination.Offset = (uint32_t)( (UINT_PTR)pAssignment->Destination.pGeneric - (UINT_PTR)pOldBlock ) ;
@@ -3416,7 +3416,7 @@ template<class T> HRESULT CEffectLoader::ReallocateBlockAssignments(T* &pBlocks,
                     assert( pVariable->pType->BelongsInConstantBuffer() && nullptr != pVariable->pCB );
 
                     // When cloning, convert pointers back into offsets
-                    if( pOldBlocks )
+                    if ( pOldBlocks )
                     {
                         VBD( pOldVariable != nullptr, "Internal loading error: pOldVariable is nullptr." );
                         pAssignment->Source.Offset = pAssignment->Source.pNumeric - pOldVariable->pCB->pBackingStore;
@@ -3695,10 +3695,10 @@ HRESULT CEffectLoader::ReallocateEffectData( bool Cloning )
 
         VHD( pHeap->MoveData((void**) &pCB->pBackingStore, pCB->Size), "Internal loading error: cannot move CB backing store." );
 
-        if( !Cloning )
+        if ( !Cloning )
         {
             // When creating the effect, MemberDataOffsetPlus4 is used, not pMemberData
-            if( pCB->MemberDataOffsetPlus4 )
+            if ( pCB->MemberDataOffsetPlus4 )
             {
                 pCB->pMemberData = (SMemberDataPointer*)( (uint8_t*)m_pEffect->m_pMemberDataBlocks + ( pCB->MemberDataOffsetPlus4 - 4 ) );
             }
@@ -3718,7 +3718,7 @@ HRESULT CEffectLoader::ReallocateEffectData( bool Cloning )
         SGlobalVariable *pVar = &m_pEffect->m_pVariables[i];
         pVar->pEffect = m_pEffect;
 
-        if( Cloning && pVar->pType->BelongsInConstantBuffer())
+        if ( Cloning && pVar->pType->BelongsInConstantBuffer())
         {
             // Convert pointer back to offset
             // pVar->pCB refers to the old CB
@@ -3730,10 +3730,10 @@ HRESULT CEffectLoader::ReallocateEffectData( bool Cloning )
             VH( FixupCBPointer( &pVar->pCB ) );
         }
 
-        if( !Cloning )
+        if ( !Cloning )
         {
             // When creating the effect, MemberDataOffsetPlus4 is used, not pMemberData
-            if( pVar->MemberDataOffsetPlus4 )
+            if ( pVar->MemberDataOffsetPlus4 )
             {
                 pVar->pMemberData = (SMemberDataPointer*)( (uint8_t*)m_pEffect->m_pMemberDataBlocks + ( pVar->MemberDataOffsetPlus4 - 4 ) );
             }
@@ -3848,7 +3848,7 @@ HRESULT CEffectLoader::ReallocateEffectData( bool Cloning )
         }
         else if (pVar->pType->IsObjectType(EOT_String))
         {
-            if( !m_pEffect->IsOptimized() )
+            if ( !m_pEffect->IsOptimized() )
             {
                 VH( FixupStringPointer(&pVar->Data.pString) );
             }
@@ -3876,7 +3876,7 @@ HRESULT CEffectLoader::ReallocateEffectData( bool Cloning )
         }
         else if (pVar->pType->VarType == EVT_Struct || pVar->pType->VarType == EVT_Numeric)
         {
-            if( pVar->pType->IsClassInstance() )
+            if ( pVar->pType->IsClassInstance() )
             {
                 // do nothing
             }
@@ -3909,14 +3909,14 @@ HRESULT CEffectLoader::ReallocateEffectData( bool Cloning )
         // This might be set to false later, for supporting textures inside classes
         const bool bGlobalMemberDataBlock = true;
 
-        if( Cloning )
+        if ( Cloning )
         {
-            if( pMember->pType->BelongsInConstantBuffer() )
+            if ( pMember->pType->BelongsInConstantBuffer() )
             {
                 assert( pMember->Data.pGeneric == nullptr || (*ppTopLevelEntity)->pEffect->m_Heap.IsInHeap(pMember->Data.pGeneric) );
                 pMember->Data.Offset = (uint32_t)( (uint8_t*)pMember->Data.pGeneric - (uint8_t*)(*ppTopLevelEntity)->pCB->pBackingStore );
             }
-            if( bGlobalMemberDataBlock && pMember->pMemberData )
+            if ( bGlobalMemberDataBlock && pMember->pMemberData )
             {
                 pMember->MemberDataOffsetPlus4 = (uint32_t)( (uint8_t*)pMember->pMemberData - (uint8_t*)(*ppTopLevelEntity)->pEffect->m_pMemberDataBlocks ) + 4;
             }
@@ -3929,7 +3929,7 @@ HRESULT CEffectLoader::ReallocateEffectData( bool Cloning )
             // Convert from offsets to pointers
             pMember->Data.pGeneric = (*ppTopLevelEntity)->pCB->pBackingStore + pMember->Data.Offset;
         }
-        if( bGlobalMemberDataBlock && pMember->MemberDataOffsetPlus4 )
+        if ( bGlobalMemberDataBlock && pMember->MemberDataOffsetPlus4 )
         {
             pMember->pMemberData = (SMemberDataPointer*)( (uint8_t*)m_pEffect->m_pMemberDataBlocks + ( pMember->MemberDataOffsetPlus4 - 4 ) );
         }

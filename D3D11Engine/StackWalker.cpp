@@ -212,7 +212,7 @@ public:
       FreeLibrary(m_hDbhHelp);
     m_hDbhHelp = NULL;
     m_parent = NULL;
-    if(m_szSymPath != NULL)
+    if (m_szSymPath != NULL)
       free(m_szSymPath);
     m_szSymPath = NULL;
   }
@@ -342,7 +342,7 @@ public:
     BOOL     Publics;                // contains public symbols
 };
 */
-typedef struct IMAGEHLP_MODULE64_V2 {
+struct IMAGEHLP_MODULE64_V2 {
     DWORD    SizeOfStruct;           // set to sizeof(IMAGEHLP_MODULE64)
     DWORD64  BaseOfImage;            // base load address of module
     DWORD    ImageSize;              // virtual size of the loaded module
@@ -695,7 +695,7 @@ public:
 
   BOOL GetModuleInfo(HANDLE hProcess, DWORD64 baseAddr, IMAGEHLP_MODULE64_V2 *pModuleInfo)
   {
-    if(this->pSGMI == NULL)
+    if (this->pSGMI == NULL)
     {
       SetLastError(ERROR_DLL_INIT_FAILED);
       return FALSE;

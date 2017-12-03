@@ -31,8 +31,8 @@ D3D11Effect::D3D11Effect(void)
 
 D3D11Effect::~D3D11Effect(void)
 {
-	if(RainTextureArray)RainTextureArray->Release();
-	if(RainTextureArraySRV)RainTextureArraySRV->Release();
+	if (RainTextureArray)RainTextureArray->Release();
+	if (RainTextureArraySRV)RainTextureArraySRV->Release();
 
 	delete RainBufferInitial;
 	delete RainBufferDrawFrom;
@@ -62,7 +62,7 @@ void D3D11Effect::FillRandomRaindropData(std::vector<ParticleInstanceInfo>& data
 		{ 
 			SeedX = Toolbox::frand() - 0.5f;
 			SeedZ = Toolbox::frand() - 0.5f;
-			if( sqrt( SeedX*SeedX + SeedZ*SeedZ ) <= 0.5f )
+			if ( sqrt( SeedX*SeedX + SeedZ*SeedZ ) <= 0.5f )
 				pointIsInside = true;
 		}
 		//save these random locations for reinitializing rain particles that have fallen out of bounds
@@ -92,7 +92,7 @@ void D3D11Effect::FillRandomRaindropData(std::vector<ParticleInstanceInfo>& data
 		//this number is used to randomly increase the brightness of some rain particles
 		float intensity = 1.0f;
 		float randomIncrease = Toolbox::frand();
-		if( randomIncrease > 0.8f)
+		if ( randomIncrease > 0.8f)
 			intensity += randomIncrease;
 
 		raindrop.color = float4(SeedX, SeedY, SeedZ, randomIncrease);
@@ -124,7 +124,7 @@ XRESULT D3D11Effect::DrawRain()
 	static bool firstFrame = true;
 
 	// Create resources if not already done
-	if(!RainBufferDrawFrom || lastHeight != state.RendererSettings.RainHeightRange 
+	if (!RainBufferDrawFrom || lastHeight != state.RendererSettings.RainHeightRange 
 		|| lastRadius != state.RendererSettings.RainRadiusRange)
 	{
 		delete RainBufferDrawFrom;
@@ -148,14 +148,14 @@ XRESULT D3D11Effect::DrawRain()
 
 		firstFrame = true;
 
-		if(!RainTextureArray)
+		if (!RainTextureArray)
 		{
 			// Load textures...
 			LogInfo() << "Loading rain-drop textures";
 			LoadTextureArray(e->GetDevice(), e->GetContext(), "system\\GD3D11\\Textures\\Raindrops\\cv0_vPositive_", 370, &RainTextureArray, &RainTextureArraySRV);
 		}
 
-		if(!RainShadowmap)
+		if (!RainShadowmap)
 		{
 			const int s = 2048;
 			RainShadowmap = new RenderToDepthStencilBuffer(e->GetDevice(), s, s, DXGI_FORMAT_R32_TYPELESS, NULL, DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_R32_FLOAT);
@@ -168,7 +168,7 @@ XRESULT D3D11Effect::DrawRain()
 	D3D11VertexBuffer* b = NULL;
 
 	// Use initial-data if we don't have something in the stream-buffers yet
-	if(firstFrame || state.RendererSettings.RainUseInitialSet || Engine::GAPI->IsGamePaused())
+	if (firstFrame || state.RendererSettings.RainUseInitialSet || Engine::GAPI->IsGamePaused())
 		b = (D3D11VertexBuffer *)RainBufferInitial;
 	else
 		b = (D3D11VertexBuffer *)RainBufferDrawFrom;
@@ -278,7 +278,7 @@ XRESULT D3D11Effect::DrawRain()
 /** Renders the rain-shadowmap */
 XRESULT D3D11Effect::DrawRainShadowmap()
 {
-	if(!RainShadowmap)
+	if (!RainShadowmap)
 		return XR_SUCCESS;
 
 	D3D11GraphicsEngine* e = (D3D11GraphicsEngine *)Engine::GraphicsEngine; // TODO: This has to be a cast to D3D11GraphicsEngineBase!
@@ -318,7 +318,7 @@ XRESULT D3D11Effect::DrawRainShadowmap()
 
 	// Bind the FF-Info to the first PS slot
 	D3D11PShader* PS_Diffuse = e->GetShaderManager()->GetPShader("PS_Diffuse");
-	if(PS_Diffuse)
+	if (PS_Diffuse)
 	{
 		PS_Diffuse->GetConstantBuffer()[0]->UpdateBuffer(&Engine::GAPI->GetRendererState()->GraphicsState);
 		PS_Diffuse->GetConstantBuffer()[0]->BindToPixelShader(0);
@@ -335,7 +335,7 @@ XRESULT D3D11Effect::DrawRainShadowmap()
 	// Restore old settings
 	Engine::GAPI->GetRendererState()->RendererSettings.DrawSkeletalMeshes = oldDrawSkel;
 	Engine::GAPI->GetRendererState()->GraphicsState.FF_AlphaRef = oldAlphaRef;
-	if(PS_Diffuse)
+	if (PS_Diffuse)
 	{
 		PS_Diffuse->GetConstantBuffer()[0]->UpdateBuffer(&Engine::GAPI->GetRendererState()->GraphicsState);
 	}
@@ -381,19 +381,19 @@ HRESULT LoadTextureArray( ID3D11Device* pd3dDevice, ID3D11DeviceContext* context
 		loadInfo.MipFilter = D3DX11_FILTER_TRIANGLE;
 
 		LE(D3DX11CreateTextureFromFile( pd3dDevice, str, &loadInfo, NULL, &pRes, &hr ));
-		if( pRes )
+		if ( pRes )
 		{
 			ID3D11Texture2D* pTemp;
 			pRes->QueryInterface( __uuidof( ID3D11Texture2D ), (LPVOID*)&pTemp );
 			pTemp->GetDesc( &desc );
 
 
-			if(DXGI_FORMAT_R8_UNORM != desc.Format)   
+			if (DXGI_FORMAT_R8_UNORM != desc.Format)   
 				return false;
 
 
 
-			if(!(*ppTex2D))
+			if (!(*ppTex2D))
 			{
 				desc.Usage = D3D11_USAGE_DEFAULT;
 				desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;

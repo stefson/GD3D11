@@ -9,7 +9,7 @@ public:
 	{
 		refCtr--;
 		int temp = refCtr;
-		if(temp <= 0)
+		if (temp <= 0)
 		{
 			// Call destructor
 			delete this;

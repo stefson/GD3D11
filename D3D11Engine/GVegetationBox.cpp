@@ -36,7 +36,7 @@ GVegetationBox::~GVegetationBox(void)
 /** Returns true if the given position is inside the box */
 bool GVegetationBox::PositionInsideBox(const D3DXVECTOR3& p)
 {
-	if( p.x > BoxMin.x &&
+	if ( p.x > BoxMin.x &&
 		p.y > BoxMin.y &&
 		p.z > BoxMin.z &&
 		p.x < BoxMax.x &&
@@ -53,7 +53,7 @@ XRESULT GVegetationBox::InitVegetationBox(  MeshInfo* mesh,
 								float maxSize,
 								zCTexture* meshTexture)
 {
-	if(VegetationMesh)
+	if (VegetationMesh)
 	{
 		LogWarn() << "Tried to init GVegetationBox twice!";
 		return XR_FAILED;
@@ -61,7 +61,7 @@ XRESULT GVegetationBox::InitVegetationBox(  MeshInfo* mesh,
 
 	// Load vegetationmesh
 	VegetationMesh = new GMeshSimple;
-	if(XR_SUCCESS != VegetationMesh->LoadMesh("system\\GD3D11\\Meshes\\grass02.3ds"))
+	if (XR_SUCCESS != VegetationMesh->LoadMesh("system\\GD3D11\\Meshes\\grass02.3ds"))
 	{
 		delete VegetationMesh;
 		VegetationMesh = NULL;
@@ -118,7 +118,7 @@ XRESULT GVegetationBox::InitVegetationBox(const D3DXVECTOR3& min,
 										  const std::string& restrictByTexture,
 										  EShape shape)
 {
-	if(VegetationMesh)
+	if (VegetationMesh)
 	{
 		LogWarn() << "Tried to init GVegetationBox twice!";
 		return XR_FAILED;
@@ -126,7 +126,7 @@ XRESULT GVegetationBox::InitVegetationBox(const D3DXVECTOR3& min,
 
 	// Load vegetationmesh
 	VegetationMesh = new GMeshSimple;
-	if(XR_SUCCESS != VegetationMesh->LoadMesh("system\\GD3D11\\Meshes\\grass02.3ds"))
+	if (XR_SUCCESS != VegetationMesh->LoadMesh("system\\GD3D11\\Meshes\\grass02.3ds"))
 	{
 		delete VegetationMesh;
 		return XR_FAILED;
@@ -135,7 +135,7 @@ XRESULT GVegetationBox::InitVegetationBox(const D3DXVECTOR3& min,
 	Engine::GraphicsEngine->CreateTexture(&VegetationTexture);
 	VegetationTexture->Init("system\\GD3D11\\Meshes\\grass02.png");
 
-	if(restrictByTexture != "")
+	if (restrictByTexture != "")
 	{
 		zCMaterial* m = Engine::GAPI->GetMaterialByTextureName(restrictByTexture);
 		MeshTexture = m ? m->GetTexture() : NULL;
@@ -154,7 +154,7 @@ XRESULT GVegetationBox::InitVegetationBox(const D3DXVECTOR3& min,
 	{
 		for(int v=0;v<4;v++)
 		{
-			if(v == 4)
+			if (v == 4)
 			{
 				// Check center too
 				D3DXVECTOR3 tri[] = {   *p[i]->getVertices()[0]->Position.toD3DXVECTOR3(), 
@@ -164,10 +164,10 @@ XRESULT GVegetationBox::InitVegetationBox(const D3DXVECTOR3& min,
 				// Get the center
 				D3DXVECTOR3 center = (tri[0] + tri[1] + tri[2]) / 3.0f;
 
-				if(PositionInsideBox(*p[i]->getVertices()[v]->Position.toD3DXVECTOR3()))
+				if (PositionInsideBox(*p[i]->getVertices()[v]->Position.toD3DXVECTOR3()))
 				{
 					// Restrict by texture
-					if(restrictByTexture.length() && 
+					if (restrictByTexture.length() && 
 						p[i]->GetMaterial() &&
 						p[i]->GetMaterial()->GetTexture() &&
 						p[i]->GetMaterial()->GetTexture()->GetNameWithoutExt() == restrictByTexture)
@@ -175,7 +175,7 @@ XRESULT GVegetationBox::InitVegetationBox(const D3DXVECTOR3& min,
 						polysInside.push_back(tri[0]);
 						polysInside.push_back(tri[1]);
 						polysInside.push_back(tri[2]);
-					}else if(!restrictByTexture.length())
+					}else if (!restrictByTexture.length())
 					{
 						polysInside.push_back(tri[0]);
 						polysInside.push_back(tri[1]);
@@ -183,7 +183,7 @@ XRESULT GVegetationBox::InitVegetationBox(const D3DXVECTOR3& min,
 					}
 
 					// Use the texture of the first poly we find
-					if(!MeshTexture)
+					if (!MeshTexture)
 					{
 						MeshTexture = p[i]->GetMaterial() ? p[i]->GetMaterial()->GetTexture() : NULL;
 					}
@@ -191,14 +191,14 @@ XRESULT GVegetationBox::InitVegetationBox(const D3DXVECTOR3& min,
 				break;
 			}
 
-			if(PositionInsideBox(*p[i]->getVertices()[v]->Position.toD3DXVECTOR3()))
+			if (PositionInsideBox(*p[i]->getVertices()[v]->Position.toD3DXVECTOR3()))
 			{
 				D3DXVECTOR3 tri[] = {   *p[i]->getVertices()[0]->Position.toD3DXVECTOR3(), 
 										*p[i]->getVertices()[1]->Position.toD3DXVECTOR3(), 
 										*p[i]->getVertices()[2]->Position.toD3DXVECTOR3()};
 
 				// Restrict by texture
-				if(restrictByTexture.length() && 
+				if (restrictByTexture.length() && 
 					p[i]->GetMaterial() &&
 					p[i]->GetMaterial()->GetTexture() &&
 					p[i]->GetMaterial()->GetTexture()->GetNameWithoutExt() == restrictByTexture)
@@ -206,7 +206,7 @@ XRESULT GVegetationBox::InitVegetationBox(const D3DXVECTOR3& min,
 					polysInside.push_back(tri[0]);
 					polysInside.push_back(tri[1]);
 					polysInside.push_back(tri[2]);
-				}else if(!restrictByTexture.length())
+				}else if (!restrictByTexture.length())
 				{
 					polysInside.push_back(tri[0]);
 					polysInside.push_back(tri[1]);
@@ -214,7 +214,7 @@ XRESULT GVegetationBox::InitVegetationBox(const D3DXVECTOR3& min,
 				}
 
 				// Use the texture of the first poly we find
-				if(!MeshTexture)
+				if (!MeshTexture)
 				{
 					MeshTexture = p[i]->GetMaterial() ? p[i]->GetMaterial()->GetTexture() : NULL;
 				}
@@ -268,14 +268,14 @@ void GVegetationBox::InitSpotsRandom(const std::vector<D3DXVECTOR3>& trisInside,
 			// Get the last point on that random made edge
 			D3DXVec3Lerp(&rp[2], &rp[0], &rp[1], Toolbox::frand());*/
 
-			if(PositionInsideBox(rnd))
+			if (PositionInsideBox(rnd))
 			{
-				if(shape == S_Circle) // Restrict to smalles circle inside our AABB
+				if (shape == S_Circle) // Restrict to smalles circle inside our AABB
 				{
 					D3DXVECTOR2 m2 = D3DXVECTOR2(mid.x, mid.z);
 					float dist = D3DXVec2Length(&(D3DXVECTOR2(rnd.x, rnd.z) - m2));
 
-					if(dist >= rad)
+					if (dist >= rad)
 						continue;
 				}
 
@@ -303,7 +303,7 @@ void GVegetationBox::InitSpotsRandom(const std::vector<D3DXVECTOR3>& trisInside,
 		VegetationSpots.push_back(w);
 	}
 
-	if(VegetationSpots.empty())
+	if (VegetationSpots.empty())
 	{
 		return;
 	}
@@ -327,19 +327,19 @@ void GVegetationBox::RenderVegetation(const D3DXVECTOR3& eye)
 	float drawRadius = Engine::GAPI->GetRendererState()->RendererSettings.OutdoorSmallVobDrawRadius;
 
 	float dist = Toolbox::ComputePointAABBDistance(eye, BoxMin, BoxMax);
-	if(dist > drawRadius)
+	if (dist > drawRadius)
 		return;
 
-	if(VegetationSpots.empty())
+	if (VegetationSpots.empty())
 	{
 		return;
 	}
 
 
 
-	if(MeshTexture)
+	if (MeshTexture)
 	{	
-		if(MeshTexture->CacheIn(0.6f) == zRES_CACHED_IN)
+		if (MeshTexture->CacheIn(0.6f) == zRES_CACHED_IN)
 			MeshTexture->Bind(0);
 		else
 			return;
@@ -352,7 +352,7 @@ void GVegetationBox::RenderVegetation(const D3DXVECTOR3& eye)
 
 	// Enable alpha-to-coverage
 	
-	if(Engine::GAPI->GetRendererState()->RendererSettings.VegetationAlphaToCoverage)
+	if (Engine::GAPI->GetRendererState()->RendererSettings.VegetationAlphaToCoverage)
 	{
 		Engine::GAPI->GetRendererState()->BlendState.SetDefault();
 		Engine::GAPI->GetRendererState()->BlendState.BlendEnabled = false;
@@ -395,7 +395,7 @@ void GVegetationBox::RenderVegetation(const D3DXVECTOR3& eye)
 	// Seed randomizer again
 	//srand(timeGetTime());
 
-	if(DrawBoundingBox)
+	if (DrawBoundingBox)
 		Engine::GraphicsEngine->GetLineRenderer()->AddAABBMinMax(BoxMin, BoxMax);
 
 	Engine::GAPI->GetRendererState()->RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_FRONT;
@@ -420,7 +420,7 @@ void GVegetationBox::VisualizeGrass(const D3DXVECTOR4& color)
 	// Draw grass
 	for(unsigned int i=0;i<VegetationSpots.size();i++)
 	{
-		if(i % 10 != 0)
+		if (i % 10 != 0)
 			continue; // Only render every 10th grassmesh
 
 		D3DXVECTOR3 spot = D3DXVECTOR3(VegetationSpots[i]._14, VegetationSpots[i]._24, VegetationSpots[i]._34); 
@@ -462,7 +462,7 @@ void GVegetationBox::RemoveVegetationAt(const D3DXVECTOR3& position, float range
 
 		float d = D3DXVec3Length(&(spot - position));
 
-		if(d < range)
+		if (d < range)
 			it = s.erase(it);
 	}
 
@@ -474,7 +474,7 @@ void GVegetationBox::RemoveVegetationAt(const D3DXVECTOR3& position, float range
 	delete InstancingBuffer;
 	InstancingBuffer = NULL;
 
-	if(!IsEmpty())
+	if (!IsEmpty())
 	{
 		Engine::GraphicsEngine->CreateVertexBuffer(&InstancingBuffer);
 		InstancingBuffer->Init(&VegetationSpots[0], VegetationSpots.size() * sizeof(D3DXMATRIX));
@@ -489,7 +489,7 @@ void GVegetationBox::RemoveVegetationAt(const D3DXVECTOR3& position, float range
 /** Refits the bounding-box around the grass-meshes. If there are none, the box will be set to 0. */
 void GVegetationBox::RefitBoundingBox()
 {
-	if(VegetationSpots.empty())
+	if (VegetationSpots.empty())
 	{
 		BoxMax = D3DXVECTOR3(0, 0, 0);
 		BoxMin = D3DXVECTOR3(0, 0, 0);
@@ -671,14 +671,14 @@ void GVegetationBox::LoadFromFILE(FILE* f, int version)
 	Engine::GraphicsEngine->CreateConstantBuffer(&GrassCB, NULL, sizeof(GrassConstantBuffer));
 
 	// TODO: Make resource-load method!
-	if(VegetationMesh)
+	if (VegetationMesh)
 	{
 		LogWarn() << "Tried to init GVegetationBox twice!";
 	}
 
 	// Load vegetationmesh
 	VegetationMesh = new GMeshSimple;
-	if(XR_SUCCESS != VegetationMesh->LoadMesh("system\\GD3D11\\Meshes\\grass02.3ds"))
+	if (XR_SUCCESS != VegetationMesh->LoadMesh("system\\GD3D11\\Meshes\\grass02.3ds"))
 	{
 		delete VegetationMesh;
 	}

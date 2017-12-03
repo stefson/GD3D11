@@ -29,7 +29,7 @@ XRESULT D3D11NVHBAO::Init()
 	GFSDK_SSAO_Status status;
 	
 	status = GFSDK_SSAO_CreateContext_D3D11(engine->GetDevice(), &AOContext, &CustomHeap);
-	if(status != GFSDK_SSAO_OK)
+	if (status != GFSDK_SSAO_OK)
 	{
 		LogError() << "Failed to initialize Nvidia HBAO+!";
 		return XR_FAILED;
@@ -69,7 +69,7 @@ XRESULT D3D11NVHBAO::Render(ID3D11RenderTargetView* rtv)
 
 	GFSDK_SSAO_Status status;
 	status = AOContext->RenderAO(engine->GetContext(), &Input, &Params, rtv);
-	if(status != GFSDK_SSAO_OK)
+	if (status != GFSDK_SSAO_OK)
 	{
 		LogError() << "Failed to render Nvidia HBAO+!";
 		return XR_FAILED;

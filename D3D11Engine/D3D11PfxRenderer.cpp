@@ -137,7 +137,7 @@ XRESULT D3D11PfxRenderer::CopyTextureToRTV(ID3D11ShaderResourceView* texture, ID
 	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 	
 	D3D11_VIEWPORT oldVP;
-	if(targetResolution.x != 0 && targetResolution.y != 0)
+	if (targetResolution.x != 0 && targetResolution.y != 0)
 	{
 		UINT n=1;
 		engine->GetContext()->RSGetViewports(&n, &oldVP);
@@ -159,7 +159,7 @@ XRESULT D3D11PfxRenderer::CopyTextureToRTV(ID3D11ShaderResourceView* texture, ID
 	engine->GetContext()->OMGetRenderTargets(1, &oldRTV, &oldDSV);
 
 	// Bind shaders
-	if(!useCustomPS)
+	if (!useCustomPS)
 	{
 		D3D11PShader* simplePS = engine->GetShaderManager()->GetPShader("PS_PFX_Simple");
 		simplePS->Apply();
@@ -172,17 +172,17 @@ XRESULT D3D11PfxRenderer::CopyTextureToRTV(ID3D11ShaderResourceView* texture, ID
 
 	engine->GetContext()->OMSetRenderTargets(1, &rtv, NULL);
 
-	if(texture)
+	if (texture)
 		engine->GetContext()->PSSetShaderResources(0,1, &texture);
 
 	DrawFullScreenQuad();
 
 	engine->GetContext()->PSSetShaderResources(0,1,&srv);
 	engine->GetContext()->OMSetRenderTargets(1, &oldRTV, oldDSV);
-	if(oldRTV)oldRTV->Release();
-	if(oldDSV)oldDSV->Release();
+	if (oldRTV)oldRTV->Release();
+	if (oldDSV)oldDSV->Release();
 	
-	if(targetResolution.x != 0 && targetResolution.y != 0)
+	if (targetResolution.x != 0 && targetResolution.y != 0)
 	{
 		engine->GetContext()->RSSetViewports(1, &oldVP);
 	}

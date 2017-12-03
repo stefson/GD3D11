@@ -98,7 +98,7 @@ XRESULT D3D11PFX_HeightFog::Render(RenderToTextureBuffer* fxbuffer)
 	cb.HF_WeightZFar = std::min(cb.HF_WeightZFar, atmoMax);
 	cb.HF_WeightZNear = std::min(cb.HF_WeightZNear, atmoMin);
 
-	if(Engine::GAPI->GetFogOverride() > 0.0f)
+	if (Engine::GAPI->GetFogOverride() > 0.0f)
 	{
 		// Make sure the camera is inside the fog when in fog zone
 		height = Toolbox::lerp(height, Engine::GAPI->GetCameraPosition().y + 10000, Engine::GAPI->GetFogOverride()); // TODO: Get this from the actual fog-distance in the fogzone!
@@ -193,8 +193,8 @@ XRESULT D3D11PFX_HeightFog::Render(RenderToTextureBuffer* fxbuffer)
 	engine->GetContext()->PSSetShaderResources(1,1,&srv);
 
 	engine->GetContext()->OMSetRenderTargets(1, &oldRTV, oldDSV);
-	if(oldRTV)oldRTV->Release();
-	if(oldDSV)oldDSV->Release();
+	if (oldRTV)oldRTV->Release();
+	if (oldDSV)oldDSV->Release();
 
 	return XR_SUCCESS;
 }

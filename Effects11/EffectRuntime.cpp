@@ -54,13 +54,13 @@ void SPassBlock::ApplyPassAssignments()
 // Returns true if the shader uses global interfaces (since these interfaces can be updated through SetClassInstance)
 bool SPassBlock::CheckShaderDependencies( _In_ const SShaderBlock* pBlock )
 {
-    if( pBlock->InterfaceDepCount > 0 )
+    if ( pBlock->InterfaceDepCount > 0 )
     {
         assert( pBlock->InterfaceDepCount == 1 );
         for( size_t i=0; i < pBlock->pInterfaceDeps[0].Count; i++ )
         {
             SInterface* pInterfaceDep = pBlock->pInterfaceDeps[0].ppFXPointers[i];
-            if( pInterfaceDep > pEffect->m_pInterfaces && pInterfaceDep < (pEffect->m_pInterfaces + pEffect->m_InterfaceCount) )
+            if ( pInterfaceDep > pEffect->m_pInterfaces && pInterfaceDep < (pEffect->m_pInterfaces + pEffect->m_InterfaceCount) )
             {
                 // This is a global interface pointer (as opposed to an SInterface created in a BindInterface call
                 return true;
@@ -75,59 +75,59 @@ bool SPassBlock::CheckShaderDependencies( _In_ const SShaderBlock* pBlock )
 #pragma warning(disable: 4616 6282)
 bool SPassBlock::CheckDependencies()
 {
-    if( HasDependencies )
+    if ( HasDependencies )
         return true;
 
     for( size_t i=0; i < AssignmentCount; i++ )
     {
-        if( pAssignments[i].DependencyCount > 0 )
+        if ( pAssignments[i].DependencyCount > 0 )
             return HasDependencies = true;
     }
-    if( BackingStore.pBlendBlock && BackingStore.pBlendBlock->AssignmentCount > 0 )
+    if ( BackingStore.pBlendBlock && BackingStore.pBlendBlock->AssignmentCount > 0 )
     {
         for( size_t i=0; i < BackingStore.pBlendBlock->AssignmentCount; i++ )
         {
-            if( BackingStore.pBlendBlock->pAssignments[i].DependencyCount > 0 )
+            if ( BackingStore.pBlendBlock->pAssignments[i].DependencyCount > 0 )
                 return HasDependencies = true;
         }
     }
-    if( BackingStore.pDepthStencilBlock && BackingStore.pDepthStencilBlock->AssignmentCount > 0 )
+    if ( BackingStore.pDepthStencilBlock && BackingStore.pDepthStencilBlock->AssignmentCount > 0 )
     {
         for( size_t i=0; i < BackingStore.pDepthStencilBlock->AssignmentCount; i++ )
         {
-            if( BackingStore.pDepthStencilBlock->pAssignments[i].DependencyCount > 0 )
+            if ( BackingStore.pDepthStencilBlock->pAssignments[i].DependencyCount > 0 )
                 return HasDependencies = true;
         }
     }
-    if( BackingStore.pRasterizerBlock && BackingStore.pRasterizerBlock->AssignmentCount > 0 )
+    if ( BackingStore.pRasterizerBlock && BackingStore.pRasterizerBlock->AssignmentCount > 0 )
     {
         for( size_t i=0; i < BackingStore.pRasterizerBlock->AssignmentCount; i++ )
         {
-            if( BackingStore.pRasterizerBlock->pAssignments[i].DependencyCount > 0 )
+            if ( BackingStore.pRasterizerBlock->pAssignments[i].DependencyCount > 0 )
                 return HasDependencies = true;
         }
     }
-    if( BackingStore.pVertexShaderBlock && CheckShaderDependencies( BackingStore.pVertexShaderBlock ) )
+    if ( BackingStore.pVertexShaderBlock && CheckShaderDependencies( BackingStore.pVertexShaderBlock ) )
     {
         return HasDependencies = true;
     }
-    if( BackingStore.pGeometryShaderBlock && CheckShaderDependencies( BackingStore.pGeometryShaderBlock ) )
+    if ( BackingStore.pGeometryShaderBlock && CheckShaderDependencies( BackingStore.pGeometryShaderBlock ) )
     {
         return HasDependencies = true;
     }
-    if( BackingStore.pPixelShaderBlock && CheckShaderDependencies( BackingStore.pPixelShaderBlock ) )
+    if ( BackingStore.pPixelShaderBlock && CheckShaderDependencies( BackingStore.pPixelShaderBlock ) )
     {
         return HasDependencies = true;
     }
-    if( BackingStore.pHullShaderBlock && CheckShaderDependencies( BackingStore.pHullShaderBlock ) )
+    if ( BackingStore.pHullShaderBlock && CheckShaderDependencies( BackingStore.pHullShaderBlock ) )
     {
         return HasDependencies = true;
     }
-    if( BackingStore.pDomainShaderBlock && CheckShaderDependencies( BackingStore.pDomainShaderBlock ) )
+    if ( BackingStore.pDomainShaderBlock && CheckShaderDependencies( BackingStore.pDomainShaderBlock ) )
     {
         return HasDependencies = true;
     }
-    if( BackingStore.pComputeShaderBlock && CheckShaderDependencies( BackingStore.pComputeShaderBlock ) )
+    if ( BackingStore.pComputeShaderBlock && CheckShaderDependencies( BackingStore.pComputeShaderBlock ) )
     {
         return HasDependencies = true;
     }
@@ -194,7 +194,7 @@ void CEffect::ApplyShaderBlock(_In_ SShaderBlock *pBlock)
     // Set the UAVs
     // UAV ranges were combined in EffectLoad.  This code remains unchanged, however, so that ranges can be easily split
     assert( pBlock->UAVDepCount < 2 );
-    if( pBlock->UAVDepCount > 0 )
+    if ( pBlock->UAVDepCount > 0 )
     {
         SUnorderedAccessViewDependency *pUAVDep = pBlock->pUAVDeps;
         assert(pUAVDep->ppFXPointers != 0);
@@ -205,7 +205,7 @@ void CEffect::ApplyShaderBlock(_In_ SShaderBlock *pBlock)
             pUAVDep->ppD3DObjects[i] = pUAVDep->ppFXPointers[i]->pUnorderedAccessView;
         }
 
-        if( EOT_ComputeShader5 == pBlock->GetShaderType() )
+        if ( EOT_ComputeShader5 == pBlock->GetShaderType() )
         {
             m_pContext->CSSetUnorderedAccessViews( pUAVDep->StartIndex, pUAVDep->Count, pUAVDep->ppD3DObjects, g_pNegativeOnes );
         }
@@ -249,7 +249,7 @@ void CEffect::ApplyShaderBlock(_In_ SShaderBlock *pBlock)
     uint32_t Interfaces = 0;
     ID3D11ClassInstance** ppClassInstances = nullptr;
     assert( pBlock->InterfaceDepCount < 2 );
-    if( pBlock->InterfaceDepCount > 0 )
+    if ( pBlock->InterfaceDepCount > 0 )
     {
         SInterfaceDependency *pInterfaceDep = pBlock->pInterfaceDeps;
         assert(pInterfaceDep->ppFXPointers);
@@ -261,7 +261,7 @@ void CEffect::ApplyShaderBlock(_In_ SShaderBlock *pBlock)
             assert(pInterfaceDep->ppFXPointers != 0);
             _Analysis_assume_(pInterfaceDep->ppFXPointers != 0);
             SClassInstanceGlobalVariable* pCI = pInterfaceDep->ppFXPointers[i]->pClassInstance;
-            if( pCI )
+            if ( pCI )
             {
                 assert( pCI->pMemberData != 0 );
                 _Analysis_assume_( pCI->pMemberData != 0 );
@@ -281,7 +281,7 @@ void CEffect::ApplyShaderBlock(_In_ SShaderBlock *pBlock)
 // Returns true if the block D3D data was recreated
 bool CEffect::ApplyRenderStateBlock(_In_ SBaseBlock *pBlock)
 {
-    if( pBlock->IsUserManaged )
+    if ( pBlock->IsUserManaged )
     {
         return false;
     }
@@ -314,7 +314,7 @@ bool CEffect::ApplyRenderStateBlock(_In_ SBaseBlock *pBlock)
 
                 assert(nullptr != pDSBlock->pDSObject);
                 SAFE_RELEASE( pDSBlock->pDSObject );
-                if( SUCCEEDED( m_pDevice->CreateDepthStencilState( &pDSBlock->BackingStore, &pDSBlock->pDSObject ) ) )
+                if ( SUCCEEDED( m_pDevice->CreateDepthStencilState( &pDSBlock->BackingStore, &pDSBlock->pDSObject ) ) )
                 {
                     pDSBlock->IsValid = true;
                     SetDebugObjectName( pDSBlock->pDSObject, "D3DX11Effect" );
@@ -330,7 +330,7 @@ bool CEffect::ApplyRenderStateBlock(_In_ SBaseBlock *pBlock)
 
                 assert(nullptr != pBBlock->pBlendObject);
                 SAFE_RELEASE( pBBlock->pBlendObject );
-                if( SUCCEEDED( m_pDevice->CreateBlendState( &pBBlock->BackingStore, &pBBlock->pBlendObject ) ) )
+                if ( SUCCEEDED( m_pDevice->CreateBlendState( &pBBlock->BackingStore, &pBBlock->pBlendObject ) ) )
                 {
                     pBBlock->IsValid = true;
                     SetDebugObjectName( pBBlock->pBlendObject, "D3DX11Effect" );
@@ -347,7 +347,7 @@ bool CEffect::ApplyRenderStateBlock(_In_ SBaseBlock *pBlock)
                 assert(nullptr != pRBlock->pRasterizerObject);
 
                 SAFE_RELEASE( pRBlock->pRasterizerObject );
-                if( SUCCEEDED( m_pDevice->CreateRasterizerState( &pRBlock->BackingStore, &pRBlock->pRasterizerObject ) ) )
+                if ( SUCCEEDED( m_pDevice->CreateRasterizerState( &pRBlock->BackingStore, &pRBlock->pRasterizerObject ) ) )
                 {
                     pRBlock->IsValid = true;
                     SetDebugObjectName( pRBlock->pRasterizerObject, "D3DX11Effect" );
@@ -451,9 +451,9 @@ bool CEffect::EvaluateAssignment(_Inout_ SAssignment *pAssignment)
 // Returns false if this shader has interface dependencies which are nullptr (SetShader will fail).
 bool CEffect::ValidateShaderBlock( _Inout_ SShaderBlock* pBlock )
 {
-    if( !pBlock->IsValid )
+    if ( !pBlock->IsValid )
         return false;
-    if( pBlock->InterfaceDepCount > 0 )
+    if ( pBlock->InterfaceDepCount > 0 )
     {
         assert( pBlock->InterfaceDepCount == 1 );
         for( size_t  i=0; i < pBlock->pInterfaceDeps[0].Count; i++ )
@@ -461,7 +461,7 @@ bool CEffect::ValidateShaderBlock( _Inout_ SShaderBlock* pBlock )
             SInterface* pInterfaceDep = pBlock->pInterfaceDeps[0].ppFXPointers[i];
             assert( pInterfaceDep != 0 );
             _Analysis_assume_( pInterfaceDep != 0 );
-            if( pInterfaceDep->pClassInstance == nullptr )
+            if ( pInterfaceDep->pClassInstance == nullptr )
             {
                 return false;
             }
@@ -479,49 +479,49 @@ bool CEffect::ValidatePassBlock( _Inout_ SPassBlock* pBlock )
     {
         ApplyRenderStateBlock(pBlock->BackingStore.pBlendBlock);
         pBlock->BackingStore.pBlendState = pBlock->BackingStore.pBlendBlock->pBlendObject;
-        if( !pBlock->BackingStore.pBlendBlock->IsValid )
+        if ( !pBlock->BackingStore.pBlendBlock->IsValid )
             return false;
     }
 
-    if( nullptr != pBlock->BackingStore.pDepthStencilBlock )
+    if ( nullptr != pBlock->BackingStore.pDepthStencilBlock )
     {
         ApplyRenderStateBlock( pBlock->BackingStore.pDepthStencilBlock );
         pBlock->BackingStore.pDepthStencilState = pBlock->BackingStore.pDepthStencilBlock->pDSObject;
-        if( !pBlock->BackingStore.pDepthStencilBlock->IsValid )
+        if ( !pBlock->BackingStore.pDepthStencilBlock->IsValid )
             return false;
     }
 
-    if( nullptr != pBlock->BackingStore.pRasterizerBlock )
+    if ( nullptr != pBlock->BackingStore.pRasterizerBlock )
     {
         ApplyRenderStateBlock( pBlock->BackingStore.pRasterizerBlock );
-        if( !pBlock->BackingStore.pRasterizerBlock->IsValid )
+        if ( !pBlock->BackingStore.pRasterizerBlock->IsValid )
             return false;
     }
 
-    if( nullptr != pBlock->BackingStore.pVertexShaderBlock && !ValidateShaderBlock(pBlock->BackingStore.pVertexShaderBlock) )
+    if ( nullptr != pBlock->BackingStore.pVertexShaderBlock && !ValidateShaderBlock(pBlock->BackingStore.pVertexShaderBlock) )
         return false;
 
-    if( nullptr != pBlock->BackingStore.pGeometryShaderBlock && !ValidateShaderBlock(pBlock->BackingStore.pGeometryShaderBlock) )
+    if ( nullptr != pBlock->BackingStore.pGeometryShaderBlock && !ValidateShaderBlock(pBlock->BackingStore.pGeometryShaderBlock) )
         return false;
 
-    if( nullptr != pBlock->BackingStore.pPixelShaderBlock )
+    if ( nullptr != pBlock->BackingStore.pPixelShaderBlock )
     {
-        if( !ValidateShaderBlock(pBlock->BackingStore.pPixelShaderBlock) )
+        if ( !ValidateShaderBlock(pBlock->BackingStore.pPixelShaderBlock) )
             return false;
-        else if( pBlock->BackingStore.pPixelShaderBlock->UAVDepCount > 0 && 
+        else if ( pBlock->BackingStore.pPixelShaderBlock->UAVDepCount > 0 && 
                  pBlock->BackingStore.RenderTargetViewCount > pBlock->BackingStore.pPixelShaderBlock->pUAVDeps[0].StartIndex )
         {
             return false;
         }
     }
 
-    if( nullptr != pBlock->BackingStore.pHullShaderBlock && !ValidateShaderBlock(pBlock->BackingStore.pHullShaderBlock) )
+    if ( nullptr != pBlock->BackingStore.pHullShaderBlock && !ValidateShaderBlock(pBlock->BackingStore.pHullShaderBlock) )
         return false;
 
-    if( nullptr != pBlock->BackingStore.pDomainShaderBlock && !ValidateShaderBlock(pBlock->BackingStore.pDomainShaderBlock) )
+    if ( nullptr != pBlock->BackingStore.pDomainShaderBlock && !ValidateShaderBlock(pBlock->BackingStore.pDomainShaderBlock) )
         return false;
 
-    if( nullptr != pBlock->BackingStore.pComputeShaderBlock && !ValidateShaderBlock(pBlock->BackingStore.pComputeShaderBlock) )
+    if ( nullptr != pBlock->BackingStore.pComputeShaderBlock && !ValidateShaderBlock(pBlock->BackingStore.pComputeShaderBlock) )
         return false;
 
     return true;
@@ -536,7 +536,7 @@ void CEffect::ApplyPassBlock(_Inout_ SPassBlock *pBlock)
     {
         ApplyRenderStateBlock(pBlock->BackingStore.pBlendBlock);
 #ifdef FXDEBUG
-        if( !pBlock->BackingStore.pBlendBlock->IsValid )
+        if ( !pBlock->BackingStore.pBlendBlock->IsValid )
             DPF( 0, "Pass::Apply - warning: applying invalid BlendState." );
 #endif
         pBlock->BackingStore.pBlendState = pBlock->BackingStore.pBlendBlock->pBlendObject;
@@ -549,7 +549,7 @@ void CEffect::ApplyPassBlock(_Inout_ SPassBlock *pBlock)
     {
         ApplyRenderStateBlock(pBlock->BackingStore.pDepthStencilBlock);
 #ifdef FXDEBUG
-        if( !pBlock->BackingStore.pDepthStencilBlock->IsValid )
+        if ( !pBlock->BackingStore.pDepthStencilBlock->IsValid )
             DPF( 0, "Pass::Apply - warning: applying invalid DepthStencilState." );
 #endif
         pBlock->BackingStore.pDepthStencilState = pBlock->BackingStore.pDepthStencilBlock->pDSObject;
@@ -561,7 +561,7 @@ void CEffect::ApplyPassBlock(_Inout_ SPassBlock *pBlock)
     {
         ApplyRenderStateBlock(pBlock->BackingStore.pRasterizerBlock);
 #ifdef FXDEBUG
-        if( !pBlock->BackingStore.pRasterizerBlock->IsValid )
+        if ( !pBlock->BackingStore.pRasterizerBlock->IsValid )
             DPF( 0, "Pass::Apply - warning: applying invalid RasterizerState." );
 #endif
         m_pContext->RSSetState(pBlock->BackingStore.pRasterizerBlock->pRasterizerObject);
@@ -587,7 +587,7 @@ void CEffect::ApplyPassBlock(_Inout_ SPassBlock *pBlock)
     if (nullptr != pBlock->BackingStore.pVertexShaderBlock)
     {
 #ifdef FXDEBUG
-        if( !pBlock->BackingStore.pVertexShaderBlock->IsValid )
+        if ( !pBlock->BackingStore.pVertexShaderBlock->IsValid )
             DPF( 0, "Pass::Apply - warning: applying invalid vertex shader." );
 #endif
         ApplyShaderBlock(pBlock->BackingStore.pVertexShaderBlock);
@@ -596,7 +596,7 @@ void CEffect::ApplyPassBlock(_Inout_ SPassBlock *pBlock)
     if (nullptr != pBlock->BackingStore.pPixelShaderBlock)
     {
 #ifdef FXDEBUG
-        if( !pBlock->BackingStore.pPixelShaderBlock->IsValid )
+        if ( !pBlock->BackingStore.pPixelShaderBlock->IsValid )
             DPF( 0, "Pass::Apply - warning: applying invalid pixel shader." );
 #endif
         ApplyShaderBlock(pBlock->BackingStore.pPixelShaderBlock);
@@ -605,7 +605,7 @@ void CEffect::ApplyPassBlock(_Inout_ SPassBlock *pBlock)
     if (nullptr != pBlock->BackingStore.pGeometryShaderBlock)
     {
 #ifdef FXDEBUG
-        if( !pBlock->BackingStore.pGeometryShaderBlock->IsValid )
+        if ( !pBlock->BackingStore.pGeometryShaderBlock->IsValid )
             DPF( 0, "Pass::Apply - warning: applying invalid geometry shader." );
 #endif
         ApplyShaderBlock(pBlock->BackingStore.pGeometryShaderBlock);
@@ -614,7 +614,7 @@ void CEffect::ApplyPassBlock(_Inout_ SPassBlock *pBlock)
     if (nullptr != pBlock->BackingStore.pHullShaderBlock)
     {
 #ifdef FXDEBUG
-        if( !pBlock->BackingStore.pHullShaderBlock->IsValid )
+        if ( !pBlock->BackingStore.pHullShaderBlock->IsValid )
             DPF( 0, "Pass::Apply - warning: applying invalid hull shader." );
 #endif
         ApplyShaderBlock(pBlock->BackingStore.pHullShaderBlock);
@@ -623,7 +623,7 @@ void CEffect::ApplyPassBlock(_Inout_ SPassBlock *pBlock)
     if (nullptr != pBlock->BackingStore.pDomainShaderBlock)
     {
 #ifdef FXDEBUG
-        if( !pBlock->BackingStore.pDomainShaderBlock->IsValid )
+        if ( !pBlock->BackingStore.pDomainShaderBlock->IsValid )
             DPF( 0, "Pass::Apply - warning: applying invalid domain shader." );
 #endif
         ApplyShaderBlock(pBlock->BackingStore.pDomainShaderBlock);
@@ -632,7 +632,7 @@ void CEffect::ApplyPassBlock(_Inout_ SPassBlock *pBlock)
     if (nullptr != pBlock->BackingStore.pComputeShaderBlock)
     {
 #ifdef FXDEBUG
-        if( !pBlock->BackingStore.pComputeShaderBlock->IsValid )
+        if ( !pBlock->BackingStore.pComputeShaderBlock->IsValid )
             DPF( 0, "Pass::Apply - warning: applying invalid compute shader." );
 #endif
         ApplyShaderBlock(pBlock->BackingStore.pComputeShaderBlock);

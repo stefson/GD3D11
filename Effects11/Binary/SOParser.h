@@ -66,7 +66,7 @@ public:
         for( uint32_t iDecl=0; iDecl < D3D11_SO_STREAM_COUNT; ++iDecl )
         {
             hr = Parse( iDecl, pStreams[iDecl] );
-            if( FAILED(hr) )
+            if ( FAILED(hr) )
             {
                 char str[16];
                 sprintf_s( str, 16, " in stream %u.", iDecl );
@@ -115,11 +115,11 @@ protected:
 
         m_pError[0] = 0;
 
-        if( pString == nullptr )
+        if ( pString == nullptr )
             return S_OK;
 
         uint32_t len = (uint32_t)strlen( pString );
-        if( len == 0 )
+        if ( len == 0 )
             return S_OK;
 
         SAFE_DELETE_ARRAY( m_SemanticString[Stream] );
@@ -135,7 +135,7 @@ protected:
 
             // strip leading and trailing spaces
             LPSTR pEnd;
-            if( pSemi != nullptr )
+            if ( pSemi != nullptr )
             {
                 *pSemi = '\0';
                 pEnd = pSemi - 1;
@@ -152,14 +152,14 @@ protected:
                 pEnd--;
             }
 
-            if( *pSemantic != '\0' )
+            if ( *pSemantic != '\0' )
             {
                 VH( AddSemantic( pSemantic ) );
                 m_newEntry.Stream = Stream;
 
                 VH( m_vDecls.Add( m_newEntry ) );
             }
-            if( pSemi == nullptr )
+            if ( pSemi == nullptr )
                 break;
             pSemantic = pSemi + 1;
         }
@@ -181,7 +181,7 @@ lExit:
         VH( ConsumeSemanticIndex( pSemantic ) );
 
         // pSenantic now contains only the SemanticName (all other fields were consumed)
-        if( strcmp( "$SKIP", pSemantic ) != 0 )
+        if ( strcmp( "$SKIP", pSemantic ) != 0 )
         {
             m_newEntry.SemanticName = pSemantic;
         }
@@ -204,7 +204,7 @@ lExit:
 
         pSemantic = strchr( pSemantic, '.' ); 
 
-        if( pSemantic == nullptr )
+        if ( pSemantic == nullptr )
         {
             m_newEntry.ComponentCount = 4;
             return S_OK;
@@ -215,14 +215,14 @@ lExit:
 
         stringLength = strlen( pSemantic );
         p = strstr(pFullMask1, pSemantic );
-        if( p )
+        if ( p )
         {
             startComponent = (uint32_t)( p - pFullMask1 );
         }
         else
         {
             p = strstr( pFullMask2, pSemantic );
-            if( p )
+            if ( p )
                 startComponent = (uint32_t)( p - pFullMask2 );
             else
             {
@@ -232,7 +232,7 @@ lExit:
 
         }
 
-        if( stringLength == 0 )
+        if ( stringLength == 0 )
             stringLength = 4;
 
         m_newEntry.StartComponent = (uint8_t)startComponent;
@@ -251,10 +251,10 @@ lExit:
         HRESULT hr = S_OK;
         LPSTR pColon = strchr( *ppSemantic, ':' ); 
 
-        if( pColon == nullptr )
+        if ( pColon == nullptr )
             return S_OK;
 
-        if( pColon == *ppSemantic )
+        if ( pColon == *ppSemantic )
         {
             strcpy_s( m_pError, MAX_ERROR_SIZE,
                            "ID3D11Effect::ParseSODecl - Invalid output slot" );
@@ -263,7 +263,7 @@ lExit:
 
         *pColon = '\0';
         int outputSlot = atoi( *ppSemantic );
-        if( outputSlot < 0 || outputSlot > 255 )
+        if ( outputSlot < 0 || outputSlot > 255 )
         {
             strcpy_s( m_pError, MAX_ERROR_SIZE,
                            "ID3D11Effect::ParseSODecl - Invalid output slot" );
@@ -273,7 +273,7 @@ lExit:
 
         while( *ppSemantic < pColon )
         {
-            if( !isdigit( (unsigned char)**ppSemantic ) )
+            if ( !isdigit( (unsigned char)**ppSemantic ) )
             {
                 sprintf_s( m_pError, MAX_ERROR_SIZE, "ID3D11Effect::ParseSODecl - Non-digit '%c' in output slot", **ppSemantic );
                 VH( E_FAIL );
@@ -302,7 +302,7 @@ lExit:
         while( uLen > 0 && isdigit( (unsigned char)pSemantic[uLen - 1] ) )
             uLen--;
 
-        if( isdigit( (unsigned char)pSemantic[uLen] ) )
+        if ( isdigit( (unsigned char)pSemantic[uLen] ) )
         {
             m_newEntry.SemanticIndex = atoi( pSemantic + uLen );
             pSemantic[uLen] = '\0';

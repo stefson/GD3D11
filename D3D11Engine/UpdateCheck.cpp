@@ -71,18 +71,18 @@ std::string UpdateCheck::CheckForUpdate()
 	progress.isDone = false;
 	HRESULT hr = URLDownloadToFile(NULL, UPDATE_URL.c_str(), "Versions.txt", 0, &progress);
 
-	if(hr == S_OK)
+	if (hr == S_OK)
 	{
 		// Wait a second for the download to finish
 		Sleep(1000);
 
 		// If this did not succeed
-		if(!progress.isDone)
+		if (!progress.isDone)
 		{
 			// give it another second
 			Sleep(1000);
 
-			if(!progress.isDone)
+			if (!progress.isDone)
 			{
 				LogWarn() << "Failed to search for updates!";
 			}
@@ -91,7 +91,7 @@ std::string UpdateCheck::CheckForUpdate()
 
 	// Open the (hopefully) downloaded file
 	FILE* f = fopen("Versions.txt", "r");
-	if(!f)
+	if (!f)
 		return "";
 
 	while(!feof(f))
@@ -118,7 +118,7 @@ void deleteDirectory(const std::string &path)
 	GetCurrentDirectory(MAX_PATH, buf);
 
 	// Make sure we are really in the right directory
-	if(!Toolbox::FileExists("system\\Gothic2.exe") && 
+	if (!Toolbox::FileExists("system\\Gothic2.exe") && 
 	   !Toolbox::FileExists("system\\Gothic 2.exe") &&
 	   !Toolbox::FileExists("system\\Gothic.exe"))
 	{
@@ -133,7 +133,7 @@ void deleteDirectory(const std::string &path)
 void UpdateCheck::RunUpdater()
 {
 	// Check for really old version
-	if(Toolbox::FileExists("System\\G2D3D11Launcher.exe"))
+	if (Toolbox::FileExists("System\\G2D3D11Launcher.exe"))
 	{
 		switch(MessageBoxA(NULL, "GD3D11 found a very old version in your systemfolder.\nSince it is not needed anymore, do you want to delete those files?\n"
 			"This includes:\n"

@@ -65,20 +65,20 @@ public:
 		std::transform(cmd.begin(), cmd.end(),cmd.begin(), ::toupper);
 
 		int pos = cmdLine.find("-" + cmd);
-		if(pos == std::string::npos)
+		if (pos == std::string::npos)
 			return ""; // Not in commandline
 
 		unsigned int paramPos = pos + 1 + cmd.length() + 1; // Skip everything until the -, then 
 								     			   // the -, then the param-name and finally the :
 		// Safety-check
-		if(paramPos >= cmdLine.length())
+		if (paramPos >= cmdLine.length())
 			return "";
 
 		// *Snip*
 		std::string arg = cmdLine.substr(paramPos); 
 		
 		// Snip the rest of the commandline, if there is any
-		if(arg.find_first_of(' ') != std::string::npos)
+		if (arg.find_first_of(' ') != std::string::npos)
 			arg = arg.substr(0, arg.find_first_of(' '));
 		
 		return arg;
@@ -89,19 +89,19 @@ public:
 	{
 		
 		int r = HookedFunctions::OriginalFunctions.original_zCOptionReadBool(thisptr, section, var, def);
-		if(_stricmp(var, "zWaterAniEnabled") == 0)
+		if (_stricmp(var, "zWaterAniEnabled") == 0)
 		{
 			Engine::GAPI->SetIntParamFromConfig("zWaterAniEnabled", 0);
 			return 0; // Disable water animations
-		}else if(_stricmp(var, "scaleVideos") == 0) // Force scaleVideos to get them into the upper left corner
+		}else if (_stricmp(var, "scaleVideos") == 0) // Force scaleVideos to get them into the upper left corner
 		{
 			Engine::GAPI->SetIntParamFromConfig("scaleVideos", 0);
 			return 0;
-		}else if(_stricmp(var, "zStartupWindowed") == 0)
+		}else if (_stricmp(var, "zStartupWindowed") == 0)
 		{
 			Engine::GAPI->SetIntParamFromConfig("zStartupWindowed", r);
 			return 1;
-		}else if(_stricmp(var, "gameAbnormalExit") == 0)
+		}else if (_stricmp(var, "gameAbnormalExit") == 0)
 		{
 #ifndef PUBLIC_RELEASE
 			// No VDFS bullshit when testing
@@ -122,41 +122,41 @@ public:
 		BaseGraphicsEngine* engine = Engine::GraphicsEngine;
 		LogInfo() << "Reading Gothic-Config: " << var;
 
-		if(!engine)
+		if (!engine)
 		{
 			LogWarn() << "ENGINE wasn't initialized yet! WTF!";
 		}
 
-		if(_stricmp(var, "zVidResFullscreenX") == 0)
+		if (_stricmp(var, "zVidResFullscreenX") == 0)
 		{
-			if(engine)
+			if (engine)
 			{
 				LogInfo() << "Forcing zVidResFullscreenX: " << engine->GetResolution().x;
 				return engine->GetResolution().x;
 			}
-		}else if(_stricmp(var, "zVidResFullscreenY") == 0)
+		}else if (_stricmp(var, "zVidResFullscreenY") == 0)
 		{
-			if(engine)
+			if (engine)
 			{
 				LogInfo() << "Forcing zVidResFullscreenY: " << engine->GetResolution().y;
 				return engine->GetResolution().y;
 			}
-		}else if(_stricmp(var, "zVidResFullscreenBPP") == 0)
+		}else if (_stricmp(var, "zVidResFullscreenBPP") == 0)
 		{
 			return 32;
-		}else if(_stricmp(var, "zTexMaxSize") == 0)
+		}else if (_stricmp(var, "zTexMaxSize") == 0)
 		{
 			return 16384;
-		}else if(_stricmp(var, "zTexCacheOutTimeMSec") == 0) // Following values are from Marcellos L'Hiver config
+		}else if (_stricmp(var, "zTexCacheOutTimeMSec") == 0) // Following values are from Marcellos L'Hiver config
 		{
 			return 9120000; 
-		}else if(_stricmp(var, "zTexCacheSizeMaxBytes") == 0)
+		}else if (_stricmp(var, "zTexCacheSizeMaxBytes") == 0)
 		{
 			return 1000000000; 
-		}else if(_stricmp(var, "zSndCacheOutTimeMSec") == 0) 
+		}else if (_stricmp(var, "zSndCacheOutTimeMSec") == 0) 
 		{
 			return 10000; 
-		}else if(_stricmp(var, "zSndCacheSizeMaxBytes") == 0)
+		}else if (_stricmp(var, "zSndCacheSizeMaxBytes") == 0)
 		{
 			return 40000000; 
 		}
@@ -170,16 +170,16 @@ public:
 		BaseGraphicsEngine* engine = Engine::GraphicsEngine;
 		LogInfo() << "Reading Gothic-Config: " << var;
 
-		if(_stricmp(var, "zTexCacheOutTimeMSec") == 0) // Following values are from Marcellos L'Hiver config
+		if (_stricmp(var, "zTexCacheOutTimeMSec") == 0) // Following values are from Marcellos L'Hiver config
 		{
 			return 9120000; 
-		}else if(_stricmp(var, "zTexCacheSizeMaxBytes") == 0)
+		}else if (_stricmp(var, "zTexCacheSizeMaxBytes") == 0)
 		{
 			return 1000000000; 
-		}else if(_stricmp(var, "zSndCacheOutTimeMSec") == 0) 
+		}else if (_stricmp(var, "zSndCacheOutTimeMSec") == 0) 
 		{
 			return 10000; 
-		}else if(_stricmp(var, "zSndCacheSizeMaxBytes") == 0)
+		}else if (_stricmp(var, "zSndCacheSizeMaxBytes") == 0)
 		{
 			return 40000000; 
 		}

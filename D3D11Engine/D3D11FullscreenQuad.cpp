@@ -9,7 +9,7 @@ D3D11FullscreenQuad::D3D11FullscreenQuad(void)
 
 D3D11FullscreenQuad::~D3D11FullscreenQuad(void)
 {
-	if(QuadVB)QuadVB->Release();
+	if (QuadVB)QuadVB->Release();
 }
 
 HRESULT D3D11FullscreenQuad::CreateQuad(ID3D11Device* device)

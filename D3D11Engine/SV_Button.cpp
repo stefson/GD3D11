@@ -22,7 +22,7 @@ SV_Button::SV_Button(D2DView* view, D2DSubView* parent) : D2DSubView(view, paren
 
 SV_Button::~SV_Button(void)
 {
-	if(CaptionLayout)CaptionLayout->Release();
+	if (CaptionLayout)CaptionLayout->Release();
 }
 
 /** Draws this sub-view */
@@ -55,7 +55,7 @@ void SV_Button::Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime)
 	MainView->GetBrush()->SetColor( D2D1::ColorF(1,1,1,1) );
 
 	D2D1_POINT_2F captionPos = D2D1::Point2F(ViewRect.left,ViewRect.top);
-	if(IsPressed)
+	if (IsPressed)
 	{	
 		captionPos.x -= 2.0f;
 		captionPos.y -= 2.0f;
@@ -66,7 +66,7 @@ void SV_Button::Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime)
 	MainView->GetRenderTarget()->DrawTextLayout(captionPos, CaptionLayout, MainView->GetBrush());
 
 	MainView->GetRenderTarget()->SetTransform(D2D1::Matrix3x2F::Translation(clientRectAbs.left,clientRectAbs.top));
-	if(IsPressed)
+	if (IsPressed)
 	{
 		r = ViewRect;
 		D2DView::ShrinkRect(&r,2);
@@ -87,7 +87,7 @@ void SV_Button::SetCaption(const std::string& caption)
 {
 	Caption = caption;
 
-	if(CaptionLayout)CaptionLayout->Release();
+	if (CaptionLayout)CaptionLayout->Release();
 	MainView->GetWriteFactory()->CreateTextLayout(
 		Toolbox::ToWideChar(caption).c_str(),      // The string to be laid out and formatted.
 		caption.length(),  // The length of the string.
@@ -97,7 +97,7 @@ void SV_Button::SetCaption(const std::string& caption)
 		&CaptionLayout  // The IDWriteTextLayout interface pointer.
 		);
 
-	if(CaptionLayout)
+	if (CaptionLayout)
 	{
 		CaptionLayout->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
 		CaptionLayout->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
@@ -125,7 +125,7 @@ bool SV_Button::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wParam, LPAR
 	case WM_LBUTTONDOWN:
 		{
 			POINT p = D2DView::GetCursorPosition();
-			if(PointInsideRect(D2D1::Point2F((float)p.x, (float)p.y), clientRectAbs))
+			if (PointInsideRect(D2D1::Point2F((float)p.x, (float)p.y), clientRectAbs))
 			{
 				SetPressed(true);
 				return false;
@@ -134,13 +134,13 @@ bool SV_Button::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wParam, LPAR
 		break;
 
 	case WM_LBUTTONUP:
-		if(IsPressed)
+		if (IsPressed)
 		{
 			POINT p = D2DView::GetCursorPosition();
-			if(PointInsideRect(D2D1::Point2F((float)p.x, (float)p.y), clientRectAbs))
+			if (PointInsideRect(D2D1::Point2F((float)p.x, (float)p.y), clientRectAbs))
 			{
 				// Button callback here
-				if(PressedCallback)
+				if (PressedCallback)
 					PressedCallback(this, PressedUserdata);
 
 				SetPressed(false);

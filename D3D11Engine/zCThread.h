@@ -26,7 +26,7 @@ public:
 		//Sleep(0);
 		//Engine::GAPI->LeaveResourceCriticalSection();
 
-		/*if(!zCResourceManager::GetResourceManagerMutex().try_lock())
+		/*if (!zCResourceManager::GetResourceManagerMutex().try_lock())
 		{
 			LogInfo() << "Trying to suspend res-thread while doing work! This would result in a deadlock.";
 
@@ -47,7 +47,7 @@ public:
 		zCThread* t = (zCThread *)thisptr;
 		int* suspCount = t->GetSuspendCounter();
 
-		if((*suspCount) > 0)
+		if ((*suspCount) > 0)
 			return 0;
 
 		(*suspCount) += 1;

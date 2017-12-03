@@ -57,23 +57,23 @@ void D2DMessageBox::ButtonPressed(SV_Button* sender, void* userdata)
 {
 	D2DMessageBox* b = (D2DMessageBox *)userdata;
 
-	if(sender == b->OkButton)
+	if (sender == b->OkButton)
 	{
 		b->SetHidden(true);
 
-		if(b->Callback)
+		if (b->Callback)
 			b->Callback(D2D_MB_OK, b->CallbackUserData);
-	}else if(sender == b->YesButton)
+	}else if (sender == b->YesButton)
 	{
 		b->SetHidden(true);
 
-		if(b->Callback)
+		if (b->Callback)
 			b->Callback(D2D_MB_YES, b->CallbackUserData);
-	}else if(sender == b->NoButton)
+	}else if (sender == b->NoButton)
 	{
 		b->SetHidden(true);
 
-		if(b->Callback)
+		if (b->Callback)
 			b->Callback(D2D_MB_NO, b->CallbackUserData);
 	}
 

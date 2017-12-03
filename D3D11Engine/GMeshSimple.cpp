@@ -36,7 +36,7 @@ XRESULT GMeshSimple::LoadMesh(const std::string& file)
 	Importer imp;
 	const aiScene* s = imp.ReadFile(file, aiProcessPreset_TargetRealtime_Fast);
 
-	if(!s)
+	if (!s)
 	{
 		LogError() << "Failed to open custom Mesh: " << file;
 		LogError() << " - " << imp.GetErrorString();
@@ -60,7 +60,7 @@ XRESULT GMeshSimple::LoadMesh(const std::string& file)
 
 		for(unsigned int n=0;n<s->mMeshes[i]->mNumVertices;n++)
 		{
-			if(s->mMeshes[i]->HasTextureCoords(0))
+			if (s->mMeshes[i]->HasTextureCoords(0))
 			{
 				vertices[n].TexCoord = float2(s->mMeshes[i]->mTextureCoords[0][n].x, -s->mMeshes[i]->mTextureCoords[0][n].y);
 			}
@@ -70,7 +70,7 @@ XRESULT GMeshSimple::LoadMesh(const std::string& file)
 
 		for(unsigned int n=0;n<s->mMeshes[i]->mNumFaces;n++)
 		{
-			if(s->mMeshes[i]->mFaces[n].mNumIndices != 3)
+			if (s->mMeshes[i]->mFaces[n].mNumIndices != 3)
 			{
 				LogError() << "Mesh not triangulated!";
 				continue;
@@ -87,7 +87,7 @@ XRESULT GMeshSimple::LoadMesh(const std::string& file)
 
 		// Extract the file extension and its name
 		int extpos = stex.find_last_of(".");
-		if(extpos >= 0)
+		if (extpos >= 0)
 		{
 			ext = &stex[extpos + 1];
 			//LogInfo() << "Got file ext: " << ext;
@@ -109,7 +109,7 @@ XRESULT GMeshSimple::LoadMesh(const std::string& file)
 		delete[] vertices;
 		delete[] indices;
 
-		if(s->mNumMeshes > 1)
+		if (s->mNumMeshes > 1)
 		{
 			LogWarn() << "SimpleMesh '" << file << "' has more than 1 submesh! SimpleMeshes should only have one!";
 		}

@@ -42,7 +42,7 @@ public:
 			}
 
 			// Make a triangle list
-			if(!polyFan.empty())
+			if (!polyFan.empty())
 				WorldConverter::TriangleFanToList(&polyFan[0], polyFan.size(), &vx);
 		}
 	}

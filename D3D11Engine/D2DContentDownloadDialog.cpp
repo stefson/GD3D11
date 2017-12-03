@@ -1,13 +1,15 @@
 #include "pch.h"
 #include "D2DContentDownloadDialog.h"
+
 #include "D2DSubView.h"
 #include "D2DView.h"
 #include "SV_Label.h"
 #include "SV_Panel.h"
 #include "SV_ProgressBar.h"
 #include "FileDownloader.h"
-#include "ZipArchive.h"
 #include "ModSpecific.h"
+#include "ZipArchive.h"
+#include "zCOption.h"
 
 /** TODO: This file has hardcoded URLs, create a config or something else for this! */
 
@@ -60,13 +62,13 @@ void D2DContentDownloadDialog::ProgressCallback(FileDownloader* downloader, void
 {
 	D2DContentDownloadDialog* v = (D2DContentDownloadDialog *)userdata;
 
-	//if(info.szStatusText)
+	//if (info.szStatusText)
 	//	v->Message->SetCaption(Toolbox::ToMultiByte(info.szStatusText));
 
 	v->ProgressBar->SetProgress((float)info.ulProgress / (float)info.ulProgressMax);
 
 	// If this is true, we are at the last line of the download-thread
-	if(downloader->GetProgress().isDone)
+	if (downloader->GetProgress().isDone)
 	{
 		// Start the unzipping
 		v->Zip->UnzipThreaded(info.targetFile, v->TargetFolder, D2DContentDownloadDialog::UnzipDoneCallback, v);
@@ -91,7 +93,7 @@ void D2DContentDownloadDialog::RunNextJob()
 	delete Zip; Zip = NULL;
 	delete Downloader; Downloader = NULL;
 
-	if(NextJobs.empty())
+	if (NextJobs.empty())
 	{
 		SetHidden(true); // FIXME: Add method to actually close these dialogs...
 
@@ -145,12 +147,12 @@ void D2DContentDownloadDialog::Draw(const D2D1_RECT_F& clientRectAbs, float delt
 {
 	std::string message;
 
-	if(!Downloader)
+	if (!Downloader)
 		return;
 
 	// FIXME: This should be in an update-function
 	// Start the next job if we are done unzipping or the download failed
-	if(UnzipFile == UnzipNumFiles - 1 || Downloader->GetProgress().hasFailed)
+	if (UnzipFile == UnzipNumFiles - 1 || Downloader->GetProgress().hasFailed)
 	{
 		UnzipFile = 0;
 		UnzipNumFiles = 0;
@@ -161,7 +163,7 @@ void D2DContentDownloadDialog::Draw(const D2D1_RECT_F& clientRectAbs, float delt
 	}
 
 	// Need to check again if the download failed and "RunNextJob()" has deleted the downloader
-	if(!Downloader || IsHidden() || 
+	if (!Downloader || IsHidden() || 
 		(Downloader->GetProgress().LastInfo.ulProgressMax == 0 && UnzipNumFiles == 0)) // Also don't draw if we are currently not doing anything
 		return;
 
@@ -169,7 +171,7 @@ void D2DContentDownloadDialog::Draw(const D2D1_RECT_F& clientRectAbs, float delt
 	float dlCurrent = Downloader->GetProgress().LastInfo.ulProgress / (1024.0f * 1024.0f);
 	float dlMax = Downloader->GetProgress().LastInfo.ulProgressMax / (1024.0f * 1024.0f);
 
-	if(dlCurrent != dlMax &&
+	if (dlCurrent != dlMax &&
 		Downloader->GetProgress().LastInfo.ulProgressMax != 0)
 	{
 		switch(Downloader->GetProgress().LastInfo.ulStatusCode)
@@ -202,13 +204,13 @@ void D2DContentDownloadDialog::Draw(const D2D1_RECT_F& clientRectAbs, float delt
 		}
 	}
 	
-	if(UnzipNumFiles > 0) // Unzip-Phase
+	if (UnzipNumFiles > 0) // Unzip-Phase
 	{
 		char txt[256];
 		sprintf_s(txt, "Unpacking... (%d/%d files)", UnzipFile, UnzipNumFiles);
 		message = txt;
 
-		if(UnzipFile == UnzipNumFiles - 1)
+		if (UnzipFile == UnzipNumFiles - 1)
 		{
 			SetHidden(true);
 			MainView->AddMessageBox("Success!", "Successfully downloaded and unpacked data. Please restart the game to apply the changes!");

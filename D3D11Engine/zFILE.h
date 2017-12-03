@@ -27,13 +27,13 @@ public:
 
 		// Extract the file extension and its name
 		int extpos = file.find_last_of(".");
-		if(extpos >= 0)
+		if (extpos >= 0)
 		{
 			ext = &file[extpos + 1];
 			//LogInfo() << "Got file ext: " << ext;
 
 			int slashpos = file.find_last_of("\\");
-			if(slashpos >= 0)
+			if (slashpos >= 0)
 			{
 				name = &file[slashpos + 1]; // Strip directories
 				name.resize(name.size() - (ext.size() + 1)); // Strip file extension

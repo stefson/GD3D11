@@ -31,7 +31,7 @@ public:
 		hook_infunc	
 		HookedFunctions::OriginalFunctions.original_oCNPCInitModel(thisptr);
 
-		if(/*((zCVob *)thisptr)->GetVisual() || */Engine::GAPI->GetSkeletalVobByVob((zCVob *)thisptr))
+		if (/*((zCVob *)thisptr)->GetVisual() || */Engine::GAPI->GetSkeletalVobByVob((zCVob *)thisptr))
 		{
 			// This may causes the vob to be added and removed multiple times, but makes sure we get all changes of armor
 			Engine::GAPI->OnRemovedVob((zCVob *)thisptr, ((zCVob *)thisptr)->GetHomeWorld());	
@@ -57,7 +57,7 @@ public:
 		hook_infunc
 
 		// Remove vob from world
-		if(!((oCNPC *)thisptr)->IsAPlayer()) // Never disable the player vob
+		if (!((oCNPC *)thisptr)->IsAPlayer()) // Never disable the player vob
 			Engine::GAPI->OnRemovedVob((zCVob *)thisptr, ((zCVob *)thisptr)->GetHomeWorld());	
 
 		HookedFunctions::OriginalFunctions.original_oCNPCDisable(thisptr);

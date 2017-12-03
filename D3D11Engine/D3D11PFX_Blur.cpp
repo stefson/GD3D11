@@ -71,15 +71,15 @@ XRESULT D3D11PFX_Blur::RenderBlur(RenderToTextureBuffer* fxbuffer, bool leaveRes
 
 	/** Pass 3: Copy back to FX-Buffer */
 
-	if(!leaveResultInD4_2)
+	if (!leaveResultInD4_2)
 	{
 		simplePS->Apply();
 		FxRenderer->CopyTextureToRTV(FxRenderer->GetTempBufferDS4_2()->GetShaderResView(), fxbuffer->GetRenderTargetView(), INT2(0,0), true);
 	}
 
 	engine->GetContext()->OMSetRenderTargets(1, &oldRTV, oldDSV);
-	if(oldRTV)oldRTV->Release();
-	if(oldDSV)oldDSV->Release();
+	if (oldRTV)oldRTV->Release();
+	if (oldDSV)oldDSV->Release();
 
 	return XR_SUCCESS;
 }

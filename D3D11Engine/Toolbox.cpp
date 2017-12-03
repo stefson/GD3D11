@@ -19,7 +19,7 @@ namespace Toolbox
 			std::string cu = checkStrings[i];
 			std::transform(cu.begin(), cu.end(),cu.begin(), ::toupper);
 
-			if(us.find(cu[i]) != std::string::npos)
+			if (us.find(cu[i]) != std::string::npos)
 				return true;
 		}
 
@@ -40,7 +40,7 @@ namespace Toolbox
 		// Check all planes
 		do {
 			// Don't test the cached plane twice
-			if(i == skip)
+			if (i == skip)
 				continue;
 
 			// Still not sure how these clipflags work
@@ -86,7 +86,7 @@ namespace Toolbox
 			};
 
 			// If this was a cached check, return to normal
-			if(tmpCache != -1)
+			if (tmpCache != -1)
 			{
 				skip = tmpCache;
 				tmpCache = -1;
@@ -138,7 +138,7 @@ namespace Toolbox
 	/** Returns true if the given position is inside the box */
 	bool PositionInsideBox(const D3DXVECTOR3& p, const D3DXVECTOR3& min, const D3DXVECTOR3& max)
 	{
-		if( p.x > min.x &&
+		if ( p.x > min.x &&
 			p.y > min.y &&
 			p.z > min.z &&
 			p.x < max.x &&
@@ -310,7 +310,7 @@ namespace Toolbox
 	/** Returns the RowPitch-Size of a DDS-Image */
 	unsigned int GetDDSRowPitchSize(unsigned int width, bool dxt1)
 	{
-		if(dxt1)
+		if (dxt1)
 			return std::max((unsigned int)1, ((width+3)/4)) * 8;
 		else 
 			return std::max((unsigned int)1, ((width+3)/4)) * 16;
@@ -321,7 +321,7 @@ namespace Toolbox
 	{
 		FILE* f = fopen(file.c_str(), "rb");
 
-		if(f)
+		if (f)
 		{
 			fclose(f);
 			return true;

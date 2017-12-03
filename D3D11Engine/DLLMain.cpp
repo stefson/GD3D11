@@ -71,7 +71,7 @@ HRESULT DoHookedDirectDrawCreateEx(GUID FAR * lpGuid, LPVOID  *lplpDD, REFIID  i
 {
 	*lplpDD = new MyDirectDraw(NULL);
 
-	if(!Engine::GraphicsEngine)
+	if (!Engine::GraphicsEngine)
 	{		
 		Engine::GAPI->OnGameStart();
 		Engine::CreateGraphicsEngine();
@@ -84,7 +84,7 @@ extern "C" HRESULT WINAPI HookedDirectDrawCreateEx(GUID FAR * lpGuid, LPVOID  *l
 	//LogInfo() << "HookedDirectDrawCreateEx!";
 	HRESULT hr = S_OK;
 
-	if(Engine::PassThrough)
+	if (Engine::PassThrough)
 	{
 		DirectDrawCreateEx_type fn = (DirectDrawCreateEx_type)ddraw.DirectDrawCreateEx;
 		return fn(lpGuid, lplpDD, iid, pUnkOuter);
@@ -101,7 +101,7 @@ extern "C" HRESULT WINAPI HookedDirectDrawCreateEx(GUID FAR * lpGuid, LPVOID  *l
 
 extern "C" void WINAPI HookedAcquireDDThreadLock()
 {
-	if(Engine::PassThrough)
+	if (Engine::PassThrough)
 	{
 		DirectDrawSimple fn = (DirectDrawSimple)ddraw.AcquireDDThreadLock;
 		fn();
@@ -113,7 +113,7 @@ extern "C" void WINAPI HookedAcquireDDThreadLock()
 
 extern "C" void WINAPI HookedReleaseDDThreadLock()
 {
-	if(Engine::PassThrough)
+	if (Engine::PassThrough)
 	{
 		DirectDrawSimple fn = (DirectDrawSimple)ddraw.ReleaseDDThreadLock;
 		fn();
@@ -123,8 +123,6 @@ extern "C" void WINAPI HookedReleaseDDThreadLock()
 	// Do nothing
 	LogInfo() << "ReleaseDDThreadLock called!";
 }
-
-
 
 __declspec(naked) void FakeAcquireDDThreadLock()			{ _asm { jmp [ddraw.AcquireDDThreadLock] } }
 __declspec(naked) void FakeCheckFullscreen()				{ _asm { jmp [ddraw.CheckFullscreen] } }
@@ -178,7 +176,6 @@ void EnableCrashingOnCrashes()
 	}
 }
 
-
 BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID) {
 	if (reason == DLL_PROCESS_ATTACH) {
 		//DebugWrite_i("DDRAW Proxy DLL starting.\n", 0);
@@ -188,7 +185,7 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID) {
 
 		//_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 
-		if(!Engine::PassThrough)
+		if (!Engine::PassThrough)
 		{
 			Log::Clear();
 			LogInfo() << "Starting DDRAW Proxy DLL.";
@@ -251,4 +248,4 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID) {
 		LogInfo() << "DDRAW Proxy DLL signing off.\n";
 	}
 	return TRUE;
-};
+}

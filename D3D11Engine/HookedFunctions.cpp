@@ -149,7 +149,7 @@ int __fastcall HookedFunctionInfo::hooked_zBinkPlayerOpenVideo(void* thisptr, vo
 	// This structure stores width and height as first two parameters, as ints.
 	BinkInfo* res = *(BinkInfo **)(((char *)thisptr) + (GothicMemoryLocations::zCBinkPlayer::Offset_VideoHandle));
 
-	if(res)
+	if (res)
 	{
 		Engine::GAPI->GetRendererState()->RendererInfo.PlayingMovieResolution = INT2(res->ResX, res->ResY);
 	}

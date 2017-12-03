@@ -91,7 +91,7 @@ static Vec3 GetMultiplicity1Evector( Sym3x3 const& matrix, float evalue )
 	for( int i = 1; i < 6; ++i )
 	{
 		float c = std::fabs( u[i] );
-		if( c > mc )
+		if ( c > mc )
 		{
 			mc = c;
 			mi = i;
@@ -130,7 +130,7 @@ static Vec3 GetMultiplicity2Evector( Sym3x3 const& matrix, float evalue )
 	for( int i = 1; i < 6; ++i )
 	{
 		float c = std::fabs( m[i] );
-		if( c > mc )
+		if ( c > mc )
 		{
 			mc = c;
 			mi = i;
@@ -176,12 +176,12 @@ Vec3 ComputePrincipleComponent( Sym3x3 const& matrix )
 	float Q = 0.25f*b*b + ( 1.0f/27.0f )*a*a*a;
 
 	// test the multiplicity
-	if( FLT_EPSILON < Q )
+	if ( FLT_EPSILON < Q )
 	{
 		// only one root, which implies we have a multiple of the identity
         return Vec3( 1.0f );
 	}
-	else if( Q < -FLT_EPSILON )
+	else if ( Q < -FLT_EPSILON )
 	{
 		// three distinct roots
 		float theta = std::atan2( std::sqrt( -Q ), -0.5f*b );
@@ -196,19 +196,19 @@ Vec3 ComputePrincipleComponent( Sym3x3 const& matrix )
 		float l3 = ( 1.0f/3.0f )*c2 - rt*( ct - ( float )sqrt( 3.0f )*st );
 
 		// pick the larger
-		if( std::fabs( l2 ) > std::fabs( l1 ) )
+		if ( std::fabs( l2 ) > std::fabs( l1 ) )
 			l1 = l2;
-		if( std::fabs( l3 ) > std::fabs( l1 ) )
+		if ( std::fabs( l3 ) > std::fabs( l1 ) )
 			l1 = l3;
 
 		// get the eigenvector
 		return GetMultiplicity1Evector( matrix, l1 );
 	}
-	else // if( -FLT_EPSILON <= Q && Q <= FLT_EPSILON )
+	else // if ( -FLT_EPSILON <= Q && Q <= FLT_EPSILON )
 	{
 		// two roots
 		float rt;
-		if( b < 0.0f )
+		if ( b < 0.0f )
 			rt = -std::pow( -0.5f*b, 1.0f/3.0f );
 		else
 			rt = std::pow( 0.5f*b, 1.0f/3.0f );
@@ -217,7 +217,7 @@ Vec3 ComputePrincipleComponent( Sym3x3 const& matrix )
 		float l2 = ( 1.0f/3.0f )*c2 - 2.0f*rt;
 		
 		// get the eigenvector
-		if( std::fabs( l1 ) > std::fabs( l2 ) )
+		if ( std::fabs( l1 ) > std::fabs( l2 ) )
 			return GetMultiplicity2Evector( matrix, l1 );
 		else
 			return GetMultiplicity1Evector( matrix, l2 );

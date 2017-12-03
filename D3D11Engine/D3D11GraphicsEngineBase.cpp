@@ -1,20 +1,14 @@
-#include "pch.h"
 #include "D3D11GraphicsEngineBase.h"
-#include "D3D11LineRenderer.h"
-#include "D3D11ShaderManager.h"
-#include "D3D11VertexBuffer.h"
-#include "Engine.h"
-#include "GothicAPI.h"
+
 #include "BaseAntTweakBar.h"
+#include "D3D11LineRenderer.h"
+#include "D3D11PipelineStates.h"
+#include "D3D11PointLight.h"
+#include "D3D11PShader.h"
+#include "D3D11ShaderManager.h"
+#include "D3D11VShader.h"
 #include "RenderToTextureBuffer.h"
 #include "zCView.h"
-#include "D3D11PipelineStates.h"
-#include "D3D11Texture.h"
-#include "D3D11ConstantBuffer.h"
-#include "D3D11PShader.h"
-#include "D3D11VShader.h"
-#include "D3D11PointLight.h"
-
 
 const int DRAWVERTEXARRAY_BUFFER_SIZE = 2048 * sizeof(ExVertexStruct);
 const int NUM_MAX_BONES = 96;
@@ -23,57 +17,69 @@ const int INSTANCING_BUFFER_SIZE = sizeof(VobInstanceInfo) * 2048;
 // If defined, creates a debug-version of the d3d11-device
 //#define DEBUG_D3D11
 
-D3D11GraphicsEngineBase::D3D11GraphicsEngineBase(void)
-{
-	TempVertexBuffer = NULL;
-	DeferredContext = NULL;
-	Context = NULL;
-	Device = NULL;
-	DXGIAdapter = NULL;
-	DXGIFactory = NULL;
-	ShaderManager = NULL;
-	SwapChain = NULL;
-	Backbuffer = NULL;
-	DepthStencilBuffer = NULL;
-	HDRBackBuffer = NULL;
-	DefaultSamplerState = NULL;
-	LineRenderer = NULL;
-	TransformsCB = NULL;
+D3D11GraphicsEngineBase::D3D11GraphicsEngineBase() {
+	TempVertexBuffer = nullptr;
+	DeferredContext = nullptr;
+	Context = nullptr;
+	Device = nullptr;
+	DXGIAdapter = nullptr;
+	DXGIFactory = nullptr;
+	ShaderManager = nullptr;
+	SwapChain = nullptr;
+	Backbuffer = nullptr;
+	DepthStencilBuffer = nullptr;
+	HDRBackBuffer = nullptr;
+	DefaultSamplerState = nullptr;
+	LineRenderer = nullptr;
+	TransformsCB = nullptr;
 	PresentPending = false;
 
 	// Match the resolution with the current desktop resolution
 	Resolution = Engine::GAPI->GetRendererState()->RendererSettings.LoadedResolution;
 }
 
-
-D3D11GraphicsEngineBase::~D3D11GraphicsEngineBase(void)
-{
+D3D11GraphicsEngineBase::~D3D11GraphicsEngineBase() {
+	LogInfo() << "D'Tor D3D11GraphicsEngineBase Start";
 	GothicDepthBufferStateInfo::DeleteCachedObjects();
 	GothicBlendStateInfo::DeleteCachedObjects();
 	GothicRasterizerStateInfo::DeleteCachedObjects();
 
-	for(size_t i=0;i<DeferredContextsAll.size();i++)
-		DeferredContextsAll[i]->Release();
+	for (size_t i = 0; i < DeferredContextsAll.size(); i++) {
+		SAFE_RELEASE(DeferredContextsAll[i]);
+	}
 
-	delete TempVertexBuffer;
-	delete ShaderManager;
-	delete Backbuffer;
-	delete HDRBackBuffer;
-	delete LineRenderer;
-	delete TransformsCB;
+	SAFE_DELETE(TempVertexBuffer);
+	LogInfo() << "D'Tor D3D11GraphicsEngineBase TempVertexBuffer";
+	SAFE_DELETE(ShaderManager);
+	LogInfo() << "D'Tor D3D11GraphicsEngineBase ShaderManager";
+	SAFE_DELETE(Backbuffer);
+	LogInfo() << "D'Tor D3D11GraphicsEngineBase Backbuffer";
+	SAFE_DELETE(HDRBackBuffer);
+	LogInfo() << "D'Tor D3D11GraphicsEngineBase HDRBackBuffer";
+	SAFE_DELETE(LineRenderer);
+	LogInfo() << "D'Tor D3D11GraphicsEngineBase LineRenderer";
+	SAFE_DELETE(TransformsCB);
+	LogInfo() << "D'Tor D3D11GraphicsEngineBase TransformsCB";
 
-	if(DefaultSamplerState)DefaultSamplerState->Release();
-	if(SwapChain)SwapChain->Release();
-	if(DeferredContext)DeferredContext->Release();
-	if(Context)Context->Release();
-	if(Device)Device->Release();
-	if(DXGIAdapter)DXGIAdapter->Release();
-	if(DXGIFactory)DXGIFactory->Release();
+	SAFE_RELEASE(DefaultSamplerState);
+	LogInfo() << "D'Tor D3D11GraphicsEngineBase DefaultSamplerState";
+	SAFE_RELEASE(SwapChain);
+	LogInfo() << "D'Tor D3D11GraphicsEngineBase SwapChain";
+	LogInfo() << "Deffered Context is " << DeferredContext;
+	SAFE_RELEASE(DeferredContext);
+	LogInfo() << "D'Tor D3D11GraphicsEngineBase DeferredContext";
+	SAFE_RELEASE(Context);
+	LogInfo() << "D'Tor D3D11GraphicsEngineBase Context";
+	SAFE_RELEASE(Device);
+	LogInfo() << "D'Tor D3D11GraphicsEngineBase Device";
+	SAFE_RELEASE(DXGIAdapter);
+	LogInfo() << "D'Tor D3D11GraphicsEngineBase DXGIAdapter";
+	SAFE_RELEASE(DXGIFactory);
+	LogInfo() << "D'Tor D3D11GraphicsEngineBase End";
 }
 
 /** Called after the fake-DDraw-Device got created */
-XRESULT D3D11GraphicsEngineBase::Init()
-{
+XRESULT D3D11GraphicsEngineBase::Init() {
 	HRESULT hr;
 
 	LogInfo() << "Initializing Device...";
@@ -97,13 +103,12 @@ XRESULT D3D11GraphicsEngineBase::Init()
 
 	// Create D3D11-Device
 #ifndef DEBUG_D3D11
-	LE(D3D11CreateDevice(DXGIAdapter, D3D_DRIVER_TYPE_UNKNOWN, NULL, flags, &featurelevel, 1, D3D11_SDK_VERSION, &Device, NULL, &Context));
+	LE(D3D11CreateDevice(DXGIAdapter, D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags, &featurelevel, 1, D3D11_SDK_VERSION, &Device, nullptr, &Context));
 #else
-	LE(D3D11CreateDevice(DXGIAdapter, D3D_DRIVER_TYPE_UNKNOWN, NULL, flags | D3D11_CREATE_DEVICE_DEBUG, &featurelevel, 1, D3D11_SDK_VERSION, &Device, NULL, &Context));
+	LE(D3D11CreateDevice(DXGIAdapter, D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags | D3D11_CREATE_DEVICE_DEBUG, &featurelevel, 1, D3D11_SDK_VERSION, &Device, nullptr, &Context));
 #endif
 	
-	if(hr == DXGI_ERROR_UNSUPPORTED)
-	{
+	if (hr == DXGI_ERROR_UNSUPPORTED) {
 		LogErrorBox() <<	"Your GPU (" << deviceDescription.c_str() << ") does not support Direct3D 11, so it can't run GD3D11!\n"
 			"It has to be at least Featurelevel 11_0 compatible, which requires at least:"
 			" *	Nvidia GeForce GTX4xx or newer"
@@ -154,9 +159,9 @@ XRESULT D3D11GraphicsEngineBase::Init()
 	Context->HSSetSamplers(0, 1, &DefaultSamplerState);
 
 	TempVertexBuffer = new D3D11VertexBuffer();
-	TempVertexBuffer->Init(NULL, DRAWVERTEXARRAY_BUFFER_SIZE, D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE);
+	TempVertexBuffer->Init(nullptr, DRAWVERTEXARRAY_BUFFER_SIZE, D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE);
 
-	TransformsCB = new D3D11ConstantBuffer(sizeof(VS_ExConstantBuffer_PerFrame), NULL);
+	TransformsCB = new D3D11ConstantBuffer(sizeof(VS_ExConstantBuffer_PerFrame), nullptr);
 
 	LineRenderer = new D3D11LineRenderer();
 
@@ -167,8 +172,7 @@ XRESULT D3D11GraphicsEngineBase::Init()
 }
 
 /** Called when the game created its window */
-XRESULT D3D11GraphicsEngineBase::SetWindow(HWND hWnd)
-{
+XRESULT D3D11GraphicsEngineBase::SetWindow(HWND hWnd) {
 	LogInfo() << "Creating swapchain";
 	OutputWindow = hWnd;
 
@@ -182,7 +186,7 @@ XRESULT D3D11GraphicsEngineBase::OnResize(INT2 newSize)
 {
 	HRESULT hr;
 
-	if(memcmp(&Resolution, &newSize, sizeof(newSize)) == 0 && SwapChain)
+	if (memcmp(&Resolution, &newSize, sizeof(newSize)) == 0 && SwapChain)
 		return XR_SUCCESS; // Don't resize if we don't have to
 
 	Resolution = newSize;
@@ -190,10 +194,10 @@ XRESULT D3D11GraphicsEngineBase::OnResize(INT2 newSize)
 
 	RECT desktopRect;
 	GetClientRect(GetDesktopWindow(), &desktopRect);
-	SetWindowPos(OutputWindow, NULL, 0, 0, desktopRect.right, desktopRect.bottom, 0);
+	SetWindowPos(OutputWindow, nullptr, 0, 0, desktopRect.right, desktopRect.bottom, 0);
 
-	delete Backbuffer; Backbuffer = NULL;
-	delete DepthStencilBuffer; DepthStencilBuffer = NULL;
+	delete Backbuffer; Backbuffer = nullptr;
+	delete DepthStencilBuffer; DepthStencilBuffer = nullptr;
 
 	if (!SwapChain)
 	{
@@ -250,7 +254,7 @@ XRESULT D3D11GraphicsEngineBase::OnResize(INT2 newSize)
 	}
 
 	// Successfully resized swapchain, re-get buffers
-	ID3D11Texture2D* backbuffer = NULL;
+	ID3D11Texture2D* backbuffer = nullptr;
 	SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void **)&backbuffer);
 
 	// Recreate RenderTargetView
@@ -263,7 +267,7 @@ XRESULT D3D11GraphicsEngineBase::OnResize(INT2 newSize)
 
 	// Recreate DepthStencilBuffer
 	delete DepthStencilBuffer;
-	DepthStencilBuffer = new RenderToDepthStencilBuffer(Device, Resolution.x, Resolution.y, DXGI_FORMAT_R32_TYPELESS, NULL, DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_R32_FLOAT);
+	DepthStencilBuffer = new RenderToDepthStencilBuffer(Device, Resolution.x, Resolution.y, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_R32_FLOAT);
 
 	// Bind our newly created resources
 	Context->OMSetRenderTargets(1, Backbuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView());
@@ -297,7 +301,7 @@ XRESULT D3D11GraphicsEngineBase::OnBeginFrame()
 {
 	// Enter the critical section for safety while executing the deferred command list
 	Engine::GAPI->EnterResourceCriticalSection();
-	ID3D11CommandList* dc_cl = NULL;
+	ID3D11CommandList* dc_cl = nullptr;
 	DeferredContext->FinishCommandList(true, &dc_cl);
 
 	// Copy list of textures we are operating on
@@ -397,7 +401,7 @@ XRESULT D3D11GraphicsEngineBase::GetDisplayModeList(std::vector<DisplayModeInfo>
 {
 	HRESULT hr;
 	UINT numModes = 0;
-	DXGI_MODE_DESC* displayModes = NULL;
+	DXGI_MODE_DESC* displayModes = nullptr;
 	DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	IDXGIOutput* output;
 
@@ -405,15 +409,15 @@ XRESULT D3D11GraphicsEngineBase::GetDisplayModeList(std::vector<DisplayModeInfo>
 	RECT desktop;
 	GetClientRect(GetDesktopWindow(), &desktop);
 
-	if(!DXGIAdapter)
+	if (!DXGIAdapter)
 		return XR_FAILED;
 
 	DXGIAdapter->EnumOutputs(0, &output);
 
-	if(!output)
+	if (!output)
 		return XR_FAILED;
 
-	hr = output->GetDisplayModeList(format, 0, &numModes, NULL);
+	hr = output->GetDisplayModeList(format, 0, &numModes, nullptr);
 
 	displayModes = new DXGI_MODE_DESC[numModes];
 
@@ -430,16 +434,16 @@ XRESULT D3D11GraphicsEngineBase::GetDisplayModeList(std::vector<DisplayModeInfo>
 		info.Width = displayModes[i].Width;
 		info.Bpp = 32;
 
-		if(info.Width > (unsigned long)desktop.right || info.Height > (unsigned long)desktop.bottom)
+		if (info.Width > (unsigned long)desktop.right || info.Height > (unsigned long)desktop.bottom)
 			continue; // Skip bigger sizes than the desktop rect, because DXGI doesn't like them apparently TODO: Fix this if possible!
 
-		if(!modeList->empty() && memcmp(&modeList->back(), &info, sizeof(info)) == 0)
+		if (!modeList->empty() && memcmp(&modeList->back(), &info, sizeof(info)) == 0)
 			continue; // Already have that in list
 
 		modeList->push_back(info);
 	}
 
-	if(includeSuperSampling)
+	if (includeSuperSampling)
 	{
 		// Put supersampling resolutions in, up to just below 8k
 		int i = 2;
@@ -480,7 +484,7 @@ XRESULT D3D11GraphicsEngineBase::Present()
 	Engine::AntTweakBar->Draw();
 
 	bool vsync = Engine::GAPI->GetRendererState()->RendererSettings.EnableVSync;
-	if(SwapChain->Present(vsync ? 1 : 0, 0) == DXGI_ERROR_DEVICE_REMOVED)
+	if (SwapChain->Present(vsync ? 1 : 0, 0) == DXGI_ERROR_DEVICE_REMOVED)
 	{
 		switch(Device->GetDeviceRemovedReason())
 		{
@@ -527,7 +531,7 @@ XRESULT D3D11GraphicsEngineBase::Present()
 /** Called when we started to render the world */
 XRESULT D3D11GraphicsEngineBase::OnStartWorldRendering() 
 {
-	if(PresentPending)
+	if (PresentPending)
 		return XR_FAILED;
 
 	PresentPending = true;
@@ -604,7 +608,7 @@ XRESULT D3D11GraphicsEngineBase::DrawVertexArray(ExVertexStruct* vertices, unsig
 	((D3D11VertexBuffer *)TempVertexBuffer)->GetVertexBuffer()->GetDesc(&desc);
 
 	// Check if we need a bigger vertexbuffer
-	if(desc.ByteWidth < stride * numVertices)
+	if (desc.ByteWidth < stride * numVertices)
 	{
 		LogInfo() << "TempVertexBuffer too small (" << desc.ByteWidth << "), need " << stride * numVertices << " bytes. Recreating buffer.";
 
@@ -612,7 +616,7 @@ XRESULT D3D11GraphicsEngineBase::DrawVertexArray(ExVertexStruct* vertices, unsig
 		delete TempVertexBuffer;
 		TempVertexBuffer = new D3D11VertexBuffer();
 
-		TempVertexBuffer->Init(NULL, stride * numVertices, D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE);
+		TempVertexBuffer->Init(nullptr, stride * numVertices, D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE);
 	}
 
 	// Send vertexdata to the GPU
@@ -636,7 +640,7 @@ XRESULT D3D11GraphicsEngineBase::UpdateRenderStates()
 	{
 		D3D11BlendStateInfo* state = (D3D11BlendStateInfo *)GothicStateCache::s_BlendStateMap[Engine::GAPI->GetRendererState()->BlendState];
 
-		if(!state)
+		if (!state)
 		{
 			// Create new state
 			state = new D3D11BlendStateInfo(Engine::GAPI->GetRendererState()->BlendState);
@@ -656,7 +660,7 @@ XRESULT D3D11GraphicsEngineBase::UpdateRenderStates()
 	{
 		D3D11RasterizerStateInfo* state = (D3D11RasterizerStateInfo *)GothicStateCache::s_RasterizerStateMap[Engine::GAPI->GetRendererState()->RasterizerState];
 
-		if(!state)
+		if (!state)
 		{
 			// Create new state
 			state = new D3D11RasterizerStateInfo(Engine::GAPI->GetRendererState()->RasterizerState);
@@ -676,7 +680,7 @@ XRESULT D3D11GraphicsEngineBase::UpdateRenderStates()
 	{
 		D3D11DepthBufferState* state = (D3D11DepthBufferState *)GothicStateCache::s_DepthBufferMap[Engine::GAPI->GetRendererState()->DepthState];
 
-		if(!state)
+		if (!state)
 		{
 			// Create new state
 			state = new D3D11DepthBufferState(Engine::GAPI->GetRendererState()->DepthState);
@@ -710,8 +714,8 @@ void D3D11GraphicsEngineBase::ConstructShaderMakroList(std::vector<D3D10_SHADER_
 	m.Definition = s.EnableSoftShadows ? "1" : "0";
 	list.push_back(m);
 
-	m.Name = NULL;
-	m.Definition = NULL;
+	m.Name = nullptr;
+	m.Definition = nullptr;
 	list.push_back(m);
 }
 
@@ -719,8 +723,8 @@ void D3D11GraphicsEngineBase::SetupVS_ExMeshDrawCall()
 {
 	UpdateRenderStates();
 
-	if(ActiveVS)ActiveVS->Apply();
-	if(ActivePS)ActivePS->Apply();
+	if (ActiveVS)ActiveVS->Apply();
+	if (ActivePS)ActivePS->Apply();
 
 	Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
@@ -812,10 +816,10 @@ void D3D11GraphicsEngineBase::UpdateTransformsCB()
 /** Creates a bufferobject for a shadowed point light */
 XRESULT D3D11GraphicsEngineBase::CreateShadowedPointLight(BaseShadowedPointLight** outPL, VobLightInfo* lightInfo, bool dynamic)
 {
-	if(Engine::GAPI->GetRendererState()->RendererSettings.EnablePointlightShadows > 0)
+	if (Engine::GAPI->GetRendererState()->RendererSettings.EnablePointlightShadows > 0)
 		*outPL = new D3D11PointLight(lightInfo, dynamic);
 	else
-		*outPL = NULL;
+		*outPL = nullptr;
 
 	return XR_SUCCESS;
 }
@@ -861,13 +865,13 @@ XRESULT D3D11GraphicsEngineBase::BindViewportInformation(const std::string& shad
 	D3D11PShader* ps = ShaderManager->GetPShader(shader);
 	D3D11VShader* vs = ShaderManager->GetVShader(shader);
 
-	if(vs)
+	if (vs)
 	{
 		vs->GetConstantBuffer()[slot]->UpdateBuffer(f2);
 		vs->GetConstantBuffer()[slot]->BindToVertexShader(slot);
 	}
 
-	if(ps)
+	if (ps)
 	{
 		ps->GetConstantBuffer()[slot]->UpdateBuffer(f2);
 		ps->GetConstantBuffer()[slot]->BindToVertexShader(slot);

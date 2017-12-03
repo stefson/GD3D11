@@ -40,14 +40,14 @@ ColourSet::ColourSet( u8 const* rgba, int mask, int flags )
 	{
 		// check this pixel is enabled
 		int bit = 1 << i;
-		if( ( mask & bit ) == 0 )
+		if ( ( mask & bit ) == 0 )
 		{
 			m_remap[i] = -1;
 			continue;
 		}
 	
 		// check for transparent pixels when using dxt1
-		if( isDxt1 && rgba[4*i + 3] < 128 )
+		if ( isDxt1 && rgba[4*i + 3] < 128 )
 		{
 			m_remap[i] = -1;
 			m_transparent = true;
@@ -58,7 +58,7 @@ ColourSet::ColourSet( u8 const* rgba, int mask, int flags )
 		for( int j = 0;; ++j )
 		{
 			// allocate a new point
-			if( j == i )
+			if ( j == i )
 			{
 				// normalise coordinates to [0,1]
 				float x = ( float )rgba[4*i] / 255.0f;
@@ -85,7 +85,7 @@ ColourSet::ColourSet( u8 const* rgba, int mask, int flags )
 				&& ( rgba[4*i + 1] == rgba[4*j + 1] )
 				&& ( rgba[4*i + 2] == rgba[4*j + 2] )
 				&& ( rgba[4*j + 3] >= 128 || !isDxt1 );
-			if( match )
+			if ( match )
 			{
 				// get the index of the match
 				int index = m_remap[j];
@@ -111,7 +111,7 @@ void ColourSet::RemapIndices( u8 const* source, u8* target ) const
 	for( int i = 0; i < 16; ++i )
 	{
 		int j = m_remap[i];
-		if( j == -1 )
+		if ( j == -1 )
 			target[i] = 3;
 		else
 			target[i] = source[j];

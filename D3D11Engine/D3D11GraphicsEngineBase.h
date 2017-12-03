@@ -1,4 +1,5 @@
 #pragma once
+
 #include "basegraphicsengine.h"
 
 class D3D11DepthBufferState;
@@ -10,8 +11,8 @@ class D3D11HDShader;
 class D3D11Texture;
 class D3D11GShader;
 
-namespace D3D11ObjectIDs
-{
+namespace D3D11ObjectIDs {
+
 	/** Map to get a texture by ID */
 	__declspec(selectany) std::map<UINT16, D3D11Texture*> TextureByID;
 	
@@ -30,9 +31,8 @@ namespace D3D11ObjectIDs
 
 	__declspec(selectany) std::map<UINT8, D3D11RasterizerStateInfo*> RasterizerStateByID;
 
-	__declspec(selectany) struct CounterStruct{
-		CounterStruct()
-		{
+	__declspec(selectany) struct CounterStruct {
+		CounterStruct() {
 			memset(this, 0, sizeof(CounterStruct));
 		}
 
@@ -46,7 +46,7 @@ namespace D3D11ObjectIDs
 		int RasterizerCounter;
 	} Counters;
 
-};
+}
 
 struct RenderToTextureBuffer;
 struct RenderToDepthStencilBuffer;
@@ -55,12 +55,11 @@ class D3D11ShaderManager;
 class D3D11VertexBuffer;
 class D3D11LineRenderer;
 class D3D11ConstantBuffer;
-class D3D11GraphicsEngineBase :
-	public BaseGraphicsEngine
-{
+
+class D3D11GraphicsEngineBase :	public BaseGraphicsEngine {
 public:
-	D3D11GraphicsEngineBase(void);
-	~D3D11GraphicsEngineBase(void);
+	D3D11GraphicsEngineBase();
+	~D3D11GraphicsEngineBase();
 
 	/** Called after the fake-DDraw-Device got created */
 	virtual XRESULT Init();
@@ -126,12 +125,12 @@ public:
 	XRESULT D3D11GraphicsEngineBase::BindViewportInformation(const std::string& shader, int slot);
 
 	/** Returns the Device/Context */
-	ID3D11Device* GetDevice(){return Device;}
-	ID3D11DeviceContext* GetContext(){return Context;}
-	ID3D11DeviceContext* GetDeferredMediaContext(){return DeferredContext;}
+	ID3D11Device* GetDevice() { return Device; }
+	ID3D11DeviceContext* GetContext() { return Context; }
+	ID3D11DeviceContext* GetDeferredMediaContext() { return DeferredContext; }
 
 	/** Returns the current resolution */
-	virtual INT2 GetResolution(){return Resolution;};
+	virtual INT2 GetResolution() { return Resolution; }
 
 	/** Recreates the renderstates */
 	XRESULT UpdateRenderStates();
@@ -148,7 +147,7 @@ public:
 	void SetupVS_ExPerInstanceConstantBuffer();
 
 	/** Puts the current world matrix into a CB and binds it to the given slot */
-	void SetupPerInstanceConstantBuffer(int slot=1);
+	void SetupPerInstanceConstantBuffer(int slot = 1);
 
 	/** Sets the active pixel shader object */
 	virtual XRESULT SetActivePixelShader(const std::string& shader);
@@ -157,7 +156,6 @@ public:
 	virtual XRESULT SetActiveGShader(const std::string& shader);
 
 protected:
-
 	/** Updates the transformsCB with new values from the GAPI */
 	void UpdateTransformsCB();
 
@@ -235,4 +233,3 @@ protected:
 	/** If true, we are still waiting for a present to happen. Don't draw everything twice! */
 	bool PresentPending;
 };
-

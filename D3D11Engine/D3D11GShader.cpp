@@ -74,7 +74,7 @@ HRESULT D3D11GShader::CompileShaderFromFile(const CHAR* szFileName, LPCSTR szEnt
 	}
 	if (pErrorBlob)
 	{
-		/*if(Engine->SwapchainCreated())
+		/*if (Engine->SwapchainCreated())
 		Engine->GetConsole()->PostConsoleMessage((char*)pErrorBlob->GetBufferPointer());
 		else
 		LogWarnBox() << (char*)pErrorBlob->GetBufferPointer() << "\n\n (You can ignore the next error from Gothic about too small video memory!)";
@@ -97,10 +97,10 @@ XRESULT D3D11GShader::LoadShader(const char* geometryShader, std::vector<D3D10_S
 	LogInfo() << "Compiling geometry shader: " << geometryShader;
 	File = geometryShader;
 
-	if(!createStreamOutFromVS)
+	if (!createStreamOutFromVS)
 	{
 		// Compile shaders
-		if(FAILED(CompileShaderFromFile(geometryShader, "GSMain", "gs_4_0", &gsBlob, makros)))
+		if (FAILED(CompileShaderFromFile(geometryShader, "GSMain", "gs_4_0", &gsBlob, makros)))
 		{
 			return XR_FAILED;
 		}
@@ -110,7 +110,7 @@ XRESULT D3D11GShader::LoadShader(const char* geometryShader, std::vector<D3D10_S
 	}else
 	{
 		// Compile vertexshader
-		if(FAILED(CompileShaderFromFile(geometryShader, "VSMain", "vs_4_0", &gsBlob, makros)))
+		if (FAILED(CompileShaderFromFile(geometryShader, "VSMain", "vs_4_0", &gsBlob, makros)))
 		{
 			return XR_FAILED;
 		}

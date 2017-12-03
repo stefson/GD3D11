@@ -34,14 +34,14 @@ SV_TabControl_Tab::SV_TabControl_Tab()
 
 SV_TabControl_Tab::~SV_TabControl_Tab()
 {
-	if(CaptionLayout)CaptionLayout->Release();
+	if (CaptionLayout)CaptionLayout->Release();
 }
 
 void SV_TabControl::SetTabCaption(const std::string& caption, SV_TabControl_Tab* tab)
 {
 	tab->Caption = caption;
 
-	if(tab->CaptionLayout)tab->CaptionLayout->Release();
+	if (tab->CaptionLayout)tab->CaptionLayout->Release();
 	MainView->GetWriteFactory()->CreateTextLayout(
 		Toolbox::ToWideChar(caption).c_str(),      // The string to be laid out and formatted.
 		caption.length(),  // The length of the string.
@@ -51,7 +51,7 @@ void SV_TabControl::SetTabCaption(const std::string& caption, SV_TabControl_Tab*
 		&tab->CaptionLayout  // The IDWriteTextLayout interface pointer.
 		);
 
-	if(tab->CaptionLayout)
+	if (tab->CaptionLayout)
 	{
 		tab->CaptionLayout->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
 		tab->CaptionLayout->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
@@ -72,7 +72,7 @@ void SV_TabControl::Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime)
 	float x = 0.0f;
 	for(std::map<std::string, SV_TabControl_Tab>::iterator it = Tabs.begin(); it != Tabs.end(); it++)
 	{
-		if(OnlyShowActiveTab && &(*it).second != ActiveTab)
+		if (OnlyShowActiveTab && &(*it).second != ActiveTab)
 					continue;
 
 		float width = D2DView::GetLabelTextWidth((*it).second.CaptionLayout, (*it).first);
@@ -84,7 +84,7 @@ void SV_TabControl::Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime)
 		//Outer shadow
 		MainView->DrawSmoothShadow(&tabRect, 10, 0.5, true);
 
-		if(&(*it).second == ActiveTab)
+		if (&(*it).second == ActiveTab)
 		{
 			activeRect = tabRect;
 			activeX = x;
@@ -95,7 +95,7 @@ void SV_TabControl::Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime)
 
 			MainView->GetBrush()->SetColor(D2D1::ColorF(1,1,1,1));
 
-			if((*it).second.CaptionLayout)
+			if ((*it).second.CaptionLayout)
 				MainView->GetRenderTarget()->DrawTextLayout(D2D1::Point2F(x + 5.0f + ViewRect.left, ViewRect.top), (*it).second.CaptionLayout, MainView->GetBrush());
 		}
 
@@ -104,7 +104,7 @@ void SV_TabControl::Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime)
 
 	D2DSubView::Draw(clientRectAbs, deltaTime);
 
-	if(ActiveTab)
+	if (ActiveTab)
 	{
 		D2D1_RECT_F sc = activeRect;
 
@@ -137,13 +137,13 @@ void SV_TabControl::Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime)
 		// Emboss it
 		MainView->GetBrush()->SetColor(D2D1::ColorF(0,0,0,0.7f));
 		
-		if(ActiveTab->CaptionLayout)
+		if (ActiveTab->CaptionLayout)
 			MainView->GetRenderTarget()->DrawTextLayout(D2D1::Point2F(1.0f + activeX + 5.0f + ViewRect.left, 1.0f + ViewRect.top), ActiveTab->CaptionLayout, MainView->GetBrush());
 
 		// Draw caption
 		MainView->GetBrush()->SetColor(D2D1::ColorF(1,1,1,1));
 
-		if(ActiveTab->CaptionLayout)
+		if (ActiveTab->CaptionLayout)
 			MainView->GetRenderTarget()->DrawTextLayout(D2D1::Point2F(activeX + 5.0f + ViewRect.left, ViewRect.top), ActiveTab->CaptionLayout, MainView->GetBrush());
 	}
 }
@@ -160,13 +160,13 @@ bool SV_TabControl::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wParam, 
 			float x = 0.0f;
 			for(std::map<std::string, SV_TabControl_Tab>::iterator it = Tabs.begin(); it != Tabs.end(); it++)
 			{
-				if(OnlyShowActiveTab && &(*it).second != ActiveTab)
+				if (OnlyShowActiveTab && &(*it).second != ActiveTab)
 					continue;
 
 				float width = D2DView::GetLabelTextWidth((*it).second.CaptionLayout, (*it).first);
 
 				D2D1_RECT_F tabRect = D2D1::RectF(x + ViewRect.left, ViewRect.top, x + ViewRect.left + width + 10.0f, ViewRect.top + SV_TABCONTROL_HEADER_SIZE_Y);
-				if(PointInsideRect(D2D1::Point2F((float)p.x, (float)p.y), tabRect))
+				if (PointInsideRect(D2D1::Point2F((float)p.x, (float)p.y), tabRect))
 				{
 					SetActiveTab((*it).second.Caption);
 					return false;
@@ -196,10 +196,10 @@ void SV_TabControl::AddControlToTab(D2DSubView* control, const std::string& tab)
 	
 	control->SetHidden(true);
 
-	if(!Tabs[tab].Caption.length())
+	if (!Tabs[tab].Caption.length())
 		SetTabCaption(tab, &Tabs[tab]);
 
-	if(!ActiveTab)
+	if (!ActiveTab)
 		ActiveTab = &Tabs[tab];
 
 	SetActiveTab(ActiveTab->Caption);
@@ -223,7 +223,7 @@ void SV_TabControl::SetRect(const D2D1_RECT_F& rect)
 /** Sets active tab */
 void SV_TabControl::SetActiveTab(const std::string& tab)
 {
-	if(Tabs.find(tab) == Tabs.end())
+	if (Tabs.find(tab) == Tabs.end())
 		return; // Don't have that
 
 	// Hide all
@@ -235,7 +235,7 @@ void SV_TabControl::SetActiveTab(const std::string& tab)
 	// Set and Show active
 	ActiveTab = &Tabs[tab];
 	SetTabVisibility(ActiveTab, false);
-	if(TabSwitchedCallback)
+	if (TabSwitchedCallback)
 		TabSwitchedCallback(this, TabSwitchedUserdata);
 }
 

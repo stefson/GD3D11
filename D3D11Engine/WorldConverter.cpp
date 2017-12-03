@@ -53,7 +53,7 @@ void WorldConverter::WorldMeshCollectPolyRange(const D3DXVECTOR3& position, floa
 		for(std::map<int, WorldMeshSectionInfo>::iterator ity = (*itx).second.begin(); ity != (*itx).second.end(); ity++)
 		{
 			D3DXVECTOR2 a = D3DXVECTOR2((float)((*itx).first - s.x), (float)((*ity).first - s.y));
-			if(D3DXVec2Length(&a) < 2)
+			if (D3DXVec2Length(&a) < 2)
 			{
 				WorldMeshSectionInfo& section = (*ity).second;
 
@@ -63,7 +63,7 @@ void WorldConverter::WorldMeshCollectPolyRange(const D3DXVECTOR3& position, floa
 					WorldMeshInfo* m;
 					
 					// Create new mesh-part for alphatested surfaces
-					if((*it).first.Texture && (*it).first.Texture->HasAlphaChannel())
+					if ((*it).first.Texture && (*it).first.Texture->HasAlphaChannel())
 					{
 						m = new WorldMeshInfo;
 						outMeshes[(*it).first] = m;
@@ -77,7 +77,7 @@ void WorldConverter::WorldMeshCollectPolyRange(const D3DXVECTOR3& position, floa
 					{
 						// Check if one of them is in range
 						float range2 = range*range;
-						if(D3DXVec3LengthSq(&(position - *(*it).second->Vertices[(*it).second->Indices[i+0]].Position.toD3DXVECTOR3())) < range2
+						if (D3DXVec3LengthSq(&(position - *(*it).second->Vertices[(*it).second->Indices[i+0]].Position.toD3DXVECTOR3())) < range2
 							|| D3DXVec3LengthSq(&(position - *(*it).second->Vertices[(*it).second->Indices[i+1]].Position.toD3DXVECTOR3())) < range2
 							|| D3DXVec3LengthSq(&(position - *(*it).second->Vertices[(*it).second->Indices[i+2]].Position.toD3DXVECTOR3())) < range2)
 						{
@@ -93,7 +93,7 @@ void WorldConverter::WorldMeshCollectPolyRange(const D3DXVECTOR3& position, floa
 	// Index all meshes
 	for(auto it=outMeshes.begin();it!=outMeshes.end();it++)
 	{
-		if((*it).second->Vertices.empty())
+		if ((*it).second->Vertices.empty())
 		{
 			it = outMeshes.erase(it);
 			continue;
@@ -124,7 +124,7 @@ XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string& file, std::map<
 	const float worldScale = 100.0f;
 
 	// Check if we have this file cached
-	if(Toolbox::FileExists((file + ".mcache").c_str()))
+	if (Toolbox::FileExists((file + ".mcache").c_str()))
 	{
 		// Load the meshfile, cached
 		mesh->LoadMesh((file + ".mcache").c_str(), worldScale);
@@ -163,16 +163,16 @@ XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string& file, std::map<
 		key.Texture = mat != NULL ? mat->GetTexture() : NULL;
 		
 		// Save missing textures
-		if(!mat)
+		if (!mat)
 		{
 			missingTextures.insert(textures[m]);
 		}else
 		{
-			if(mat->GetMatGroup() == zMAT_GROUP_WATER)
+			if (mat->GetMatGroup() == zMAT_GROUP_WATER)
 			{
 				// Give water surfaces a water-shader
 				MaterialInfo* info = Engine::GAPI->GetMaterialInfoFrom(mat->GetTexture());
-				if(info)
+				if (info)
 				{
 					info->PixelShader = "PS_Water";
 					info->MaterialType = MaterialInfo::MT_Water;
@@ -196,7 +196,7 @@ XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string& file, std::map<
 		for(unsigned int i=0;i<meshes[m]->Indices.size();i+=3)
 		{
 
-			if(meshes[m]->Indices[i] > meshes[m]->Vertices.size() || 
+			if (meshes[m]->Indices[i] > meshes[m]->Vertices.size() || 
 				meshes[m]->Indices[i+1] > meshes[m]->Vertices.size() || 
 				meshes[m]->Indices[i+2] > meshes[m]->Vertices.size())
 				break; // Catch broken meshes
@@ -225,7 +225,7 @@ XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string& file, std::map<
 			bbmax.y = bbmax.y < v[0]->Position.y ? v[0]->Position.y : bbmax.y;
 			bbmax.z = bbmax.z < v[0]->Position.z ? v[0]->Position.z : bbmax.z;
 
-			if(section.WorldMeshes.find(key) == section.WorldMeshes.end())
+			if (section.WorldMeshes.find(key) == section.WorldMeshes.end())
 			{
 				key.Info = Engine::GAPI->GetMaterialInfoFrom(key.Texture);
 
@@ -234,16 +234,16 @@ XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string& file, std::map<
 				// Try to load custom texture.
 				/*std::string rep = ("system\\GD3D11\\Textures\\Custom\\" + textures[m] + ".dds").c_str();
 
-				if(loadedTextures.find(rep) == loadedTextures.end())
+				if (loadedTextures.find(rep) == loadedTextures.end())
 				{
 					FILE* f = fopen(rep.c_str(), "rb");
-					if(f)
+					if (f)
 					{
 						fclose(f);
 
 						D3D11Texture* tx;
 						Engine::GraphicsEngine->CreateTexture(&tx);
-						if(XR_SUCCESS != tx->Init(rep))
+						if (XR_SUCCESS != tx->Init(rep))
 						{
 							delete tx;
 						}else
@@ -270,7 +270,7 @@ XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string& file, std::map<
 	}
 
 	// Print textures we couldn't find any materials for if there are any
-	if(!missingTextures.empty())
+	if (!missingTextures.empty())
 	{
 		std::string ms = "\nMissing materials for custom-mesh:\n";
 
@@ -364,7 +364,7 @@ XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string& file, std::map<
 
 			section.NumIndices = numIndices;
 
-			if(!section.WorldMeshes.empty())
+			if (!section.WorldMeshes.empty())
 				section.BaseIndexLocation = (*section.WorldMeshes.begin()).second->BaseIndexLocation;
 		}
 	}
@@ -383,7 +383,7 @@ XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string& file, std::map<
 	// Calculate the approx midpoint of the world
 	avgSections /= (float)numSections;
 
-	if(info)
+	if (info)
 	{
 		WorldInfo i;
 		i.MidPoint = avgSections * WORLD_SECTION_SIZE;
@@ -406,18 +406,18 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN(zCPolygon** polys, unsigned int nu
 		zCPolygon* poly = polys[i];
 
 		// Check if we even need this polygon
-		if(poly->GetPolyFlags()->GhostOccluder || 
+		if (poly->GetPolyFlags()->GhostOccluder || 
 			poly->GetPolyFlags()->PortalPoly)
 			continue;
 
-		//if(polygons[i]->GetNumPolyVertices() != 3)
+		//if (polygons[i]->GetNumPolyVertices() != 3)
 		//	continue;
 
 		// Use the section of the first point for the whole polygon
 		INT2 section = GetSectionOfPos(*poly->getVertices()[0]->Position.toD3DXVECTOR3());
 		(*outSections)[section.x][section.y].WorldCoordinates = section;
 
-		if(poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER)
+		if (poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER)
 		{
 			//(*outSections)[section.x][section.y].OceanPoints.push_back(*poly->getVertices()[0]->Position.toD3DXVECTOR3());
 			//continue;
@@ -428,7 +428,7 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN(zCPolygon** polys, unsigned int nu
 
 		DWORD sectionColor = float4((section.x % 2) + 0.5f, (section.x % 2) + 0.5f, 1, 1).ToDWORD();
 
-		if(poly->GetNumPolyVertices() < 3)
+		if (poly->GetNumPolyVertices() < 3)
 		{
 			LogWarn() << "Poly with less than 3 vertices!";
 		}
@@ -452,7 +452,7 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN(zCPolygon** polys, unsigned int nu
 			bbmax.y = bbmax.y < poly->getVertices()[v]->Position.y ? poly->getVertices()[v]->Position.y : bbmax.y;
 			bbmax.z = bbmax.z < poly->getVertices()[v]->Position.z ? poly->getVertices()[v]->Position.z : bbmax.z;
 
-			if(poly->GetLightmap())
+			if (poly->GetLightmap())
 			{
 				t.TexCoord2 = poly->GetLightmap()->GetLightmapUV(*t.Position.toD3DXVECTOR3());
 				t.Color = DEFAULT_LIGHTMAP_POLY_COLOR;
@@ -462,12 +462,12 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN(zCPolygon** polys, unsigned int nu
 				t.TexCoord2.x = 0.0f;
 				t.TexCoord2.y = 0.0f;
 
-				if(poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER)
+				if (poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER)
 				{
 					t.Normal = float3(0,1,0); // Get rid of ugly shadows on water
 				}
 
-				/*if((poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER) ||
+				/*if ((poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER) ||
 					(poly->GetMaterial() && (poly->GetMaterial()->GetAlphaFunc() != zMAT_ALPHA_FUNC_FUNC_MAT_DEFAULT ||
 											 poly->GetMaterial()->GetAlphaFunc() != zMAT_ALPHA_FUNC_FUNC_NONE)))
 					t.Color = 0xFFFFFFFF; // Get rid of ugly shadows on water*/
@@ -485,7 +485,7 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN(zCPolygon** polys, unsigned int nu
 		
 		//key.Lightmap = poly->GetLightmap();
 
-		if((*outSections)[section.x][section.y].WorldMeshes.count(key) == 0)
+		if ((*outSections)[section.x][section.y].WorldMeshes.count(key) == 0)
 		{
 			key.Info = Engine::GAPI->GetMaterialInfoFrom(key.Texture);
 			(*outSections)[section.x][section.y].WorldMeshes[key] = new WorldMeshInfo;
@@ -504,11 +504,11 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN(zCPolygon** polys, unsigned int nu
 			finalVertices.insert(finalVertices.end(), tess.begin(), tess.end());
 		}*/
 
-		if(finalVertices.size() == 3)
+		if (finalVertices.size() == 3)
 		{
-			if(mat && mat->GetTexture())
+			if (mat && mat->GetTexture())
 			{
-				/*if(strnicmp(mat->GetTexture()->GetNameWithoutExt().c_str(), "NW_Harbour_Stairs", strlen("NW_Harbour_Stairs")) == 0)
+				/*if (strnicmp(mat->GetTexture()->GetNameWithoutExt().c_str(), "NW_Harbour_Stairs", strlen("NW_Harbour_Stairs")) == 0)
 				{
 					ExVertexStruct vx[3];
 					memcpy(vx, &finalVertices[0], sizeof(ExVertexStruct) * 3);
@@ -519,14 +519,14 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN(zCPolygon** polys, unsigned int nu
 			}
 		}
 
-		//if(mat && mat->GetTexture())
+		//if (mat && mat->GetTexture())
 		//	LogInfo() << "Got texture name: " << mat->GetTexture()->GetName();
 
-		if(poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER)
+		if (poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER)
 		{
 			// Give water surfaces a water-shader
 			MaterialInfo* info = Engine::GAPI->GetMaterialInfoFrom(poly->GetMaterial()->GetTexture());
-			if(info)
+			if (info)
 			{
 				info->PixelShader = "PS_Water";
 				info->MaterialType = MaterialInfo::MT_Water;
@@ -635,7 +635,7 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN(zCPolygon** polys, unsigned int nu
 	// Calculate the approx midpoint of the world
 	avgSections /= (float)numSections;
 
-	if(info)
+	if (info)
 	{
 		info->MidPoint = avgSections * WORLD_SECTION_SIZE;
 		info->LowestVertex = 0;
@@ -648,17 +648,17 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN(zCPolygon** polys, unsigned int nu
 /** Converts the worldmesh into a more usable format */
 HRESULT WorldConverter::ConvertWorldMesh(zCPolygon** polys, unsigned int numPolygons, std::map<int, std::map<int, WorldMeshSectionInfo>>* outSections, WorldInfo* info, MeshInfo** outWrappedMesh)
 {
-	// Go through every polygon and put it into it's section
-	for(unsigned int i=0;i<numPolygons;i++)
-	{
-		zCPolygon* poly = polys[i];
+	LogInfo() << "ConvertWorldMesh";
+	// Go through every polygon and put it into its section
+	for (unsigned int i = 0; i < numPolygons; i++) {
+		zCPolygon * poly = polys[i];
 
 		// Check if we even need this polygon
-		if(poly->GetPolyFlags()->GhostOccluder || 
-			poly->GetPolyFlags()->PortalPoly)
+		if (poly->GetPolyFlags()->GhostOccluder || poly->GetPolyFlags()->PortalPoly) {
 			continue;
+		}
 
-		//if(polygons[i]->GetNumPolyVertices() != 3)
+		//if (polygons[i]->GetNumPolyVertices() != 3)
 		//	continue;
 
 		// Calculate midpoint of this triange to get the section
@@ -666,26 +666,23 @@ HRESULT WorldConverter::ConvertWorldMesh(zCPolygon** polys, unsigned int numPoly
 		INT2 section = GetSectionOfPos(avgPos);
 		(*outSections)[section.x][section.y].WorldCoordinates = section;
 
-		if(poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER)
-		{
+		if (poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER) {
 			//(*outSections)[section.x][section.y].OceanPoints.push_back(*poly->getVertices()[0]->Position.toD3DXVECTOR3());
 			//continue;
 		}
 
-		D3DXVECTOR3& bbmin = (*outSections)[section.x][section.y].BoundingBox.Min;
-		D3DXVECTOR3& bbmax = (*outSections)[section.x][section.y].BoundingBox.Max;
+		D3DXVECTOR3 & bbmin = (*outSections)[section.x][section.y].BoundingBox.Min;
+		D3DXVECTOR3 & bbmax = (*outSections)[section.x][section.y].BoundingBox.Max;
 
 		DWORD sectionColor = float4((section.x % 2) + 0.5f, (section.x % 2) + 0.5f, 1, 1).ToDWORD();
 
-		if(poly->GetNumPolyVertices() < 3)
-		{
+		if (poly->GetNumPolyVertices() < 3) {
 			LogWarn() << "Poly with less than 3 vertices!";
 		}
 
 		// Extract poly vertices
 		std::vector<ExVertexStruct> polyVertices;
-		for(int v=0;v<poly->GetNumPolyVertices();v++)
-		{
+		for (int v = 0; v < poly->GetNumPolyVertices(); v++) {
 			ExVertexStruct t;
 			t.Position = poly->getVertices()[v]->Position;
 			t.TexCoord = poly->getFeatures()[v]->texCoord;
@@ -701,22 +698,19 @@ HRESULT WorldConverter::ConvertWorldMesh(zCPolygon** polys, unsigned int numPoly
 			bbmax.y = bbmax.y < poly->getVertices()[v]->Position.y ? poly->getVertices()[v]->Position.y : bbmax.y;
 			bbmax.z = bbmax.z < poly->getVertices()[v]->Position.z ? poly->getVertices()[v]->Position.z : bbmax.z;
 
-			if(poly->GetLightmap())
-			{
+			if (poly->GetLightmap()) {
 				t.TexCoord2 = poly->GetLightmap()->GetLightmapUV(*t.Position.toD3DXVECTOR3());
 				t.Color = DEFAULT_LIGHTMAP_POLY_COLOR;
-			}else
-			{
+			} else {
 				//t.Color = 0xFFFFFFFF;
 				t.TexCoord2.x = 0.0f;
 				t.TexCoord2.y = 0.0f;
 
-				if(poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER)
-				{
+				if (poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER) {
 					t.Normal = float3(0,1,0); // Get rid of ugly shadows on water
 				}
 
-				/*if((poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER) ||
+				/*if ((poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER) ||
 					(poly->GetMaterial() && (poly->GetMaterial()->GetAlphaFunc() != zMAT_ALPHA_FUNC_FUNC_MAT_DEFAULT ||
 											 poly->GetMaterial()->GetAlphaFunc() != zMAT_ALPHA_FUNC_FUNC_NONE)))
 					t.Color = 0xFFFFFFFF; // Get rid of ugly shadows on water*/
@@ -734,8 +728,7 @@ HRESULT WorldConverter::ConvertWorldMesh(zCPolygon** polys, unsigned int numPoly
 		
 		//key.Lightmap = poly->GetLightmap();
 
-		if((*outSections)[section.x][section.y].WorldMeshes.count(key) == 0)
-		{
+		if ((*outSections)[section.x][section.y].WorldMeshes.count(key) == 0) {
 			key.Info = Engine::GAPI->GetMaterialInfoFrom(key.Texture);
 			(*outSections)[section.x][section.y].WorldMeshes[key] = new WorldMeshInfo;
 		}
@@ -743,11 +736,9 @@ HRESULT WorldConverter::ConvertWorldMesh(zCPolygon** polys, unsigned int numPoly
 		std::vector<ExVertexStruct> finalVertices;
 		TriangleFanToList(&polyVertices[0], polyVertices.size(), &finalVertices);
 
-		if(finalVertices.size() == 3)
-		{
-			if(mat && mat->GetTexture())
-			{
-				/*if(strnicmp(mat->GetTexture()->GetNameWithoutExt().c_str(), "NW_Harbour_Stairs", strlen("NW_Harbour_Stairs")) == 0)
+		if (finalVertices.size() == 3) {
+			if (mat && mat->GetTexture()) {
+				/*if (strnicmp(mat->GetTexture()->GetNameWithoutExt().c_str(), "NW_Harbour_Stairs", strlen("NW_Harbour_Stairs")) == 0)
 				{
 					ExVertexStruct vx[3];
 					memcpy(vx, &finalVertices[0], sizeof(ExVertexStruct) * 3);
@@ -758,24 +749,25 @@ HRESULT WorldConverter::ConvertWorldMesh(zCPolygon** polys, unsigned int numPoly
 			}
 		}
 
-		//if(mat && mat->GetTexture())
+		//if (mat && mat->GetTexture())
 		//	LogInfo() << "Got texture name: " << mat->GetTexture()->GetName();
 
-		if(poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER // Check for water
+		if (poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER // Check for water
 			&& poly->GetMaterial()->GetAlphaFunc() != zMAT_ALPHA_FUNC_TEST) // Fix foam on waterfalls
 		{
 			// Give water surfaces a water-shader
-			MaterialInfo* info = Engine::GAPI->GetMaterialInfoFrom(poly->GetMaterial()->GetTexture());
-			if(info)
-			{
+			MaterialInfo * info = Engine::GAPI->GetMaterialInfoFrom(poly->GetMaterial()->GetTexture());
+			if (info) {
 				info->PixelShader = "PS_Water";
 				info->MaterialType = MaterialInfo::MT_Water;
 			}
 		}
 
-		for(unsigned int v=0;v<finalVertices.size();v++)
+		for (unsigned int v = 0; v < finalVertices.size(); v++) {
 			(*outSections)[section.x][section.y].WorldMeshes[key]->Vertices.push_back(finalVertices[v]);
+		}
 	}
+	LogInfo() << "ConvertWorldMesh First Loop Finished";
 	
 	D3DXVECTOR2 avgSections = D3DXVECTOR2(0,0);
 	int numSections = 0;
@@ -783,17 +775,17 @@ HRESULT WorldConverter::ConvertWorldMesh(zCPolygon** polys, unsigned int numPoly
 	std::list<std::vector<ExVertexStruct>*> vertexBuffers;
 	std::list<std::vector<VERTEX_INDEX>*> indexBuffers;
 
+	LogInfo() << "ConvertWorldMesh Map #1: " << outSections->size();
 	// Create the vertexbuffers for every material
-	for(std::map<int, std::map<int, WorldMeshSectionInfo>>::iterator itx = (*outSections).begin(); itx != (*outSections).end(); itx++)
-	{
-		for(std::map<int, WorldMeshSectionInfo>::iterator ity = (*itx).second.begin(); ity != (*itx).second.end(); ity++)
-		{
+	for (std::map<int, std::map<int, WorldMeshSectionInfo>>::iterator itx = (*outSections).begin(); itx != (*outSections).end(); ++itx) {
+		LogInfo() << "ConvertWorldMesh Map #2: " << (*itx).second.size();
+		for (std::map<int, WorldMeshSectionInfo>::iterator ity = (*itx).second.begin(); ity != (*itx).second.end(); ++ity) {
 			WorldMeshSectionInfo& section = (*ity).second;
 			numSections++;
 			avgSections += D3DXVECTOR2((float)(*itx).first, (float)(*ity).first);
 
-			for(std::map<MeshKey, WorldMeshInfo*>::iterator it = section.WorldMeshes.begin(); it != section.WorldMeshes.end();it++)
-			{
+			LogInfo() << "ConvertWorldMesh Map #3: " << section.WorldMeshes.size();
+			for (std::map<MeshKey, WorldMeshInfo*>::iterator it = section.WorldMeshes.begin(); it != section.WorldMeshes.end(); ++it) {
 				std::vector<ExVertexStruct> indexedVertices;
 				std::vector<VERTEX_INDEX> indices;
 				IndexVertices(&(*it).second->Vertices[0], (*it).second->Vertices.size(), indexedVertices, indices);
@@ -833,6 +825,7 @@ HRESULT WorldConverter::ConvertWorldMesh(zCPolygon** polys, unsigned int numPoly
 			}
 		}
 	}
+	LogInfo() << "ConvertWorldMesh Second Loop Finished";
 
 	std::vector<ExVertexStruct> wrappedVertices;
 	std::vector<unsigned int> wrappedIndices;
@@ -842,24 +835,22 @@ HRESULT WorldConverter::ConvertWorldMesh(zCPolygon** polys, unsigned int numPoly
 	WorldConverter::WrapVertexBuffers(vertexBuffers, indexBuffers, wrappedVertices, wrappedIndices, offsets);
 
 	// Propergate the offsets
-	int i=0;
-	for(std::map<int, std::map<int, WorldMeshSectionInfo>>::iterator itx = (*outSections).begin(); itx != (*outSections).end(); itx++)
-	{
-		for(std::map<int, WorldMeshSectionInfo>::iterator ity = (*itx).second.begin(); ity != (*itx).second.end(); ity++)
-		{
+	int i = 0;
+	for (std::map<int, std::map<int, WorldMeshSectionInfo>>::iterator itx = (*outSections).begin(); itx != (*outSections).end(); ++itx) {
+		for(std::map<int, WorldMeshSectionInfo>::iterator ity = (*itx).second.begin(); ity != (*itx).second.end(); ++ity) {
 			WorldMeshSectionInfo& section = (*ity).second;
 
-			for(std::map<MeshKey, WorldMeshInfo*>::iterator it = section.WorldMeshes.begin(); it != section.WorldMeshes.end();it++)
-			{
+			for (std::map<MeshKey, WorldMeshInfo*>::iterator it = section.WorldMeshes.begin(); it != section.WorldMeshes.end(); ++it) {
 				(*it).second->BaseIndexLocation = offsets[i];
 
 				i++;
 			}
 		}
 	}
+	LogInfo() << "ConvertWorldMesh Third Loop Finished";
 
 	// Create the buffers for wrapped mesh
-	MeshInfo* wmi = new MeshInfo;
+	MeshInfo* wmi = new MeshInfo();
 	Engine::GraphicsEngine->CreateVertexBuffer(&wmi->MeshVertexBuffer);
 	Engine::GraphicsEngine->CreateVertexBuffer(&wmi->MeshIndexBuffer);
 	
@@ -880,8 +871,7 @@ HRESULT WorldConverter::ConvertWorldMesh(zCPolygon** polys, unsigned int numPoly
 	// Calculate the approx midpoint of the world
 	avgSections /= (float)numSections;
 
-	if(info)
-	{
+	if (info) {
 		/*WorldInfo i;
 		i.MidPoint = avgSections * WORLD_SECTION_SIZE;
 		i.LowestVertex = 0;
@@ -902,9 +892,8 @@ HRESULT WorldConverter::ConvertWorldMesh(zCPolygon** polys, unsigned int numPoly
 void WorldConverter::GenerateFullSectionMesh(WorldMeshSectionInfo& section)
 {
 	std::vector<ExVertexStruct> vx;
-	for(std::map<MeshKey, WorldMeshInfo*>::iterator it = section.WorldMeshes.begin(); it != section.WorldMeshes.end();it++)
-	{
-		if(!(*it).first.Material ||
+	for (std::map<MeshKey, WorldMeshInfo*>::iterator it = section.WorldMeshes.begin(); it != section.WorldMeshes.end(); ++it) {
+		if (!(*it).first.Material ||
 			(*it).first.Material->HasAlphaTest())
 			continue;
 
@@ -920,7 +909,7 @@ void WorldConverter::GenerateFullSectionMesh(WorldMeshSectionInfo& section)
 	// Get VOBs
 	for(std::list<VobInfo*>::iterator it = section.Vobs.begin(); it != section.Vobs.end(); it++)
 	{
-		if((*it)->IsIndoorVob)
+		if ((*it)->IsIndoorVob)
 			continue;
 
 		D3DXMATRIX world;
@@ -930,7 +919,7 @@ void WorldConverter::GenerateFullSectionMesh(WorldMeshSectionInfo& section)
 		// Insert the vob
 		for(std::map<zCMaterial *, std::vector<MeshInfo*>>::iterator itm = (*it)->VisualInfo->Meshes.begin(); itm != (*it)->VisualInfo->Meshes.end();itm++)
 		{
-			if(!(*itm).first ||
+			if (!(*itm).first ||
 				(*itm).first->HasAlphaTest())
 				continue;
 
@@ -949,7 +938,7 @@ void WorldConverter::GenerateFullSectionMesh(WorldMeshSectionInfo& section)
 	}
 
 	// Catch empty section
-	if(vx.empty())
+	if (vx.empty())
 		return;
 
 	// Index the mesh
@@ -996,10 +985,10 @@ INT2 WorldConverter::GetSectionOfPos(const D3DXVECTOR3& pos)
 	int py = (int)((pos.z / WORLD_SECTION_SIZE) + 0.5f);
 
 	// Fix the centerpiece
-	/*if(pos.x < 0)
+	/*if (pos.x < 0)
 		px-=1;
 
-	if(pos.z < 0)
+	if (pos.z < 0)
 		py-=1;*/
 
 	return INT2(px, py);
@@ -1021,7 +1010,7 @@ void WorldConverter::SaveSectionsToObjUnindexed(const char* file, const std::map
 {
 	FILE* f = fopen(file, "w");
 
-	if(!f)
+	if (!f)
 	{
 		LogError() << "Failed to open file " << file << " for writing!";
 		return;
@@ -1042,7 +1031,7 @@ void WorldConverter::SaveSectionsToObjUnindexed(const char* file, const std::map
 					std::string ln = "v " + std::to_string((*it).second->Vertices[i].Position.x) + " " + std::to_string((*it).second->Vertices[i].Position.y) + " " + std::to_string((*it).second->Vertices[i].Position.z) + "\n";
 					fputs(ln.c_str(), f);
 
-					//if(i % 3 == 0)
+					//if (i % 3 == 0)
 					//	fputs("f -3 -2 -1\n", f);
 					//ln = "vn " + std::to_string((*it).second.Vertices[i].Normal.x) + " " + std::to_string((*it).second.Vertices[i].Normal.y) + " " + std::to_string((*it).second.Vertices[i].Normal.z) + "\n";
 					//fputs(ln.c_str(), f);
@@ -1154,11 +1143,11 @@ void WorldConverter::ExtractSkeletalMeshFromVob(zCModel* model, SkeletalMeshVisu
 				zTWeightEntry weightEntry = *(zTWeightEntry *)stream;
 				stream += sizeof(zTWeightEntry);
 
-				//if(s->GetNormalsList() && i < s->GetNormalsList()->NumInArray)
+				//if (s->GetNormalsList() && i < s->GetNormalsList()->NumInArray)
 				//	(*vx.Normal.toD3DXVECTOR3()) += weightEntry.Weight * (*s->GetNormalsList()->Array[i].toD3DXVECTOR3());
 
 				// Get index and weight
-				if(n < 4)
+				if (n < 4)
 				{
 					vx.weights[n] = weightEntry.Weight;
 					vx.boneIndices[n] = weightEntry.NodeIndex;
@@ -1263,7 +1252,7 @@ void WorldConverter::ExtractSkeletalMeshFromVob(zCModel* model, SkeletalMeshVisu
 	static int s_NoMeshesNum = 0;
 
 	skeletalMeshInfo->VisualName = model->GetVisualName();
-	/*if(skeletalMeshInfo->VisualName.empty())
+	/*if (skeletalMeshInfo->VisualName.empty())
 	{
 		skeletalMeshInfo->VisualName = "MESHLESS_SKEL_" + std::to_string(s_NoMeshesNum);
 		s_NoMeshesNum++;
@@ -1273,7 +1262,7 @@ void WorldConverter::ExtractSkeletalMeshFromVob(zCModel* model, SkeletalMeshVisu
 	skeletalMeshInfo->LoadMeshVisualInfo(skeletalMeshInfo->VisualName);
 
 	// Create additional information
-	if(skeletalMeshInfo->TesselationInfo.buffer.VT_TesselationFactor > 0.0f
+	if (skeletalMeshInfo->TesselationInfo.buffer.VT_TesselationFactor > 0.0f
 		&& Engine::GAPI->GetRendererState()->RendererSettings.AllowWorldMeshTesselation) // TODO: PNAEN for skeletals causes huge lags in the game and is barely
 																						 // noticable anyways. Disable for now.
 		skeletalMeshInfo->CreatePNAENInfo(skeletalMeshInfo->TesselationInfo.buffer.VT_DisplacementStrength > 0.0f);
@@ -1314,11 +1303,11 @@ void WorldConverter::ExtractSkeletalMeshFromProto(zCModelMeshLib* model, Skeleta
 				zTWeightEntry weightEntry = *(zTWeightEntry *)stream;
 				stream += sizeof(zTWeightEntry);
 
-				//if(s->GetNormalsList() && i < s->GetNormalsList()->NumInArray)
+				//if (s->GetNormalsList() && i < s->GetNormalsList()->NumInArray)
 				//	(*vx.Normal.toD3DXVECTOR3()) += weightEntry.Weight * (*s->GetNormalsList()->Array[i].toD3DXVECTOR3());
 
 				// Get index and weight
-				if(n < 4)
+				if (n < 4)
 				{
 					vx.weights[n] = weightEntry.Weight;
 					vx.boneIndices[n] = weightEntry.NodeIndex;
@@ -1428,7 +1417,7 @@ void WorldConverter::ExtractSkeletalMeshFromProto(zCModelMeshLib* model, Skeleta
 	skeletalMeshInfo->LoadMeshVisualInfo(skeletalMeshInfo->VisualName);
 
 	// Create additional information
-	if(skeletalMeshInfo->TesselationInfo.buffer.VT_TesselationFactor > 0.0f)
+	if (skeletalMeshInfo->TesselationInfo.buffer.VT_TesselationFactor > 0.0f)
 		skeletalMeshInfo->CreatePNAENInfo(skeletalMeshInfo->TesselationInfo.buffer.VT_DisplacementStrength > 0.0f);
 }
 
@@ -1436,28 +1425,28 @@ void WorldConverter::ExtractSkeletalMeshFromProto(zCModelMeshLib* model, Skeleta
 void WorldConverter::ExtractNodeVisual(int index, zCModelNodeInst* node, std::map<int, std::vector<MeshVisualInfo *>>& attachments)
 {
 	// Only allow 1 attachment
-	if(!attachments[index].empty())
+	if (!attachments[index].empty())
 	{
 		delete attachments[index][0];
 		attachments[index].clear();
 	}
 
 	// Extract node visuals
-	if(node->NodeVisual)
+	if (node->NodeVisual)
 	{
 		const char* ext = node->NodeVisual->GetFileExtension(0);
 
-		if(strcmp(ext, ".3DS") == 0)
+		if (strcmp(ext, ".3DS") == 0)
 		{
 			zCProgMeshProto* pm = (zCProgMeshProto *)node->NodeVisual;
 
 			/*std::string name = pm->GetObjectName();
-			if(name.empty())
+			if (name.empty())
 			{
 				return;
 			}*/
 
-			if(pm->GetNumSubmeshes() == 0)
+			if (pm->GetNumSubmeshes() == 0)
 			{
 				return;
 			}
@@ -1470,18 +1459,18 @@ void WorldConverter::ExtractNodeVisual(int index, zCModelNodeInst* node, std::ma
 
 			attachments[index].push_back(mi);
 
-		}else if(strcmp(ext, ".MMS") == 0)
+		}else if (strcmp(ext, ".MMS") == 0)
 		{
 			// These are zCMorphMeshes
 			zCProgMeshProto* pm = ((zCMorphMesh *)node->NodeVisual)->GetMorphMesh();
 
 			/*std::string name = pm->GetObjectName();
-			if(name.empty())
+			if (name.empty())
 			{
 				return;
 			}*/
 
-			if(pm->GetNumSubmeshes() == 0)
+			if (pm->GetNumSubmeshes() == 0)
 			{
 				return;
 			}
@@ -1553,7 +1542,7 @@ void WorldConverter::Extract3DSMeshFromVisual2PNAEN(zCProgMeshProto* visual, Mes
 		std::vector<ExVertexStruct> ixVertices;
 		std::vector<unsigned short> ixIndices;
 
-		if(vertices.empty())
+		if (vertices.empty())
 			return;
 
 		// ** PNAEN **
@@ -1669,7 +1658,7 @@ void WorldConverter::Extract3DSMeshFromVisual2(zCProgMeshProto* visual, MeshVisu
 				vx.Position = posList[visual->GetSubmeshes()[i].WedgeList.Array[v].position];
 				vx.TexCoord	= visual->GetSubmeshes()[i].WedgeList.Array[v].texUV;
 
-				//if(visual->GetSubmeshes()[i].Material)
+				//if (visual->GetSubmeshes()[i].Material)
 				//	vx.Color = visual->GetSubmeshes()[i].Material->GetColor(); // Bake materialcolor into the mesh. This is ok for the most meshes.
 				//else
 					vx.Color = 0xFFFFFFFF;
@@ -1692,7 +1681,7 @@ void WorldConverter::Extract3DSMeshFromVisual2(zCProgMeshProto* visual, MeshVisu
 		MeshInfo* mi = new MeshInfo;
 
 		// Create the indexed mesh
-		if(vertices.empty())
+		if (vertices.empty())
 		{
 			LogWarn() << "Empty submesh (#" << i << ") on Visual " << visual->GetObjectName();
 			continue;		
@@ -1746,7 +1735,7 @@ void WorldConverter::Extract3DSMeshFromVisual2(zCProgMeshProto* visual, MeshVisu
 	std::vector<unsigned int> wrappedIndices;
 	std::vector<unsigned int> offsets;
 
-	if(visual->GetNumSubmeshes())
+	if (visual->GetNumSubmeshes())
 	{
 		// Calculate fat vertexbuffer
 		WorldConverter::WrapVertexBuffers(vertexBuffers, indexBuffers, wrappedVertices, wrappedIndices, offsets);
@@ -1785,7 +1774,7 @@ void WorldConverter::Extract3DSMeshFromVisual2(zCProgMeshProto* visual, MeshVisu
 	meshInfo->LoadMeshVisualInfo(meshInfo->VisualName);
 
 	// Create additional information
-	if(meshInfo->TesselationInfo.buffer.VT_TesselationFactor > 0.0f)
+	if (meshInfo->TesselationInfo.buffer.VT_TesselationFactor > 0.0f)
 		meshInfo->CreatePNAENInfo(meshInfo->TesselationInfo.buffer.VT_DisplacementStrength > 0.0f);
 }
 
@@ -1797,17 +1786,17 @@ struct CmpClass // class comparing vertices in the set
 {
     bool operator() (const std::pair<ExVertexStruct, int>& p1, const std::pair<ExVertexStruct, int>& p2) const
     {
-		/*if(p1.first.Position.x < p2.first.Position.x)
+		/*if (p1.first.Position.x < p2.first.Position.x)
 			return true;
-		if(p1.first.Position.y < p2.first.Position.y)
+		if (p1.first.Position.y < p2.first.Position.y)
 			return true;
-		if(p1.first.Position.z < p2.first.Position.z)
-			return true;
-
-		if(p1.first.TexCoord.x < p2.first.TexCoord.x)
+		if (p1.first.Position.z < p2.first.Position.z)
 			return true;
 
-		if(p1.first.TexCoord.y < p2.first.TexCoord.y)
+		if (p1.first.TexCoord.x < p2.first.TexCoord.x)
+			return true;
+
+		if (p1.first.TexCoord.y < p2.first.TexCoord.y)
 			return true;
 
 		return false;*/
@@ -1850,7 +1839,7 @@ void WorldConverter::IndexVertices(ExVertexStruct* input, unsigned int numInputV
 	// TODO: Remove this and fix it properly!
 	/*for (std::set<std::pair<ExVertexStruct, int>>::iterator it=vertices.begin(); it!=vertices.end(); it++)
 	{
-		if((unsigned int)it->second >= vertices.size())
+		if ((unsigned int)it->second >= vertices.size())
 		{
 			 // TODO: Investigate!
 			it = vertices.erase(it);
@@ -1860,7 +1849,7 @@ void WorldConverter::IndexVertices(ExVertexStruct* input, unsigned int numInputV
 
 	for (std::vector<VERTEX_INDEX>::iterator it=outIndices.begin(); it!=outIndices.end(); it++)
 	{
-		if((unsigned int)(*it) >= vertices.size())
+		if ((unsigned int)(*it) >= vertices.size())
 		{
 			 // TODO: Investigate!
 			it = outIndices.erase(it);
@@ -1877,7 +1866,7 @@ void WorldConverter::IndexVertices(ExVertexStruct* input, unsigned int numInputV
 		triangles.insert(std::make_tuple(outIndices[i+0], outIndices[i+1], outIndices[i+2]));
 	}
 
-	//if(triangles.size() != outIndices.size() / 3)
+	//if (triangles.size() != outIndices.size() / 3)
 	//	LogWarn() << "Found mesh with " << (outIndices.size() / 3) - triangles.size() << " overlaying Triangles!";
 
 	// Extract the cleaned triangles to the indices vector
@@ -1895,7 +1884,7 @@ void WorldConverter::IndexVertices(ExVertexStruct* input, unsigned int numInputV
     outVertices.resize(vertices.size());
     for (std::set<std::pair<ExVertexStruct, int>>::iterator it=vertices.begin(); it!=vertices.end(); it++)
 	{
-		if((unsigned int)it->second >= vertices.size())
+		if ((unsigned int)it->second >= vertices.size())
 		{
 			continue;
 		}
@@ -2040,7 +2029,7 @@ static void TessSingleTri(ExVertexStruct* tri, std::vector<ExVertexStruct>& tess
 /** Tesselates the given triangle and adds the values to the list */
 void WorldConverter::TesselateTriangle(ExVertexStruct* tri, std::vector<ExVertexStruct>& tesselated, int amount)
 {
-	if(amount == 0)
+	if (amount == 0)
 	{
 		tesselated.push_back(tri[0]);
 		tesselated.push_back(tri[1]);
@@ -2175,7 +2164,7 @@ void WorldConverter::UpdateQuadMarkInfo(QuadMarkInfo* info, zCQuadMark* mark, co
 		quadVertices.insert(quadVertices.end(), finalVertices.begin(), finalVertices.end());
 	}
 
-	if(quadVertices.empty())
+	if (quadVertices.empty())
 		return;
 
 	delete info->Mesh; info->Mesh = NULL;
@@ -2309,7 +2298,7 @@ void WorldConverter::TesselateMesh(WorldMeshInfo* mesh, int amount)
 	std::vector<unsigned short> ixOld = mesh->Indices;
 	
 	// Tesselate if the outcome would still be in 16-bit range
-	if(amount > 1 && mesh->Vertices.size() + (mesh->Indices.size() / 3) < 0x0000FFFF)
+	if (amount > 1 && mesh->Vertices.size() + (mesh->Indices.size() / 3) < 0x0000FFFF)
 	{
 		std::vector<ExVertexStruct> meshTess;
 		for(unsigned int i=0;i<mesh->Indices.size();i+=3)
@@ -2341,7 +2330,7 @@ void WorldConverter::TesselateMesh(WorldMeshInfo* mesh, int amount)
 	//WorldConverter::GenerateVertexNormals(mesh->Vertices, mesh->Indices);
 
 	MeshModifier::ComputePNAEN18Indices(mesh->Vertices, mesh->Indices, mesh->IndicesPNAEN, true, true);
-	if(mesh->Vertices.size() >= 0xFFFF)
+	if (mesh->Vertices.size() >= 0xFFFF)
 	{
 		// Too large
 		return;

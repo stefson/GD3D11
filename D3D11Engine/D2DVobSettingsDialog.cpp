@@ -104,49 +104,49 @@ void D2DVobSettingsDialog::SliderDragged(SV_Slider* sender, void* userdata)
 {
 	D2DVobSettingsDialog* d = (D2DVobSettingsDialog*)userdata;
 
-	if(!d->Vob)
+	if (!d->Vob)
 		return;
 
 	VisualTesselationSettings* ts = NULL;
-	if(d->Vob)
+	if (d->Vob)
 		ts = &d->Vob->VisualInfo->TesselationInfo;
 
-	if(sender == d->DisplacementStrengthSetting->GetSlider())
+	if (sender == d->DisplacementStrengthSetting->GetSlider())
 	{
 		float oldValue = ts->buffer.VT_DisplacementStrength;
 		ts->buffer.VT_DisplacementStrength = sender->GetValue();
 
-		if(ts->buffer.VT_DisplacementStrength == 0.0f)
+		if (ts->buffer.VT_DisplacementStrength == 0.0f)
 		{
 			// If this is the case, we just set it to 0.0f from something higher. Unsmooth the normals!
 			
-			if(d->Vob)
+			if (d->Vob)
 			{
 				d->Vob->VisualInfo->ClearPNAENInfo();
 				d->Vob->VisualInfo->CreatePNAENInfo(false);
 			}
-		}else if(oldValue == 0.0f)
+		}else if (oldValue == 0.0f)
 		{
 			// Here we just set it to something higher than 0.0f, Smooth the normals!
-			if(d->Vob)
+			if (d->Vob)
 			{
 				d->Vob->VisualInfo->ClearPNAENInfo();
 				d->Vob->VisualInfo->CreatePNAENInfo(true);
 			}
 		}
-	}else if(sender == d->RoundnessSetting->GetSlider())
+	}else if (sender == d->RoundnessSetting->GetSlider())
 	{
 		ts->buffer.VT_Roundness = sender->GetValue();
-	}else if(sender == d->TesselationFactorSetting->GetSlider())
+	}else if (sender == d->TesselationFactorSetting->GetSlider())
 	{
 		ts->buffer.VT_TesselationFactor = sender->GetValue();
 
-		if( ts->buffer.VT_TesselationFactor > 0.0f)
+		if ( ts->buffer.VT_TesselationFactor > 0.0f)
 		{
-			if(d->Vob)
+			if (d->Vob)
 				d->Vob->VisualInfo->CreatePNAENInfo(ts->buffer.VT_DisplacementStrength > 0.0f); // This only creates missing infos
 		}
-	}else if(sender == d->RenderMode->GetSlider())
+	}else if (sender == d->RenderMode->GetSlider())
 	{
 		d->MeshView->SetRenderMode((SV_GMeshInfoView::ERenderMode)(int)(sender->GetValue() + 0.5f));
 	}
@@ -173,7 +173,7 @@ void D2DVobSettingsDialog::SetVobInfo(BaseVobInfo* vob)
 	// Filter meshes by texture
 	for(std::map<zCMaterial *, std::vector<MeshInfo*>>::iterator itm = vob->VisualInfo->Meshes.begin(); itm != vob->VisualInfo->Meshes.end();itm++)
 	{
-		if(!(*itm).first)
+		if (!(*itm).first)
 			continue;
 
 		for(unsigned int i=0;i<(*itm).second.size();i++)

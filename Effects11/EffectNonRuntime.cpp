@@ -350,7 +350,7 @@ HRESULT SShaderBlock::ComputeStateBlockMask(_Inout_ D3DX11_STATE_BLOCK_MASK *pSt
         _Analysis_assume_( pUnorderedAccessViewMask != 0 );
         for (j = 0; j < pUAVDeps[i].Count; ++ j)
         {
-            if( pUAVDeps[i].ppFXPointers[j] != &g_NullUnorderedAccessView )
+            if ( pUAVDeps[i].ppFXPointers[j] != &g_NullUnorderedAccessView )
                 _SET_BIT(pUnorderedAccessViewMask, (pUAVDeps[i].StartIndex + j));
         }
     }
@@ -541,7 +541,7 @@ HRESULT SShaderBlock::GetSignatureElementDesc(ESigType SigType, uint32_t Element
         VH( pReflectionData->pReflection->GetDesc( &ShaderDesc ) );
 
         D3D11_SIGNATURE_PARAMETER_DESC ParamDesc ={0};
-        if( pReflectionData->IsNullGS )
+        if ( pReflectionData->IsNullGS )
         {
             switch( SigType )
             {
@@ -558,7 +558,7 @@ HRESULT SShaderBlock::GetSignatureElementDesc(ESigType SigType, uint32_t Element
         switch( SigType )
         {
         case ST_Input:
-            if( Element >= ShaderDesc.InputParameters )
+            if ( Element >= ShaderDesc.InputParameters )
             {
                 DPF( 0, "%s: Invalid Element index (%u) specified", pFuncName, Element );
                 VH( E_INVALIDARG );
@@ -566,7 +566,7 @@ HRESULT SShaderBlock::GetSignatureElementDesc(ESigType SigType, uint32_t Element
             VH( pReflectionData->pReflection->GetInputParameterDesc( Element, &ParamDesc ) );
             break;
         case ST_Output:
-            if( Element >= ShaderDesc.OutputParameters )
+            if ( Element >= ShaderDesc.OutputParameters )
             {
                 DPF( 0, "%s: Invalid Element index (%u) specified", pFuncName, Element );
                 VH( E_INVALIDARG );
@@ -574,7 +574,7 @@ HRESULT SShaderBlock::GetSignatureElementDesc(ESigType SigType, uint32_t Element
             VH( pReflectionData->pReflection->GetOutputParameterDesc( Element, &ParamDesc ) );
             break;
         case ST_PatchConstant:
-            if( Element >= ShaderDesc.PatchConstantParameters )
+            if ( Element >= ShaderDesc.PatchConstantParameters )
             {
                 DPF( 0, "%s: Invalid Element index (%u) specified", pFuncName, Element );
                 VH( E_INVALIDARG );
@@ -587,17 +587,17 @@ HRESULT SShaderBlock::GetSignatureElementDesc(ESigType SigType, uint32_t Element
         pDesc->SystemValueType = ParamDesc.SystemValueType;
 
         // Pixel shaders need to be special-cased as they don't technically output SVs
-        if( pDesc->SystemValueType == D3D_NAME_UNDEFINED && GetShaderType() == EOT_PixelShader && pDesc->SemanticName != 0 )
+        if ( pDesc->SystemValueType == D3D_NAME_UNDEFINED && GetShaderType() == EOT_PixelShader && pDesc->SemanticName != 0 )
         {
-            if( _stricmp(pDesc->SemanticName, "SV_TARGET") == 0 )
+            if ( _stricmp(pDesc->SemanticName, "SV_TARGET") == 0 )
             {
                 pDesc->SystemValueType = D3D_NAME_TARGET;
             } 
-            else if( _stricmp(pDesc->SemanticName, "SV_DEPTH") == 0 )
+            else if ( _stricmp(pDesc->SemanticName, "SV_DEPTH") == 0 )
             {
                 pDesc->SystemValueType = D3D_NAME_DEPTH;
             } 
-            else if( _stricmp(pDesc->SemanticName, "SV_COVERAGE") == 0 )
+            else if ( _stricmp(pDesc->SemanticName, "SV_COVERAGE") == 0 )
             {
                 pDesc->SystemValueType = D3D_NAME_COVERAGE;
             }
@@ -768,7 +768,7 @@ void CEffect::ReleaseShaderRefection()
     for( size_t i = 0; i < m_ShaderBlockCount; ++ i )
     {
         SAFE_RELEASE( m_pShaderBlocks[i].pInputSignatureBlob );
-        if( m_pShaderBlocks[i].pReflectionData )
+        if ( m_pShaderBlocks[i].pReflectionData )
         {
             SAFE_RELEASE( m_pShaderBlocks[i].pReflectionData->pReflection );
         }
@@ -798,7 +798,7 @@ CEffect::~CEffect()
         pInfoQueue->PushStorageFilter(&filter);
     }
 
-    if( nullptr != m_pDevice )
+    if ( nullptr != m_pDevice )
     {
         // if m_pDevice == nullptr, then we failed LoadEffect(), which means ReleaseShaderReflection was already called.
 
@@ -939,7 +939,7 @@ void CEffect::AddRefAllForCloning( _In_ CEffect* pEffectSource )
     for( size_t i = 0; i < m_ShaderBlockCount; ++ i )
     {
         SAFE_ADDREF( m_pShaderBlocks[i].pInputSignatureBlob );
-        if( m_pShaderBlocks[i].pReflectionData )
+        if ( m_pShaderBlocks[i].pReflectionData )
         {
             SAFE_ADDREF( m_pShaderBlocks[i].pReflectionData->pReflection );
         }
@@ -1052,7 +1052,7 @@ HRESULT CEffect::QueryInterface(REFIID iid, LPVOID *ppv)
 {
     HRESULT hr = S_OK;
 
-    if(nullptr == ppv)
+    if (nullptr == ppv)
     {
         DPF(0, "ID3DX11Effect::QueryInterface: nullptr parameter");
         hr = E_INVALIDARG;
@@ -1060,11 +1060,11 @@ HRESULT CEffect::QueryInterface(REFIID iid, LPVOID *ppv)
     }
 
     *ppv = nullptr;
-    if(IsEqualIID(iid, IID_IUnknown))
+    if (IsEqualIID(iid, IID_IUnknown))
     {
         *ppv = (IUnknown *) this;
     }
-    else if(IsEqualIID(iid, IID_ID3DX11Effect))
+    else if (IsEqualIID(iid, IID_ID3DX11Effect))
     {
         *ppv = (ID3DX11Effect *) this;
     }
@@ -1222,7 +1222,7 @@ HRESULT CEffect::BindToDevice(ID3D11Device *pDevice, LPCSTR srcName)
     for(; pRB != pRBLast; pRB++)
     {
         SAFE_RELEASE(pRB->pRasterizerObject);
-        if( SUCCEEDED( m_pDevice->CreateRasterizerState( &pRB->BackingStore, &pRB->pRasterizerObject) ) )
+        if ( SUCCEEDED( m_pDevice->CreateRasterizerState( &pRB->BackingStore, &pRB->pRasterizerObject) ) )
         {
             pRB->IsValid = true;
             SetDebugObjectName( pRB->pRasterizerObject, srcName );
@@ -1237,7 +1237,7 @@ HRESULT CEffect::BindToDevice(ID3D11Device *pDevice, LPCSTR srcName)
     for(; pDS != pDSLast; pDS++)
     {
         SAFE_RELEASE(pDS->pDSObject);
-        if( SUCCEEDED( m_pDevice->CreateDepthStencilState( &pDS->BackingStore, &pDS->pDSObject) ) )
+        if ( SUCCEEDED( m_pDevice->CreateDepthStencilState( &pDS->BackingStore, &pDS->pDSObject) ) )
         {
             pDS->IsValid = true;
             SetDebugObjectName( pDS->pDSObject, srcName );
@@ -1252,7 +1252,7 @@ HRESULT CEffect::BindToDevice(ID3D11Device *pDevice, LPCSTR srcName)
     for(; pBlend != pBlendLast; pBlend++)
     {
         SAFE_RELEASE(pBlend->pBlendObject);
-        if( SUCCEEDED( m_pDevice->CreateBlendState( &pBlend->BackingStore, &pBlend->pBlendObject ) ) )
+        if ( SUCCEEDED( m_pDevice->CreateBlendState( &pBlend->BackingStore, &pBlend->pBlendObject ) ) )
         {
             pBlend->IsValid = true;
             SetDebugObjectName( pBlend->pBlendObject, srcName );
@@ -1320,11 +1320,11 @@ HRESULT CEffect::BindToDevice(ID3D11Device *pDevice, LPCSTR srcName)
         else
         {
             // This is a regular shader
-            if( pShader->pReflectionData->RasterizedStream == D3D11_SO_NO_RASTERIZED_STREAM )
+            if ( pShader->pReflectionData->RasterizedStream == D3D11_SO_NO_RASTERIZED_STREAM )
                 pShader->IsValid = false;
             else 
             {
-                if( FAILED( (m_pDevice->*(pShader->pVT->pCreateShader))( (uint32_t *) pShader->pReflectionData->pBytecode, pShader->pReflectionData->BytecodeLength, neededClassLinkage, &pShader->pD3DObject) ) )
+                if ( FAILED( (m_pDevice->*(pShader->pVT->pCreateShader))( (uint32_t *) pShader->pReflectionData->pBytecode, pShader->pReflectionData->BytecodeLength, neededClassLinkage, &pShader->pD3DObject) ) )
                 {
                     DPF(1, "ID3DX11Effect::Load - failed to create shader" );
                     pShader->IsValid = false;
@@ -1344,9 +1344,9 @@ HRESULT CEffect::BindToDevice(ID3D11Device *pDevice, LPCSTR srcName)
     uint32_t CurMemberData = 0;
     for (uint32_t i = 0; i < m_VariableCount; ++ i)
     {
-        if( m_pVariables[i].pMemberData )
+        if ( m_pVariables[i].pMemberData )
         {
-            if( m_pVariables[i].pType->IsClassInstance() )
+            if ( m_pVariables[i].pType->IsClassInstance() )
             {
                 for (uint32_t j = 0; j < std::max<size_t>(m_pVariables[i].pType->Elements,1); ++j)
                 {
@@ -1354,7 +1354,7 @@ HRESULT CEffect::BindToDevice(ID3D11Device *pDevice, LPCSTR srcName)
                     ID3D11ClassInstance** ppCI = &(m_pVariables[i].pMemberData + j)->Data.pD3DClassInstance;
                     (m_pVariables[i].pMemberData + j)->Type = MDT_ClassInstance;
                     (m_pVariables[i].pMemberData + j)->Data.pD3DClassInstance = nullptr;
-                    if( m_pVariables[i].pType->TotalSize > 0 )
+                    if ( m_pVariables[i].pType->TotalSize > 0 )
                     {
                         // ignore failures in GetClassInstance;
                         m_pClassLinkage->GetClassInstance( m_pVariables[i].pName, j, ppCI );
@@ -1362,7 +1362,7 @@ HRESULT CEffect::BindToDevice(ID3D11Device *pDevice, LPCSTR srcName)
                     else
                     {
                         // The HLSL compiler optimizes out zero-sized classes, so we have to create class instances from scratch
-                        if( FAILED( m_pClassLinkage->CreateClassInstance( m_pVariables[i].pType->pTypeName, 0, 0, 0, 0, ppCI ) ) )
+                        if ( FAILED( m_pClassLinkage->CreateClassInstance( m_pVariables[i].pType->pTypeName, 0, 0, 0, 0, ppCI ) ) )
                         {
                             DPF(0, "ID3DX11Effect: Out of memory while trying to create new class instance interface");
                         }
@@ -1374,7 +1374,7 @@ HRESULT CEffect::BindToDevice(ID3D11Device *pDevice, LPCSTR srcName)
                     CurMemberData++;
                 }
             }
-            else if( m_pVariables[i].pType->IsStateBlockObject() )
+            else if ( m_pVariables[i].pType->IsStateBlockObject() )
             {
                 for (size_t j = 0; j < std::max<size_t>(m_pVariables[i].pType->Elements,1); ++j)
                 {
@@ -1435,23 +1435,23 @@ HRESULT CEffect::BindToDevice(ID3D11Device *pDevice, LPCSTR srcName)
                 SPassBlock* pPass = &pTechnique->pPasses[iPass];
                 pPass->InitiallyValid = true;
 
-                if( pPass->BackingStore.pBlendBlock != nullptr && !pPass->BackingStore.pBlendBlock->IsValid )
+                if ( pPass->BackingStore.pBlendBlock != nullptr && !pPass->BackingStore.pBlendBlock->IsValid )
                     pPass->InitiallyValid = false;
-                if( pPass->BackingStore.pDepthStencilBlock != nullptr && !pPass->BackingStore.pDepthStencilBlock->IsValid )
+                if ( pPass->BackingStore.pDepthStencilBlock != nullptr && !pPass->BackingStore.pDepthStencilBlock->IsValid )
                     pPass->InitiallyValid = false;
-                if( pPass->BackingStore.pRasterizerBlock != nullptr && !pPass->BackingStore.pRasterizerBlock->IsValid )
+                if ( pPass->BackingStore.pRasterizerBlock != nullptr && !pPass->BackingStore.pRasterizerBlock->IsValid )
                     pPass->InitiallyValid = false;
-                if( pPass->BackingStore.pVertexShaderBlock != nullptr && !pPass->BackingStore.pVertexShaderBlock->IsValid )
+                if ( pPass->BackingStore.pVertexShaderBlock != nullptr && !pPass->BackingStore.pVertexShaderBlock->IsValid )
                     pPass->InitiallyValid = false;
-                if( pPass->BackingStore.pPixelShaderBlock != nullptr && !pPass->BackingStore.pPixelShaderBlock->IsValid )
+                if ( pPass->BackingStore.pPixelShaderBlock != nullptr && !pPass->BackingStore.pPixelShaderBlock->IsValid )
                     pPass->InitiallyValid = false;
-                if( pPass->BackingStore.pGeometryShaderBlock != nullptr && !pPass->BackingStore.pGeometryShaderBlock->IsValid )
+                if ( pPass->BackingStore.pGeometryShaderBlock != nullptr && !pPass->BackingStore.pGeometryShaderBlock->IsValid )
                     pPass->InitiallyValid = false;
-                if( pPass->BackingStore.pHullShaderBlock != nullptr && !pPass->BackingStore.pHullShaderBlock->IsValid )
+                if ( pPass->BackingStore.pHullShaderBlock != nullptr && !pPass->BackingStore.pHullShaderBlock->IsValid )
                     pPass->InitiallyValid = false;
-                if( pPass->BackingStore.pDomainShaderBlock != nullptr && !pPass->BackingStore.pDomainShaderBlock->IsValid )
+                if ( pPass->BackingStore.pDomainShaderBlock != nullptr && !pPass->BackingStore.pDomainShaderBlock->IsValid )
                     pPass->InitiallyValid = false;
-                if( pPass->BackingStore.pComputeShaderBlock != nullptr && !pPass->BackingStore.pComputeShaderBlock->IsValid )
+                if ( pPass->BackingStore.pComputeShaderBlock != nullptr && !pPass->BackingStore.pComputeShaderBlock->IsValid )
                     pPass->InitiallyValid = false;
 
                 pTechnique->InitiallyValid &= pPass->InitiallyValid;
@@ -1481,29 +1481,29 @@ SVariable * CEffect::FindVariableByNameWithParsing(_In_z_ LPCSTR pName)
 
     while( *pSource != 0 )
     {
-        if( pDest == pEnd )
+        if ( pDest == pEnd )
         {
             pVariable = FindLocalVariableByName(pName);
-            if( pVariable == nullptr )
+            if ( pVariable == nullptr )
             {
                 DPF( 0, "Name %s is too long to parse", pName );
             }
             return pVariable;
         }
 
-        if( *pSource == '[' )
+        if ( *pSource == '[' )
         {
             // parse previous variable name
             *pDest = 0;
             assert( pVariable == nullptr );
             pVariable = FindLocalVariableByName(pScratchString);
-            if( pVariable == nullptr )
+            if ( pVariable == nullptr )
             {
                 return nullptr;
             }
             pDest = pScratchString;
         }
-        else if( *pSource == ']' )
+        else if ( *pSource == ']' )
         {
             // parse integer
             *pDest = 0;
@@ -1511,7 +1511,7 @@ SVariable * CEffect::FindVariableByNameWithParsing(_In_z_ LPCSTR pName)
             assert( pVariable != 0 );
             _Analysis_assume_( pVariable != 0 );
             pVariable = (SGlobalVariable*)pVariable->GetElement(index);
-            if( pVariable && !pVariable->IsValid() )
+            if ( pVariable && !pVariable->IsValid() )
             {
                 pVariable = nullptr;
             }
@@ -1526,7 +1526,7 @@ SVariable * CEffect::FindVariableByNameWithParsing(_In_z_ LPCSTR pName)
         pSource++;
     }
 
-    if( pDest != pScratchString )
+    if ( pDest != pScratchString )
     {
         // parse the variable name (there was no [i])
         *pDest = 0;
@@ -1760,7 +1760,7 @@ HRESULT CEffect::CopyMemberInterfaces( _In_ CEffect* pEffectSource )
     for(; i < Members; i++ )
     {
         SMember* pOldMember = pEffectSource->m_pMemberInterfaces[i];
-        if( pOldMember == nullptr )
+        if ( pOldMember == nullptr )
         {
             // During Optimization, m_pMemberInterfaces[i] was set to nullptr because it was an annotation
             m_pMemberInterfaces[i] = nullptr;
@@ -1788,7 +1788,7 @@ HRESULT CEffect::CopyMemberInterfaces( _In_ CEffect* pEffectSource )
     }
 
 lExit:
-    if( FAILED(hr) )
+    if ( FAILED(hr) )
     {
         assert( i < Members );
         ZeroMemory( &m_pMemberInterfaces[i], sizeof(SMember) * ( Members - i ) );
@@ -1891,7 +1891,7 @@ HRESULT CEffect::CopyTypePool( CEffect* pEffectSource, CPointerMappingTable& map
 
         SType *pType = (SType *) ptrMapping.pNew;
 
-        if( pType->pTypeName )
+        if ( pType->pTypeName )
         {
             VH( RemapString(&pType->pTypeName, &mappingTableStrings) );
         }
@@ -1902,11 +1902,11 @@ HRESULT CEffect::CopyTypePool( CEffect* pEffectSource, CPointerMappingTable& map
             for (uint32_t i = 0; i < pType->StructType.Members; ++ i)
             {
                 VH( RemapType((SType**)&pType->StructType.pMembers[i].pType, &mappingTableTypes) );
-                if( pType->StructType.pMembers[i].pName )
+                if ( pType->StructType.pMembers[i].pName )
                 {
                     VH( RemapString(&pType->StructType.pMembers[i].pName, &mappingTableStrings) );
                 }
-                if( pType->StructType.pMembers[i].pSemantic )
+                if ( pType->StructType.pMembers[i].pSemantic )
                 {
                     VH( RemapString(&pType->StructType.pMembers[i].pSemantic, &mappingTableStrings) );
                 }
@@ -1998,12 +1998,12 @@ HRESULT CEffect::RecreateCBs()
 
         pCB->IsNonUpdatable = pCB->IsUserManaged || pCB->ClonedSingle();
 
-        if( pCB->Size > 0 && !pCB->ClonedSingle() )
+        if ( pCB->Size > 0 && !pCB->ClonedSingle() )
         {
             ID3D11Buffer** ppOriginalBuffer;
             ID3D11ShaderResourceView** ppOriginalTBufferView;
 
-            if( pCB->IsUserManaged )
+            if ( pCB->IsUserManaged )
             {
                 ppOriginalBuffer = &pCB->pMemberData[0].Data.pD3DEffectsManagedConstantBuffer;
                 ppOriginalTBufferView = &pCB->pMemberData[1].Data.pD3DEffectsManagedTextureBuffer;
@@ -2024,7 +2024,7 @@ HRESULT CEffect::RecreateCBs()
             (*ppOriginalBuffer) = pNewBuffer;
             pNewBuffer = nullptr;
 
-            if( pCB->IsTBuffer )
+            if ( pCB->IsTBuffer )
             {
                 VN( *ppOriginalTBufferView );
                 D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
@@ -2056,9 +2056,9 @@ HRESULT CEffect::FixupMemberInterface( SMember* pMember, CEffect* pEffectSource,
 {
     HRESULT hr = S_OK;
 
-    if( pMember->pName )
+    if ( pMember->pName )
     {
-        if( pEffectSource->m_pReflection && pEffectSource->m_pReflection->m_Heap.IsInHeap(pMember->pName) )
+        if ( pEffectSource->m_pReflection && pEffectSource->m_pReflection->m_Heap.IsInHeap(pMember->pName) )
         {
             pMember->pName = (char*)((UINT_PTR)pMember->pName - (UINT_PTR)pEffectSource->m_pReflection->m_Heap.GetDataStart() + (UINT_PTR)m_pReflection->m_Heap.GetDataStart());
         }
@@ -2067,9 +2067,9 @@ HRESULT CEffect::FixupMemberInterface( SMember* pMember, CEffect* pEffectSource,
             VH( RemapString(&pMember->pName, &mappingTableStrings) );
         }
     }
-    if( pMember->pSemantic )
+    if ( pMember->pSemantic )
     {
-        if( pEffectSource->m_pReflection && pEffectSource->m_pReflection->m_Heap.IsInHeap(pMember->pSemantic) )
+        if ( pEffectSource->m_pReflection && pEffectSource->m_pReflection->m_Heap.IsInHeap(pMember->pSemantic) )
         {
             pMember->pSemantic = (char*)((UINT_PTR)pMember->pSemantic - (UINT_PTR)pEffectSource->m_pReflection->m_Heap.GetDataStart() + (UINT_PTR)m_pReflection->m_Heap.GetDataStart());
         }
@@ -2097,7 +2097,7 @@ HRESULT CEffect::CloneEffect(_In_ uint32_t Flags, _Outptr_ ID3DX11Effect** ppClo
 
 
     VN( pNewEffect = new CEffect( m_Flags ) );
-    if( Flags & D3DX11_EFFECT_CLONE_FORCE_NONSINGLE )
+    if ( Flags & D3DX11_EFFECT_CLONE_FORCE_NONSINGLE )
     {
         // The effect is cloned as if there was no original, so don't mark it as cloned
         pNewEffect->m_Flags &= ~(uint32_t)D3DX11_EFFECT_CLONE;
@@ -2159,7 +2159,7 @@ HRESULT CEffect::CloneEffect(_In_ uint32_t Flags, _Outptr_ ID3DX11Effect** ppClo
 
 
     // Move data from current effect to new effect
-    if( !IsOptimized() )
+    if ( !IsOptimized() )
     {
         VN( pNewEffect->m_pReflection = new CEffectReflection() );
         loader.m_pReflection = pNewEffect->m_pReflection;
@@ -2168,7 +2168,7 @@ HRESULT CEffect::CloneEffect(_In_ uint32_t Flags, _Outptr_ ID3DX11Effect** ppClo
         VH( loader.InitializeReflectionDataAndMoveStrings( m_pReflection->m_Heap.GetSize() ) );
     }
     VH( loader.ReallocateEffectData( true ) );
-    if( !IsOptimized() )
+    if ( !IsOptimized() )
     {
         VH( loader.ReallocateReflectionData( true ) );
     }
@@ -2182,7 +2182,7 @@ HRESULT CEffect::CloneEffect(_In_ uint32_t Flags, _Outptr_ ID3DX11Effect** ppClo
     VH( mappingTableTypes.AutoGrow() );
     VH( mappingTableStrings.AutoGrow() );
 
-    if( !IsOptimized() )
+    if ( !IsOptimized() )
     {
         // Let's re-create the type pool and string pool
         VN( pNewEffect->m_pPooledHeap = new CDataBlockStore );
@@ -2211,7 +2211,7 @@ HRESULT CEffect::CloneEffect(_In_ uint32_t Flags, _Outptr_ ID3DX11Effect** ppClo
 
 lExit:
     SAFE_DELETE( pTempHeap );
-    if( FAILED( hr ) )
+    if ( FAILED( hr ) )
     {
         SAFE_DELETE( pNewEffect );
     }
@@ -2234,14 +2234,14 @@ HRESULT CEffect::OptimizeTypes(_Inout_ CPointerMappingTable *pMappingTable, _In_
     uint32_t Members = m_pMemberInterfaces.GetSize();
     for( size_t i=0; i < Members; i++ )
     {
-        if( m_pMemberInterfaces[i] != nullptr )
+        if ( m_pMemberInterfaces[i] != nullptr )
         {
             VH( RemapType((SType**)&m_pMemberInterfaces[i]->pType, pMappingTable) );
         }
     }
 
     // when cloning, there may be annotations
-    if( Cloning )
+    if ( Cloning )
     {
         for (size_t iVar = 0; iVar < m_VariableCount; ++ iVar)
         {
@@ -2352,7 +2352,7 @@ HRESULT CEffect::Optimize()
 
     for (size_t i = 0; i < m_ShaderBlockCount; ++ i)
     {
-        if( m_pShaderBlocks[i].pReflectionData )
+        if ( m_pShaderBlocks[i].pReflectionData )
         {
             // pReflection was not created with PRIVATENEW
             SAFE_RELEASE( m_pShaderBlocks[i].pReflectionData->pReflection );
@@ -2365,7 +2365,7 @@ HRESULT CEffect::Optimize()
     for( size_t i=0; i < Members; i++ )
     {
         assert( m_pMemberInterfaces[i] != nullptr );
-        if( IsReflectionData(m_pMemberInterfaces[i]->pTopLevelEntity) )
+        if ( IsReflectionData(m_pMemberInterfaces[i]->pTopLevelEntity) )
         {
             assert( IsReflectionData(m_pMemberInterfaces[i]->Data.pGeneric) );
 

@@ -22,8 +22,8 @@ GOcean::GOcean(void)
 
 GOcean::~GOcean(void)
 {
-	if(FresnelMapSRV)FresnelMapSRV->Release();
-	if(FresnelMap)FresnelMap->Release();
+	if (FresnelMapSRV)FresnelMapSRV->Release();
+	if (FresnelMap)FresnelMap->Release();
 
 
 	delete PlaneMesh;
@@ -36,7 +36,7 @@ XRESULT GOcean::InitOcean()
 	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 
 	PlaneMesh = new GMesh;
-	if(XR_SUCCESS != PlaneMesh->LoadMesh("system\\GD3D11\\Meshes\\PlaneSubdiv.3ds"))
+	if (XR_SUCCESS != PlaneMesh->LoadMesh("system\\GD3D11\\Meshes\\PlaneSubdiv.3ds"))
 	{
 		delete PlaneMesh;
 		PlaneMesh = NULL;
@@ -81,7 +81,7 @@ XRESULT GOcean::InitOcean()
 /** Draws the ocean */
 void GOcean::Draw()
 {
-	if(Patches.empty())
+	if (Patches.empty())
 		return;
 
 	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
@@ -204,7 +204,7 @@ XRESULT GOcean::SavePatches(const std::string& file)
 {
 	FILE* f = fopen(file.c_str(), "wb");
 
-	if(!f)
+	if (!f)
 		return XR_FAILED;
 
 	int version = 1;
@@ -233,7 +233,7 @@ XRESULT GOcean::LoadPatches(const std::string& file)
 {
 	FILE* f = fopen(file.c_str(), "rb");
 
-	if(!f)
+	if (!f)
 		return XR_FAILED;
 
 	int version;

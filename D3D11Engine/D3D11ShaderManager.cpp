@@ -454,12 +454,12 @@ XRESULT D3D11ShaderManager::LoadShaders()
 			if (Shaders[i].type == "v")
 			{
 				// See if this is a reload
-				if(VShaders.count(Shaders[i].name) > 0)
+				if (VShaders.count(Shaders[i].name) > 0)
 				{
 					LogInfo() << "Reloading shader: " << Shaders[i].name;
 
 					D3D11VShader* vs = new D3D11VShader();
-					if(XR_SUCCESS != vs->LoadShader(("system\\GD3D11\\shaders\\" + Shaders[i].fileName).c_str(), Shaders[i].layout, Shaders[i].shaderMakros))
+					if (XR_SUCCESS != vs->LoadShader(("system\\GD3D11\\shaders\\" + Shaders[i].fileName).c_str(), Shaders[i].layout, Shaders[i].shaderMakros))
 					{
 						LogError() << "Failed to reload shader: " << Shaders[i].fileName;
 
@@ -490,10 +490,10 @@ XRESULT D3D11ShaderManager::LoadShaders()
 			else if (Shaders[i].type == "p")
 			{
 				// See if this is a reload
-				if(PShaders.count(Shaders[i].name) > 0)
+				if (PShaders.count(Shaders[i].name) > 0)
 				{
 					D3D11PShader* ps = new D3D11PShader();
-					if(XR_SUCCESS != ps->LoadShader(("system\\GD3D11\\shaders\\" + Shaders[i].fileName).c_str(), Shaders[i].shaderMakros))
+					if (XR_SUCCESS != ps->LoadShader(("system\\GD3D11\\shaders\\" + Shaders[i].fileName).c_str(), Shaders[i].shaderMakros))
 					{
 						LogError() << "Failed to reload shader: " << Shaders[i].fileName;
 
@@ -521,10 +521,10 @@ XRESULT D3D11ShaderManager::LoadShaders()
 			}else if (Shaders[i].type == "g")
 			{
 				// See if this is a reload
-				if(GShaders.count(Shaders[i].name) > 0)
+				if (GShaders.count(Shaders[i].name) > 0)
 				{
 					D3D11GShader* gs = new D3D11GShader();
-					if(XR_SUCCESS != gs->LoadShader(("system\\GD3D11\\shaders\\" + Shaders[i].fileName).c_str(), Shaders[i].shaderMakros, Shaders[i].layout != 0, Shaders[i].layout))
+					if (XR_SUCCESS != gs->LoadShader(("system\\GD3D11\\shaders\\" + Shaders[i].fileName).c_str(), Shaders[i].shaderMakros, Shaders[i].layout != 0, Shaders[i].layout))
 					{
 						LogError() << "Failed to reload shader: " << Shaders[i].fileName;
 
@@ -558,10 +558,10 @@ XRESULT D3D11ShaderManager::LoadShaders()
 		if (Shaders[i].type == std::string("hd"))
 		{
 			// See if this is a reload
-			if(HDShaders.count(Shaders[i].name) > 0)
+			if (HDShaders.count(Shaders[i].name) > 0)
 			{
 				D3D11HDShader* hds = new D3D11HDShader();
-				if(XR_SUCCESS != hds->LoadShader(("system\\GD3D11\\shaders\\" + Shaders[i].fileName).c_str(), 
+				if (XR_SUCCESS != hds->LoadShader(("system\\GD3D11\\shaders\\" + Shaders[i].fileName).c_str(), 
 					("system\\GD3D11\\shaders\\" + Shaders[i].fileName).c_str()))
 				{
 					LogError() << "Failed to reload shader: " << Shaders[i].fileName;
@@ -606,7 +606,7 @@ XRESULT D3D11ShaderManager::ReloadShaders()
 /** Called on frame start */
 XRESULT D3D11ShaderManager::OnFrameStart()
 {
-	if(ReloadShadersNextFrame)
+	if (ReloadShadersNextFrame)
 	{
 		LoadShaders();
 		ReloadShadersNextFrame = false;

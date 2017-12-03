@@ -21,7 +21,7 @@ D3D11LineRenderer::~D3D11LineRenderer(void)
 /** Adds a line to the list */
 XRESULT D3D11LineRenderer::AddLine(const LineVertex& v1, const LineVertex& v2)
 {
-	if(LineCache.size() >= 0xFFFFFFFF)
+	if (LineCache.size() >= 0xFFFFFFFF)
 	{
 		return XR_FAILED;
 	}
@@ -36,11 +36,11 @@ XRESULT D3D11LineRenderer::Flush()
 {
 	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase*)Engine::GraphicsEngine;
 
-	if(LineCache.size() == 0)
+	if (LineCache.size() == 0)
 		return XR_SUCCESS;
 
 	// Check buffersize and create a new one if needed
-	if(!LineBuffer || LineCache.size() > LineBufferSize)
+	if (!LineBuffer || LineCache.size() > LineBufferSize)
 	{
 		// Create a new buffer
 		delete LineBuffer;

@@ -35,7 +35,7 @@ RangeFit::RangeFit( ColourSet const* colours, int flags )
 {
 	// initialise the metric
 	bool perceptual = ( ( m_flags & kColourMetricPerceptual ) != 0 );
-	if( perceptual )
+	if ( perceptual )
 		m_metric = Vec3( 0.2126f, 0.7152f, 0.0722f );
 	else
 		m_metric = Vec3( 1.0f );
@@ -57,7 +57,7 @@ RangeFit::RangeFit( ColourSet const* colours, int flags )
 	// get the min and max range as the codebook endpoints
 	Vec3 start( 0.0f );
 	Vec3 end( 0.0f );
-	if( count > 0 )
+	if ( count > 0 )
 	{
 		float min, max;
 		
@@ -67,12 +67,12 @@ RangeFit::RangeFit( ColourSet const* colours, int flags )
 		for( int i = 1; i < count; ++i )
 		{
 			float val = Dot( values[i], principle );
-			if( val < min )
+			if ( val < min )
 			{
 				start = values[i];
 				min = val;
 			}
-			else if( val > max )
+			else if ( val > max )
 			{
 				end = values[i];
 				max = val;
@@ -117,7 +117,7 @@ void RangeFit::Compress3( void* block )
 		for( int j = 0; j < 3; ++j )
 		{
 			float d = LengthSquared( m_metric*( values[i] - codes[j] ) );
-			if( d < dist )
+			if ( d < dist )
 			{
 				dist = d;
 				idx = j;
@@ -132,7 +132,7 @@ void RangeFit::Compress3( void* block )
 	}
 	
 	// save this scheme if it wins
-	if( error < m_besterror )
+	if ( error < m_besterror )
 	{
 		// remap the indices
 		u8 indices[16];
@@ -170,7 +170,7 @@ void RangeFit::Compress4( void* block )
 		for( int j = 0; j < 4; ++j )
 		{
 			float d = LengthSquared( m_metric*( values[i] - codes[j] ) );
-			if( d < dist )
+			if ( d < dist )
 			{
 				dist = d;
 				idx = j;
@@ -185,7 +185,7 @@ void RangeFit::Compress4( void* block )
 	}
 	
 	// save this scheme if it wins
-	if( error < m_besterror )
+	if ( error < m_besterror )
 	{
 		// remap the indices
 		u8 indices[16];

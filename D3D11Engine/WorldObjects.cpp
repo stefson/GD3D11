@@ -15,7 +15,7 @@ void WorldMeshInfo::SaveWorldMeshInfo(const std::string& name)
 {
 	FILE* f = fopen(("system\\GD3D11\\meshes\\infos\\" + name + ".wi").c_str(), "wb");
 
-	if(!f)
+	if (!f)
 	{
 		LogError() << "Failed to open file '" << ("system\\GD3D11\\meshes\\infos\\" + name + ".wi") << "' for writing! Make sure the game runs in Admin mode "
 					  "to get the rights to write to that directory!";
@@ -38,7 +38,7 @@ void WorldMeshInfo::LoadWorldMeshInfo(const std::string& name)
 {
 	FILE* f = fopen(("system\\GD3D11\\meshes\\infos\\" + name + ".wi").c_str(), "rb");
 
-	if(!f)
+	if (!f)
 	{
 		// Silently fail here, since it is totally valid for a visual to not have an info-file
 		return;
@@ -55,7 +55,7 @@ void WorldMeshInfo::LoadWorldMeshInfo(const std::string& name)
 	TesselationSettings.UpdateConstantbuffer();
 
 	// Create actual PNAEN-Info if needed
-	if(TesselationSettings.buffer.VT_TesselationFactor > 0.0f)
+	if (TesselationSettings.buffer.VT_TesselationFactor > 0.0f)
 	{
 		WorldConverter::CreatePNAENInfoFor(this, TesselationSettings.buffer.VT_DisplacementStrength > 0.0f);
 	}
@@ -75,7 +75,7 @@ void VobInfo::UpdateVobConstantBuffer()
 	WorldMatrix = cb.World;
 
 	// Colorize the vob according to the underlaying polygon
-	if(IsIndoorVob)
+	if (IsIndoorVob)
 	{
 		// All lightmapped polys have this color, so just use it
 		GroundColor = DEFAULT_LIGHTMAP_POLY_COLOR;
@@ -96,7 +96,7 @@ void SkeletalVobInfo::UpdateVobConstantBuffer()
 
 	WorldMatrix = cb.World;
 
-	if(!VobConstantBuffer)
+	if (!VobConstantBuffer)
 		Engine::GraphicsEngine->CreateConstantBuffer(&VobConstantBuffer, &cb, sizeof(cb));
 	else
 		VobConstantBuffer->UpdateBuffer(&cb);
@@ -105,7 +105,7 @@ void SkeletalVobInfo::UpdateVobConstantBuffer()
 /** creates/updates the constantbuffer */
 void VisualTesselationSettings::UpdateConstantbuffer()
 {
-	if(Constantbuffer)
+	if (Constantbuffer)
 	{
 		Constantbuffer->UpdateBuffer(&buffer);
 	}else
@@ -122,7 +122,7 @@ void SkeletalMeshVisualInfo::CreatePNAENInfo(bool softNormals)
 	{
 		for(unsigned int i=0;i<(*it).second.size();i++)
 		{
-			if((*it).second[i]->IndicesPNAEN.empty())
+			if ((*it).second[i]->IndicesPNAEN.empty())
 				WorldConverter::CreatePNAENInfoFor((*it).second[i], Meshes[(*it).first][i], softNormals);
 		}
 	}
@@ -152,7 +152,7 @@ void MeshVisualInfo::CreatePNAENInfo(bool softNormals)
 	{
 		for(unsigned int i=0;i<(*it).second.size();i++)
 		{
-			if((*it).second[i]->IndicesPNAEN.empty())
+			if ((*it).second[i]->IndicesPNAEN.empty())
 				WorldConverter::CreatePNAENInfoFor((*it).second[i], softNormals);
 		}
 	}
@@ -179,7 +179,7 @@ void BaseVisualInfo::SaveMeshVisualInfo(const std::string& name)
 {
 	FILE* f = fopen(("system\\GD3D11\\meshes\\infos\\" + name + ".vi").c_str(), "wb");
 
-	if(!f)
+	if (!f)
 	{
 		LogError() << "Failed to open file '" << ("system\\GD3D11\\meshes\\infos\\" + name + ".vi") << "' for writing! Make sure the game runs in Admin mode "
 					  "to get the rights to write to that directory!";
@@ -202,7 +202,7 @@ void BaseVisualInfo::LoadMeshVisualInfo(const std::string& name)
 {
 	FILE* f = fopen(("system\\GD3D11\\meshes\\infos\\" + name + ".vi").c_str(), "rb");
 
-	if(!f)
+	if (!f)
 	{
 		// Silently fail here, since it is totally valid for a visual to not have an info-file
 		return;
@@ -253,7 +253,7 @@ SkeletalMeshInfo::~SkeletalMeshInfo()
 /** Clears the cache for the given progmesh */
 void SectionInstanceCache::ClearCacheForStatic(MeshVisualInfo* pm)
 {
-	if(InstanceCache.find(pm) != InstanceCache.end())
+	if (InstanceCache.find(pm) != InstanceCache.end())
 	{
 		D3D11VertexBuffer* vb = InstanceCache[pm];
 		delete vb;
@@ -268,7 +268,7 @@ void WorldMeshSectionInfo::SaveSectionMeshToFile(const std::string& name)
 	FILE* f;
 	fopen_s(&f, name.c_str(), "wb");
 
-	if(!f)
+	if (!f)
 		return;
 
 
@@ -281,12 +281,12 @@ void WorldMeshSectionInfo::SaveMeshInfos(const std::string& worldName, INT2 sect
 	for(auto it = WorldMeshes.begin(); it != WorldMeshes.end(); it++)
 	{
 		// TODO: Custom mesh!
-		if((*it).first.Texture)
+		if ((*it).first.Texture)
 		{
 			std::string tx = (*it).first.Texture->GetNameWithoutExt();
 			std::string name = "WS_" + worldName + "_" + std::to_string(sectionPos.x) + "_" + std::to_string(sectionPos.y) + "_" + tx;
 
-			if((*it).second->SaveInfo) /// Save only if marked dirty
+			if ((*it).second->SaveInfo) /// Save only if marked dirty
 				(*it).second->SaveWorldMeshInfo(name);
 		}
 	}
@@ -298,7 +298,7 @@ void WorldMeshSectionInfo::LoadMeshInfos(const std::string& worldName, INT2 sect
 	for(auto it = WorldMeshes.begin(); it != WorldMeshes.end(); it++)
 	{
 		// TODO: Custom mesh!
-		if((*it).first.Texture)
+		if ((*it).first.Texture)
 		{
 			std::string tx = (*it).first.Texture->GetNameWithoutExt();
 			std::string name = "WS_" + worldName + "_" + std::to_string(sectionPos.x) + "_" + std::to_string(sectionPos.y) + "_" + tx;

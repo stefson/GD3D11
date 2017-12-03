@@ -249,16 +249,16 @@ void MT_AddLeak(const char* file_name,const char * function_name,unsigned int so
   _LEAKED_LIST *walker = NULL;
   _LEAKED_LIST *last = NULL;
   
-  if(! _hashtable.leaked_list) {// first call
+  if (! _hashtable.leaked_list) {// first call
     _hashtable.leaked_list = ptr;
     _hashtable.leaked_list->next = NULL;
     return;
   }
   for(walker = _hashtable.leaked_list;walker;walker = walker->next) {
-    if(source_line == walker->source_line) {
-      if(walker->mul == -1) {
+    if (source_line == walker->source_line) {
+      if (walker->mul == -1) {
 walker->size_mem += size_mem;
-      } else if(walker->size_mem == size_mem) {
+      } else if (walker->size_mem == size_mem) {
 walker->mul += 1;
       } else {
 walker->size_mem += walker->size_mem * (walker->mul -1);
@@ -271,9 +271,9 @@ walker->mul = -1;
 
       return;
     }
-    if(source_line < walker->source_line) {
+    if (source_line < walker->source_line) {
 
-      if(!last) { // The line is less then the first one.
+      if (!last) { // The line is less then the first one.
 ptr->next = walker;
 _hashtable.leaked_list = ptr;
       } else {
@@ -292,15 +292,15 @@ ptr->next = walker;
 }
 void MT_AddError(const char* allocation_TLA,const char* deallocation_TLA,unsigned int source_line,const char* function_name,const char* file_name) {
 
-	if(!function_name)
+	if (!function_name)
 		function_name = "unknown_function";
 
-	if(!file_name)
+	if (!file_name)
 		file_name = "unknown_file";
 
   _ERRORS *ptr = NULL;
   ptr = (_ERRORS *) calloc(1,sizeof(_ERRORS));
-  if(! (allocation_TLA)) {
+  if (! (allocation_TLA)) {
     // Then this is not a mismatch, it is a double deallocation call.
     ptr->allocation_TLA = NULL;
     ptr->deallocation_TLA = 
@@ -324,14 +324,14 @@ void MT_AddError(const char* allocation_TLA,const char* deallocation_TLA,unsigne
   _ERRORS *walker = NULL;
   _ERRORS *last = NULL;
   
-  if(! _hashtable.error_array) {// first call
+  if (! _hashtable.error_array) {// first call
     _hashtable.error_array = ptr;
     _hashtable.error_array->next = NULL;
     return;
   }
   for(walker = _hashtable.error_array;walker;walker = walker->next) {
-    if(source_line < walker->source_line) {
-      if(!last) { // The line is less then the first one.
+    if (source_line < walker->source_line) {
+      if (!last) { // The line is less then the first one.
 ptr->next = walker;
 _hashtable.error_array = ptr;
       } else {
@@ -388,7 +388,7 @@ unsigned int MT_gen_hash_array_index (unsigned long int address)
 
 int MT_should_double() /* hash table automagically doubles when needed */
 {
-  if(_hashtable.total_entries > _hashtable.total_rows-1) return 1;
+  if (_hashtable.total_entries > _hashtable.total_rows-1) return 1;
   return 0;
 }
 
@@ -457,7 +457,7 @@ int MT_check_redzone(  void *address, unsigned long int size )
 {
   char *start = (char *)address + size - REDZONE_SIZE;
   
-  if(strncmp(start, REDZONE_STR, REDZONE_SIZE) != 0) return 0;
+  if (strncmp(start, REDZONE_STR, REDZONE_SIZE) != 0) return 0;
   return 1;
 }
 
@@ -771,7 +771,7 @@ int MT_report_blocks_allocated(int speak)  /* dumps sorted list by serial_num of
     {
       while (*mover)
 {
- if(speak) {
+ if (speak) {
    MT_dump_he(*mover);
  }
  leakNumber++;
@@ -814,16 +814,16 @@ void MT_FreeAllMyMemory()          /* avoid embarassing leak ourselves! */
     toFree = ePtr;
     ePtr = ePtr->next;
     
-    if(toFree->allocation_TLA) {
+    if (toFree->allocation_TLA) {
       free(toFree->allocation_TLA);
     }
-    if(toFree->deallocation_TLA) {
+    if (toFree->deallocation_TLA) {
       free(toFree->deallocation_TLA);
     }
-    if(toFree->function_name) {
+    if (toFree->function_name) {
       free(toFree->function_name);
     }
-    if(toFree->file_name) {
+    if (toFree->file_name) {
       free(toFree->file_name);
     }
     free(toFree);
@@ -838,10 +838,10 @@ void MT_FreeAllMyMemory()          /* avoid embarassing leak ourselves! */
       
       lPtr = lPtr->next;
 
-      if(ltoFree->file_name){
+      if (ltoFree->file_name){
 free(ltoFree->file_name);
       }
-      if(ltoFree->function_name){
+      if (ltoFree->function_name){
 free(ltoFree->function_name);
       }
       free(ltoFree);
@@ -860,7 +860,7 @@ void MemTrackerFinalReport()
   const char * getTLA(char *TLA);
   int size;
   size = MT_report_blocks_allocated(1);
-  if(_hashtable.total_bytes != 0) {
+  if (_hashtable.total_bytes != 0) {
     printf("\nYour program contains memory leaks!\n");
     printf("Total bytes lost: %d\n",_hashtable.total_bytes - REDZONE_SIZE * (size));
     printf("###########      START LIST OF LEAKS      ###########\n");
@@ -868,14 +868,14 @@ void MemTrackerFinalReport()
     char *lastFuncName2 = (char *)"fewfewgewgewgw";
     int lastLineNum2 = -1;
     for(ptr2 = _hashtable.leaked_list;ptr2;ptr2 = ptr2->next) {
-if(strcmp(lastFuncName2,ptr2->function_name) != 0) {
+if (strcmp(lastFuncName2,ptr2->function_name) != 0) {
  printf("%s()\n",ptr2->function_name);
  lastFuncName2 = ptr2->function_name;
 }
-if((int)ptr2->source_line != lastLineNum2) {
+if ((int)ptr2->source_line != lastLineNum2) {
 
  printf("  %s:%-3d - ",ptr2->file_name,ptr2->source_line);
- if(ptr2->mul == 1 || ptr2->mul == -1) {
+ if (ptr2->mul == 1 || ptr2->mul == -1) {
    printf("%u bytes lost.\n",ptr2->size_mem);
  } else {
    printf("%u bytes lost %u times.\n",ptr2->size_mem,ptr2->mul);
@@ -890,13 +890,13 @@ if((int)ptr2->source_line != lastLineNum2) {
   }
   
 
-  if(_hashtable.total_bytes == 0) {
+  if (_hashtable.total_bytes == 0) {
     printf("\nCongratulations, your program has no memory leaks.\n");
-    if(_hashtable.error_array != NULL) {
+    if (_hashtable.error_array != NULL) {
       printf("HOWEVER, errors have been detected!\n");
     }
   }
-  if(_hashtable.error_array != NULL) {
+  if (_hashtable.error_array != NULL) {
 
     printf("########### START LIST OF NON-LEAK ERRORS ###########\n");
       _ERRORS *ptr = NULL;
@@ -907,13 +907,13 @@ if((int)ptr2->source_line != lastLineNum2) {
 
       int lastLineNum = -1;
       for(ptr = _hashtable.error_array;ptr;ptr = ptr->next) {
-if(strcmp(lastFuncName,ptr->function_name) != 0) {
+if (strcmp(lastFuncName,ptr->function_name) != 0) {
  printf("%s()\n",ptr->function_name);
  lastFuncName = ptr->function_name;
 }
-if((int)ptr->source_line != lastLineNum) {
+if ((int)ptr->source_line != lastLineNum) {
  printf("  %s:%-3d - ",ptr->file_name,ptr->source_line);
- if(ptr->allocation_TLA) { // it's a mismatch error 
+ if (ptr->allocation_TLA) { // it's a mismatch error 
    printf("Using \"%s\" to free an object allocated with \"%s\".\n",
   getTLA(ptr->deallocation_TLA),getTLA(ptr->allocation_TLA));
  } else { // deallocation was called on a nonallocated object.
@@ -934,7 +934,7 @@ if((int)ptr->source_line != lastLineNum) {
   return;
 }
 const char * getTLA(char *TLA) {
-  if(strcmp(TLA,"DEL") == 0) {
+  if (strcmp(TLA,"DEL") == 0) {
     return "delete";
   }else if (strcmp(TLA,"VDE") == 0) {
     return "delete[]";
@@ -993,7 +993,7 @@ const char* file_name)
   void *newptr;
   size += REDZONE_SIZE;
   
-  if(!ptr)
+  if (!ptr)
     {
       if ((newptr = (void *) realloc(ptr, size)) == NULL)
 {
@@ -1003,7 +1003,7 @@ const char* file_name)
       
       MT_add_entry((unsigned long int)newptr, size, "RAL", line, func_name, file_name);
     }
-  else if(!MT_find_entry((unsigned long int)ptr))
+  else if (!MT_find_entry((unsigned long int)ptr))
     {
       fprintf (stderr, "MemTracker: %s:%u func:%s()  realloc called but 0x%lX not allocated!\n",
       file_name, line, func_name, (unsigned long int)ptr);
@@ -1028,7 +1028,7 @@ const char* file_name)
 
 void MT_Free (void* ptr, int line, const char* func, const char* file_name)
 {
-  if(MT_delete_entry((unsigned long int)ptr, "FRE", line, func, file_name))
+  if (MT_delete_entry((unsigned long int)ptr, "FRE", line, func, file_name))
     free(ptr);
   
   return;
@@ -1086,10 +1086,10 @@ void* operator new [] (size_t size, unsigned int line, const char* func_name,
 /* even if I don't throw anything! Some compilers require this */
 void operator delete(void* ptr) throw ()
 {
-	if(!ptr)
+	if (!ptr)
 		return;
 
-  if(MT_delete_entry((unsigned long int)ptr ,"DEL", _mt_src_line, _mt_src_func, _mt_src_file))
+  if (MT_delete_entry((unsigned long int)ptr ,"DEL", _mt_src_line, _mt_src_func, _mt_src_file))
     free(ptr);
 }
 
@@ -1098,10 +1098,10 @@ void operator delete(void* ptr) throw ()
 /* even if I don't throw anything!  Some compilers require this */
 void operator delete [] (void* ptr) throw ()
 {
-	if(!ptr)
+	if (!ptr)
 		return;
 
-  if(MT_delete_entry((unsigned long int)ptr, "VDE", _mt_src_line, _mt_src_func, _mt_src_file))
+  if (MT_delete_entry((unsigned long int)ptr, "VDE", _mt_src_line, _mt_src_func, _mt_src_file))
     free(ptr);
 }
 

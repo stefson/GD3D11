@@ -36,7 +36,7 @@ XRESULT GMesh::LoadMesh(const std::string& file, float scale)
 	LogInfo() << "Loading custom mesh " << dir << "\\" << file;
 
 	// Check file format
-	if(file.substr(file.find_last_of(".") + 1) == "mcache")
+	if (file.substr(file.find_last_of(".") + 1) == "mcache")
 	{
 		// Load cached format
 		return LoadCached(file);
@@ -45,7 +45,7 @@ XRESULT GMesh::LoadMesh(const std::string& file, float scale)
 	Importer imp;
 	imp.SetPropertyInteger(AI_CONFIG_PP_SLM_VERTEX_LIMIT, 0xFFFF - 1);
 	const aiScene* s = imp.ReadFile(file, aiProcessPreset_TargetRealtime_Fast | aiProcess_SplitLargeMeshes);
-	if(!s)
+	if (!s)
 	{
 		LogError() << "Failed to open custom Mesh: " << file;
 		LogError() << " - " << imp.GetErrorString();
@@ -55,7 +55,7 @@ XRESULT GMesh::LoadMesh(const std::string& file, float scale)
 	LogInfo() << "Loading " << std::to_string(s->mNumMeshes) << " submeshes";
 
 	// Little helper for the case that the .mtl went wrong
-	if(s->mNumMaterials <= 3)
+	if (s->mNumMaterials <= 3)
 	{
 		LogWarn() << "Mesh contains only " << s->mNumMaterials << " materials! This may not be what the creator wanted, please check your"
 			".mtl-File and the mtllib-reference in the .obj-File. Remember to delete the cache-file after a change!";
@@ -82,7 +82,7 @@ XRESULT GMesh::LoadMesh(const std::string& file, float scale)
 		}
 
 		//s->mMaterials[s->mMeshes[i]->mMaterialIndex]->Get(AI_MATKEY_NAME, texture);
-		if(s->mMeshes[i]->mNumFaces * 3 >= 0xFFFF)
+		if (s->mMeshes[i]->mNumFaces * 3 >= 0xFFFF)
 		{
 			LogWarn() << "Mesh with Texture '" << texture << "' has more than 0xFFFF vertices!";
 			continue;
@@ -99,17 +99,17 @@ XRESULT GMesh::LoadMesh(const std::string& file, float scale)
 
 		for(unsigned int n=0;n<s->mMeshes[i]->mNumVertices;n++)
 		{
-			if(s->mMeshes[i]->HasNormals())
+			if (s->mMeshes[i]->HasNormals())
 			{
 				vertices[n].Normal = float3(s->mMeshes[i]->mNormals[n].x, s->mMeshes[i]->mNormals[n].y, s->mMeshes[i]->mNormals[n].z);
 			}
 
-			if(s->mMeshes[i]->HasTextureCoords(0))
+			if (s->mMeshes[i]->HasTextureCoords(0))
 			{
 				vertices[n].TexCoord = float2(s->mMeshes[i]->mTextureCoords[0][n].x, s->mMeshes[i]->mTextureCoords[0][n].y);
 			}
 
-			if(s->mMeshes[i]->HasTextureCoords(1))
+			if (s->mMeshes[i]->HasTextureCoords(1))
 			{
 				vertices[n].TexCoord2 = float2(s->mMeshes[i]->mTextureCoords[1][n].x, s->mMeshes[i]->mTextureCoords[1][n].y);
 			}
@@ -120,7 +120,7 @@ XRESULT GMesh::LoadMesh(const std::string& file, float scale)
 
 		for(unsigned int n=0;n<s->mMeshes[i]->mNumFaces;n++)
 		{
-			if(s->mMeshes[i]->mFaces[n].mNumIndices != 3)
+			if (s->mMeshes[i]->mFaces[n].mNumIndices != 3)
 			{
 				LogError() << "Mesh not triangulated!";
 				continue;
@@ -137,7 +137,7 @@ XRESULT GMesh::LoadMesh(const std::string& file, float scale)
 
 		// Extract the file extension and its name
 		int extpos = stex.find_last_of(".");
-		if(extpos >= 0)
+		if (extpos >= 0)
 		{
 			ext = &stex[extpos + 1];
 			//LogInfo() << "Got file ext: " << ext;
@@ -192,7 +192,7 @@ XRESULT GMesh::LoadCached(const std::string& file)
 
 	LogInfo() << "Loading cached mesh: " << file;
 
-	if(!f)
+	if (!f)
 	{
 		LogWarn() << "Failed to find cache file: " << file;
 		return XR_FAILED;

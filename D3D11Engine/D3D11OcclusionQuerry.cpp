@@ -46,13 +46,13 @@ unsigned int D3D11OcclusionQuerry::AddPredicationObject()
 /** Checks the BSP-Tree for visibility */
 void D3D11OcclusionQuerry::DoOcclusionForBSP(BspInfo* root)
 {
-	if(!root || !root->OriginalNode)
+	if (!root || !root->OriginalNode)
 		return;
 
 	D3D11GraphicsEngine* g = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 
 	// Check if this node has it's queryID
-	if(root->OcclusionInfo.QueryID == -1)
+	if (root->OcclusionInfo.QueryID == -1)
 	{
 		// Add new object
 		root->OcclusionInfo.QueryID = AddPredicationObject();
@@ -71,7 +71,7 @@ void D3D11OcclusionQuerry::DoOcclusionForBSP(BspInfo* root)
 	// If this node wasn't inside the frustum last frame, but got inside it this frame, just draw it
 	// to reduce the popping in dialogs where the camera switches heavily between targets
 	// This may introduce a little framedrop when the camera switches targets, but it has to be ok.
-	if(root->OcclusionInfo.LastCameraClipType == ZTCAM_CLIPTYPE_OUT &&
+	if (root->OcclusionInfo.LastCameraClipType == ZTCAM_CLIPTYPE_OUT &&
 		fstate != ZTCAM_CLIPTYPE_OUT)
 	{
 		// Mark entire subtree visible
@@ -92,14 +92,14 @@ void D3D11OcclusionQuerry::DoOcclusionForBSP(BspInfo* root)
 	// If the node wasn't visible last frame, we need to test it again
 	// Invisible nodes need to be tested each frame in case they go visible
 	// Visible nodes don't need to be tested every frame
-	if(!root->OcclusionInfo.VisibleLastFrame ||
+	if (!root->OcclusionInfo.VisibleLastFrame ||
 	   (root->OcclusionInfo.LastVisitedFrameID + VISIBLE_RECHECK_FRAME_DELAY <= FrameID && root->OcclusionInfo.VisibleLastFrame))
 	{
 		
 
 		// Take those which have the camera inside as visible
 		// Also make leafs which don't contain anything just visible so we can save the draw-call
-		if(Toolbox::PositionInsideBox(Engine::GAPI->GetCameraPosition(), root->OriginalNode->BBox3D.Min, root->OriginalNode->BBox3D.Max) ||
+		if (Toolbox::PositionInsideBox(Engine::GAPI->GetCameraPosition(), root->OriginalNode->BBox3D.Min, root->OriginalNode->BBox3D.Max) ||
 			(root->IsEmpty() && root->OriginalNode->IsLeaf())) 
 		{
 			DoOcclusionForBSP(root->Front);
@@ -113,13 +113,13 @@ void D3D11OcclusionQuerry::DoOcclusionForBSP(BspInfo* root)
 		ID3D11Predicate* p = Predicates[root->OcclusionInfo.QueryID];
 
 		// Check if there is data available from the last query
-		if( root->OcclusionInfo.LastVisitedFrameID != 0 && // Always do the first query
+		if ( root->OcclusionInfo.LastVisitedFrameID != 0 && // Always do the first query
 			S_OK != g->GetContext()->GetData(p, NULL, 0, D3D11_ASYNC_GETDATA_DONOTFLUSH))
 		{
 			c = D3DXVECTOR4(0,0,1,1);
 
 			// Query is in progress and still not done, wait for it...
-			if(!root->OcclusionInfo.VisibleLastFrame)
+			if (!root->OcclusionInfo.VisibleLastFrame)
 			{
 				// Continue with the sub-nodes to see if they are visible to make sure nothing pops in
 				// Don't continue with the sub-nodes if this was visible last time we checked
@@ -133,7 +133,7 @@ void D3D11OcclusionQuerry::DoOcclusionForBSP(BspInfo* root)
 			g->GetContext()->GetData(p, &data, sizeof(UINT32), D3D11_ASYNC_GETDATA_DONOTFLUSH);
 			root->OcclusionInfo.VisibleLastFrame = data > 0; // data contains visible pixels of the object
 
-			if(data == 0)
+			if (data == 0)
 			{
 				// Mark entire subtree invisible and don't waste draw-calls for it
 				MarkTreeVisible(root->Front, false);
@@ -145,7 +145,7 @@ void D3D11OcclusionQuerry::DoOcclusionForBSP(BspInfo* root)
 				DoOcclusionForBSP(root->Back);
 			}
 
-			if(data > 0)
+			if (data > 0)
 				c = D3DXVECTOR4(0,1,0,1);
 			else
 				c = D3DXVECTOR4(1,0,0,1);
@@ -161,9 +161,9 @@ void D3D11OcclusionQuerry::DoOcclusionForBSP(BspInfo* root)
 		root->OcclusionInfo.LastVisitedFrameID = FrameID;
 	}
 
-	if(!Engine::GAPI->GetRendererState()->RendererSettings.DisableWatermark && root->OriginalNode->IsLeaf())
+	if (!Engine::GAPI->GetRendererState()->RendererSettings.DisableWatermark && root->OriginalNode->IsLeaf())
 	{
-		if(!root->OcclusionInfo.VisibleLastFrame)
+		if (!root->OcclusionInfo.VisibleLastFrame)
 		{
 			//DebugVisualizeNodeMesh(root->OcclusionInfo.NodeMesh, c);
 			Engine::GraphicsEngine->GetLineRenderer()->AddAABBMinMax(root->OriginalNode->BBox3D.Min,
@@ -275,7 +275,7 @@ void D3D11OcclusionQuerry::DebugVisualizeNodeMesh(MeshInfo* m, const D3DXVECTOR4
 /** Marks the entire subtree visible */
 void D3D11OcclusionQuerry::MarkTreeVisible(BspInfo* root, bool visible)
 {
-	if(!root || !root->OriginalNode)
+	if (!root || !root->OriginalNode)
 		return;
 
 	root->OcclusionInfo.LastVisitedFrameID = FrameID;

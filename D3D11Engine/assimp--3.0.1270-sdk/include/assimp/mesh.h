@@ -687,7 +687,7 @@ struct aiMesh
 	//! \param pIndex Index of the vertex color set
 	bool HasVertexColors( unsigned int pIndex) const
 	{ 
-		if( pIndex >= AI_MAX_NUMBER_OF_COLOR_SETS) 
+		if ( pIndex >= AI_MAX_NUMBER_OF_COLOR_SETS) 
 			return false; 
 		else 
 			return mColors[pIndex] != NULL && mNumVertices > 0; 
@@ -697,7 +697,7 @@ struct aiMesh
 	//! \param pIndex Index of the texture coordinates set
 	bool HasTextureCoords( unsigned int pIndex) const
 	{ 
-		if( pIndex >= AI_MAX_NUMBER_OF_TEXTURECOORDS) 
+		if ( pIndex >= AI_MAX_NUMBER_OF_TEXTURECOORDS) 
 			return false; 
 		else 
 			return mTextureCoords[pIndex] != NULL && mNumVertices > 0; 

@@ -49,9 +49,9 @@ static int FloatToInt( float a, int limit )
 	int i = ( int )( a + 0.5f );
 
 	// clamp to the limit
-	if( i < 0 )
+	if ( i < 0 )
 		i = 0;
-	else if( i > limit )
+	else if ( i > limit )
 		i = limit; 
 
 	// done
@@ -85,7 +85,7 @@ void SingleColourFit::Compress3( void* block )
 	ComputeEndPoints( lookups );
 	
 	// build the block if we win
-	if( m_error < m_besterror )
+	if ( m_error < m_besterror )
 	{
 		// remap the indices
 		u8 indices[16];
@@ -113,7 +113,7 @@ void SingleColourFit::Compress4( void* block )
 	ComputeEndPoints( lookups );
 	
 	// build the block if we win
-	if( m_error < m_besterror )
+	if ( m_error < m_besterror )
 	{
 		// remap the indices
 		u8 indices[16];
@@ -151,7 +151,7 @@ void SingleColourFit::ComputeEndPoints( SingleColourLookup const* const* lookups
 		}
 		
 		// keep it if the error is lower
-		if( error < m_error )
+		if ( error < m_error )
 		{
 			m_start = Vec3(
 				( float )sources[0]->start/31.0f, 

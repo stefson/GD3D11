@@ -103,7 +103,7 @@ extern "C"
 		g->CreateMainUIView();
 
 		// Check again, in case it failed
-		if(g->GetUIView())
+		if (g->GetUIView())
 		{
 			// Store the callback ID in memory
 			int* d = new int;

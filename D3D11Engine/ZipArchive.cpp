@@ -10,7 +10,7 @@ ZipArchive::ZipArchive(void)
 
 ZipArchive::~ZipArchive(void)
 {
-	if(UnzipThread)
+	if (UnzipThread)
 	{
 		UnzipThread->join(); // Wait for the thread to complete
 		delete UnzipThread;
@@ -24,7 +24,7 @@ XRESULT ZipArchive::Unzip(const std::string& zip, const std::string& target)
 
 	HZIP hz = OpenZip((void *)zip.c_str(), 0, ZIP_FILENAME);
 
-	if(!hz)
+	if (!hz)
 	{
 		LogWarn() << "Failed to open Zip-File: " << zip;
 		return XR_FAILED;
@@ -57,7 +57,7 @@ XRESULT ZipArchive::Unzip(const std::string& zip, const std::string& target)
 
 XRESULT ZipArchive::UnzipThreaded(const std::string& zip, const std::string& target, UnzipDoneCallback callback, void* cbUserdata)
 {
-	if(UnzipThread)
+	if (UnzipThread)
 		return XR_FAILED; // Already doing something
 
 	// Start unzip thread
@@ -73,7 +73,7 @@ void ZipArchive::UnzipThreadFunc(const std::string& zip, const std::string& targ
 
 	HZIP hz = OpenZip((void *)zip.c_str(), 0, ZIP_FILENAME);
 
-	if(!hz)
+	if (!hz)
 	{
 		LogWarn() << "Failed to open Zip-File: " << zip;
 		return;

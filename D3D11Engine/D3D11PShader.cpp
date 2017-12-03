@@ -74,7 +74,7 @@ HRESULT D3D11PShader::CompileShaderFromFile(const CHAR* szFileName, LPCSTR szEnt
 	}
 	if (pErrorBlob)
 	{
-		/*if(Engine->SwapchainCreated())
+		/*if (Engine->SwapchainCreated())
 		Engine->GetConsole()->PostConsoleMessage((char*)pErrorBlob->GetBufferPointer());
 		else
 		LogWarnBox() << (char*)pErrorBlob->GetBufferPointer() << "\n\n (You can ignore the next error from Gothic about too small video memory!)";
@@ -98,7 +98,7 @@ XRESULT D3D11PShader::LoadShader(const char* pixelShader, std::vector<D3D10_SHAD
 	File = pixelShader;
 
 	// Compile shaders
-	if(FAILED(CompileShaderFromFile(pixelShader, "PSMain", "ps_4_0", &psBlob, makros)))
+	if (FAILED(CompileShaderFromFile(pixelShader, "PSMain", "ps_4_0", &psBlob, makros)))
 	{
 		return XR_FAILED;
 	}

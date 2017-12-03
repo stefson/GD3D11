@@ -53,8 +53,8 @@ XRESULT D3D11PFX_DistanceBlur::Render(RenderToTextureBuffer* fxbuffer)
 
 	// Restore rendertargets
 	engine->GetContext()->OMSetRenderTargets(1, &oldRTV, oldDSV);
-	if(oldRTV)oldRTV->Release();
-	if(oldDSV)oldDSV->Release();
+	if (oldRTV)oldRTV->Release();
+	if (oldDSV)oldDSV->Release();
 
 	return XR_SUCCESS;
 }

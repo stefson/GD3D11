@@ -20,7 +20,7 @@ D3D11HDShader::D3D11HDShader(void)
 	// Insert into state-map
 	ID = 0;
 
-	if(!D3D11ObjectIDs::HDShadersByID.empty())
+	if (!D3D11ObjectIDs::HDShadersByID.empty())
 		ID = D3D11ObjectIDs::Counters.HDShadersCounter + 1;
 
 	D3D11ObjectIDs::HDShadersByID[ID] = this;
@@ -32,8 +32,8 @@ D3D11HDShader::~D3D11HDShader(void)
 	// Remove from state map
 	Toolbox::EraseByElement(D3D11ObjectIDs::HDShadersByID, this);
 
-	if(HullShader)HullShader->Release();
-	if(DomainShader)DomainShader->Release();
+	if (HullShader)HullShader->Release();
+	if (DomainShader)DomainShader->Release();
 
 	for (unsigned int i = 0; i < ConstantBuffers.size(); i++)
 	{
@@ -80,7 +80,7 @@ HRESULT D3D11HDShader::CompileShaderFromFile(const CHAR* szFileName, LPCSTR szEn
 	}
 	if (pErrorBlob)
 	{
-		/*if(Engine->SwapchainCreated())
+		/*if (Engine->SwapchainCreated())
 		Engine->GetConsole()->PostConsoleMessage((char*)pErrorBlob->GetBufferPointer());
 		else
 		LogWarnBox() << (char*)pErrorBlob->GetBufferPointer() << "\n\n (You can ignore the next error from Gothic about too small video memory!)";
@@ -105,12 +105,12 @@ XRESULT D3D11HDShader::LoadShader(const char* hullShader, const char* domainShad
 	File = hullShader;
 
 	// Compile shaders
-	if(FAILED(CompileShaderFromFile(hullShader, "HSMain", "hs_5_0", &hsBlob)))
+	if (FAILED(CompileShaderFromFile(hullShader, "HSMain", "hs_5_0", &hsBlob)))
 	{
 		return XR_FAILED;
 	}
 
-	if(FAILED(CompileShaderFromFile(domainShader, "DSMain", "ds_5_0", &dsBlob)))
+	if (FAILED(CompileShaderFromFile(domainShader, "DSMain", "ds_5_0", &dsBlob)))
 	{
 		return XR_FAILED;
 	}

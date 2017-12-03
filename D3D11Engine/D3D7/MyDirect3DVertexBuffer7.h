@@ -66,7 +66,7 @@ public:
     HRESULT STDMETHODCALLTYPE GetVertexBufferDesc(LPD3DVERTEXBUFFERDESC lpVBDesc) {
         DebugWrite("MyDirect3DVertexBuffer7::GetVertexBufferDesc\n");
 
-		if(lpVBDesc)*lpVBDesc = OriginalDesc;
+		if (lpVBDesc)*lpVBDesc = OriginalDesc;
         return S_OK;
     }
 
@@ -76,7 +76,7 @@ public:
 		// Pass the lock-call through to our engine
 		UINT size = 0;
 		VertexBuffer->Map(D3D11VertexBuffer::EMapFlags::M_WRITE_DISCARD, lplpData, &size);
-		if(lpdwSize)*lpdwSize = size;
+		if (lpdwSize)*lpdwSize = size;
 
         return S_OK;
     }

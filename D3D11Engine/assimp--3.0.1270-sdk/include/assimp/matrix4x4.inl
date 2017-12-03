@@ -169,7 +169,7 @@ inline aiMatrix4x4t<TReal>& aiMatrix4x4t<TReal>::Inverse()
 {
 	// Compute the reciprocal determinant
 	const TReal det = Determinant();
-	if(det == static_cast<TReal>(0.0)) 
+	if (det == static_cast<TReal>(0.0)) 
 	{
 		// Matrix not invertible. Setting all elements to nan is not really
 		// correct in a mathematical sense but it is easy to debug for the
@@ -273,15 +273,15 @@ inline void aiMatrix4x4t<TReal>::Decompose (aiVector3t<TReal>& scaling, aiQuater
 	}
 
 	// and remove all scaling from the matrix
-	if(scaling.x)
+	if (scaling.x)
 	{
 		vRows[0] /= scaling.x;
 	}
-	if(scaling.y)
+	if (scaling.y)
 	{
 		vRows[1] /= scaling.y;
 	}
-	if(scaling.z)
+	if (scaling.z)
 	{
 		vRows[2] /= scaling.z;
 	}

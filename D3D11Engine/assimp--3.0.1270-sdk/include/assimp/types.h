@@ -271,7 +271,7 @@ struct aiString
 
 	/** Copy a std::string to the aiString */
 	void Set( const std::string& pString) {
-		if( pString.length() > MAXLEN - 1) {
+		if ( pString.length() > MAXLEN - 1) {
 			return;
 		}
 		length = pString.length();
@@ -282,7 +282,7 @@ struct aiString
 	/** Copy a const char* to the aiString */
 	void Set( const char* sz) {
 		const size_t len = ::strlen(sz);
-		if( len > MAXLEN - 1) {
+		if ( len > MAXLEN - 1) {
 			return;
 		}
 		length = len;

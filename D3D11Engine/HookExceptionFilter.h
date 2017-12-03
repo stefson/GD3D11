@@ -39,7 +39,7 @@ __declspec( selectany ) std::vector<std::string> _functions;
 static void __AddDbgFuncCall(const std::string& fn, int threadID, bool out)
 {
 	std::string o;
-	if(out)
+	if (out)
 		o = "OUT - ";
 	else
 		o = "IN - ";

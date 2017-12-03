@@ -117,7 +117,7 @@ public:
 
 	const char* GetVisualName()
 	{
-		if(GetMeshSoftSkinList()->NumInArray > 0)
+		if (GetMeshSoftSkinList()->NumInArray > 0)
 			return GetMeshSoftSkinList()->Array[0]->GetObjectName();
 
 		return "";
@@ -147,7 +147,7 @@ public:
 		int r = HookedFunctions::OriginalFunctions.original_zCModelPrototypeLoadModelASC(thisptr, file);
 
 		// Pre-Load this model for us, too
-		if(r)
+		if (r)
 		{
 			
 		}
@@ -162,7 +162,7 @@ public:
 		int r = HookedFunctions::OriginalFunctions.original_zCModelPrototypeReadMeshAndTreeMSB(thisptr, i, f);
 
 		// Pre-Load this model for us, too
-		if(r)
+		if (r)
 		{
 		}
 
@@ -191,7 +191,7 @@ public:
 	/** Returns the name of the first Mesh inside this */
 	const char* GetVisualName()
 	{
-		if(GetMeshSoftSkinList()->NumInArray > 0)
+		if (GetMeshSoftSkinList()->NumInArray > 0)
 			return GetMeshSoftSkinList()->Array[0]->GetObjectName();
 
 		return "";
@@ -337,7 +337,7 @@ public:
 	/** Fills a vector of (viewspace) bone-transformation matrices for this frame */
 	void GetBoneTransforms(std::vector<D3DXMATRIX>* transforms, zCVob* vob = NULL)
 	{
-		if(!GetNodeList())
+		if (!GetNodeList())
 			return;
 
 		// Make this static so we don't reallocate the memory every time
@@ -350,7 +350,7 @@ public:
 			tptr[i] = &node->TrafoObjToCam;
 
 			// Calculate transform for this node
-			if(parent)	
+			if (parent)	
 			{
 				node->TrafoObjToCam = parent->TrafoObjToCam * node->Trafo;
 			}else
@@ -369,7 +369,7 @@ public:
 
 	const char* GetVisualName()
 	{
-		if(GetMeshSoftSkinList()->NumInArray > 0)
+		if (GetMeshSoftSkinList()->NumInArray > 0)
 			return GetMeshSoftSkinList()->Array[0]->GetObjectName();
 
 		return "";

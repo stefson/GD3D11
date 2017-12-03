@@ -600,7 +600,7 @@ HRESULT CompileShaderFromFile( WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR sz
     // open the file
     HANDLE hFile = CreateFileW( str, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING,
         FILE_FLAG_SEQUENTIAL_SCAN, NULL );
-    if( INVALID_HANDLE_VALUE == hFile )
+    if ( INVALID_HANDLE_VALUE == hFile )
         return E_FAIL;
 
     // Get the file size
@@ -609,12 +609,12 @@ HRESULT CompileShaderFromFile( WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR sz
 
     // create enough space for the file data
     BYTE* pFileData = new BYTE[ FileSize.LowPart ];
-    if( !pFileData )
+    if ( !pFileData )
         return E_OUTOFMEMORY;
 
     // read the data in
     DWORD BytesRead;
-    if( !ReadFile( hFile, pFileData, FileSize.LowPart, &BytesRead, NULL ) )
+    if ( !ReadFile( hFile, pFileData, FileSize.LowPart, &BytesRead, NULL ) )
         return E_FAIL; 
 
     CloseHandle( hFile );
@@ -627,7 +627,7 @@ HRESULT CompileShaderFromFile( WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR sz
 
     delete []pFileData;
 
-    if( FAILED(hr) )
+    if ( FAILED(hr) )
     {
         OutputDebugStringA( (char*)pErrorBlob->GetBufferPointer() );
 		LogError() << "(char*)pErrorBlob->GetBufferPointer()";

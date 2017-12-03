@@ -95,7 +95,7 @@ void FileDownloader::DownloadThreadFunc(FileDownloader* dl, const std::string& u
 	// Start download
 	HRESULT hr = URLDownloadToFile(NULL, url.c_str(), targetFile.c_str(), 0, &dl->Progress);
 
-	if(FAILED(hr))
+	if (FAILED(hr))
 	{
 		LogWarn() << "Failed to start contentdownload of " << url << " to " << targetFile;
 		dl->Progress.hasFailed = true;

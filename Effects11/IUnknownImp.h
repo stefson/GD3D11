@@ -22,19 +22,19 @@
  \
 HRESULT STDMETHODCALLTYPE Class##::QueryInterface(REFIID iid, _COM_Outptr_ LPVOID *ppv) override \
 { \
-    if( !ppv ) \
+    if ( !ppv ) \
         return E_INVALIDARG; \
  \
     *ppv = nullptr; \
-    if(IsEqualIID(iid, IID_IUnknown)) \
+    if (IsEqualIID(iid, IID_IUnknown)) \
     { \
         *ppv = (IUnknown*)((Interface*)this); \
     } \
-    else if(IsEqualIID(iid, IID_##Interface)) \
+    else if (IsEqualIID(iid, IID_##Interface)) \
     { \
         *ppv = (Interface *)this; \
     } \
-    else if(IsEqualIID(iid, IID_##BaseInterface)) \
+    else if (IsEqualIID(iid, IID_##BaseInterface)) \
     { \
         *ppv = (BaseInterface *)this; \
     } \

@@ -42,7 +42,7 @@ ClusterFit::ClusterFit( ColourSet const* colours, int flags )
 
 	// initialise the metric
 	bool perceptual = ( ( m_flags & kColourMetricPerceptual ) != 0 );
-	if( perceptual )
+	if ( perceptual )
 		m_metric = Vec4( 0.2126f, 0.7152f, 0.0722f, 0.0f );
 	else
 		m_metric = VEC4_CONST( 1.0f );	
@@ -90,13 +90,13 @@ bool ClusterFit::ConstructOrdering( Vec3 const& axis, int iteration )
 		bool same = true;
 		for( int i = 0; i < count; ++i )
 		{
-			if( order[i] != prev[i] )
+			if ( order[i] != prev[i] )
 			{
 				same = false;
 				break;
 			}
 		}
-		if( same )
+		if ( same )
 			return false;
 	}
 	
@@ -185,7 +185,7 @@ void ClusterFit::Compress3( void* block )
 				Vec4 error = e5.SplatX() + e5.SplatY() + e5.SplatZ();
 				
 				// keep the solution if it wins
-				if( CompareAnyLessThan( error, besterror ) )
+				if ( CompareAnyLessThan( error, besterror ) )
 				{
 					beststart = a;
 					bestend = b;
@@ -196,7 +196,7 @@ void ClusterFit::Compress3( void* block )
 				}
 
 				// advance
-				if( j == count )
+				if ( j == count )
 					break;
 				part1 += m_points_weights[j];
 				++j;
@@ -207,22 +207,22 @@ void ClusterFit::Compress3( void* block )
 		}
 		
 		// stop if we didn't improve in this iteration
-		if( bestiteration != iterationIndex )
+		if ( bestiteration != iterationIndex )
 			break;
 			
 		// advance if possible
 		++iterationIndex;
-		if( iterationIndex == m_iterationCount )
+		if ( iterationIndex == m_iterationCount )
 			break;
 			
 		// stop if a new iteration is an ordering that has already been tried
 		Vec3 axis = ( bestend - beststart ).GetVec3();
-		if( !ConstructOrdering( axis, iterationIndex ) )
+		if ( !ConstructOrdering( axis, iterationIndex ) )
 			break;
 	}
 		
 	// save the block if necessary
-	if( CompareAnyLessThan( besterror, m_besterror ) )
+	if ( CompareAnyLessThan( besterror, m_besterror ) )
 	{
 		// remap the indices
 		u8 const* order = ( u8* )m_order + 16*bestiteration;
@@ -320,7 +320,7 @@ void ClusterFit::Compress4( void* block )
 					Vec4 error = e5.SplatX() + e5.SplatY() + e5.SplatZ();
 
 					// keep the solution if it wins
-					if( CompareAnyLessThan( error, besterror ) )
+					if ( CompareAnyLessThan( error, besterror ) )
 					{
 						beststart = a;
 						bestend = b;
@@ -332,14 +332,14 @@ void ClusterFit::Compress4( void* block )
 					}
 
 					// advance
-					if( k == count )
+					if ( k == count )
 						break;
 					part2 += m_points_weights[k];
 					++k;
 				}
 
 				// advance
-				if( j == count )
+				if ( j == count )
 					break;
 				part1 += m_points_weights[j];
 				++j;
@@ -350,22 +350,22 @@ void ClusterFit::Compress4( void* block )
 		}
 		
 		// stop if we didn't improve in this iteration
-		if( bestiteration != iterationIndex )
+		if ( bestiteration != iterationIndex )
 			break;
 			
 		// advance if possible
 		++iterationIndex;
-		if( iterationIndex == m_iterationCount )
+		if ( iterationIndex == m_iterationCount )
 			break;
 			
 		// stop if a new iteration is an ordering that has already been tried
 		Vec3 axis = ( bestend - beststart ).GetVec3();
-		if( !ConstructOrdering( axis, iterationIndex ) )
+		if ( !ConstructOrdering( axis, iterationIndex ) )
 			break;
 	}
 
 	// save the block if necessary
-	if( CompareAnyLessThan( besterror, m_besterror ) )
+	if ( CompareAnyLessThan( besterror, m_besterror ) )
 	{
 		// remap the indices
 		u8 const* order = ( u8* )m_order + 16*bestiteration;

@@ -15,7 +15,7 @@ namespace VersionCheck
 	{
 		FILE* f = fopen(file.c_str(), "rb");
 
-		if(f)
+		if (f)
 		{
 			fclose(f);
 			return true;
@@ -37,17 +37,17 @@ namespace VersionCheck
 		std::string dir_upper(dir);
 		std::transform(dir_upper.begin(), dir_upper.end(), dir_upper.begin(), ::toupper);
 
-		if(dir_upper.find("\\SYSTEM") == std::string::npos)
+		if (dir_upper.find("\\SYSTEM") == std::string::npos)
 		{
 			dir_upper += "\\system";
 		}
 
 		std::string exe = dir_upper + std::string("\\Gothic.exe");
 
-		if(!FileExists(exe))
+		if (!FileExists(exe))
 		{
 			exe = dir_upper + std::string("\\Gothic2.exe");
-			if(!FileExists(exe))
+			if (!FileExists(exe))
 			{
 				LogWarnBox() << "Failed to find the Game-Executable! Continuing without version-check...";
 				return;
@@ -58,7 +58,7 @@ namespace VersionCheck
 		MapFileAndCheckSum(exe.c_str(), &headersum, &checksum);
 
 #ifdef BUILD_GOTHIC_2_6_fix
-		if(headersum != CHECKSUM_G2_2_6_FIX)
+		if (headersum != CHECKSUM_G2_2_6_FIX)
 		{
 			LogWarnBox() << "Your Gothic-Executable does not match the checksum for this Version of GD3D11!\n"
 				"This DLL only works for Gothic 2 - The Night Of The Raven, Version 2.6 (fix) or the System-Pack.\n\n"
@@ -68,7 +68,7 @@ namespace VersionCheck
 #endif
 
 #ifdef BUILD_GOTHIC_1_08k
-		if(headersum != CHECKSUM_G2_1_08k)
+		if (headersum != CHECKSUM_G2_1_08k)
 		{
 			LogWarnBox() << "Your Gothic-Executable does not match the checksum for this Version of GD3D11!\n"
 				"This DLL only works for Gothic 1 - Version 1.08k_mod or the System-Pack.\n\n"
@@ -86,7 +86,7 @@ namespace VersionCheck
 		// Do this by checking one file in the folder which should always be there
 		// Not the best solution, but we'll just roll with it at this point as
 		// this is only a hint for the user that he forgot to copy over the GD3D11-Folder
-		if(!Toolbox::FileExists("GD3D11\\data\\DeviceEnum.bin"))
+		if (!Toolbox::FileExists("GD3D11\\data\\DeviceEnum.bin"))
 		{
 			LogErrorBox() << "Failed to find GD3D11 systemfiles!\n"
 							 "This means: The GD3D11-folder is missing or corrupt. This can be the result of only copying the ddraw.dll into Gothics system-folder, which isn't enough!\n\n"

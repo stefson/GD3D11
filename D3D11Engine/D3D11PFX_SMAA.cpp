@@ -28,9 +28,9 @@ D3D11PFX_SMAA::~D3D11PFX_SMAA(void)
 	delete EdgesTex;
 	delete BlendTex;
 
-	if(AreaTextureSRV)AreaTextureSRV->Release();
-	if(SearchTextureSRV)SearchTextureSRV->Release();
-	if(SMAAShader)SMAAShader->Release();
+	if (AreaTextureSRV)AreaTextureSRV->Release();
+	if (SearchTextureSRV)SearchTextureSRV->Release();
+	if (SMAAShader)SMAAShader->Release();
 }
 
 HRESULT D3DX11CreateEffectFromFile_RES(
@@ -52,7 +52,7 @@ HRESULT D3DX11CreateEffectFromFile_RES(
 
 
 	char* Errors;
-	if(ErrorsBuffer)
+	if (ErrorsBuffer)
 	{
 		Errors=(char *)ErrorsBuffer->GetBufferPointer();
 
@@ -60,7 +60,7 @@ HRESULT D3DX11CreateEffectFromFile_RES(
 
 		strcpy_s((char *)&Msg,ErrorsBuffer->GetBufferSize(),Errors);
 
-		if(ShaderBuffer)
+		if (ShaderBuffer)
 		{
 			LogError() << ErrorsBuffer->GetBufferPointer();
 			return E_FAIL;
@@ -87,8 +87,8 @@ bool D3D11PFX_SMAA::Init()
 
 	LE(D3DX11CreateEffectFromFile_RES("System\\GD3D11\\Shaders\\SMAA.fx", NULL, "fx_5_0", D3D10_SHADER_ENABLE_STRICTNESS | D3D10_SHADER_OPTIMIZATION_LEVEL3, 0, engine->GetDevice(), NULL,&SMAAShader, NULL));
 	
-	if(AreaTextureSRV)AreaTextureSRV->Release();
-	if(SearchTextureSRV)SearchTextureSRV->Release();
+	if (AreaTextureSRV)AreaTextureSRV->Release();
+	if (SearchTextureSRV)SearchTextureSRV->Release();
 
 
 	/*SMAAShader->AddCustomVariable("colorTex", CVT_SHADER_RES_VIEW, &ColorTexIdx);
@@ -142,7 +142,7 @@ void D3D11PFX_SMAA::RenderPostFX(ID3D11ShaderResourceView* renderTargetSRV)
 
 	RenderToTextureBuffer* TempRTV = FxRenderer->GetTempBuffer();
 
-	if(!EdgesTex)
+	if (!EdgesTex)
 	{
 		OnResize(INT2(engine->GetResolution().x, engine->GetResolution().y));
 	}
@@ -216,7 +216,7 @@ void D3D11PFX_SMAA::RenderPostFX(ID3D11ShaderResourceView* renderTargetSRV)
 	engine->GetContext()->PSSetShaderResources(0, 1, &srv);
 
 
-	if(Engine::GAPI->GetRendererState()->RendererSettings.SharpenFactor > 0.0f)
+	if (Engine::GAPI->GetRendererState()->RendererSettings.SharpenFactor > 0.0f)
 	{	
 		D3D11PShader* sharpenPS = engine->GetShaderManager()->GetPShader("PS_PFX_Sharpen");
 		sharpenPS->Apply();
@@ -239,8 +239,8 @@ void D3D11PFX_SMAA::RenderPostFX(ID3D11ShaderResourceView* renderTargetSRV)
 	engine->GetContext()->PSSetShaderResources(0, 3, NoSRV);
 
 	engine->GetContext()->OMSetRenderTargets(1, &OldRTV, OldDSV);
-	if(OldRTV)OldRTV->Release();
-	if(OldDSV)OldDSV->Release();
+	if (OldRTV)OldRTV->Release();
+	if (OldDSV)OldDSV->Release();
 
 	engine->SetDefaultStates(true);
 }
@@ -305,8 +305,8 @@ void D3D11PFX_SMAA::OnResize(const INT2& size)
 
 	LE(D3DX11CreateEffectFromFile_RES("system\\GD3D11\\shaders\\SMAA.fx", &Makros[0], "fx_5_0", D3D10_SHADER_OPTIMIZATION_LEVEL3, 0, engine->GetDevice(), NULL,&SMAAShader, NULL));
 	
-	if(AreaTextureSRV)AreaTextureSRV->Release();
-	if(SearchTextureSRV)SearchTextureSRV->Release();
+	if (AreaTextureSRV)AreaTextureSRV->Release();
+	if (SearchTextureSRV)SearchTextureSRV->Release();
 
 	// Load the textures
 	D3DX11_IMAGE_LOAD_INFO img;

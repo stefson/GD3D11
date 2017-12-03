@@ -21,7 +21,7 @@ D2DSettingsDialog::D2DSettingsDialog(D2DView* view, D2DSubView* parent) : D2DDia
 	ResolutionSetting = 0;
 	for(unsigned int i=0;i<Resolutions.size();i++)
 	{
-		if( Resolutions[i].Width == Engine::GraphicsEngine->GetResolution().x &&
+		if ( Resolutions[i].Width == Engine::GraphicsEngine->GetResolution().x &&
 			Resolutions[i].Height == Engine::GraphicsEngine->GetResolution().y)
 		{
 			ResolutionSetting = i;
@@ -347,7 +347,7 @@ void D2DSettingsDialog::ResolutionSliderChanged(SV_Slider* sender, void* userdat
 
 	unsigned int val = (unsigned int)(sender->GetValue() + 0.5f);
 
-	if(val >= d->Resolutions.size())
+	if (val >= d->Resolutions.size())
 		val = d->Resolutions.size()-1;
 
 	d->ResolutionSetting = val;
@@ -359,7 +359,7 @@ void D2DSettingsDialog::CloseButtonPressed(SV_Button* sender, void* userdata)
 {
 	D2DSettingsDialog* d = (D2DSettingsDialog *)userdata;
 
-	if(d->NeedsApply())
+	if (d->NeedsApply())
 		d->ApplyButtonPressed(sender, userdata);
 
 	d->SetHidden(true);
@@ -375,14 +375,14 @@ void D2DSettingsDialog::ApplyButtonPressed(SV_Button* sender, void* userdata)
 	D2DSettingsDialog* d = (D2DSettingsDialog *)userdata;
 
 	// Check for shader reload
-	if( d->InitialSettings.EnableShadows != settings.EnableShadows ||
+	if ( d->InitialSettings.EnableShadows != settings.EnableShadows ||
 		d->InitialSettings.EnableSoftShadows != settings.EnableSoftShadows)
 	{
 		Engine::GraphicsEngine->ReloadShaders();
 	}
 
 	// Check for resolution change
-	if( d->Resolutions[d->ResolutionSetting].Width != Engine::GraphicsEngine->GetResolution().x ||
+	if ( d->Resolutions[d->ResolutionSetting].Width != Engine::GraphicsEngine->GetResolution().x ||
 		d->Resolutions[d->ResolutionSetting].Height != Engine::GraphicsEngine->GetResolution().y)
 	{
 		Engine::GraphicsEngine->OnResize(INT2(d->Resolutions[d->ResolutionSetting].Width, d->Resolutions[d->ResolutionSetting].Height));
@@ -395,14 +395,14 @@ bool D2DSettingsDialog::NeedsApply()
 	GothicRendererSettings& settings = Engine::GAPI->GetRendererState()->RendererSettings;
 
 	// Check for shader reload
-	if( InitialSettings.EnableShadows != settings.EnableShadows ||
+	if ( InitialSettings.EnableShadows != settings.EnableShadows ||
 		InitialSettings.EnableSoftShadows != settings.EnableSoftShadows)
 	{
 		return true;
 	}
 
 	// Check for resolution change
-	if( Resolutions[ResolutionSetting].Width != Engine::GraphicsEngine->GetResolution().x ||
+	if ( Resolutions[ResolutionSetting].Width != Engine::GraphicsEngine->GetResolution().x ||
 			Resolutions[ResolutionSetting].Height != Engine::GraphicsEngine->GetResolution().y)
 	{
 		return true;
@@ -420,7 +420,7 @@ void D2DSettingsDialog::OnOpenedSettings()
 /** Sets if this control is hidden */
 void D2DSettingsDialog::SetHidden(bool hidden)
 {
-	if(IsHidden() && !hidden)
+	if (IsHidden() && !hidden)
 		OnOpenedSettings(); // Changed visibility from hidden to non-hidden
 
 	D2DDialog::SetHidden(hidden);

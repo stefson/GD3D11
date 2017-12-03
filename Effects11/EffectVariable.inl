@@ -1016,7 +1016,7 @@ struct TVariable : public IBaseInterface
             DPF(0, "%s: Invalid typecast", pFuncName);
             return &g_InvalidClassInstanceVariable;
         }
-        else if( pMemberData == nullptr )
+        else if ( pMemberData == nullptr )
         {
             DPF(0, "%s: Non-global class instance variables (members of structs or classes) and class instances "
                    "inside tbuffers are not supported.", pFuncName );
@@ -3501,7 +3501,7 @@ static HRESULT ValidateTextureType(_In_ ID3D11ShaderResourceView *pView, _In_ EO
                 D3D11_BUFFER_DESC BufDesc;
                 pBuffer->GetDesc( &BufDesc );
                 SAFE_RELEASE( pBuffer );
-                if( BufDesc.MiscFlags & D3D11_RESOURCE_MISC_BUFFER_STRUCTURED )
+                if ( BufDesc.MiscFlags & D3D11_RESOURCE_MISC_BUFFER_STRUCTURED )
                 {
                     DPF(0, "%s: Resource type mismatch; %s expected, StructuredBuffer provided.", pFuncName, GetTextureTypeNameFromEnum(ObjectType));
                     return E_INVALIDARG;
@@ -3553,7 +3553,7 @@ static HRESULT ValidateTextureType(_In_ ID3D11ShaderResourceView *pView, _In_ EO
                 D3D11_BUFFER_DESC BufDesc;
                 pBuffer->GetDesc( &BufDesc );
                 SAFE_RELEASE( pBuffer );
-                if( BufDesc.MiscFlags & D3D11_RESOURCE_MISC_BUFFER_STRUCTURED )
+                if ( BufDesc.MiscFlags & D3D11_RESOURCE_MISC_BUFFER_STRUCTURED )
                 {
                     return S_OK;
                 }
@@ -3702,7 +3702,7 @@ static HRESULT ValidateTextureType(_In_ ID3D11UnorderedAccessView *pView, _In_ E
                 D3D11_BUFFER_DESC BufDesc;
                 pBuffer->GetDesc( &BufDesc );
                 SAFE_RELEASE( pBuffer );
-                if( BufDesc.MiscFlags & D3D11_RESOURCE_MISC_BUFFER_STRUCTURED )
+                if ( BufDesc.MiscFlags & D3D11_RESOURCE_MISC_BUFFER_STRUCTURED )
                 {
                     DPF(0, "%s: Resource type mismatch; %s expected, an RWStructuredBuffer provided.", pFuncName, GetTextureTypeNameFromEnum(ObjectType));
                     return E_INVALIDARG;
@@ -3742,7 +3742,7 @@ static HRESULT ValidateTextureType(_In_ ID3D11UnorderedAccessView *pView, _In_ E
                 D3D11_BUFFER_DESC BufDesc;
                 pBuffer->GetDesc( &BufDesc );
                 SAFE_RELEASE( pBuffer );
-                if( BufDesc.MiscFlags & D3D11_RESOURCE_MISC_BUFFER_STRUCTURED )
+                if ( BufDesc.MiscFlags & D3D11_RESOURCE_MISC_BUFFER_STRUCTURED )
                 {
                     return S_OK;
                 }
@@ -4277,7 +4277,7 @@ HRESULT TBlendVariable<IBaseInterface>::SetBlendState(uint32_t Index, ID3D11Blen
 
     CHECK_SCALAR_BOUNDS(Index);
 
-    if( !Data.pBlend[Index].IsUserManaged )
+    if ( !Data.pBlend[Index].IsUserManaged )
     {
         // Save original state object in case we UndoSet
         assert( pMemberData[Index].Type == MDT_BlendState );
@@ -4303,7 +4303,7 @@ HRESULT TBlendVariable<IBaseInterface>::UndoSetBlendState(uint32_t Index)
 
     CHECK_SCALAR_BOUNDS(Index);
 
-    if( !Data.pBlend[Index].IsUserManaged )
+    if ( !Data.pBlend[Index].IsUserManaged )
     {
         return S_FALSE;
     }
@@ -4326,9 +4326,9 @@ HRESULT TBlendVariable<IBaseInterface>::GetBackingStore(uint32_t Index, D3D11_BL
 
     CHECK_OBJECT_SCALAR_BOUNDS(Index, pBlendDesc);
 
-    if( Data.pBlend[Index].IsUserManaged )
+    if ( Data.pBlend[Index].IsUserManaged )
     {
-        if( Data.pBlend[Index].pBlendObject )
+        if ( Data.pBlend[Index].pBlendObject )
         {
             Data.pBlend[Index].pBlendObject->GetDesc( pBlendDesc );
         }
@@ -4403,7 +4403,7 @@ HRESULT TDepthStencilVariable<IBaseInterface>::SetDepthStencilState(uint32_t Ind
 
     CHECK_SCALAR_BOUNDS(Index);
 
-    if( !Data.pDepthStencil[Index].IsUserManaged )
+    if ( !Data.pDepthStencil[Index].IsUserManaged )
     {
         // Save original state object in case we UndoSet
         assert( pMemberData[Index].Type == MDT_DepthStencilState );
@@ -4428,7 +4428,7 @@ HRESULT TDepthStencilVariable<IBaseInterface>::UndoSetDepthStencilState(_In_ uin
 
     CHECK_SCALAR_BOUNDS(Index);
 
-    if( !Data.pDepthStencil[Index].IsUserManaged )
+    if ( !Data.pDepthStencil[Index].IsUserManaged )
     {
         return S_FALSE;
     }
@@ -4451,9 +4451,9 @@ HRESULT TDepthStencilVariable<IBaseInterface>::GetBackingStore(uint32_t Index, D
 
     CHECK_OBJECT_SCALAR_BOUNDS(Index, pDepthStencilDesc);
 
-    if( Data.pDepthStencil[Index].IsUserManaged )
+    if ( Data.pDepthStencil[Index].IsUserManaged )
     {
-        if( Data.pDepthStencil[Index].pDSObject )
+        if ( Data.pDepthStencil[Index].pDSObject )
         {
             Data.pDepthStencil[Index].pDSObject->GetDesc( pDepthStencilDesc );
         }
@@ -4528,7 +4528,7 @@ HRESULT TRasterizerVariable<IBaseInterface>::SetRasterizerState(uint32_t Index, 
 
     CHECK_SCALAR_BOUNDS(Index);
 
-    if( !Data.pRasterizer[Index].IsUserManaged )
+    if ( !Data.pRasterizer[Index].IsUserManaged )
     {
         // Save original state object in case we UndoSet
         assert( pMemberData[Index].Type == MDT_RasterizerState );
@@ -4554,7 +4554,7 @@ HRESULT TRasterizerVariable<IBaseInterface>::UndoSetRasterizerState(uint32_t Ind
 
     CHECK_SCALAR_BOUNDS(Index);
 
-    if( !Data.pRasterizer[Index].IsUserManaged )
+    if ( !Data.pRasterizer[Index].IsUserManaged )
     {
         return S_FALSE;
     }
@@ -4577,9 +4577,9 @@ HRESULT TRasterizerVariable<IBaseInterface>::GetBackingStore(uint32_t Index, D3D
 
     CHECK_OBJECT_SCALAR_BOUNDS(Index, pRasterizerDesc);
 
-    if( Data.pRasterizer[Index].IsUserManaged )
+    if ( Data.pRasterizer[Index].IsUserManaged )
     {
-        if( Data.pRasterizer[Index].pRasterizerObject )
+        if ( Data.pRasterizer[Index].pRasterizerObject )
         {
             Data.pRasterizer[Index].pRasterizerObject->GetDesc( pRasterizerDesc );
         }
@@ -4655,7 +4655,7 @@ HRESULT TSamplerVariable<IBaseInterface>::SetSampler(uint32_t Index, ID3D11Sampl
     // Replace all references to the old shader block with this one
     GetEffect()->ReplaceSamplerReference(&Data.pSampler[Index], pSampler);
 
-    if( !Data.pSampler[Index].IsUserManaged )
+    if ( !Data.pSampler[Index].IsUserManaged )
     {
         // Save original state object in case we UndoSet
         assert( pMemberData[Index].Type == MDT_SamplerState );
@@ -4679,7 +4679,7 @@ HRESULT TSamplerVariable<IBaseInterface>::UndoSetSampler(_In_ uint32_t Index)
 
     CHECK_SCALAR_BOUNDS(Index);
 
-    if( !Data.pSampler[Index].IsUserManaged )
+    if ( !Data.pSampler[Index].IsUserManaged )
     {
         return S_FALSE;
     }
@@ -4705,9 +4705,9 @@ HRESULT TSamplerVariable<IBaseInterface>::GetBackingStore(uint32_t Index, D3D11_
 
     CHECK_OBJECT_SCALAR_BOUNDS(Index, pDesc);
 
-    if( Data.pSampler[Index].IsUserManaged )
+    if ( Data.pSampler[Index].IsUserManaged )
     {
-        if( Data.pSampler[Index].pD3DObject )
+        if ( Data.pSampler[Index].pD3DObject )
         {
             Data.pSampler[Index].pD3DObject->GetDesc( pDesc );
         }

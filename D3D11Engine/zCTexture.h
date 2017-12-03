@@ -40,12 +40,12 @@ public:
 
 		Engine::GAPI->SetBoundTexture(7, NULL); // Slot 7 is reserved for this
 
-		/*if(ret)
+		/*if (ret)
 		{
 			zCTexture* tx = (zCTexture *)thisptr;
 			MyDirectDrawSurface7* srf = tx->GetSurface();
 
-			if(srf)
+			if (srf)
 			{
 				//LogInfo() << "Loading " << tx->GetNameWithoutExt();
 				srf->LoadAdditionalResources(tx);
@@ -75,7 +75,7 @@ public:
 
 		int p = n.find_last_of('.');
 
-		if(p != std::string::npos)
+		if (p != std::string::npos)
 			n.resize(p);
 
 		return n;
@@ -115,20 +115,20 @@ public:
 		if (GetCacheState()==zRES_CACHED_IN)
 		{
 			TouchTimeStamp();
-		} else if(GetCacheState()==zRES_CACHED_OUT || zCTextureCacheHack::ForceCacheIn)
+		} else if (GetCacheState()==zRES_CACHED_OUT || zCTextureCacheHack::ForceCacheIn)
 		{
 
 			/*TouchTimeStampLocal();
 			zCTextureCacheHack::NumNotCachedTexturesInFrame++;
 		
-			if(zCTextureCacheHack::NumNotCachedTexturesInFrame >= zCTextureCacheHack::MAX_NOT_CACHED_TEXTURES_IN_FRAME)
+			if (zCTextureCacheHack::NumNotCachedTexturesInFrame >= zCTextureCacheHack::MAX_NOT_CACHED_TEXTURES_IN_FRAME)
 			{
 				// Don't let the renderer cache in all textures at once!
 				return zRES_CACHED_OUT;
 			}*/
 
 #ifndef PUBLIC_RELEASE
-			if(1 == 0) // Small debugger-only section to get the name of currently cachedin texture
+			if (1 == 0) // Small debugger-only section to get the name of currently cachedin texture
 			{
 				std::string name = GetName();
 				LogInfo() << "CacheIn on Texture: " << name;
@@ -142,9 +142,9 @@ public:
 		}
 
 		MyDirectDrawSurface7* surface = GetSurface();
-		if(!surface || !surface->IsSurfaceReady())
+		if (!surface || !surface->IsSurfaceReady())
 		{
-			if(zCTextureCacheHack::ForceCacheIn)
+			if (zCTextureCacheHack::ForceCacheIn)
 				zCResourceManager::GetResourceManager()->CacheIn(this, -1);
 			else
 				return zRES_CACHED_OUT;

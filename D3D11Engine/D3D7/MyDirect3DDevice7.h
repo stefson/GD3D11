@@ -39,7 +39,7 @@ public:
 
 		// Load the caps we created the "device" with
 		FILE* f = fopen("system\\GD3D11\\data\\DeviceEnum.bin", "rb");
-		if(!f)
+		if (!f)
 		{
 			LogError() << "Failed to open the system\\GD3D11\\data\\DeviceEnum.bin file. Can't fake a device for Gothic now!";
 			return;
@@ -162,8 +162,8 @@ public:
 
 
 
-#define LOG_RENDERSTATE(s, v) if(State == s){LogInfo() << "Set " #s " to value " << v << " (uint), " << *(float *)&v << " (float)";}
-#define LOG_RENDERSTATE_COLOR(s, v) if(State == s){LogInfo() << "Set " #s " to value " << v << " (uint), " << LogColorHelper(v) << " (D3DCOLOR)";}
+#define LOG_RENDERSTATE(s, v) if (State == s){LogInfo() << "Set " #s " to value " << v << " (uint), " << *(float *)&v << " (float)";}
+#define LOG_RENDERSTATE_COLOR(s, v) if (State == s){LogInfo() << "Set " #s " to value " << v << " (uint), " << LogColorHelper(v) << " (D3DCOLOR)";}
 #define LOG_UNIMPLMENTED_RENDERSTATE(x) {LogWarn() << "Unimplemented Renderstate : " << #x << " (uint: " << Value << ")";}
 
     HRESULT STDMETHODCALLTYPE SetRenderState(D3DRENDERSTATETYPE State,DWORD Value) {
@@ -300,7 +300,7 @@ public:
 		// Bind the texture
 		MyDirectDrawSurface7* surface = (MyDirectDrawSurface7 *)lplpTexture;
 		
-		if(surface)
+		if (surface)
 		{
 			surface->BindToSlot(dwStage);
 		}else
@@ -321,7 +321,7 @@ public:
 
 		// Update stateblock
 		
-		/*if(Settings::LogD3D7StateChanges)
+		/*if (Settings::LogD3D7StateChanges)
 		{
 			switch(Type)
 			{
@@ -409,11 +409,11 @@ public:
 			case D3DTSS_TEXCOORDINDEX: LogInfo() << "Set  D3DTSS_TEXCOORDINDEX  to " << Value; 
 				//Value &= ~7;		
 
-				if((Value & D3DTSS_TCI_CAMERASPACEREFLECTIONVECTOR) == D3DTSS_TCI_CAMERASPACEREFLECTIONVECTOR)
+				if ((Value & D3DTSS_TCI_CAMERASPACEREFLECTIONVECTOR) == D3DTSS_TCI_CAMERASPACEREFLECTIONVECTOR)
 					LogInfo() << " - D3DTSS_TCI_CAMERASPACEREFLECTIONVECTOR";
-				else if((Value & D3DTSS_TCI_CAMERASPACEPOSITION) == D3DTSS_TCI_CAMERASPACEPOSITION)
+				else if ((Value & D3DTSS_TCI_CAMERASPACEPOSITION) == D3DTSS_TCI_CAMERASPACEPOSITION)
 					LogInfo() << " - D3DTSS_TCI_CAMERASPACEPOSITION";	
-				else if((Value & D3DTSS_TCI_CAMERASPACENORMAL) == D3DTSS_TCI_CAMERASPACENORMAL)
+				else if ((Value & D3DTSS_TCI_CAMERASPACENORMAL) == D3DTSS_TCI_CAMERASPACENORMAL)
 					LogInfo() << " - D3DTSS_TCI_CAMERASPACENORMAL";
 
 				LogInfo() << "Setting to index :" << (Value & ~(D3DTSS_TCI_CAMERASPACENORMAL | D3DTSS_TCI_CAMERASPACEPOSITION | D3DTSS_TCI_CAMERASPACEREFLECTIONVECTOR));
@@ -431,14 +431,14 @@ public:
 			case D3DTSS_BUMPENVLSCALE: LogInfo() << "Set  D3DTSS_BUMPENVLSCALE  to " << Value; break;
 			case D3DTSS_BUMPENVLOFFSET:LogInfo() << "Set  D3DTSS_BUMPENVLOFFSET to " << Value; break;
 			case D3DTSS_TEXTURETRANSFORMFLAGS: LogInfo() << "Set  D3DTSS_TEXTURETRANSFORMFLAGS to " << Value; 
-				if((Value & D3DTTFF_COUNT1) == D3DTTFF_COUNT1) LogInfo() << " - D3DTTFF_COUNT1";
-				if((Value & D3DTTFF_COUNT2) == D3DTTFF_COUNT2) LogInfo() << " - D3DTTFF_COUNT2";
-				if((Value & D3DTTFF_COUNT3) == D3DTTFF_COUNT3) LogInfo() << " - D3DTTFF_COUNT3";
-				if((Value & D3DTTFF_COUNT4) == D3DTTFF_COUNT4) LogInfo() << " - D3DTTFF_COUNT4";
-				if((Value & D3DTTFF_DISABLE) == D3DTTFF_DISABLE) LogInfo() << " - D3DTTFF_DISABLE";
-				if((Value & D3DTTFF_PROJECTED) == D3DTTFF_PROJECTED) LogInfo() << " - D3DTTFF_PROJECTED";
+				if ((Value & D3DTTFF_COUNT1) == D3DTTFF_COUNT1) LogInfo() << " - D3DTTFF_COUNT1";
+				if ((Value & D3DTTFF_COUNT2) == D3DTTFF_COUNT2) LogInfo() << " - D3DTTFF_COUNT2";
+				if ((Value & D3DTTFF_COUNT3) == D3DTTFF_COUNT3) LogInfo() << " - D3DTTFF_COUNT3";
+				if ((Value & D3DTTFF_COUNT4) == D3DTTFF_COUNT4) LogInfo() << " - D3DTTFF_COUNT4";
+				if ((Value & D3DTTFF_DISABLE) == D3DTTFF_DISABLE) LogInfo() << " - D3DTTFF_DISABLE";
+				if ((Value & D3DTTFF_PROJECTED) == D3DTTFF_PROJECTED) LogInfo() << " - D3DTTFF_PROJECTED";
 				
-				if(!Value)
+				if (!Value)
 					D3D11Wnd::Window.GetEngine()->SetTransform(D3D11Engine::TransformStateType::D3DTRANSFORMSTATE_TEXTURE0, NULL);
 
 				break;
@@ -450,34 +450,34 @@ public:
 		switch(Type)
 			{
 			case D3DTSS_COLOROP: 
-				if(Stage < 2)
+				if (Stage < 2)
 					state->GraphicsState.FF_Stages[Stage].ColorOp = (FixedFunctionStage::EColorOp)Value;
 				else
 					LogWarn() << "Gothic uses more than 2 TextureStages!";
 				break; 
 
 			case D3DTSS_COLORARG1:
-				if(Stage < 2)
+				if (Stage < 2)
 					state->GraphicsState.FF_Stages[Stage].ColorArg1 = (FixedFunctionStage::ETextureArg)Value;
 				break;	
 
 			case D3DTSS_COLORARG2:
-				if(Stage < 2)
+				if (Stage < 2)
 					state->GraphicsState.FF_Stages[Stage].ColorArg2 = (FixedFunctionStage::ETextureArg)Value;
 				break;
 
 			case D3DTSS_ALPHAOP:
-				if(Stage < 2)
+				if (Stage < 2)
 					state->GraphicsState.FF_Stages[Stage].AlphaOp = (FixedFunctionStage::EColorOp)Value;
 				 break;	   
 
 			case D3DTSS_ALPHAARG1: 	
-				if(Stage < 2)
+				if (Stage < 2)
 					state->GraphicsState.FF_Stages[Stage].ColorArg1 = (FixedFunctionStage::ETextureArg)Value;
 				break;
 
 			case D3DTSS_ALPHAARG2:    
-				if(Stage < 2)
+				if (Stage < 2)
 					state->GraphicsState.FF_Stages[Stage].ColorArg2 = (FixedFunctionStage::ETextureArg)Value;
 				break;
 
@@ -486,7 +486,7 @@ public:
 			case D3DTSS_BUMPENVMAT10: break;  
 			case D3DTSS_BUMPENVMAT11: break;  
 			case D3DTSS_TEXCOORDINDEX: 
-				if(Value > 7) // This means that some other flag was set, and the only case that happens is for reflections
+				if (Value > 7) // This means that some other flag was set, and the only case that happens is for reflections
 				{
 					state->GraphicsState.SetGraphicsSwitch(GSWITCH_REFLECTIONS, true);
 				}else
@@ -572,12 +572,12 @@ public:
 		vp.MaxZ = lpViewport->dvMaxZ;
 
 		// Viewport is sometimes off by a few pixels when using scaling
-		/*if(abs((int)vp.Height - Engine::GraphicsEngine->GetResolution().y) < 10)
+		/*if (abs((int)vp.Height - Engine::GraphicsEngine->GetResolution().y) < 10)
 		{
 			vp.Height = Engine::GraphicsEngine->GetResolution().y;
 		}
 
-		if(abs((int)vp.Width - Engine::GraphicsEngine->GetResolution().x) < 10)
+		if (abs((int)vp.Width - Engine::GraphicsEngine->GetResolution().x) < 10)
 		{
 			vp.Width = Engine::GraphicsEngine->GetResolution().x;
 		}*/
@@ -655,7 +655,7 @@ public:
     HRESULT STDMETHODCALLTYPE DrawIndexedPrimitiveVB(D3DPRIMITIVETYPE d3dptPrimitiveType, LPDIRECT3DVERTEXBUFFER7 lpd3dVertexBuffer, DWORD dwStartVertex, DWORD dwNumVertices, LPWORD lpwIndices, DWORD dwIndexCount, DWORD dwFlags) {
         DebugWrite("MyDirect3DDevice7::DrawIndexedPrimitiveVB");
         
-		if(d3dptPrimitiveType == D3DPRIMITIVETYPE::D3DPT_TRIANGLEFAN)
+		if (d3dptPrimitiveType == D3DPRIMITIVETYPE::D3DPT_TRIANGLEFAN)
 			return S_OK;
 
 		//DrawPrimIndexBuffer->UpdateBuffer(lpwIndices, dwIndexCount * sizeof(VERTEX_INDEX));
@@ -670,7 +670,7 @@ public:
 		
 		//return S_OK;
 
-		if(dptPrimitiveType != D3DPT_TRIANGLEFAN) // Handle lines here
+		if (dptPrimitiveType != D3DPT_TRIANGLEFAN) // Handle lines here
 		{
 			return S_OK;
 		}
@@ -725,7 +725,7 @@ public:
 
 		Engine::GraphicsEngine->SetActivePixelShader("PS_FixedFunctionPipe");
 
-		if(dptPrimitiveType == D3DPT_TRIANGLEFAN)
+		if (dptPrimitiveType == D3DPT_TRIANGLEFAN)
 		{
 			std::vector<ExVertexStruct> vertexList;
 			WorldConverter::TriangleFanToList(&exv[0], dwVertexCount, &vertexList);
@@ -733,7 +733,7 @@ public:
 			Engine::GraphicsEngine->DrawVertexArray(&vertexList[0], vertexList.size());
 		}else
 		{
-			if(dptPrimitiveType ==  D3DPT_TRIANGLELIST)
+			if (dptPrimitiveType ==  D3DPT_TRIANGLELIST)
 				Engine::GraphicsEngine->DrawVertexArray(&exv[0], dwVertexCount);
 		}
 
@@ -752,7 +752,7 @@ public:
     HRESULT STDMETHODCALLTYPE DrawPrimitiveVB(D3DPRIMITIVETYPE d3dptPrimitiveType, LPDIRECT3DVERTEXBUFFER7 lpd3dVertexBuffer, DWORD dwStartVertex, DWORD dwNumVertices, DWORD dwFlags) {
         DebugWrite("MyDirect3DDevice7::DrawPrimitiveVB");
        
-		if(d3dptPrimitiveType < 4) // Handle lines here
+		if (d3dptPrimitiveType < 4) // Handle lines here
 		{
 			return S_OK;
 		}
@@ -802,7 +802,7 @@ public:
 			CONTEXT* context = NULL;
 			for(UINT32 i = pStack; i > pStack - 0x1000; i--)
 			{
-				if(*(UINT32 *)i == 0x0001003f || *(UINT32 *)i == 0x0001001f )
+				if (*(UINT32 *)i == 0x0001003f || *(UINT32 *)i == 0x0001001f )
 				{
 					context = (CONTEXT *)i;
 					break;

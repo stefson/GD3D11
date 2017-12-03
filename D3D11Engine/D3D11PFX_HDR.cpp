@@ -84,8 +84,8 @@ XRESULT D3D11PFX_HDR::Render(RenderToTextureBuffer* fxbuffer)
 	ID3D11ShaderResourceView* srv = NULL;
 	engine->GetContext()->PSSetShaderResources(1,1,&srv);
 	engine->GetContext()->OMSetRenderTargets(1, &oldRTV, oldDSV);
-	if(oldRTV)oldRTV->Release();
-	if(oldDSV)oldDSV->Release();
+	if (oldRTV)oldRTV->Release();
+	if (oldDSV)oldDSV->Release();
 
 	return XR_SUCCESS;
 }

@@ -174,7 +174,7 @@ public:
 	{
 		DebugWrite("MyDirectDraw::CreateSurface\n");
 	
-		if(lpDDSurfaceDesc2->ddsCaps.dwCaps & DDSCAPS_OFFSCREENPLAIN)
+		if (lpDDSurfaceDesc2->ddsCaps.dwCaps & DDSCAPS_OFFSCREENPLAIN)
 		{
 			LogInfo() << "Forcing DDSCAPS_OFFSCREENPLAIN-Surface to 24-Bit";
 			// Set up the pixel format for 24-bit RGB (8-8-8).
@@ -195,7 +195,7 @@ public:
 		// Figure out format
 		DXGI_FORMAT fmt;
 		int bpp = 0;
-		if((lpDDSurfaceDesc2->ddpfPixelFormat.dwFlags & DDPF_FOURCC) == DDPF_FOURCC)
+		if ((lpDDSurfaceDesc2->ddpfPixelFormat.dwFlags & DDPF_FOURCC) == DDPF_FOURCC)
 		{
 			switch(lpDDSurfaceDesc2->ddpfPixelFormat.dwFourCC)
 			{
@@ -217,14 +217,14 @@ public:
 			bpp = 32;
 		}
 
-		if(redBits == 5)
+		if (redBits == 5)
 			bpp=16;
 
 		// Create surface
 		MyDirectDrawSurface7* mySurface = new MyDirectDrawSurface7();
 
 		// Create a fake mipmap chain if needed
-		if(lpDDSurfaceDesc2->ddsCaps.dwCaps & DDSCAPS_MIPMAP)
+		if (lpDDSurfaceDesc2->ddsCaps.dwCaps & DDSCAPS_MIPMAP)
 		{
 			DDSURFACEDESC2 desc = *lpDDSurfaceDesc2;
 
@@ -241,7 +241,7 @@ public:
 				desc.ddsCaps.dwCaps2 |= DDSCAPS2_MIPMAPSUBLEVEL;
 				mip->InitFakeSurface(&desc, mySurface, level);
 
-				if(!lastMip)
+				if (!lastMip)
 				{
 					mySurface->AddAttachedSurface((LPDIRECTDRAWSURFACE7)mip);
 				}

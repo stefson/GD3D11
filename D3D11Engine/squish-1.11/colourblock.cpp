@@ -33,9 +33,9 @@ static int FloatToInt( float a, int limit )
 	int i = ( int )( a + 0.5f );
 
 	// clamp to the limit
-	if( i < 0 )
+	if ( i < 0 )
 		i = 0;
-	else if( i > limit )
+	else if ( i > limit )
 		i = limit; 
 
 	// done
@@ -80,7 +80,7 @@ void WriteColourBlock3( Vec3::Arg start, Vec3::Arg end, u8 const* indices, void*
 
 	// remap the indices
 	u8 remapped[16];
-	if( a <= b )
+	if ( a <= b )
 	{
 		// use the indices directly
 		for( int i = 0; i < 16; ++i )
@@ -92,9 +92,9 @@ void WriteColourBlock3( Vec3::Arg start, Vec3::Arg end, u8 const* indices, void*
 		std::swap( a, b );
 		for( int i = 0; i < 16; ++i )
 		{
-			if( indices[i] == 0 )
+			if ( indices[i] == 0 )
 				remapped[i] = 1;
-			else if( indices[i] == 1 )
+			else if ( indices[i] == 1 )
 				remapped[i] = 0;
 			else
 				remapped[i] = indices[i];
@@ -113,14 +113,14 @@ void WriteColourBlock4( Vec3::Arg start, Vec3::Arg end, u8 const* indices, void*
 
 	// remap the indices
 	u8 remapped[16];
-	if( a < b )
+	if ( a < b )
 	{
 		// swap a and b
 		std::swap( a, b );
 		for( int i = 0; i < 16; ++i )
 			remapped[i] = ( indices[i] ^ 0x1 ) & 0x3;
 	}
-	else if( a == b )
+	else if ( a == b )
 	{
 		// use index 0
 		for( int i = 0; i < 16; ++i )
@@ -173,7 +173,7 @@ void DecompressColour( u8* rgba, void const* block, bool isDxt1 )
 		int c = codes[i];
 		int d = codes[4 + i];
 
-		if( isDxt1 && a <= b )
+		if ( isDxt1 && a <= b )
 		{
 			codes[8 + i] = ( u8 )( ( c + d )/2 );
 			codes[12 + i] = 0;

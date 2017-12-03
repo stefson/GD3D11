@@ -81,7 +81,7 @@ public:
 	static void __fastcall hooked_zCWorldDisposeVobs(void* thisptr, void* unknwn, zCTree<zCVob>* tree)
 	{
 		// Reset only if this is the main world, inventory worlds are handled differently
-		if((zCWorld *)thisptr == Engine::GAPI->GetLoadedWorldInfo()->MainWorld)
+		if ((zCWorld *)thisptr == Engine::GAPI->GetLoadedWorldInfo()->MainWorld)
 			Engine::GAPI->ResetVobs();
 
 		HookedFunctions::OriginalFunctions.original_zCWorldDisposeVobs(thisptr, tree);
@@ -102,7 +102,7 @@ public:
 		//hook_infunc
 		//LogInfo() << "Loading: " << fileName.ToChar();
 
-		//if(loadMode != 1)
+		//if (loadMode != 1)
 		//	Engine::GAPI->ResetWorld();
 
 		Engine::GAPI->OnLoadWorld(fileName.ToChar(), loadMode);
@@ -121,7 +121,7 @@ public:
 	{
 		hook_infunc
 		HookedFunctions::OriginalFunctions.original_oCWorldInsertVobInWorld(thisptr, vob);
-		if(vob->GetVisual())
+		if (vob->GetVisual())
 		{
 			//LogInfo() << vob->GetVisual()->GetFileExtension(0);
 			//Engine::GAPI->OnAddVob(vob); 
@@ -136,7 +136,7 @@ public:
 
 		HookedFunctions::OriginalFunctions.original_zCWorldVobAddedToWorld(thisptr, vob);
 
-		if(vob->GetVisual())
+		if (vob->GetVisual())
 		{
 			//LogInfo() << vob->GetVisual()->GetFileExtension(0);
 			Engine::GAPI->OnAddVob(vob, (zCWorld *)thisptr);
@@ -150,12 +150,12 @@ public:
 		Engine::GAPI->SetTextureTestBindMode(false, "");
 
 		//HookedFunctions::OriginalFunctions.original_zCWorldRender(thisptr, camera);
-		if(thisptr == Engine::GAPI->GetLoadedWorldInfo()->MainWorld)
+		if (thisptr == Engine::GAPI->GetLoadedWorldInfo()->MainWorld)
 		{
 			Engine::GAPI->OnWorldUpdate();
 
 			// Main world
-			if(Engine::GAPI->GetRendererState()->RendererSettings.AtmosphericScattering)
+			if (Engine::GAPI->GetRendererState()->RendererSettings.AtmosphericScattering)
 			{
 				HookedFunctions::OriginalFunctions.original_zCWorldRender(thisptr, camera);
 				//zCWorld::fake_zCWorldRender(thisptr, camera);

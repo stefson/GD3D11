@@ -43,7 +43,7 @@ XRESULT D3D11PFX_GodRays::Render(RenderToTextureBuffer* fxbuffer)
 	D3DXVec3TransformCoord(&sunViewPosition, &sunPosition, &view); // This is for checking if the light is behind the camera
 	D3DXVec3TransformCoord(&sunPosition, &sunPosition, &viewProj);
 
-	if(sunViewPosition.z < 0.0f)
+	if (sunViewPosition.z < 0.0f)
 		return XR_SUCCESS; // Don't render the godrays when the sun is behind the camera
 
 	GodRayZoomConstantBuffer gcb;
@@ -57,10 +57,10 @@ XRESULT D3D11PFX_GodRays::Render(RenderToTextureBuffer* fxbuffer)
 
 	gcb.GR_ColorMod = Engine::GAPI->GetRendererState()->RendererSettings.GodRayColorMod;
 
-	if(abs(gcb.GR_Center.x - 0.5f) > 0.5f)
+	if (abs(gcb.GR_Center.x - 0.5f) > 0.5f)
 		gcb.GR_Weight *= std::max(0.0f, 1.0f - (abs(gcb.GR_Center.x - 0.5f) - 0.5f) / 0.5f);
 
-	if(abs(gcb.GR_Center.y - 0.5f) > 0.5f)
+	if (abs(gcb.GR_Center.y - 0.5f) > 0.5f)
 		gcb.GR_Weight *= std::max(0.0f, 1.0f - (abs(gcb.GR_Center.y - 0.5f) - 0.5f) / 0.5f);
 
 
@@ -115,7 +115,7 @@ XRESULT D3D11PFX_GodRays::Render(RenderToTextureBuffer* fxbuffer)
 	engine->GetContext()->RSSetViewports(1, &vp);
 
 	engine->GetContext()->OMSetRenderTargets(1, &oldRTV, oldDSV);
-	if(oldRTV)oldRTV->Release();
-	if(oldDSV)oldDSV->Release();
+	if (oldRTV)oldRTV->Release();
+	if (oldDSV)oldDSV->Release();
 	return XR_SUCCESS;
 }

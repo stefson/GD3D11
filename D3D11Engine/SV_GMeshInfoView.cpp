@@ -106,7 +106,7 @@ void SV_GMeshInfoView::SetObjectOrientation(float yaw, float pitch, float distan
 /** Updates the view */
 void SV_GMeshInfoView::UpdateView()
 {
-	if(IsHidden())
+	if (IsHidden())
 		return;
 
 	D3D11GraphicsEngine* g = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
@@ -195,14 +195,14 @@ void SV_GMeshInfoView::DrawMeshes()
 	g->SetupVS_ExPerInstanceConstantBuffer();
 
 	VisualTesselationSettings* ts = NULL;
-	if(VisualInfo)
+	if (VisualInfo)
 		ts = &VisualInfo->TesselationInfo;
 
 	// Draw each texture
 	for(auto it = Meshes.begin(); it != Meshes.end(); it++)
 	{
 		// Set up tesselation if wanted
-		if(ts && !(*it).second->IndicesPNAEN.empty() && ts->buffer.VT_TesselationFactor > 0.0f)
+		if (ts && !(*it).second->IndicesPNAEN.empty() && ts->buffer.VT_TesselationFactor > 0.0f)
 		{
 			g->Setup_PNAEN(D3D11GraphicsEngine::PNAEN_Default);
 			ts->Constantbuffer->BindToDomainShader(1);
@@ -210,7 +210,7 @@ void SV_GMeshInfoView::DrawMeshes()
 
 			
 
-			if((*it).first->CacheIn(-1) == zRES_CACHED_IN)
+			if ((*it).first->CacheIn(-1) == zRES_CACHED_IN)
 			{
 				MyDirectDrawSurface7* surface = (*it).first->GetSurface();
 				ID3D11ShaderResourceView* srv = surface->GetNormalmap() ? ((D3D11Texture *)surface->GetNormalmap())->GetShaderResourceView() : NULL;
@@ -221,7 +221,7 @@ void SV_GMeshInfoView::DrawMeshes()
 											(*it).second->MeshIndexBufferPNAEN,
 											(*it).second->IndicesPNAEN.size() );
 			}
-		}else if(VisualInfo)
+		}else if (VisualInfo)
 		{
 			g->GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			g->GetContext()->DSSetShader(NULL, NULL, NULL);
@@ -229,7 +229,7 @@ void SV_GMeshInfoView::DrawMeshes()
 			g->SetActiveHDShader("");
 			g->SetActiveVertexShader("VS_Ex");
 
-			if((*it).first && (*it).first->CacheIn(-1) == zRES_CACHED_IN)
+			if ((*it).first && (*it).first->CacheIn(-1) == zRES_CACHED_IN)
 			{
 				// Draw
 				(*it).first->Bind(0);
@@ -275,7 +275,7 @@ bool SV_GMeshInfoView::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wPara
 	switch(msg)
 	{
 	case WM_MOUSEMOVE:
-		if(IsDraggingView)
+		if (IsDraggingView)
 		{
 			POINT p = D2DView::GetCursorPosition();
 
@@ -300,7 +300,7 @@ bool SV_GMeshInfoView::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wPara
 			D2D1_RECT_F panelrect = D2D1::RectF(Panel->GetPosition().x + clientRectAbs.left, 
 				Panel->GetPosition().y + clientRectAbs.top, 
 				Panel->GetSize().width + clientRectAbs.left, Panel->GetSize().height + clientRectAbs.top);
-			if(PointInsideRect(D2D1::Point2F((float)p.x, (float)p.y), panelrect))
+			if (PointInsideRect(D2D1::Point2F((float)p.x, (float)p.y), panelrect))
 			{
 				IsDraggingView = true;
 				LastDragPosition = p;
@@ -310,7 +310,7 @@ bool SV_GMeshInfoView::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wPara
 		break;
 
 	case WM_LBUTTONUP:
-		if(IsDraggingView)
+		if (IsDraggingView)
 		{
 			IsDraggingView = false;
 			return false;
@@ -324,7 +324,7 @@ bool SV_GMeshInfoView::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wPara
 				D2D1_RECT_F panelrect = D2D1::RectF(Panel->GetPosition().x + clientRectAbs.left, 
 					Panel->GetPosition().y + clientRectAbs.top, 
 					Panel->GetSize().width + clientRectAbs.left, Panel->GetSize().height + clientRectAbs.top);
-				if(PointInsideRect(D2D1::Point2F((float)p.x, (float)p.y), panelrect))
+				if (PointInsideRect(D2D1::Point2F((float)p.x, (float)p.y), panelrect))
 				{
 					FOV += GET_WHEEL_DELTA_WPARAM(wParam) * ZOOM_SPEED;
 					UpdateView();

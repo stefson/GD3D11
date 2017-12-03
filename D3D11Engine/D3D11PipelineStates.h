@@ -17,7 +17,7 @@ public:
 		// Depth test parameters
 		depthStencilDesc.DepthEnable = ds.DepthBufferEnabled;
 
-		if(ds.DepthWriteEnabled)
+		if (ds.DepthWriteEnabled)
 		{
 			depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 		}else
@@ -53,7 +53,7 @@ public:
 
 	virtual ~D3D11DepthBufferState(void)
 	{
-		if(State)State->Release();
+		if (State)State->Release();
 
 		Toolbox::EraseByElement<UINT8, D3D11DepthBufferState*>(D3D11ObjectIDs::DepthStateByID, this);
 	}
@@ -100,7 +100,7 @@ public:
 
 	virtual ~D3D11BlendStateInfo(void)
 	{
-		if(State)State->Release();
+		if (State)State->Release();
 
 		Toolbox::EraseByElement<UINT8, D3D11BlendStateInfo*>(D3D11ObjectIDs::BlendStateByID, this);
 	}
@@ -122,7 +122,7 @@ public:
 		D3D11_RASTERIZER_DESC rasterizerDesc;
 		rasterizerDesc.CullMode = (D3D11_CULL_MODE)rs.CullMode;
 
-		if(rs.Wireframe)
+		if (rs.Wireframe)
 			rasterizerDesc.FillMode = D3D11_FILL_WIREFRAME;
 		else
 			rasterizerDesc.FillMode = D3D11_FILL_SOLID;
@@ -146,7 +146,7 @@ public:
 
 	virtual ~D3D11RasterizerStateInfo(void)
 	{
-		if(State)State->Release();
+		if (State)State->Release();
 
 		Toolbox::EraseByElement<UINT8, D3D11RasterizerStateInfo*>(D3D11ObjectIDs::RasterizerStateByID, this);
 	}

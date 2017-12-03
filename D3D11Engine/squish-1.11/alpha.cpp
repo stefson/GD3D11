@@ -34,9 +34,9 @@ static int FloatToInt( float a, int limit )
 	int i = ( int )( a + 0.5f );
 
 	// clamp to the limit
-	if( i < 0 )
+	if ( i < 0 )
 		i = 0;
-	else if( i > limit )
+	else if ( i > limit )
 		i = limit; 
 
 	// done
@@ -59,9 +59,9 @@ void CompressAlphaDxt3( u8 const* rgba, int mask, void* block )
 		// set alpha to zero where masked
 		int bit1 = 1 << ( 2*i );
 		int bit2 = 1 << ( 2*i + 1 );
-		if( ( mask & bit1 ) == 0 )
+		if ( ( mask & bit1 ) == 0 )
 			quant1 = 0;
-		if( ( mask & bit2 ) == 0 )
+		if ( ( mask & bit2 ) == 0 )
 			quant2 = 0;
 
 		// pack into the byte
@@ -91,9 +91,9 @@ void DecompressAlphaDxt3( u8* rgba, void const* block )
 
 static void FixRange( int& min, int& max, int steps )
 {
-	if( max - min < steps )
+	if ( max - min < steps )
 		max = std::min( min + steps, 255 );
-	if( max - min < steps )
+	if ( max - min < steps )
 		min = std::max( 0, max - steps );
 }
 
@@ -105,7 +105,7 @@ static int FitCodes( u8 const* rgba, int mask, u8 const* codes, u8* indices )
 	{
 		// check this pixel is valid
 		int bit = 1 << i;
-		if( ( mask & bit ) == 0 )
+		if ( ( mask & bit ) == 0 )
 		{
 			// use the first code
 			indices[i] = 0;
@@ -123,7 +123,7 @@ static int FitCodes( u8 const* rgba, int mask, u8 const* codes, u8* indices )
 			dist *= dist;
 			
 			// compare with the best so far
-			if( dist < least )
+			if ( dist < least )
 			{
 				least = dist;
 				index = j;
@@ -172,18 +172,18 @@ static void WriteAlphaBlock( int alpha0, int alpha1, u8 const* indices, void* bl
 static void WriteAlphaBlock5( int alpha0, int alpha1, u8 const* indices, void* block )
 {
 	// check the relative values of the endpoints
-	if( alpha0 > alpha1 )
+	if ( alpha0 > alpha1 )
 	{
 		// swap the indices
 		u8 swapped[16];
 		for( int i = 0; i < 16; ++i )
 		{
 			u8 index = indices[i];
-			if( index == 0 )
+			if ( index == 0 )
 				swapped[i] = 1;
-			else if( index == 1 )
+			else if ( index == 1 )
 				swapped[i] = 0;
-			else if( index <= 5 )
+			else if ( index <= 5 )
 				swapped[i] = 7 - index;
 			else 
 				swapped[i] = index;
@@ -202,16 +202,16 @@ static void WriteAlphaBlock5( int alpha0, int alpha1, u8 const* indices, void* b
 static void WriteAlphaBlock7( int alpha0, int alpha1, u8 const* indices, void* block )
 {
 	// check the relative values of the endpoints
-	if( alpha0 < alpha1 )
+	if ( alpha0 < alpha1 )
 	{
 		// swap the indices
 		u8 swapped[16];
 		for( int i = 0; i < 16; ++i )
 		{
 			u8 index = indices[i];
-			if( index == 0 )
+			if ( index == 0 )
 				swapped[i] = 1;
-			else if( index == 1 )
+			else if ( index == 1 )
 				swapped[i] = 0;
 			else
 				swapped[i] = 9 - index;
@@ -238,25 +238,25 @@ void CompressAlphaDxt5( u8 const* rgba, int mask, void* block )
 	{
 		// check this pixel is valid
 		int bit = 1 << i;
-		if( ( mask & bit ) == 0 )
+		if ( ( mask & bit ) == 0 )
 			continue;
 
 		// incorporate into the min/max
 		int value = rgba[4*i + 3];
-		if( value < min7 )
+		if ( value < min7 )
 			min7 = value;
-		if( value > max7 )
+		if ( value > max7 )
 			max7 = value;
-		if( value != 0 && value < min5 )
+		if ( value != 0 && value < min5 )
 			min5 = value;
-		if( value != 255 && value > max5 )
+		if ( value != 255 && value > max5 )
 			max5 = value;
 	}
 	
 	// handle the case that no valid range was found
-	if( min5 > max5 )
+	if ( min5 > max5 )
 		min5 = max5;
-	if( min7 > max7 )
+	if ( min7 > max7 )
 		min7 = max7;
 		
 	// fix the range to be the minimum in each case
@@ -286,7 +286,7 @@ void CompressAlphaDxt5( u8 const* rgba, int mask, void* block )
 	int err7 = FitCodes( rgba, mask, codes7, indices7 );
 	
 	// save the block with least error
-	if( err5 <= err7 )
+	if ( err5 <= err7 )
 		WriteAlphaBlock5( min5, max5, indices5, block );
 	else
 		WriteAlphaBlock7( min7, max7, indices7, block );
@@ -303,7 +303,7 @@ void DecompressAlphaDxt5( u8* rgba, void const* block )
 	u8 codes[8];
 	codes[0] = ( u8 )alpha0;
 	codes[1] = ( u8 )alpha1;
-	if( alpha0 <= alpha1 )
+	if ( alpha0 <= alpha1 )
 	{
 		// use 5-alpha codebook
 		for( int i = 1; i < 5; ++i )

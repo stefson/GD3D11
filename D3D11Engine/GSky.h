@@ -1,10 +1,10 @@
 #pragma once
-#include "pch.h"
-#include "WorldConverter.h"
-#include "ConstantBufferStructs.h"
 
-struct AtmosphereSettings
-{
+#include "pch.h"
+#include "ConstantBufferStructs.h"
+#include "WorldConverter.h"
+
+struct AtmosphereSettings {
 	float G;
 	float Kr;
 	float Km;
@@ -20,8 +20,7 @@ struct AtmosphereSettings
 	float SkyTimeScale;
 };
 
-enum ESkyTexture
-{
+enum ESkyTexture {
 	ST_NewWorld,
 	ST_OldWorld
 };
@@ -30,11 +29,11 @@ class zCSkyLayer;
 class zCSkyState;
 class GMesh;
 class D3D11Texture;
-class GSky
-{
+
+class GSky {
 public:
-	GSky(void);
-	~GSky(void);
+	GSky();
+	~GSky();
 
 	/** Creates needed resources by the sky */
 	XRESULT InitSky();
@@ -43,7 +42,7 @@ public:
 	XRESULT RenderSky();
 
 	/** Returns the sky-texture for the passed daytime (0..1) */
-	void GetTextureOfDaytime(float time, D3D11Texture** t1, D3D11Texture** t2, float* factor);
+	void GetTextureOfDaytime(float time, D3D11Texture ** t1, D3D11Texture ** t2, float * factor);
 
 	/** Returns the loaded sky-Dome */
 	GMesh* GetSkyDome();
@@ -55,47 +54,47 @@ public:
 	MeshInfo* GetSkyPlane();
 
 	/** Returns the cloud meshes */
-	std::vector<GMesh *>& GetCloudMeshes();
+	std::vector<GMesh *> & GetCloudMeshes();
 
 	/** Returns the atmospheric parameters */
-	AtmosphereConstantBuffer& GetAtmosphereCB(){return AtmosphereCB;}
+	AtmosphereConstantBuffer & GetAtmosphereCB() { return AtmosphereCB; }
 
 	/** returns atmosphere settings */
-	AtmosphereSettings& GetAtmoshpereSettings(){return Atmosphere;}
+	AtmosphereSettings & GetAtmoshpereSettings() { return Atmosphere; }
 
 	/** Returns the current sky-light color */
 	float4 GetSkylightColor();
 
 	/** Returns the cloud texture */
-	D3D11Texture* GetCloudTexture();
+	D3D11Texture * GetCloudTexture();
 
 	/** Returns the night texture */
-	D3D11Texture* GetNightTexture();
+	D3D11Texture * GetNightTexture();
 
 	/** Returns the current sun color */
 	float3 GetSunColor();
-protected:
 
+protected:
 	/** Loads the sky textures */
 	XRESULT LoadSkyResources();
 
 	/** Adds a sky texture. Sky textures must be in order to make the daytime work */
-	XRESULT AddSkyTexture(const std::string& file);
+	XRESULT AddSkyTexture(const std::string & file);
 
 	/** Sky mesh */
-	GMesh* SkyDome;
+	GMesh * SkyDome;
 
 	/** Skyplane */
-	MeshInfo* SkyPlane;
+	MeshInfo * SkyPlane;
 
 	/** Sky textures by time:
 		1=0	0.25	0.5	  0.75	  1=0
 		Day	Evening	Night Morning Day
 	*/
-	std::vector<D3D11Texture*> SkyTextures;
+	std::vector<D3D11Texture *> SkyTextures;
 
-	D3D11Texture* CloudTexture;
-	D3D11Texture* NightTexture;
+	D3D11Texture * CloudTexture;
+	D3D11Texture * NightTexture;
 
 	D3D11VertexBuffer* SkyPlaneVertexBuffer;
 	ExVertexStruct SkyPlaneVertices[6];
@@ -104,4 +103,3 @@ protected:
 	AtmosphereConstantBuffer AtmosphereCB;
 	AtmosphereSettings Atmosphere;
 };
-

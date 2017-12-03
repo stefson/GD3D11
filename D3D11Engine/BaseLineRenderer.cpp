@@ -173,7 +173,7 @@ void BaseLineRenderer::AddWireframeMesh(const std::vector<ExVertexStruct>& verti
 		D3DXVECTOR3 vx[3];
 		for(int v=0;v<3;v++)
 		{
-			if(world)
+			if (world)
 				D3DXVec3TransformCoord(&vx[v], vertices[indices[i + v]].Position.toD3DXVECTOR3(), world);
 			else
 				vx[v] = *vertices[indices[i + v]].Position.toD3DXVECTOR3();

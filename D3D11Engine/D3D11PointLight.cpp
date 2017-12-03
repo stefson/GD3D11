@@ -23,7 +23,7 @@ D3D11PointLight::D3D11PointLight(VobLightInfo* info, bool dynamicLight)
 	DepthCubemap = NULL;
 	ViewMatricesCB = NULL;
 
-	if(!dynamicLight)
+	if (!dynamicLight)
 	{
 		InitDone = false;
 
@@ -78,7 +78,7 @@ void D3D11PointLight::InitResources()
 	engine->CreateConstantBuffer(&ViewMatricesCB, NULL, sizeof(CubemapGSConstantBuffer));
 
 	// Generate worldmesh cache if we aren't a dynamically added light
-	if(!DynamicLight)
+	if (!DynamicLight)
 	{
 		WorldConverter::WorldMeshCollectPolyRange(LightInfo->Vob->GetPositionWorld(), LightInfo->Vob->GetLightRange(), Engine::GAPI->GetWorldSections(), WorldMeshCache);
 		WorldCacheInvalid = false;
@@ -115,8 +115,8 @@ bool D3D11PointLight::WantsUpdate()
 {
 	// If dynamic, update colorchanging lights too, because they are mostly lamps and campfires
 	// They wouldn't need an update just because of the colorchange, but most of them are dominant lights so it looks better
-	if(Engine::GAPI->GetRendererState()->RendererSettings.EnablePointlightShadows >= GothicRendererSettings::PLS_UPDATE_DYNAMIC)
-		if(LightInfo->Vob->GetLightColor() != LastUpdateColor)
+	if (Engine::GAPI->GetRendererState()->RendererSettings.EnablePointlightShadows >= GothicRendererSettings::PLS_UPDATE_DYNAMIC)
+		if (LightInfo->Vob->GetLightColor() != LastUpdateColor)
 			return true;
 
 	return false;
@@ -125,10 +125,10 @@ bool D3D11PointLight::WantsUpdate()
 /** Draws the surrounding scene into the cubemap */
 void D3D11PointLight::RenderCubemap(bool forceUpdate)
 {
-	if(!InitDone)
+	if (!InitDone)
 		return;
 
-	//if(!GetAsyncKeyState('X'))
+	//if (!GetAsyncKeyState('X'))
 	//	return;
 	D3D11GraphicsEngineBase* engineBase = (D3D11GraphicsEngineBase *)Engine::GraphicsEngine;
 	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine *) engineBase; // TODO: Remove and use newer system!
@@ -138,7 +138,7 @@ void D3D11PointLight::RenderCubemap(bool forceUpdate)
 	//vEyePt += D3DXVECTOR3(0,1,0) * 20.0f; // Move lightsource out of the ground or other objects (torches!)
 	// TODO: Move the actual lightsource up too!
 
-	/*if(WantsUpdate())
+	/*if (WantsUpdate())
 	{
 		// Move lights with colorchanges around a bit to make it look more light torches
 		vEyePt.y += (float4(LastUpdateColor).x - 0.5f) * LIGHT_COLORCHANGE_POS_MOD;
@@ -149,13 +149,13 @@ void D3D11PointLight::RenderCubemap(bool forceUpdate)
     D3DXVECTOR3 vLookDir;
     D3DXVECTOR3 vUpDir;
 
-	if(!NeedsUpdate() && !WantsUpdate())
+	if (!NeedsUpdate() && !WantsUpdate())
 	{
-		if(!forceUpdate)
+		if (!forceUpdate)
 			return; // Don't update when we don't need to
 	}else
 	{
-		if(LightInfo->Vob->GetPositionWorld() != LastUpdatePosition)
+		if (LightInfo->Vob->GetPositionWorld() != LastUpdatePosition)
 		{
 			// Position changed, refresh our caches
 			VobCache.clear();
@@ -178,27 +178,27 @@ void D3D11PointLight::RenderCubemap(bool forceUpdate)
 	// Generate cubemap view-matrices
     vLookDir = D3DXVECTOR3( 1.0f, 0.0f, 0.0f ) + vEyePt;
     vUpDir = D3DXVECTOR3( 0.0f, 1.0f, 0.0f );
-	if(dbg)Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(vEyePt, float4(1.0f,0,0,1)), LineVertex((vLookDir - vEyePt) * 50.0f + vEyePt, float4(1.0f,1.0f,0,1)));
+	if (dbg)Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(vEyePt, float4(1.0f,0,0,1)), LineVertex((vLookDir - vEyePt) * 50.0f + vEyePt, float4(1.0f,1.0f,0,1)));
     D3DXMatrixLookAtLH( &CubeMapViewMatrices[0], &vEyePt, &vLookDir, &vUpDir );
     vLookDir = D3DXVECTOR3( -1.0f, 0.0f, 0.0f ) + vEyePt;
     vUpDir = D3DXVECTOR3( 0.0f, 1.0f, 0.0f );
-	if(dbg)Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(vEyePt, float4(1.0f,0,0,1)), LineVertex((vLookDir - vEyePt) * 50.0f + vEyePt, float4(1.0f,1.0f,0,1)));
+	if (dbg)Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(vEyePt, float4(1.0f,0,0,1)), LineVertex((vLookDir - vEyePt) * 50.0f + vEyePt, float4(1.0f,1.0f,0,1)));
     D3DXMatrixLookAtLH( &CubeMapViewMatrices[1], &vEyePt, &vLookDir, &vUpDir );
     vLookDir = D3DXVECTOR3( 0.0f, 0.0f + 1.0f, 0.0f ) + vEyePt;
     vUpDir = D3DXVECTOR3( 0.0f, 0.0f, -1.0f );
-	if(dbg)Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(vEyePt, float4(1.0f,0,0,1)), LineVertex((vLookDir - vEyePt) * 50.0f + vEyePt, float4(1.0f,1.0f,0,1)));
+	if (dbg)Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(vEyePt, float4(1.0f,0,0,1)), LineVertex((vLookDir - vEyePt) * 50.0f + vEyePt, float4(1.0f,1.0f,0,1)));
     D3DXMatrixLookAtLH( &CubeMapViewMatrices[2], &vEyePt, &vLookDir, &vUpDir );
     vLookDir = D3DXVECTOR3( 0.0f, 0.0f - 1.0f, 0.0f ) + vEyePt;
     vUpDir = D3DXVECTOR3( 0.0f, 0.0f, 1.0f );
-	if(dbg)Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(vEyePt, float4(1.0f,0,0,1)), LineVertex((vLookDir - vEyePt) * 50.0f + vEyePt, float4(1.0f,1.0f,0,1)));
+	if (dbg)Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(vEyePt, float4(1.0f,0,0,1)), LineVertex((vLookDir - vEyePt) * 50.0f + vEyePt, float4(1.0f,1.0f,0,1)));
     D3DXMatrixLookAtLH( &CubeMapViewMatrices[3], &vEyePt, &vLookDir, &vUpDir );
     vLookDir = D3DXVECTOR3( 0.0f, 0.0f, 1.0f ) + vEyePt;
     vUpDir = D3DXVECTOR3( 0.0f, 1.0f, 0.0f );
-	if(dbg)Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(vEyePt, float4(1.0f,0,0,1)), LineVertex((vLookDir - vEyePt) * 50.0f + vEyePt, float4(1.0f,1.0f,0,1)));
+	if (dbg)Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(vEyePt, float4(1.0f,0,0,1)), LineVertex((vLookDir - vEyePt) * 50.0f + vEyePt, float4(1.0f,1.0f,0,1)));
     D3DXMatrixLookAtLH( &CubeMapViewMatrices[4], &vEyePt, &vLookDir, &vUpDir );
     vLookDir = D3DXVECTOR3( 0.0f, 0.0f, -1.0f ) + vEyePt;
     vUpDir = D3DXVECTOR3( 0.0f, 1.0f, 0.0f );
-	if(dbg)Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(vEyePt, float4(1.0f,0,0,1)), LineVertex((vLookDir - vEyePt) * 50.0f + vEyePt, float4(1.0f,1.0f,0,1)));
+	if (dbg)Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(vEyePt, float4(1.0f,0,0,1)), LineVertex((vLookDir - vEyePt) * 50.0f + vEyePt, float4(1.0f,1.0f,0,1)));
     D3DXMatrixLookAtLH( &CubeMapViewMatrices[5], &vEyePt, &vLookDir, &vUpDir );
 
 	for(int i=0;i<6;i++)
@@ -233,7 +233,7 @@ void D3D11PointLight::RenderCubemap(bool forceUpdate)
 	//	RenderCubemapFace(CubeMapViewMatrices[i], proj, i);
 	RenderFullCubemap();
 
-	if(dbg)
+	if (dbg)
 	{
 		for(auto it = VobCache.begin();it!=VobCache.end();it++)
 			Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(vEyePt, float4(1.0f,0,0,1)), LineVertex((*it)->Vob->GetPositionWorld(), float4(1.0f,1.0f,0,1)));
@@ -267,7 +267,7 @@ void D3D11PointLight::RenderFullCubemap()
 	std::map<MeshKey, WorldMeshInfo*, cmpMeshKey>* wc = &WorldMeshCache;
 
 	// Don't use the cache if we have moved
-	if(WorldCacheInvalid)
+	if (WorldCacheInvalid)
 		wc = NULL;
 
 	engine->RenderShadowCube(LightInfo->Vob->GetPositionWorld(), range, DepthCubemap, NULL, NULL, false, LightInfo->IsIndoorVob, noNPCs, &VobCache, &SkeletalVobCache, wc);
@@ -288,7 +288,7 @@ void D3D11PointLight::RenderCubemapFace(const D3DXMATRIX& view, const D3DXMATRIX
 	// Replace gothics camera
 	Engine::GAPI->SetCameraReplacementPtr(&cr);
 
-	if(engine->GetDummyCubeRT())
+	if (engine->GetDummyCubeRT())
 		engine->GetContext()->ClearRenderTargetView(engine->GetDummyCubeRT()->GetRTVCubemapFace(faceIdx), (float *)&float4(0,0,0,0));
 
 	// Disable shadows for NPCs
@@ -311,7 +311,7 @@ void D3D11PointLight::RenderCubemapFace(const D3DXMATRIX& view, const D3DXMATRIX
 /** Binds the shadowmap to the pixelshader */
 void D3D11PointLight::OnRenderLight()
 {	
-	if(!InitDone)
+	if (!InitDone)
 		return;
 
 	DepthCubemap->BindToPixelShader(((D3D11GraphicsEngineBase *)Engine::GraphicsEngine)->GetContext(), 3);
@@ -320,7 +320,7 @@ void D3D11PointLight::OnRenderLight()
 /** Debug-draws the cubemap to the screen */
 void D3D11PointLight::DebugDrawCubeMap()
 {
-	if(!InitDone)
+	if (!InitDone)
 		return;
 
 	D3D11GraphicsEngineBase* engineBase = (D3D11GraphicsEngineBase *)Engine::GraphicsEngine;
@@ -335,27 +335,27 @@ void D3D11PointLight::DebugDrawCubeMap()
 	{
 		INT2 pPosition;
 		int stride = (previewSize / previewDownscale);
-		if(i==1) // x-
+		if (i==1) // x-
 		{
 			pPosition.x = 0;
 			pPosition.y = stride;
-		}else if(i==3) // y-
+		}else if (i==3) // y-
 		{
 			pPosition.x = stride;
 			pPosition.y = stride;
-		}else if(i==0) // x+
+		}else if (i==0) // x+
 		{
 			pPosition.x = stride * 2;
 			pPosition.y = stride;
-		}else if(i==2) // y+
+		}else if (i==2) // y+
 		{
 			pPosition.x = stride * 3;
 			pPosition.y = stride;
-		}else if(i==5) // z-
+		}else if (i==5) // z-
 		{
 			pPosition.x = stride;
 			pPosition.y = 0;
-		}else if(i==4) // z+
+		}else if (i==4) // z+
 		{
 			pPosition.x = stride;
 			pPosition.y = stride * 2;
@@ -376,7 +376,7 @@ void D3D11PointLight::OnVobRemovedFromWorld(BaseVobInfo* vob)
 	InitMutex.lock();
 
 	// See if we have this vob registered
-	if(std::find(VobCache.begin(), VobCache.end(), vob) != VobCache.end()
+	if (std::find(VobCache.begin(), VobCache.end(), vob) != VobCache.end()
 		|| std::find(SkeletalVobCache.begin(), SkeletalVobCache.end(), vob) != SkeletalVobCache.end())
 	{
 		// Clear cache, if so

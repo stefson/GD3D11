@@ -46,7 +46,7 @@ public:
 		hook_infunc
 
 		// Notify the world
-		if(Engine::GAPI)
+		if (Engine::GAPI)
 			Engine::GAPI->OnMaterialDeleted((zCMaterial *)thisptr);
 
 		HookedFunctions::OriginalFunctions.original_zCMaterialDestructor(thisptr);
@@ -70,7 +70,7 @@ public:
 		hook_infunc
 
 		// Notify the world
-		if(Engine::GAPI)
+		if (Engine::GAPI)
 			Engine::GAPI->OnMaterialCreated((zCMaterial *)thisptr);
 
 		HookedFunctions::OriginalFunctions.original_zCMaterialInitValues(thisptr);
@@ -110,20 +110,20 @@ public:
 
 	void BindTexture(int slot)
 	{
-		if(GetTexture())
+		if (GetTexture())
 		{
 			// Bind it
-			if(GetTexture()->CacheIn(0.6f) == zRES_CACHED_IN)
+			if (GetTexture()->CacheIn(0.6f) == zRES_CACHED_IN)
 				GetTexture()->Bind(slot);
 		}
 	}
 
 	void BindTextureSingle(int slot)
 	{
-		if(GetTextureSingle())
+		if (GetTextureSingle())
 		{
 			// Bind it
-			if(GetTextureSingle()->CacheIn(0.6f) == zRES_CACHED_IN	)
+			if (GetTextureSingle()->CacheIn(0.6f) == zRES_CACHED_IN	)
 				GetTextureSingle()->Bind(slot);
 		}
 	}

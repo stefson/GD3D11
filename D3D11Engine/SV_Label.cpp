@@ -16,7 +16,7 @@ SV_Label::SV_Label(D2DView* view, D2DSubView* parent) : D2DSubView(view, parent)
 
 SV_Label::~SV_Label(void)
 {
-	if(CaptionLayout)CaptionLayout->Release();
+	if (CaptionLayout)CaptionLayout->Release();
 }
 
 /** Draws this sub-view */
@@ -26,13 +26,13 @@ void SV_Label::Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime)
 	MainView->GetRenderTarget()->SetTransform(D2D1::Matrix3x2F::Translation(clientRectAbs.left,clientRectAbs.top));
 
 	//Draw text
-	if(CaptionLayout)
+	if (CaptionLayout)
 	{
-		if(DrawBackground)
+		if (DrawBackground)
 		{
 			MainView->GetBrush()->SetColor(D2D1::ColorF(0,0,0,0.7f));
 
-			if(HorizAlignment == DWRITE_TEXT_ALIGNMENT_LEADING)
+			if (HorizAlignment == DWRITE_TEXT_ALIGNMENT_LEADING)
 			{
 				MainView->GetRenderTarget()->FillRoundedRectangle(D2D1::RoundedRect(D2D1::RectF(ViewRect.left - 1, 
 					ViewRect.top, 
@@ -57,7 +57,7 @@ void SV_Label::SetCaption(const std::string& caption)
 {
 	Caption = caption;
 
-	if(CaptionLayout)CaptionLayout->Release();
+	if (CaptionLayout)CaptionLayout->Release();
 	MainView->GetWriteFactory()->CreateTextLayout(
 		Toolbox::ToWideChar(caption).c_str(),      // The string to be laid out and formatted.
 		caption.length(),  // The length of the string.
@@ -67,7 +67,7 @@ void SV_Label::SetCaption(const std::string& caption)
 		&CaptionLayout  // The IDWriteTextLayout interface pointer.
 		);
 
-	if(!CaptionLayout)
+	if (!CaptionLayout)
 		return;
 
 	DWRITE_TEXT_RANGE range;
@@ -75,7 +75,7 @@ void SV_Label::SetCaption(const std::string& caption)
 	range.length = caption.size();
 	CaptionLayout->SetFontSize(TextSize, range);
 
-	if(CaptionLayout)
+	if (CaptionLayout)
 	{
 		SetVertAlignment(VertAlignment);
 		SetHorizAlignment(HorizAlignment);
@@ -94,7 +94,7 @@ void SV_Label::SetRect(const D2D1_RECT_F& rect)
 	D2DSubView::SetRect(rect);
 
 	// check for actual change
-	if(memcmp(&r, &rect, sizeof(rect)) != 0)
+	if (memcmp(&r, &rect, sizeof(rect)) != 0)
 	{
 		// Need to update the layout
 		SetCaption(Caption);
@@ -106,7 +106,7 @@ void SV_Label::SetHorizAlignment(DWRITE_TEXT_ALIGNMENT alignment)
 {
 	HorizAlignment = alignment;
 
-	if(CaptionLayout)
+	if (CaptionLayout)
 		CaptionLayout->SetTextAlignment(alignment);
 		
 }
@@ -116,7 +116,7 @@ void SV_Label::SetVertAlignment(DWRITE_PARAGRAPH_ALIGNMENT alignment)
 {
 	VertAlignment = alignment;
 
-	if(CaptionLayout)
+	if (CaptionLayout)
 		CaptionLayout->SetParagraphAlignment(alignment);
 }
 
@@ -129,7 +129,7 @@ void SV_Label::SetDrawBackground(bool bgr)
 /** Sets the text size */
 void SV_Label::SetTextSize(float size)
 {
-	if(TextSize != size)
+	if (TextSize != size)
 	{
 		TextSize = size;
 
@@ -137,7 +137,7 @@ void SV_Label::SetTextSize(float size)
 		range.startPosition = 0;
 		range.length = Caption.size();
 
-		if(CaptionLayout)
+		if (CaptionLayout)
 			CaptionLayout->SetFontSize(TextSize, range);
 	}
 }

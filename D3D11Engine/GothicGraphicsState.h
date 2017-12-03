@@ -77,7 +77,7 @@ struct GothicGraphicsState
 	/** Sets one of the GraphicsFlags */
 	void SetGraphicsSwitch(int flag, bool enabled)
 	{
-		if(enabled)
+		if (enabled)
 			FF_GSwitches |= flag;
 		else
 			FF_GSwitches &= ~flag;

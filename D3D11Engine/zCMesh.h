@@ -40,7 +40,7 @@ public:
 
 	zCPolygon* SharePoly(int i)
 	{
-		if(GetPolyArray()) 
+		if (GetPolyArray()) 
 			return GetPolyArray() + i;
 		else
 			return GetPolygons()[i];

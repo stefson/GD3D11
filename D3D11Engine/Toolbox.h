@@ -21,7 +21,7 @@ namespace Toolbox
 	{
 		auto it = std::find(vector.begin(), vector.end(), value);
 
-		if(it != vector.end())
+		if (it != vector.end())
 			vector.erase(it);
 	}
 
@@ -30,7 +30,7 @@ namespace Toolbox
 	{
 		for(auto it = map.begin();it!=map.end();it++)
 		{
-			if((*it).second == value)
+			if ((*it).second == value)
 				it = map.erase(it);
 		}
 	}

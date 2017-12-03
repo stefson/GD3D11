@@ -56,7 +56,7 @@ void BaseWidget::SetMouseVisibility(bool visible)
 {
 	static HCURSOR s_oldCursor = GetCursor();
 
-	if(!visible)
+	if (!visible)
 	{
 		s_oldCursor = GetCursor();
 		SetCursor(NULL);

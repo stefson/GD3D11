@@ -18,7 +18,7 @@ SV_Panel::SV_Panel(D2DView* view, D2DSubView* parent) : D2DSubView(view, parent)
 
 SV_Panel::~SV_Panel(void)
 {
-	if(Image)Image->Release();
+	if (Image)Image->Release();
 }
 
 /** Draws this sub-view */
@@ -29,14 +29,14 @@ void SV_Panel::Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime)
 
 
 
-	if(HasShadow)
+	if (HasShadow)
 		MainView->DrawSmoothShadow(&ViewRect, ShadowRange, 0.8f, false, 7);
 
-	if(RenderMode == PR_SolidColor)
+	if (RenderMode == PR_SolidColor)
 	{
 		MainView->GetBrush()->SetColor(PanelColor);
 		MainView->GetRenderTarget()->FillRectangle(ViewRect, MainView->GetBrush());
-	}else if(RenderMode == PR_Background)
+	}else if (RenderMode == PR_Background)
 	{
 		float darkness = 1.0f - powf(0.7f, (float)Level);
 
@@ -47,9 +47,9 @@ void SV_Panel::Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime)
 
 		MainView->GetBrush()->SetColor(D2D1::ColorF(0,0,0, darkness));
 		MainView->GetRenderTarget()->FillRectangle(ViewRect, MainView->GetBrush());
-	}else if(RenderMode == PR_Image)
+	}else if (RenderMode == PR_Image)
 	{
-		if(Image)
+		if (Image)
 			MainView->GetRenderTarget()->DrawBitmap(Image, ViewRect);
 		else
 		{
@@ -58,7 +58,7 @@ void SV_Panel::Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime)
 		}
 	}
 
-	if(HasDarkOverlay)
+	if (HasDarkOverlay)
 	{
 		D2D1_RECT_F rr = ViewRect;
 		D2DView::ShrinkRect(&rr, 3);
@@ -67,7 +67,7 @@ void SV_Panel::Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime)
 		MainView->GetRenderTarget()->FillRoundedRectangle(D2D1::RoundedRect(rr, 3, 3), MainView->GetBrush());
 	}
 
-	if(HasGlossyOutline)
+	if (HasGlossyOutline)
 	{
 		// Draw outer metallic deco-line
 		MainView->GetLinearReflectBrush()->SetStartPoint(D2D1::Point2F(ViewRect.left, ViewRect.top));
@@ -114,7 +114,7 @@ D2D1_COLOR_F SV_Panel::GetPanelColor()
 /** Sets the image of this panel from d3d11 */
 HRESULT SV_Panel::SetD3D11TextureAsImage(ID3D11Texture2D* texture, INT2 size)
 {
-	if(Image)Image->Release();
+	if (Image)Image->Release();
 	Image = NULL;
 
 	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
@@ -158,7 +158,7 @@ HRESULT SV_Panel::SetD3D11TextureAsImage(ID3D11Texture2D* texture, INT2 size)
 	MainView->GetRenderTarget()->CreateSharedBitmap(__uuidof( IDXGISurface ),(void *)texture, &Properties, &Image);
 
 
-	if(surface)surface->Release();*/
+	if (surface)surface->Release();*/
 
 	return S_OK;
 }

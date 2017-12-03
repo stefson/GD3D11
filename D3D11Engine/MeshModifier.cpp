@@ -102,7 +102,7 @@ static void PullVertexData(MyMesh& mesh, std::vector<ExVertexStruct>& outVertice
 		v.TexCoord = *(float2 *)&mesh.texcoord2D(*v_it);
 
 		// Check if this is a boundry vertex
-		if(mesh.is_boundary(*v_it))
+		if (mesh.is_boundary(*v_it))
 		{
 			v.TexCoord2.x = 0.0f;
 		}else
@@ -304,7 +304,7 @@ struct PNAENKeyHasher
 
 	/*bool operator()(const PNAENEdge &left, const PNAENEdge &right) 
 	{
-		if(left.iD < right.iD || (left.iD == right.iD && left.iO < right.iO))
+		if (left.iD < right.iD || (left.iD == right.iD && left.iO < right.iO))
 			return true;
 
 		return left.pD < right.pD || (left.pD == right.pD && left.pO < right.pO);
@@ -427,7 +427,7 @@ struct Vertex
 
 	bool operator == (const Vertex& o) const
 	{
-		if(vx->Position == o.vx->Position)
+		if (vx->Position == o.vx->Position)
 			return true;
 
 		return false;
@@ -546,7 +546,7 @@ void MeshModifier::ComputePNAEN18Indices(std::vector<ExVertexStruct>& inVertices
 		std::vector<ExVertexStruct *>& vx = (*it).second.second;
 
 		D3DXVECTOR3 nrm = D3DXVECTOR3(0,0,0);
-		if(softNormals)
+		if (softNormals)
 		{
 			// Average normal of all adj. vertices			
 			for(unsigned int i=0;i<vx.size();i++)
@@ -559,13 +559,13 @@ void MeshModifier::ComputePNAEN18Indices(std::vector<ExVertexStruct>& inVertices
 		// Set it to all of them
 		for(unsigned int i=0;i<vx.size();i++)
 		{
-			if(detectBorders)
+			if (detectBorders)
 			{
 				vx[i]->TexCoord2.x = 0.0f;
 				vx[i]->TexCoord2.y = num / 1000.0f;
 				num++;
 			}
-			if(softNormals)
+			if (softNormals)
 				vx[i]->Normal = nrm;
 		}
 	}
@@ -689,29 +689,29 @@ void MeshModifier::ComputePNAEN18Indices(std::vector<ExVertexStruct>& inVertices
 				}*/
 			}
 
-			if(!(temp < domEdge) && !(domEdge < temp))
+			if (!(temp < domEdge) && !(domEdge < temp))
 			{
 				inVertices[i0].TexCoord2.x = 1.0f;
 				inVertices[i1].TexCoord2.x = 1.0f;
 			}
 
-			if(detectBorders)
+			if (detectBorders)
 			{
 				//continue;
 				outIndices[i + 6 + k] = i0;
 				outIndices[i + 6 + k + 1] = i1;
 
-				if(domEdge.iO != 0 && domEdge.iD != 0)
+				if (domEdge.iO != 0 && domEdge.iD != 0)
 				{
 					//temp.ReverseEdge();
 
-					if(domEdge < temp) // Find edge with lower indices
+					if (domEdge < temp) // Find edge with lower indices
 					{
 						outIndices[i + 6 + k] = domEdge.iO;
 						outIndices[i + 6 + k + 1] = domEdge.iD;
 					}/*else
 					{
-						//if(domReversed)
+						//if (domReversed)
 						temp.ReverseEdge();
 
 						outIndices[i + 6 + k] = temp.iO;
@@ -728,7 +728,7 @@ void MeshModifier::ComputePNAEN18Indices(std::vector<ExVertexStruct>& inVertices
 			}
 		}
 
-		if(detectBorders)
+		if (detectBorders)
 		{
 			// Dom. UV-Coords
 			for(int k=0;k<3;k++)
@@ -742,18 +742,18 @@ void MeshModifier::ComputePNAEN18Indices(std::vector<ExVertexStruct>& inVertices
 				bool isBorder = false;
 				for(unsigned int j=0;j<adj.first.size();j++)
 				{
-					if(adj.second[j]->TexCoord < smallest)
+					if (adj.second[j]->TexCoord < smallest)
 					{
 						smallest = adj.second[j]->TexCoord;
 						smallestIdx = adj.first[j];
 					}
 
-					if(adj.second[j]->TexCoord2.x == 1.0f)
+					if (adj.second[j]->TexCoord2.x == 1.0f)
 						isBorder = true;
 				}
 
 				// If one vertex is a border vertex, apply that to all of them
-				if(isBorder)
+				if (isBorder)
 				{
 					for(unsigned int j=0;j<adj.first.size();j++)
 					{
@@ -770,7 +770,7 @@ void MeshModifier::ComputePNAEN18Indices(std::vector<ExVertexStruct>& inVertices
 
 bool TexcoordSame(float2 a, float2 b)
 {
-	if(( abs(a.x - 		b.x) > 0.001f &&
+	if (( abs(a.x - 		b.x) > 0.001f &&
 		abs((a.x + 1) - b.x) > 0.001f &&
 		abs((a.x - 1) - b.x) > 0.001f) ||
 		(abs(a.y - 		b.y) > 0.001f &&
@@ -817,7 +817,7 @@ void MeshModifier::ComputeSmoothNormals(std::vector<ExVertexStruct>& inVertices)
 			vx[i]->TexCoord2.x = 1.0f;
 			for(unsigned int n=0;n<vx.size();n++)
 			{				
-				if(!TexcoordSame(vx[i]->TexCoord, vx[n]->TexCoord))
+				if (!TexcoordSame(vx[i]->TexCoord, vx[n]->TexCoord))
 				{
 					vx[i]->TexCoord2.x = 0.0f;
 					break;

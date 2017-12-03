@@ -80,7 +80,7 @@ public:
 
 		// Open the device data gothic wants
 		FILE* f = fopen("system\\GD3D11\\data\\DeviceEnum.bin", "rb");
-		if(!f)
+		if (!f)
 		{
 			LogError() << "Failed to open the system\\GD3D11\\data\\DeviceEnum.bin file. Can't fake a device for Gothic now!";
 			return E_FAIL;

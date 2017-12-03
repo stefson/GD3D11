@@ -15,8 +15,8 @@ D3D11VertexBuffer::D3D11VertexBuffer(void)
 
 D3D11VertexBuffer::~D3D11VertexBuffer(void)
 {
-	if(VertexBuffer)VertexBuffer->Release();
-	if(ShaderResourceView)ShaderResourceView->Release();
+	if (VertexBuffer)VertexBuffer->Release();
+	if (ShaderResourceView)ShaderResourceView->Release();
 }
 
 /** Creates the vertexbuffer with the given arguments */
@@ -42,7 +42,7 @@ XRESULT D3D11VertexBuffer::Init(void* initData, unsigned int sizeInBytes, EBindF
 	bufferDesc.StructureByteStride = structuredByteSize;
 
 	// Check for structured buffer
-	if((EBindFlags & EBindFlags::B_SHADER_RESOURCE) != 0)
+	if ((EBindFlags & EBindFlags::B_SHADER_RESOURCE) != 0)
 		bufferDesc.MiscFlags |= D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 
 	// In case we dont have data, allocate some to satisfy D3D11
@@ -63,7 +63,7 @@ XRESULT D3D11VertexBuffer::Init(void* initData, unsigned int sizeInBytes, EBindF
 	LE(engine->GetDevice()->CreateBuffer(&bufferDesc, &InitData, &VertexBuffer));
 
 	// Check for structured buffer again to create the SRV
-	if((EBindFlags & EBindFlags::B_SHADER_RESOURCE) != 0)
+	if ((EBindFlags & EBindFlags::B_SHADER_RESOURCE) != 0)
 	{
 		 D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 		ZeroMemory( &srvDesc, sizeof(srvDesc) );
@@ -89,7 +89,7 @@ XRESULT D3D11VertexBuffer::UpdateBuffer(void* data, UINT size)
 	void* mappedData;
 	UINT bsize;
 
-	if(SizeInBytes < size)
+	if (SizeInBytes < size)
 		size = SizeInBytes;
 
 	if (XR_SUCCESS == Map(EMapFlags::M_WRITE_DISCARD, &mappedData, &bsize))
@@ -166,7 +166,7 @@ XRESULT D3D11VertexBuffer::OptimizeVertices(VERTEX_INDEX* indices, byte* vertice
 	return XR_SUCCESS;
 
 	DWORD* remap = new DWORD[numVertices];
-	if(FAILED(D3DXOptimizeVertices(indices, numIndices / 3, numVertices, FALSE, (DWORD *)remap)))
+	if (FAILED(D3DXOptimizeVertices(indices, numIndices / 3, numVertices, FALSE, (DWORD *)remap)))
 	{
 		delete[] remap;
 		return XR_FAILED;
@@ -200,7 +200,7 @@ XRESULT D3D11VertexBuffer::OptimizeFaces(VERTEX_INDEX* indices, byte* vertices, 
 	return XR_SUCCESS;
 	unsigned int numFaces = numIndices / 3;
 	DWORD* remap = new DWORD[numFaces];
-	if(FAILED(D3DXOptimizeFaces(indices, numFaces, numVertices, FALSE, (DWORD *)remap)))
+	if (FAILED(D3DXOptimizeFaces(indices, numFaces, numVertices, FALSE, (DWORD *)remap)))
 	{
 		delete[] remap;
 		return XR_FAILED;

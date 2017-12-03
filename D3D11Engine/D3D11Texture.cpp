@@ -6,8 +6,7 @@
 #include <D3DX11.h>
 #include "RenderToTextureBuffer.h"
 
-D3D11Texture::D3D11Texture(void)
-{
+D3D11Texture::D3D11Texture() {
 	Texture = NULL;
 	ShaderResourceView = NULL;
 	Thumbnail = NULL;
@@ -18,14 +17,14 @@ D3D11Texture::D3D11Texture(void)
 	D3D11ObjectIDs::TextureByID[ID] = this;
 }
 
-D3D11Texture::~D3D11Texture(void)
-{
+D3D11Texture::~D3D11Texture() {
+	LogInfo() << "Delete D3D11Texture: " << this;
 	// Remove from state map
 	Toolbox::EraseByElement(D3D11ObjectIDs::TextureByID, this);
 
-	if (Thumbnail)Thumbnail->Release();
-	if (Texture)Texture->Release();
-	if (ShaderResourceView)ShaderResourceView->Release();
+	SAFE_RELEASE(Thumbnail);
+	SAFE_RELEASE(Texture);
+	SAFE_RELEASE(ShaderResourceView);
 }
 
 /** Initializes the texture object */
@@ -79,7 +78,7 @@ XRESULT D3D11Texture::Init(const std::string& file)
 
 	LE(D3DX11CreateShaderResourceViewFromFileA(engine->GetDevice(), file.c_str(), NULL, NULL, &ShaderResourceView, NULL));
 
-	if(!ShaderResourceView)
+	if (!ShaderResourceView)
 		return XR_FAILED;
 	
 	ID3D11Texture2D* res;
@@ -118,12 +117,12 @@ XRESULT D3D11Texture::UpdateDataDeferred(void* data, int mip, bool noLock)
 	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase *)Engine::GraphicsEngine;
 
 	// Enter the critical section for safety while executing the deferred command list
-	if(!noLock)
+	if (!noLock)
 		Engine::GAPI->EnterResourceCriticalSection();
 
 	engine->GetDeferredMediaContext()->UpdateSubresource(Texture, mip, NULL, data, GetRowPitchBytes(mip), GetSizeInBytes(mip));
 
-	if(!noLock)
+	if (!noLock)
 		Engine::GAPI->LeaveResourceCriticalSection();
 
 	return XR_SUCCESS;
@@ -222,7 +221,7 @@ XRESULT D3D11Texture::CreateThumbnail()
 	// Create temporary RTV
 	ID3D11RenderTargetView* tempRTV;
 	LE(engine->GetDevice()->CreateRenderTargetView(Thumbnail, NULL, &tempRTV));
-	if(!tempRTV)
+	if (!tempRTV)
 		return XR_FAILED;
 
 	engine->GetContext()->ClearRenderTargetView(tempRTV, (float *)&D3DXVECTOR4(1,0,0,1));
@@ -240,9 +239,9 @@ XRESULT D3D11Texture::CreateThumbnail()
 
 	engine->GetContext()->OMSetRenderTargets(2, oldRTV, oldDSV);
 
-	if(oldRTV[0])oldRTV[0]->Release();
-	if(oldRTV[1])oldRTV[1]->Release();
-	if(oldDSV)oldDSV->Release();
+	if (oldRTV[0])oldRTV[0]->Release();
+	if (oldRTV[1])oldRTV[1]->Release();
+	if (oldDSV)oldDSV->Release();
 
 	tempRTV->Release();
 	return XR_SUCCESS;
@@ -257,7 +256,7 @@ ID3D11Texture2D* D3D11Texture::GetThumbnail()
 /** Generates mipmaps for this texture (may be slow!) */
 XRESULT D3D11Texture::GenerateMipMaps()
 {
-	if(MipMapCount == 1)
+	if (MipMapCount == 1)
 		return XR_SUCCESS;
 
 	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase *)Engine::GraphicsEngine;

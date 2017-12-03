@@ -1,22 +1,21 @@
-#include "pch.h"
 #include "GSky.h"
-#include "zCTimer.h"
-#include "zCSkyController_Outdoor.h"
-#include "oCGame.h"
+
 #include "BaseGraphicsEngine.h"
-#include "zCMaterial.h"
-#include "zCWorld.h"
-#include "zCMesh.h"
-#include "GMesh.h"
 #include "D3D11Texture.h"
 #include "Engine.h"
+#include "GMesh.h"
+#include "oCGame.h"
+#include "zCMaterial.h"
+#include "zCMesh.h"
+#include "zCTimer.h"
+#include "zCSkyController_Outdoor.h"
+#include "zCWorld.h"
 
-GSky::GSky(void)
-{
-	SkyPlaneVertexBuffer = NULL;
-	SkyDome = NULL;
-	SkyPlane = NULL;
-	CloudTexture = NULL;
+GSky::GSky() {
+	SkyPlaneVertexBuffer = nullptr;
+	SkyDome = nullptr;
+	SkyPlane = nullptr;
+	CloudTexture = nullptr;
 
 	Atmosphere.Kr = 0.0075f;
 	Atmosphere.Km = 0.0010f;
@@ -37,17 +36,24 @@ GSky::GSky(void)
 	ZeroMemory(&AtmosphereCB, sizeof(AtmosphereCB));
 }
 
+GSky::~GSky() {
+	LogInfo() << "D'Tor GSky Start";
+	SAFE_DELETE(SkyPlaneVertexBuffer);
+	LogInfo() << "D'Tor GSky SkyPlaneVertexBuffer";
+	SAFE_DELETE(SkyDome);
+	LogInfo() << "D'Tor GSky SkyDome";
+	SAFE_DELETE(SkyPlane);
+	LogInfo() << "D'Tor GSky SkyPlane";
+	SAFE_DELETE(CloudTexture);
+	LogInfo() << "D'Tor GSky CloudTexture";
+	SAFE_DELETE(NightTexture);
+	LogInfo() << "D'Tor GSky NightTexture";
 
-GSky::~GSky(void)
-{
-	delete SkyPlaneVertexBuffer;
-	delete SkyDome;
-	delete SkyPlane;
-	delete CloudTexture;
-	delete NightTexture;
-
-	for(unsigned int i=0;i<SkyTextures.size();i++)
-		delete SkyTextures[i];
+	for (unsigned int i = 0; i < SkyTextures.size(); i++) {
+		SAFE_DELETE(SkyTextures[i]);
+		LogInfo() << "D'Tor GSky SkyTextures[" << i << "]";
+	}
+	LogInfo() << "D'Tor GSky End";
 }
 
 /** Creates needed resources by the sky */
@@ -110,7 +116,6 @@ MeshInfo* GSky::GetSkyPlane()
 	return SkyPlane;
 }
 
-
 /** Adds a sky texture. Sky textures must be in order to make the daytime work */
 XRESULT GSky::AddSkyTexture(const std::string& file)
 {
@@ -161,7 +166,7 @@ XRESULT GSky::LoadSkyResources()
 void GSky::SetSkyTexture(ESkyTexture texture)
 {
 	// Delete old texture
-	delete CloudTexture; CloudTexture = NULL;
+	delete CloudTexture; CloudTexture = nullptr;
 
 	XLE(Engine::GraphicsEngine->CreateTexture(&CloudTexture));
 
@@ -183,7 +188,7 @@ void GSky::SetSkyTexture(ESkyTexture texture)
 /** Returns the sky-texture for the passed daytime (0..1) */
 void GSky::GetTextureOfDaytime(float time, D3D11Texture** t1, D3D11Texture** t2, float* factor)
 {
-	if(!SkyTextures.size())
+	if (!SkyTextures.size())
 		return;
 
 	time -= floor(time); // Fractionalize, put into 0..1 range
@@ -205,10 +210,8 @@ void GSky::GetTextureOfDaytime(float time, D3D11Texture** t1, D3D11Texture** t2,
 }
 
 /** Renders the sky */
-XRESULT GSky::RenderSky()
-{
-	if(!SkyDome)
-	{
+XRESULT GSky::RenderSky() {
+	if (!SkyDome) {
 		XLE(LoadSkyResources());
 	}
 
@@ -217,14 +220,11 @@ XRESULT GSky::RenderSky()
 	D3DXVECTOR3 camPos = Engine::GAPI->GetCameraPosition();
 	D3DXVECTOR3 LightDir;
 
-	if(Engine::GAPI->GetRendererState()->RendererSettings.ReplaceSunDirection)
-	{
+	if (Engine::GAPI->GetRendererState()->RendererSettings.ReplaceSunDirection) {
 		LightDir = Atmosphere.LightDirection;
-	}else
-	{
+	} else {
 		zCSkyController_Outdoor* sc = oCGame::GetGame()->_zCSession_world->GetSkyControllerOutdoor();
-		if(sc)
-		{
+		if (sc) {
 			LightDir = sc->GetSunWorldPosition(Atmosphere.SkyTimeScale);
 			Atmosphere.LightDirection = LightDir;
 		}
@@ -276,23 +276,19 @@ XRESULT GSky::RenderSky()
 }
 
 /** Returns the loaded sky-Dome */
-GMesh* GSky::GetSkyDome()
-{
+GMesh* GSky::GetSkyDome() {
 	return SkyDome;
 }
 
 /** Returns the current sky-light color */
-float4 GSky::GetSkylightColor()
-{
+float4 GSky::GetSkylightColor() {
 	zCSkyController_Outdoor* sc = oCGame::GetGame()->_zCSession_world->GetSkyControllerOutdoor();
 	float4 color = float4(1,1,1,1);
 
-	if(sc)
-	{
+	if (sc) {
 		DWORD* clut = sc->PolyLightCLUTPtr;
 
-		if(clut)
-		{
+		if (clut) {
 
 		}
 	}
@@ -366,7 +362,7 @@ float3 GSky::GetSunColor()
 	
 	//return float4(abs(AC_SpherePosition), 1);
 	
-	//if(AC_CameraHeight < AC_InnerRadius)
+	//if (AC_CameraHeight < AC_InnerRadius)
 	//	return float4(1,0,0,1);
 	
 	// Calculate the closest intersection of the ray with the outer atmosphere (which is the near point of the ray passing through the atmosphere)

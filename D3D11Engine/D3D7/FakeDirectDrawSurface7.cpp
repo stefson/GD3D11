@@ -40,7 +40,7 @@ ULONG FakeDirectDrawSurface7::Release()
 	DebugWrite("FakeDirectDrawSurface7(%p)::Release( %i )");//, PRINT_DEV, uRet );
 	RefCount--;
 
-	if(RefCount == 0)
+	if (RefCount == 0)
 	{
 		delete[] Data;
 		delete this;
@@ -118,7 +118,7 @@ HRESULT FakeDirectDrawSurface7::GetAttachedSurface( LPDDSCAPS2 lpDDSCaps2, LPDIR
 	DebugWrite("FakeDirectDrawSurface7(%p)::GetAttachedSurface()");//, PRINT_DEV );
 	//return originalSurface->GetAttachedSurface( lpDDSCaps2, lplpDDAttachedSurface );
 
-	if(AttachedSurfaces.empty())
+	if (AttachedSurfaces.empty())
 		return E_FAIL;
 
 	*lplpDDAttachedSurface = (LPDIRECTDRAWSURFACE7)AttachedSurfaces[0]; // Mipmap chains only have one entry
@@ -231,7 +231,7 @@ HRESULT FakeDirectDrawSurface7::Unlock( LPRECT lpRect )
 
 	int bpp = redBits + greenBits + blueBits + alphaBits;
 
-	if(bpp == 16)
+	if (bpp == 16)
 	{
 		// Convert
 		/*unsigned char* dst = new unsigned char[Resource->GetEngineTexture()->GetSizeInBytes(MipLevel)];

@@ -12,7 +12,7 @@ D2DSubView::D2DSubView(D2DView* view, D2DSubView* parent)
 
 	Hidden = false;
 
-	if(parent)
+	if (parent)
 		parent->AddChild(this);
 	else
 	{
@@ -25,7 +25,7 @@ D2DSubView::D2DSubView(D2DView* view, D2DSubView* parent)
 
 D2DSubView::~D2DSubView(void)
 {
-	//if(Layer)Layer->Release();
+	//if (Layer)Layer->Release();
 
 	
 	for(std::list<D2DSubView*>::iterator it = Children.begin();it != Children.end();it++)
@@ -105,7 +105,7 @@ void D2DSubView::Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime)
 
 		//MainView->GetRenderTarget()->SetTransform(D2D1::Matrix3x2F::Translation(clientRectAbs.left,clientRectAbs.top));
 
-		if(!(*it)->IsHidden())
+		if (!(*it)->IsHidden())
 			(*it)->Draw(rectAbs, deltaTime);
 	}
 
@@ -118,7 +118,7 @@ void D2DSubView::Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime)
 /** Updates the subview */
 void D2DSubView::Update(float deltaTime)
 {
-	if(Hidden)
+	if (Hidden)
 		return;
 
 	for(std::list<D2DSubView*>::iterator it = Children.begin();it != Children.end();it++)
@@ -139,8 +139,8 @@ bool D2DSubView::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wParam, LPA
 		cr.right = clientRectAbs.left + (*it)->GetRect().right;
 		cr.bottom = clientRectAbs.top + (*it)->GetRect().bottom;
 
-		if(!(*it)->IsHidden())
-			if(!(*it)->OnWindowMessage(hWnd, msg, wParam, lParam, cr))
+		if (!(*it)->IsHidden())
+			if (!(*it)->OnWindowMessage(hWnd, msg, wParam, lParam, cr))
 				return false;
 	}
 
@@ -150,7 +150,7 @@ bool D2DSubView::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wParam, LPA
 /** Adds a child to this subview */
 void D2DSubView::AddChild(D2DSubView* child)
 {
-	if(child->GetParent() != this)
+	if (child->GetParent() != this)
 	{
 		LogWarn() << "Trying to add a D2DSubView-Child with an other parent than this!";
 		return;
@@ -178,7 +178,7 @@ void D2DSubView::SetPositionAndSize(const D2D1_POINT_2F& position, const D2D1_SI
 /** Point inside rect? */
 bool D2DSubView::PointInsideRect(const D2D1_POINT_2F& p, const D2D1_RECT_F& r)
 {
-	if( p.x > r.left && p.x < r.right &&
+	if ( p.x > r.left && p.x < r.right &&
 		p.y > r.top && p.y < r.bottom)
 	{
 		return true;
@@ -189,7 +189,7 @@ bool D2DSubView::PointInsideRect(const D2D1_POINT_2F& p, const D2D1_RECT_F& r)
 
 bool D2DSubView::PointInsideRect(const POINT& p, const D2D1_RECT_F& r)
 {
-	if( (float)p.x > r.left && (float)p.x < r.right &&
+	if ( (float)p.x > r.left && (float)p.x < r.right &&
 		(float)p.y > r.top && (float)p.y < r.bottom)
 	{
 		return true;

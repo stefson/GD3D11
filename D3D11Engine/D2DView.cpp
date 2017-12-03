@@ -48,18 +48,18 @@ D2DView::~D2DView(void)
 {
 	delete MainSubView;
 
-	if(TextFormatBig)TextFormatBig->Release();
-	if(LinearReflectBrush)LinearReflectBrush->Release();
-	if(LinearReflectBrushHigh)LinearReflectBrushHigh->Release();
-	if(Brush)Brush->Release();
-	if(GUIStyleLinearBrush)GUIStyleLinearBrush->Release();
-	if(LinearBrush)LinearBrush->Release();
-	if(RadialBrush)RadialBrush->Release();
-	if(BackgroundBrush)BackgroundBrush->Release();
-	if(DefaultTextFormat)DefaultTextFormat->Release();
-	if(WriteFactory)WriteFactory->Release();
-	if(RenderTarget)RenderTarget->Release();
-	if(Factory)Factory->Release();
+	if (TextFormatBig)TextFormatBig->Release();
+	if (LinearReflectBrush)LinearReflectBrush->Release();
+	if (LinearReflectBrushHigh)LinearReflectBrushHigh->Release();
+	if (Brush)Brush->Release();
+	if (GUIStyleLinearBrush)GUIStyleLinearBrush->Release();
+	if (LinearBrush)LinearBrush->Release();
+	if (RadialBrush)RadialBrush->Release();
+	if (BackgroundBrush)BackgroundBrush->Release();
+	if (DefaultTextFormat)DefaultTextFormat->Release();
+	if (WriteFactory)WriteFactory->Release();
+	if (RenderTarget)RenderTarget->Release();
+	if (Factory)Factory->Release();
 }
 
 /** Inits this d2d-view */
@@ -75,7 +75,7 @@ XRESULT D2DView::Init(HWND hwnd)
 
 	D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, options, &Factory);
 
-	if(!Factory)
+	if (!Factory)
 	{
 		LogError() << "Failed to create ID2D1Factory!";
 		return XR_FAILED;
@@ -88,7 +88,7 @@ XRESULT D2DView::Init(HWND hwnd)
 	RECT windowSize;
 	GetClientRect(hwnd, &windowSize);
 
-	if(FAILED(Factory->CreateHwndRenderTarget(D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT,
+	if (FAILED(Factory->CreateHwndRenderTarget(D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT,
 		D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, 
 		D2D1_ALPHA_MODE_PREMULTIPLIED)),	
 		D2D1::HwndRenderTargetProperties(	hwnd, D2D1::SizeU(windowSize.right - windowSize.left, windowSize.bottom - windowSize.top),
@@ -119,7 +119,7 @@ XRESULT D2DView::Init(const INT2& initialResolution, ID3D11Texture2D* rendertarg
 
 	D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, options, &Factory);
 
-	if(!Factory)
+	if (!Factory)
 	{
 		LogError() << "Failed to create ID2D1Factory!";
 		return XR_FAILED;
@@ -131,7 +131,7 @@ XRESULT D2DView::Init(const INT2& initialResolution, ID3D11Texture2D* rendertarg
 	D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(
 		D2D1_RENDER_TARGET_TYPE_DEFAULT,
 		D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED));
-	if(FAILED(Factory->CreateDxgiSurfaceRenderTarget(dxgiBackbuffer, props, &RenderTarget)))
+	if (FAILED(Factory->CreateDxgiSurfaceRenderTarget(dxgiBackbuffer, props, &RenderTarget)))
 	{
 		// Copy downloadlink of the platform update to clipboard
 		clipput("https://www.microsoft.com/en-us/download/details.aspx?id=36805");
@@ -141,7 +141,7 @@ XRESULT D2DView::Init(const INT2& initialResolution, ID3D11Texture2D* rendertarg
 						 "You can get it here: https://www.microsoft.com/en-us/download/details.aspx?id=36805 \n"
 						 "This will not crash the Renderer, but you will have to continue without editor-features.\n"
 						 "\nThe link has been copied to your clipboard.";
-		if(dxgiBackbuffer)dxgiBackbuffer->Release();
+		if (dxgiBackbuffer)dxgiBackbuffer->Release();
 		Factory->Release();
 		Factory = NULL;
 		return XR_FAILED;
@@ -370,12 +370,12 @@ void D2DView::RunContentDownloader()
 	CreateDirectory("system\\GD3D11\\textures\\replacements", NULL);
 
 	// Check for original game normalmaps
-	if(!ModSpecific::NormalmapPackageInstalled(ModSpecific::NRMPACK_ORIGINAL))
+	if (!ModSpecific::NormalmapPackageInstalled(ModSpecific::NRMPACK_ORIGINAL))
 		jobs.push_back(DownloadJob(std::string(ModSpecific::NRMPACK_ORIGINAL) + ".zip", 
 		"system\\GD3D11\\textures\\replacements\\"));
 
 	// Check for the current mods normalmaps
-	if(!ModSpecific::NormalmapPackageInstalled(ModSpecific::GetModNormalmapPackName()) && 
+	if (!ModSpecific::NormalmapPackageInstalled(ModSpecific::GetModNormalmapPackName()) && 
 		ModSpecific::GetModNormalmapPackName() != std::string(ModSpecific::NRMPACK_ORIGINAL))
 		jobs.push_back(DownloadJob(std::string(ModSpecific::GetModNormalmapPackName()) + ".zip", 
 		"system\\GD3D11\\textures\\replacements\\" + ModSpecific::GetModNormalmapPackName()));
@@ -387,7 +387,7 @@ void D2DView::RunContentDownloader()
 /** Draws the view */
 void D2DView::Render(float deltaTime)
 {
-	if(!EditorView->IsHidden())
+	if (!EditorView->IsHidden())
 	{
 		RenderTarget->BeginDraw();
 
@@ -409,7 +409,7 @@ void D2DView::Update(float deltaTime)
 /** Releases all resources needed to resize this view */
 XRESULT D2DView::PrepareResize()
 {
-	if(RenderTarget)RenderTarget->Release();
+	if (RenderTarget)RenderTarget->Release();
 	RenderTarget = NULL;
 
 	return XR_SUCCESS;
@@ -459,7 +459,7 @@ void D2DView::DrawSmoothShadow(const D2D1_RECT_F* Rectangle,
 
 	D2D1_RECT_F TempRect=*Rectangle;
 
-	if(Size>0 && !bDoNotShrink)
+	if (Size>0 && !bDoNotShrink)
 	{
 		ShrinkRect(&TempRect, RectShrink);
 	}
@@ -473,7 +473,7 @@ void D2DView::DrawSmoothShadow(const D2D1_RECT_F* Rectangle,
 	RadBrush->SetOpacity(Opacity);
 
 	//Draw the edges (left edge)
-	if(bLeft)
+	if (bLeft)
 	{
 		Rect.right=Rect.left;
 		Rect.left-=Size;
@@ -483,7 +483,7 @@ void D2DView::DrawSmoothShadow(const D2D1_RECT_F* Rectangle,
 	}
 
 	//Right edge
-	if(bRight)
+	if (bRight)
 	{
 		Rect=TempRect;
 		Rect.left=Rect.right;
@@ -493,7 +493,7 @@ void D2DView::DrawSmoothShadow(const D2D1_RECT_F* Rectangle,
 		RenderTarget->FillRectangle(&Rect,LinBrush);
 	}
 	//Upper edge
-	if(bTop)
+	if (bTop)
 	{
 		Rect=TempRect;
 		Rect.bottom=Rect.top;
@@ -503,7 +503,7 @@ void D2DView::DrawSmoothShadow(const D2D1_RECT_F* Rectangle,
 		RenderTarget->FillRectangle(&Rect,LinBrush);
 	}
 	//Bottom edge
-	if(bBottom)
+	if (bBottom)
 	{
 		Rect=TempRect;
 		Rect.top=Rect.bottom;
@@ -516,9 +516,9 @@ void D2DView::DrawSmoothShadow(const D2D1_RECT_F* Rectangle,
 	RadBrush->SetRadiusY(Size);
 	RadialBrush->SetOpacity(Opacity);
 
-	if(Size>0)
+	if (Size>0)
 	{
-		if(bLeft && bTop)
+		if (bLeft && bTop)
 		{
 			//Draw upper left corner
 			Rect=TempRect;
@@ -531,7 +531,7 @@ void D2DView::DrawSmoothShadow(const D2D1_RECT_F* Rectangle,
 			RenderTarget->FillRectangle(Rect,RadBrush);
 		}
 
-		if(bRight && bTop)
+		if (bRight && bTop)
 		{
 			//Draw upper right corner
 			Rect=TempRect;
@@ -544,7 +544,7 @@ void D2DView::DrawSmoothShadow(const D2D1_RECT_F* Rectangle,
 			RenderTarget->FillRectangle(Rect,RadBrush);
 		}
 
-		if(bRight && bBottom)
+		if (bRight && bBottom)
 		{
 			//Draw bottom right corner
 			Rect=TempRect;
@@ -557,7 +557,7 @@ void D2DView::DrawSmoothShadow(const D2D1_RECT_F* Rectangle,
 			RenderTarget->FillRectangle(Rect,RadBrush);
 		}
 
-		if(bLeft && bBottom)
+		if (bLeft && bBottom)
 		{
 			//Draw bottom left corner
 			Rect=TempRect;
@@ -575,7 +575,7 @@ void D2DView::DrawSmoothShadow(const D2D1_RECT_F* Rectangle,
 /** Processes a window-message. Return false to stop the message from going to children */
 bool D2DView::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wParam, LPARAM lParam)
 {
-	if(!MainSubView)
+	if (!MainSubView)
 		return false;
 
 	return MainSubView->OnWindowMessage(hWnd, msg, wParam, lParam, D2D1::RectF(0, 0, RenderTarget->GetSize().width, RenderTarget->GetSize().height));
@@ -586,7 +586,7 @@ float D2DView::GetLabelTextWidth(IDWriteTextLayout* layout, const std::string& t
 	DWRITE_CLUSTER_METRICS* m=new DWRITE_CLUSTER_METRICS[text.length()];
 	UINT32 lc;
 	
-	if(!layout)
+	if (!layout)
 	{
 		return 0;
 	}
@@ -615,7 +615,7 @@ float D2DView::GetTextHeight(IDWriteTextLayout* layout, const std::string& text)
 		float ty;
 
 		layout->GetFontSize(i,&ty);
-		if(ty>y){y=ty;}
+		if (ty>y){y=ty;}
 	}
 
 	return y;
@@ -649,7 +649,7 @@ void D2DView::CheckDeadMessageBoxes()
 	for(auto it = MessageBoxes.begin(); it != MessageBoxes.end(); it++)
 	{
 		// Delete the messagebox if it is hidden
-		if((*it)->IsHidden())
+		if ((*it)->IsHidden())
 		{
 			MainSubView->DeleteChild((*it));
 

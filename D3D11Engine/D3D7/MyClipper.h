@@ -24,7 +24,7 @@ public:
 	ULONG __stdcall Release()
 	{
 		refCount--;
-		if(!refCount)
+		if (!refCount)
 		{
 			delete this;
 			return 0;

@@ -44,7 +44,7 @@ bool SV_Slider::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wParam, LPAR
 	case WM_LBUTTONDOWN:
 		{
 			POINT p = D2DView::GetCursorPosition();
-			if(PointInsideRect(D2D1::Point2F((float)p.x, (float)p.y), clientRectAbs))
+			if (PointInsideRect(D2D1::Point2F((float)p.x, (float)p.y), clientRectAbs))
 			{
 				DraggingSlider = true;
 				return false;
@@ -54,7 +54,7 @@ bool SV_Slider::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wParam, LPAR
 		// There is no break here!
 
 	case WM_MOUSEMOVE:
-		if(DraggingSlider)
+		if (DraggingSlider)
 		{
 			// Calculate valueP from the x-axis
 			POINT p = D2DView::GetCursorPosition();
@@ -68,7 +68,7 @@ bool SV_Slider::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wParam, LPAR
 		break;
 
 	case WM_LBUTTONUP:
-		if(DraggingSlider)
+		if (DraggingSlider)
 		{
 			DraggingSlider = false;
 			return false;
@@ -173,7 +173,7 @@ void SV_Slider::RenderSlider()
 	MainView->GetRenderTarget()->DrawRectangle(bc,MainView->GetBrush(), 1);
 
 	// If bar position on the left side, place label to the right of the slider
-	if(BarPosition < GetSize().width / 2)
+	if (BarPosition < GetSize().width / 2)
 	{
 		ValueLabel->SetPosition(D2D1::Point2F(BarPosition + 2 + SV_SLIDERCONTROL_SLIDER_SIZEX,0));
 		ValueLabel->SetSize(GetSize());
@@ -186,15 +186,15 @@ void SV_Slider::RenderSlider()
 	}
 
 	// Only change when needed
-	if((DraggingSlider && (!DataToUpdate)) || (DataToUpdate && *DataToUpdate != Value) || !ValueLabel)
+	if ((DraggingSlider && (!DataToUpdate)) || (DataToUpdate && *DataToUpdate != Value) || !ValueLabel)
 	{
-		if(DisplayValues.empty())
+		if (DisplayValues.empty())
 		{
 			// Remove trailing zeros
 			std::string str;
 			char txt[32];
 
-			if(IsIntegral)
+			if (IsIntegral)
 			{
 				sprintf_s(txt, "%d", (int)(Value * DisplayMultiplier + 0.5f));
 				str = txt;
@@ -206,7 +206,7 @@ void SV_Slider::RenderSlider()
 				str.erase(str.find_last_not_of('0') + 1, std::string::npos);
 
 				// Fix integral numbers going like "100.", make them go "100" instead"
-				if(str.back() == '.')
+				if (str.back() == '.')
 					str.pop_back();
 			}
 
@@ -214,7 +214,7 @@ void SV_Slider::RenderSlider()
 		}else
 		{
 			unsigned int v = (unsigned int)(Value + 0.5f);
-			if(v >= DisplayValues.size())
+			if (v >= DisplayValues.size())
 				v = DisplayValues.size() - 1;
 
 			ValueLabel->SetCaption(DisplayValues[v]);
@@ -243,30 +243,30 @@ void SV_Slider::SetValueP(float value)
 	float oldVal = Value;
 	Value = Toolbox::lerp(Min, Max, value);
 
-	if(IsIntegral)
+	if (IsIntegral)
 		Value = (float)((int)(Value + 0.5f));
 
 	BarPosition = (GetSize().width - ((SV_SLIDERCONTROL_SLIDER_SIZEX+2) * 2)) * value + (SV_SLIDERCONTROL_SLIDER_SIZEX+2);
 
 	// Update data
-	if(DataToUpdate)
+	if (DataToUpdate)
 		*DataToUpdate = Value;
 
-	if(DataToUpdateInt)
+	if (DataToUpdateInt)
 		*DataToUpdateInt = (int)(Value + 0.5f);
 
 	// Fire callback
-	if(oldVal != Value && ValueChangedCallback)
+	if (oldVal != Value && ValueChangedCallback)
 		ValueChangedCallback(this, ValueChangedUserdata);
 
 	// Update caption:
-	if(DisplayValues.empty())
+	if (DisplayValues.empty())
 	{
 		// Remove trailing zeros
 		std::string str;
 		char txt[32];
 
-		if(IsIntegral)
+		if (IsIntegral)
 		{
 			sprintf_s(txt, "%d", (int)(Value * DisplayMultiplier + 0.5f));
 			str = txt;
@@ -278,7 +278,7 @@ void SV_Slider::SetValueP(float value)
 			str.erase(str.find_last_not_of('0') + 1, std::string::npos);
 
 			// Fix integral numbers going like "100.", make them go "100" instead"
-			if(str.back() == '.')
+			if (str.back() == '.')
 				str.pop_back();
 		}
 
@@ -286,7 +286,7 @@ void SV_Slider::SetValueP(float value)
 	}else
 	{
 		unsigned int v = (unsigned int)(Value + 0.5f);
-		if(v >= DisplayValues.size())
+		if (v >= DisplayValues.size())
 			v = DisplayValues.size() - 1;
 
 		ValueLabel->SetCaption(DisplayValues[v]);
