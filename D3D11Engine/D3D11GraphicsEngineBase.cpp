@@ -66,7 +66,7 @@ D3D11GraphicsEngineBase::~D3D11GraphicsEngineBase() {
 	SAFE_RELEASE(SwapChain);
 	LogInfo() << "D'Tor D3D11GraphicsEngineBase SwapChain";
 	LogInfo() << "Deffered Context is " << DeferredContext;
-	SAFE_RELEASE(DeferredContext);
+	//SAFE_RELEASE(DeferredContext);
 	LogInfo() << "D'Tor D3D11GraphicsEngineBase DeferredContext";
 	SAFE_RELEASE(Context);
 	LogInfo() << "D'Tor D3D11GraphicsEngineBase Context";
