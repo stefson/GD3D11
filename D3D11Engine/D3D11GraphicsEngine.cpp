@@ -4451,12 +4451,11 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights)
 		Engine::GAPI->GetRendererState()->RendererInfo.FrameDrawnLights++;
 	}
 
-
 	{
 		// *cough cough* somehow this makes the worldmesh disappear in indoor locations
 		// TODO: Fixme
-		//Engine::GAPI->GetRendererState()->RendererSettings.EnableSMAA = false;
-
+		bool oldState = Engine::GAPI->GetRendererState()->RendererSettings.EnableSMAA;
+		Engine::GAPI->GetRendererState()->RendererSettings.EnableSMAA = false;
 
 		Engine::GAPI->GetRendererState()->RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_BACK;
 		Engine::GAPI->GetRendererState()->RasterizerState.SetDirty();
@@ -4545,6 +4544,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights)
 
 		PfxRenderer->DrawFullScreenQuad();
 
+		Engine::GAPI->GetRendererState()->RendererSettings.EnableSMAA = oldState;
 	}
 
 	// Reset state
