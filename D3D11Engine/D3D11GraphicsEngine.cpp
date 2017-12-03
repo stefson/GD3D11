@@ -4228,8 +4228,8 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights)
 	D3DXVECTOR3 WorldShadowCP;
 
 	// Update dir
-	if(fabs(D3DXVec3Dot(&oldDir, &dir)) > 0.9995f)
-	{
+	if (fabs(D3DXVec3Dot(&oldDir, &dir)) > 0.9995f && false) {
+		LogInfo() << "Using old dir";
 		dir = oldDir;	
 	} else {
 		D3DXVECTOR3 target = dir;
