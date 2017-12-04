@@ -605,7 +605,6 @@
     </ClInclude>
     <ClInclude Include="D3D11RenderPipe.h" />
     <ClInclude Include="D3D11GraphicsEngineBase.h" />
-    <ClInclude Include="ModSpecific.h" />
     <ClInclude Include="D3D11GodRayEffect.h">
       <Filter>Engine\D3D11</Filter>
     </ClInclude>
@@ -880,7 +879,6 @@
     </ClCompile>
     <ClCompile Include="D3D11RenderPipe.cpp" />
     <ClCompile Include="D3D11GraphicsEngineBase.cpp" />
-    <ClCompile Include="ModSpecific.cpp" />
     <ClCompile Include="D3D11GodRayEffect.cpp">
       <Filter>Engine\D3D11</Filter>
     </ClCompile>

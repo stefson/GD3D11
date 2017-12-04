@@ -382,7 +382,6 @@ copy "$(OutDir)$(TargetName).pdb" "$(G1_SYSTEM_PATH)\ddraw.pdb"</Command>
     <ClInclude Include="Logger.h" />
     <ClInclude Include="MemoryTracker.h" />
     <ClInclude Include="MeshModifier.h" />
-    <ClInclude Include="ModSpecific.h" />
     <ClInclude Include="ocean_simulator.h" />
     <ClInclude Include="oCGame.h" />
     <ClInclude Include="oCNPC.h" />
@@ -563,7 +562,6 @@ copy "$(OutDir)$(TargetName).pdb" "$(G1_SYSTEM_PATH)\ddraw.pdb"</Command>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_G1|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="MeshModifier.cpp" />
-    <ClCompile Include="ModSpecific.cpp" />
     <ClCompile Include="ocean_simulator.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_G1|Win32'">NotUsing</PrecompiledHeader>
