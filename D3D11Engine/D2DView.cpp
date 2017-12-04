@@ -6,7 +6,6 @@
 #include "D2DSettingsDialog.h"
 #include "Engine.h"
 #include "GothicAPI.h"
-#include "ModSpecific.h"
 
 #pragma comment(lib, "d2d1.lib")
 #pragma comment(lib, "d3d11.lib")

@@ -36,7 +36,6 @@
 #include "zCRndD3D.h"
 #include "win32ClipboardWrapper.h"
 #include "zCSoundSystem.h"
-#include "ModSpecific.h"
 #include "zCView.h"
 
 // Duration how long the scene will stay wet, in MS

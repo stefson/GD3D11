@@ -1,111 +1,108 @@
 #pragma once
-#include <Windows.h>
-#include <D3DX10.h>
-#include <string>
+
 #include <map>
+#include <string>
 #include <unordered_map>
+
+#include <D3DX10.h>
+#include <Windows.h>
+
 #include "Types.h"
 
-
 /** Misc. tools */
+enum zTCam_ClipType;
 struct zTBBox3D;
 struct zTPlane;
-enum zTCam_ClipType;
-namespace Toolbox
-{
+
+namespace Toolbox {
+
 	/** Checks if one of a series of strings is found within the input-string */
-	bool StringContainsOneOf(const std::string& string, const std::string* checkStrings, int numStrings);
+	bool StringContainsOneOf(const std::string & string, const std::string * checkStrings, int numStrings);
 
 	/** Erases an element by value from a vector */
-	template<typename T> void EraseByElement(std::vector<T>& vector, T value)
-	{
+	template<typename T>
+	void EraseByElement(std::vector<T> & vector, T value) {
 		auto it = std::find(vector.begin(), vector.end(), value);
-
-		if (it != vector.end())
+		if (it != vector.end()) {
 			vector.erase(it);
+		}
 	}
 
 	/** Erases an element by value from a vector */
-	template<typename T, typename S> void EraseByElement(std::map<T, S>& map, S value)
-	{
-		for(auto it = map.begin();it!=map.end();it++)
-		{
-			if ((*it).second == value)
+	template<typename T, typename S>
+	void EraseByElement(std::map<T, S> & map, S value) {
+		for (auto it = map.begin(); it != map.end();) {
+			if ((*it).second == value) {
 				it = map.erase(it);
+			} else {
+				++it;
+			}
 		}
 	}
 
 	/** Deletes all elements of the given std::vector */
-	template<typename T> void DeleteElements(std::vector<T>& vector)
-	{
-		for(auto it = vector.begin(); it != vector.end(); it++)
-		{
-			delete (*it);
+	template<typename T>
+	void DeleteElements(std::vector<T> & vector) {
+		for (auto it = vector.begin(); it != vector.end(); ++it) {
+			delete *it;
 		}
-
 		vector.clear();
 	}
 
 	/** Deletes all elements of the given std::vector */
-	template<typename T> void DeleteElements(std::list<T>& list)
-	{
-		for(auto it = list.begin(); it != list.end(); it++)
-		{
-			delete (*it);
+	template<typename T>
+	void DeleteElements(std::list<T> & list) {
+		for (auto it = list.begin(); it != list.end(); ++it) {
+			delete *it;
 		}
-
 		list.clear();
 	}
 
 	/** Deletes all (second) elements of the given std::map */
-	template<typename T, typename S> void DeleteElements(std::map<T, S>& map)
-	{
-		for(auto it = map.begin(); it != map.end(); it++)
-		{
-			delete (*it).second;
+	template<typename T, typename S>
+	void DeleteElements(std::map<T, S> & map) {
+		for (auto it = map.begin(); it != map.end(); ++it) {
+			delete it->second;
 		}
-
 		map.clear();
 	}
 
 	/** Deletes all (second) elements of the given std::unordered_map */
-	template<typename T, typename S> void DeleteElements(std::unordered_map<T, S>& map)
-	{
-		for(auto it = map.begin(); it != map.end(); it++)
-		{
-			delete (*it).second;
+	template<typename T, typename S>
+	void DeleteElements(std::unordered_map<T, S> & map) {
+		for (auto it = map.begin(); it != map.end(); ++it) {
+			delete it->second;
 		}
-
 		map.clear();
 	}
 
 	/** Sorts the vector and removes all doubles */
-	template<typename T> void RemoveDoubles(std::vector<T>& vector)
-	{
-		std::sort(vector.begin(),vector.end());
-		std::unique(vector.begin(),vector.end());
+	template<typename T>
+	void RemoveDoubles(std::vector<T> & vector) {
+		std::sort(vector.begin(), vector.end());
+		std::unique(vector.begin(), vector.end());
 	}
 
 	/** Checks whether a given boundingbox is inside the given frustum. The index in "cache" is tested first, if it isn't set to -1 */
-	zTCam_ClipType BBox3DInFrustumCached(const zTBBox3D& bbox3D, zTPlane* frustumPlanes, byte* signbits, int& cache);
+	zTCam_ClipType BBox3DInFrustumCached(const zTBBox3D & bbox3D, zTPlane * frustumPlanes, byte * signbits, int & cache);
 
 	/** Checks if a folder exists */
-	bool FolderExists(const std::string& dirName_in);
+	bool FolderExists(const std::string & dirName_in);
 
 	/** Hashes the given float value */
-	void hash_combine(std::size_t& seed, float value);
+	void hash_combine(std::size_t & seed, float value);
 
 	/** Hashes the given DWORD value */
-	void hash_combine(std::size_t& seed, DWORD value);
+	void hash_combine(std::size_t & seed, DWORD value);
 
 	/** Returns true if the given position is inside the box */
-	bool PositionInsideBox(const D3DXVECTOR3& p, const D3DXVECTOR3& min, const D3DXVECTOR3& max);
+	bool PositionInsideBox(const D3DXVECTOR3 & p, const D3DXVECTOR3 & min, const D3DXVECTOR3 & max);
 
 	/** Converts an errorcode into a string */
 	std::string MakeErrorString(XRESULT code);
 
 	/** Returns the number of bits inside a bitmask */
-	WORD GetNumberOfBits( DWORD dwMask );
+	WORD GetNumberOfBits(DWORD dwMask);
 
 	/** Returns the size of a DDS-Image in bytes */
 	unsigned int GetDDSStorageRequirements(unsigned int width, unsigned int height, bool dxt1);
@@ -120,35 +117,36 @@ namespace Toolbox
 	float lerp(float a, float b, float w);
 
 	/** Converts a multi-byte-string to wide-char */
-	std::wstring ToWideChar(const std::string& str);
+	std::wstring ToWideChar(const std::string & str);
 	
 	/** Converts a wide-char-string to  multi-byte*/
-	std::string ToMultiByte(const std::wstring& str);
+	std::string ToMultiByte(const std::wstring & str);
 
 	/** Returns whether two AABBs are intersecting or not */
-	bool AABBsOverlapping(const D3DXVECTOR3& minA, const D3DXVECTOR3& maxA, const D3DXVECTOR3& minB, const D3DXVECTOR3& maxB); 
+	bool AABBsOverlapping(const D3DXVECTOR3 & minA, const D3DXVECTOR3 & maxA, const D3DXVECTOR3 & minB, const D3DXVECTOR3 & maxB); 
 
 	/** Does a ray vs aabb test */
-	bool IntersectBox(const D3DXVECTOR3& min, const D3DXVECTOR3& max, const D3DXVECTOR3& origin, const D3DXVECTOR3& direction, float& t);
+	bool IntersectBox(const D3DXVECTOR3 & min, const D3DXVECTOR3 & max, const D3DXVECTOR3 & origin, const D3DXVECTOR3 & direction, float & t);
 
 	/** Does a ray vs aabb test */
-	bool IntersectTri(const D3DXVECTOR3& v0, const D3DXVECTOR3& v1, const D3DXVECTOR3& v2, const D3DXVECTOR3& origin, const D3DXVECTOR3& direction, float& u, float& v, float& t);
+	bool IntersectTri(const D3DXVECTOR3 & v0, const D3DXVECTOR3 & v1, const D3DXVECTOR3 & v2, const D3DXVECTOR3 & origin, const D3DXVECTOR3 & direction, float & u, float & v, float & t);
 
 	/** Computes the normal of a triangle */
-	D3DXVECTOR3 ComputeNormal(const D3DXVECTOR3& v0, const D3DXVECTOR3& v1, const D3DXVECTOR3& v2);
+	D3DXVECTOR3 ComputeNormal(const D3DXVECTOR3 & v0, const D3DXVECTOR3 & v1, const D3DXVECTOR3 & v2);
 
 	/** Computes the distance of a point to an AABB */
-	float ComputePointAABBDistance(const D3DXVECTOR3& p, const D3DXVECTOR3& min, const D3DXVECTOR3& max);
+	float ComputePointAABBDistance(const D3DXVECTOR3 & p, const D3DXVECTOR3 & min, const D3DXVECTOR3 & max);
 
 	/** Returns whether the given file exists */
-	bool FileExists(const std::string& file);
+	bool FileExists(const std::string & file);
 
 	/** Saves a std::string to a FILE* */
-	void SaveStringToFILE(FILE* f, const std::string& str);
+	void SaveStringToFILE(FILE * f, const std::string & str);
 
 	/** sse2 memcpy implementation by William Chan and Google */
-	void X_aligned_memcpy_sse2(void* dest, const void* src, const unsigned long size_t);
+	void X_aligned_memcpy_sse2(void * dest, const void * src, const unsigned long size_t);
 
 	/** Loads a std::string from a FILE* */
-	std::string LoadStringFromFILE(FILE* f);
-};
+	std::string LoadStringFromFILE(FILE * f);
+
+}

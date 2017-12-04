@@ -38,7 +38,6 @@
 #include "zCParticleFX.h"
 #include "win32ClipboardWrapper.h"
 #include "D3D11OcclusionQuerry.h"
-#include "ModSpecific.h"
 #include "D3D11Effect.h"
 #include "D3D11PointLight.h"
 
