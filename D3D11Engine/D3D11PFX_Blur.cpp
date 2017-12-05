@@ -16,7 +16,7 @@ D3D11PFX_Blur::D3D11PFX_Blur(D3D11PfxRenderer* rnd) : D3D11PFX_Effect(rnd)
 }
 
 
-D3D11PFX_Blur::~D3D11PFX_Blur(void)
+D3D11PFX_Blur::~D3D11PFX_Blur()
 {
 
 }
@@ -27,8 +27,8 @@ XRESULT D3D11PFX_Blur::RenderBlur(RenderToTextureBuffer* fxbuffer, bool leaveRes
 	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 
 	// Save old rendertargets
-	ID3D11RenderTargetView* oldRTV = NULL;
-	ID3D11DepthStencilView* oldDSV = NULL;
+	ID3D11RenderTargetView* oldRTV = nullptr;
+	ID3D11DepthStencilView* oldDSV = nullptr;
 	engine->GetContext()->OMGetRenderTargets(1, &oldRTV, &oldDSV);
 
 	INT2 dsRes = INT2(fxbuffer->GetSizeX() / 4, fxbuffer->GetSizeY() / 4);

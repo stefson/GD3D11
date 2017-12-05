@@ -9,8 +9,8 @@
 class oCNPC : public zCVob
 {
 public:
-	oCNPC(void);
-	~oCNPC(void);
+	oCNPC();
+	~oCNPC();
 
 	/** Hooks the functions of this Class */
 	static void Hook()

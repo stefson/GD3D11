@@ -59,33 +59,33 @@ public:
 
 	/**	@brief	Logs a debug message */
 	void OnDebug(const char* message) { 
-		(void)message; //this avoids compiler warnings
+		()message; //this avoids compiler warnings
 	}
 
 	/**	@brief	Logs an info message */
 	void OnInfo(const char* message) { 
-		(void)message; //this avoids compiler warnings
+		()message; //this avoids compiler warnings
 	}
 
 	/**	@brief	Logs a warning message */
 	void OnWarn(const char* message) { 
-		(void)message; //this avoids compiler warnings
+		()message; //this avoids compiler warnings
 	}
 	
 	/**	@brief	Logs an error message */
 	void OnError(const char* message) { 
-		(void)message; //this avoids compiler warnings
+		()message; //this avoids compiler warnings
 	}
 
 	/**	@brief	Detach a still attached stream from logger */
 	bool attachStream(LogStream *pStream, unsigned int severity) {
-		(void)pStream; (void)severity; //this avoids compiler warnings
+		()pStream; ()severity; //this avoids compiler warnings
 		return false;
 	}
 
 	/**	@brief	Detach a still attached stream from logger */
 	bool detatchStream(LogStream *pStream, unsigned int severity) {
-		(void)pStream; (void)severity; //this avoids compiler warnings
+		()pStream; ()severity; //this avoids compiler warnings
 		return false;
 	}
 

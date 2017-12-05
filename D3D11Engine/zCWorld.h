@@ -201,7 +201,7 @@ public:
 
 		memcpy(originalzCWorldRender, worldRender, 0x255);
 
-		// zCBspTree::Render(void)
+		// zCBspTree::Render()
 		//REPLACE_CALL(GothicMemoryLocations::zCWorld::Call_Render_zCBspTreeRender, INST_NOP);
 
 		// Increase farplane 

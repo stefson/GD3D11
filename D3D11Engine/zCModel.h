@@ -111,7 +111,7 @@ public:
 #ifndef BUILD_GOTHIC_1_08k
 		return &SoftSkinList;
 #else
-		return NULL;
+		return nullptr;
 #endif
 	}
 
@@ -184,7 +184,7 @@ public:
 #ifndef BUILD_GOTHIC_1_08k
 		return (zCArray<zCMeshSoftSkin *> *)THISPTR_OFFSET(GothicMemoryLocations::zCModelPrototype::Offset_MeshSoftSkinList);
 #else
-		return NULL;
+		return nullptr;
 #endif
 	}
 
@@ -335,14 +335,14 @@ public:
 	}
 
 	/** Fills a vector of (viewspace) bone-transformation matrices for this frame */
-	void GetBoneTransforms(std::vector<D3DXMATRIX>* transforms, zCVob* vob = NULL)
+	void GetBoneTransforms(std::vector<D3DXMATRIX>* transforms, zCVob* vob = nullptr)
 	{
 		if (!GetNodeList())
 			return;
 
 		// Make this static so we don't reallocate the memory every time
 		static std::vector<D3DXMATRIX*> tptr;
-		tptr.resize(GetNodeList()->NumInArray, NULL);
+		tptr.resize(GetNodeList()->NumInArray, nullptr);
 		for (int i=0; i<GetNodeList()->NumInArray; i++) 
 		{
 			zCModelNodeInst* node = GetNodeList()->Array[i];

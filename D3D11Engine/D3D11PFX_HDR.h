@@ -7,7 +7,7 @@ class D3D11PFX_HDR :
 {
 public:
 	D3D11PFX_HDR(D3D11PfxRenderer* rnd);
-	~D3D11PFX_HDR(void);
+	~D3D11PFX_HDR();
 
 	/** Draws this effect to the given buffer */
 	XRESULT Render(RenderToTextureBuffer* fxbuffer);

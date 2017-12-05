@@ -17,7 +17,7 @@ D3D11PFX_HeightFog::D3D11PFX_HeightFog(D3D11PfxRenderer* rnd) : D3D11PFX_Effect(
 }
 
 
-D3D11PFX_HeightFog::~D3D11PFX_HeightFog(void)
+D3D11PFX_HeightFog::~D3D11PFX_HeightFog()
 {
 }
 
@@ -27,8 +27,8 @@ XRESULT D3D11PFX_HeightFog::Render(RenderToTextureBuffer* fxbuffer)
 	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 
 	// Save old rendertargets
-	ID3D11RenderTargetView* oldRTV = NULL;
-	ID3D11DepthStencilView* oldDSV = NULL;
+	ID3D11RenderTargetView* oldRTV = nullptr;
+	ID3D11DepthStencilView* oldDSV = nullptr;
 	engine->GetContext()->OMGetRenderTargets(1, &oldRTV, &oldDSV);
 
 	D3D11VShader* vs = engine->GetShaderManager()->GetVShader("VS_PFX");
@@ -38,10 +38,10 @@ XRESULT D3D11PFX_HeightFog::Render(RenderToTextureBuffer* fxbuffer)
 	vs->Apply();
 
 	HeightfogConstantBuffer cb;
-	D3DXMatrixInverse(&cb.InvProj, NULL, &Engine::GAPI->GetProjectionMatrix());
+	D3DXMatrixInverse(&cb.InvProj, nullptr, &Engine::GAPI->GetProjectionMatrix());
 
 	Engine::GAPI->GetViewMatrix(&cb.InvView);
-	D3DXMatrixInverse(&cb.InvView, NULL, &cb.InvView);
+	D3DXMatrixInverse(&cb.InvView, nullptr, &cb.InvView);
 	cb.CameraPosition = Engine::GAPI->GetCameraPosition();
 	float NearPlane=Engine::GAPI->GetRendererState()->RendererInfo.NearPlane;
 	float FarPlane=Engine::GAPI->GetRendererState()->RendererInfo.FarPlane;
@@ -49,7 +49,7 @@ XRESULT D3D11PFX_HeightFog::Render(RenderToTextureBuffer* fxbuffer)
 	D3DXMATRIX invViewProj, view;
 	Engine::GAPI->GetViewMatrix(&view);
 	D3DXMatrixMultiply(&invViewProj, &Engine::GAPI->GetProjectionMatrix(), &view);
-	D3DXMatrixInverse(&invViewProj, NULL, &invViewProj);
+	D3DXMatrixInverse(&invViewProj, nullptr, &invViewProj);
 
 	D3DXVECTOR3 vecFrustum[4];
 	/*vecFrustum[0] = D3DXVECTOR3(-1.0f, -1.0f,  0.0f); // xyz
@@ -174,7 +174,7 @@ XRESULT D3D11PFX_HeightFog::Render(RenderToTextureBuffer* fxbuffer)
 	hfPS->GetConstantBuffer()[1]->UpdateBuffer(&sky->GetAtmosphereCB());
 	hfPS->GetConstantBuffer()[1]->BindToPixelShader(1);
 
-	engine->GetContext()->OMSetRenderTargets(1, &oldRTV, NULL);
+	engine->GetContext()->OMSetRenderTargets(1, &oldRTV, nullptr);
 
 	// Bind depthbuffer
 	engine->GetDepthBuffer()->BindToPixelShader(engine->GetContext(), 1);
@@ -189,7 +189,7 @@ XRESULT D3D11PFX_HeightFog::Render(RenderToTextureBuffer* fxbuffer)
 
 
 	// Restore rendertargets
-	ID3D11ShaderResourceView* srv = NULL;
+	ID3D11ShaderResourceView* srv = nullptr;
 	engine->GetContext()->PSSetShaderResources(1,1,&srv);
 
 	engine->GetContext()->OMSetRenderTargets(1, &oldRTV, oldDSV);

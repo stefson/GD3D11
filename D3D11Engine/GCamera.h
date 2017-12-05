@@ -4,8 +4,8 @@
 class GCamera
 {
 public:
-	GCamera(void);
-	~GCamera(void);
+	GCamera();
+	~GCamera();
 
 
 

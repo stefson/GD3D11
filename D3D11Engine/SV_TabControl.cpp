@@ -14,22 +14,22 @@ SV_TabControl::SV_TabControl(D2DView* view, D2DSubView* parent) : D2DSubView(vie
 	TabPanel->SetDarkOverlay(true);
 	TabPanel->SetGlossyOutline(true);
 
-	TabSwitchedCallback = NULL;
-	TabSwitchedUserdata = NULL;
+	TabSwitchedCallback = nullptr;
+	TabSwitchedUserdata = nullptr;
 
-	ActiveTab = NULL;
+	ActiveTab = nullptr;
 
 	OnlyShowActiveTab = false;
 }
 
 
-SV_TabControl::~SV_TabControl(void)
+SV_TabControl::~SV_TabControl()
 {
 }
 
 SV_TabControl_Tab::SV_TabControl_Tab()
 {
-	CaptionLayout = NULL;
+	CaptionLayout = nullptr;
 }
 
 SV_TabControl_Tab::~SV_TabControl_Tab()

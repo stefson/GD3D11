@@ -11,10 +11,10 @@
 #pragma ruledisable 0x0802405f
 #endif
 
-D3D11HDShader::D3D11HDShader(void)
+D3D11HDShader::D3D11HDShader()
 {
-	HullShader = NULL;
-	DomainShader = NULL;
+	HullShader = nullptr;
+	DomainShader = nullptr;
 	ConstantBuffers = std::vector<D3D11ConstantBuffer*>();
 
 	// Insert into state-map
@@ -27,7 +27,7 @@ D3D11HDShader::D3D11HDShader(void)
 }
 
  
-D3D11HDShader::~D3D11HDShader(void)
+D3D11HDShader::~D3D11HDShader()
 {
 	// Remove from state map
 	Toolbox::EraseByElement(D3D11ObjectIDs::HDShadersByID, this);
@@ -63,12 +63,12 @@ HRESULT D3D11HDShader::CompileShaderFromFile(const CHAR* szFileName, LPCSTR szEn
 #endif
 
 	ID3DBlob* pErrorBlob;
-	hr = D3DX11CompileFromFileA(szFileName, NULL, NULL, szEntryPoint, szShaderModel,
-		dwShaderFlags, 0, NULL, ppBlobOut, &pErrorBlob, NULL);
+	hr = D3DX11CompileFromFileA(szFileName, nullptr, nullptr, szEntryPoint, szShaderModel,
+		dwShaderFlags, 0, nullptr, ppBlobOut, &pErrorBlob, nullptr);
 	if (FAILED(hr))
 	{
 		LogInfo() << "Shader compilation failed!";
-		if (pErrorBlob != NULL)
+		if (pErrorBlob != nullptr)
 		{
 
 			LogErrorBox() << (char*)pErrorBlob->GetBufferPointer() << "\n\n (You can ignore the next error from Gothic about too small video memory!)";
@@ -116,8 +116,8 @@ XRESULT D3D11HDShader::LoadShader(const char* hullShader, const char* domainShad
 	}
 
 	// Create the shaders
-	LE(engine->GetDevice()->CreateHullShader(hsBlob->GetBufferPointer(), hsBlob->GetBufferSize(), NULL, &HullShader));
-	LE(engine->GetDevice()->CreateDomainShader(dsBlob->GetBufferPointer(), dsBlob->GetBufferSize(), NULL, &DomainShader));
+	LE(engine->GetDevice()->CreateHullShader(hsBlob->GetBufferPointer(), hsBlob->GetBufferSize(), nullptr, &HullShader));
+	LE(engine->GetDevice()->CreateDomainShader(dsBlob->GetBufferPointer(), dsBlob->GetBufferSize(), nullptr, &DomainShader));
 
 #ifndef PUBLIC_RELEASE
 	HullShader->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(hullShader), hullShader);
@@ -135,8 +135,8 @@ XRESULT D3D11HDShader::Apply()
 {
 	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase *)Engine::GraphicsEngine;
 
-	engine->GetContext()->HSSetShader(HullShader, NULL, 0);
-	engine->GetContext()->DSSetShader(DomainShader, NULL, 0);
+	engine->GetContext()->HSSetShader(HullShader, nullptr, 0);
+	engine->GetContext()->DSSetShader(DomainShader, nullptr, 0);
 
 	return XR_SUCCESS;
 }
@@ -146,8 +146,8 @@ void D3D11HDShader::Unbind()
 {
 	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase *)Engine::GraphicsEngine;
 
-	engine->GetContext()->HSSetShader(NULL, NULL, 0);
-	engine->GetContext()->DSSetShader(NULL, NULL, 0);
+	engine->GetContext()->HSSetShader(nullptr, nullptr, 0);
+	engine->GetContext()->DSSetShader(nullptr, nullptr, 0);
 }
 
 /** Returns a reference to the constantBuffer vector*/

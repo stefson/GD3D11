@@ -51,7 +51,7 @@ public:
 		D3D11ObjectIDs::DepthStateByID[id] = this;
 	}
 
-	virtual ~D3D11DepthBufferState(void)
+	virtual ~D3D11DepthBufferState()
 	{
 		if (State)State->Release();
 
@@ -98,7 +98,7 @@ public:
 		D3D11ObjectIDs::BlendStateByID[id] = this;
 	}
 
-	virtual ~D3D11BlendStateInfo(void)
+	virtual ~D3D11BlendStateInfo()
 	{
 		if (State)State->Release();
 
@@ -144,7 +144,7 @@ public:
 		D3D11ObjectIDs::RasterizerStateByID[id] = this;
 	}
 
-	virtual ~D3D11RasterizerStateInfo(void)
+	virtual ~D3D11RasterizerStateInfo()
 	{
 		if (State)State->Release();
 

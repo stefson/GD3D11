@@ -2,8 +2,8 @@
 class D3D11Texture
 {
 public:
-	D3D11Texture(void);
-	~D3D11Texture(void);
+	D3D11Texture();
+	~D3D11Texture();
 
 	/** Layec out for DXGI */
 	enum ETextureFormat
@@ -15,7 +15,7 @@ public:
 	};
 
 	/** Initializes the texture object */
-	XRESULT Init(INT2 size, ETextureFormat format, UINT mipMapCount = 1, void* data = NULL, const std::string& fileName = "");
+	XRESULT Init(INT2 size, ETextureFormat format, UINT mipMapCount = 1, void* data = nullptr, const std::string& fileName = "");
 
 	/** Initializes the texture from a file */
 	XRESULT Init(const std::string& file);
@@ -50,7 +50,7 @@ public:
 	/** Creates a thumbnail for this */
 	XRESULT CreateThumbnail();
 
-	/** Returns the thumbnail of this texture. If this returns NULL, you need to create one first */
+	/** Returns the thumbnail of this texture. If this returns nullptr, you need to create one first */
 	ID3D11Texture2D* GetThumbnail();
 
 	/** Generates mipmaps for this texture (may be slow!) */

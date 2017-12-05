@@ -21,28 +21,28 @@ const D2D1::ColorF ReflectColor2 = D2D1::ColorF(0.22f,0.54f,0.725f,1.0f);
 const D2D1::ColorF DefBackgroundColor1 = D2D1::ColorF(0.4f,0.4f,0.4f,1.0f);
 const D2D1::ColorF DefBackgroundColor2 = D2D1::ColorF(0.0f,0.0f,0.0f,1.0f);
 
-D2DView::D2DView(void)
+D2DView::D2DView()
 {
-	RenderTarget = NULL;
-	Brush = NULL;
-	MainSubView = NULL;
-	Factory = NULL;
+	RenderTarget = nullptr;
+	Brush = nullptr;
+	MainSubView = nullptr;
+	Factory = nullptr;
 
-	GUIStyleLinearBrush = NULL;
-	RadialBrush = NULL;
-	LinearBrush = NULL;
-	LinearReflectBrushHigh = NULL;
-	LinearReflectBrush = NULL;
-	BackgroundBrush = NULL;
-	DefaultTextFormat = NULL;
-	TextFormatBig = NULL;
-	WriteFactory = NULL;
+	GUIStyleLinearBrush = nullptr;
+	RadialBrush = nullptr;
+	LinearBrush = nullptr;
+	LinearReflectBrushHigh = nullptr;
+	LinearReflectBrush = nullptr;
+	BackgroundBrush = nullptr;
+	DefaultTextFormat = nullptr;
+	TextFormatBig = nullptr;
+	WriteFactory = nullptr;
 
-	SettingsDialog = NULL;
+	SettingsDialog = nullptr;
 }
 
 
-D2DView::~D2DView(void)
+D2DView::~D2DView()
 {
 	delete MainSubView;
 
@@ -94,7 +94,7 @@ XRESULT D2DView::Init(HWND hwnd)
 			(ID2D1HwndRenderTarget**)&RenderTarget)))
 	{
 		Factory->Release();
-		Factory = NULL;
+		Factory = nullptr;
 
 		LogError() << "Failed to create D2D-Device!";
 
@@ -123,7 +123,7 @@ XRESULT D2DView::Init(const INT2& initialResolution, ID3D11Texture2D* rendertarg
 		return XR_FAILED;
 	}
 
-	IDXGISurface *dxgiBackbuffer = NULL;
+	IDXGISurface *dxgiBackbuffer = nullptr;
 	rendertarget->QueryInterface(&dxgiBackbuffer);
 
 	D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(
@@ -141,7 +141,7 @@ XRESULT D2DView::Init(const INT2& initialResolution, ID3D11Texture2D* rendertarg
 						 "\nThe link has been copied to your clipboard.";
 		if (dxgiBackbuffer)dxgiBackbuffer->Release();
 		Factory->Release();
-		Factory = NULL;
+		Factory = nullptr;
 		return XR_FAILED;
 	}
 	dxgiBackbuffer->Release();
@@ -319,7 +319,7 @@ HRESULT D2DView::InitResources()
 	// create the DWrite text format
 	WriteFactory->CreateTextFormat(
 		L"Arial",
-		NULL,
+		nullptr,
 		DWRITE_FONT_WEIGHT_NORMAL,
 		DWRITE_FONT_STYLE_NORMAL,
 		DWRITE_FONT_STRETCH_NORMAL,
@@ -332,7 +332,7 @@ HRESULT D2DView::InitResources()
 
 	WriteFactory->CreateTextFormat(
 		L"Arial",
-		NULL,
+		nullptr,
 		DWRITE_FONT_WEIGHT_NORMAL,
 		DWRITE_FONT_STYLE_NORMAL,
 		DWRITE_FONT_STRETCH_NORMAL,
@@ -341,7 +341,7 @@ HRESULT D2DView::InitResources()
 		&TextFormatBig);
 	
 
-	MainSubView = new D2DSubView(this, NULL);
+	MainSubView = new D2DSubView(this, nullptr);
 	MainSubView->SetRect(D2D1::RectF(0, 0, RenderTarget->GetSize().width, RenderTarget->GetSize().height));
 
 	EditorView = new D2DEditorView(this, MainSubView);
@@ -381,7 +381,7 @@ void D2DView::Update(float deltaTime)
 XRESULT D2DView::PrepareResize()
 {
 	if (RenderTarget)RenderTarget->Release();
-	RenderTarget = NULL;
+	RenderTarget = nullptr;
 
 	return XR_SUCCESS;
 }

@@ -2,13 +2,13 @@
 #include "ZipArchive.h"
 #include "XUnzip.h"
 
-ZipArchive::ZipArchive(void)
+ZipArchive::ZipArchive()
 {
-	UnzipThread = NULL;
+	UnzipThread = nullptr;
 }
 
 
-ZipArchive::~ZipArchive(void)
+ZipArchive::~ZipArchive()
 {
 	if (UnzipThread)
 	{

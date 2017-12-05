@@ -10,7 +10,7 @@ class SV_GMeshInfoView :
 {
 public:
 	SV_GMeshInfoView(D2DView* view, D2DSubView* parent);
-	~SV_GMeshInfoView(void);
+	~SV_GMeshInfoView();
 
 	enum ERenderMode
 	{
@@ -24,7 +24,7 @@ public:
 	void SetRenderMode(ERenderMode mode);
 
 	/** Sets the mesh infos for this view */
-	void SetMeshes(const std::map<zCTexture*, MeshInfo*>& meshes, BaseVisualInfo* visInfo = NULL);
+	void SetMeshes(const std::map<zCTexture*, MeshInfo*>& meshes, BaseVisualInfo* visInfo = nullptr);
 
 	/** Sets the name of this view */
 	void SetName(const std::string& name);

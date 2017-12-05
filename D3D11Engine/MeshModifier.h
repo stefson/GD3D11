@@ -5,8 +5,8 @@
 class MeshModifier
 {
 public:
-	MeshModifier(void);
-	~MeshModifier(void);
+	MeshModifier();
+	~MeshModifier();
 
 	/** Performs catmul-clark smoothing on the mesh */
 	static void DoCatmulClark(const std::vector<ExVertexStruct>& inVertices, const std::vector<unsigned short>& inIndices, std::vector<ExVertexStruct>& outVertices, std::vector<unsigned short>& outIndices, int iterations);

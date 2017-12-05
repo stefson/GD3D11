@@ -8,7 +8,7 @@ SV_Border::SV_Border(D2DView* view, D2DSubView* parent) : D2DSubView(view, paren
 }
 
 
-SV_Border::~SV_Border(void)
+SV_Border::~SV_Border()
 {
 }
 

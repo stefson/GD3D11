@@ -21,7 +21,7 @@ public:
 		
 	}
 
-	static zCParser* GetParser(){return NULL;}
+	static zCParser* GetParser(){return nullptr;}
 #else
 	static zCParser* GetParser(){return (zCParser *)GothicMemoryLocations::GlobalObjects::zCParser;}
 #endif

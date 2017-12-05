@@ -6,14 +6,14 @@
 #include "GothicAPI.h"
 #include "D3D11VertexBuffer.h"
 
-D3D11LineRenderer::D3D11LineRenderer(void)
+D3D11LineRenderer::D3D11LineRenderer()
 {
-	LineBuffer = NULL;
+	LineBuffer = nullptr;
 	LineBufferSize = 0;
 }
 
 
-D3D11LineRenderer::~D3D11LineRenderer(void)
+D3D11LineRenderer::~D3D11LineRenderer()
 {
 	delete LineBuffer;
 }

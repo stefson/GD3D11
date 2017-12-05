@@ -41,18 +41,18 @@ void radix008A(CSFFT512x512_Plan* fft_plan,
 
 	// Shader
 	if (istride > 1)
-		pd3dImmediateContext->CSSetShader(fft_plan->pRadix008A_CS, NULL, 0);
+		pd3dImmediateContext->CSSetShader(fft_plan->pRadix008A_CS, nullptr, 0);
 	else
-		pd3dImmediateContext->CSSetShader(fft_plan->pRadix008A_CS2, NULL, 0);
+		pd3dImmediateContext->CSSetShader(fft_plan->pRadix008A_CS2, nullptr, 0);
 
 	// Execute
 	pd3dImmediateContext->Dispatch(grid, 1, 1);
 
 	// Unbind resource
-	cs_srvs[0] = NULL;
+	cs_srvs[0] = nullptr;
 	pd3dImmediateContext->CSSetShaderResources(0, 1, cs_srvs);
 
-	cs_uavs[0] = NULL;
+	cs_uavs[0] = nullptr;
 	pd3dImmediateContext->CSSetUnorderedAccessViews(0, 1, cs_uavs, (UINT*)(&cs_uavs[0]));
 }
 
@@ -196,16 +196,16 @@ void fft512x512_create_plan(CSFFT512x512_Plan* plan, ID3D11Device* pd3dDevice, U
 	assert(plan->pd3dImmediateContext);
 
 	// Compute shaders
-    ID3DBlob* pBlobCS = NULL;
-    ID3DBlob* pBlobCS2 = NULL;
+    ID3DBlob* pBlobCS = nullptr;
+    ID3DBlob* pBlobCS2 = nullptr;
 
     CompileShaderFromFile(L"CSFFT\\fft_512x512_c2c.hlsl", "Radix008A_CS", "cs_4_0", &pBlobCS);
     CompileShaderFromFile(L"CSFFT\\fft_512x512_c2c.hlsl", "Radix008A_CS2", "cs_4_0", &pBlobCS2);
 	assert(pBlobCS);
 	assert(pBlobCS2);
 
-    pd3dDevice->CreateComputeShader(pBlobCS->GetBufferPointer(), pBlobCS->GetBufferSize(), NULL, &plan->pRadix008A_CS);
-    pd3dDevice->CreateComputeShader(pBlobCS2->GetBufferPointer(), pBlobCS2->GetBufferSize(), NULL, &plan->pRadix008A_CS2);
+    pd3dDevice->CreateComputeShader(pBlobCS->GetBufferPointer(), pBlobCS->GetBufferSize(), nullptr, &plan->pRadix008A_CS);
+    pd3dDevice->CreateComputeShader(pBlobCS2->GetBufferPointer(), pBlobCS2->GetBufferSize(), nullptr, &plan->pRadix008A_CS2);
 	assert(plan->pRadix008A_CS);
 	assert(plan->pRadix008A_CS2);
     
@@ -225,7 +225,7 @@ void fft512x512_create_plan(CSFFT512x512_Plan* plan, ID3D11Device* pd3dDevice, U
     buf_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
     buf_desc.StructureByteStride = sizeof(float) * 2;
 
-	pd3dDevice->CreateBuffer(&buf_desc, NULL, &plan->pBuffer_Tmp);
+	pd3dDevice->CreateBuffer(&buf_desc, nullptr, &plan->pBuffer_Tmp);
 	assert(plan->pBuffer_Tmp);
 
 	// Temp undordered access view

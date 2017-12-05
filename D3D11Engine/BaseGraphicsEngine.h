@@ -60,8 +60,8 @@ public:
 		UI_OpenEditor
 	};
 
-	BaseGraphicsEngine(void);
-	virtual ~BaseGraphicsEngine(void);
+	BaseGraphicsEngine();
+	virtual ~BaseGraphicsEngine();
 
 	/** Called after the fake-DDraw-Device got created */
 	virtual XRESULT Init() = 0;
@@ -128,7 +128,7 @@ public:
 	virtual XRESULT DrawVertexBufferIndexedUINT(D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices, unsigned int indexOffset){return XR_SUCCESS;};
 
 	/** Draws a skeletal mesh */
-	virtual XRESULT DrawSkeletalMesh(D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices, const std::vector<D3DXMATRIX>& transforms, float fatness = 1.0f, SkeletalMeshVisualInfo* msh = NULL){return XR_SUCCESS;};
+	virtual XRESULT DrawSkeletalMesh(D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices, const std::vector<D3DXMATRIX>& transforms, float fatness = 1.0f, SkeletalMeshVisualInfo* msh = nullptr){return XR_SUCCESS;};
 
 	
 

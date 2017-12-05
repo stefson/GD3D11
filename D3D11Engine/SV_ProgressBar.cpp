@@ -8,7 +8,7 @@ SV_ProgressBar::SV_ProgressBar(D2DView* view, D2DSubView* parent) : D2DSubView(v
 }
 
 
-SV_ProgressBar::~SV_ProgressBar(void)
+SV_ProgressBar::~SV_ProgressBar()
 {
 }
 

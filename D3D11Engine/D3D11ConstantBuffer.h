@@ -4,7 +4,7 @@ class D3D11ConstantBuffer
 {
 public:
 	D3D11ConstantBuffer(int size, void* data);
-	~D3D11ConstantBuffer(void);
+	~D3D11ConstantBuffer();
 
 	/** Updates the buffer */
 	void UpdateBuffer(void* data);

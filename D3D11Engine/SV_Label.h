@@ -7,7 +7,7 @@ class SV_Label :
 {
 public:
 	SV_Label(D2DView* view, D2DSubView* parent);
-	~SV_Label(void);
+	~SV_Label();
 
 	/** Draws this sub-view */
 	virtual void Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime);

@@ -13,8 +13,8 @@ class D3D11NVHBAO;
 class D3D11PfxRenderer
 {
 public:
-	D3D11PfxRenderer(void);
-	~D3D11PfxRenderer(void);
+	D3D11PfxRenderer();
+	~D3D11PfxRenderer();
 
 	/** Called on resize */
 	XRESULT OnResize(const INT2& newResolution);

@@ -6,8 +6,8 @@
 class GInventory
 {
 public:
-	GInventory(void);
-	~GInventory(void);
+	GInventory();
+	~GInventory();
 
 	/** Called when a VOB got added to the BSP-Tree or the world */
 	void OnAddVob(VobInfo* vob, zCWorld* world);

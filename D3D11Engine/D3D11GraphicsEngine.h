@@ -40,8 +40,8 @@ class D3D11Effect;
 class D3D11GraphicsEngine : public D3D11GraphicsEngineBase
 {
 public:
-	D3D11GraphicsEngine(void);
-	~D3D11GraphicsEngine(void);
+	D3D11GraphicsEngine();
+	~D3D11GraphicsEngine();
 
 	/** Called after the fake-DDraw-Device got created */
 	virtual XRESULT Init();
@@ -114,7 +114,7 @@ public:
 	void Setup_PNAEN(EPNAENRenderMode mode = PNAEN_Default);
 
 	/** Draws a skeletal mesh */
-	virtual XRESULT DrawSkeletalMesh(D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices, const std::vector<D3DXMATRIX>& transforms, float fatness = 1.0f, SkeletalMeshVisualInfo* msh= NULL);
+	virtual XRESULT DrawSkeletalMesh(D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices, const std::vector<D3DXMATRIX>& transforms, float fatness = 1.0f, SkeletalMeshVisualInfo* msh= nullptr);
 
 	/** Draws a vertexarray, non-indexed */
 	virtual XRESULT DrawVertexArray(ExVertexStruct* vertices, unsigned int numVertices, unsigned int startVertex = 0, unsigned int stride = sizeof(ExVertexStruct));
@@ -203,7 +203,7 @@ public:
 					     bool cullFront = true, 
 						 bool indoor = false,
 						 bool noNPCs = false,
-					     std::list<VobInfo*>* renderedVobs = NULL, std::list<SkeletalVobInfo*>* renderedMobs = NULL, std::map<MeshKey, WorldMeshInfo*, cmpMeshKey>* worldMeshCache = NULL);
+					     std::list<VobInfo*>* renderedVobs = nullptr, std::list<SkeletalVobInfo*>* renderedMobs = nullptr, std::map<MeshKey, WorldMeshInfo*, cmpMeshKey>* worldMeshCache = nullptr);
 					     
 	/** Draws the static vobs instanced */
 	XRESULT DrawVOBsInstanced();
@@ -218,18 +218,18 @@ public:
 	virtual XRESULT DrawSky();
 
 	/** Renders the shadowmaps for the sun */
-	void RenderShadowmaps(const D3DXVECTOR3& cameraPosition, RenderToDepthStencilBuffer* target = NULL, bool cullFront = true, bool dontCull = false, ID3D11DepthStencilView* dsvOverwrite = NULL, ID3D11RenderTargetView* debugRTV = NULL);
+	void RenderShadowmaps(const D3DXVECTOR3& cameraPosition, RenderToDepthStencilBuffer* target = nullptr, bool cullFront = true, bool dontCull = false, ID3D11DepthStencilView* dsvOverwrite = nullptr, ID3D11RenderTargetView* debugRTV = nullptr);
 
 	/** Renders the shadowmaps for a pointlight */
 	void RenderShadowCube(const D3DXVECTOR3& position, 
 		float range, 
 		RenderToDepthStencilBuffer* targetCube, 
 		ID3D11DepthStencilView* face,
-		ID3D11RenderTargetView* debugRTV = NULL, 
+		ID3D11RenderTargetView* debugRTV = nullptr, 
 		bool cullFront = true, 
 		bool indoor = false,
 		bool noNPCs = false,
-		std::list<VobInfo*>* renderedVobs = NULL, std::list<SkeletalVobInfo*>* renderedMobs = NULL, std::map<MeshKey, WorldMeshInfo*, cmpMeshKey>* worldMeshCache = NULL); 
+		std::list<VobInfo*>* renderedVobs = nullptr, std::list<SkeletalVobInfo*>* renderedMobs = nullptr, std::map<MeshKey, WorldMeshInfo*, cmpMeshKey>* worldMeshCache = nullptr); 
 
 	/** Updates the occlusion for the bsp-tree */
 	void UpdateOcclusion();

@@ -25,7 +25,7 @@ static LONG WINAPI ExpFilter(EXCEPTION_POINTERS* pExp, DWORD dwExpCode)
 	MyStackWalker::GetSingleton().ShowCallstack(GetCurrentThread(), pExp->ContextRecord);
 
 	// Show message:
-	/*MessageBoxA(NULL, "GD3D11 crashed due to internal problems. A detailed description can be found in system\\log.txt.\n\n"
+	/*MessageBoxA(nullptr, "GD3D11 crashed due to internal problems. A detailed description can be found in system\\log.txt.\n\n"
 		"Be sure to include this File if you want to report the crash in the Forums!", "GD3D11 has encountered a problem and can not continue.", MB_OK | MB_ICONERROR);
 
 	exit(0);*/

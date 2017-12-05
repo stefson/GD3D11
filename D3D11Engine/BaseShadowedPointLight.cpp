@@ -2,11 +2,11 @@
 #include "BaseShadowedPointLight.h"
 
 
-BaseShadowedPointLight::BaseShadowedPointLight(void)
+BaseShadowedPointLight::BaseShadowedPointLight()
 {
 }
 
 
-BaseShadowedPointLight::~BaseShadowedPointLight(void)
+BaseShadowedPointLight::~BaseShadowedPointLight()
 {
 }

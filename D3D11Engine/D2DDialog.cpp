@@ -27,7 +27,7 @@ D2DDialog::D2DDialog(D2DView* view, D2DSubView* parent) : D2DSubView(view, paren
 }
 
 
-D2DDialog::~D2DDialog(void)
+D2DDialog::~D2DDialog()
 {
 }
 

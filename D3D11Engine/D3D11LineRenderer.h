@@ -6,8 +6,8 @@ class D3D11LineRenderer :
 	public BaseLineRenderer
 {
 public:
-	D3D11LineRenderer(void);
-	~D3D11LineRenderer(void);
+	D3D11LineRenderer();
+	~D3D11LineRenderer();
 
 	/** Adds a line to the list */
 	virtual XRESULT AddLine(const LineVertex& v1, const LineVertex& v2);

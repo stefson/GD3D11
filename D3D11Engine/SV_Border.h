@@ -5,7 +5,7 @@ class SV_Border :
 {
 public:
 	SV_Border(D2DView* view, D2DSubView* parent);
-	~SV_Border(void);
+	~SV_Border();
 
 	/** Sets the border color */
 	void SetBorderColor(const D2D1_COLOR_F& color);

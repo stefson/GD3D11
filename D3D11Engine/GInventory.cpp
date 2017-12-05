@@ -4,12 +4,12 @@
 #include "GothicAPI.h"
 #include "zCMaterial.h"
 
-GInventory::GInventory(void)
+GInventory::GInventory()
 {
 }
 
 
-GInventory::~GInventory(void)
+GInventory::~GInventory()
 {
 }
 

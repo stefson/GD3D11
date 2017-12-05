@@ -4,13 +4,13 @@
 
 SV_Checkbox::SV_Checkbox(D2DView* view, D2DSubView* parent) : D2DSubView(view, parent)
 {
-	CaptionLayout = NULL;
-	DataToUpdate = NULL;
+	CaptionLayout = nullptr;
+	DataToUpdate = nullptr;
 	IsChecked = false;
 }
 
 
-SV_Checkbox::~SV_Checkbox(void)
+SV_Checkbox::~SV_Checkbox()
 {
 	if (CaptionLayout)CaptionLayout->Release();
 }

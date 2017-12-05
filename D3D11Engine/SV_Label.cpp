@@ -4,7 +4,7 @@
 
 SV_Label::SV_Label(D2DView* view, D2DSubView* parent) : D2DSubView(view, parent)
 {
-	CaptionLayout = NULL;
+	CaptionLayout = nullptr;
 	VertAlignment = DWRITE_PARAGRAPH_ALIGNMENT_NEAR;
 	HorizAlignment = DWRITE_TEXT_ALIGNMENT_LEADING;
 	DrawBackground = false;
@@ -14,7 +14,7 @@ SV_Label::SV_Label(D2DView* view, D2DSubView* parent) : D2DSubView(view, parent)
 }
 
 
-SV_Label::~SV_Label(void)
+SV_Label::~SV_Label()
 {
 	if (CaptionLayout)CaptionLayout->Release();
 }

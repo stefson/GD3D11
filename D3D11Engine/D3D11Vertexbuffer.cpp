@@ -6,14 +6,14 @@
 
 #pragma comment(lib, "d3dx9.lib")
 
-D3D11VertexBuffer::D3D11VertexBuffer(void)
+D3D11VertexBuffer::D3D11VertexBuffer()
 {
-	VertexBuffer = NULL;
-	ShaderResourceView = NULL;
+	VertexBuffer = nullptr;
+	ShaderResourceView = nullptr;
 }
 
 
-D3D11VertexBuffer::~D3D11VertexBuffer(void)
+D3D11VertexBuffer::~D3D11VertexBuffer()
 {
 	if (VertexBuffer)VertexBuffer->Release();
 	if (ShaderResourceView)ShaderResourceView->Release();
@@ -46,7 +46,7 @@ XRESULT D3D11VertexBuffer::Init(void* initData, unsigned int sizeInBytes, EBindF
 		bufferDesc.MiscFlags |= D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 
 	// In case we dont have data, allocate some to satisfy D3D11
-	char* data = NULL;
+	char* data = nullptr;
 	if (!initData)
 	{
 		data = new char[bufferDesc.ByteWidth];

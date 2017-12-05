@@ -7,8 +7,8 @@ class D3D11VertexBuffer;
 class D3D11GShader
 {
 public:
-	D3D11GShader(void);
-	~D3D11GShader(void);
+	D3D11GShader();
+	~D3D11GShader();
 
 	
 	/** Loads shader */

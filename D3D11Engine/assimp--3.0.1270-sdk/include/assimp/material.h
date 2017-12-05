@@ -632,7 +632,7 @@ struct aiMaterialProperty
 #ifdef __cplusplus
 
 	aiMaterialProperty()	{
-		mData = NULL;
+		mData = nullptr;
 		mIndex = mSemantic = 0;
 	}
 
@@ -677,7 +677,7 @@ public:
      * @param pOut Pointer to a buffer to receive the result. 
      * @param pMax Specifies the size of the given buffer, in Type's.
      * Receives the number of values (not bytes!) read. 
-     * NULL is a valid value for this parameter.
+     * nullptr is a valid value for this parameter.
      */
     template <typename Type>
     aiReturn Get(const char* pKey,unsigned int type,
@@ -717,17 +717,17 @@ public:
 	*    #GetTextureCount() can be used to determine the number of textures
 	*    per texture type.
 	*  @param path Receives the path to the texture.
-	*	 NULL is a valid value.
+	*	 nullptr is a valid value.
    *  @param mapping The texture mapping.
-   *		NULL is allowed as value.
+   *		nullptr is allowed as value.
 	*  @param uvindex Receives the UV index of the texture. 
-	*    NULL is a valid value.
+	*    nullptr is a valid value.
 	*  @param blend Receives the blend factor for the texture
-	*	 NULL is a valid value.
+	*	 nullptr is a valid value.
 	*  @param op Receives the texture operation to be performed between
-	*	 this texture and the previous texture. NULL is allowed as value.
+	*	 this texture and the previous texture. nullptr is allowed as value.
 	*  @param mapmode Receives the mapping modes to be used for the texture.
-	*    The parameter may be NULL but if it is a valid pointer it MUST
+	*    The parameter may be nullptr but if it is a valid pointer it MUST
 	*    point to an array of 3 aiTextureMapMode's (one for each
 	*    axis: UVW order (=XYZ)). 
 	*/
@@ -735,11 +735,11 @@ public:
 	aiReturn GetTexture(aiTextureType type,
 		unsigned int  index,
 		C_STRUCT aiString* path,
-		aiTextureMapping* mapping	= NULL,
-		unsigned int* uvindex		= NULL,
-		float* blend				   = NULL,
-		aiTextureOp* op				= NULL,
-		aiTextureMapMode* mapmode	= NULL) const; 
+		aiTextureMapping* mapping	= nullptr,
+		unsigned int* uvindex		= nullptr,
+		float* blend				   = nullptr,
+		aiTextureOp* op				= nullptr,
+		aiTextureMapMode* mapmode	= nullptr) const; 
 
 
 	// Setters
@@ -1264,13 +1264,13 @@ extern "C" {
 // ---------------------------------------------------------------------------
 /** @brief Retrieve a material property with a specific key from the material
  *
- * @param pMat Pointer to the input material. May not be NULL
+ * @param pMat Pointer to the input material. May not be nullptr
  * @param pKey Key to search for. One of the AI_MATKEY_XXX constants.
  * @param type Specifies the type of the texture to be retrieved (
  *    e.g. diffuse, specular, height map ...)
  * @param index Index of the texture to be retrieved.
  * @param pPropOut Pointer to receive a pointer to a valid aiMaterialProperty
- *        structure or NULL if the key has not been found. */
+ *        structure or nullptr if the key has not been found. */
 // ---------------------------------------------------------------------------
 ASSIMP_API C_ENUM aiReturn aiGetMaterialProperty(
 	 const C_STRUCT aiMaterial* pMat, 
@@ -1295,7 +1295,7 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialProperty(
  * }
  * @endcode
  *
- * @param pMat Pointer to the input material. May not be NULL
+ * @param pMat Pointer to the input material. May not be nullptr
  * @param pKey Key to search for. One of the AI_MATKEY_XXX constants.
  * @param pOut Pointer to a buffer to receive the result. 
  * @param pMax Specifies the size of the given buffer, in float's.
@@ -1327,7 +1327,7 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialFloatArray(
 *    (float*)&specStrength);
 * @endcode
 *
-* @param pMat Pointer to the input material. May not be NULL
+* @param pMat Pointer to the input material. May not be nullptr
 * @param pKey Key to search for. One of the AI_MATKEY_XXX constants.
 * @param pOut Receives the output float.
 * @param type (see the code sample above)
@@ -1348,7 +1348,7 @@ inline aiReturn aiGetMaterialFloat(const aiMaterial* pMat,
 
 // Use our friend, the C preprocessor
 #define aiGetMaterialFloat (pMat, type, index, pKey, pOut) \
-    aiGetMaterialFloatArray(pMat, type, index, pKey, pOut, NULL)
+    aiGetMaterialFloatArray(pMat, type, index, pKey, pOut, nullptr)
 
 #endif //!__cplusplus
 
@@ -1386,7 +1386,7 @@ inline aiReturn aiGetMaterialInteger(const C_STRUCT aiMaterial* pMat,
 
 // use our friend, the C preprocessor
 #define aiGetMaterialInteger (pMat, type, index, pKey, pOut) \
-    aiGetMaterialIntegerArray(pMat, type, index, pKey, pOut, NULL)
+    aiGetMaterialIntegerArray(pMat, type, index, pKey, pOut, nullptr)
 
 #endif //!__cplusplus
 
@@ -1417,7 +1417,7 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialString(const C_STRUCT aiMaterial* pMat,
 
 // ---------------------------------------------------------------------------
 /** Get the number of textures for a particular texture type.
- *  @param[in] pMat Pointer to the input material. May not be NULL
+ *  @param[in] pMat Pointer to the input material. May not be nullptr
  *  @param type Texture type to check for
  *  @return Number of textures for this type.
  *  @note A texture can be easily queried using #aiGetMaterialTexture() */
@@ -1433,7 +1433,7 @@ ASSIMP_API unsigned int aiGetMaterialTextureCount(const C_STRUCT aiMaterial* pMa
  *  texture by parsing all of its properties manually. This function bundles
  *  all of them in a huge function monster.
  *
- *  @param[in] mat Pointer to the input material. May not be NULL
+ *  @param[in] mat Pointer to the input material. May not be nullptr
  *  @param[in] type Specifies the texture stack to read from (e.g. diffuse,
  *     specular, height map ...). 
  *  @param[in] index Index of the texture. The function fails if the 
@@ -1443,17 +1443,17 @@ ASSIMP_API unsigned int aiGetMaterialTextureCount(const C_STRUCT aiMaterial* pMa
  *  @param[out] path Receives the output path
  *      This parameter must be non-null.
  *  @param mapping The texture mapping mode to be used.
- *      Pass NULL if you're not interested in this information.
+ *      Pass nullptr if you're not interested in this information.
  *  @param[out] uvindex For UV-mapped textures: receives the index of the UV
  *      source channel. Unmodified otherwise.
- *      Pass NULL if you're not interested in this information.
+ *      Pass nullptr if you're not interested in this information.
  *  @param[out] blend Receives the blend factor for the texture
- *      Pass NULL if you're not interested in this information.
+ *      Pass nullptr if you're not interested in this information.
  *  @param[out] op Receives the texture blend operation to be perform between
  *		this texture and the previous texture.
- *      Pass NULL if you're not interested in this information.
+ *      Pass nullptr if you're not interested in this information.
  *  @param[out] mapmode Receives the mapping modes to be used for the texture.
- *      Pass NULL if you're not interested in this information. Otherwise,
+ *      Pass nullptr if you're not interested in this information. Otherwise,
  *      pass a pointer to an array of two aiTextureMapMode's (one for each
  *      axis, UV order).
  *  @return AI_SUCCESS on success, otherwise something else. Have fun.*/
@@ -1463,23 +1463,23 @@ ASSIMP_API aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
 	aiTextureType type,
     unsigned int  index,
     aiString* path,
-	aiTextureMapping* mapping	= NULL,
-    unsigned int* uvindex		= NULL,
-    float* blend				= NULL,
-    aiTextureOp* op				= NULL,
-	aiTextureMapMode* mapmode	= NULL,
-	unsigned int* flags         = NULL); 
+	aiTextureMapping* mapping	= nullptr,
+    unsigned int* uvindex		= nullptr,
+    float* blend				= nullptr,
+    aiTextureOp* op				= nullptr,
+	aiTextureMapMode* mapmode	= nullptr,
+	unsigned int* flags         = nullptr); 
 #else
 C_ENUM aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
     C_ENUM aiTextureType type,
     unsigned int  index,
     C_STRUCT aiString* path,
-	C_ENUM aiTextureMapping* mapping	/*= NULL*/,
-    unsigned int* uvindex				/*= NULL*/,
-    float* blend						/*= NULL*/,
-    C_ENUM aiTextureOp* op				/*= NULL*/,
-	C_ENUM aiTextureMapMode* mapmode	/*= NULL*/,
-	unsigned int* flags                 /*= NULL*/); 
+	C_ENUM aiTextureMapping* mapping	/*= nullptr*/,
+    unsigned int* uvindex				/*= nullptr*/,
+    float* blend						/*= nullptr*/,
+    C_ENUM aiTextureOp* op				/*= nullptr*/,
+	C_ENUM aiTextureMapMode* mapmode	/*= nullptr*/,
+	unsigned int* flags                 /*= nullptr*/); 
 #endif // !#ifdef __cplusplus
 
 #ifdef __cplusplus

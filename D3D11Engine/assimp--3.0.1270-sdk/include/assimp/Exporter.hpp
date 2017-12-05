@@ -127,7 +127,7 @@ public:
 	 *
 	 * #Exporter takes ownership of the object and will destroy it 
 	 * afterwards. The previously assigned handler will be deleted.
-	 * Pass NULL to take again ownership of your IOSystem and reset Assimp
+	 * Pass nullptr to take again ownership of your IOSystem and reset Assimp
 	 * to use its default implementation, which uses plain file IO.
 	 *
 	 * @param pIOHandler The IO handler to be used in all file accesses 
@@ -140,7 +140,7 @@ public:
 	 * interface is the default IO handler provided by ASSIMP. The default
 	 * handler is active as long the application doesn't supply its own
 	 * custom IO handler via #SetIOHandler().
-	 * @return A valid IOSystem interface, never NULL. */
+	 * @return A valid IOSystem interface, never nullptr. */
 	IOSystem* GetIOHandler() const;
 
 	// -------------------------------------------------------------------
@@ -164,7 +164,7 @@ public:
 	* #GetExportFormatCount / #GetExportFormatDescription to learn which 
 	*   export formats are available.
 	* @param pPreprocessing See the documentation for #Export
-	* @return the exported data or NULL in case of error.
+	* @return the exported data or nullptr in case of error.
 	* @note If the Exporter instance did already hold a blob from
 	*   a previous call to #ExportToBlob, it will be disposed. 
 	*   Any IO handlers set via #SetIOHandler are ignored here.*/
@@ -176,7 +176,7 @@ public:
 	/** Convenience function to export directly to a file. Use
 	 *  #SetIOSystem to supply a custom IOSystem to gain fine-grained control
 	 *  about the output data flow of the export process.
-	 * @param pBlob A data blob obtained from a previous call to #aiExportScene. Must not be NULL.
+	 * @param pBlob A data blob obtained from a previous call to #aiExportScene. Must not be nullptr.
 	 * @param pPath Full target file name. Target must be accessible.
 	 * @param pPreprocessing Accepts any choice of the #aiPostProcessing enumerated
 	 *   flags, but in reality only a subset of them makes sense here. Specifying
@@ -207,7 +207,7 @@ public:
 	 *
 	 * Returns an empty string if no error occurred.
 	 * @return A description of the last error, an empty string if no 
-	 *   error occurred. The string is never NULL.
+	 *   error occurred. The string is never nullptr.
 	 *
 	 * @note The returned function remains valid until one of the 
 	 * following methods is called: #Export, #ExportToBlob, #FreeBlob */
@@ -251,7 +251,7 @@ public:
 	 * @param pIndex Index of the export format to retrieve information 
 	 *  for. Valid range is 0 to #Exporter::GetExportFormatCount
 	 * @return A description of that specific export format. 
-	 *  NULL if pIndex is out of range. */
+	 *  nullptr if pIndex is out of range. */
 	const aiExportFormatDesc* GetExportFormatDescription( size_t pIndex ) const;
 
 

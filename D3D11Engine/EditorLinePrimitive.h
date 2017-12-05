@@ -27,8 +27,8 @@ class D3D11PShader;
 class EditorLinePrimitive
 {
 public:
-	EditorLinePrimitive(void);
-	virtual ~EditorLinePrimitive(void);
+	EditorLinePrimitive();
+	virtual ~EditorLinePrimitive();
 
 	/** Creates the buffers (Polygon-version) and sets up the rest of the object */
 	HRESULT CreateSolidPrimitive(LineVertex* PrimVerts, UINT NumVertices, D3D11_PRIMITIVE_TOPOLOGY Topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

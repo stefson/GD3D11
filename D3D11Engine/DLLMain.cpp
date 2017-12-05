@@ -69,7 +69,7 @@ struct ddraw_dll
 
 HRESULT DoHookedDirectDrawCreateEx(GUID FAR * lpGuid, LPVOID  *lplpDD, REFIID  iid,IUnknown FAR *pUnkOuter)
 {
-	*lplpDD = new MyDirectDraw(NULL);
+	*lplpDD = new MyDirectDraw(nullptr);
 
 	if (!Engine::GraphicsEngine)
 	{		
@@ -195,8 +195,8 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID) {
 
 			HookedFunctions::OriginalFunctions.InitHooks();
 
-			Engine::GAPI = NULL;
-			Engine::GraphicsEngine = NULL;
+			Engine::GAPI = nullptr;
+			Engine::GraphicsEngine = nullptr;
 
 			// Create GothicAPI here to make all hooks work
 			Engine::CreateGothicAPI();

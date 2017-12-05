@@ -65,7 +65,7 @@ class ASSIMP_API IOStream : public Intern::AllocateFromAssimpHeap
 {
 protected:
 	/** Constructor protected, use IOSystem::Open() to create an instance. */
-	IOStream(void);
+	IOStream();
 
 public:
 	// -------------------------------------------------------------------

@@ -7,8 +7,8 @@ struct MeshInfo;
 class D3D11OcclusionQuerry
 {
 public:
-	D3D11OcclusionQuerry(void);
-	~D3D11OcclusionQuerry(void);
+	D3D11OcclusionQuerry();
+	~D3D11OcclusionQuerry();
 
 	/** Advances the frame counter of this */
 	void AdvanceFrameCounter();

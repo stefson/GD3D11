@@ -3,8 +3,8 @@
 class D3D11VertexBuffer
 {
 public:
-	D3D11VertexBuffer(void);
-	~D3D11VertexBuffer(void);
+	D3D11VertexBuffer();
+	~D3D11VertexBuffer();
 
 	/** Layed out for D3D11*/
 	enum ECPUAccessFlags

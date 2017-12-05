@@ -16,7 +16,7 @@ class BaseWidget
 {
 public:
 	BaseWidget(WidgetContainer* container);
-	virtual ~BaseWidget(void);
+	virtual ~BaseWidget();
 
 	/** Renders the widget */
 	virtual void RenderWidget();

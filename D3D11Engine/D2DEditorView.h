@@ -26,11 +26,11 @@ struct SelectionInfo
 
 	void Reset()
 	{
-		SelectedMesh = NULL;
-		SelectedMaterial = NULL;
-		SelectedVegetationBox = NULL;
-		SelectedVobInfo = NULL;
-		SelectedSkeletalVob = NULL;
+		SelectedMesh = nullptr;
+		SelectedMaterial = nullptr;
+		SelectedVegetationBox = nullptr;
+		SelectedVobInfo = nullptr;
+		SelectedSkeletalVob = nullptr;
 	}
 
 	MeshInfo* SelectedMesh;
@@ -45,7 +45,7 @@ class D2DEditorView :
 {
 public:
 	D2DEditorView(D2DView* view, D2DSubView* parent);
-	virtual ~D2DEditorView(void);
+	virtual ~D2DEditorView();
 
 	enum EditorMode
 	{
@@ -75,7 +75,7 @@ public:
 
 protected:
 	/** Visualizes a mesh info */
-	void VisualizeMeshInfo(MeshInfo* m, const D3DXVECTOR4& color = D3DXVECTOR4(1,1,1,1), bool showBounds = false, const D3DXMATRIX* world = NULL);
+	void VisualizeMeshInfo(MeshInfo* m, const D3DXVECTOR4& color = D3DXVECTOR4(1,1,1,1), bool showBounds = false, const D3DXMATRIX* world = nullptr);
 
 	/** Sets the editor-mode */
 	void SetEditorMode(EditorMode mode);

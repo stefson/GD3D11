@@ -77,7 +77,7 @@ public:
 	 *   occasion (loaders and Assimp are generally allowed to perform
 	 *   all needed cleanup tasks prior to returning control to the
 	 *   caller). If the loading is aborted, #Importer::ReadFile()
-	 *   returns always NULL.
+	 *   returns always nullptr.
 	 *
 	 *  @note Currently, percentage is always -1.f because there is 
 	 *   no reliable way to compute it.

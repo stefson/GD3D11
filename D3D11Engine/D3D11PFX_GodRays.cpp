@@ -17,7 +17,7 @@ D3D11PFX_GodRays::D3D11PFX_GodRays(D3D11PfxRenderer* rnd) : D3D11PFX_Effect(rnd)
 }
 
 
-D3D11PFX_GodRays::~D3D11PFX_GodRays(void)
+D3D11PFX_GodRays::~D3D11PFX_GodRays()
 {
 }
 
@@ -65,8 +65,8 @@ XRESULT D3D11PFX_GodRays::Render(RenderToTextureBuffer* fxbuffer)
 
 
 
-	ID3D11RenderTargetView* oldRTV=NULL;
-	ID3D11DepthStencilView* oldDSV=NULL;
+	ID3D11RenderTargetView* oldRTV=nullptr;
+	ID3D11DepthStencilView* oldDSV=nullptr;
 
 	engine->GetContext()->OMGetRenderTargets(1, &oldRTV, &oldDSV);
 
@@ -78,7 +78,7 @@ XRESULT D3D11PFX_GodRays::Render(RenderToTextureBuffer* fxbuffer)
 	vs->Apply();
 
 	// Draw downscaled mask
-	engine->GetContext()->OMSetRenderTargets(1, FxRenderer->GetTempBufferDS4_1()->GetRenderTargetViewPtr(), NULL);
+	engine->GetContext()->OMSetRenderTargets(1, FxRenderer->GetTempBufferDS4_1()->GetRenderTargetViewPtr(), nullptr);
 
 	engine->GetHDRBackBuffer()->BindToPixelShader(engine->GetContext(), 0);
 	engine->GetGBuffer1()->BindToPixelShader(engine->GetContext(), 1);

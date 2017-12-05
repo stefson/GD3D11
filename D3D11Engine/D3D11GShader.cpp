@@ -6,9 +6,9 @@
 #include "GothicAPI.h"
 #include "D3D11ConstantBuffer.h"
 
-D3D11GShader::D3D11GShader(void)
+D3D11GShader::D3D11GShader()
 {
-	GeometryShader = NULL;
+	GeometryShader = nullptr;
 
 	// Insert into state-map
 	ID = D3D11ObjectIDs::Counters.GShadersCounter++;
@@ -16,7 +16,7 @@ D3D11GShader::D3D11GShader(void)
 	D3D11ObjectIDs::GShadersByID[ID] = this;
 }
 
-D3D11GShader::~D3D11GShader(void)
+D3D11GShader::~D3D11GShader()
 {
 	// Remove from state map
 	Toolbox::EraseByElement(D3D11ObjectIDs::GShadersByID, this);
@@ -57,12 +57,12 @@ HRESULT D3D11GShader::CompileShaderFromFile(const CHAR* szFileName, LPCSTR szEnt
 	m.insert(m.begin(), makros.begin(), makros.end());
 
 	ID3DBlob* pErrorBlob;
-	hr = D3DX11CompileFromFileA(szFileName, &m[0], NULL, szEntryPoint, szShaderModel,
-		dwShaderFlags, 0, NULL, ppBlobOut, &pErrorBlob, NULL);
+	hr = D3DX11CompileFromFileA(szFileName, &m[0], nullptr, szEntryPoint, szShaderModel,
+		dwShaderFlags, 0, nullptr, ppBlobOut, &pErrorBlob, nullptr);
 	if (FAILED(hr))
 	{
 		LogInfo() << "Shader compilation failed!";
-		if (pErrorBlob != NULL)
+		if (pErrorBlob != nullptr)
 		{
 
 			LogErrorBox() << (char*)pErrorBlob->GetBufferPointer() << "\n\n (You can ignore the next error from Gothic about too small video memory!)";
@@ -106,7 +106,7 @@ XRESULT D3D11GShader::LoadShader(const char* geometryShader, std::vector<D3D10_S
 		}
 
 		// Create the shader
-		LE(engine->GetDevice()->CreateGeometryShader(gsBlob->GetBufferPointer(), gsBlob->GetBufferSize(), NULL, &GeometryShader));
+		LE(engine->GetDevice()->CreateGeometryShader(gsBlob->GetBufferPointer(), gsBlob->GetBufferSize(), nullptr, &GeometryShader));
 	}else
 	{
 		// Compile vertexshader
@@ -115,7 +115,7 @@ XRESULT D3D11GShader::LoadShader(const char* geometryShader, std::vector<D3D10_S
 			return XR_FAILED;
 		}
 
-		D3D11_SO_DECLARATION_ENTRY* soDec = NULL;
+		D3D11_SO_DECLARATION_ENTRY* soDec = nullptr;
 		int numSoDecElements = 0;
 		UINT stride = 0;
 
@@ -149,7 +149,7 @@ XRESULT D3D11GShader::LoadShader(const char* geometryShader, std::vector<D3D10_S
 		}
 
 		// Create the shader from a vertexshader
-		engine->GetDevice()->CreateGeometryShaderWithStreamOutput(gsBlob->GetBufferPointer(), gsBlob->GetBufferSize(), soDec, numSoDecElements, &stride, 1, D3D11_SO_NO_RASTERIZED_STREAM, NULL, &GeometryShader);
+		engine->GetDevice()->CreateGeometryShaderWithStreamOutput(gsBlob->GetBufferPointer(), gsBlob->GetBufferSize(), soDec, numSoDecElements, &stride, 1, D3D11_SO_NO_RASTERIZED_STREAM, nullptr, &GeometryShader);
 	}
 #ifndef PUBLIC_RELEASE
 	GeometryShader->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(geometryShader), geometryShader);
@@ -165,7 +165,7 @@ XRESULT D3D11GShader::Apply()
 {
 	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase *)Engine::GraphicsEngine;
 
-	engine->GetContext()->GSSetShader(GeometryShader, NULL, 0);
+	engine->GetContext()->GSSetShader(GeometryShader, nullptr, 0);
 
 	return XR_SUCCESS;
 }

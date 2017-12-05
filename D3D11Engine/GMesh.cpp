@@ -14,12 +14,12 @@
 
 using namespace Assimp;
 
-GMesh::GMesh(void)
+GMesh::GMesh()
 {
 }
 
 
-GMesh::~GMesh(void)
+GMesh::~GMesh()
 {
 	for(unsigned int i=0;i<Meshes.size();i++)
 	{
@@ -181,7 +181,7 @@ void GMesh::DrawMesh()
 {
 	for(unsigned int i=0;i<Meshes.size();i++)
 	{
-		Engine::GAPI->DrawMeshInfo(NULL, Meshes[i]);
+		Engine::GAPI->DrawMeshInfo(nullptr, Meshes[i]);
 	}
 }
 

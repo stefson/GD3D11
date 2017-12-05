@@ -24,7 +24,7 @@ public:
 		XLE(Engine::GraphicsEngine->CreateVertexBuffer(&VertexBuffer));
 
 		// Initialize it
-		XLE(VertexBuffer->Init(NULL, OriginalDesc.dwNumVertices * ComputeFVFSize(OriginalDesc.dwFVF), D3D11VertexBuffer::EBindFlags::B_VERTEXBUFFER, D3D11VertexBuffer::EUsageFlags::U_DYNAMIC, D3D11VertexBuffer::ECPUAccessFlags::CA_WRITE));
+		XLE(VertexBuffer->Init(nullptr, OriginalDesc.dwNumVertices * ComputeFVFSize(OriginalDesc.dwFVF), D3D11VertexBuffer::EBindFlags::B_VERTEXBUFFER, D3D11VertexBuffer::EUsageFlags::U_DYNAMIC, D3D11VertexBuffer::ECPUAccessFlags::CA_WRITE));
 
 		// Start with 1 reference
 		RefCount = 1;

@@ -17,7 +17,7 @@ class D2DDialog :
 {
 public:
 	D2DDialog(D2DView* view, D2DSubView* parent);
-	~D2DDialog(void);
+	~D2DDialog();
 
 	/** Initializes the controls of this view */
 	virtual XRESULT InitControls();

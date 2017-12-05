@@ -2,11 +2,11 @@
 #include "GCamera.h"
 
 
-GCamera::GCamera(void)
+GCamera::GCamera()
 {
 }
 
 
-GCamera::~GCamera(void)
+GCamera::~GCamera()
 {
 }

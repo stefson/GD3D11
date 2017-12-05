@@ -8,8 +8,8 @@ class D3D11HDShader
 public:
 	static std::map<UINT8, D3D11HDShader *> ShadersByID;
 
-	D3D11HDShader(void);
-	~D3D11HDShader(void);
+	D3D11HDShader();
+	~D3D11HDShader();
 
 		/** Loads shader */
 	XRESULT LoadShader(const char* hullShader, const char* domainShader);

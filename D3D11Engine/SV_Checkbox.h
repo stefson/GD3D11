@@ -8,7 +8,7 @@ class SV_Checkbox :
 {
 public:
 	SV_Checkbox(D2DView* view, D2DSubView* parent);
-	~SV_Checkbox(void);
+	~SV_Checkbox();
 
 	/** Draws this sub-view */
 	virtual void Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime);

@@ -18,9 +18,9 @@ D3D11PFX_HDR::D3D11PFX_HDR(D3D11PfxRenderer* rnd) : D3D11PFX_Effect(rnd)
 	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 
 	// Create lum-buffer
-	LumBuffer1 = new RenderToTextureBuffer(engine->GetDevice(), LUM_SIZE, LUM_SIZE, DXGI_FORMAT_R16_FLOAT, NULL, DXGI_FORMAT_UNKNOWN, DXGI_FORMAT_UNKNOWN, (int)(log(LUM_SIZE) / log(2)));
-	LumBuffer2 = new RenderToTextureBuffer(engine->GetDevice(), LUM_SIZE, LUM_SIZE, DXGI_FORMAT_R16_FLOAT, NULL, DXGI_FORMAT_UNKNOWN, DXGI_FORMAT_UNKNOWN, (int)(log(LUM_SIZE) / log(2)));
-	LumBuffer3 = new RenderToTextureBuffer(engine->GetDevice(), LUM_SIZE, LUM_SIZE, DXGI_FORMAT_R16_FLOAT, NULL, DXGI_FORMAT_UNKNOWN, DXGI_FORMAT_UNKNOWN, (int)(log(LUM_SIZE) / log(2)));
+	LumBuffer1 = new RenderToTextureBuffer(engine->GetDevice(), LUM_SIZE, LUM_SIZE, DXGI_FORMAT_R16_FLOAT, nullptr, DXGI_FORMAT_UNKNOWN, DXGI_FORMAT_UNKNOWN, (int)(log(LUM_SIZE) / log(2)));
+	LumBuffer2 = new RenderToTextureBuffer(engine->GetDevice(), LUM_SIZE, LUM_SIZE, DXGI_FORMAT_R16_FLOAT, nullptr, DXGI_FORMAT_UNKNOWN, DXGI_FORMAT_UNKNOWN, (int)(log(LUM_SIZE) / log(2)));
+	LumBuffer3 = new RenderToTextureBuffer(engine->GetDevice(), LUM_SIZE, LUM_SIZE, DXGI_FORMAT_R16_FLOAT, nullptr, DXGI_FORMAT_UNKNOWN, DXGI_FORMAT_UNKNOWN, (int)(log(LUM_SIZE) / log(2)));
 
 	engine->GetContext()->ClearRenderTargetView(LumBuffer1->GetRenderTargetView(), (float *)&D3DXVECTOR4(0,0,0,0));
 	engine->GetContext()->ClearRenderTargetView(LumBuffer2->GetRenderTargetView(), (float *)&D3DXVECTOR4(0,0,0,0));
@@ -29,7 +29,7 @@ D3D11PFX_HDR::D3D11PFX_HDR(D3D11PfxRenderer* rnd) : D3D11PFX_Effect(rnd)
 }
 
 
-D3D11PFX_HDR::~D3D11PFX_HDR(void)
+D3D11PFX_HDR::~D3D11PFX_HDR()
 {
 	delete LumBuffer1;
 	delete LumBuffer2;
@@ -45,8 +45,8 @@ XRESULT D3D11PFX_HDR::Render(RenderToTextureBuffer* fxbuffer)
 	Engine::GAPI->GetRendererState()->BlendState.SetDirty();
 
 	// Save old rendertargets
-	ID3D11RenderTargetView* oldRTV = NULL;
-	ID3D11DepthStencilView* oldDSV = NULL;
+	ID3D11RenderTargetView* oldRTV = nullptr;
+	ID3D11DepthStencilView* oldDSV = nullptr;
 	engine->GetContext()->OMGetRenderTargets(1, &oldRTV, &oldDSV);
 
 
@@ -81,7 +81,7 @@ XRESULT D3D11PFX_HDR::Render(RenderToTextureBuffer* fxbuffer)
 	//FxRenderer->CopyTextureToRTV(currentLum->GetShaderResView(), oldRTV, INT2(LUM_SIZE,LUM_SIZE), false);
 
 	// Restore rendertargets
-	ID3D11ShaderResourceView* srv = NULL;
+	ID3D11ShaderResourceView* srv = nullptr;
 	engine->GetContext()->PSSetShaderResources(1,1,&srv);
 	engine->GetContext()->OMSetRenderTargets(1, &oldRTV, oldDSV);
 	if (oldRTV)oldRTV->Release();
@@ -197,7 +197,7 @@ RenderToTextureBuffer* D3D11PFX_HDR::CalcLuminance()
 	currentLum->BindToPixelShader(engine->GetContext(), 2);
 	
 	// Convert the backbuffer to our luminance buffer
-	FxRenderer->CopyTextureToRTV(NULL, lumRTV->GetRenderTargetView(), INT2(LUM_SIZE,LUM_SIZE), true);
+	FxRenderer->CopyTextureToRTV(nullptr, lumRTV->GetRenderTargetView(), INT2(LUM_SIZE,LUM_SIZE), true);
 
 	// Create the average luminance
 	engine->GetContext()->GenerateMips(lumRTV->GetShaderResView());

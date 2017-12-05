@@ -4,8 +4,8 @@ class D3D11AntTweakBar :
 	public BaseAntTweakBar
 {
 public:
-	D3D11AntTweakBar(void);
-	~D3D11AntTweakBar(void);
+	D3D11AntTweakBar();
+	~D3D11AntTweakBar();
 
 	/** Creates the resources */
 	virtual XRESULT Init();

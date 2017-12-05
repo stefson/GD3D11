@@ -15,13 +15,13 @@
 #include "D3D11PFX_SMAA.h"
 #include "D3D11PFX_GodRays.h"
 
-D3D11PfxRenderer::D3D11PfxRenderer(void)
+D3D11PfxRenderer::D3D11PfxRenderer()
 {
-	TempBuffer = NULL;
-	TempBufferDS4_1 = NULL;
-	TempBufferDS4_2 = NULL;
+	TempBuffer = nullptr;
+	TempBufferDS4_1 = nullptr;
+	TempBufferDS4_2 = nullptr;
 
-	FX_Blur = NULL;
+	FX_Blur = nullptr;
 
 	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 	ScreenQuad = new D3D11FullscreenQuad;
@@ -40,7 +40,7 @@ D3D11PfxRenderer::D3D11PfxRenderer(void)
 }
 
 
-D3D11PfxRenderer::~D3D11PfxRenderer(void)
+D3D11PfxRenderer::~D3D11PfxRenderer()
 {
 	delete NvHBAO;
 	delete TempBuffer;
@@ -57,7 +57,7 @@ D3D11PfxRenderer::~D3D11PfxRenderer(void)
 /** Renders the distance blur effect */
 XRESULT D3D11PfxRenderer::RenderDistanceBlur()
 {
-	FX_DistanceBlur->Render(NULL);
+	FX_DistanceBlur->Render(nullptr);
 	return XR_SUCCESS;
 }
 
@@ -71,19 +71,19 @@ XRESULT D3D11PfxRenderer::BlurTexture(RenderToTextureBuffer* texture, bool leave
 /** Renders the heightfog */
 XRESULT D3D11PfxRenderer::RenderHeightfog()
 {
-	return FX_HeightFog->Render(NULL);
+	return FX_HeightFog->Render(nullptr);
 } 
 
 /** Renders the godrays-Effect */
 XRESULT D3D11PfxRenderer::RenderGodRays()
 {
-	return FX_GodRays->Render(NULL);
+	return FX_GodRays->Render(nullptr);
 }
 
 /** Renders the HDR-Effect */
 XRESULT D3D11PfxRenderer::RenderHDR()
 {
-	return FX_HDR->Render(NULL);
+	return FX_HDR->Render(nullptr);
 }
 
 /** Renders the SMAA-Effect */
@@ -108,7 +108,7 @@ XRESULT D3D11PfxRenderer::DrawFullScreenQuad()
 	ID3D11Buffer* buffers = ScreenQuad->GetBuffer();
 	engine->GetContext()->IASetVertexBuffers( 0, 1, &buffers, &uStride, &offset );
 
-	//ID3D11Buffer* cb = NULL;
+	//ID3D11Buffer* cb = nullptr;
 	//engine->GetContext()->VSSetConstantBuffers(0, 1, &cb);
 
 	//Draw the mesh
@@ -154,8 +154,8 @@ XRESULT D3D11PfxRenderer::CopyTextureToRTV(ID3D11ShaderResourceView* texture, ID
 	}
 
 	// Save old rendertargets
-	ID3D11RenderTargetView* oldRTV = NULL;
-	ID3D11DepthStencilView* oldDSV = NULL;
+	ID3D11RenderTargetView* oldRTV = nullptr;
+	ID3D11DepthStencilView* oldDSV = nullptr;
 	engine->GetContext()->OMGetRenderTargets(1, &oldRTV, &oldDSV);
 
 	// Bind shaders
@@ -167,10 +167,10 @@ XRESULT D3D11PfxRenderer::CopyTextureToRTV(ID3D11ShaderResourceView* texture, ID
 
 	engine->GetShaderManager()->GetVShader("VS_PFX")->Apply();
 	
-	ID3D11ShaderResourceView* srv = NULL;
+	ID3D11ShaderResourceView* srv = nullptr;
 	engine->GetContext()->PSSetShaderResources(0,1,&srv);
 
-	engine->GetContext()->OMSetRenderTargets(1, &rtv, NULL);
+	engine->GetContext()->OMSetRenderTargets(1, &rtv, nullptr);
 
 	if (texture)
 		engine->GetContext()->PSSetShaderResources(0,1, &texture);
@@ -197,13 +197,13 @@ XRESULT D3D11PfxRenderer::OnResize(const INT2& newResolution)
 
 	// Create temp-buffer
 	delete TempBuffer;
-	TempBuffer = new RenderToTextureBuffer(engine->GetDevice(), newResolution.x, newResolution.y, DXGI_FORMAT_R16G16B16A16_FLOAT, NULL);
+	TempBuffer = new RenderToTextureBuffer(engine->GetDevice(), newResolution.x, newResolution.y, DXGI_FORMAT_R16G16B16A16_FLOAT, nullptr);
 
 	delete TempBufferDS4_1;
-	TempBufferDS4_1 = new RenderToTextureBuffer(engine->GetDevice(), newResolution.x / 4, newResolution.y / 4, DXGI_FORMAT_R16G16B16A16_FLOAT, NULL);
+	TempBufferDS4_1 = new RenderToTextureBuffer(engine->GetDevice(), newResolution.x / 4, newResolution.y / 4, DXGI_FORMAT_R16G16B16A16_FLOAT, nullptr);
 
 	delete TempBufferDS4_2;
-	TempBufferDS4_2 = new RenderToTextureBuffer(engine->GetDevice(), newResolution.x / 4, newResolution.y / 4, DXGI_FORMAT_R16G16B16A16_FLOAT, NULL);
+	TempBufferDS4_2 = new RenderToTextureBuffer(engine->GetDevice(), newResolution.x / 4, newResolution.y / 4, DXGI_FORMAT_R16G16B16A16_FLOAT, nullptr);
 	
 	FX_SMAA->OnResize(newResolution);
 

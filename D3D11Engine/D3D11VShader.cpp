@@ -6,10 +6,10 @@
 #include "GothicAPI.h"
 #include "D3D11ConstantBuffer.h"
 
-D3D11VShader::D3D11VShader(void)
+D3D11VShader::D3D11VShader()
 {
-	VertexShader = NULL;
-	InputLayout = NULL;
+	VertexShader = nullptr;
+	InputLayout = nullptr;
 
 	// Insert into state-map
 	ID = D3D11ObjectIDs::Counters.VShadersCounter++;
@@ -17,7 +17,7 @@ D3D11VShader::D3D11VShader(void)
 	D3D11ObjectIDs::VShadersByID[ID] = this;
 }
 
-D3D11VShader::~D3D11VShader(void)
+D3D11VShader::~D3D11VShader()
 {
 	// Remove from state map
 	Toolbox::EraseByElement(D3D11ObjectIDs::VShadersByID, this);
@@ -59,12 +59,12 @@ HRESULT D3D11VShader::CompileShaderFromFile(const CHAR* szFileName, LPCSTR szEnt
 	m.insert(m.begin(), makros.begin(), makros.end());
 
 	ID3DBlob* pErrorBlob;
-	hr = D3DX11CompileFromFileA(szFileName, &m[0], NULL, szEntryPoint, szShaderModel,
-		dwShaderFlags, 0, NULL, ppBlobOut, &pErrorBlob, NULL);
+	hr = D3DX11CompileFromFileA(szFileName, &m[0], nullptr, szEntryPoint, szShaderModel,
+		dwShaderFlags, 0, nullptr, ppBlobOut, &pErrorBlob, nullptr);
 	if (FAILED(hr))
 	{
 		LogInfo() << "Shader compilation failed!";
-		if (pErrorBlob != NULL)
+		if (pErrorBlob != nullptr)
 		{
 
 			LogErrorBox() << (char*)pErrorBlob->GetBufferPointer() << "\n\n (You can ignore the next error from Gothic about too small video memory!)";
@@ -109,7 +109,7 @@ XRESULT D3D11VShader::LoadShader(const char* vertexShader, int layout, std::vect
 
 	// Create the shader
 	LE(engine->GetDevice()->CreateVertexShader(vsBlob->GetBufferPointer(),
-		vsBlob->GetBufferSize(), NULL, &VertexShader));
+		vsBlob->GetBufferSize(), nullptr, &VertexShader));
 
 #ifndef PUBLIC_RELEASE
 	VertexShader->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(vertexShader), vertexShader);
@@ -305,7 +305,7 @@ XRESULT D3D11VShader::Apply()
 	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase *)Engine::GraphicsEngine;
 
 	engine->GetContext()->IASetInputLayout(InputLayout);
-	engine->GetContext()->VSSetShader(VertexShader, NULL, 0);
+	engine->GetContext()->VSSetShader(VertexShader, nullptr, 0);
 
 	return XR_SUCCESS;
 }

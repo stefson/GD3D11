@@ -65,7 +65,7 @@ public:
 		for(int i=0;i<GetNumPolyVertices();i++)
 		{
 			delete getVertices()[i];
-			getVertices()[i] = NULL;
+			getVertices()[i] = nullptr;
 		}
 
 		Destructor();

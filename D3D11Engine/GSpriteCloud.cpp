@@ -2,12 +2,12 @@
 #include "GSpriteCloud.h"
 
 
-GSpriteCloud::GSpriteCloud(void)
+GSpriteCloud::GSpriteCloud()
 {
 }
 
 
-GSpriteCloud::~GSpriteCloud(void)
+GSpriteCloud::~GSpriteCloud()
 {
 }
 

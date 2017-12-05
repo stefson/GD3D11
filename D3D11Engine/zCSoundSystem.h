@@ -24,6 +24,6 @@ public:
 #ifndef BUILD_GOTHIC_1_08k
 	static zCSoundSystem* GetSoundSystem(){return *(zCSoundSystem **)GothicMemoryLocations::GlobalObjects::zSound;}
 #else
-	static zCSoundSystem* GetSoundSystem(){return NULL;}
+	static zCSoundSystem* GetSoundSystem(){return nullptr;}
 #endif
 };

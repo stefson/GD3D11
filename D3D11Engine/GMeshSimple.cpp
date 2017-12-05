@@ -13,14 +13,14 @@
 using namespace Assimp;
 
 
-GMeshSimple::GMeshSimple(void)
+GMeshSimple::GMeshSimple()
 {
-	VertexBuffer = NULL;
-	IndexBuffer = NULL;
+	VertexBuffer = nullptr;
+	IndexBuffer = nullptr;
 }
 
 
-GMeshSimple::~GMeshSimple(void)
+GMeshSimple::~GMeshSimple()
 {
 	delete VertexBuffer;
 	delete IndexBuffer;

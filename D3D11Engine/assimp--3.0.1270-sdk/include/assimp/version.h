@@ -55,28 +55,28 @@ extern "C" {
  *  about Assimp. The string may include multiple lines.
  *  @return Pointer to static string.
  */
-ASSIMP_API const char*  aiGetLegalString  (void);
+ASSIMP_API const char*  aiGetLegalString  ();
 
 // ---------------------------------------------------------------------------
 /** @brief Returns the current minor version number of Assimp.
  *  @return Minor version of the Assimp runtime the application was
  *    linked/built against
  */
-ASSIMP_API unsigned int aiGetVersionMinor (void);
+ASSIMP_API unsigned int aiGetVersionMinor ();
 
 // ---------------------------------------------------------------------------
 /** @brief Returns the current major version number of Assimp.
  *  @return Major version of the Assimp runtime the application was
  *    linked/built against
  */
-ASSIMP_API unsigned int aiGetVersionMajor (void);
+ASSIMP_API unsigned int aiGetVersionMajor ();
 
 // ---------------------------------------------------------------------------
 /** @brief Returns the repository revision of the Assimp runtime.
  *  @return SVN Repository revision number of the Assimp runtime the 
  *    application was linked/built against
  */
-ASSIMP_API unsigned int aiGetVersionRevision (void);
+ASSIMP_API unsigned int aiGetVersionRevision ();
 
 
 //! Assimp was compiled as a shared object (Windows: DLL)
@@ -95,7 +95,7 @@ ASSIMP_API unsigned int aiGetVersionRevision (void);
 /** @brief Returns assimp's compile flags
  *  @return Any bitwise combination of the ASSIMP_CFLAGS_xxx constants.
  */
-ASSIMP_API unsigned int aiGetCompileFlags (void);
+ASSIMP_API unsigned int aiGetCompileFlags ();
 
 #ifdef __cplusplus
 } // end extern "C"

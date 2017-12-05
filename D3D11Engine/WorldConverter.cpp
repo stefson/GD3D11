@@ -24,12 +24,12 @@
 #include "zCQuadMark.h"
 
 
-WorldConverter::WorldConverter(void)
+WorldConverter::WorldConverter()
 {
 }
 
 
-WorldConverter::~WorldConverter(void)
+WorldConverter::~WorldConverter()
 {
 }
 
@@ -40,9 +40,9 @@ void WorldConverter::WorldMeshCollectPolyRange(const D3DXVECTOR3& position, floa
 {
 	INT2 s = GetSectionOfPos(position);
 	MeshKey opaqueKey;
-	opaqueKey.Material = NULL;
-	opaqueKey.Info = NULL;
-	opaqueKey.Texture = NULL;
+	opaqueKey.Material = nullptr;
+	opaqueKey.Info = nullptr;
+	opaqueKey.Texture = nullptr;
 
 	WorldMeshInfo* opaqueMesh = new WorldMeshInfo;
 	outMeshes[opaqueKey] = opaqueMesh;
@@ -156,11 +156,11 @@ XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string& file, std::map<
 	// run through meshes and pack them into sections
 	for(unsigned int m = 0;m<meshes.size();m++)
 	{
-		D3D11Texture* customTexture = NULL;
+		D3D11Texture* customTexture = nullptr;
 		zCMaterial* mat = Engine::GAPI->GetMaterialByTextureName(textures[m]);
 		MeshKey key;
 		key.Material = mat;
-		key.Texture = mat != NULL ? mat->GetTexture() : NULL;
+		key.Texture = mat != nullptr ? mat->GetTexture() : nullptr;
 		
 		// Save missing textures
 		if (!mat)
@@ -480,7 +480,7 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN(zCPolygon** polys, unsigned int nu
 
 		zCMaterial* mat = poly->GetMaterial();
 		MeshKey key;
-		key.Texture = mat != NULL ? mat->GetTexture() : NULL;
+		key.Texture = mat != nullptr ? mat->GetTexture() : nullptr;
 		key.Material = mat;
 		
 		//key.Lightmap = poly->GetLightmap();
@@ -723,7 +723,7 @@ HRESULT WorldConverter::ConvertWorldMesh(zCPolygon** polys, unsigned int numPoly
 
 		zCMaterial* mat = poly->GetMaterial();
 		MeshKey key;
-		key.Texture = mat != NULL ? mat->GetTexture() : NULL;
+		key.Texture = mat != nullptr ? mat->GetTexture() : nullptr;
 		key.Material = mat;
 		
 		//key.Lightmap = poly->GetLightmap();
@@ -2167,7 +2167,7 @@ void WorldConverter::UpdateQuadMarkInfo(QuadMarkInfo* info, zCQuadMark* mark, co
 	if (quadVertices.empty())
 		return;
 
-	delete info->Mesh; info->Mesh = NULL;
+	delete info->Mesh; info->Mesh = nullptr;
 	Engine::GraphicsEngine->CreateVertexBuffer(&info->Mesh);
 
 	// Init and fill it

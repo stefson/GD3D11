@@ -80,11 +80,11 @@ public:
 	 *  @param streams Type of the default stream
 	 *  @param name For aiDefaultLogStream_FILE: name of the output file
 	 *  @param io For aiDefaultLogStream_FILE: IOSystem to be used to open the output 
-	 *   file. Pass NULL for the default implementation.
+	 *   file. Pass nullptr for the default implementation.
 	 *  @return New LogStream instance.  */
 	static LogStream* createDefaultStream(aiDefaultLogStream stream,
 		const char* name = "AssimpLog.txt",
-		IOSystem* io = NULL);
+		IOSystem* io = nullptr);
 
 }; // !class LogStream
 // ------------------------------------------------------------------------------------

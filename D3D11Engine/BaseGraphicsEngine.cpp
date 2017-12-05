@@ -2,11 +2,11 @@
 #include "BaseGraphicsEngine.h"
 
 
-BaseGraphicsEngine::BaseGraphicsEngine(void)
+BaseGraphicsEngine::BaseGraphicsEngine()
 {
 }
 
 
-BaseGraphicsEngine::~BaseGraphicsEngine(void)
+BaseGraphicsEngine::~BaseGraphicsEngine()
 {
 }

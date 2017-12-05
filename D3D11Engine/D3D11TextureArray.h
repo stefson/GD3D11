@@ -2,8 +2,8 @@
 class D3D11TextureArray
 {
 public:
-	D3D11TextureArray(void);
-	~D3D11TextureArray(void);
+	D3D11TextureArray();
+	~D3D11TextureArray();
 
 	/** Adds a texture with data to the array, returns the index of texture */
 	int AddTexture(byte* data, unsigned int dataSize);

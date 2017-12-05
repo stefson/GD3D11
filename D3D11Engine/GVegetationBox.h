@@ -14,8 +14,8 @@ struct MeshInfo;
 class GVegetationBox
 {
 public:
-	GVegetationBox(void);
-	virtual ~GVegetationBox(void);
+	GVegetationBox();
+	virtual ~GVegetationBox();
 
 	enum EShape
 	{
@@ -37,7 +37,7 @@ public:
 								const std::string& vegetationMesh,
 								float density, 
 								float maxSize,
-								zCTexture* meshTexture = NULL);
+								zCTexture* meshTexture = nullptr);
 
 	/** Draws this vegetation box */
 	void RenderVegetation(const D3DXVECTOR3& eye);

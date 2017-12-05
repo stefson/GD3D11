@@ -7,7 +7,7 @@ class D3D11PFX_Effect
 {
 public:
 	D3D11PFX_Effect(D3D11PfxRenderer* rnd);
-	virtual ~D3D11PFX_Effect(void);
+	virtual ~D3D11PFX_Effect();
 
 	/** Draws this effect to the given buffer */
 	virtual XRESULT Render(RenderToTextureBuffer* fxbuffer) = 0;

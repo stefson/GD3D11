@@ -22,7 +22,7 @@
 // Disable warning "conditional expression is constant"
 #pragma warning(disable:4127)
 
-#define SAFE_DELETE_ARRAY(x) {delete[] x; x = NULL;}
+#define SAFE_DELETE_ARRAY(x) {delete[] x; x = nullptr;}
 
 #define HALF_SQRT_2	0.7071068f
 #define GRAV_ACCEL	981.0f	// The acceleration of gravity, cm/s^2
@@ -77,7 +77,7 @@ void createBufferAndUAV(ID3D11Device* pd3dDevice, void* data, UINT byte_width, U
 
 	D3D11_SUBRESOURCE_DATA init_data = {data, 0, 0};
 
-	pd3dDevice->CreateBuffer(&buf_desc, data != NULL ? &init_data : NULL, ppBuffer);
+	pd3dDevice->CreateBuffer(&buf_desc, data != nullptr ? &init_data : nullptr, ppBuffer);
 	assert(*ppBuffer);
 
 	// Create undordered access view
@@ -119,7 +119,7 @@ void createTextureAndViews(ID3D11Device* pd3dDevice, UINT width, UINT height, DX
 	tex_desc.CPUAccessFlags = 0;
 	tex_desc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
 
-	pd3dDevice->CreateTexture2D(&tex_desc, NULL, ppTex);
+	pd3dDevice->CreateTexture2D(&tex_desc, nullptr, ppTex);
 	assert(*ppTex);
 
 	// Create shader resource view
@@ -220,20 +220,20 @@ OceanSimulator::OceanSimulator(OceanParameter& params, ID3D11Device* pd3dDevice)
 	assert(m_pPointSamplerState);
 
 	// Compute shaders
-    ID3DBlob* pBlobUpdateSpectrumCS = NULL;
+    ID3DBlob* pBlobUpdateSpectrumCS = nullptr;
 
     CompileShaderFromFile(L"ocean_simulator_cs.hlsl", "UpdateSpectrumCS", "cs_4_0", &pBlobUpdateSpectrumCS);
 	assert(pBlobUpdateSpectrumCS);
 
-    m_pd3dDevice->CreateComputeShader(pBlobUpdateSpectrumCS->GetBufferPointer(), pBlobUpdateSpectrumCS->GetBufferSize(), NULL, &m_pUpdateSpectrumCS);
+    m_pd3dDevice->CreateComputeShader(pBlobUpdateSpectrumCS->GetBufferPointer(), pBlobUpdateSpectrumCS->GetBufferSize(), nullptr, &m_pUpdateSpectrumCS);
 	assert(m_pUpdateSpectrumCS);
     
     SAFE_RELEASE(pBlobUpdateSpectrumCS);
 
 	// Vertex & pixel shaders
-    ID3DBlob* pBlobQuadVS = NULL;
-    ID3DBlob* pBlobUpdateDisplacementPS = NULL;
-    ID3DBlob* pBlobGenGradientFoldingPS = NULL;
+    ID3DBlob* pBlobQuadVS = nullptr;
+    ID3DBlob* pBlobUpdateDisplacementPS = nullptr;
+    ID3DBlob* pBlobGenGradientFoldingPS = nullptr;
 
     CompileShaderFromFile(L"ocean_simulator_vs_ps.hlsl", "QuadVS", "vs_4_0", &pBlobQuadVS);
     CompileShaderFromFile(L"ocean_simulator_vs_ps.hlsl", "UpdateDisplacementPS", "ps_4_0", &pBlobUpdateDisplacementPS);
@@ -242,9 +242,9 @@ OceanSimulator::OceanSimulator(OceanParameter& params, ID3D11Device* pd3dDevice)
 	assert(pBlobUpdateDisplacementPS);
 	assert(pBlobGenGradientFoldingPS);
 
-    m_pd3dDevice->CreateVertexShader(pBlobQuadVS->GetBufferPointer(), pBlobQuadVS->GetBufferSize(), NULL, &m_pQuadVS);
-    m_pd3dDevice->CreatePixelShader(pBlobUpdateDisplacementPS->GetBufferPointer(), pBlobUpdateDisplacementPS->GetBufferSize(), NULL, &m_pUpdateDisplacementPS);
-    m_pd3dDevice->CreatePixelShader(pBlobGenGradientFoldingPS->GetBufferPointer(), pBlobGenGradientFoldingPS->GetBufferSize(), NULL, &m_pGenGradientFoldingPS);
+    m_pd3dDevice->CreateVertexShader(pBlobQuadVS->GetBufferPointer(), pBlobQuadVS->GetBufferSize(), nullptr, &m_pQuadVS);
+    m_pd3dDevice->CreatePixelShader(pBlobUpdateDisplacementPS->GetBufferPointer(), pBlobUpdateDisplacementPS->GetBufferSize(), nullptr, &m_pUpdateDisplacementPS);
+    m_pd3dDevice->CreatePixelShader(pBlobGenGradientFoldingPS->GetBufferPointer(), pBlobGenGradientFoldingPS->GetBufferSize(), nullptr, &m_pGenGradientFoldingPS);
 	assert(m_pQuadVS);
 	assert(m_pUpdateDisplacementPS);
 	assert(m_pGenGradientFoldingPS);
@@ -313,7 +313,7 @@ OceanSimulator::OceanSimulator(OceanParameter& params, ID3D11Device* pd3dDevice)
 	cb_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	cb_desc.MiscFlags = 0;    
 	cb_desc.ByteWidth = PAD16(sizeof(float) * 3);
-	m_pd3dDevice->CreateBuffer(&cb_desc, NULL, &m_pPerFrameCB);
+	m_pd3dDevice->CreateBuffer(&cb_desc, nullptr, &m_pPerFrameCB);
 	assert(m_pPerFrameCB);
 
 	// FFT
@@ -328,7 +328,7 @@ OceanSimulator::OceanSimulator(OceanParameter& params, ID3D11Device* pd3dDevice)
     buf_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
     buf_desc.StructureByteStride = float2_stride;
 
-	m_pd3dDevice->CreateBuffer(&buf_desc, NULL, &m_pDebugBuffer);
+	m_pd3dDevice->CreateBuffer(&buf_desc, nullptr, &m_pDebugBuffer);
 	assert(m_pDebugBuffer);
 #endif
 }
@@ -433,7 +433,7 @@ void OceanSimulator::updateDisplacementMap(float time)
 {
 	// ---------------------------- H(0) -> H(t), D(x, t), D(y, t) --------------------------------
 	// Compute shader
-	m_pd3dImmediateContext->CSSetShader(m_pUpdateSpectrumCS, NULL, 0);
+	m_pd3dImmediateContext->CSSetShader(m_pUpdateSpectrumCS, nullptr, 0);
 
 	// Buffers
 	ID3D11ShaderResourceView* cs0_srvs[2] = {m_pSRV_H0, m_pSRV_Omega};
@@ -464,10 +464,10 @@ void OceanSimulator::updateDisplacementMap(float time)
 	m_pd3dImmediateContext->Dispatch(group_count_x, group_count_y, 1);
 
 	// Unbind resources for CS
-	cs0_uavs[0] = NULL;
+	cs0_uavs[0] = nullptr;
 	m_pd3dImmediateContext->CSSetUnorderedAccessViews(0, 1, cs0_uavs, (UINT*)(&cs0_uavs[0]));
-	cs0_srvs[0] = NULL;
-	cs0_srvs[1] = NULL;
+	cs0_srvs[0] = nullptr;
+	cs0_srvs[1] = nullptr;
 	m_pd3dImmediateContext->CSSetShaderResources(0, 2, cs0_srvs);
 
 
@@ -488,11 +488,11 @@ void OceanSimulator::updateDisplacementMap(float time)
 
 	// Set RT
 	ID3D11RenderTargetView* rt_views[1] = {m_pDisplacementRTV};
-	m_pd3dImmediateContext->OMSetRenderTargets(1, rt_views, NULL);
+	m_pd3dImmediateContext->OMSetRenderTargets(1, rt_views, nullptr);
 
 	// VS & PS
-	m_pd3dImmediateContext->VSSetShader(m_pQuadVS, NULL, 0);
-	m_pd3dImmediateContext->PSSetShader(m_pUpdateDisplacementPS, NULL, 0);
+	m_pd3dImmediateContext->VSSetShader(m_pQuadVS, nullptr, 0);
+	m_pd3dImmediateContext->PSSetShader(m_pUpdateDisplacementPS, nullptr, 0);
 
 	// Constants
 	ID3D11Buffer* ps_cbs[2] = {m_pImmutableCB, m_pPerFrameCB};
@@ -515,18 +515,18 @@ void OceanSimulator::updateDisplacementMap(float time)
 	m_pd3dImmediateContext->Draw(4, 0);
 
 	// Unbind
-	ps_srvs[0] = NULL;
+	ps_srvs[0] = nullptr;
     m_pd3dImmediateContext->PSSetShaderResources(0, 1, ps_srvs);
 
 
 	// ----------------------------------- Generate Normal ----------------------------------------
 	// Set RT
 	rt_views[0] = m_pGradientRTV;
-	m_pd3dImmediateContext->OMSetRenderTargets(1, rt_views, NULL);
+	m_pd3dImmediateContext->OMSetRenderTargets(1, rt_views, nullptr);
 
 	// VS & PS
-	m_pd3dImmediateContext->VSSetShader(m_pQuadVS, NULL, 0);
-	m_pd3dImmediateContext->PSSetShader(m_pGenGradientFoldingPS, NULL, 0);
+	m_pd3dImmediateContext->VSSetShader(m_pQuadVS, nullptr, 0);
+	m_pd3dImmediateContext->PSSetShader(m_pGenGradientFoldingPS, nullptr, 0);
 
 	// Texture resource and sampler
 	ps_srvs[0] = m_pDisplacementSRV;
@@ -539,7 +539,7 @@ void OceanSimulator::updateDisplacementMap(float time)
 	m_pd3dImmediateContext->Draw(4, 0);
 
 	// Unbind
-	ps_srvs[0] = NULL;
+	ps_srvs[0] = nullptr;
     m_pd3dImmediateContext->PSSetShaderResources(0, 1, ps_srvs);
 
 	// Pop RT
@@ -598,8 +598,8 @@ HRESULT CompileShaderFromFile( WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR sz
 	//V_RETURN( DXUTFindDXSDKMediaFileCch( str, MAX_PATH, szFileName ) );
 
     // open the file
-    HANDLE hFile = CreateFileW( str, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING,
-        FILE_FLAG_SEQUENTIAL_SCAN, NULL );
+    HANDLE hFile = CreateFileW( str, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
+        FILE_FLAG_SEQUENTIAL_SCAN, nullptr );
     if ( INVALID_HANDLE_VALUE == hFile )
         return E_FAIL;
 
@@ -614,16 +614,16 @@ HRESULT CompileShaderFromFile( WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR sz
 
     // read the data in
     DWORD BytesRead;
-    if ( !ReadFile( hFile, pFileData, FileSize.LowPart, &BytesRead, NULL ) )
+    if ( !ReadFile( hFile, pFileData, FileSize.LowPart, &BytesRead, nullptr ) )
         return E_FAIL; 
 
     CloseHandle( hFile );
 
     // Compile the shader
     char pFilePathName[MAX_PATH];        
-    WideCharToMultiByte(CP_ACP, 0, str, -1, pFilePathName, MAX_PATH, NULL, NULL);
+    WideCharToMultiByte(CP_ACP, 0, str, -1, pFilePathName, MAX_PATH, nullptr, nullptr);
     ID3DBlob* pErrorBlob;
-    hr = D3DCompile( pFileData, FileSize.LowPart, pFilePathName, NULL, NULL, szEntryPoint, szShaderModel, D3D10_SHADER_ENABLE_STRICTNESS, 0, ppBlobOut, &pErrorBlob );
+    hr = D3DCompile( pFileData, FileSize.LowPart, pFilePathName, nullptr, nullptr, szEntryPoint, szShaderModel, D3D10_SHADER_ENABLE_STRICTNESS, 0, ppBlobOut, &pErrorBlob );
 
     delete []pFileData;
 

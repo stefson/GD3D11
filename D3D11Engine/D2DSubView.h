@@ -7,7 +7,7 @@ class D2DSubView
 {
 public:
 	D2DSubView(D2DView* view, D2DSubView* parent);
-	virtual ~D2DSubView(void);
+	virtual ~D2DSubView();
 
 	/** Initializes the controls of this view */
 	virtual XRESULT InitControls(){return XR_SUCCESS;}

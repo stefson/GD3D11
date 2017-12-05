@@ -4,7 +4,7 @@
 
 D2DSubView::D2DSubView(D2DView* view, D2DSubView* parent)
 {
-	//Layer = NULL;
+	//Layer = nullptr;
 	MainView = view;
 	Parent = parent;
 	ViewRect = D2D1::RectF(0,0,0,0);
@@ -19,11 +19,11 @@ D2DSubView::D2DSubView(D2DView* view, D2DSubView* parent)
 		InitControls();
 	}
 
-	MainView->GetRenderTarget()->CreateLayer(NULL, &Layer);
+	MainView->GetRenderTarget()->CreateLayer(nullptr, &Layer);
 }
 
 
-D2DSubView::~D2DSubView(void)
+D2DSubView::~D2DSubView()
 {
 	//if (Layer)Layer->Release();
 

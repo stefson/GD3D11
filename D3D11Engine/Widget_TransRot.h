@@ -14,7 +14,7 @@ class Widget_TransRot :
 {
 public:
 	Widget_TransRot(WidgetContainer* container);
-	~Widget_TransRot(void);
+	~Widget_TransRot();
 
 	/** Renders the widget */
 	virtual void RenderWidget();

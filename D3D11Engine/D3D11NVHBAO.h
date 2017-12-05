@@ -5,8 +5,8 @@ class GFSDK_SSAO_Context_D3D11;
 class D3D11NVHBAO
 {
 public:
-	D3D11NVHBAO(void);
-	~D3D11NVHBAO(void);
+	D3D11NVHBAO();
+	~D3D11NVHBAO();
 
 	/** Initializes the library */
 	XRESULT Init();

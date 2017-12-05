@@ -13,8 +13,8 @@ struct SimpleVertexStruct
 class D3D11FullscreenQuad
 {
 public:
-	D3D11FullscreenQuad(void);
-	virtual ~D3D11FullscreenQuad(void);
+	D3D11FullscreenQuad();
+	virtual ~D3D11FullscreenQuad();
 
 	//Fills the VertexBuffer
 	HRESULT CreateQuad(ID3D11Device* device);

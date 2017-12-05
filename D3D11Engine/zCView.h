@@ -20,7 +20,7 @@ public:
 		REPLACE_RANGE(GothicMemoryLocations::zCView::REPL_SetMode_ModechangeStart, GothicMemoryLocations::zCView::REPL_SetMode_ModechangeEnd-1, INST_NOP);
 	}
 
-	static void SetMode(int x, int y, int bpp, HWND* window = NULL)
+	static void SetMode(int x, int y, int bpp, HWND* window = nullptr)
 	{
 		hook_infunc
 		HookedFunctions::OriginalFunctions.original_zCViewSetMode(x,y,bpp, window);
@@ -28,7 +28,7 @@ public:
 	}
 
 	/** Prints a message to the screen */
-	void PrintTimed(int posX, int posY, const zSTRING& strMessage, float time = 3000.0f, DWORD* col = NULL)
+	void PrintTimed(int posX, int posY, const zSTRING& strMessage, float time = 3000.0f, DWORD* col = nullptr)
 	{
 		XCALL(GothicMemoryLocations::zCView::PrintTimed);
 	}

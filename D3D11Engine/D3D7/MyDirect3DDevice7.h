@@ -56,7 +56,7 @@ public:
 
 		// Create DrawPrimIndexBuffer
 		Engine::GraphicsEngine->CreateVertexBuffer(&DrawPrimIndexBuffer);
-		DrawPrimIndexBuffer->Init(NULL, DRAW_PRIM_INDEX_BUFFER_SIZE, D3D11VertexBuffer::B_INDEXBUFFER, D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE);
+		DrawPrimIndexBuffer->Init(nullptr, DRAW_PRIM_INDEX_BUFFER_SIZE, D3D11VertexBuffer::B_INDEXBUFFER, D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE);
     }
 
 	~MyDirect3DDevice7()
@@ -124,7 +124,7 @@ public:
 
     HRESULT STDMETHODCALLTYPE GetDirect3D(IDirect3D7** ppD3D) {
         DebugWrite("MyDirect3DDevice7::GetDirect3D");
-        *ppD3D = NULL;
+        *ppD3D = nullptr;
         return S_OK;
     }
 
@@ -278,7 +278,7 @@ public:
         DebugWrite("MyDirect3DDevice7::GetRenderTarget");
 
 		LogWarn() << "GetRenderTarget not supported!";
-		*lplpRenderTarget = NULL;
+		*lplpRenderTarget = nullptr;
 
         return S_OK; 
     }
@@ -439,7 +439,7 @@ public:
 				if ((Value & D3DTTFF_PROJECTED) == D3DTTFF_PROJECTED) LogInfo() << " - D3DTTFF_PROJECTED";
 				
 				if (!Value)
-					D3D11Wnd::Window.GetEngine()->SetTransform(D3D11Engine::TransformStateType::D3DTRANSFORMSTATE_TEXTURE0, NULL);
+					D3D11Wnd::Window.GetEngine()->SetTransform(D3D11Engine::TransformStateType::D3DTRANSFORMSTATE_TEXTURE0, nullptr);
 
 				break;
 			}
@@ -799,7 +799,7 @@ public:
 			__asm{	mov pStack, esp} 
 			__asm{mov pBase, ebp} 
 			
-			CONTEXT* context = NULL;
+			CONTEXT* context = nullptr;
 			for(UINT32 i = pStack; i > pStack - 0x1000; i--)
 			{
 				if (*(UINT32 *)i == 0x0001003f || *(UINT32 *)i == 0x0001001f )

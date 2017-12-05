@@ -331,7 +331,7 @@ TW_API int TW_GLUT_CALL TwEventMouseButtonGLUT(int glutButton, int glutState, in
 TW_API int TW_GLUT_CALL TwEventMouseMotionGLUT(int mouseX, int mouseY);
 TW_API int TW_GLUT_CALL TwEventKeyboardGLUT(unsigned char glutKey, int mouseX, int mouseY);
 TW_API int TW_GLUT_CALL TwEventSpecialGLUT(int glutKey, int mouseX, int mouseY);
-TW_API int TW_CALL      TwGLUTModifiersFunc(int (TW_CALL *glutGetModifiersFunc)(void));
+TW_API int TW_CALL      TwGLUTModifiersFunc(int (TW_CALL *glutGetModifiersFunc)());
 typedef void (TW_GLUT_CALL *GLUTmousebuttonfun)(int glutButton, int glutState, int mouseX, int mouseY);
 typedef void (TW_GLUT_CALL *GLUTmousemotionfun)(int mouseX, int mouseY);
 typedef void (TW_GLUT_CALL *GLUTkeyboardfun)(unsigned char glutKey, int mouseX, int mouseY);

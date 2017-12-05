@@ -17,7 +17,7 @@ BaseWidget::BaseWidget(WidgetContainer* container)
 }
 
 
-BaseWidget::~BaseWidget(void)
+BaseWidget::~BaseWidget()
 {
 }
 
@@ -59,7 +59,7 @@ void BaseWidget::SetMouseVisibility(bool visible)
 	if (!visible)
 	{
 		s_oldCursor = GetCursor();
-		SetCursor(NULL);
+		SetCursor(nullptr);
 	}else
 	{
 		SetCursor(s_oldCursor);

@@ -4,8 +4,8 @@
 class GMesh
 {
 public:
-	GMesh(void);
-	virtual ~GMesh(void);
+	GMesh();
+	virtual ~GMesh();
 
 	enum ELoadType
 	{

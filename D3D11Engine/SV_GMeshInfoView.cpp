@@ -24,16 +24,16 @@ SV_GMeshInfoView::SV_GMeshInfoView(D2DView* view, D2DSubView* parent) : D2DSubVi
 
 	ObjectPosition = D3DXVECTOR3(0,0,0);
 	SetObjectOrientation(0, 0, 10.0f);
-	RT = NULL;
-	DS = NULL;
-	VisualInfo = NULL;
+	RT = nullptr;
+	DS = nullptr;
+	VisualInfo = nullptr;
 	RenderMode = RM_Lit;
 
 	FOV = DEFAULT_FOV;
 }
 
 
-SV_GMeshInfoView::~SV_GMeshInfoView(void)
+SV_GMeshInfoView::~SV_GMeshInfoView()
 {
 	delete RT;
 	delete DS;
@@ -194,7 +194,7 @@ void SV_GMeshInfoView::DrawMeshes()
 	g->SetupVS_ExConstantBuffer();
 	g->SetupVS_ExPerInstanceConstantBuffer();
 
-	VisualTesselationSettings* ts = NULL;
+	VisualTesselationSettings* ts = nullptr;
 	if (VisualInfo)
 		ts = &VisualInfo->TesselationInfo;
 
@@ -213,7 +213,7 @@ void SV_GMeshInfoView::DrawMeshes()
 			if ((*it).first->CacheIn(-1) == zRES_CACHED_IN)
 			{
 				MyDirectDrawSurface7* surface = (*it).first->GetSurface();
-				ID3D11ShaderResourceView* srv = surface->GetNormalmap() ? ((D3D11Texture *)surface->GetNormalmap())->GetShaderResourceView() : NULL;
+				ID3D11ShaderResourceView* srv = surface->GetNormalmap() ? ((D3D11Texture *)surface->GetNormalmap())->GetShaderResourceView() : nullptr;
 
 				// Draw
 				(*it).first->Bind(0);
@@ -224,8 +224,8 @@ void SV_GMeshInfoView::DrawMeshes()
 		}else if (VisualInfo)
 		{
 			g->GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			g->GetContext()->DSSetShader(NULL, NULL, NULL);
-			g->GetContext()->HSSetShader(NULL, NULL, NULL);
+			g->GetContext()->DSSetShader(nullptr, nullptr, 0);
+			g->GetContext()->HSSetShader(nullptr, nullptr, 0);
 			g->SetActiveHDShader("");
 			g->SetActiveVertexShader("VS_Ex");
 
@@ -266,7 +266,7 @@ void SV_GMeshInfoView::SetRect(const D2D1_RECT_F& rect)
 	DS = new RenderToDepthStencilBuffer(g->GetDevice(), 
 		(UINT)std::max(8.0f, GetSize().width), 
 		(UINT)std::max(8.0f, GetSize().height), 
-		DXGI_FORMAT_R32_TYPELESS, NULL, DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_R32_FLOAT);
+		DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_R32_FLOAT);
 }
 
 /** Processes a window-message. Return false to stop the message from going to children */

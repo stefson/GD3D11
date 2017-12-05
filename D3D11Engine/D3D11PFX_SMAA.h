@@ -10,7 +10,7 @@ class D3D11PFX_SMAA :
 {
 public:
 	D3D11PFX_SMAA(D3D11PfxRenderer* rnd);
-	~D3D11PFX_SMAA(void);
+	~D3D11PFX_SMAA();
 
 	/** Creates needed resources */
 	bool Init();

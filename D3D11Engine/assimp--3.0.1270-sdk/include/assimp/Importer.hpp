@@ -97,7 +97,7 @@ namespace Assimp	{
 * If the import succeeds, the function returns a pointer to the imported data. 
 * The data remains property of the object, it is intended to be accessed 
 * read-only. The imported data will be destroyed along with the Importer 
-* object. If the import fails, ReadFile() returns a NULL pointer. In this
+* object. If the import fails, ReadFile() returns a nullptr pointer. In this
 * case you can retrieve a human-readable error description be calling 
 * GetErrorString(). You can call ReadFile() multiple times with a single Importer
 * instance. Actually, constructing Importer objects involves quite many
@@ -203,7 +203,7 @@ public:
 	 *   GetPropertyFloat() to read the property, but it won't be there.
 	 */
 	void SetPropertyInteger(const char* szName, int iValue, 
-		bool* bWasExisting = NULL);
+		bool* bWasExisting = nullptr);
 
 	// -------------------------------------------------------------------
 	/** Set a boolean configuration property. Boolean properties
@@ -212,7 +212,7 @@ public:
 	 *  #GetPropertyBool and vice versa.
 	 * @see SetPropertyInteger()
 	 */
-	void SetPropertyBool(const char* szName, bool value, bool* bWasExisting = NULL)	{
+	void SetPropertyBool(const char* szName, bool value, bool* bWasExisting = nullptr)	{
 		SetPropertyInteger(szName,value,bWasExisting);
 	}
 
@@ -221,14 +221,14 @@ public:
 	 * @see SetPropertyInteger()
 	 */
 	void SetPropertyFloat(const char* szName, float fValue, 
-		bool* bWasExisting = NULL);
+		bool* bWasExisting = nullptr);
 
 	// -------------------------------------------------------------------
 	/** Set a string configuration property.
 	 * @see SetPropertyInteger()
 	 */
 	void SetPropertyString(const char* szName, const std::string& sValue, 
-		bool* bWasExisting = NULL);
+		bool* bWasExisting = nullptr);
 
 	// -------------------------------------------------------------------
 	/** Get a configuration property.
@@ -282,7 +282,7 @@ public:
 	 *
 	 * The Importer takes ownership of the object and will destroy it 
 	 * afterwards. The previously assigned handler will be deleted.
-	 * Pass NULL to take again ownership of your IOSystem and reset Assimp
+	 * Pass nullptr to take again ownership of your IOSystem and reset Assimp
 	 * to use its default implementation.
 	 *
 	 * @param pIOHandler The IO handler to be used in all file accesses 
@@ -296,7 +296,7 @@ public:
 	 * interface is the default IO handler provided by ASSIMP. The default
 	 * handler is active as long the application doesn't supply its own
 	 * custom IO handler via #SetIOHandler().
-	 * @return A valid IOSystem interface, never NULL.
+	 * @return A valid IOSystem interface, never nullptr.
 	 */
 	IOSystem* GetIOHandler() const;
 
@@ -315,7 +315,7 @@ public:
 	 *  isn't as periodically as you'd like it to have ...).
 	 *  This can be used to implement progress bars and loading
 	 *  timeouts. 
-	 *  @param pHandler Progress callback interface. Pass NULL to 
+	 *  @param pHandler Progress callback interface. Pass nullptr to 
 	 *    disable progress reporting. 
 	 *  @note Progress handlers can be used to abort the loading
 	 *    at almost any time.*/
@@ -327,7 +327,7 @@ public:
 	 * interface is the default handler provided by ASSIMP. The default
 	 * handler is active as long the application doesn't supply its own
 	 * custom handler via #SetProgressHandler().
-	 * @return A valid ProgressHandler interface, never NULL.
+	 * @return A valid ProgressHandler interface, never nullptr.
 	 */
 	ProgressHandler* GetProgressHandler() const;
 
@@ -359,7 +359,7 @@ public:
 	 * If the call succeeds, the contents of the file are returned as a 
 	 * pointer to an aiScene object. The returned data is intended to be 
 	 * read-only, the importer object keeps ownership of the data and will
-	 * destroy it upon destruction. If the import fails, NULL is returned.
+	 * destroy it upon destruction. If the import fails, nullptr is returned.
 	 * A human-readable error description can be retrieved by calling 
 	 * GetErrorString(). The previous scene will be deleted during this call.
 	 * @param pFile Path and filename to the file to be imported.
@@ -368,7 +368,7 @@ public:
 	 *   #aiPostProcessSteps flags. If you wish to inspect the imported
 	 *   scene first in order to fine-tune your post-processing setup,
 	 *   consider to use #ApplyPostProcessing().
-	 * @return A pointer to the imported data, NULL if the import failed.
+	 * @return A pointer to the imported data, nullptr if the import failed.
 	 *   The pointer to the scene remains in possession of the Importer
 	 *   instance. Use GetOrphanedScene() to take ownership of it.
 	 *
@@ -386,7 +386,7 @@ public:
 	 * If the call succeeds, the contents of the file are returned as a 
 	 * pointer to an aiScene object. The returned data is intended to be 
 	 * read-only, the importer object keeps ownership of the data and will
-	 * destroy it upon destruction. If the import fails, NULL is returned.
+	 * destroy it upon destruction. If the import fails, nullptr is returned.
 	 * A human-readable error description can be retrieved by calling 
 	 * GetErrorString(). The previous scene will be deleted during this call.
 	 * Calling this method doesn't affect the active IOSystem.
@@ -404,7 +404,7 @@ public:
 	 *   the request, the library continues and tries to determine the
 	 *   file format on its own, a task that may or may not be successful.
 	 *   Check the return value, and you'll know ...
-	 * @return A pointer to the imported data, NULL if the import failed.
+	 * @return A pointer to the imported data, nullptr if the import failed.
 	 *   The pointer to the scene remains in possession of the Importer
 	 *   instance. Use GetOrphanedScene() to take ownership of it.
 	 *
@@ -431,11 +431,11 @@ public:
 	 *   #aiPostProcessSteps flags.
 	 *  @return A pointer to the post-processed data. This is still the
 	 *   same as the pointer returned by #ReadFile(). However, if
-	 *   post-processing fails, the scene could now be NULL.
+	 *   post-processing fails, the scene could now be nullptr.
 	 *   That's quite a rare case, post processing steps are not really
 	 *   designed to 'fail'. To be exact, the #aiProcess_ValidateDS
 	 *   flag is currently the only post processing step which can actually
-	 *   cause the scene to be reset to NULL.
+	 *   cause the scene to be reset to nullptr.
 	 *
 	 *  @note The method does nothing if no scene is currently bound
 	 *    to the #Importer instance.  */
@@ -464,7 +464,7 @@ public:
 	 *
 	 * Returns an empty string if no error occurred.
 	 * @return A description of the last error, an empty string if no 
-	 *   error occurred. The string is never NULL.
+	 *   error occurred. The string is never nullptr.
 	 *
 	 * @note The returned function remains valid until one of the 
 	 * following methods is called: #ReadFile(), #FreeScene(). */
@@ -473,7 +473,7 @@ public:
 	// -------------------------------------------------------------------
 	/** Returns the scene loaded by the last successful call to ReadFile()
 	 *
-	 * @return Current scene or NULL if there is currently no scene loaded */
+	 * @return Current scene or nullptr if there is currently no scene loaded */
 	const aiScene* GetScene() const;
 
 	// -------------------------------------------------------------------
@@ -481,9 +481,9 @@ public:
 	 *  and releases the scene from the ownership of the Importer 
 	 *  instance. The application is now responsible for deleting the
 	 *  scene. Any further calls to GetScene() or GetOrphanedScene()
-	 *  will return NULL - until a new scene has been loaded via ReadFile().
+	 *  will return nullptr - until a new scene has been loaded via ReadFile().
 	 *
-	 * @return Current scene or NULL if there is currently no scene loaded
+	 * @return Current scene or nullptr if there is currently no scene loaded
 	 * @note Use this method with maximal caution, and only if you have to.
 	 *   By design, aiScene's are exclusively maintained, allocated and
 	 *   deallocated by Assimp and no one else. The reasoning behind this
@@ -546,7 +546,7 @@ public:
 	*
 	*  For the declaration of #aiImporterDesc, include <assimp/importerdesc.h>.
 	*  @param index Index to query, must be within [0,GetImporterCount())
-	*  @return Importer meta data structure, NULL if the index does not
+	*  @return Importer meta data structure, nullptr if the index does not
 	*     exist or if the importer doesn't offer meta information (
 	*     importers may do this at the cost of being hated by their peers).*/
 	const aiImporterDesc* GetImporterInfo(size_t index) const;
@@ -555,7 +555,7 @@ public:
 	/** Find the importer corresponding to a specific index.
 	*
 	*  @param index Index to query, must be within [0,GetImporterCount())
-	*  @return Importer instance. NULL if the index does not
+	*  @return Importer instance. nullptr if the index does not
 	*     exist. */
 	BaseImporter* GetImporter(size_t index) const;
 
@@ -568,7 +568,7 @@ public:
 	*    are recognized (BAH being the file extension): "BAH" (comparison
 	*    is case-insensitive), ".bah", "*.bah" (wild card and dot
 	*    characters at the beginning of the extension are skipped).
-	*  @return NULL if no importer is found*/
+	*  @return nullptr if no importer is found*/
 	BaseImporter* GetImporter (const char* szExtension) const;
 
 	// -------------------------------------------------------------------

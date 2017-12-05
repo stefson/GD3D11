@@ -1,13 +1,13 @@
 #include "pch.h"
 #include "D3D11FullscreenQuad.h"
 
-D3D11FullscreenQuad::D3D11FullscreenQuad(void)
+D3D11FullscreenQuad::D3D11FullscreenQuad()
 {
-	QuadVB = NULL;
+	QuadVB = nullptr;
 }
 
 
-D3D11FullscreenQuad::~D3D11FullscreenQuad(void)
+D3D11FullscreenQuad::~D3D11FullscreenQuad()
 {
 	if (QuadVB)QuadVB->Release();
 }

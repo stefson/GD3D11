@@ -97,7 +97,7 @@ public:
         */
         zCArray()
         {
-                this->Array           = NULL;
+                this->Array           = nullptr;
                 this->NumAlloc        = 0;
                 this->NumInArray      = 0;
         };
@@ -131,10 +131,10 @@ public:
         {
                 this->NumAlloc        = 0;
                 this->NumInArray      = 0;
-                if (this->Array != NULL)
+                if (this->Array != nullptr)
                 {
                         delete[] this->Array;
-                        this->Array = NULL;
+                        this->Array = nullptr;
                 };
         };
 
@@ -184,7 +184,7 @@ public:
 
         /** Insert description.
         */
-        unsigned int GetSize(void)
+        unsigned int GetSize()
         {
                 return (unsigned int)this->NumInArray;
         };

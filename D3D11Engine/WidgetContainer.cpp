@@ -4,13 +4,13 @@
 #include "Widget_TransRot.h"
 #include "WorldConverter.h"
 
-WidgetContainer::WidgetContainer(void)
+WidgetContainer::WidgetContainer()
 {
 	Widgets.push_back(new Widget_TransRot(this));
 }
 
 
-WidgetContainer::~WidgetContainer(void)
+WidgetContainer::~WidgetContainer()
 {
 	Toolbox::DeleteElements(Widgets);
 }

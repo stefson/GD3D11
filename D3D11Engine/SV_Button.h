@@ -9,7 +9,7 @@ class SV_Button :
 {
 public:
 	SV_Button(D2DView* view, D2DSubView* parent);
-	~SV_Button(void);
+	~SV_Button();
 
 	/** Sets this buttons caption */
 	void SetCaption(const std::string& caption);

@@ -7,8 +7,8 @@ class D3D11VertexBuffer;
 class D3D11VShader
 {
 public:
-	D3D11VShader(void);
-	~D3D11VShader(void);
+	D3D11VShader();
+	~D3D11VShader();
 
 	/** Loads both shader at the same time */
 	XRESULT LoadShader(const char* vertexShader, int layoput = 1, std::vector<D3D10_SHADER_MACRO>& makros = std::vector<D3D10_SHADER_MACRO>());

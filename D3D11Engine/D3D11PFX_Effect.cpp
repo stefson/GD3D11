@@ -8,6 +8,6 @@ D3D11PFX_Effect::D3D11PFX_Effect(D3D11PfxRenderer* rnd)
 }
 
 
-D3D11PFX_Effect::~D3D11PFX_Effect(void)
+D3D11PFX_Effect::~D3D11PFX_Effect()
 {
 }

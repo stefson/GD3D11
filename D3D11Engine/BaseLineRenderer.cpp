@@ -2,12 +2,12 @@
 #include "BaseLineRenderer.h"
 
 
-BaseLineRenderer::BaseLineRenderer(void)
+BaseLineRenderer::BaseLineRenderer()
 {
 }
 
 
-BaseLineRenderer::~BaseLineRenderer(void)
+BaseLineRenderer::~BaseLineRenderer()
 {
 }
 

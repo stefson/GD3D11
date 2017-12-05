@@ -8,7 +8,7 @@ class SV_NamedSlider :
 {
 public:
 	SV_NamedSlider(D2DView* view, D2DSubView* parent);
-	~SV_NamedSlider(void);
+	~SV_NamedSlider();
 
 	SV_Label* GetLabel(){return Label;}
 	SV_Slider* GetSlider(){return Slider;}

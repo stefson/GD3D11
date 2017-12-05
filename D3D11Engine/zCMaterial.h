@@ -29,8 +29,8 @@ private:
 class zCMaterial
 {
 public:
-	zCMaterial(void);
-	~zCMaterial(void);
+	zCMaterial();
+	~zCMaterial();
 
 	/** Hooks the functions of this Class */
 	static void Hook()

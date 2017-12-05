@@ -6,8 +6,8 @@ class D3D11PShader
 {
 public:
 
-	D3D11PShader(void);
-	~D3D11PShader(void);
+	D3D11PShader();
+	~D3D11PShader();
 
 	/** Loads shader */
 	XRESULT LoadShader(const char* pixelShader, std::vector<D3D10_SHADER_MACRO>& makros = std::vector<D3D10_SHADER_MACRO>());

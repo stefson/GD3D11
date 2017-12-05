@@ -10,8 +10,8 @@ struct RenderToDepthStencilBuffer;
 class D3D11Effect
 {
 public:
-	D3D11Effect(void);
-	~D3D11Effect(void);
+	D3D11Effect();
+	~D3D11Effect();
 
 	/** Draws GPU-Based rain */
 	XRESULT DrawRain();

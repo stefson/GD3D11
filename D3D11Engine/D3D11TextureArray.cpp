@@ -2,12 +2,12 @@
 #include "D3D11TextureArray.h"
 
 
-D3D11TextureArray::D3D11TextureArray(void)
+D3D11TextureArray::D3D11TextureArray()
 {
 }
 
 
-D3D11TextureArray::~D3D11TextureArray(void)
+D3D11TextureArray::~D3D11TextureArray()
 {
 }
 

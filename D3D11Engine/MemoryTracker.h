@@ -216,8 +216,8 @@ void MT_init_hash()
   _hashtable.err_total_unallocated   = 0;
   _hashtable.current_bit_mask        = INITIAL_HASH_SZ-1;
   _hashtable.hash_array = (_HASH_ENTRY**) calloc(INITIAL_HASH_SZ, sizeof (_HASH_ENTRY*));
-  _hashtable.error_array = NULL;
-  _hashtable.leaked_list = NULL;
+  _hashtable.error_array = nullptr;
+  _hashtable.leaked_list = nullptr;
   if (!_hashtable.hash_array)
     {
       fprintf (stderr, "MemTracker: Internal Error: main hash table init error - calloc()");
@@ -231,7 +231,7 @@ void MT_AddLeak(const char* file_name,const char * function_name,unsigned int so
   
 
 
-  _LEAKED_LIST *ptr = NULL;
+  _LEAKED_LIST *ptr = nullptr;
 
   ptr = (_LEAKED_LIST *) calloc(1,sizeof(_LEAKED_LIST));
 
@@ -246,12 +246,12 @@ void MT_AddLeak(const char* file_name,const char * function_name,unsigned int so
   ptr->mul = 1;
 
 
-  _LEAKED_LIST *walker = NULL;
-  _LEAKED_LIST *last = NULL;
+  _LEAKED_LIST *walker = nullptr;
+  _LEAKED_LIST *last = nullptr;
   
   if (! _hashtable.leaked_list) {// first call
     _hashtable.leaked_list = ptr;
-    _hashtable.leaked_list->next = NULL;
+    _hashtable.leaked_list->next = nullptr;
     return;
   }
   for(walker = _hashtable.leaked_list;walker;walker = walker->next) {
@@ -288,7 +288,7 @@ ptr->next = walker;
   }
   // If it's the biggest line so far.
   last->next = ptr;
-  ptr->next = NULL;
+  ptr->next = nullptr;
 }
 void MT_AddError(const char* allocation_TLA,const char* deallocation_TLA,unsigned int source_line,const char* function_name,const char* file_name) {
 
@@ -298,11 +298,11 @@ void MT_AddError(const char* allocation_TLA,const char* deallocation_TLA,unsigne
 	if (!file_name)
 		file_name = "unknown_file";
 
-  _ERRORS *ptr = NULL;
+  _ERRORS *ptr = nullptr;
   ptr = (_ERRORS *) calloc(1,sizeof(_ERRORS));
   if (! (allocation_TLA)) {
     // Then this is not a mismatch, it is a double deallocation call.
-    ptr->allocation_TLA = NULL;
+    ptr->allocation_TLA = nullptr;
     ptr->deallocation_TLA = 
       (char *) calloc(strlen(deallocation_TLA)+1,sizeof(char));
     strcpy(ptr->deallocation_TLA,deallocation_TLA);
@@ -321,12 +321,12 @@ void MT_AddError(const char* allocation_TLA,const char* deallocation_TLA,unsigne
   ptr->file_name = (char *) calloc(strlen(file_name)+1,sizeof(char));
   strcpy(ptr->file_name,file_name);
   
-  _ERRORS *walker = NULL;
-  _ERRORS *last = NULL;
+  _ERRORS *walker = nullptr;
+  _ERRORS *last = nullptr;
   
   if (! _hashtable.error_array) {// first call
     _hashtable.error_array = ptr;
-    _hashtable.error_array->next = NULL;
+    _hashtable.error_array->next = nullptr;
     return;
   }
   for(walker = _hashtable.error_array;walker;walker = walker->next) {
@@ -344,14 +344,14 @@ ptr->next = walker;
   }
   // If it's the biggest line so far.
   last->next = ptr;
-  ptr->next = NULL;
+  ptr->next = nullptr;
 }
 
 
 void MT_free_hentry (_HASH_ENTRY* ptr)
 {
   
-  if (ptr == NULL) {printf ("DIE\n"); exit(5);}
+  if (ptr == nullptr) {printf ("DIE\n"); exit(5);}
   if (ptr->function_name)
     free (ptr->function_name);
   if (ptr->file_name)
@@ -403,7 +403,7 @@ _HASH_ENTRY* MT_find_entry(unsigned long int address)
 return mover;     /* found!! */
       mover = mover -> next;
     }
-  return NULL;  /* not found */
+  return nullptr;  /* not found */
 }
 
 /* MemTracker keeps a record of what kind of allocation method was
@@ -464,11 +464,11 @@ int MT_check_redzone(  void *address, unsigned long int size )
 int MT_delete_entry (  unsigned long int address,  const char* TLA, int line,
       const char* func, const char* file_name )
 {
-  _HASH_ENTRY*  mover = NULL;
-  _HASH_ENTRY*  prev  = NULL;
+  _HASH_ENTRY*  mover = nullptr;
+  _HASH_ENTRY*  prev  = nullptr;
   unsigned int i;
   
-  if (_hashtable.hash_array == NULL )
+  if (_hashtable.hash_array == nullptr )
     return (1); /* Probable cause: MemTrackerFinalReport() called too early */
   /* C++ is continuing to run destructor methods */
   /* I consider that "ok" */
@@ -480,7 +480,7 @@ int MT_delete_entry (  unsigned long int address,  const char* TLA, int line,
 		 return 0;
       /* fprintf (stderr, "MemTracker: %s:%u func:%s()  Deallocator called but 0x%lX not allocated!\n", */
       /*       file_name, line, func, address); */
-      MT_AddError(NULL,TLA,line,func,file_name);
+      MT_AddError(nullptr,TLA,line,func,file_name);
       _hashtable.err_total_unallocated++;
       return 0; /* fail */
     }
@@ -537,7 +537,7 @@ int MT_delete_entry (  unsigned long int address,  const char* TLA, int line,
 void MT_double_hash()
 {
   _HASH_ENTRY **old_hash = _hashtable.hash_array;
-  _HASH_ENTRY *mover = NULL;
+  _HASH_ENTRY *mover = nullptr;
   int n_rows = _hashtable.total_rows;
   int i;
   
@@ -567,7 +567,7 @@ void MT_double_hash()
  if (!temp)
    {
      _hashtable.hash_array[new_row] = mover;
-     mover -> next = NULL;
+     mover -> next = nullptr;
      _hashtable.rows_used++;
    }
  else
@@ -612,7 +612,7 @@ unsigned int source_line,  const char* func_name, const char* file_name)
   p_new_entry->sequence_num = _hashtable.next_serial_num++;
   p_new_entry->size_mem     = size;
   p_new_entry->source_line  = source_line;
-  p_new_entry->next         = NULL;
+  p_new_entry->next         = nullptr;
   strncpy (p_new_entry->allocation_TLA, TLA,3);
   
   /* insert new entry on top of stack*/
@@ -710,7 +710,7 @@ _HASH_ENTRY** MT_all_entries()  /* list of all current hash table entries */
   _HASH_ENTRY ** list;
   unsigned int i;
   
-  if (!_hashtable.total_entries) return NULL;
+  if (!_hashtable.total_entries) return nullptr;
   
   list = (_HASH_ENTRY**) calloc(_hashtable.total_entries +1, sizeof(_HASH_ENTRY*));
   if (!list)
@@ -723,7 +723,7 @@ _HASH_ENTRY** MT_all_entries()  /* list of all current hash table entries */
   
   for (i=0; i<_hashtable.total_rows; i++)
     {
-      if (_hashtable.hash_array != NULL)
+      if (_hashtable.hash_array != nullptr)
 {
  mover = _hashtable.hash_array[i];
  while (mover)
@@ -803,7 +803,7 @@ void MT_FreeAllMyMemory()          /* avoid embarassing leak ourselves! */
 
 
   free (_hashtable.hash_array);
-  _hashtable.hash_array = NULL;
+  _hashtable.hash_array = nullptr;
 
   // Time to free ERRORS and LEAKED_LIST
 
@@ -864,7 +864,7 @@ void MemTrackerFinalReport()
     printf("\nYour program contains memory leaks!\n");
     printf("Total bytes lost: %d\n",_hashtable.total_bytes - REDZONE_SIZE * (size));
     printf("###########      START LIST OF LEAKS      ###########\n");
-    _LEAKED_LIST *ptr2 = NULL;
+    _LEAKED_LIST *ptr2 = nullptr;
     char *lastFuncName2 = (char *)"fewfewgewgewgw";
     int lastLineNum2 = -1;
     for(ptr2 = _hashtable.leaked_list;ptr2;ptr2 = ptr2->next) {
@@ -892,14 +892,14 @@ if ((int)ptr2->source_line != lastLineNum2) {
 
   if (_hashtable.total_bytes == 0) {
     printf("\nCongratulations, your program has no memory leaks.\n");
-    if (_hashtable.error_array != NULL) {
+    if (_hashtable.error_array != nullptr) {
       printf("HOWEVER, errors have been detected!\n");
     }
   }
-  if (_hashtable.error_array != NULL) {
+  if (_hashtable.error_array != nullptr) {
 
     printf("########### START LIST OF NON-LEAK ERRORS ###########\n");
-      _ERRORS *ptr = NULL;
+      _ERRORS *ptr = nullptr;
       
       char * lastFuncName = (char *)"fewagewgreqwteqw"; // setinal value.
                                                        // please don't name your function this
@@ -958,7 +958,7 @@ void *MT_Malloc(size_t size, int line, const char* func_name, const char* file_n
   void *ptr;
   size += REDZONE_SIZE;
   
-  if ((ptr = (void *) malloc(size)) == NULL)
+  if ((ptr = (void *) malloc(size)) == nullptr)
     {
       perror("malloc failed to get memory!");
       exit(1);
@@ -974,7 +974,7 @@ const char *file_name)
   void *ptr;
   size = numMembers * size + REDZONE_SIZE;
   
-  if ((ptr = (void *) malloc(size)) == NULL)
+  if ((ptr = (void *) malloc(size)) == nullptr)
     {
       perror("calloc failed to get memory!");
       exit(1);
@@ -995,7 +995,7 @@ const char* file_name)
   
   if (!ptr)
     {
-      if ((newptr = (void *) realloc(ptr, size)) == NULL)
+      if ((newptr = (void *) realloc(ptr, size)) == nullptr)
 {
  perror("realloc failed to resize memory!");
  exit(1);
@@ -1012,7 +1012,7 @@ const char* file_name)
   
   else
     {
-      if ((newptr = (void *) realloc(ptr, size)) == NULL)
+      if ((newptr = (void *) realloc(ptr, size)) == nullptr)
 {
  perror("realloc failed to resize memory!");
  exit(1);
@@ -1054,7 +1054,7 @@ void* operator new(size_t size, unsigned int line,  const char* func_name,
   void *ptr;
   size += REDZONE_SIZE;
   
-  if ((ptr = (void *) malloc(size)) == NULL)
+  if ((ptr = (void *) malloc(size)) == nullptr)
     {
       perror("C++ function \"new\" failed to get memory!");
       exit(1);
@@ -1070,7 +1070,7 @@ void* operator new [] (size_t size, unsigned int line, const char* func_name,
   void *ptr;
   size += REDZONE_SIZE;
   
-  if ((ptr = (void *) malloc(size)) == NULL)
+  if ((ptr = (void *) malloc(size)) == nullptr)
     {
       perror("C++ Vector form of \"new\" failed to get memory!");
       exit(1);

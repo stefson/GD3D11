@@ -18,13 +18,13 @@ D2DVobSettingsDialog::D2DVobSettingsDialog(D2DView* view, D2DSubView* parent) : 
 	SetPositionCentered(D2D1::Point2F(view->GetRenderTarget()->GetSize().width / 2, view->GetRenderTarget()->GetSize().height / 2), D2D1::SizeF(700, 450));
 	Header->SetCaption("VOB Settings");
 
-	Vob = NULL;
+	Vob = nullptr;
 
 	InitControls();
 }
 
 
-D2DVobSettingsDialog::~D2DVobSettingsDialog(void)
+D2DVobSettingsDialog::~D2DVobSettingsDialog()
 {
 }
 
@@ -107,7 +107,7 @@ void D2DVobSettingsDialog::SliderDragged(SV_Slider* sender, void* userdata)
 	if (!d->Vob)
 		return;
 
-	VisualTesselationSettings* ts = NULL;
+	VisualTesselationSettings* ts = nullptr;
 	if (d->Vob)
 		ts = &d->Vob->VisualInfo->TesselationInfo;
 
@@ -166,7 +166,7 @@ void D2DVobSettingsDialog::SetVobInfo(BaseVobInfo* vob)
 	return;
 #endif
 
-	Vob = NULL; // Reset the dialog first without messing with the vobs settings
+	Vob = nullptr; // Reset the dialog first without messing with the vobs settings
 
 	std::map<zCTexture*, MeshInfo*> meshes;
 

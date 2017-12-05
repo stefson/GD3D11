@@ -32,9 +32,9 @@ __declspec( selectany ) std::string LOGFILE;
 /** throws an exceptopn if failed (HRESULT-function) */
 #define LE_THROW(x) { hr = (x); if (FAILED(hr)){LogError() << L#x << L" failed: " << DXGetErrorDescription(hr); UT::ThrowIfFailed(hr);} }
 
-#define ErrorBox(Msg) MessageBox(NULL,Msg,L"Error!",MB_OK|MB_ICONERROR|MB_TOPMOST)
-#define InfoBox(Msg) MessageBox(NULL,Msg,L"Info!",MB_OK|MB_ICONASTERISK|MB_TOPMOST)
-#define WarnBox(Msg) MessageBox(NULL,Msg,L"Warning!",MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST)
+#define ErrorBox(Msg) MessageBox(nullptr,Msg,L"Error!",MB_OK|MB_ICONERROR|MB_TOPMOST)
+#define InfoBox(Msg) MessageBox(nullptr,Msg,L"Info!",MB_OK|MB_ICONASTERISK|MB_TOPMOST)
+#define WarnBox(Msg) MessageBox(nullptr,Msg,L"Warning!",MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST)
 
 #else
 
@@ -52,9 +52,9 @@ __declspec( selectany ) std::string LOGFILE;
 /** Returns false if failed (bool-function) */
 #define LE_RB(x) { hr = (x); if (FAILED(hr)){LogError() << "failed with code: " << hr << "!"; return false;} }
 
-#define ErrorBox(Msg) MessageBoxA(NULL,Msg,"Error!",MB_OK|MB_ICONERROR|MB_TOPMOST)
-#define InfoBox(Msg) MessageBoxA(NULL,Msg,"Info!",MB_OK|MB_ICONASTERISK|MB_TOPMOST)
-#define WarnBox(Msg) MessageBoxA(NULL,Msg,"Warning!",MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST)
+#define ErrorBox(Msg) MessageBoxA(nullptr,Msg,"Error!",MB_OK|MB_ICONERROR|MB_TOPMOST)
+#define InfoBox(Msg) MessageBoxA(nullptr,Msg,"Info!",MB_OK|MB_ICONASTERISK|MB_TOPMOST)
+#define WarnBox(Msg) MessageBoxA(nullptr,Msg,"Warning!",MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST)
 
 #endif
 
@@ -146,7 +146,7 @@ public:
 	static void Clear()
 	{
 		char path[MAX_PATH + 1];
-		GetModuleFileNameA(NULL, path, MAX_PATH);
+		GetModuleFileNameA(nullptr, path, MAX_PATH);
 		LOGFILE = std::string(path);
 		LOGFILE = LOGFILE.substr(0, LOGFILE.find_last_of('\\')+1);
 		LOGFILE += "Log.txt";

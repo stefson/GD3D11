@@ -10,13 +10,13 @@ SV_Panel::SV_Panel(D2DView* view, D2DSubView* parent) : D2DSubView(view, parent)
 	HasShadow = true;
 	RenderMode = PR_Background;
 	ShadowRange = 20.0f;
-	Image = NULL;
+	Image = nullptr;
 	HasDarkOverlay = false;
 	HasGlossyOutline = false;
 }
 
 
-SV_Panel::~SV_Panel(void)
+SV_Panel::~SV_Panel()
 {
 	if (Image)Image->Release();
 }
@@ -115,7 +115,7 @@ D2D1_COLOR_F SV_Panel::GetPanelColor()
 HRESULT SV_Panel::SetD3D11TextureAsImage(ID3D11Texture2D* texture, INT2 size)
 {
 	if (Image)Image->Release();
-	Image = NULL;
+	Image = nullptr;
 
 	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 	HRESULT hr;
@@ -130,7 +130,7 @@ HRESULT SV_Panel::SetD3D11TextureAsImage(ID3D11Texture2D* texture, INT2 size)
 		1,
 		0, D3D11_USAGE_STAGING, D3D11_CPU_ACCESS_READ, 1, 0, 0);
 
-	ID3D11Texture2D* staging = NULL;
+	ID3D11Texture2D* staging = nullptr;
 	LE(engine->GetDevice()->CreateTexture2D(&textureDesc, nullptr, &staging));
 
 	engine->GetContext()->CopyResource(staging, texture);

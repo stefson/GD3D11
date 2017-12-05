@@ -6,8 +6,8 @@ class BaseWidget;
 class WidgetContainer
 {
 public:
-	WidgetContainer(void);
-	~WidgetContainer(void);
+	WidgetContainer();
+	~WidgetContainer();
 
 	/** Renders the active widget */
 	void Render();

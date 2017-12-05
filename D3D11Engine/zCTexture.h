@@ -20,8 +20,8 @@ namespace zCTextureCacheHack
 class zCTexture
 {
 public:
-	zCTexture(void);
-	~zCTexture(void);
+	zCTexture();
+	~zCTexture();
 
 	/** Hooks the functions of this Class */
 	static void Hook()
@@ -38,7 +38,7 @@ public:
 		Engine::GAPI->SetBoundTexture(7, (zCTexture *)thisptr); // Slot 7 is reserved for this
 		int ret = HookedFunctions::OriginalFunctions.ofiginal_zCTextureLoadResourceData(thisptr);
 
-		Engine::GAPI->SetBoundTexture(7, NULL); // Slot 7 is reserved for this
+		Engine::GAPI->SetBoundTexture(7, nullptr); // Slot 7 is reserved for this
 
 		/*if (ret)
 		{

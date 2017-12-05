@@ -11,16 +11,16 @@ SV_Button::SV_Button(D2DView* view, D2DSubView* parent) : D2DSubView(view, paren
 
 	IsPressed = false;
 
-	CaptionLayout = NULL;
+	CaptionLayout = nullptr;
 
 	SetCaption("Button");
 
-	PressedCallback = NULL;
-	PressedUserdata = NULL;
+	PressedCallback = nullptr;
+	PressedUserdata = nullptr;
 }
 
 
-SV_Button::~SV_Button(void)
+SV_Button::~SV_Button()
 {
 	if (CaptionLayout)CaptionLayout->Release();
 }

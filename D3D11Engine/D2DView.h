@@ -13,8 +13,8 @@ class D2DDialog;
 class D2DView
 {
 public:
-	D2DView(void);
-	~D2DView(void);
+	D2DView();
+	~D2DView();
 
 	/** Inits this d2d-view */
 	XRESULT Init(const INT2& initialResolution, ID3D11Texture2D* rendertarget);
@@ -35,7 +35,7 @@ public:
 	virtual void Update(float deltaTime);
 
 	/** Adds a message box */
-	void AddMessageBox(const std::string& caption, const std::string& message, D2DMessageBoxCallback callback = NULL, void* userdata = NULL, ED2D_MB_TYPE type = D2D_MBT_OK);
+	void AddMessageBox(const std::string& caption, const std::string& message, D2DMessageBoxCallback callback = nullptr, void* userdata = nullptr, ED2D_MB_TYPE type = D2D_MBT_OK);
 
 	/** Drass a smooth shadow around the given rectangle */
 	void DrawSmoothShadow(const D2D1_RECT_F* Rectangle, 

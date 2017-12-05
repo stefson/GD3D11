@@ -10,17 +10,17 @@
 
 const int FRESNEL_TEX_SIZE = 256;
 
-GOcean::GOcean(void)
+GOcean::GOcean()
 {
-	PlaneMesh = NULL;
-	FFTOceanSimulator = NULL;
-	FresnelMapSRV = NULL;
-	FresnelMap = NULL;
+	PlaneMesh = nullptr;
+	FFTOceanSimulator = nullptr;
+	FresnelMapSRV = nullptr;
+	FresnelMap = nullptr;
 	
 }
 
 
-GOcean::~GOcean(void)
+GOcean::~GOcean()
 {
 	if (FresnelMapSRV)FresnelMapSRV->Release();
 	if (FresnelMap)FresnelMap->Release();
@@ -39,7 +39,7 @@ XRESULT GOcean::InitOcean()
 	if (XR_SUCCESS != PlaneMesh->LoadMesh("system\\GD3D11\\Meshes\\PlaneSubdiv.3ds"))
 	{
 		delete PlaneMesh;
-		PlaneMesh = NULL;
+		PlaneMesh = nullptr;
 		return XR_FAILED;
 	}
 
@@ -163,7 +163,7 @@ void GOcean::CreateFresnelMap(ID3D11Device* pd3dDevice)
 	pd3dDevice->CreateTexture1D(&tex_desc, &init_data, &FresnelMap);
 	assert(g_pFresnelMap);
 
-	delete[] buffer; buffer = NULL;
+	delete[] buffer; buffer = nullptr;
 
 	// Create shader resource
 	D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;

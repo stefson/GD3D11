@@ -6,18 +6,18 @@
 
 D2DMessageBox::D2DMessageBox(D2DView* view, D2DSubView* parent, ED2D_MB_TYPE type) : D2DDialog(view, parent)
 {
-	Callback = NULL;
-	CallbackUserData = NULL;
+	Callback = nullptr;
+	CallbackUserData = nullptr;
 
-	OkButton = NULL;
-	YesButton = NULL;
-	NoButton = NULL;
+	OkButton = nullptr;
+	YesButton = nullptr;
+	NoButton = nullptr;
 
 	InitControls(type);
 }
 
 
-D2DMessageBox::~D2DMessageBox(void)
+D2DMessageBox::~D2DMessageBox()
 {
 }
 

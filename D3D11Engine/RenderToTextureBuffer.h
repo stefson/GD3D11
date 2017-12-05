@@ -27,13 +27,13 @@ struct RenderToTextureBuffer
 	}
 
 	/** Creates the render-to-texture buffers */
-	RenderToTextureBuffer(ID3D11Device* device, UINT SizeX,UINT SizeY,DXGI_FORMAT Format, HRESULT* Result=NULL, DXGI_FORMAT RTVFormat=DXGI_FORMAT_UNKNOWN, DXGI_FORMAT SRVFormat=DXGI_FORMAT_UNKNOWN, int MipLevels = 1, UINT arraySize = 1)
+	RenderToTextureBuffer(ID3D11Device* device, UINT SizeX,UINT SizeY,DXGI_FORMAT Format, HRESULT* Result=nullptr, DXGI_FORMAT RTVFormat=DXGI_FORMAT_UNKNOWN, DXGI_FORMAT SRVFormat=DXGI_FORMAT_UNKNOWN, int MipLevels = 1, UINT arraySize = 1)
 	{
 		HRESULT hr=S_OK;
 
-		Texture=NULL;
-		ShaderResView=NULL;
-		RenderTargetView=NULL;
+		Texture=nullptr;
+		ShaderResView=nullptr;
+		RenderTargetView=nullptr;
 		ZeroMemory(CubeMapRTVs, sizeof(CubeMapRTVs));
 		ZeroMemory(CubeMapSRVs, sizeof(CubeMapSRVs));
 
@@ -68,7 +68,7 @@ struct RenderToTextureBuffer
 		if (MipLevels != 1)
 			Desc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
 
-		LE(device->CreateTexture2D(&Desc,NULL,&Texture));
+		LE(device->CreateTexture2D(&Desc,nullptr,&Texture));
 
 		//Create a render target view
 		D3D11_RENDER_TARGET_VIEW_DESC DescRT = CD3D11_RENDER_TARGET_VIEW_DESC();
@@ -176,9 +176,9 @@ private:
 
 	void ReleaseAll()
 	{
-		if (Texture)Texture->Release(); Texture=NULL;
-		if (ShaderResView)ShaderResView->Release(); ShaderResView=NULL;
-		if (RenderTargetView)RenderTargetView->Release(); RenderTargetView=NULL;
+		if (Texture)Texture->Release(); Texture=nullptr;
+		if (ShaderResView)ShaderResView->Release(); ShaderResView=nullptr;
+		if (RenderTargetView)RenderTargetView->Release(); RenderTargetView=nullptr;
 	}
 };
 
@@ -193,7 +193,7 @@ struct RenderToDepthStencilBuffer
 	}
 
 	/** Creates the render-to-texture buffers */
-	RenderToDepthStencilBuffer(ID3D11Device* device, UINT SizeX,UINT SizeY,DXGI_FORMAT Format, HRESULT* Result=NULL, DXGI_FORMAT DSVFormat=DXGI_FORMAT_UNKNOWN, DXGI_FORMAT SRVFormat=DXGI_FORMAT_UNKNOWN, UINT arraySize = 1)
+	RenderToDepthStencilBuffer(ID3D11Device* device, UINT SizeX,UINT SizeY,DXGI_FORMAT Format, HRESULT* Result=nullptr, DXGI_FORMAT DSVFormat=DXGI_FORMAT_UNKNOWN, DXGI_FORMAT SRVFormat=DXGI_FORMAT_UNKNOWN, UINT arraySize = 1)
 	{
 		HRESULT hr=S_OK;
 
@@ -203,9 +203,9 @@ struct RenderToDepthStencilBuffer
 			return;
 		}
 
-		Texture=NULL;
-		ShaderResView=NULL;
-		DepthStencilView=NULL;
+		Texture=nullptr;
+		ShaderResView=nullptr;
+		DepthStencilView=nullptr;
 		ZeroMemory(CubeMapDSVs, sizeof(CubeMapDSVs));
 		ZeroMemory(CubeMapSRVs, sizeof(CubeMapSRVs));
 		
@@ -239,7 +239,7 @@ struct RenderToDepthStencilBuffer
 			Desc.MiscFlags |= D3D11_RESOURCE_MISC_TEXTURECUBE;
 
 
-		LE(device->CreateTexture2D(&Desc,NULL,&Texture));
+		LE(device->CreateTexture2D(&Desc,nullptr,&Texture));
 
 		//Create a render target view
 		D3D11_DEPTH_STENCIL_VIEW_DESC DescDSV = CD3D11_DEPTH_STENCIL_VIEW_DESC();
@@ -349,9 +349,9 @@ private:
 
 	void ReleaseAll()
 	{
-		if (Texture)Texture->Release(); Texture=NULL;
-		if (ShaderResView)ShaderResView->Release(); ShaderResView=NULL;
-		if (DepthStencilView)DepthStencilView->Release(); DepthStencilView=NULL;
+		if (Texture)Texture->Release(); Texture=nullptr;
+		if (ShaderResView)ShaderResView->Release(); ShaderResView=nullptr;
+		if (DepthStencilView)DepthStencilView->Release(); DepthStencilView=nullptr;
 
 		for(int i=0;i<6;i++)
 			if (CubeMapDSVs[i])CubeMapDSVs[i]->Release();

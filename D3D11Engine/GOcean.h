@@ -23,8 +23,8 @@ struct OceanSettingsConstantBuffer;
 class GOcean
 {
 public:
-	GOcean(void);
-	virtual ~GOcean(void);
+	GOcean();
+	virtual ~GOcean();
 
 	/** Initializes the ocean */
 	XRESULT InitOcean();

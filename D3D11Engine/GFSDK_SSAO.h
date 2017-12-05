@@ -194,7 +194,7 @@ enum GFSDK_SSAO_Status
 {
     GFSDK_SSAO_OK,                                          // Success
     GFSDK_SSAO_VERSION_MISMATCH,                            // The header version number does not match the DLL version number
-    GFSDK_SSAO_NULL_ARGUMENT,                               // One of the required argument pointers is NULL
+    GFSDK_SSAO_NULL_ARGUMENT,                               // One of the required argument pointers is nullptr
     GFSDK_SSAO_INVALID_PROJECTION_MATRIX,                   // The projection matrix is not valid
     GFSDK_SSAO_INVALID_WORLD_TO_VIEW_MATRIX,                // The world-to-view matrix is not valid (transposing it may help)
     GFSDK_SSAO_INVALID_NORMAL_TEXTURE_RESOLUTION,           // The normal-texture resolution does not match the depth-texture resolution
@@ -212,7 +212,7 @@ enum GFSDK_SSAO_Status
     //
     GFSDK_SSAO_GL_INVALID_TEXTURE_TARGET,                   // One of the input textures is not GL_TEXTURE_2D or GL_TEXTURE_2D_MULTISAMPLE
     GFSDK_SSAO_GL_RESOURCE_CREATION_FAILED,                 // A GL resource-creation call has failed (running out of memory?)
-    GFSDK_SSAO_GL_NULL_FUNCTION_POINTER,                    // One of the provided GL function pointers is NULL
+    GFSDK_SSAO_GL_NULL_FUNCTION_POINTER,                    // One of the provided GL function pointers is nullptr
 };
 
 enum GFSDK_SSAO_DepthTextureType
@@ -302,7 +302,7 @@ struct GFSDK_SSAO_InputDepthData
 
     GFSDK_SSAO_InputDepthData()
         : DepthTextureType(GFSDK_SSAO_HARDWARE_DEPTHS)
-        , pProjectionMatrix(NULL)
+        , pProjectionMatrix(nullptr)
         , ProjectionMatrixLayout(GFSDK_SSAO_ROW_MAJOR_ORDER)
         , MetersToViewSpaceUnits(1.f)
      {
@@ -315,8 +315,8 @@ struct GFSDK_SSAO_InputDepthData_D3D11 : GFSDK_SSAO_InputDepthData
     const D3D11_VIEWPORT*           pViewport;                  // Viewport from the depth generation pass
 
     GFSDK_SSAO_InputDepthData_D3D11()
-        : pFullResDepthTextureSRV(NULL)
-        , pViewport(NULL)
+        : pFullResDepthTextureSRV(nullptr)
+        , pViewport(nullptr)
      {
      }
 };
@@ -382,7 +382,7 @@ struct GFSDK_SSAO_InputNormalData
 
     GFSDK_SSAO_InputNormalData()
         : Enable(false)
-        , pWorldToViewMatrix(NULL)
+        , pWorldToViewMatrix(nullptr)
         , WorldToViewMatrixLayout(GFSDK_SSAO_ROW_MAJOR_ORDER)
         , DecodeScale(1.f)
         , DecodeBias(0.f)
@@ -395,7 +395,7 @@ struct GFSDK_SSAO_InputNormalData_D3D11 : GFSDK_SSAO_InputNormalData
     ID3D11ShaderResourceView*   pFullResNormalTextureSRV;       // Full-resolution world-space normal texture
 
     GFSDK_SSAO_InputNormalData_D3D11()
-        : pFullResNormalTextureSRV(NULL)
+        : pFullResNormalTextureSRV(nullptr)
     {
     }
 };
@@ -495,8 +495,8 @@ struct GFSDK_SSAO_CustomBlendState_D3D11
     const GFSDK_SSAO_FLOAT*         pBlendFactor;               // Relevant only if pBlendState uses D3D11_BLEND_BLEND_FACTOR
 
     GFSDK_SSAO_CustomBlendState_D3D11()
-        : pBlendState(NULL)
-        , pBlendFactor(NULL)
+        : pBlendState(nullptr)
+        , pBlendFactor(nullptr)
     {
     }
 };
@@ -642,7 +642,7 @@ public:
 //    * Setting RenderMask = GFSDK_SSAO_RENDER_DEBUG_NORMAL can be useful to visualize the normals used for the AO rendering.
 //
 // Returns:
-//     GFSDK_SSAO_NULL_ARGUMENT                        - One of the required argument pointers is NULL
+//     GFSDK_SSAO_NULL_ARGUMENT                        - One of the required argument pointers is nullptr
 //     GFSDK_SSAO_INVALID_PROJECTION_MATRIX            - The projection matrix is not valid
 //     GFSDK_SSAO_INVALID_VIEWPORT_DEPTH_RANGE         - The viewport depth range is not a sub-range of [0.f,1.f]
 //     GFSDK_SSAO_INVALID_WORLD_TO_VIEW_MATRIX         - The world-to-view matrix is not valid (transposing it may help)
@@ -667,7 +667,7 @@ virtual GFSDK_SSAO_Status RenderAO(ID3D11DeviceContext* pDeviceContext,
 //    * This call performs CreateTexture calls for all the relevant render targets.
 //
 // Returns:
-//     GFSDK_SSAO_NULL_ARGUMENT                        - One of the required argument pointers is NULL
+//     GFSDK_SSAO_NULL_ARGUMENT                        - One of the required argument pointers is nullptr
 //     GFSDK_SSAO_D3D_RESOURCE_CREATION_FAILED         - A D3D resource-creation call has failed (running out of memory?)
 //     GFSDK_SSAO_OK                                   - Success
 //---------------------------------------------------------------------------------------------------
@@ -690,7 +690,7 @@ virtual void Release() = 0;
 //    * Allocates memory using the default "::operator new", or "pCustomHeap->new_" if provided.
 //
 // Returns:
-//     GFSDK_SSAO_NULL_ARGUMENT                        - One of the required argument pointers is NULL
+//     GFSDK_SSAO_NULL_ARGUMENT                        - One of the required argument pointers is nullptr
 //     GFSDK_SSAO_VERSION_MISMATCH                     - Invalid HeaderVersion (have you set HeaderVersion = GFSDK_SSAO_Version()?)
 //     GFSDK_SSAO_MEMORY_ALLOCATION_FAILED             - Failed to allocate memory on the heap
 //     GFSDK_SSAO_D3D_FEATURE_LEVEL_NOT_SUPPORTED      - The D3D11 feature level of pD3DDevice is lower than 11_0
@@ -699,7 +699,7 @@ virtual void Release() = 0;
 //---------------------------------------------------------------------------------------------------
 GFSDK_SSAO_DECL(GFSDK_SSAO_Status) GFSDK_SSAO_CreateContext_D3D11(ID3D11Device* pD3DDevice,
                                                                   GFSDK_SSAO_Context_D3D11** ppContext,
-                                                                  const GFSDK_SSAO_CustomHeap* pCustomHeap = NULL,
+                                                                  const GFSDK_SSAO_CustomHeap* pCustomHeap = nullptr,
                                                                   GFSDK_SSAO_Version HeaderVersion = GFSDK_SSAO_Version());
 
 /*====================================================================================================
@@ -723,7 +723,7 @@ public:
 //    * The current GL PolygonMode is assumed to be GL_FILL.
 //
 // Returns:
-//     GFSDK_SSAO_NULL_ARGUMENT                        - One of the required argument pointers is NULL
+//     GFSDK_SSAO_NULL_ARGUMENT                        - One of the required argument pointers is nullptr
 //     GFSDK_SSAO_INVALID_PROJECTION_MATRIX            - The projection matrix is not valid
 //     GFSDK_SSAO_INVALID_VIEWPORT_DEPTH_RANGE         - The viewport depth range is not a sub-range of [0.f,1.f]
 //     GFSDK_SSAO_GL_INVALID_TEXTURE_TARGET            - One of the input textures is not GL_TEXTURE_2D or GL_TEXTURE_2D_MULTISAMPLE
@@ -743,7 +743,7 @@ virtual GFSDK_SSAO_Status RenderAO(const GFSDK_SSAO_InputData_GL* pInputData,
 //    * This call releases and re-creates the internal framebuffer objects if the provided resolution changes.
 //
 // Returns:
-//     GFSDK_SSAO_NULL_ARGUMENT                        - One of the required argument pointers is NULL
+//     GFSDK_SSAO_NULL_ARGUMENT                        - One of the required argument pointers is nullptr
 //     GFSDK_SSAO_GL_RESOURCE_CREATION_FAILED          - A GL resource-creation call has failed (running out of memory?)
 //     GFSDK_SSAO_OK                                   - Success
 //---------------------------------------------------------------------------------------------------
@@ -780,7 +780,7 @@ struct GFSDK_SSAO_GLFunctions
     void (GFSDK_SSAO_STDCALL* glColorMaski) (GLuint, GLboolean, GLboolean, GLboolean, GLboolean);
     void (GFSDK_SSAO_STDCALL* glCompileShader) (GLuint shader);
     GLuint (GFSDK_SSAO_STDCALL* glCreateShader) (GLenum type);
-    GLuint (GFSDK_SSAO_STDCALL* glCreateProgram) (void);
+    GLuint (GFSDK_SSAO_STDCALL* glCreateProgram) ();
     void (GFSDK_SSAO_STDCALL* glDeleteBuffers) (GLsizei n, const GLuint* buffers);
     void (GFSDK_SSAO_STDCALL* glDeleteFramebuffers) (GLsizei n, const GLuint* framebuffers);
     void (GFSDK_SSAO_STDCALL* glDeleteProgram) (GLuint program);
@@ -798,7 +798,7 @@ struct GFSDK_SSAO_GLFunctions
     void (GFSDK_SSAO_STDCALL* glGenFramebuffers) (GLsizei n, GLuint* framebuffers);
     void (GFSDK_SSAO_STDCALL* glGenTextures) (GLsizei n, GLuint *textures);
     void (GFSDK_SSAO_STDCALL* glGenVertexArrays) (GLsizei n, GLuint* arrays);
-    GLenum (GFSDK_SSAO_STDCALL* glGetError) (void);
+    GLenum (GFSDK_SSAO_STDCALL* glGetError) ();
     void (GFSDK_SSAO_STDCALL* glGetBooleani_v) (GLenum, GLuint, GLboolean*);
     void (GFSDK_SSAO_STDCALL* glGetFloatv) (GLenum pname, GLfloat *params);
     void (GFSDK_SSAO_STDCALL* glGetIntegerv) (GLenum pname, GLint *params);
@@ -907,15 +907,15 @@ struct GFSDK_SSAO_GLFunctions
 //    * Allocates memory using the default "::operator new", or "pCustomHeap->new_" if provided.
 //
 // Returns:
-//     GFSDK_SSAO_NULL_ARGUMENT                        - One of the required argument pointers is NULL
+//     GFSDK_SSAO_NULL_ARGUMENT                        - One of the required argument pointers is nullptr
 //     GFSDK_SSAO_VERSION_MISMATCH                     - Invalid HeaderVersion (have you set HeaderVersion = GFSDK_SSAO_Version()?)
 //     GFSDK_SSAO_GL_RESOURCE_CREATION_FAILED          - A GL resource-creation call has failed (running out of memory?)
-//     GFSDK_SSAO_GL_NULL_FUNCTION_POINTER,            - One of the provided GL function pointers is NULL
+//     GFSDK_SSAO_GL_NULL_FUNCTION_POINTER,            - One of the provided GL function pointers is nullptr
 //     GFSDK_SSAO_OK                                   - Success
 //---------------------------------------------------------------------------------------------------
 GFSDK_SSAO_DECL(GFSDK_SSAO_Status) GFSDK_SSAO_CreateContext_GL(GFSDK_SSAO_Context_GL** ppContext,
                                                                const GFSDK_SSAO_GLFunctions* pGLFunctions,
-                                                               const GFSDK_SSAO_CustomHeap* pCustomHeap = NULL,
+                                                               const GFSDK_SSAO_CustomHeap* pCustomHeap = nullptr,
                                                                GFSDK_SSAO_Version HeaderVersion = GFSDK_SSAO_Version());
 
 #pragma pack(pop)

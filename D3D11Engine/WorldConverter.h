@@ -27,8 +27,8 @@ class zCMesh;
 class WorldConverter
 {
 public:
-	WorldConverter(void);
-	virtual ~WorldConverter(void);
+	WorldConverter();
+	virtual ~WorldConverter();
 
 	/** Collects all world-polys in the specific range. Drops all materials that have no alphablending */
 	static void WorldMeshCollectPolyRange(const D3DXVECTOR3& position, float range, std::map<int,std::map<int, WorldMeshSectionInfo>>& inSections, std::map<MeshKey, WorldMeshInfo*, cmpMeshKey>& outMeshes);

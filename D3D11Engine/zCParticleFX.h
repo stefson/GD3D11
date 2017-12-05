@@ -120,8 +120,8 @@ public:
 class zCParticleFX
 {
 public:
-	zCParticleFX(void);
-	~zCParticleFX(void);
+	zCParticleFX();
+	~zCParticleFX();
 
 	/** Hooks the functions of this Class */
 	static void Hook()
@@ -205,8 +205,8 @@ public:
 		zCParticleFX* next = *(zCParticleFX **)THISPTR_OFFSET(GothicMemoryLocations::zCParticleFX::Offset_NextPFX); 
 		zCParticleFX* prev = *(zCParticleFX **)THISPTR_OFFSET(GothicMemoryLocations::zCParticleFX::Offset_PrevPFX); 
 
-		// The remove-function sets these two to NULL
-		return prev == NULL && next == NULL;
+		// The remove-function sets these two to nullptr
+		return prev == nullptr && next == nullptr;
 	}*/
 	
 	zCStaticPfxList* GetStaticPFXList()

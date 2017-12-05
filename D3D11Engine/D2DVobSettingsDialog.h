@@ -11,7 +11,7 @@ class D2DVobSettingsDialog :
 {
 public:
 	D2DVobSettingsDialog(D2DView* view, D2DSubView* parent);
-	~D2DVobSettingsDialog(void);
+	~D2DVobSettingsDialog();
 
 	/** Initializes the controls of this view */
 	virtual XRESULT InitControls();

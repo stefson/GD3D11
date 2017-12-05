@@ -283,9 +283,9 @@ struct aiNodeAnim
 #ifdef __cplusplus
 	aiNodeAnim()
 	{
-		mNumPositionKeys = 0; mPositionKeys = NULL; 
-		mNumRotationKeys = 0; mRotationKeys = NULL; 
-		mNumScalingKeys  = 0; mScalingKeys  = NULL; 
+		mNumPositionKeys = 0; mPositionKeys = nullptr; 
+		mNumRotationKeys = 0; mRotationKeys = nullptr; 
+		mNumScalingKeys  = 0; mScalingKeys  = nullptr; 
 
 		mPreState = mPostState = aiAnimBehaviour_DEFAULT;
 	}
@@ -316,7 +316,7 @@ struct aiMeshAnim
 	/** Size of the #mKeys array. Must be 1, at least. */
 	unsigned int mNumKeys;
 
-	/** Key frames of the animation. May not be NULL. */
+	/** Key frames of the animation. May not be nullptr. */
 	C_STRUCT aiMeshKey* mKeys;
 
 #ifdef __cplusplus

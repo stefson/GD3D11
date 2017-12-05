@@ -10,7 +10,7 @@ class SV_Slider :
 {
 public:
 	SV_Slider(D2DView* view, D2DSubView* parent);
-	~SV_Slider(void);
+	~SV_Slider();
 
 	/** Draws this sub-view */
 	virtual void Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime);

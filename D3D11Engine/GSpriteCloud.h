@@ -4,8 +4,8 @@
 class GSpriteCloud
 {
 public:
-	GSpriteCloud(void);
-	~GSpriteCloud(void);
+	GSpriteCloud();
+	~GSpriteCloud();
 
 	/** Initializes this cloud */
 	void CreateCloud(const D3DXVECTOR3& size, int numSprites = 10);

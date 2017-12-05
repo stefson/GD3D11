@@ -190,7 +190,7 @@ public:
 		if (!GetGroundPoly())
 			return false;
 
-		return GetGroundPoly()->GetLightmap() != NULL;
+		return GetGroundPoly()->GetLightmap() != nullptr;
 	}
 
 	/** Returns the world this vob resists in */

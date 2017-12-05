@@ -6,8 +6,8 @@ class D3D11HDShader;
 class D3D11GodRayEffect
 {
 public:
-	D3D11GodRayEffect(void);
-	~D3D11GodRayEffect(void);
+	D3D11GodRayEffect();
+	~D3D11GodRayEffect();
 
 	D3D11VShader* QuadVS;
 	D3D11PShader* QuadPS;

@@ -6,7 +6,7 @@ class BaseDepthBufferState
 {
 public:
 	BaseDepthBufferState(const GothicDepthBufferStateInfo& state){}
-	virtual ~BaseDepthBufferState(void){}
+	virtual ~BaseDepthBufferState(){}
 
 };
 
@@ -15,7 +15,7 @@ class BaseBlendStateInfo
 {
 public:
 	BaseBlendStateInfo(const GothicBlendStateInfo& state){}
-	virtual ~BaseBlendStateInfo(void){}
+	virtual ~BaseBlendStateInfo(){}
 
 };
 
@@ -24,7 +24,7 @@ class BaseRasterizerStateInfo
 {
 public:
 	BaseRasterizerStateInfo(const GothicRasterizerStateInfo& state){}
-	virtual ~BaseRasterizerStateInfo(void){}
+	virtual ~BaseRasterizerStateInfo(){}
 
 };
 

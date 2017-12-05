@@ -70,7 +70,7 @@ struct VisualTesselationSettings
 		buffer.VT_DisplacementStrength = 0.0f;
 		buffer.VT_Roundness = 1.0f;
 		buffer.VT_TesselationFactor = 0.0f;
-		Constantbuffer = NULL;
+		Constantbuffer = nullptr;
 	}
 
 	~VisualTesselationSettings()
@@ -99,13 +99,13 @@ struct MeshInfo
 {
 	MeshInfo()
 	{
-		MeshVertexBuffer = NULL;
-		MeshIndexBuffer = NULL;
+		MeshVertexBuffer = nullptr;
+		MeshIndexBuffer = nullptr;
 		BaseIndexLocation = 0;
-		MeshIndexBufferPNAEN = NULL;
+		MeshIndexBufferPNAEN = nullptr;
 
-		WrappedVB = NULL;
-		WrappedIB = NULL;
+		WrappedVB = nullptr;
+		WrappedIB = nullptr;
 	}
 
 	virtual ~MeshInfo();
@@ -152,7 +152,7 @@ struct QuadMarkInfo
 {
 	QuadMarkInfo()
 	{
-		Mesh = NULL;
+		Mesh = nullptr;
 		NumVertices = 0;
 	}
 
@@ -174,10 +174,10 @@ struct SkeletalMeshInfo
 {
 	SkeletalMeshInfo()
 	{
-		MeshVertexBuffer = NULL;
-		MeshIndexBuffer = NULL;
-		visual = NULL;
-		MeshIndexBufferPNAEN = NULL;
+		MeshVertexBuffer = nullptr;
+		MeshIndexBuffer = nullptr;
+		visual = nullptr;
+		MeshIndexBufferPNAEN = nullptr;
 	}
 
 	~SkeletalMeshInfo();
@@ -199,7 +199,7 @@ struct BaseVisualInfo
 {
 	BaseVisualInfo()
 	{
-		Visual = NULL;
+		Visual = nullptr;
 	}
 
 	virtual ~BaseVisualInfo()
@@ -251,10 +251,10 @@ struct MeshVisualInfo : public BaseVisualInfo
 {
 	MeshVisualInfo()
 	{
-		Visual = NULL;
+		Visual = nullptr;
 		UnloadedSomething = false;
 		StartInstanceNum = 0;
-		FullMesh = NULL;
+		FullMesh = nullptr;
 	}
 
 	~MeshVisualInfo()
@@ -294,7 +294,7 @@ struct SkeletalMeshVisualInfo : public BaseVisualInfo
 {
 	SkeletalMeshVisualInfo()
 	{
-		Visual = NULL;
+		Visual = nullptr;
 	}
 
 	~SkeletalMeshVisualInfo()
@@ -335,11 +335,11 @@ struct VobInfo : public BaseVobInfo
 {
 	VobInfo()
 	{
-		//Vob = NULL;
-		VobConstantBuffer = NULL;
+		//Vob = nullptr;
+		VobConstantBuffer = nullptr;
 		IsIndoorVob = false;
 		VisibleInRenderPass = false;
-		VobSection = NULL;
+		VobSection = nullptr;
 	}
 
 	~VobInfo()
@@ -382,8 +382,8 @@ struct VobLightInfo
 {
 	VobLightInfo()
 	{
-		Vob = NULL;
-		LightShadowBuffers = NULL;
+		Vob = nullptr;
+		LightShadowBuffers = nullptr;
 		VisibleInRenderPass = false;
 		IsIndoorVob = false;
 		DynamicShadows = false;
@@ -422,11 +422,11 @@ struct SkeletalVobInfo : public BaseVobInfo
 {
 	SkeletalVobInfo()
 	{
-		Vob = NULL;
-		VisualInfo = NULL;
+		Vob = nullptr;
+		VisualInfo = nullptr;
 		IndoorVob = false;
 		VisibleInRenderPass = false;
-		VobConstantBuffer = NULL;
+		VobConstantBuffer = nullptr;
 	}
 
 	~SkeletalVobInfo()
@@ -490,7 +490,7 @@ struct WorldMeshSectionInfo
 	{
 		BoundingBox.Min = D3DXVECTOR3(FLT_MAX, FLT_MAX, FLT_MAX);
 		BoundingBox.Max = D3DXVECTOR3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
-		FullStaticMesh = NULL;
+		FullStaticMesh = nullptr;
 	}
 
 	~WorldMeshSectionInfo()
@@ -572,7 +572,7 @@ struct WorldInfo
 {
 	WorldInfo()
 	{
-		BspTree = NULL;
+		BspTree = nullptr;
 		CustomWorldLoaded = false;
 	}
 

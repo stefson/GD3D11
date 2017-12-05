@@ -87,13 +87,13 @@ struct aiNode
 	/** The transformation relative to the node's parent. */
 	C_STRUCT aiMatrix4x4 mTransformation;
 
-	/** Parent node. NULL if this node is the root node. */
+	/** Parent node. nullptr if this node is the root node. */
 	C_STRUCT aiNode* mParent;
 
 	/** The number of child nodes of this node. */
 	unsigned int mNumChildren;
 
-	/** The child nodes of this node. NULL if mNumChildren is 0. */
+	/** The child nodes of this node. nullptr if mNumChildren is 0. */
 	C_STRUCT aiNode** mChildren;
 
 	/** The number of meshes of this node. */
@@ -107,18 +107,18 @@ struct aiNode
 	aiNode() 
 	{ 
 		// set all members to zero by default
-		mParent = NULL; 
-		mNumChildren = 0; mChildren = NULL;
-		mNumMeshes = 0; mMeshes = NULL;
+		mParent = nullptr; 
+		mNumChildren = 0; mChildren = nullptr;
+		mNumMeshes = 0; mMeshes = nullptr;
 	}
 
 	/** Construction from a specific name */
 	aiNode(const std::string& name) 
 	{ 
 		// set all members to zero by default
-		mParent = NULL; 
-		mNumChildren = 0; mChildren = NULL;
-		mNumMeshes = 0; mMeshes = NULL;
+		mParent = nullptr; 
+		mNumChildren = 0; mChildren = nullptr;
+		mNumMeshes = 0; mMeshes = nullptr;
 		mName = name;
 	}
 
@@ -141,7 +141,7 @@ struct aiNode
 	 *  of the scene.
 	 * 
 	 *  @param name Name to search for
-	 *  @return NULL or a valid Node if the search was successful.
+	 *  @return nullptr or a valid Node if the search was successful.
 	 */
 	inline aiNode* FindNode(const aiString& name)
 	{
@@ -159,7 +159,7 @@ struct aiNode
 			if (p)return p;
 		}
 		// there is definitely no sub node with this name
-		return NULL;
+		return nullptr;
 	}
 
 #endif // __cplusplus
@@ -327,7 +327,7 @@ struct aiScene
 
 #ifdef __cplusplus
 
-	//! Default constructor - set everything to 0/NULL
+	//! Default constructor - set everything to 0/nullptr
 	aiScene();
 
 	//! Destructor
@@ -336,28 +336,28 @@ struct aiScene
 	//! Check whether the scene contains meshes
 	//! Unless no special scene flags are set this will always be true.
 	inline bool HasMeshes() const 
-		{ return mMeshes != NULL && mNumMeshes > 0; }
+		{ return mMeshes != nullptr && mNumMeshes > 0; }
 
 	//! Check whether the scene contains materials
 	//! Unless no special scene flags are set this will always be true.
 	inline bool HasMaterials() const 
-		{ return mMaterials != NULL && mNumMaterials > 0; }
+		{ return mMaterials != nullptr && mNumMaterials > 0; }
 
 	//! Check whether the scene contains lights
 	inline bool HasLights() const 
-		{ return mLights != NULL && mNumLights > 0; }
+		{ return mLights != nullptr && mNumLights > 0; }
 
 	//! Check whether the scene contains textures
 	inline bool HasTextures() const 
-		{ return mTextures != NULL && mNumTextures > 0; }
+		{ return mTextures != nullptr && mNumTextures > 0; }
 
 	//! Check whether the scene contains cameras
 	inline bool HasCameras() const 
-		{ return mCameras != NULL && mNumCameras > 0; }
+		{ return mCameras != nullptr && mNumCameras > 0; }
 
 	//! Check whether the scene contains animations
 	inline bool HasAnimations() const 
-		{ return mAnimations != NULL && mNumAnimations > 0; }
+		{ return mAnimations != nullptr && mNumAnimations > 0; }
 
 #endif // __cplusplus
 

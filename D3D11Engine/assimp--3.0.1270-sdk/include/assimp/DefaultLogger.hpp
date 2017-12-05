@@ -84,12 +84,12 @@ public:
 	 *    If #aiDefaultLogStream_FILE is specified but an empty string is
 	 *    passed for 'name', no log file is created at all.
 	 *  @param  io IOSystem to be used to open external files (such as the 
-	 *   log file). Pass NULL to rely on the default implementation.
+	 *   log file). Pass nullptr to rely on the default implementation.
 	 *  This replaces the default #NullLogger with a #DefaultLogger instance. */
 	static Logger *create(const char* name = ASSIMP_DEFAULT_LOG_NAME,
 		LogSeverity severity    = NORMAL,
 		unsigned int defStreams = aiDefaultLogStream_DEBUGGER | aiDefaultLogStream_FILE,
-		IOSystem* io		    = NULL);
+		IOSystem* io		    = nullptr);
 
 	// ----------------------------------------------------------------------
 	/** @brief Setup a custom #Logger implementation.
@@ -98,7 +98,7 @@ public:
 	 *  your needs. If the provided message formatting is OK for you,
 	 *  it's much easier to use #create() and to attach your own custom 
 	 *  output streams to it.
-	 *  @param logger Pass NULL to setup a default NullLogger*/
+	 *  @param logger Pass nullptr to setup a default NullLogger*/
 	static void set (Logger *logger);
 	
 	// ----------------------------------------------------------------------

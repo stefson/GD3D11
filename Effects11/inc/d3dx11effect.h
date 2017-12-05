@@ -1129,7 +1129,7 @@ HRESULT WINAPI D3DX11CreateEffectFromFile( _In_z_ LPCWSTR pFileName,
 //  srcName [optional]
 //      ASCII string to use for debug object naming
 //  pDefines [optional]
-//      A NULL-terminated array of shader macros
+//      A nullptr-terminated array of shader macros
 //  pInclude [optional]
 //      A pointer to an include interface
 //  HLSLFlags
@@ -1169,7 +1169,7 @@ HRESULT D3DX11CompileEffectFromMemory( _In_reads_bytes_(DataLength) LPCVOID pDat
 //  pFileName
 //      FX shader source file
 //  pDefines [optional]
-//      A NULL-terminated array of shader macros
+//      A nullptr-terminated array of shader macros
 //  pInclude [optional]
 //      A pointer to an include interface
 //  HLSLFlags

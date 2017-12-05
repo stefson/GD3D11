@@ -20,7 +20,7 @@ class SV_TabControl :
 {
 public:
 	SV_TabControl(D2DView* view, D2DSubView* parent);
-	~SV_TabControl(void);
+	~SV_TabControl();
 
 	/** Draws this sub-view */
 	virtual void Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime);

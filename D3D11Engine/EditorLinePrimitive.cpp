@@ -7,21 +7,21 @@
 #include "GothicAPI.h"
 #include "D3D11ShaderManager.h"
 
-EditorLinePrimitive::EditorLinePrimitive(void)
+EditorLinePrimitive::EditorLinePrimitive()
 {
-	Vertices = NULL;
-	PrimVB = NULL;
-	PrimShader = NULL;
+	Vertices = nullptr;
+	PrimVB = nullptr;
+	PrimShader = nullptr;
 	Location = D3DXVECTOR3(0, 0, 0);
 	Rotation = D3DXVECTOR3(0, 0, 0);
 	Scale = D3DXVECTOR3(1, 1, 1);
 	RecalcTransforms();
 	bHidden=false;
 
-	SolidPrimShader = NULL;
-	SolidVertices = NULL;
+	SolidPrimShader = nullptr;
+	SolidVertices = nullptr;
 	NumSolidVertices = 0;
-	SolidPrimVB = NULL;
+	SolidPrimVB = nullptr;
 
 	NumVertices = 0;
 
@@ -36,7 +36,7 @@ EditorLinePrimitive::EditorLinePrimitive(void)
 }
 
 
-EditorLinePrimitive::~EditorLinePrimitive(void)
+EditorLinePrimitive::~EditorLinePrimitive()
 {
 	delete[] Vertices;
 	delete[] SolidVertices;
@@ -588,7 +588,7 @@ float EditorLinePrimitive::IntersectPrimitive(D3DXVECTOR3* RayOrigin, D3DXVECTOR
 
 	// Bring the ray into object space
 	D3DXMATRIX invWorld;
-	D3DXMatrixInverse(&invWorld, NULL, &WorldMatrix);
+	D3DXMatrixInverse(&invWorld, nullptr, &WorldMatrix);
 
 	D3DXVECTOR3 Origin;
 	D3DXVECTOR3 Dir;
@@ -944,8 +944,8 @@ void EditorLinePrimitive::RenderVertexBuffer(ID3D11Buffer* VB, UINT NumVertices,
 	// Set vertex buffer
 	UINT stride = sizeof( LineVertex);
 	UINT offset = 0;
-	engine->GetContext()->IASetVertexBuffers( 0, 1, &VB, &stride, &offset );
-	engine->GetContext()->IASetIndexBuffer(NULL, DXGI_FORMAT_UNKNOWN, NULL );
+	engine->GetContext()->IASetVertexBuffers(0, 1, &VB, &stride, &offset);
+	engine->GetContext()->IASetIndexBuffer(nullptr, DXGI_FORMAT_UNKNOWN, 0);
 	
 	engine->GetContext()->IASetPrimitiveTopology( Topology );
 

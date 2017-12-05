@@ -18,18 +18,18 @@
 // TODO: Remove this!
 #include "D3D11GraphicsEngine.h"
 
-D3D11Effect::D3D11Effect(void)
+D3D11Effect::D3D11Effect()
 {
-	RainBufferDrawFrom = NULL;
-	RainBufferStreamTo = NULL;
-	RainBufferInitial = NULL;
-	RainShadowmap = NULL;
-	RainTextureArray = NULL;
-	RainTextureArraySRV = NULL;
+	RainBufferDrawFrom = nullptr;
+	RainBufferStreamTo = nullptr;
+	RainBufferInitial = nullptr;
+	RainShadowmap = nullptr;
+	RainTextureArray = nullptr;
+	RainTextureArraySRV = nullptr;
 }
 
 
-D3D11Effect::~D3D11Effect(void)
+D3D11Effect::~D3D11Effect()
 {
 	if (RainTextureArray)RainTextureArray->Release();
 	if (RainTextureArraySRV)RainTextureArraySRV->Release();
@@ -158,14 +158,14 @@ XRESULT D3D11Effect::DrawRain()
 		if (!RainShadowmap)
 		{
 			const int s = 2048;
-			RainShadowmap = new RenderToDepthStencilBuffer(e->GetDevice(), s, s, DXGI_FORMAT_R32_TYPELESS, NULL, DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_R32_FLOAT);
+			RainShadowmap = new RenderToDepthStencilBuffer(e->GetDevice(), s, s, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_R32_FLOAT);
 		}
 	}
 
 	lastHeight = state.RendererSettings.RainHeightRange;
 	lastRadius = state.RendererSettings.RainRadiusRange;
 
-	D3D11VertexBuffer* b = NULL;
+	D3D11VertexBuffer* b = nullptr;
 
 	// Use initial-data if we don't have something in the stream-buffers yet
 	if (firstFrame || state.RendererSettings.RainUseInitialSet || Engine::GAPI->IsGamePaused())
@@ -211,7 +211,7 @@ XRESULT D3D11Effect::DrawRain()
 	e->GetContext()->Draw(numParticles, 0);
 
 	// Unset streamout target
-	bobjStream = NULL;
+	bobjStream = nullptr;
 	e->GetContext()->SOSetTargets(1, &bobjStream, 0);
 
 	// Swap buffers
@@ -269,7 +269,7 @@ XRESULT D3D11Effect::DrawRain()
 
 	// Reset this
 	e->GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	e->GetContext()->GSSetShader(NULL, 0, 0);
+	e->GetContext()->GSSetShader(nullptr, 0, 0);
 
 	e->SetDefaultStates();
 	return XR_SUCCESS;
@@ -343,7 +343,7 @@ XRESULT D3D11Effect::DrawRainShadowmap()
 	e->SetDefaultStates();
 
 	// Restore gothics camera
-	Engine::GAPI->SetCameraReplacementPtr(NULL);
+	Engine::GAPI->SetCameraReplacementPtr(nullptr);
 
 	return XR_SUCCESS;
 }
@@ -364,7 +364,7 @@ HRESULT LoadTextureArray( ID3D11Device* pd3dDevice, ID3D11DeviceContext* context
 	{
 		sprintf(str, "%s%.4d.dds", sTexturePrefix, i); 
 
-		ID3D11Resource *pRes = NULL;
+		ID3D11Resource *pRes = nullptr;
 		D3DX11_IMAGE_LOAD_INFO loadInfo;
 		ZeroMemory( &loadInfo, sizeof( D3DX11_IMAGE_LOAD_INFO ) );
 		loadInfo.Width = D3DX_FROM_FILE;
@@ -380,7 +380,7 @@ HRESULT LoadTextureArray( ID3D11Device* pd3dDevice, ID3D11DeviceContext* context
 		loadInfo.Filter = D3DX11_FILTER_TRIANGLE;
 		loadInfo.MipFilter = D3DX11_FILTER_TRIANGLE;
 
-		LE(D3DX11CreateTextureFromFile( pd3dDevice, str, &loadInfo, NULL, &pRes, &hr ));
+		LE(D3DX11CreateTextureFromFile( pd3dDevice, str, &loadInfo, nullptr, &pRes, &hr ));
 		if ( pRes )
 		{
 			ID3D11Texture2D* pTemp;
@@ -399,7 +399,7 @@ HRESULT LoadTextureArray( ID3D11Device* pd3dDevice, ID3D11DeviceContext* context
 				desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 				desc.CPUAccessFlags = 0;
 				desc.ArraySize = iNumTextures;
-				LE(pd3dDevice->CreateTexture2D( &desc, NULL, ppTex2D));
+				LE(pd3dDevice->CreateTexture2D( &desc, nullptr, ppTex2D));
 			}
 
 
@@ -410,7 +410,7 @@ HRESULT LoadTextureArray( ID3D11Device* pd3dDevice, ID3D11DeviceContext* context
 
 				context->UpdateSubresource(		(*ppTex2D), 
 					D3D11CalcSubresource( iMip, i, desc.MipLevels ),
-					NULL,
+					nullptr,
 					mappedTex2D.pData,
 					mappedTex2D.RowPitch,
 					0 );

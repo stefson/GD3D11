@@ -20,8 +20,8 @@ D3D11PointLight::D3D11PointLight(VobLightInfo* info, bool dynamicLight)
 
 	LastUpdatePosition = LightInfo->Vob->GetPositionWorld();
 
-	DepthCubemap = NULL;
-	ViewMatricesCB = NULL;
+	DepthCubemap = nullptr;
+	ViewMatricesCB = nullptr;
 
 	if (!dynamicLight)
 	{
@@ -39,7 +39,7 @@ D3D11PointLight::D3D11PointLight(VobLightInfo* info, bool dynamicLight)
 }
 
 
-D3D11PointLight::~D3D11PointLight(void)
+D3D11PointLight::~D3D11PointLight()
 {
 	// Make sure we are out of the init-queue
 	while(!InitDone);
@@ -69,13 +69,13 @@ void D3D11PointLight::InitResources()
 		POINTLIGHT_SHADOWMAP_SIZE,
 		POINTLIGHT_SHADOWMAP_SIZE,
 		DXGI_FORMAT_R32_TYPELESS,
-		NULL,
+		nullptr,
 		DXGI_FORMAT_D32_FLOAT,
 		DXGI_FORMAT_R32_FLOAT,
 		6);
 
 	// Create constantbuffer for the view-matrices
-	engine->CreateConstantBuffer(&ViewMatricesCB, NULL, sizeof(CubemapGSConstantBuffer));
+	engine->CreateConstantBuffer(&ViewMatricesCB, nullptr, sizeof(CubemapGSConstantBuffer));
 
 	// Generate worldmesh cache if we aren't a dynamically added light
 	if (!DynamicLight)
@@ -90,7 +90,7 @@ void D3D11PointLight::InitResources()
 		POINTLIGHT_SHADOWMAP_SIZE,
 		POINTLIGHT_SHADOWMAP_SIZE,
 		DXGI_FORMAT_R8G8B8A8_UNORM,
-		NULL,
+		nullptr,
 		DXGI_FORMAT_UNKNOWN,
 		DXGI_FORMAT_UNKNOWN,
 		1,
@@ -268,9 +268,9 @@ void D3D11PointLight::RenderFullCubemap()
 
 	// Don't use the cache if we have moved
 	if (WorldCacheInvalid)
-		wc = NULL;
+		wc = nullptr;
 
-	engine->RenderShadowCube(LightInfo->Vob->GetPositionWorld(), range, DepthCubemap, NULL, NULL, false, LightInfo->IsIndoorVob, noNPCs, &VobCache, &SkeletalVobCache, wc);
+	engine->RenderShadowCube(LightInfo->Vob->GetPositionWorld(), range, DepthCubemap, nullptr, nullptr, false, LightInfo->IsIndoorVob, noNPCs, &VobCache, &SkeletalVobCache, wc);
 
 	//Engine::GAPI->GetRendererState()->RendererSettings.DrawSkeletalMeshes = oldDrawSkel;
 }
@@ -299,13 +299,13 @@ void D3D11PointLight::RenderCubemapFace(const D3DXMATRIX& view, const D3DXMATRIX
 	float range = LightInfo->Vob->GetLightRange() * 1.1f;
 
 	// Draw cubemap face
-	ID3D11RenderTargetView* debugRTV = engine->GetDummyCubeRT() != NULL ? engine->GetDummyCubeRT()->GetRTVCubemapFace(faceIdx) : NULL;
+	ID3D11RenderTargetView* debugRTV = engine->GetDummyCubeRT() != nullptr ? engine->GetDummyCubeRT()->GetRTVCubemapFace(faceIdx) : nullptr;
 	engine->RenderShadowCube(cr.PositionReplacement, range, DepthCubemap, DepthCubemap->GetDSVCubemapFace(faceIdx), debugRTV, false);
 
 	//Engine::GAPI->GetRendererState()->RendererSettings.DrawSkeletalMeshes = oldDrawSkel;
 
 	// Reset settings
-	Engine::GAPI->SetCameraReplacementPtr(NULL);
+	Engine::GAPI->SetCameraReplacementPtr(nullptr);
 }
 
 /** Binds the shadowmap to the pixelshader */

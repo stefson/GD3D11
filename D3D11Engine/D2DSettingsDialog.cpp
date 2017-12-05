@@ -35,7 +35,7 @@ D2DSettingsDialog::D2DSettingsDialog(D2DView* view, D2DSubView* parent) : D2DDia
 }
 
 
-D2DSettingsDialog::~D2DSettingsDialog(void)
+D2DSettingsDialog::~D2DSettingsDialog()
 {
 }
 

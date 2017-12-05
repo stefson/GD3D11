@@ -6,9 +6,9 @@
 #include "GothicAPI.h"
 #include "D3D11ConstantBuffer.h"
 
-D3D11PShader::D3D11PShader(void)
+D3D11PShader::D3D11PShader()
 {
-	PixelShader = NULL;
+	PixelShader = nullptr;
 
 	// Insert into state-map
 	ID = D3D11ObjectIDs::Counters.PShadersCounter++;
@@ -16,7 +16,7 @@ D3D11PShader::D3D11PShader(void)
 	D3D11ObjectIDs::PShadersByID[ID] = this;
 }
 
-D3D11PShader::~D3D11PShader(void)
+D3D11PShader::~D3D11PShader()
 {
 	// Remove from state map
 	Toolbox::EraseByElement(D3D11ObjectIDs::PShadersByID, this);
@@ -57,12 +57,12 @@ HRESULT D3D11PShader::CompileShaderFromFile(const CHAR* szFileName, LPCSTR szEnt
 	m.insert(m.begin(), makros.begin(), makros.end());
 
 	ID3DBlob* pErrorBlob;
-	hr = D3DX11CompileFromFileA(szFileName, &m[0], NULL, szEntryPoint, szShaderModel,
-		dwShaderFlags, 0, NULL, ppBlobOut, &pErrorBlob, NULL);
+	hr = D3DX11CompileFromFileA(szFileName, &m[0], nullptr, szEntryPoint, szShaderModel,
+		dwShaderFlags, 0, nullptr, ppBlobOut, &pErrorBlob, nullptr);
 	if (FAILED(hr))
 	{
 		LogInfo() << "Shader compilation failed!";
-		if (pErrorBlob != NULL)
+		if (pErrorBlob != nullptr)
 		{
 
 			LogErrorBox() << (char*)pErrorBlob->GetBufferPointer() << "\n\n (You can ignore the next error from Gothic about too small video memory!)";
@@ -104,7 +104,7 @@ XRESULT D3D11PShader::LoadShader(const char* pixelShader, std::vector<D3D10_SHAD
 	}
 
 	// Create the shader
-	LE(engine->GetDevice()->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), NULL, &PixelShader));
+	LE(engine->GetDevice()->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &PixelShader));
 
 #ifndef PUBLIC_RELEASE
 	PixelShader->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(pixelShader), pixelShader);
@@ -120,7 +120,7 @@ XRESULT D3D11PShader::Apply()
 {
 	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase *)Engine::GraphicsEngine;
 
-	engine->GetContext()->PSSetShader(PixelShader, NULL, 0);
+	engine->GetContext()->PSSetShader(PixelShader, nullptr, 0);
 
 	return XR_SUCCESS;
 }

@@ -32,7 +32,7 @@ D3D11ConstantBuffer::D3D11ConstantBuffer(int size, void* data)
 }
 
 
-D3D11ConstantBuffer::~D3D11ConstantBuffer(void)
+D3D11ConstantBuffer::~D3D11ConstantBuffer()
 {
 	if (Buffer)Buffer->Release();
 }

@@ -16,8 +16,8 @@ SV_Slider::SV_Slider(D2DView* view, D2DSubView* parent) : D2DSubView(view, paren
 	DraggingSlider = false;
 	IsIntegral = false;
 
-	DataToUpdate = NULL;
-	DataToUpdateInt = NULL;
+	DataToUpdate = nullptr;
+	DataToUpdateInt = nullptr;
 
 	// Add label
 	ValueLabel = new SV_Label(view, this);
@@ -26,11 +26,11 @@ SV_Slider::SV_Slider(D2DView* view, D2DSubView* parent) : D2DSubView(view, paren
 	ValueLabel->SetTextSize(9);
 	ValueLabel->SetTextColor(D2D1::ColorF(1,1,1,0.6f));
 
-	SetSliderChangedCallback(NULL, NULL);
+	SetSliderChangedCallback(nullptr, nullptr);
 }
 
 
-SV_Slider::~SV_Slider(void)
+SV_Slider::~SV_Slider()
 {
 }
 

@@ -75,7 +75,7 @@ Widget_TransRot::Widget_TransRot(WidgetContainer* container) : BaseWidget(contai
 }
 
 
-Widget_TransRot::~Widget_TransRot(void)
+Widget_TransRot::~Widget_TransRot()
 {
 	delete Arrows[0];
 	delete Arrows[1];
@@ -211,7 +211,7 @@ void Widget_TransRot::DoHoverTest(HWND hw)
 	}
 
 	float Dist = Width;
-	EditorLinePrimitive* Prim = NULL;
+	EditorLinePrimitive* Prim = nullptr;
 	ActiveSelection = WTR_None;
 	
 

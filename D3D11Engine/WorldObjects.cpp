@@ -136,7 +136,7 @@ void SkeletalMeshVisualInfo::ClearPNAENInfo()
 		for(unsigned int i=0;i<(*it).second.size();i++)
 		{
 			delete (*it).second[i]->MeshIndexBufferPNAEN;
-			(*it).second[i]->MeshIndexBufferPNAEN = NULL;
+			(*it).second[i]->MeshIndexBufferPNAEN = nullptr;
 
 			(*it).second[i]->IndicesPNAEN.clear();	
 		}
@@ -166,7 +166,7 @@ void BaseVisualInfo::ClearPNAENInfo()
 		for(unsigned int i=0;i<(*it).second.size();i++)
 		{
 			delete (*it).second[i]->MeshIndexBufferPNAEN;
-			(*it).second[i]->MeshIndexBufferPNAEN = NULL;
+			(*it).second[i]->MeshIndexBufferPNAEN = nullptr;
 
 			(*it).second[i]->VerticesPNAEN.clear();
 			(*it).second[i]->IndicesPNAEN.clear();	
@@ -257,7 +257,7 @@ void SectionInstanceCache::ClearCacheForStatic(MeshVisualInfo* pm)
 	{
 		D3D11VertexBuffer* vb = InstanceCache[pm];
 		delete vb;
-		InstanceCache[pm] = NULL;
+		InstanceCache[pm] = nullptr;
 		InstanceCacheData[pm].clear();
 	}
 }

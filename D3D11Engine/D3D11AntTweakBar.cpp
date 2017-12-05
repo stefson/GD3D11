@@ -4,12 +4,12 @@
 #include "Engine.h"
 #include "D3D11GraphicsEngineBase.h"
 
-D3D11AntTweakBar::D3D11AntTweakBar(void)
+D3D11AntTweakBar::D3D11AntTweakBar()
 {
 }
 
 
-D3D11AntTweakBar::~D3D11AntTweakBar(void)
+D3D11AntTweakBar::~D3D11AntTweakBar()
 {
 }
 

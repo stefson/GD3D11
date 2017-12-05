@@ -5,8 +5,8 @@
 class GMeshSimple
 {
 public:
-	GMeshSimple(void);
-	virtual ~GMeshSimple(void);
+	GMeshSimple();
+	virtual ~GMeshSimple();
 
 	/** Load a mesh from file */
 	XRESULT LoadMesh(const std::string& file);

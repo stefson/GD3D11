@@ -13,11 +13,11 @@ int clipput(char *toclipdata)
 	bytes = strlen(toclipdata);
 
 	// Peform the transfer to clipboard magic
-	OpenClipboard(NULL);
+	OpenClipboard(nullptr);
 	EmptyClipboard();
 	clipbuffer = GlobalAlloc(GMEM_DDESHARE,bytes+1);
 	buffer = (char far*)GlobalLock(clipbuffer);
-	if (buffer == NULL)
+	if (buffer == nullptr)
 		return GetLastError() * -1; // Do what you want to signal error
 	strcpy(buffer,toclipdata);
 
@@ -32,14 +32,14 @@ int clipput(char *toclipdata)
 char *clipget(int &bytes)
 	{
 		int k;
-		char *buffer=NULL;
-		char *data=NULL;
+		char *buffer=nullptr;
+		char *data=nullptr;
 		char empty[80]="<Clipboard is empty>";
 
 		bytes = 0;
 
 		// open the clipboard
-		if (OpenClipboard(NULL))
+		if (OpenClipboard(nullptr))
 		{
 			HANDLE hData = GetClipboardData(CF_TEXT);
 			char * buffer = (char*)GlobalLock(hData);
@@ -47,7 +47,7 @@ char *clipget(int &bytes)
 			CloseClipboard();
 
 			// Return an error message
-			if (buffer == NULL)
+			if (buffer == nullptr)
 			{
 				bytes = strlen(empty);
 				data = (char *) malloc(bytes+1);

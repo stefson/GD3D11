@@ -5,7 +5,7 @@ class SV_ProgressBar :
 {
 public:
 	SV_ProgressBar(D2DView* view, D2DSubView* parent);
-	~SV_ProgressBar(void);
+	~SV_ProgressBar();
 
 	/** Draws this sub-view */
 	virtual void Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime);

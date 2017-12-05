@@ -7,7 +7,7 @@ class SV_Panel :
 {
 public:
 	SV_Panel(D2DView* view, D2DSubView* parent);
-	~SV_Panel(void);
+	~SV_Panel();
 
 	enum EPanelRenderMode
 	{

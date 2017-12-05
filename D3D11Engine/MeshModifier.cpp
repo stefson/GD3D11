@@ -47,12 +47,12 @@ typedef OpenMesh::Decimater::ModRoundnessT<MyMesh>::Handle HModRoundnessT;
 */
 
 
-MeshModifier::MeshModifier(void)
+MeshModifier::MeshModifier()
 {
 }
 
 
-MeshModifier::~MeshModifier(void)
+MeshModifier::~MeshModifier()
 {
 }
 

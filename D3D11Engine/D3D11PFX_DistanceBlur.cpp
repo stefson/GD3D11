@@ -16,7 +16,7 @@ D3D11PFX_DistanceBlur::D3D11PFX_DistanceBlur(D3D11PfxRenderer* rnd) : D3D11PFX_E
 }
 
 
-D3D11PFX_DistanceBlur::~D3D11PFX_DistanceBlur(void)
+D3D11PFX_DistanceBlur::~D3D11PFX_DistanceBlur()
 {
 }
 
@@ -26,8 +26,8 @@ XRESULT D3D11PFX_DistanceBlur::Render(RenderToTextureBuffer* fxbuffer)
 	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 
 	// Save old rendertargets
-	ID3D11RenderTargetView* oldRTV = NULL;
-	ID3D11DepthStencilView* oldDSV = NULL;
+	ID3D11RenderTargetView* oldRTV = nullptr;
+	ID3D11DepthStencilView* oldDSV = nullptr;
 	engine->GetContext()->OMGetRenderTargets(1, &oldRTV, &oldDSV);
 
 	engine->GetShaderManager()->GetVShader("VS_PFX")->Apply();
@@ -40,7 +40,7 @@ XRESULT D3D11PFX_DistanceBlur::Render(RenderToTextureBuffer* fxbuffer)
 	engine->GetContext()->ClearRenderTargetView(FxRenderer->GetTempBuffer()->GetRenderTargetView(), (float *)&D3DXVECTOR4(0,0,0,0));
 	FxRenderer->CopyTextureToRTV(engine->GetGBuffer0()->GetShaderResView(), FxRenderer->GetTempBuffer()->GetRenderTargetView(), Engine::GraphicsEngine->GetResolution());
 
-	engine->GetContext()->OMSetRenderTargets(1, &oldRTV, NULL);
+	engine->GetContext()->OMSetRenderTargets(1, &oldRTV, nullptr);
 
 	// Bind textures
 	FxRenderer->GetTempBuffer()->BindToPixelShader(engine->GetContext(), 0);

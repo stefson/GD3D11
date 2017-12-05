@@ -22,7 +22,7 @@ class D2DMessageBox :
 {
 public:
 	D2DMessageBox(D2DView* view, D2DSubView* parent, ED2D_MB_TYPE type);
-	~D2DMessageBox(void);
+	~D2DMessageBox();
 
 	/** Sets the text displayed in the messagebox */
 	void SetMessage(const std::string& text);

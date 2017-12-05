@@ -14,7 +14,7 @@ SV_NamedSlider::SV_NamedSlider(D2DView* view, D2DSubView* parent) : D2DSubView(v
 }
 
 
-SV_NamedSlider::~SV_NamedSlider(void)
+SV_NamedSlider::~SV_NamedSlider()
 {
 }
 

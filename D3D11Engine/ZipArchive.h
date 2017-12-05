@@ -8,8 +8,8 @@ typedef void (__cdecl* UnzipDoneCallback)(const std::string&, void*, int,int);
 class ZipArchive
 {
 public:
-	ZipArchive(void);
-	~ZipArchive(void);
+	ZipArchive();
+	~ZipArchive();
 
 	/** unzips the given archive */
 	static XRESULT Unzip(const std::string& zip, const std::string& target);
