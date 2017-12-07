@@ -72,8 +72,10 @@ char *clipget(int &bytes)
 				bytes = k * -1;
 			sprintf(empty,"Error occurred opening clipboard - RC: %d",k);
 			k = strlen(empty);
-			data = (char *) malloc(k+1);
-			strcpy(data,empty);
+			data = (char *) malloc(k + 1);
+			if (data) {
+				strcpy(data, empty);
+			}
 		}
 		// Return pointer to data field allocated
 		// It's up to the caller to free the storage

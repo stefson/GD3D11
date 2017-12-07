@@ -1,4 +1,5 @@
 #pragma once
+
 #include "D3D11GraphicsEngineBase.h"
 
 struct RenderToDepthStencilBuffer;
@@ -7,8 +8,7 @@ class D3D11ConstantBuffer;
 class D3D11VertexBuffer;
 class D3D11ShaderManager;
 
-enum D3D11ENGINE_RENDER_STAGE
-{
+enum D3D11ENGINE_RENDER_STAGE {
 	DES_Z_PRE_PASS,
 	DES_MAIN,
 	DES_SHADOWMAP,
@@ -37,8 +37,8 @@ class D3D11OcclusionQuerry;
 struct MeshInfo;
 struct RenderToTextureBuffer;
 class D3D11Effect;
-class D3D11GraphicsEngine : public D3D11GraphicsEngineBase
-{
+
+class D3D11GraphicsEngine : public D3D11GraphicsEngineBase {
 public:
 	D3D11GraphicsEngine();
 	~D3D11GraphicsEngine();
@@ -103,13 +103,12 @@ public:
 	/** Puts the current world matrix into a CB and binds it to the given slot */
 	void SetupPerInstanceConstantBuffer(int slot=1);
 
-	enum EPNAENRenderMode
-	{
+	enum EPNAENRenderMode {
 		PNAEN_Default,
 		PNAEN_Instanced,
 		PNAEN_Skeletal,
-
 	};
+
 	/** Sets up everything for a PNAEN-Mesh */
 	void Setup_PNAEN(EPNAENRenderMode mode = PNAEN_Default);
 

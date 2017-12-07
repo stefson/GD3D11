@@ -1,10 +1,9 @@
 #pragma once
 
-#include <wrl.h>
 #include <exception>
+#include <wrl.h>
 
-class BasicTimer
-{
+class BasicTimer {
 private:
     LARGE_INTEGER m_frequency;
     LARGE_INTEGER m_currentTime;
@@ -13,20 +12,16 @@ private:
     float m_total;
     float m_delta;
 
-
 public:
-    BasicTimer()
-    {
-        if (!QueryPerformanceFrequency(&m_frequency))
-        {
+    BasicTimer() {
+        if (!QueryPerformanceFrequency(&m_frequency)) {
             throw std::exception();
         }
 
         Reset();
     }
     
-    void Reset()
-    {
+    void Reset() {
 		m_total = 0;
 		m_delta = 1.0f / 60.0f;
 
@@ -35,45 +30,28 @@ public:
 		m_startTime = m_currentTime;
     }
     
-    void Update()
-    {
-
-
-        if (!QueryPerformanceCounter(&m_currentTime))
-        {
+    void Update() {
+        if (!QueryPerformanceCounter(&m_currentTime)) {
             throw std::exception();
         }
         
-        m_total = static_cast<float>(
-            static_cast<double>(m_currentTime.QuadPart-m_startTime.QuadPart) /
-            static_cast<double>(m_frequency.QuadPart)
-            );
+        m_total = float(double(m_currentTime.QuadPart-m_startTime.QuadPart) / double(m_frequency.QuadPart));
         
-        if (m_lastTime.QuadPart==m_startTime.QuadPart)
-        {
+        if (m_lastTime.QuadPart==m_startTime.QuadPart) {
             // If the timer was just reset, report a time delta equivalent to 60Hz frame time.
             m_delta = 1.0f / 60.0f;
-        }
-        else
-        {
-            m_delta = static_cast<float>(
-                static_cast<double>(m_currentTime.QuadPart-m_lastTime.QuadPart) /
-                static_cast<double>(m_frequency.QuadPart)
-                );
+        } else {
+            m_delta = float(double(m_currentTime.QuadPart-m_lastTime.QuadPart) / double(m_frequency.QuadPart));
         }
         
         m_lastTime = m_currentTime;
     }
-    
 
-
-    float GetTotal() 
-	{  
+    float GetTotal() const {
 		return m_total;
 	}
     
-    float GetDelta() 
-	{ 
+    float GetDelta() const {
 		return m_delta;
 	}
     

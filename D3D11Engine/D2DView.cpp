@@ -129,7 +129,7 @@ XRESULT D2DView::Init(const INT2& initialResolution, ID3D11Texture2D* rendertarg
 	D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(
 		D2D1_RENDER_TARGET_TYPE_DEFAULT,
 		D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED));
-	if (FAILED(Factory->CreateDxgiSurfaceRenderTarget(dxgiBackbuffer, props, &RenderTarget)))
+	if (!dxgiBackbuffer || FAILED(Factory->CreateDxgiSurfaceRenderTarget(dxgiBackbuffer, props, &RenderTarget)))
 	{
 		// Copy downloadlink of the platform update to clipboard
 		clipput("https://www.microsoft.com/en-us/download/details.aspx?id=36805");
@@ -393,9 +393,10 @@ XRESULT D2DView::Resize(const INT2& initialResolution, ID3D11Texture2D* renderta
 	IDXGISurface *dxgiBackbuffer;
 	rendertarget->QueryInterface(&dxgiBackbuffer);
 
-	D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(
-		D2D1_RENDER_TARGET_TYPE_DEFAULT,
-		D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED));
+	D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT, D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED));
+	if (!dxgiBackbuffer) {
+		return XR_FAILED;
+	}
 	Factory->CreateDxgiSurfaceRenderTarget(dxgiBackbuffer, props, &RenderTarget);
 	dxgiBackbuffer->Release();
 
@@ -554,24 +555,20 @@ bool D2DView::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wParam, LPARAM
 
 float D2DView::GetLabelTextWidth(IDWriteTextLayout* layout, const std::string& text)
 {
-	DWRITE_CLUSTER_METRICS* m=new DWRITE_CLUSTER_METRICS[text.length()];
+	DWRITE_CLUSTER_METRICS* m = new DWRITE_CLUSTER_METRICS[text.length()];
 	UINT32 lc;
 	
-	if (!layout)
-	{
-		return 0;
+	if (!layout) {
+		return 0.0f;
 	}
 
-	layout->GetClusterMetrics(m,text.length(),&lc);
+	layout->GetClusterMetrics(m, text.length(), &lc);
 
-	unsigned int i=1;
-	float width=0;
+	float width = 0.0f;
 
-	for(i=0;i<text.length();i++)
-	{
-		width+=m[i].width;
+	for (size_t i = 0; i < text.length(); i++) {
+		width += m[i].width;
 	}
-	
 	delete[] m;
 
 	return width; 

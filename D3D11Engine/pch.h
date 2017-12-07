@@ -1,26 +1,23 @@
 #pragma once
 
-/** Precompiled header */
-//#pragma message ("Creating precompiled header data")
-
 #define NOMINMAX
 
 #pragma warning(disable: 4731) // Change of ebp from inline assembly
 #pragma warning(disable: 4244) // Loss of data during conversion
 #include <Windows.h>
-#include <mmsystem.h>
 #include <d3d11.h>
-#include "Types.h"
-#include "Logger.h"
-#include "VertexTypes.h"
-#include <map>
-#include <unordered_map>
-#include <unordered_set>
-#include <list>
 #include <future>
-
+#include <list>
+#include <map>
+#include <mmsystem.h>
 #include <set>
 #include <signal.h>
+#include <unordered_map>
+#include <unordered_set>
+
+#include "Logger.h"
+#include "Types.h"
+#include "VertexTypes.h"
 
 #if _MSC_VER < 1900
 ;

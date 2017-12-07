@@ -1,35 +1,30 @@
 #pragma once
 #include "pch.h"
 
-enum zTCam_ClipType 
-{ 
+enum zTCam_ClipType {
 	ZTCAM_CLIPTYPE_IN, 
 	ZTCAM_CLIPTYPE_OUT, 
 	ZTCAM_CLIPTYPE_CROSSING 
 };
 
-enum zTCam_ClipFlags
-{ 
+enum zTCam_ClipFlags {
 	CLIP_FLAGS_FULL		= 63, 
 	CLIP_FLAGS_NO_FAR	= 15 
 };
 
 #pragma pack (push, 1)	
-struct zTBBox3D 
-{
+struct zTBBox3D {
 	D3DXVECTOR3	Min;	
 	D3DXVECTOR3	Max;
 
-	enum zTPlaneClass 
-	{ 
+	enum zTPlaneClass {
 		zPLANE_INFRONT, 
 		zPLANE_BEHIND, 
 		zPLANE_ONPLANE, 
 		zPLANE_SPANNING 
 	};
 
-	int ClassifyToPlane (float planeDist, int axis) const 
-	{
+	int ClassifyToPlane (float planeDist, int axis) const {
 		if (planeDist>=((float*)&Max)[axis])	
 			return zPLANE_BEHIND;	
 		else if (planeDist<=((float*)&Max)[axis])	
@@ -38,8 +33,7 @@ struct zTBBox3D
 	}
 };
 
-struct zTPlane
-{
+struct zTPlane {
 	float Distance;
 	D3DXVECTOR3 Normal;
 };
@@ -49,19 +43,17 @@ class zCWorld;
 class zCVob;
 class zCCamera;
 
-struct zTRenderContext 
-{
+struct zTRenderContext {
 	int ClipFlags;
-	zCVob *Vob;
-	zCWorld* world;
-	zCCamera* cam;
+	zCVob * Vob;
+	zCWorld * world;
+	zCCamera * cam;
 	float distVobToCam;
 	
 	// More not needed stuff here
 };
 
-struct zCRenderLight 
-{
+struct zCRenderLight {
 	int	LightType;            
 	D3DXVECTOR3	ColorDiffuse;			
 	D3DXVECTOR3	Position;				
@@ -73,22 +65,18 @@ struct zCRenderLight
 	float Dir_approxFalloff;			
 };
 
-struct zCRenderLightContainer
-{
+struct zCRenderLightContainer {
 	zCRenderLight			LightList[8];
 	int						NumLights;
 
 private:
-	
 	int	DoPrelight;
 	int	DoSmoothPrelit;
 	float PreLightDist;
 	D3DXMATRIX MatObjToCam;
 };
 
-
-enum zTRnd_AlphaBlendFunc	
-{	
+enum zTRnd_AlphaBlendFunc {	
 	zRND_ALPHA_FUNC_MAT_DEFAULT = 0,	
 	zRND_ALPHA_FUNC_NONE = 1,				
 	zRND_ALPHA_FUNC_BLEND = 2,				

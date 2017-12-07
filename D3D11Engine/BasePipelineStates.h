@@ -1,30 +1,26 @@
 #pragma once
-#include "GothicGraphicsState.h"
 
 struct GothicDepthBufferStateInfo;
-class BaseDepthBufferState
-{
-public:
-	BaseDepthBufferState(const GothicDepthBufferStateInfo& state){}
-	virtual ~BaseDepthBufferState(){}
 
+class BaseDepthBufferState {
+public:
+	BaseDepthBufferState(const GothicDepthBufferStateInfo & state) {}
+	virtual ~BaseDepthBufferState() {}
 };
 
 struct GothicBlendStateInfo;
-class BaseBlendStateInfo
-{
+
+class BaseBlendStateInfo {
 public:
-	BaseBlendStateInfo(const GothicBlendStateInfo& state){}
-	virtual ~BaseBlendStateInfo(){}
+	BaseBlendStateInfo(const GothicBlendStateInfo & state) {}
+	virtual ~BaseBlendStateInfo() {}
 
 };
 
 struct GothicRasterizerStateInfo;
-class BaseRasterizerStateInfo
-{
+
+class BaseRasterizerStateInfo {
 public:
-	BaseRasterizerStateInfo(const GothicRasterizerStateInfo& state){}
-	virtual ~BaseRasterizerStateInfo(){}
-
+	BaseRasterizerStateInfo(const GothicRasterizerStateInfo & state) {}
+	virtual ~BaseRasterizerStateInfo() {}
 };
-

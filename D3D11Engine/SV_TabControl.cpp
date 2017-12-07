@@ -68,10 +68,10 @@ void SV_TabControl::Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime)
 	MainView->GetRenderTarget()->SetTransform(D2D1::Matrix3x2F::Translation(clientRectAbs.left,clientRectAbs.top));
 
 	D2D1_RECT_F activeRect;
+	memset(&activeRect, 0, sizeof(activeRect));
 	float activeX = 0.0f;
 	float x = 0.0f;
-	for(std::map<std::string, SV_TabControl_Tab>::iterator it = Tabs.begin(); it != Tabs.end(); it++)
-	{
+	for (std::map<std::string, SV_TabControl_Tab>::iterator it = Tabs.begin(); it != Tabs.end(); ++it) {
 		if (OnlyShowActiveTab && &(*it).second != ActiveTab)
 					continue;
 
@@ -84,12 +84,10 @@ void SV_TabControl::Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime)
 		//Outer shadow
 		MainView->DrawSmoothShadow(&tabRect, 10, 0.5, true);
 
-		if (&(*it).second == ActiveTab)
-		{
+		if (&(*it).second == ActiveTab) {
 			activeRect = tabRect;
 			activeX = x;
-		}else // Active tab draws its text later
-		{
+		} else { // Active tab draws its text later
 			MainView->GetBrush()->SetColor(D2D1::ColorF(0,0,0,0.5));
 			MainView->GetRenderTarget()->DrawRectangle(tabRect, MainView->GetBrush());
 

@@ -93,7 +93,6 @@ public:
 class zCSkyController_Outdoor : public zCSkyController
 {
 public:
-
 	/** Hooks the functions of this Class */
 	static void Hook()
 	{

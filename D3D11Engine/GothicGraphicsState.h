@@ -54,8 +54,6 @@ struct FixedFunctionStage
 	int FFS_Pad2;
 };
 
-
-
 struct GothicGraphicsState
 {
 	/** Sets the default values for this struct */

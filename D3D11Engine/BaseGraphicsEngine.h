@@ -1,12 +1,17 @@
 #pragma once
-#include "pch.h"
-#include "WorldConverter.h"
 
-class D3D11VertexBuffer;
-class D3D11Texture;
-class D3D11ConstantBuffer;
+#include "WorldObjects.h"
+
 class BaseLineRenderer;
+class BaseShadowedPointLight;
+class D3D11ConstantBuffer;
+class D3D11Texture;
+class D3D11VertexBuffer;
+class zCTexture;
+class zCVob;
+struct SkeletalMeshVisualInfo;
 struct VobInfo;
+struct VobLightInfo;
 
 struct DisplayModeInfo
 {
@@ -46,9 +51,6 @@ struct ViewportInfo
 	float MinZ;
 	float MaxZ;
 };
-
-class zCTexture;
-class BaseShadowedPointLight;
 
 /** Base graphics engine */
 class BaseGraphicsEngine
@@ -129,8 +131,6 @@ public:
 
 	/** Draws a skeletal mesh */
 	virtual XRESULT DrawSkeletalMesh(D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices, const std::vector<D3DXMATRIX>& transforms, float fatness = 1.0f, SkeletalMeshVisualInfo* msh = nullptr){return XR_SUCCESS;};
-
-	
 
 	/** Draws a vertexarray, non-indexed */
 	virtual XRESULT DrawIndexedVertexArray(ExVertexStruct* vertices, unsigned int numVertices, D3D11VertexBuffer* ib, unsigned int numIndices, unsigned int stride = sizeof(ExVertexStruct)){return XR_SUCCESS;};

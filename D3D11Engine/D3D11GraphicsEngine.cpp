@@ -1,49 +1,32 @@
-#include "pch.h"
 #include "D3D11GraphicsEngine.h"
-#include <D3DX11.h>
-#include "D3D11VertexBuffer.h"
-#include "D3D11ShaderManager.h"
-#include "D3D11PShader.h"
-#include "D3D11VShader.h"
-#include "D3D11HDShader.h"
-#include "D3D11GShader.h"
-#include "D3D11ConstantBuffer.h"
-#include "D3D11Texture.h"
-#include "Engine.h"
-#include "GothicAPI.h"
-#include "Logger.h"
-#include "RenderToTextureBuffer.h"
-#include "GSky.h"
-#include "GMesh.h"
-#include "D3D11PfxRenderer.h"
-#include "ConstantBufferStructs.h"
-#include "BaseAntTweakBar.h"
-#include "zCVob.h"
-#include "zCVobLight.h"
-#include "zCMaterial.h"
-#include "zCLightmap.h"
-#include "zCBspTree.h"
-#include "D3D11LineRenderer.h"
-#include "D3D7\MyDirectDrawSurface7.h"
-#include "zCView.h"
-#include "D2DView.h"
-#include "GOcean.h"
-#include "D2DDialog.h"
+
 #include "AlignedAllocator.h"
+#include "BaseAntTweakBar.h"
+#include "D2DEditorView.h"
+#include "D2DView.h"
+#include "D3D11Effect.h"
+#include "D3D11GShader.h"
+#include "D3D11HDShader.h"
+#include "D3D11LineRenderer.h"
+#include "D3D11OcclusionQuerry.h"
+#include "D3D11PfxRenderer.h"
+#include "D3D11PipelineStates.h"
+#include "D3D11PointLight.h"
+#include "D3D11PShader.h"
+#include "D3D11ShaderManager.h"
+#include "D3D11VShader.h"
+#include "GMesh.h"
+#include "GOcean.h"
+#include "GSky.h"
+#include "RenderToTextureBuffer.h"
 #include "zCDecal.h"
 #include "zCQuadMark.h"
-#include "D2DEditorView.h"
-#include <algorithm>
-#include "D3D11PipelineStates.h"
-#include "zCParticleFX.h"
-#include "win32ClipboardWrapper.h"
-#include "D3D11OcclusionQuerry.h"
-#include "D3D11Effect.h"
-#include "D3D11PointLight.h"
+#include "zCView.h"
+#include "zCVobLight.h"
 
-//#include "MemoryTracker.h"
+#include <D3DX11.h>
 
-#pragma comment( lib, "dxguid.lib")
+#pragma comment(lib, "dxguid.lib")
 
 const int RES_UPSCALE = 1;
 const INT2 DEFAULT_RESOLUTION = INT2(1920 * RES_UPSCALE, 1080*  RES_UPSCALE);
@@ -154,9 +137,8 @@ D3D11GraphicsEngine::D3D11GraphicsEngine() {
 	PresentPending = false;
 	SaveScreenshotNextFrame = false;
 
-	LineRenderer = new D3D11LineRenderer;
-	Occlusion = new D3D11OcclusionQuerry;
-
+	LineRenderer = new D3D11LineRenderer();
+	Occlusion = new D3D11OcclusionQuerry();
 
 	RECT desktopRect;
 	GetClientRect(GetDesktopWindow(), &desktopRect);
@@ -166,7 +148,6 @@ D3D11GraphicsEngine::D3D11GraphicsEngine() {
 }
 
 D3D11GraphicsEngine::~D3D11GraphicsEngine() {
-	LogInfo() << "D'Tor D3D11GraphicsEngine Start";
 	GothicDepthBufferStateInfo::DeleteCachedObjects();
 	GothicBlendStateInfo::DeleteCachedObjects();
 	GothicRasterizerStateInfo::DeleteCachedObjects();
@@ -233,7 +214,6 @@ D3D11GraphicsEngine::~D3D11GraphicsEngine() {
 	SAFE_RELEASE(DXGIFactory);
 
 	//MemTrackerFinalReport();
-	LogInfo() << "D'Tor D3D11GraphicsEngine End";
 }
 
 /** Called when the game created it's window */
@@ -290,13 +270,11 @@ XRESULT D3D11GraphicsEngine::Init()
 	PS_DiffuseNormalmappedAlphatest = ShaderManager->GetPShader("PS_DiffuseNormalmappedAlphaTest");
 	PS_DiffuseAlphatest = ShaderManager->GetPShader("PS_DiffuseAlphaTest");
 
-
 	TempVertexBuffer = new D3D11VertexBuffer();
 	TempVertexBuffer->Init(nullptr, DRAWVERTEXARRAY_BUFFER_SIZE, D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE);
 
 	DynamicInstancingBuffer = new D3D11VertexBuffer();
 	DynamicInstancingBuffer->Init(nullptr, INSTANCING_BUFFER_SIZE, D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE);
-
 
 	D3D11_SAMPLER_DESC samplerDesc;
 	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
@@ -2187,7 +2165,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh(bool noTextures) {
 			if (/*Engine::GAPI->GetSceneWetness() > 0.0f && */!srv[1])
 			{
 				// Modify the strength of that default normalmap for the material info
-				if (info->buffer.NormalmapStrength/* * Engine::GAPI->GetSceneWetness()*/ != DEFAULT_NORMALMAP_STRENGTH)
+				if (info && info->buffer.NormalmapStrength/* * Engine::GAPI->GetSceneWetness()*/ != DEFAULT_NORMALMAP_STRENGTH)
 				{
 					info->buffer.NormalmapStrength = DEFAULT_NORMALMAP_STRENGTH;
 					info->UpdateConstantbuffer();
@@ -2499,7 +2477,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMeshW(bool noTextures)
 		if ((*it).second.second.empty())
 			continue;
 
-		if (!(*it).first || !(*it).first)
+		if (!(*it).first)
 		{
 			DistortionTexture->BindToPixelShader(0);
 		}else

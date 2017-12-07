@@ -149,9 +149,9 @@ RenderToTextureBuffer* D3D11PFX_HDR::CalcLuminance()
 {
 	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 
-	RenderToTextureBuffer* lumRTV;
-	RenderToTextureBuffer* lastLum;
-	RenderToTextureBuffer* currentLum;
+	RenderToTextureBuffer* lumRTV = nullptr;
+	RenderToTextureBuffer* lastLum = nullptr;
+	RenderToTextureBuffer* currentLum = nullptr;
 
 	// Figure out which buffers to use where
 	switch(ActiveLumBuffer)
@@ -173,6 +173,9 @@ RenderToTextureBuffer* D3D11PFX_HDR::CalcLuminance()
 		lastLum = LumBuffer3;
 		currentLum = LumBuffer1;
 		break;
+	default: {
+		return nullptr;
+	}
 	}
 
 	D3D11PShader* lps = engine->GetShaderManager()->GetPShader("PS_PFX_LumConvert");

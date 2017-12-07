@@ -3055,7 +3055,7 @@ int unzGoToFirstFile (unzFile file);
 int unzCloseCurrentFile (unzFile file);
 
 // Open a Zip file.
-// If the zipfile cannot be opened (file don't exist or in not valid), return nullptr.
+// If the zipfile cannot be opened (file don't exist or is not valid), return nullptr.
 // Otherwise, the return value is a unzFile Handle, usable with other unzip functions
 unzFile unzOpenInternal(LUFILE *fin)
 { 
@@ -3100,8 +3100,10 @@ unzFile unzOpenInternal(LUFILE *fin)
   fin->initial_offset = 0; // since the zipfile itself is expected to handle this
 
   unz_s *s = (unz_s*)zmalloc(sizeof(unz_s));
-  *s=us;
-  unzGoToFirstFile((unzFile)s);
+  if (s) {
+	  *s = us;
+	  unzGoToFirstFile((unzFile)s);
+  }
   return (unzFile)s;
 }
 

@@ -1,32 +1,28 @@
-#include "pch.h"
 #include "D3D11VertexBuffer.h"
+
+#include "pch.h"
 #include "D3D11GraphicsEngineBase.h"
 #include "Engine.h"
 #include <d3dx9mesh.h>
 
 #pragma comment(lib, "d3dx9.lib")
 
-D3D11VertexBuffer::D3D11VertexBuffer()
-{
+D3D11VertexBuffer::D3D11VertexBuffer() {
 	VertexBuffer = nullptr;
 	ShaderResourceView = nullptr;
 }
 
-
-D3D11VertexBuffer::~D3D11VertexBuffer()
-{
-	if (VertexBuffer)VertexBuffer->Release();
-	if (ShaderResourceView)ShaderResourceView->Release();
+D3D11VertexBuffer::~D3D11VertexBuffer() {
+	SAFE_RELEASE(VertexBuffer);
+	SAFE_RELEASE(ShaderResourceView);
 }
 
 /** Creates the vertexbuffer with the given arguments */
-XRESULT D3D11VertexBuffer::Init(void* initData, unsigned int sizeInBytes, EBindFlags EBindFlags, EUsageFlags usage, ECPUAccessFlags cpuAccess, const std::string& fileName, unsigned int structuredByteSize)
-{
+XRESULT D3D11VertexBuffer::Init(void * initData, unsigned int sizeInBytes, EBindFlags EBindFlags, EUsageFlags usage, ECPUAccessFlags cpuAccess, const std::string & fileName, unsigned int structuredByteSize) {
 	HRESULT hr;
-	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase *)Engine::GraphicsEngine;
+	D3D11GraphicsEngineBase * engine = (D3D11GraphicsEngineBase *)Engine::GraphicsEngine;
 
-	if (sizeInBytes == 0)
-	{
+	if (sizeInBytes == 0) {
 		LogError() << "VertexBuffer size can't be 0!";
 	}
 
@@ -42,13 +38,13 @@ XRESULT D3D11VertexBuffer::Init(void* initData, unsigned int sizeInBytes, EBindF
 	bufferDesc.StructureByteStride = structuredByteSize;
 
 	// Check for structured buffer
-	if ((EBindFlags & EBindFlags::B_SHADER_RESOURCE) != 0)
+	if ((EBindFlags & EBindFlags::B_SHADER_RESOURCE) != 0) {
 		bufferDesc.MiscFlags |= D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	}
 
 	// In case we dont have data, allocate some to satisfy D3D11
-	char* data = nullptr;
-	if (!initData)
-	{
+	char * data = nullptr;
+	if (!initData) {
 		data = new char[bufferDesc.ByteWidth];
 		memset(data, 0, bufferDesc.ByteWidth);
 
@@ -63,10 +59,9 @@ XRESULT D3D11VertexBuffer::Init(void* initData, unsigned int sizeInBytes, EBindF
 	LE(engine->GetDevice()->CreateBuffer(&bufferDesc, &InitData, &VertexBuffer));
 
 	// Check for structured buffer again to create the SRV
-	if ((EBindFlags & EBindFlags::B_SHADER_RESOURCE) != 0)
-	{
-		 D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-		ZeroMemory( &srvDesc, sizeof(srvDesc) );
+	if ((EBindFlags & EBindFlags::B_SHADER_RESOURCE) != 0 && structuredByteSize > 0) {
+		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+		ZeroMemory(&srvDesc, sizeof(srvDesc));
 		srvDesc.Format              = DXGI_FORMAT_UNKNOWN;
 		srvDesc.ViewDimension       = D3D11_SRV_DIMENSION_BUFFER;
 		srvDesc.Buffer.ElementWidth = sizeInBytes / structuredByteSize;
@@ -84,18 +79,18 @@ XRESULT D3D11VertexBuffer::Init(void* initData, unsigned int sizeInBytes, EBindF
 }
 
 /** Updates the vertexbuffer with the given data */
-XRESULT D3D11VertexBuffer::UpdateBuffer(void* data, UINT size)
-{
-	void* mappedData;
+XRESULT D3D11VertexBuffer::UpdateBuffer(void * data, UINT size) {
+	void * mappedData;
 	UINT bsize;
 
-	if (SizeInBytes < size)
+	if (SizeInBytes < size) {
 		size = SizeInBytes;
+	}
 
-	if (XR_SUCCESS == Map(EMapFlags::M_WRITE_DISCARD, &mappedData, &bsize))
-	{
-		if (size)
+	if (XR_SUCCESS == Map(EMapFlags::M_WRITE_DISCARD, &mappedData, &bsize)) {
+		if (size) {
 			bsize = size;
+		}
 		// Copy data
 		memcpy(mappedData, data, bsize);
 
@@ -108,14 +103,13 @@ XRESULT D3D11VertexBuffer::UpdateBuffer(void* data, UINT size)
 }
 
 /** Updates the vertexbuffer with the given data */
-XRESULT D3D11VertexBuffer::UpdateBufferAligned16(void* data, UINT size)
-{
-	void* mappedData;
+XRESULT D3D11VertexBuffer::UpdateBufferAligned16(void * data, UINT size) {
+	void * mappedData;
 	UINT bsize;
-	if (XR_SUCCESS == Map(EMapFlags::M_WRITE_DISCARD, &mappedData, &bsize))
-	{
-		if (size)
+	if (XR_SUCCESS == Map(EMapFlags::M_WRITE_DISCARD, &mappedData, &bsize)) {
+		if (size) {
 			bsize = size;
+		}
 		
 		// Copy data
 		//Toolbox::X_aligned_memcpy_sse2(mappedData, data, bsize);
@@ -130,13 +124,13 @@ XRESULT D3D11VertexBuffer::UpdateBufferAligned16(void* data, UINT size)
 }
 
 /** Maps the buffer */
-XRESULT D3D11VertexBuffer::Map(int flags, void** dataPtr, UINT* size)
-{
-	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase *)Engine::GraphicsEngine;
+XRESULT D3D11VertexBuffer::Map(int flags, void ** dataPtr, UINT * size) {
+	D3D11GraphicsEngineBase * engine = (D3D11GraphicsEngineBase *)Engine::GraphicsEngine;
 
 	D3D11_MAPPED_SUBRESOURCE res;
-	if (FAILED(engine->GetContext()->Map(VertexBuffer, 0, (D3D11_MAP)flags, 0, &res)))
+	if (FAILED(engine->GetContext()->Map(VertexBuffer, 0, (D3D11_MAP)flags, 0, &res))) {
 		return XR_FAILED;
+	}
 
 	*dataPtr = res.pData;
 	*size = res.DepthPitch;
@@ -145,9 +139,8 @@ XRESULT D3D11VertexBuffer::Map(int flags, void** dataPtr, UINT* size)
 }
 
 /** Unmaps the buffer */
-XRESULT D3D11VertexBuffer::Unmap()
-{
-	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase *)Engine::GraphicsEngine;
+XRESULT D3D11VertexBuffer::Unmap() {
+	D3D11GraphicsEngineBase * engine = (D3D11GraphicsEngineBase *)Engine::GraphicsEngine;
 
 	engine->GetContext()->Unmap(VertexBuffer, 0);
 
@@ -155,35 +148,30 @@ XRESULT D3D11VertexBuffer::Unmap()
 }
 
 /** Returns the D3D11-Buffer object */
-ID3D11Buffer* D3D11VertexBuffer::GetVertexBuffer()
-{
+ID3D11Buffer * D3D11VertexBuffer::GetVertexBuffer() const {
 	return VertexBuffer;
 }
 
 /** Optimizes the given set of vertices */
-XRESULT D3D11VertexBuffer::OptimizeVertices(VERTEX_INDEX* indices, byte* vertices, unsigned int numIndices, unsigned int numVertices, unsigned int stride)
-{
+XRESULT D3D11VertexBuffer::OptimizeVertices(VERTEX_INDEX * indices, byte * vertices, unsigned int numIndices, unsigned int numVertices, unsigned int stride) {
 	return XR_SUCCESS;
 
-	DWORD* remap = new DWORD[numVertices];
-	if (FAILED(D3DXOptimizeVertices(indices, numIndices / 3, numVertices, FALSE, (DWORD *)remap)))
-	{
+	DWORD * remap = new DWORD[numVertices];
+	if (FAILED(D3DXOptimizeVertices(indices, numIndices / 3, numVertices, FALSE, (DWORD *)remap))) {
 		delete[] remap;
 		return XR_FAILED;
 	}
 
 	// Remap vertices
-	byte* vxCopy = new byte[numVertices * stride];
+	byte * vxCopy = new byte[numVertices * stride];
 	memcpy(vxCopy, vertices, numVertices * stride);
 
-	for(unsigned int i=0;i<numVertices;i++)
-	{
+	for (unsigned int i = 0; i < numVertices; i++) {
 		// Assign the vertex at remap[i] to its new vertex
 		memcpy(vertices + remap[i] * stride, vxCopy + i * stride, stride);
 	}
 
-	for(unsigned int i=0;i<numIndices;i++)
-	{
+	for (unsigned int i = 0; i < numIndices; i++) {
 		// Remap the indices.
 		indices[i] = (VERTEX_INDEX)remap[indices[i]];
 	}
@@ -195,24 +183,21 @@ XRESULT D3D11VertexBuffer::OptimizeVertices(VERTEX_INDEX* indices, byte* vertice
 }
 
 /** Optimizes the given set of vertices */
-XRESULT D3D11VertexBuffer::OptimizeFaces(VERTEX_INDEX* indices, byte* vertices, unsigned int numIndices, unsigned int numVertices, unsigned int stride)
-{
+XRESULT D3D11VertexBuffer::OptimizeFaces(VERTEX_INDEX * indices, byte * vertices, unsigned int numIndices, unsigned int numVertices, unsigned int stride) {
 	return XR_SUCCESS;
 	unsigned int numFaces = numIndices / 3;
-	DWORD* remap = new DWORD[numFaces];
-	if (FAILED(D3DXOptimizeFaces(indices, numFaces, numVertices, FALSE, (DWORD *)remap)))
-	{
+	DWORD * remap = new DWORD[numFaces];
+	if (FAILED(D3DXOptimizeFaces(indices, numFaces, numVertices, FALSE, (DWORD *)remap))) {
 		delete[] remap;
 		return XR_FAILED;
 	}
 	// Remap vertices
-	VERTEX_INDEX* ibCopy = new VERTEX_INDEX[numFaces * 3];
+	VERTEX_INDEX * ibCopy = new VERTEX_INDEX[numFaces * 3];
 	memcpy(ibCopy, indices, numFaces * 3 * sizeof(VERTEX_INDEX));
 
-	for(unsigned int i=0;i<numFaces;i++)
-	{
+	for (unsigned int i = 0; i < numFaces; i++) {
 		// Copy the remapped face
-		memcpy( &indices[i * 3], &ibCopy[ remap[i] * 3], 3 * sizeof(VERTEX_INDEX));
+		memcpy(&indices[i * 3], &ibCopy[ remap[i] * 3], 3 * sizeof(VERTEX_INDEX));
 	}
 
 	delete[] ibCopy;
@@ -222,13 +207,11 @@ XRESULT D3D11VertexBuffer::OptimizeFaces(VERTEX_INDEX* indices, byte* vertices, 
 }
 
 /** Returns the size in bytes of this buffer */
-unsigned int D3D11VertexBuffer::GetSizeInBytes()
-{
+unsigned int D3D11VertexBuffer::GetSizeInBytes() const {
 	return SizeInBytes;
 }
 
 /** Returns the SRV of this buffer, if it represents a structured buffer */
-ID3D11ShaderResourceView* D3D11VertexBuffer::GetShaderResourceView()
-{
+ID3D11ShaderResourceView * D3D11VertexBuffer::GetShaderResourceView() const {
 	return ShaderResourceView;
 }

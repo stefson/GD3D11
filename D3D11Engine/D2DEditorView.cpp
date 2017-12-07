@@ -1055,13 +1055,10 @@ GVegetationBox* D2DEditorView::PlaceDraggedVegetationBox()
 		shape = GVegetationBox::S_Circle;
 
 	GVegetationBox* box = new GVegetationBox;
-	if (XR_SUCCESS == box->InitVegetationBox(DraggedBoxCenter + DraggedBoxMinLocal * (1 + MMWDelta), DraggedBoxCenter + DraggedBoxMaxLocal * (1 + MMWDelta),
-		"", 1.0f, 1.0f, TracedTexture, shape))
-	{
+	if (XR_SUCCESS == box->InitVegetationBox(DraggedBoxCenter + DraggedBoxMinLocal * (1 + MMWDelta), DraggedBoxCenter + DraggedBoxMaxLocal * (1 + MMWDelta), "", 1.0f, 1.0f, TracedTexture, shape)) {
 		Engine::GAPI->AddVegetationBox(box);
-	}else
-	{
-		delete box;
+	} else {
+		SAFE_DELETE(box);
 	}
 
 	Selection.SelectedVegetationBox = box;
