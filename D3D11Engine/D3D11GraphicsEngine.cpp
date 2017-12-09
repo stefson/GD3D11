@@ -4039,6 +4039,7 @@ XRESULT D3D11GraphicsEngine::OnKeyDown(unsigned int key)
 {
 	switch (key)
 	{
+#ifndef PUBLIC_RELEASE
 	case VK_NUMPAD0:
 		Engine::GAPI->PrintMessageTimed(INT2(30,30), "Reloading shaders...");
 		ReloadShaders();
@@ -4047,6 +4048,7 @@ XRESULT D3D11GraphicsEngine::OnKeyDown(unsigned int key)
 	case VK_NUMPAD7:
 		SaveScreenshotNextFrame = true;
 		break;
+#endif
 
 	case VK_F1:		
 		if (!UIView && !Engine::GAPI->GetRendererState()->RendererSettings.EnableEditorPanel)

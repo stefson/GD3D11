@@ -2721,22 +2721,17 @@ void GothicAPI::SendMessageToGameWindow(UINT msg, WPARAM wParam, LPARAM lParam)
 }
 
 /** Message-Callback for the main window */
-LRESULT GothicAPI::OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	switch(msg)
-	{
+LRESULT GothicAPI::OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+	switch (msg) {
 	case WM_KEYDOWN:
 		Engine::GraphicsEngine->OnKeyDown(wParam);
-		switch(wParam)
-		{
+		switch (wParam) {
 		case VK_F11:
 #ifdef PUBLIC_RELEASE
-			if (GetAsyncKeyState(VK_CONTROL))
-			{
+			if (GetAsyncKeyState(VK_CONTROL)) {
 				Engine::AntTweakBar->SetActive(!Engine::AntTweakBar->GetActive());
 				SetEnableGothicInput(!Engine::AntTweakBar->GetActive());
-			}else
-			{
+			} else {
 				Engine::AntTweakBar->SetActive(false);
 				SetEnableGothicInput(true);
 				Engine::GraphicsEngine->OnUIEvent(BaseGraphicsEngine::EUIEvent::UI_OpenSettings);
@@ -2789,8 +2784,7 @@ LRESULT GothicAPI::OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 		return 0; // We handle this ourselfes, because we need the ability to hold down the RMB
 #endif
 
-	if (OriginalGothicWndProc)
-	{
+	if (OriginalGothicWndProc) {
 		return CallWindowProc((WNDPROC)OriginalGothicWndProc, hWnd, msg, wParam, lParam);
 	}
 	else
@@ -4016,18 +4010,17 @@ XRESULT GothicAPI::LoadVegetation(const std::string& file)
 }
 
 /** Saves the users settings from the menu */
-XRESULT GothicAPI::SaveMenuSettings(const std::string& file)
-{
-	FILE* f = fopen(file.c_str(), "wb");
+XRESULT GothicAPI::SaveMenuSettings(const std::string & file) {
+	FILE * f = fopen(file.c_str(), "wb");
 
 	LogInfo() << "Saving menu settings";
 
 	if (!f)
 		return XR_FAILED;
 
-	GothicRendererSettings& s = RendererState.RendererSettings;
+	GothicRendererSettings & s = RendererState.RendererSettings;
 
-	int version = 2;
+	int version = 3;
 	fwrite(&version, sizeof(version), 1, f);
 
 	fwrite(&s.EnableShadows, sizeof(s.EnableShadows), 1, f);
@@ -4061,6 +4054,9 @@ XRESULT GothicAPI::SaveMenuSettings(const std::string& file)
 	fwrite(&s.EnableSMAA, sizeof(s.EnableSMAA), 1, f);
 
 	fwrite(&s.EnablePointlightShadows, sizeof(s.EnablePointlightShadows), 1, f);
+
+	fwrite(&s.AllowWorldMeshTesselation, sizeof(s.AllowWorldMeshTesselation), 1, f);
+	fwrite(&s.SharpenFactor, sizeof(s.SharpenFactor), 1, f);
 
 	fclose(f);
 
@@ -4115,8 +4111,7 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string& file)
 	// Fix the resolution if the players maximum resolution got lower
 	RECT r;
 	GetClientRect(GetDesktopWindow(), &r);
-	if (res.x > r.right ||res.y > r.bottom)
-	{
+	if (res.x > r.right ||res.y > r.bottom) {
 		LogInfo() << "Reducing resolution from (" << res.x << ", " << res.y << " to (" << r.right << ", " << r.bottom << ") because users desktop resolution got lowered";
 		res = INT2(r.right, r.bottom);
 	}
@@ -4152,6 +4147,11 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string& file)
 	fread(&s.EnableSMAA, sizeof(s.EnableSMAA), 1, f);
 
 	fread(&s.EnablePointlightShadows, sizeof(s.EnablePointlightShadows), 1, f);
+
+	if (version == 3) {
+		fread(&s.AllowWorldMeshTesselation, sizeof(s.AllowWorldMeshTesselation), 1, f);
+		fread(&s.SharpenFactor, sizeof(s.SharpenFactor), 1, f);
+	}
 
 	fclose(f);
 
