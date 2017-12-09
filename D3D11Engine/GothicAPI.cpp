@@ -658,7 +658,7 @@ const std::string& GothicAPI::GetStartDirectory()
 /** Builds the static mesh instancing cache */
 void GothicAPI::BuildStaticMeshInstancingCache()
 {
-	for (std::unordered_map<zCProgMeshProto*, MeshVisualInfo*>::iterator it = StaticMeshVisuals.begin(); it != StaticMeshVisuals.end(); ++it)
+	for (std::unordered_map<zCProgMeshProto*, MeshVisualInfo *>::iterator it = StaticMeshVisuals.begin(); it != StaticMeshVisuals.end(); ++it)
 	{
 		it->second->StartNewFrame();
 	}
@@ -757,7 +757,7 @@ void GothicAPI::DrawWorldMeshNaive()
 			// Indoor? // TODO: Double-check if this is really a simple getter. Also, is this even valid for NPCs?
 			(*it)->IndoorVob = (*it)->Vob->GetGroundPoly() && ((*it)->Vob->GetGroundPoly()->GetLightmap() != 0);
 
-			zCModel* model = (zCModel *)(*it)->Vob->GetVisual();
+			zCModel * model = (zCModel *)(*it)->Vob->GetVisual();
 
 			if (!model)// || vi->VisualInfo)
 				continue; // Gothic fortunately sets this to 0 when it throws the model out of the cache
@@ -774,7 +774,7 @@ void GothicAPI::DrawWorldMeshNaive()
 	RendererState.RasterizerState.SetDirty();
 
 	// Reset vob-state
-	/*for (std::unordered_map<zCProgMeshProto*, MeshVisualInfo*>::iterator it = StaticMeshVisuals.begin(); it != StaticMeshVisuals.end(); ++it)
+	/*for (std::unordered_map<zCProgMeshProto*, MeshVisualInfo *>::iterator it = StaticMeshVisuals.begin(); it != StaticMeshVisuals.end(); ++it)
 	{
 		it->second->StartNewFrame();
 	}*/
@@ -928,11 +928,11 @@ void GothicAPI::OnMaterialDeleted(zCMaterial * mat)
 		return;
 
 	/** Map for static mesh visuals */
-	/*for (std::unordered_map<zCProgMeshProto*, MeshVisualInfo*>::iterator it = StaticMeshVisuals.begin(); it != StaticMeshVisuals.end(); ++it)
+	/*for (std::unordered_map<zCProgMeshProto*, MeshVisualInfo *>::iterator it = StaticMeshVisuals.begin(); it != StaticMeshVisuals.end(); ++it)
 	{
 		for (std::map<zCMaterial *, std::vector<MeshInfo*>>::iterator itm = it->second->Meshes.begin(); itm != it->second->Meshes.end(); itm++)
 		{
-			if ((*itm).first == mat)
+			if (itm->first == mat)
 			{
 				it->second->UnloadedSomething = true;
 			}
@@ -940,7 +940,7 @@ void GothicAPI::OnMaterialDeleted(zCMaterial * mat)
 	}*/
 	
 	
-	for (std::unordered_map<std::string, SkeletalMeshVisualInfo*>::iterator it = SkeletalMeshVisuals.begin(); it != SkeletalMeshVisuals.end(); ++it) {
+	for (std::unordered_map<std::string, SkeletalMeshVisualInfo *>::iterator it = SkeletalMeshVisuals.begin(); it != SkeletalMeshVisuals.end(); ++it) {
 		it->second->Meshes.erase(mat);
 		it->second->SkeletalMeshes.erase(mat);
 
@@ -1358,7 +1358,7 @@ void GothicAPI::OnSetVisual(zCVob* vob)
 		return;
 
 	// Check for skeletalmesh
-	/*if ((zCModel*)vob->GetVisual() == nullptr || std::string(vob->GetVisual()->GetFileExtension(0)) != ".PFX")
+	/*if ((zCModel *)vob->GetVisual() == nullptr || std::string(vob->GetVisual()->GetFileExtension(0)) != ".PFX")
 	{
 		return; // Only take PFX
 	}*/
@@ -1384,8 +1384,7 @@ void GothicAPI::OnSetVisual(zCVob* vob)
 }
 
 /** Called when a VOB got added to the BSP-Tree */
-void GothicAPI::OnAddVob(zCVob* vob, zCWorld* world)
-{
+void GothicAPI::OnAddVob(zCVob * vob, zCWorld * world) {
 	//LogInfo() << "Adding vob: " << vob;
 
 	if (!vob->GetVisual())
@@ -1398,12 +1397,10 @@ void GothicAPI::OnAddVob(zCVob* vob, zCWorld* world)
 
 	// Add the vob to the set
 	std::set<zCVob *>::iterator it = RegisteredVobs.find(vob);
-	if (it != RegisteredVobs.end())
-	{
+	if (it != RegisteredVobs.end()) {
 		// Already got that
 		return;
 	}
-
 	RegisteredVobs.insert(vob);
 
 	if (!world)
@@ -1411,32 +1408,28 @@ void GothicAPI::OnAddVob(zCVob* vob, zCWorld* world)
 
 	std::vector<std::string> extv;
 	
-	int e=0;
-	while(strlen(vob->GetVisual()->GetFileExtension(e)) > 0)
-	{
+	int e = 0;
+	while (strlen(vob->GetVisual()->GetFileExtension(e)) > 0) {
 		extv.push_back(vob->GetVisual()->GetFileExtension(e));
 		e++;
 	}
 
-	for (unsigned int i=0; i<extv.size();i++)
-	{
+	for (unsigned int i = 0; i < extv.size(); i++) {
 		std::string ext = extv[i];
 
-		if (ext == ".3DS" || ext == ".MMS")
-		{
-			zCProgMeshProto* pm;
+		if (ext == ".3DS" || ext == ".MMS") {
+			zCProgMeshProto * pm;
 			if (ext == ".3DS")
 				pm = (zCProgMeshProto *)vob->GetVisual();
 			else
 				pm = ((zCMorphMesh *)vob->GetVisual())->GetMorphMesh();
 
-			if (StaticMeshVisuals.count(pm) == 0)
-			{
+			if (StaticMeshVisuals.count(pm) == 0) {
 				if (pm->GetNumSubmeshes() == 0)
 					return; // Empty mesh?
 
 				// Load the new visual
-				MeshVisualInfo* mi = new MeshVisualInfo;
+				MeshVisualInfo * mi = new MeshVisualInfo;
 				WorldConverter::Extract3DSMeshFromVisual2(pm, mi);
 				StaticMeshVisuals[pm] = mi;
 			}
@@ -1451,8 +1444,7 @@ void GothicAPI::OnAddVob(zCVob* vob, zCWorld* world)
 			VobsByVisual[vob->GetVisual()].push_back(vi);
 
 			// Check for mainworld
-			if (world == oCGame::GetGame()->_zCSession_world)
-			{
+			if (world == oCGame::GetGame()->_zCSession_world) {
 				VobMap[vob] = vi;
 				WorldSections[section.x][section.y].Vobs.push_back(vi);
 
@@ -1462,20 +1454,16 @@ void GothicAPI::OnAddVob(zCVob* vob, zCWorld* world)
 				Engine::GraphicsEngine->CreateConstantBuffer(&vi->VobConstantBuffer, nullptr, sizeof(VS_ExConstantBuffer_PerInstance));
 				vi->UpdateVobConstantBuffer();
 
-				if (!BspLeafVobLists.empty()) // Check if this is the initial loading
-				{
+				if (!BspLeafVobLists.empty()) { // Check if this is the initial loading
 					// It's not, chose this as a dynamically added vob
 					DynamicallyAddedVobs.push_back(vi);
 				}
-
-			}else
-			{
+			} else {
 				// Must be inventory
 				Inventory->OnAddVob(vi, world);
 			}
 			break;
-		}else if (ext == ".MDS" || ext == ".ASC")
-		{
+		} else if (ext == ".MDS" || ext == ".ASC") {
 			std::string mds = ((zCModel *)vob->GetVisual())->GetModelName().ToChar();
 			
 			//if (mds == "SWARM.MDS")
@@ -1486,11 +1474,11 @@ void GothicAPI::OnAddVob(zCVob* vob, zCWorld* world)
 			if (str.empty()) // Happens when the model has no skeletal-mesh
 				str = mds;
 
-			if (str == "HAMMEL_BODY")
-			{
+			LogInfo() << str;
+
+			if (str == "HAMMEL_BODY") {
 				str == "SHEEP_BODY"; // FIXME: HAMMEL_BODY seems to have fucked up bones, but only this model! Replace with usual sheep before I fix this
-				if (!SkeletalMeshVisuals[str])
-				{
+				if (!SkeletalMeshVisuals[str]) {
 					RegisteredVobs.erase(vob);
 					SkeletalMeshVisuals.erase(str);
 					return; // Just don't load it here!
@@ -1498,7 +1486,7 @@ void GothicAPI::OnAddVob(zCVob* vob, zCWorld* world)
 			}
 
 			// Load the model or get it from cache if already done
-			SkeletalMeshVisualInfo* mi = LoadzCModelData(((zCModel *)vob->GetVisual()));
+			SkeletalMeshVisualInfo * mi = LoadzCModelData(((zCModel *)vob->GetVisual()));
 		
 			// Add vob to the skeletal list
 			SkeletalVobInfo * vi = new SkeletalVobInfo;
@@ -1512,8 +1500,7 @@ void GothicAPI::OnAddVob(zCVob* vob, zCWorld* world)
 			vi->WorldMatrix = *vob->GetWorldMatrixPtr();
 
 			// Check for mainworld
-			if (world == oCGame::GetGame()->_zCSession_world)
-			{
+			if (world == oCGame::GetGame()->_zCSession_world) {
 				SkeletalMeshVobs.push_back(vi);
 				SkeletalVobMap[vob] = vi;
 
@@ -1523,23 +1510,19 @@ void GothicAPI::OnAddVob(zCVob* vob, zCWorld* world)
 				{
 					AnimatedSkeletalVobs.push_back(vi);
 				}
-			}else
-			{
+			} else {
 				// Must be inventory
 				//Inventory->OnAddVob(vi, world);
 			}
 			break;
-		}else if (ext == ".PFX")
-		{
+		} else if (ext == ".PFX") {
 			//if (!BspLeafVobLists.empty())
 			//	return; // FIXME: Don't add particle effects after the loading time, since some effects (like landing from a jump?) will crash the game!
-
 			ParticleEffectVobs.push_back(vob);
 
 			//tempParticleNames[vob] = ((zCParticleFX *)vob->GetVisual())->GetEmitter()->particleFXName.ToChar() + std::string(" | ") + ((zCParticleFX *)vob->GetVisual())->GetEmitter()->visName_S.ToChar();
 			break;
-		}else if (ext == ".TGA")
-		{
+		} else if (ext == ".TGA") {
 			DecalVobs.push_back(vob);
 			break;
 		}
@@ -1547,7 +1530,7 @@ void GothicAPI::OnAddVob(zCVob* vob, zCWorld* world)
 }
 
 /** Loads the data out of a zCModel */
-SkeletalMeshVisualInfo* GothicAPI::LoadzCModelData(zCModel* model)
+SkeletalMeshVisualInfo * GothicAPI::LoadzCModelData(zCModel * model)
 {
 	std::string mds = model->GetModelName().ToChar();
 	std::string str = model->GetVisualName();
@@ -1555,7 +1538,7 @@ SkeletalMeshVisualInfo* GothicAPI::LoadzCModelData(zCModel* model)
 	if (str.empty()) // Happens when the model has no skeletal-mesh
 		str = mds;
 
-	SkeletalMeshVisualInfo* mi = SkeletalMeshVisuals[str];
+	SkeletalMeshVisualInfo * mi = SkeletalMeshVisuals[str];
 
 	if (!mi || mi->Meshes.empty())
 	{
@@ -1577,27 +1560,23 @@ SkeletalMeshVisualInfo* GothicAPI::LoadzCModelData(zCModel* model)
 #include "D3D11GraphicsEngine.h"
 
 /** Draws a skeletal mesh-vob */
-void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance)
-{
+void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 	// FIXME: Put this into the renderer!!
-	D3D11GraphicsEngine* g = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
+	D3D11GraphicsEngine * g = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 	g->SetActiveVertexShader("VS_Ex");
 
 	std::vector<D3DXMATRIX> transforms;
-	zCModel* model = (zCModel *)vi->Vob->GetVisual();
-	SkeletalMeshVisualInfo* visual = ((SkeletalMeshVisualInfo *)vi->VisualInfo);
+	zCModel * model = (zCModel *)vi->Vob->GetVisual();
+	SkeletalMeshVisualInfo * visual = ((SkeletalMeshVisualInfo *)vi->VisualInfo);
 	
 	//Engine::GraphicsEngine->GetLineRenderer()->AddPointLocator(vi->Vob->GetPositionWorld(), 50.0f);
 
 	if (!model || !vi->VisualInfo)
 		return; // Gothic fortunately sets this to 0 when it throws the model out of the cache
 
-	
-
 	//std::string name = model->GetModelName().ToChar();
 	//if (name.empty())
 	//	return; // This happens for wild bees in Odyssee for example. Not sure what that is, but it crashes horrible.
-
 
 	model->SetIsVisible(true);
 
@@ -1638,8 +1617,6 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance)
 		// Update attachments
 		model->UpdateAttachedVobs();
 		model->UpdateMeshLibTexAniState();
-
-		
 	 
 		std::string visname = model->GetVisualName();
 		std::string vobname = vi->Vob->GetName();
@@ -1648,30 +1625,23 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance)
 
 		// Draw submeshes
 		//if (model->GetMeshSoftSkinList()->NumInArray)
-
 		
-		struct fns
-		{
+		struct fns {
 			// TODO: FIXME
 			// Ugly stuff to get the fucking corrupt visual in returning here
-			static void Draw(SkeletalVobInfo * vi, std::vector<D3DXMATRIX>& transforms, float fatness)
-			{
-				for (std::map<zCMaterial *, std::vector<SkeletalMeshInfo*>>::iterator itm = ((SkeletalMeshVisualInfo *)vi->VisualInfo)->SkeletalMeshes.begin(); itm != ((SkeletalMeshVisualInfo *)vi->VisualInfo)->SkeletalMeshes.end();itm++)
-				{
-					for (unsigned int i=0;i<(*itm).second.size();i++)
-					{
-						Engine::GAPI->DrawSkeletalMeshInfo((*itm).first, (*itm).second[i], ((SkeletalMeshVisualInfo *)vi->VisualInfo), transforms, fatness);
+			static void Draw(SkeletalVobInfo * vi, std::vector<D3DXMATRIX> & transforms, float fatness) {
+				for (std::map<zCMaterial *, std::vector<SkeletalMeshInfo *>>::iterator itm = ((SkeletalMeshVisualInfo *)vi->VisualInfo)->SkeletalMeshes.begin(); itm != ((SkeletalMeshVisualInfo *)vi->VisualInfo)->SkeletalMeshes.end(); ++itm) {
+					for (unsigned int i = 0; i < itm->second.size(); i++) {
+						Engine::GAPI->DrawSkeletalMeshInfo(itm->first, itm->second[i], ((SkeletalMeshVisualInfo *)vi->VisualInfo), transforms, fatness);
 					}
 				}
 			}
 	
-			static bool CatchDraw(SkeletalVobInfo * vi, std::string* visName, std::string* vobName, D3DXVECTOR3* pos, std::vector<D3DXMATRIX>& transforms, float fatness)
-			{
+			static bool CatchDraw(SkeletalVobInfo * vi, std::string * visName, std::string * vobName, D3DXVECTOR3 * pos, std::vector<D3DXMATRIX> & transforms, float fatness) {
 				bool success = true;
 				__try {
 					Draw(vi, transforms, fatness);
-				}__except(EXCEPTION_EXECUTE_HANDLER)
-				{
+				} __except(EXCEPTION_EXECUTE_HANDLER) {
 					Except(vi, visName, vobName, pos);
 					success = false;
 				}
@@ -1679,8 +1649,7 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance)
 				return success;
 			}
 
-			static void Except(SkeletalVobInfo * vi, std::string* visName, std::string* vobName, D3DXVECTOR3* pos)
-			{
+			static void Except(SkeletalVobInfo * vi, std::string * visName, std::string * vobName, D3DXVECTOR3 * pos) {
 				static bool done = false;
 				
 				if (!done)
@@ -1693,10 +1662,8 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance)
 			}
 		};
 
-		if (!((SkeletalMeshVisualInfo *)vi->VisualInfo)->SkeletalMeshes.empty())
-		{
-			if (!fns::CatchDraw(vi, &visname, &vobname, &vobPos, transforms, fatness))
-			{
+		if (!((SkeletalMeshVisualInfo *)vi->VisualInfo)->SkeletalMeshes.empty()) {
+			if (!fns::CatchDraw(vi, &visname, &vobname, &vobPos, transforms, fatness)) {
 				// This vob is broken, quickly remove its stuff
 				// This will probably cause a memoryleak, but it will keep the game running until this is fixed
 				// Better than nothing...
@@ -1709,8 +1676,7 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance)
 
 	if (g->GetRenderingStage() == DES_SHADOWMAP_CUBE)
 		g->SetActiveVertexShader("VS_ExCube");
-	else 
-	{
+	else {
 		g->SetActiveVertexShader("VS_Ex");
 
 		/*if (g->GetRenderingStage() == DES_MAIN)
@@ -1740,12 +1706,10 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance)
 
 	// Set up instance info
 	VS_ExConstantBuffer_PerInstance instanceInfo;
-	if (vi->Vob->IsIndoorVob())
-	{
+	if (vi->Vob->IsIndoorVob()) {
 		// All lightmapped polys have this color, so just use it
 		instanceInfo.Color = DEFAULT_LIGHTMAP_POLY_COLOR;
-	}else
-	{
+	} else {
 		// Get the color of the first found feature of the ground poly
 		instanceInfo.Color = vi->Vob->GetGroundPoly() ? vi->Vob->GetGroundPoly()->getFeatures()[0]->lightStatic : 0xFFFFFFFF;
 	}
@@ -1757,32 +1721,28 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance)
 	g->SetupVS_ExMeshDrawCall();
 	g->SetupVS_ExConstantBuffer();
 
-	std::map<int, std::vector<MeshVisualInfo *>>& nodeAttachments = vi->NodeAttachments;
-	for (unsigned int i=0;i<transforms.size();i++)
-	{
+	std::map<int, std::vector<MeshVisualInfo *>> & nodeAttachments = vi->NodeAttachments;
+	for (unsigned int i = 0; i < transforms.size(); i++) {
 		// Check for new visual
-		zCModel* mvis = (zCModel *)vi->Vob->GetVisual();
-		zCModelNodeInst* node = mvis->GetNodeList()->Array[i];
+		zCModel * mvis = (zCModel *)vi->Vob->GetVisual();
+		zCModelNodeInst * node = mvis->GetNodeList()->Array[i];
 
 		if (!node->NodeVisual)
 			continue; // Happens when you pull your sword for example
 
 		// Check if this is loaded
-		if (node->NodeVisual && nodeAttachments.find(i) == nodeAttachments.end())
-		{
+		if (node->NodeVisual && nodeAttachments.find(i) == nodeAttachments.end()) {
 			// It's not, extract it
 			WorldConverter::ExtractNodeVisual(i, node, nodeAttachments);
 		}
 
 		// Check for changed visual
-		if (nodeAttachments[i].size() && node->NodeVisual != (zCVisual *)nodeAttachments[i][0]->Visual)
-		{
+		if (nodeAttachments[i].size() && node->NodeVisual != (zCVisual *)nodeAttachments[i][0]->Visual) {
 			// Visual changed
 			//delete vi->VisualInfo->NodeAttachments[i][0];
 
 			// Check for deleted attachment
-			if (!node->NodeVisual)
-			{
+			if (!node->NodeVisual) {
 				// Remove attachment
 				delete nodeAttachments[i][0];
 				nodeAttachments[i].clear();
@@ -1810,17 +1770,14 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance)
 		}
 
 	
-		if (nodeAttachments.find(i) != nodeAttachments.end())
-		{
+		if (nodeAttachments.find(i) != nodeAttachments.end()) {
 			//RendererState.TransformState.TransformWorld = transforms[i] * RendererState.TransformState.TransformWorld;
 
 			// Go through all attachments this node has
-			for (unsigned int n=0;n<nodeAttachments[i].size();n++)
-			{
+			for (unsigned int n = 0; n < nodeAttachments[i].size(); n++) {
 				SetWorldViewTransform(world * transforms[i], view);
 
-				if (!nodeAttachments[i][n]->Visual)
-				{
+				if (!nodeAttachments[i][n]->Visual) {
 					LogWarn() << "Attachment without visual on model: " << model->GetVisualName();
 					continue;
 				}
@@ -1829,15 +1786,13 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance)
 				node->TexAniState.UpdateTexList();		
 
 				bool isMMS = std::string(node->NodeVisual->GetFileExtension(0)) == ".MMS";
-				if (distance < 2000 && isMMS)
-				{
-					zCMorphMesh* mm = (zCMorphMesh *)node->NodeVisual;
+				if (distance < 2000 && isMMS) {
+					zCMorphMesh * mm = (zCMorphMesh *)node->NodeVisual;
 					mm->GetTexAniState()->UpdateTexList();
 
 					g->SetActivePixelShader("PS_DiffuseAlphaTest");
 
-					if (g->GetRenderingStage() == DES_MAIN) // Only draw this as a morphmesh when rendering the main scene
-					{					
+					if (g->GetRenderingStage() == DES_MAIN) {// Only draw this as a morphmesh when rendering the main scene
 						D3DXMATRIX fatnessScale;
 						float fs = (fatness + 1.0f) * 0.02f; // This is what gothic seems to be doing for heads, and it even looks right...
 
@@ -1863,9 +1818,8 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance)
 				}
 
 				// Update the head textures in case this is a morph-mesh
-				if (isMMS)
-				{
-					zCMorphMesh* mm = (zCMorphMesh *)node->NodeVisual;
+				if (isMMS) {
+					zCMorphMesh * mm = (zCMorphMesh *)node->NodeVisual;
 					mm->GetTexAniState()->UpdateTexList();
 				}
 
@@ -1876,31 +1830,24 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance)
 				vi->VobConstantBuffer->BindToVertexShader(1);
 
 				// Go through all materials registered here
-				for (std::map<zCMaterial *, std::vector<MeshInfo*>>::iterator itm = nodeAttachments[i][n]->Meshes.begin(); 
-					itm != nodeAttachments[i][n]->Meshes.end();
-					itm++)
-				{
-					if ((*itm).first && (*itm).first->GetAniTexture()) // TODO: Crash here!
-					{
-						if ((*itm).first->GetAniTexture()->CacheIn(0.6f) == zRES_CACHED_IN)
-						{
-							(*itm).first->GetAniTexture()->Bind(0);
-							g->BindShaderForTexture((*itm).first->GetAniTexture());
+				for (std::map<zCMaterial *, std::vector<MeshInfo*>>::iterator itm = nodeAttachments[i][n]->Meshes.begin(); itm != nodeAttachments[i][n]->Meshes.end(); ++itm) {
+					if (itm->first && itm->first->GetAniTexture()) { // TODO: Crash here!
+						if (itm->first->GetAniTexture()->CacheIn(0.6f) == zRES_CACHED_IN) {
+							itm->first->GetAniTexture()->Bind(0);
+							g->BindShaderForTexture(itm->first->GetAniTexture());
 
-							//MaterialInfo* info = GetMaterialInfoFrom((*itm).first->GetAniTexture());
+							//MaterialInfo* info = GetMaterialInfoFrom(itm->first->GetAniTexture());
 							//if (!info->Constantbuffer)
 							//	info->UpdateConstantbuffer();
 
 							//info->Constantbuffer->BindToPixelShader(2);
-						}
-						else
+						} else
 							continue;
 					}
 
 					// Go through all meshes using that material
-					for (unsigned int m=0;m<(*itm).second.size();m++)
-					{
-						DrawMeshInfo((*itm).first, (*itm).second[m]);
+					for (unsigned int m = 0; m < itm->second.size(); m++) {
+						DrawMeshInfo(itm->first, itm->second[m]);
 					}
 				}
 			}
@@ -1909,8 +1856,6 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance)
 	}
 
 	//model->SetIsVisible(vi->VisualInfo->Visual->GetMeshSoftSkinList()->NumInArray > 0);
-
-
 
 	RendererState.RendererInfo.FrameDrawnVobs++;
 }
@@ -2136,18 +2081,18 @@ void GothicAPI::DrawTriangle()
 }
 
 /** Sets the world matrix */
-void GothicAPI::SetWorldTransform(const D3DXMATRIX& world)
+void GothicAPI::SetWorldTransform(const D3DXMATRIX & world)
 {
 	RendererState.TransformState.TransformWorld = world;
 }
 /** Sets the world matrix */
-void GothicAPI::SetViewTransform(const D3DXMATRIX& view)
+void GothicAPI::SetViewTransform(const D3DXMATRIX & view)
 {
 	RendererState.TransformState.TransformView = view;
 }
 
 /** Sets the Projection matrix */
-void GothicAPI::SetProjTransform(const D3DXMATRIX& proj)
+void GothicAPI::SetProjTransform(const D3DXMATRIX & proj)
 {
 	RendererState.TransformState.TransformProj = proj;
 }
@@ -2159,7 +2104,7 @@ D3DXMATRIX GothicAPI::GetProjTransform()
 }
 
 /** Sets the world matrix */
-void GothicAPI::SetWorldTransform(const D3DXMATRIX& world, bool transpose)
+void GothicAPI::SetWorldTransform(const D3DXMATRIX & world, bool transpose)
 {
 	if (transpose)
 		D3DXMatrixTranspose(&RendererState.TransformState.TransformWorld, &world);
@@ -2168,7 +2113,7 @@ void GothicAPI::SetWorldTransform(const D3DXMATRIX& world, bool transpose)
 }
 
 /** Sets the world matrix */
-void GothicAPI::SetViewTransform(const D3DXMATRIX& view, bool transpose)
+void GothicAPI::SetViewTransform(const D3DXMATRIX & view, bool transpose)
 {
 	if (transpose)
 		D3DXMatrixTranspose(&RendererState.TransformState.TransformView, &view);
@@ -2177,7 +2122,7 @@ void GothicAPI::SetViewTransform(const D3DXMATRIX& view, bool transpose)
 }
 
 /** Sets the world matrix */
-void GothicAPI::SetWorldViewTransform(const D3DXMATRIX& world, const D3DXMATRIX& view)
+void GothicAPI::SetWorldViewTransform(const D3DXMATRIX & world, const D3DXMATRIX & view)
 {
 	RendererState.TransformState.TransformWorld = world;
 	RendererState.TransformState.TransformView = view;
@@ -2495,7 +2440,7 @@ void GothicAPI::GetInverseViewMatrix(D3DXMATRIX* invView)
 }
 
 /** Returns the projection-matrix */
-D3DXMATRIX& GothicAPI::GetProjectionMatrix()
+D3DXMATRIX & GothicAPI::GetProjectionMatrix()
 {
 	if (CameraReplacementPtr)
 	{
@@ -4077,7 +4022,7 @@ void GothicAPI::MoveLoadedTexturesToProcessedList()
 }
 
 /** Draws a morphmesh */
-void GothicAPI::DrawMorphMesh(zCMorphMesh* msh, float fatness)
+void GothicAPI::DrawMorphMesh(zCMorphMesh * msh, float fatness)
 {
 	D3DXVECTOR3 tri0, tri1, tri2;
 	D3DXVECTOR2	uv0, uv1, uv2;

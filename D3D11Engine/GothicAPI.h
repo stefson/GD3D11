@@ -495,7 +495,7 @@ public:
 	HWND GetOutputWindow() { return OutputWindow; }
 
 	/** Spawns a vegetationbox at the camera */
-	GVegetationBox * SpawnVegetationBoxAt(const D3DXVECTOR3 & position,  const D3DXVECTOR3 & min = D3DXVECTOR3(-1000, -500, -1000), const D3DXVECTOR3 & max = D3DXVECTOR3(1000, 500, 1000), float density = 1.0f,const std::string & restrictByTexture = "");
+	GVegetationBox * SpawnVegetationBoxAt(const D3DXVECTOR3 & position,  const D3DXVECTOR3 & min = D3DXVECTOR3(-1000, -500, -1000), const D3DXVECTOR3 & max = D3DXVECTOR3(1000, 500, 1000), float density = 1.0f, const std::string & restrictByTexture = "");
 
 	/** Adds a vegetationbox to the world */
 	void AddVegetationBox(GVegetationBox * box);
@@ -679,7 +679,6 @@ private:
 	std::unordered_map<zCVob *, VobInfo *> VobMap;
 	std::unordered_map<zCVobLight *, VobLightInfo *> VobLightMap;
 	std::unordered_map<zCVob *, SkeletalVobInfo *> SkeletalVobMap;
-
 
 	/** Map of VobInfo-Lists for zCBspLeafs */
 	std::unordered_map<zCBspBase *, BspInfo> BspLeafVobLists;

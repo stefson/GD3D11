@@ -4965,9 +4965,9 @@ void D3D11GraphicsEngine::OnUIEvent(EUIEvent uiEvent)
 }
 
 /** Returns the data of the backbuffer */
-void D3D11GraphicsEngine::GetBackbufferData(byte** data, int& pixelsize)
-{
-	byte* d = new byte[256 * 256* 4];
+void D3D11GraphicsEngine::GetBackbufferData(byte ** data, int & pixelsize) {
+	constexpr int width = 256;
+	byte * d = new byte[width * width * 4];
 
 	// Copy HDR scene to backbuffer
 	SetDefaultStates();
@@ -4989,34 +4989,35 @@ void D3D11GraphicsEngine::GetBackbufferData(byte** data, int& pixelsize)
 	HRESULT hr;
 
 	// Buffer for scaling down the image
-	RenderToTextureBuffer* rt = new RenderToTextureBuffer(Device, 256, 256, DXGI_FORMAT_R8G8B8A8_UNORM);
+	RenderToTextureBuffer * rt = new RenderToTextureBuffer(Device, width, width, DXGI_FORMAT_R8G8B8A8_UNORM);
 
 	// Downscale to 256x256
-	PfxRenderer->CopyTextureToRTV(HDRBackBuffer->GetShaderResView(), rt->GetRenderTargetView(), INT2(256,256), true);
+	PfxRenderer->CopyTextureToRTV(HDRBackBuffer->GetShaderResView(), rt->GetRenderTargetView(), INT2(width, width), true);
 
 	D3D11_TEXTURE2D_DESC texDesc;
 	texDesc.ArraySize = 1;
 	texDesc.BindFlags = 0;
 	texDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
 	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	texDesc.Width = 256; // Gothic transforms the backbufferdata for savegamethumbs to 256x256-pictures anyways
-	texDesc.Height = 256;
+	texDesc.Width = width; // Gothic transforms the backbufferdata for savegamethumbs to 256x256-pictures anyways
+	texDesc.Height = width;
 	texDesc.MipLevels = 1;
 	texDesc.MiscFlags = 0;
 	texDesc.SampleDesc.Count = 1;
 	texDesc.SampleDesc.Quality = 0;
 	texDesc.Usage = D3D11_USAGE_STAGING;
 
-	ID3D11Texture2D *texture;
+	ID3D11Texture2D * texture;
 	LE(Device->CreateTexture2D(&texDesc, 0, &texture));
 	Context->CopyResource(texture, rt->GetTexture());
 
 	// Get data
 	D3D11_MAPPED_SUBRESOURCE res;
-	if (SUCCEEDED(Context->Map(texture, 0, D3D11_MAP_READ, 0, &res)))
-	{
-		memcpy(d, res.pData, 256 * 256 * 4);
+	if (SUCCEEDED(Context->Map(texture, 0, D3D11_MAP_READ, 0, &res))) {
+		memcpy(d, res.pData, width * width * 4);
 		Context->Unmap(texture, 0);
+	} else {
+		LogInfo() << "Thumbnail failed";
 	}
 
 	pixelsize = 4;
