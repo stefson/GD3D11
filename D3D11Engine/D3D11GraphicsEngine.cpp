@@ -759,7 +759,7 @@ XRESULT D3D11GraphicsEngine::Clear(const float4& color)
 }
 
 /** Creates a vertexbuffer object (Not registered inside) */
-XRESULT D3D11GraphicsEngine::CreateVertexBuffer(D3D11VertexBuffer** outBuffer)
+XRESULT D3D11GraphicsEngine::CreateVertexBuffer(D3D11VertexBuffer ** outBuffer)
 {
 	*outBuffer = new D3D11VertexBuffer;
 	return XR_SUCCESS;
@@ -983,7 +983,7 @@ XRESULT D3D11GraphicsEngine::SetViewport(const ViewportInfo& viewportInfo)
 }
 
 /** Draws a vertexbuffer, non-indexed (World)*/
-XRESULT D3D11GraphicsEngine::DrawVertexBuffer(D3D11VertexBuffer* vb, unsigned int numVertices, unsigned int stride)
+XRESULT D3D11GraphicsEngine::DrawVertexBuffer(D3D11VertexBuffer * vb, unsigned int numVertices, unsigned int stride)
 {
 #ifdef RECORD_LAST_DRAWCALL
 	g_LastDrawCall.Type = DrawcallInfo::VB;
@@ -996,7 +996,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexBuffer(D3D11VertexBuffer* vb, unsigned in
 
 	UINT offset = 0;
 	UINT uStride = stride;
-	ID3D11Buffer* buffer = ((D3D11VertexBuffer *)vb)->GetVertexBuffer();
+	ID3D11Buffer * buffer = ((D3D11VertexBuffer *)vb)->GetVertexBuffer();
 	Context->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
 
 	//Draw the mesh
@@ -1008,7 +1008,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexBuffer(D3D11VertexBuffer* vb, unsigned in
 }
 
 /** Draws a vertexbuffer, non-indexed (VOBs)*/
-XRESULT D3D11GraphicsEngine::DrawVertexBufferIndexed(D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices, unsigned int indexOffset)
+XRESULT D3D11GraphicsEngine::DrawVertexBufferIndexed(D3D11VertexBuffer * vb, D3D11VertexBuffer * ib, unsigned int numIndices, unsigned int indexOffset)
 {
 #ifdef RECORD_LAST_DRAWCALL
 	g_LastDrawCall.Type = DrawcallInfo::VB_IX;
@@ -1023,7 +1023,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferIndexed(D3D11VertexBuffer* vb, D3D1
 	{
 		UINT offset = 0;
 		UINT uStride = sizeof(ExVertexStruct);
-		ID3D11Buffer* buffer = ((D3D11VertexBuffer *)vb)->GetVertexBuffer();
+		ID3D11Buffer * buffer = ((D3D11VertexBuffer *)vb)->GetVertexBuffer();
 		Context->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
 
 		if (sizeof(VERTEX_INDEX) == sizeof(unsigned short))
@@ -1045,7 +1045,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferIndexed(D3D11VertexBuffer* vb, D3D1
 	return XR_SUCCESS;
 }
 
-XRESULT D3D11GraphicsEngine::DrawVertexBufferIndexedUINT(D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices, unsigned int indexOffset)
+XRESULT D3D11GraphicsEngine::DrawVertexBufferIndexedUINT(D3D11VertexBuffer * vb, D3D11VertexBuffer * ib, unsigned int numIndices, unsigned int indexOffset)
 {
 #ifdef RECORD_LAST_DRAWCALL
 	g_LastDrawCall.Type = DrawcallInfo::VB_IX_UINT;
@@ -1060,7 +1060,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferIndexedUINT(D3D11VertexBuffer* vb, 
 	{
 		UINT offset = 0;
 		UINT uStride = sizeof(ExVertexStruct);
-		ID3D11Buffer* buffer = ((D3D11VertexBuffer *)vb)->GetVertexBuffer();
+		ID3D11Buffer * buffer = ((D3D11VertexBuffer *)vb)->GetVertexBuffer();
 		Context->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
 		Context->IASetIndexBuffer(((D3D11VertexBuffer *)ib)->GetVertexBuffer(), DXGI_FORMAT_R32_UINT, 0);
 		
@@ -1140,7 +1140,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexArray(ExVertexStruct* vertices, unsigned 
 
 	UINT offset = 0;
 	UINT uStride = stride;
-	ID3D11Buffer* buffer = TempVertexBuffer->GetVertexBuffer();
+	ID3D11Buffer * buffer = TempVertexBuffer->GetVertexBuffer();
 	Context->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
 
 	//Draw the mesh
@@ -1152,7 +1152,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexArray(ExVertexStruct* vertices, unsigned 
 }
 
 /** Draws a vertexarray, indexed */
-XRESULT D3D11GraphicsEngine::DrawIndexedVertexArray(ExVertexStruct* vertices, unsigned int numVertices, D3D11VertexBuffer* ib, unsigned int numIndices, unsigned int stride)
+XRESULT D3D11GraphicsEngine::DrawIndexedVertexArray(ExVertexStruct* vertices, unsigned int numVertices, D3D11VertexBuffer * ib, unsigned int numIndices, unsigned int stride)
 {
 	UpdateRenderStates();
 	D3D11VShader* vShader = ActiveVS;//ShaderManager->GetVShader("VS_TransformedEx");
@@ -1182,7 +1182,7 @@ XRESULT D3D11GraphicsEngine::DrawIndexedVertexArray(ExVertexStruct* vertices, un
 
 	UINT offset = 0;
 	UINT uStride = stride;
-	ID3D11Buffer* buffers[] = {TempVertexBuffer->GetVertexBuffer(), ((D3D11VertexBuffer *)ib)->GetVertexBuffer()};
+	ID3D11Buffer * buffers[] = {TempVertexBuffer->GetVertexBuffer(), ((D3D11VertexBuffer *)ib)->GetVertexBuffer()};
 	Context->IASetVertexBuffers(0, 2, buffers, &uStride, &offset);
 
 	//Draw the mesh
@@ -1195,7 +1195,7 @@ XRESULT D3D11GraphicsEngine::DrawIndexedVertexArray(ExVertexStruct* vertices, un
 
 
 /** Draws a vertexbuffer, non-indexed, binding the FF-Pipe values */
-XRESULT D3D11GraphicsEngine::DrawVertexBufferFF(D3D11VertexBuffer* vb, unsigned int numVertices, unsigned int startVertex, unsigned int stride)
+XRESULT D3D11GraphicsEngine::DrawVertexBufferFF(D3D11VertexBuffer * vb, unsigned int numVertices, unsigned int startVertex, unsigned int stride)
 {
 	SetupVS_ExMeshDrawCall();
 
@@ -1205,7 +1205,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferFF(D3D11VertexBuffer* vb, unsigned 
 
 	UINT offset = 0;
 	UINT uStride = stride;
-	ID3D11Buffer* buffer = ((D3D11VertexBuffer *)vb)->GetVertexBuffer();
+	ID3D11Buffer * buffer = ((D3D11VertexBuffer *)vb)->GetVertexBuffer();
 	Context->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
 
 	//Draw the mesh
@@ -1217,8 +1217,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferFF(D3D11VertexBuffer* vb, unsigned 
 }
 
 /** Draws a skeletal mesh */
-XRESULT D3D11GraphicsEngine::DrawSkeletalMesh(D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices, const std::vector<D3DXMATRIX>& transforms, float fatness, SkeletalMeshVisualInfo* msh)
-{
+XRESULT D3D11GraphicsEngine::DrawSkeletalMesh(D3D11VertexBuffer * vb, D3D11VertexBuffer * ib, unsigned int numIndices, const std::vector<D3DXMATRIX> & transforms, float fatness, SkeletalMeshVisualInfo * msh) {
 	Context->RSSetState(WorldRasterizerState);
 	Context->OMSetDepthStencilState(DefaultDepthStencilState, 0);
 
@@ -1244,20 +1243,18 @@ XRESULT D3D11GraphicsEngine::DrawSkeletalMesh(D3D11VertexBuffer* vb, D3D11Vertex
 	Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Get currently bound texture name
-	zCTexture* tex = Engine::GAPI->GetBoundTexture(0);
+	zCTexture * tex = Engine::GAPI->GetBoundTexture(0);
 
 	bool tesselationEnabled = Engine::GAPI->GetRendererState()->RendererSettings.EnableTesselation;
 
-	if (tex)
-	{
-		MaterialInfo* info = Engine::GAPI->GetMaterialInfoFrom(tex);
+	if (tex) {
+		MaterialInfo * info = Engine::GAPI->GetMaterialInfoFrom(tex);
 		if (!info->Constantbuffer)
 			info->UpdateConstantbuffer(); // TODO: Slow, save this somewhere!
 
 		// FIXME: Currently bodies and faces look really glossy. 
 		//		  This is only a temporary fix!	
-		if (info->buffer.SpecularIntensity != 0.05f)
-		{
+		if (info->buffer.SpecularIntensity != 0.05f) {
 			info->buffer.SpecularIntensity = 0.05f;
 			info->UpdateConstantbuffer(); 
 		}
@@ -1265,11 +1262,9 @@ XRESULT D3D11GraphicsEngine::DrawSkeletalMesh(D3D11VertexBuffer* vb, D3D11Vertex
 		info->Constantbuffer->BindToPixelShader(2);
 
 		// Bind a default normalmap in case the scene is wet and we currently have none
-		if (!tex->GetSurface()->GetNormalmap())
-		{
+		if (!tex->GetSurface()->GetNormalmap()) {
 			// Modify the strength of that default normalmap for the material info
-			if (info->buffer.NormalmapStrength/* * Engine::GAPI->GetSceneWetness()*/ != DEFAULT_NORMALMAP_STRENGTH)
-			{
+			if (info->buffer.NormalmapStrength/* * Engine::GAPI->GetSceneWetness()*/ != DEFAULT_NORMALMAP_STRENGTH) {
 				info->buffer.NormalmapStrength = DEFAULT_NORMALMAP_STRENGTH;
 				info->UpdateConstantbuffer();
 			}
@@ -1280,8 +1275,7 @@ XRESULT D3D11GraphicsEngine::DrawSkeletalMesh(D3D11VertexBuffer* vb, D3D11Vertex
 		// Select shader
 		BindShaderForTexture(tex);
 	
-		if (RenderingStage == DES_MAIN)
-		{
+		if (RenderingStage == DES_MAIN) {
 			/*if (tesselationEnabled && msh->TesselationInfo.buffer.VT_TesselationFactor > 0.0f)
 			{
 				MyDirectDrawSurface7* surface = tex->GetSurface();
@@ -1292,8 +1286,7 @@ XRESULT D3D11GraphicsEngine::DrawSkeletalMesh(D3D11VertexBuffer* vb, D3D11Vertex
 				Setup_PNAEN(PNAEN_Skeletal);
 				msh->TesselationInfo.Constantbuffer->BindToDomainShader(1);
 				msh->TesselationInfo.Constantbuffer->BindToHullShader(1);
-			}else*/ if (ActiveHDS)
-			{
+			}else*/ if (ActiveHDS) {
 				Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 				Context->DSSetShader(nullptr, nullptr, 0);
 				Context->HSSetShader(nullptr, nullptr, 0);
@@ -1301,8 +1294,6 @@ XRESULT D3D11GraphicsEngine::DrawSkeletalMesh(D3D11VertexBuffer* vb, D3D11Vertex
 			}
 		}
 	}
-
-
 
 	VS_ExConstantBuffer_PerInstanceSkeletal cb2;
 	cb2.World = world;
@@ -1316,38 +1307,32 @@ XRESULT D3D11GraphicsEngine::DrawSkeletalMesh(D3D11VertexBuffer* vb, D3D11Vertex
 	ActiveVS->GetConstantBuffer()[2]->UpdateBuffer(TempBonesD3DXmatrix);
 	ActiveVS->GetConstantBuffer()[2]->BindToVertexShader(2);
 
-	if (transforms.size() >= sizeof(TempBonesD3DXmatrix) / sizeof(TempBonesD3DXmatrix[0]))
-	{
+	if (transforms.size() >= sizeof(TempBonesD3DXmatrix) / sizeof(TempBonesD3DXmatrix[0])) {
 		LogWarn() << "SkeletalMesh has more than " << sizeof(TempBonesD3DXmatrix) / sizeof(TempBonesD3DXmatrix[0]) << " bones! (" << transforms.size() << ")Up this limit!";
 	}
 
 	ActiveVS->Apply();
 	ActivePS->Apply();
-
 	
 	UINT offset = 0;
 	UINT uStride = sizeof(ExSkelVertexStruct);
-	ID3D11Buffer* buffer = ((D3D11VertexBuffer *)vb)->GetVertexBuffer();
+	ID3D11Buffer * buffer = ((D3D11VertexBuffer *)vb)->GetVertexBuffer();
 	Context->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
 
-	if (sizeof(VERTEX_INDEX) == sizeof(unsigned short))
-	{
+	if (sizeof(VERTEX_INDEX) == sizeof(unsigned short)) {
 		Context->IASetIndexBuffer(((D3D11VertexBuffer *)ib)->GetVertexBuffer(), DXGI_FORMAT_R16_UINT, 0);
-	}else
-	{
+	} else {
 		Context->IASetIndexBuffer(((D3D11VertexBuffer *)ib)->GetVertexBuffer(), DXGI_FORMAT_R32_UINT, 0);
 	}
 
-	if (RenderingStage == DES_SHADOWMAP)
-	{
+	if (RenderingStage == DES_SHADOWMAP) {
 		// Unbind PixelShader in this case
 		Context->PSSetShader(nullptr, nullptr, 0);
 		ActivePS = nullptr;
 	}
 
 	bool linearDepth = (Engine::GAPI->GetRendererState()->GraphicsState.FF_GSwitches & GSWITCH_LINEAR_DEPTH) != 0;
-	if (linearDepth)
-	{
+	if (linearDepth) {
 		ActivePS = PS_LinDepth;
 		ActivePS->Apply();
 	}
@@ -1355,8 +1340,7 @@ XRESULT D3D11GraphicsEngine::DrawSkeletalMesh(D3D11VertexBuffer* vb, D3D11Vertex
 	//Draw the mesh
 	Context->DrawIndexed(numIndices, 0, 0);
 
-	if (ActiveHDS)
-	{
+	if (ActiveHDS) {
 		Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		Context->DSSetShader(nullptr, nullptr, 0);
 		Context->HSSetShader(nullptr, nullptr, 0);
@@ -1367,16 +1351,14 @@ XRESULT D3D11GraphicsEngine::DrawSkeletalMesh(D3D11VertexBuffer* vb, D3D11Vertex
 }
 
 /** Draws a batch of instanced geometry */
-XRESULT D3D11GraphicsEngine::DrawInstanced(D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices, void* instanceData, unsigned int instanceDataStride, unsigned int numInstances, unsigned int vertexStride)
-{
+XRESULT D3D11GraphicsEngine::DrawInstanced(D3D11VertexBuffer * vb, D3D11VertexBuffer * ib, unsigned int numIndices, void* instanceData, unsigned int instanceDataStride, unsigned int numInstances, unsigned int vertexStride) {
 	UpdateRenderStates();
 
 	// Check buffersize
 	D3D11_BUFFER_DESC desc;
 	((D3D11VertexBuffer *)DynamicInstancingBuffer)->GetVertexBuffer()->GetDesc(&desc);
 
-	if (desc.ByteWidth < instanceDataStride * numInstances)
-	{
+	if (desc.ByteWidth < instanceDataStride * numInstances) {
 		LogInfo() << "Instancing buffer too small (" << desc.ByteWidth << "), need " << instanceDataStride * numInstances << " bytes. Recreating buffer.";
 
 		// Buffer too small, recreate it
@@ -1399,16 +1381,12 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(D3D11VertexBuffer* vb, D3D11VertexBuf
 	D3DXMATRIX& view = Engine::GAPI->GetRendererState()->TransformState.TransformView;
 	D3DXMATRIX& proj = Engine::GAPI->GetProjectionMatrix();
 
-	
 	VS_ExConstantBuffer_PerFrame cb;
 	cb.View = view;
 	cb.Projection = proj;
 
 	VS_ExConstantBuffer_PerInstance cb2;
 	cb2.World = world;
-
-
-
 
 	vShader->GetConstantBuffer()[0]->UpdateBuffer(&cb);
 	vShader->GetConstantBuffer()[0]->BindToVertexShader(0);
@@ -1421,15 +1399,13 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(D3D11VertexBuffer* vb, D3D11VertexBuf
 	Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	UINT offset[] = {0,0};
 	UINT uStride[] = {vertexStride, instanceDataStride};
-	ID3D11Buffer* buffers[] = {((D3D11VertexBuffer *)vb)->GetVertexBuffer(),
+	ID3D11Buffer * buffers[] = {((D3D11VertexBuffer *)vb)->GetVertexBuffer(),
 		((D3D11VertexBuffer *)DynamicInstancingBuffer)->GetVertexBuffer()};
 	Context->IASetVertexBuffers(0, 2, buffers, uStride, offset);
 
-	if (sizeof(VERTEX_INDEX) == sizeof(unsigned short))
-	{
+	if (sizeof(VERTEX_INDEX) == sizeof(unsigned short)) {
 		Context->IASetIndexBuffer(((D3D11VertexBuffer *)ib)->GetVertexBuffer(), DXGI_FORMAT_R16_UINT, 0);
-	}else
-	{
+	} else {
 		Context->IASetIndexBuffer(((D3D11VertexBuffer *)ib)->GetVertexBuffer(), DXGI_FORMAT_R32_UINT, 0);
 	}
 
@@ -1440,20 +1416,17 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(D3D11VertexBuffer* vb, D3D11VertexBuf
 }
 
 /** Draws a batch of instanced geometry */
-XRESULT D3D11GraphicsEngine::DrawInstanced(D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices, D3D11VertexBuffer* instanceData, unsigned int instanceDataStride, unsigned int numInstances, unsigned int vertexStride, unsigned int startInstanceNum, unsigned int indexOffset)
-{
+XRESULT D3D11GraphicsEngine::DrawInstanced(D3D11VertexBuffer * vb, D3D11VertexBuffer * ib, unsigned int numIndices, D3D11VertexBuffer * instanceData, unsigned int instanceDataStride, unsigned int numInstances, unsigned int vertexStride, unsigned int startInstanceNum, unsigned int indexOffset) {
 	// Bind shader and pipeline flags
-	UINT offset[] = {0,0};
-	UINT uStride[] = {vertexStride, instanceDataStride};
-	ID3D11Buffer* buffers[] = {((D3D11VertexBuffer *)vb)->GetVertexBuffer(),
+	UINT offset[] = { 0, 0 };
+	UINT uStride[] = { vertexStride, instanceDataStride };
+	ID3D11Buffer * buffers[] = {((D3D11VertexBuffer *)vb)->GetVertexBuffer(),
 		((D3D11VertexBuffer *)instanceData)->GetVertexBuffer()};
 	Context->IASetVertexBuffers(0, 2, buffers, uStride, offset);
 
-	if (sizeof(VERTEX_INDEX) == sizeof(unsigned short))
-	{
+	if (sizeof(VERTEX_INDEX) == sizeof(unsigned short)) {
 		Context->IASetIndexBuffer(((D3D11VertexBuffer *)ib)->GetVertexBuffer(), DXGI_FORMAT_R16_UINT, 0);
-	}else
-	{
+	} else {
 		Context->IASetIndexBuffer(((D3D11VertexBuffer *)ib)->GetVertexBuffer(), DXGI_FORMAT_R32_UINT, 0);
 	}
 
