@@ -18,7 +18,6 @@ D3D11Texture::D3D11Texture() {
 }
 
 D3D11Texture::~D3D11Texture() {
-	LogInfo() << "Delete D3D11Texture: " << this;
 	// Remove from state map
 	Toolbox::EraseByElement(D3D11ObjectIDs::TextureByID, this);
 

@@ -450,20 +450,21 @@ void GVegetationBox::SetBoundingBox(const D3DXVECTOR3& bbMin, const D3DXVECTOR3&
 }
 
 /** Removes all vegetation in range of the given position */
-void GVegetationBox::RemoveVegetationAt(const D3DXVECTOR3& position, float range)
-{
+void GVegetationBox::RemoveVegetationAt(const D3DXVECTOR3 & position, float range) {
 	// Make a list of the vector
 	std::list<D3DXMATRIX> s(VegetationSpots.begin(), VegetationSpots.end());
 
 	// Remove everything in range
-	for(std::list<D3DXMATRIX>::iterator it = s.begin(); it != s.end(); it++)
-	{
+	for (std::list<D3DXMATRIX>::iterator it = s.begin(); it != s.end();) {
 		D3DXVECTOR3 spot = D3DXVECTOR3((*it)._14, (*it)._24, (*it)._34); 
 
 		float d = D3DXVec3Length(&(spot - position));
 
-		if (d < range)
+		if (d < range) {
 			it = s.erase(it);
+		} else {
+			++it;
+		}
 	}
 
 	// Reassign
@@ -474,8 +475,7 @@ void GVegetationBox::RemoveVegetationAt(const D3DXVECTOR3& position, float range
 	delete InstancingBuffer;
 	InstancingBuffer = nullptr;
 
-	if (!IsEmpty())
-	{
+	if (!IsEmpty()) {
 		Engine::GraphicsEngine->CreateVertexBuffer(&InstancingBuffer);
 		InstancingBuffer->Init(&VegetationSpots[0], VegetationSpots.size() * sizeof(D3DXMATRIX));
 	}

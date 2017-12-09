@@ -611,21 +611,19 @@ void D2DView::AddMessageBox(const std::string& caption, const std::string& messa
 }
 
 /** Checks dead message boxes and removes them */
-void D2DView::CheckDeadMessageBoxes()
-{
+void D2DView::CheckDeadMessageBoxes() {
 	// FIXME
-	for(auto it = MessageBoxes.begin(); it != MessageBoxes.end(); it++)
-	{
+	for (auto it = MessageBoxes.begin(); it != MessageBoxes.end();) {
 		// Delete the messagebox if it is hidden
-		if ((*it)->IsHidden())
-		{
-			MainSubView->DeleteChild((*it));
+		if ((*it)->IsHidden()) {
+			MainSubView->DeleteChild(*it);
 
 			it = MessageBoxes.erase(it);
-
-			// Capture mouse again
-			Engine::GAPI->SetEnableGothicInput(true);
-			break; // FIXME: Loop crashes when it reaches end here, not sure why.
+		} else {
+			++it;
 		}
 	}
+
+	// Capture mouse again
+	Engine::GAPI->SetEnableGothicInput(true);
 }

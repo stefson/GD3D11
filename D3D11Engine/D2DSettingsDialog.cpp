@@ -375,6 +375,7 @@ void D2DSettingsDialog::OnOpenedSettings() {
 
 /** Sets if this control is hidden */
 void D2DSettingsDialog::SetHidden(bool hidden) {
+	LogInfo() << "Opening settings";
 	if (IsHidden() && !hidden)
 		OnOpenedSettings(); // Changed visibility from hidden to non-hidden
 

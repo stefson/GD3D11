@@ -1514,14 +1514,11 @@ XRESULT D3D11GraphicsEngine::UnbindTexture(int slot)
 }
 
 /** Recreates the renderstates */
-XRESULT D3D11GraphicsEngine::UpdateRenderStates()
-{
-	if (Engine::GAPI->GetRendererState()->BlendState.StateDirty && Engine::GAPI->GetRendererState()->BlendState.Hash != FFBlendStateHash)
-	{
-		D3D11BlendStateInfo* state = (D3D11BlendStateInfo *)GothicStateCache::s_BlendStateMap[Engine::GAPI->GetRendererState()->BlendState];
+XRESULT D3D11GraphicsEngine::UpdateRenderStates() {
+	if (Engine::GAPI->GetRendererState()->BlendState.StateDirty && Engine::GAPI->GetRendererState()->BlendState.Hash != FFBlendStateHash) {
+		D3D11BlendStateInfo * state = (D3D11BlendStateInfo *)GothicStateCache::s_BlendStateMap[Engine::GAPI->GetRendererState()->BlendState];
 
-		if (!state)
-		{
+		if (!state) {
 			// Create new state
 			state = new D3D11BlendStateInfo(Engine::GAPI->GetRendererState()->BlendState);
 
@@ -1535,14 +1532,10 @@ XRESULT D3D11GraphicsEngine::UpdateRenderStates()
 		Context->OMSetBlendState(FFBlendState, (float *)&D3DXVECTOR4(0, 0, 0, 0), 0xFFFFFFFF);
 	}
 
-	
+	if (Engine::GAPI->GetRendererState()->RasterizerState.StateDirty && Engine::GAPI->GetRendererState()->RasterizerState.Hash != FFRasterizerStateHash) {
+		D3D11RasterizerStateInfo * state = (D3D11RasterizerStateInfo *)GothicStateCache::s_RasterizerStateMap[Engine::GAPI->GetRendererState()->RasterizerState];
 
-	if (Engine::GAPI->GetRendererState()->RasterizerState.StateDirty && Engine::GAPI->GetRendererState()->RasterizerState.Hash != FFRasterizerStateHash)
-	{
-		D3D11RasterizerStateInfo* state = (D3D11RasterizerStateInfo *)GothicStateCache::s_RasterizerStateMap[Engine::GAPI->GetRendererState()->RasterizerState];
-
-		if (!state)
-		{
+		if (!state) {
 			// Create new state
 			state = new D3D11RasterizerStateInfo(Engine::GAPI->GetRendererState()->RasterizerState);
 
@@ -1556,14 +1549,10 @@ XRESULT D3D11GraphicsEngine::UpdateRenderStates()
 		Context->RSSetState(FFRasterizerState);
 	}
 
-	
+	if (Engine::GAPI->GetRendererState()->DepthState.StateDirty && Engine::GAPI->GetRendererState()->DepthState.Hash != FFDepthStencilStateHash) {
+		D3D11DepthBufferState * state = (D3D11DepthBufferState *)GothicStateCache::s_DepthBufferMap[Engine::GAPI->GetRendererState()->DepthState];
 
-	if (Engine::GAPI->GetRendererState()->DepthState.StateDirty && Engine::GAPI->GetRendererState()->DepthState.Hash != FFDepthStencilStateHash)
-	{
-		D3D11DepthBufferState* state = (D3D11DepthBufferState *)GothicStateCache::s_DepthBufferMap[Engine::GAPI->GetRendererState()->DepthState];
-
-		if (!state)
-		{
+		if (!state) {
 			// Create new state
 			state = new D3D11DepthBufferState(Engine::GAPI->GetRendererState()->DepthState);
 
@@ -1577,14 +1566,11 @@ XRESULT D3D11GraphicsEngine::UpdateRenderStates()
 		Context->OMSetDepthStencilState(FFDepthStencilState, 0);
 	}
 
-	
-
 	return XR_SUCCESS;
 }
 
 /** Called when we started to render the world */
-XRESULT D3D11GraphicsEngine::OnStartWorldRendering()
-{
+XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 	//Clear(float4(0,0,0,0));
 	//Clear(float4(0xFF44AEFF));
 
@@ -1607,7 +1593,7 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering()
 
 	Context->RSSetViewports(1, &vp);
 
-	ID3D11RenderTargetView* rtvs[] = {GBuffer0_Diffuse->GetRenderTargetView(), GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView()};
+	ID3D11RenderTargetView * rtvs[] = { GBuffer0_Diffuse->GetRenderTargetView(), GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView() };
 	Context->OMSetRenderTargets(2, rtvs, DepthStencilBuffer->GetDepthStencilView());
 
 	Engine::GAPI->SetFarPlane(Engine::GAPI->GetRendererState()->RendererSettings.SectionDrawRadius * WORLD_SECTION_SIZE);
@@ -1631,15 +1617,15 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering()
 	OutdoorSmallVobsConstantBuffer->UpdateBuffer(&D3DXVECTOR4(Engine::GAPI->GetRendererState()->RendererSettings.OutdoorSmallVobDrawRadius, 0, 0, 0));
 	OutdoorVobsConstantBuffer->UpdateBuffer(&D3DXVECTOR4(Engine::GAPI->GetRendererState()->RendererSettings.OutdoorVobDrawRadius, 0, 0, 0));
 
-
 	// Update editor
-	if (UIView)UIView->Update(Engine::GAPI->GetFrameTimeSec());
+	if (UIView) {
+		UIView->Update(Engine::GAPI->GetFrameTimeSec());
+	}
 
 	Engine::GAPI->GetRendererState()->RasterizerState.FrontCounterClockwise = false;
 	Engine::GAPI->GetRendererState()->RasterizerState.SetDirty();
 
-	if (Engine::GAPI->GetRendererState()->RendererSettings.DrawSky)
-	{
+	if (Engine::GAPI->GetRendererState()->RendererSettings.DrawSky) {
 		// Draw back of the sky if outdoor
 		DrawSky();
 	}
@@ -1647,14 +1633,11 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering()
 	// Draw world
 	Engine::GAPI->DrawWorldMeshNaive();
 
-	
-
 	// Draw HBAO
 	if (Engine::GAPI->GetRendererState()->RendererSettings.HbaoSettings.Enabled)
 		PfxRenderer->DrawHBAO(HDRBackBuffer->GetRenderTargetView());
 
 	SetDefaultStates();
-	
 
 	//PfxRenderer->RenderDistanceBlur();
 	
@@ -1683,8 +1666,7 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering()
 	Context->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView());
 
 	// Draw unlit decals //FIXME: Only get them once!
-	if (Engine::GAPI->GetRendererState()->RendererSettings.DrawParticleEffects)
-	{
+	if (Engine::GAPI->GetRendererState()->RendererSettings.DrawParticleEffects) {
 		std::vector<zCVob *> decals;
 		Engine::GAPI->GetVisibleDecalList(decals);
 
@@ -1716,7 +1698,6 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering()
 
 	PresentPending = true;
 
-
 	// Set viewport for gothics rendering
 	vp.TopLeftX = 0.0f;
 	vp.TopLeftY = 0.0f;
@@ -1738,8 +1719,7 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering()
 	SetDefaultStates();
 
 	// Save screenshot if wanted
-	if (SaveScreenshotNextFrame)
-	{
+	if (SaveScreenshotNextFrame) {
 		SaveScreenshot();
 		SaveScreenshotNextFrame = false;
 	}
@@ -1747,13 +1727,15 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering()
 	return XR_SUCCESS;
 }
 
-
-void D3D11GraphicsEngine::SetupVS_ExMeshDrawCall()
-{
+void D3D11GraphicsEngine::SetupVS_ExMeshDrawCall() {
 	UpdateRenderStates();
 
-	if (ActiveVS)ActiveVS->Apply();
-	if (ActivePS)ActivePS->Apply();
+	if (ActiveVS) {
+		ActiveVS->Apply();
+	}
+	if (ActivePS) {
+		ActivePS->Apply();
+	}
 
 	Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
@@ -5627,17 +5609,13 @@ void D3D11GraphicsEngine::DrawFrameParticles(std::map<zCTexture*, std::vector<Pa
 }
 
 /** Called when a vob was removed from the world */
-XRESULT D3D11GraphicsEngine::OnVobRemovedFromWorld(zCVob* vob)
-{
+XRESULT D3D11GraphicsEngine::OnVobRemovedFromWorld(zCVob * vob) {
 	if (UIView)
 		UIView->GetEditorPanel()->OnVobRemovedFromWorld(vob);
-
 	
 	// Take out of shadowupdate queue
-	for (auto it = FrameShadowUpdateLights.begin();it!=FrameShadowUpdateLights.end();++it)
-	{
-		if ((*it)->Vob == vob)
-		{
+	for (auto it = FrameShadowUpdateLights.begin(); it != FrameShadowUpdateLights.end(); ++it) {
+		if ((*it)->Vob == vob) {
 			FrameShadowUpdateLights.erase(it);
 			break;
 		}
@@ -5649,8 +5627,7 @@ XRESULT D3D11GraphicsEngine::OnVobRemovedFromWorld(zCVob* vob)
 }
 
 /** Updates the occlusion for the bsp-tree */
-void D3D11GraphicsEngine::UpdateOcclusion()
-{
+void D3D11GraphicsEngine::UpdateOcclusion() {
 	if (!Engine::GAPI->GetRendererState()->RendererSettings.EnableOcclusionCulling)
 		return;
 

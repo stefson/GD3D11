@@ -200,7 +200,6 @@ public:
 		//float angle = GetMasterTime() * 2.0f * (float)D3DX_PI; // Get mastertime into rad, 0 and 12 are now at the horizon, 18 is in the sky
 		//angle += (float)D3DX_PI * 0.5f; // 12 is now in the sky, 18 horizon
 		float angle = ((GetMasterTime() * timeScale - 0.3f) * 1.25f + 0.5f) * 2.0f * (float)D3DX_PI;
-		LogInfo() << "Time: " << GetMasterTime() << ", angle: " << angle;
 
 		D3DXVECTOR3 sunPos = D3DXVECTOR3(-60, 0, 100);
 		D3DXVec3Normalize(&sunPos, &sunPos);

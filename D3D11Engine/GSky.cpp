@@ -38,23 +38,15 @@ GSky::GSky() {
 }
 
 GSky::~GSky() {
-	LogInfo() << "D'Tor GSky Start";
 	SAFE_DELETE(SkyPlaneVertexBuffer);
-	LogInfo() << "D'Tor GSky SkyPlaneVertexBuffer";
 	SAFE_DELETE(SkyDome);
-	LogInfo() << "D'Tor GSky SkyDome";
 	SAFE_DELETE(SkyPlane);
-	LogInfo() << "D'Tor GSky SkyPlane";
 	SAFE_DELETE(CloudTexture);
-	LogInfo() << "D'Tor GSky CloudTexture";
 	SAFE_DELETE(NightTexture);
-	LogInfo() << "D'Tor GSky NightTexture";
 
 	for (unsigned int i = 0; i < SkyTextures.size(); i++) {
 		SAFE_DELETE(SkyTextures[i]);
-		LogInfo() << "D'Tor GSky SkyTextures[" << i << "]";
 	}
-	LogInfo() << "D'Tor GSky End";
 }
 
 /** Creates needed resources by the sky */

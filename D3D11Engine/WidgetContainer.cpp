@@ -42,8 +42,7 @@ void WidgetContainer::ClearSelection()
 }
 
 /** Removes a single object from the selection */
-void WidgetContainer::RemoveSelection(BaseVobInfo* vob)
-{
+void WidgetContainer::RemoveSelection(BaseVobInfo * vob) {
 	Selection.erase(vob);
 }
 

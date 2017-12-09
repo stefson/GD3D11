@@ -39,7 +39,6 @@ D3D11GraphicsEngineBase::D3D11GraphicsEngineBase() {
 }
 
 D3D11GraphicsEngineBase::~D3D11GraphicsEngineBase() {
-	LogInfo() << "D'Tor D3D11GraphicsEngineBase Start";
 	GothicDepthBufferStateInfo::DeleteCachedObjects();
 	GothicBlendStateInfo::DeleteCachedObjects();
 	GothicRasterizerStateInfo::DeleteCachedObjects();
@@ -49,33 +48,19 @@ D3D11GraphicsEngineBase::~D3D11GraphicsEngineBase() {
 	}
 
 	SAFE_DELETE(TempVertexBuffer);
-	LogInfo() << "D'Tor D3D11GraphicsEngineBase TempVertexBuffer";
 	SAFE_DELETE(ShaderManager);
-	LogInfo() << "D'Tor D3D11GraphicsEngineBase ShaderManager";
 	SAFE_DELETE(Backbuffer);
-	LogInfo() << "D'Tor D3D11GraphicsEngineBase Backbuffer";
 	SAFE_DELETE(HDRBackBuffer);
-	LogInfo() << "D'Tor D3D11GraphicsEngineBase HDRBackBuffer";
 	SAFE_DELETE(LineRenderer);
-	LogInfo() << "D'Tor D3D11GraphicsEngineBase LineRenderer";
 	SAFE_DELETE(TransformsCB);
-	LogInfo() << "D'Tor D3D11GraphicsEngineBase TransformsCB";
 
 	SAFE_RELEASE(DefaultSamplerState);
-	LogInfo() << "D'Tor D3D11GraphicsEngineBase DefaultSamplerState";
 	SAFE_RELEASE(SwapChain);
-	LogInfo() << "D'Tor D3D11GraphicsEngineBase SwapChain";
-	LogInfo() << "Deffered Context is " << DeferredContext;
 	//SAFE_RELEASE(DeferredContext);
-	LogInfo() << "D'Tor D3D11GraphicsEngineBase DeferredContext";
 	SAFE_RELEASE(Context);
-	LogInfo() << "D'Tor D3D11GraphicsEngineBase Context";
 	SAFE_RELEASE(Device);
-	LogInfo() << "D'Tor D3D11GraphicsEngineBase Device";
 	SAFE_RELEASE(DXGIAdapter);
-	LogInfo() << "D'Tor D3D11GraphicsEngineBase DXGIAdapter";
 	SAFE_RELEASE(DXGIFactory);
-	LogInfo() << "D'Tor D3D11GraphicsEngineBase End";
 }
 
 /** Called after the fake-DDraw-Device got created */
