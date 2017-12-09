@@ -4177,7 +4177,6 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights)
 
 	// Update dir
 	if (fabs(D3DXVec3Dot(&oldDir, &dir)) > 0.9995f && false) {
-		LogInfo() << "Using old dir";
 		dir = oldDir;	
 	} else {
 		D3DXVECTOR3 target = dir;
@@ -4188,7 +4187,6 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights)
 		else
 			oldDir = dir;	
 
-		LogInfo() << "Using new dir";
 		smoothDir = dir;
 	}
 
