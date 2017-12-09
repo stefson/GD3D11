@@ -13,10 +13,9 @@ const float INDOOR_LIGHT_DISTANCE_SCALE_FACTOR = 0.5f;
 
 class zCBspBase;
 class zCModelPrototype;
-struct BspInfo
-{
-	BspInfo()
-	{
+
+struct BspInfo {
+	BspInfo() {
 		NumStaticLights = 0;
 		OriginalNode = nullptr;
 		Front = nullptr;
@@ -31,13 +30,11 @@ struct BspInfo
 		OcclusionInfo.NodeMesh = nullptr;
 	}
 
-	~BspInfo()
-	{
+	~BspInfo() {
 		delete OcclusionInfo.NodeMesh;
 	}
 
-	bool IsEmpty()
-	{
+	bool IsEmpty() {
 		return Vobs.empty() && IndoorVobs.empty() && SmallVobs.empty() && Lights.empty() && IndoorLights.empty();
 	}
 
@@ -54,8 +51,7 @@ struct BspInfo
 	int NumStaticLights;
 
 	/** Occlusion info for this node */
-	struct OcclusionInfo_s
-	{
+	struct OcclusionInfo_s {
 		unsigned int LastVisitedFrameID;
 		bool VisibleLastFrame;
 		int QueryID;
@@ -65,13 +61,12 @@ struct BspInfo
 	} OcclusionInfo;
 
 	// Original bsp-node
-	zCBspBase* OriginalNode;
-	BspInfo* Front;
-	BspInfo* Back;
+	zCBspBase * OriginalNode;
+	BspInfo * Front;
+	BspInfo * Back;
 };
 
-struct CameraReplacement
-{
+struct CameraReplacement {
 	D3DXMATRIX ViewReplacement;
 	D3DXMATRIX ProjectionReplacement;
 	D3DXVECTOR3 PositionReplacement;
@@ -81,18 +76,14 @@ struct CameraReplacement
 /** Version of this struct */
 const int MATERIALINFO_VERSION = 5;
 
-struct MaterialInfo
-{
-	enum EMaterialType
-	{
+struct MaterialInfo {
+	enum EMaterialType {
 		MT_None,
 		MT_Water,
 		MT_Ocean
 	};
 
-
-	MaterialInfo()
-	{
+	MaterialInfo() {
 		buffer.SpecularIntensity = 0.1f;
 		buffer.SpecularPower = 60.0f;
 		buffer.NormalmapStrength = 1.0f;
@@ -107,19 +98,17 @@ struct MaterialInfo
 		PixelShader = "";
 	}
 
-	~MaterialInfo()
-	{
+	~MaterialInfo() {
 		delete Constantbuffer;
 	}
 
 	/** Writes this info to a file */
-	void WriteToFile(const std::string& name);
+	void WriteToFile(const std::string & name);
 
 	/** Loads this info from a file */
-	void LoadFromFile(const std::string& name);
+	void LoadFromFile(const std::string & name);
 
-	struct Buffer
-	{
+	struct Buffer {
 		float SpecularIntensity;
 		float SpecularPower;
 		float NormalmapStrength;
@@ -131,7 +120,7 @@ struct MaterialInfo
 	/** creates/updates the constantbuffer */
 	void UpdateConstantbuffer();
 
-	D3D11ConstantBuffer* Constantbuffer;
+	D3D11ConstantBuffer * Constantbuffer;
 
 	std::string VertexShader;
 	std::string TesselationShaderPair;
@@ -143,9 +132,8 @@ struct MaterialInfo
 	VisualTesselationSettings TextureTesselationSettings;
 };
 
-struct ParticleFrameData
-{
-	unsigned char* Buffer;
+struct ParticleFrameData {
+	unsigned char * Buffer;
 	unsigned int BufferPosition;
 	unsigned int BufferSize;
 	unsigned int NeededSize;
@@ -166,8 +154,8 @@ class GVegetationBox;
 class GOcean;
 class zCMorphMesh;
 class zCDecal;
-class GothicAPI
-{
+
+class GothicAPI {
 public:
 	GothicAPI();
 	~GothicAPI();
@@ -185,10 +173,10 @@ public:
 	void SendMessageToGameWindow(UINT msg, WPARAM wParam, LPARAM lParam);
 
 	/** Called when the game is about to load a new level */
-	void OnLoadWorld(const std::string& levelName, int loadMode);
+	void OnLoadWorld(const std::string & levelName, int loadMode);
 
 	/** Called when the game loaded a new level */
-	void OnGeometryLoaded(zCPolygon** polys, unsigned int numPolygons);
+	void OnGeometryLoaded(zCPolygon ** polys, unsigned int numPolygons);
 
 	/** Called when the game is done loading the world */
 	void OnWorldLoaded();
@@ -197,28 +185,28 @@ public:
 	void OnWorldUpdate();
 
 	/** Called when a VOB got added to the BSP-Tree or the world */
-	void OnAddVob(zCVob* vob, zCWorld* world);
+	void OnAddVob(zCVob * vob, zCWorld * world);
 
 	/** Called when a VOB got removed from the world */
-	void OnRemovedVob(zCVob* vob, zCWorld* world);
+	void OnRemovedVob(zCVob * vob, zCWorld * world);
 
 	/** Called on a SetVisual-Call of a vob */
-	void OnSetVisual(zCVob* vob);
+	void OnSetVisual(zCVob * vob);
 
 	/** Called when a material got removed */
-	void OnMaterialDeleted(zCMaterial* mat);
+	void OnMaterialDeleted(zCMaterial * mat);
 
 	/** Called when a particle system got removed */
-	void OnParticleFXDeleted(zCParticleFX* pfx);
+	void OnParticleFXDeleted(zCParticleFX * pfx);
 
 	/** Called when a visual got removed */
-	void OnVisualDeleted(zCVisual* visual);
+	void OnVisualDeleted(zCVisual * visual);
 
 	/** Called when a vob moved */
-	void OnVobMoved(zCVob* vob);
+	void OnVobMoved(zCVob * vob);
 
 	/** Called when a material got removed */
-	void OnMaterialCreated(zCMaterial* mat);
+	void OnMaterialCreated(zCMaterial * mat);
 
 	/** Loads resources created for this .ZEN */
 	void LoadCustomZENResources();
@@ -227,22 +215,22 @@ public:
 	void SaveCustomZENResources();
 
 	/** Returns the GraphicsState */
-	GothicRendererState* GetRendererState();
+	GothicRendererState * GetRendererState();
 
 	/** Returns in which directory we started in */
-	const std::string& GetStartDirectory();
+	const std::string & GetStartDirectory();
 
 	/** Draws the world-mesh */
 	void DrawWorldMeshNaive();
 
 	/** Draws a skeletal mesh-vob */
-	void DrawSkeletalMeshVob(SkeletalVobInfo* vi, float distance);
+	void DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance);
 
 	/** Draws the inventory */
-	void DrawInventory(zCWorld* world, zCCamera& camera);
+	void DrawInventory(zCWorld * world, zCCamera & camera);
 
 	/** Draws a morphmesh */
-	void DrawMorphMesh(zCMorphMesh* msh, float fatness);
+	void DrawMorphMesh(zCMorphMesh * msh, float fatness);
 
 	/** Locks the resource CriticalSection */
 	void EnterResourceCriticalSection();
@@ -251,46 +239,46 @@ public:
 	void LeaveResourceCriticalSection();
 
 	/** Adds a future to the internal buffer */
-	void AddFuture(std::future<void>& future);
+	void AddFuture(std::future<void> & future);
 
 	/** Checks which futures are ready and cleans them */
 	void CleanFutures();
 
 	/** Draws a MeshInfo */
-	void DrawMeshInfo(zCMaterial* mat, MeshInfo* msh);
+	void DrawMeshInfo(zCMaterial * mat, MeshInfo * msh);
 
 	/** Draws a SkeletalMeshInfo */
-	void DrawSkeletalMeshInfo(zCMaterial* mat, SkeletalMeshInfo* msh, SkeletalMeshVisualInfo* vis, std::vector<D3DXMATRIX>& transforms, float fatness = 1.0f);
+	void DrawSkeletalMeshInfo(zCMaterial * mat, SkeletalMeshInfo * msh, SkeletalMeshVisualInfo * vis, std::vector<D3DXMATRIX> & transforms, float fatness = 1.0f);
 
 	/** Draws a zCParticleFX */
-	void DrawParticleFX(zCVob* source, zCParticleFX* fx, ParticleFrameData& data);
+	void DrawParticleFX(zCVob * source, zCParticleFX * fx, ParticleFrameData & data);
 
 	/** Gets a list of visible decals */
-	void GetVisibleDecalList(std::vector<zCVob *>& decals);
+	void GetVisibleDecalList(std::vector<zCVob *> & decals);
 
 	/** Returns a list of visible particle-effects */
-	void GetVisibleParticleEffectsList(std::vector<zCVob*>& pfxList);
+	void GetVisibleParticleEffectsList(std::vector<zCVob *> & pfxList);
 
 	/** Sets the world matrix */
-	void SetWorldTransform(const D3DXMATRIX& world);
+	void SetWorldTransform(const D3DXMATRIX & world);
 
 	/** Sets the View matrix */
-	void SetViewTransform(const D3DXMATRIX& view);
+	void SetViewTransform(const D3DXMATRIX & view);
 
 	/** Sets the Projection matrix */
-	void SetProjTransform(const D3DXMATRIX& proj);
+	void SetProjTransform(const D3DXMATRIX & proj);
 
 	/** Sets the Projection matrix */
 	D3DXMATRIX GetProjTransform();
 
 	/** Sets the world matrix */
-	void SetWorldTransform(const D3DXMATRIX& world, bool transpose);
+	void SetWorldTransform(const D3DXMATRIX & world, bool transpose);
 
 	/** Sets the world matrix */
-	void SetViewTransform(const D3DXMATRIX& view, bool transpose);
+	void SetViewTransform(const D3DXMATRIX & view, bool transpose);
 
 	/** Sets the world matrix */
-	void SetWorldViewTransform(const D3DXMATRIX& world, const D3DXMATRIX& view);
+	void SetWorldViewTransform(const D3DXMATRIX & world, const D3DXMATRIX & view);
 
 	/** Sets the world matrix */
 	void ResetWorldTransform();
@@ -302,7 +290,7 @@ public:
 	void DrawTriangle();
 
 	/** Removes the given quadmark */
-	void RemoveQuadMark(zCQuadMark* mark);
+	void RemoveQuadMark(zCQuadMark * mark);
 
 	/** Saves all sections information */
 	void SaveSectionInfos();
@@ -314,20 +302,20 @@ public:
 	bool IsUnderWater();
 
 	/** Returns the quadmark info for the given mark. Creates a new one if needed. */
-	QuadMarkInfo* GetQuadMarkInfo(zCQuadMark* mark);
+	QuadMarkInfo * GetQuadMarkInfo(zCQuadMark * mark);
 
 	/** Returns all quad marks */
-	const stdext::unordered_map<zCQuadMark*, QuadMarkInfo>& GetQuadMarks();
+	const stdext::unordered_map<zCQuadMark *, QuadMarkInfo> & GetQuadMarks();
 
 	/** Returns the loaded sections */
-	std::map<int, std::map<int, WorldMeshSectionInfo>>& GetWorldSections();
+	std::map<int, std::map<int, WorldMeshSectionInfo>> & GetWorldSections();
 
 	/** Returns the wrapped world mesh */
-	MeshInfo* GetWrappedWorldMesh();
+	MeshInfo * GetWrappedWorldMesh();
 
 	/** Returns the loaded skeletal mesh vobs */
-	std::list<SkeletalVobInfo *>& GetSkeletalMeshVobs();
-	std::list<SkeletalVobInfo *>& GetAnimatedSkeletalMeshVobs();
+	std::list<SkeletalVobInfo *> & GetSkeletalMeshVobs();
+	std::list<SkeletalVobInfo *> & GetAnimatedSkeletalMeshVobs();
 
 	/** Returns the current cameraposition */
 	D3DXVECTOR3 GetCameraPosition();
@@ -336,35 +324,35 @@ public:
 	D3DXVECTOR3 GetCameraForward();
 
 	/** Returns the view matrix */
-	void GetViewMatrix(D3DXMATRIX* view);
+	void GetViewMatrix(D3DXMATRIX * view);
 
 	/** Returns the view matrix */
-	void GetInverseViewMatrix(D3DXMATRIX* invView);
+	void GetInverseViewMatrix(D3DXMATRIX * invView);
 
 	/** Returns the projection-matrix */
-	D3DXMATRIX& GetProjectionMatrix();
+	D3DXMATRIX & GetProjectionMatrix();
 
 	/** Unprojects a pixel-position on the screen */
-	void Unproject(const D3DXVECTOR3& p, D3DXVECTOR3* worldPos, D3DXVECTOR3* worldDir);
+	void Unproject(const D3DXVECTOR3 & p, D3DXVECTOR3 * worldPos, D3DXVECTOR3 * worldDir);
 
 	/** Unprojects the current cursor, returns it's direction in world-space */
 	D3DXVECTOR3 UnprojectCursor();
 
 	/** Traces the worldmesh and returns the hit-location */
-	bool TraceWorldMesh(const D3DXVECTOR3& origin, const D3DXVECTOR3& dir, D3DXVECTOR3& hit, std::string* hitTextureName = nullptr, D3DXVECTOR3* hitTriangle = nullptr, MeshInfo** hitMesh = nullptr, zCMaterial** hitMaterial = nullptr);
+	bool TraceWorldMesh(const D3DXVECTOR3 & origin, const D3DXVECTOR3 & dir, D3DXVECTOR3 & hit, std::string * hitTextureName = nullptr, D3DXVECTOR3 * hitTriangle = nullptr, MeshInfo ** hitMesh = nullptr, zCMaterial ** hitMaterial = nullptr);
 
 	/** Traces vobs with static mesh visual */
-	VobInfo* TraceStaticMeshVobsBB(const D3DXVECTOR3& origin, const D3DXVECTOR3& dir, D3DXVECTOR3& hit, zCMaterial** hitMaterial = nullptr);
-	SkeletalVobInfo* TraceSkeletalMeshVobsBB(const D3DXVECTOR3& origin, const D3DXVECTOR3& dir, D3DXVECTOR3& hit);
+	VobInfo * TraceStaticMeshVobsBB(const D3DXVECTOR3 & origin, const D3DXVECTOR3 & dir, D3DXVECTOR3 & hit, zCMaterial ** hitMaterial = nullptr);
+	SkeletalVobInfo * TraceSkeletalMeshVobsBB(const D3DXVECTOR3 & origin, const D3DXVECTOR3 & dir, D3DXVECTOR3 & hit);
 
 	/** Traces a visual info. Returns -1 if not hit, distance otherwise */
-	float TraceVisualInfo(const D3DXVECTOR3& origin, const D3DXVECTOR3& dir, BaseVisualInfo* visual, zCMaterial** hitMaterial = nullptr);
+	float TraceVisualInfo(const D3DXVECTOR3 & origin, const D3DXVECTOR3 & dir, BaseVisualInfo * visual, zCMaterial ** hitMaterial = nullptr);
 
 	/** Applies tesselation-settings for all mesh-parts using the given info */
-	void ApplyTesselationSettingsForAllMeshPartsUsing(MaterialInfo* info, int amount = 1);
+	void ApplyTesselationSettingsForAllMeshPartsUsing(MaterialInfo * info, int amount = 1);
 
 	/** Returns the GSky-Object */
-	GSky* GetSky();
+	GSky * GetSky();
 
 	/** Returns the fog-color */
 	D3DXVECTOR3 GetFogColor();
@@ -373,16 +361,16 @@ public:
 	float GetFogOverride();
 
 	/** Returns the inventory */
-	GInventory* GetInventory();
+	GInventory * GetInventory();
 
 	/** Returns if the material is currently active */
-	bool IsMaterialActive(zCMaterial* mat);
+	bool IsMaterialActive(zCMaterial * mat);
 
 	/** Sets the current input state. Keeps an internal count of how many times it was disabled. */
 	void SetEnableGothicInput(bool value);
 
 	/** Returns the midpoint of the current world */
-	WorldInfo* GetLoadedWorldInfo(){return LoadedWorldInfo;}
+	WorldInfo * GetLoadedWorldInfo() { return LoadedWorldInfo; }
 
 	/** Returns wether the camera is indoor or not */
 	bool IsCameraIndoor();
@@ -406,31 +394,31 @@ public:
 	void DebugDrawBSPTree();
 
 	/** Recursive helper function to draw the BSP-Tree */
-	void DebugDrawTreeNode(zCBspBase* base, zTBBox3D boxCell, int clipFlags = 63);
+	void DebugDrawTreeNode(zCBspBase * base, zTBBox3D boxCell, int clipFlags = 63);
 
 	/** Draws particles, in a simple way */
 	void DrawParticlesSimple();
 
 	/** Moves the given vob from a BSP-Node to the dynamic vob list */
-	void MoveVobFromBspToDynamic(VobInfo* vob);
-	void MoveVobFromBspToDynamic(SkeletalVobInfo* vob);
+	void MoveVobFromBspToDynamic(VobInfo * vob);
+	void MoveVobFromBspToDynamic(SkeletalVobInfo * vob);
 
-	std::vector<VobInfo *>::iterator MoveVobFromBspToDynamic(VobInfo* vob, std::vector<VobInfo *>* source);
+	std::vector<VobInfo *>::iterator MoveVobFromBspToDynamic(VobInfo * vob, std::vector<VobInfo *> * source);
 
 	/** Collects vobs using gothics BSP-Tree */
-	void CollectVisibleVobs(std::vector<VobInfo *>& vobs, std::vector<VobLightInfo *>& lights, std::vector<SkeletalVobInfo *>& mobs);
+	void CollectVisibleVobs(std::vector<VobInfo *> & vobs, std::vector<VobLightInfo *> & lights, std::vector<SkeletalVobInfo *> & mobs);
 
 	/** Collects visible sections from the current camera perspective */
-	void CollectVisibleSections(std::list<WorldMeshSectionInfo*>& sections);
+	void CollectVisibleSections(std::list<WorldMeshSectionInfo *> & sections);
 
 	/** Builds our BspTreeVobMap */
 	void BuildBspVobMapCache();
 
 	/** Returns the new node from tha base node */
-	BspInfo* GetNewBspNode(zCBspBase* base);
+	BspInfo * GetNewBspNode(zCBspBase * base);
 
 	/** Returns our bsp-root-node */
-	BspInfo* GetNewRootNode();
+	BspInfo * GetNewRootNode();
 
 	/** Disables a problematic method which causes the game to conflict with other applications on startup */
 	static void DisableErrorMessageBroadcast();
@@ -447,13 +435,13 @@ public:
 	void ReloadTextures();
 
 	/** Returns true if the given string can be found in the commandline */
-	bool HasCommandlineParameter(const std::string& param);
+	bool HasCommandlineParameter(const std::string & param);
 
 	/** Gets the int-param from the ini. String must be UPPERCASE. */
-	int GetIntParamFromConfig(const std::string& param);
+	int GetIntParamFromConfig(const std::string & param);
 
 	/** Sets the given int param into the internal ini-cache. That does not set the actual value for the game! */
-	void SetIntParamFromConfig(const std::string& param, int value);
+	void SetIntParamFromConfig(const std::string & param, int value);
 
 	/** Resets the object, like at level load */
 	void ResetWorld();
@@ -462,77 +450,73 @@ public:
 	void ResetVobs();
 
 	/** Get material by texture name */
-	zCMaterial* GetMaterialByTextureName(const std::string& name);
-	void GetMaterialListByTextureName(const std::string& name, std::list<zCMaterial*>& list);
+	zCMaterial * GetMaterialByTextureName(const std::string & name);
+	void GetMaterialListByTextureName(const std::string & name, std::list<zCMaterial*> & list);
 
 	/** Returns the time since the last frame */
 	float GetDeltaTime();
 
 	/** If this returns true, the property holds the name of the currently bound texture. If that is the case, any MyDirectDrawSurfaces should not bind themselfes
 		to the pipeline, but rather check if there are additional textures to load */
-	bool IsInTextureTestBindMode(std::string& currentBoundTexture);
+	bool IsInTextureTestBindMode(std::string & currentBoundTexture);
 
 	/** Sets the current texture test bind mode status */
-	void SetTextureTestBindMode(bool enable, const std::string& currentTexture);
+	void SetTextureTestBindMode(bool enable, const std::string & currentTexture);
 
 	/** Sets the CameraReplacementPtr */
-	void SetCameraReplacementPtr(CameraReplacement* ptr){CameraReplacementPtr = ptr;}
+	void SetCameraReplacementPtr(CameraReplacement * ptr) { CameraReplacementPtr = ptr; }
 
 	/** Lets Gothic draw its sky */
 	void DrawSkyGothicOriginal();
 
 	/** Returns the material info associated with the given material */
-	MaterialInfo* GetMaterialInfoFrom(zCTexture* tex);
+	MaterialInfo * GetMaterialInfoFrom(zCTexture * tex);
 
 	/** Adds a surface */
-	void AddSurface(const std::string& name, MyDirectDrawSurface7* surface);
+	void AddSurface(const std::string & name, MyDirectDrawSurface7 * surface);
 
 	/** Gets a surface by texturename */
-	MyDirectDrawSurface7* GetSurface(const std::string& name);
+	MyDirectDrawSurface7 * GetSurface(const std::string & name);
 
 	/** Removes a surface */
-	void RemoveSurface(MyDirectDrawSurface7* surface);
+	void RemoveSurface(MyDirectDrawSurface7 * surface);
 
 	/** Returns a texture from the given surface */
-	zCTexture* GetTextureBySurface(MyDirectDrawSurface7* surface);
+	zCTexture * GetTextureBySurface(MyDirectDrawSurface7 * surface);
 
 	/** Resets all vob-stats drawn this frame */
-	void ResetVobFrameStats(std::list<VobInfo *>& vobs);
+	void ResetVobFrameStats(std::list<VobInfo *> & vobs);
 
 	/** Sets the currently bound texture */
-	void SetBoundTexture(int idx, zCTexture* tex);
-	zCTexture* GetBoundTexture(int idx);
+	void SetBoundTexture(int idx, zCTexture * tex);
+	zCTexture * GetBoundTexture(int idx);
 
 	/** Returns gothics output window */
-	HWND GetOutputWindow(){return OutputWindow;}
+	HWND GetOutputWindow() { return OutputWindow; }
 
 	/** Spawns a vegetationbox at the camera */
-	GVegetationBox* SpawnVegetationBoxAt(const D3DXVECTOR3& position, 
-		const D3DXVECTOR3& min = D3DXVECTOR3(-1000, -500, -1000), 
-		const D3DXVECTOR3& max = D3DXVECTOR3(1000, 500, 1000), 
-		float density = 1.0f,
-		const std::string& restrictByTexture = "");
+	GVegetationBox * SpawnVegetationBoxAt(const D3DXVECTOR3 & position,  const D3DXVECTOR3 & min = D3DXVECTOR3(-1000, -500, -1000), const D3DXVECTOR3 & max = D3DXVECTOR3(1000, 500, 1000), float density = 1.0f,const std::string & restrictByTexture = "");
 
 	/** Adds a vegetationbox to the world */
-	void AddVegetationBox(GVegetationBox* box);
+	void AddVegetationBox(GVegetationBox * box);
 
 	/** Returns the list of current GVegentationBoxes */
-	const std::list<GVegetationBox*>& GetVegetationBoxes(){return VegetationBoxes;}
+	const std::list<GVegetationBox *> & GetVegetationBoxes() { return VegetationBoxes; }
 
 	/** Removes a vegetationbox from the world */
-	void RemoveVegetationBox(GVegetationBox* box);
+	void RemoveVegetationBox(GVegetationBox * box);
 
 	/** Teleports the player to the given location */
-	void SetPlayerPosition(const D3DXVECTOR3& pos);
+	void SetPlayerPosition(const D3DXVECTOR3 & pos);
 
 	/** Returns the player-vob */
-	zCVob* GetPlayerVob();
+	zCVob * GetPlayerVob();
 
 	/** Returns the map of static mesh visuals */
-	const std::unordered_map<zCProgMeshProto*, MeshVisualInfo*>& GetStaticMeshVisuals(){return StaticMeshVisuals;}
+	const std::unordered_map<zCProgMeshProto *, MeshVisualInfo *> & GetStaticMeshVisuals() { return StaticMeshVisuals; }
 
 	/** Removes the given texture from the given section and stores the supression, so we can load it next time */
-	void SupressTexture(WorldMeshSectionInfo* section, const std::string& texture);
+	void SupressTexture(WorldMeshSectionInfo * section, const std::string & texture);
 
 	/** Resets the suppressed textures */
 	void ResetSupressedTextures();
@@ -541,20 +525,20 @@ public:
 	void ResetVegetation();
 
 	/** Saves Suppressed textures to a file */
-	XRESULT SaveSuppressedTextures(const std::string& file);
+	XRESULT SaveSuppressedTextures(const std::string & file);
 
 	/** Saves Suppressed textures to a file */
-	XRESULT LoadSuppressedTextures(const std::string& file);
+	XRESULT LoadSuppressedTextures(const std::string & file);
 
 	/** Saves vegetation to a file */
-	XRESULT SaveVegetation(const std::string& file);
+	XRESULT SaveVegetation(const std::string & file);
 
 	/** Saves vegetation to a file */
-	XRESULT LoadVegetation(const std::string& file);
+	XRESULT LoadVegetation(const std::string & file);
 
 	/** Sets/Gets the pending movie frame */
-	void SetPendingMovieFrame(D3D11Texture* frame);
-	D3D11Texture* GetPendingMovieFrame();
+	void SetPendingMovieFrame(D3D11Texture * frame);
+	D3D11Texture * GetPendingMovieFrame();
 
 	/** Returns the main-thread id */
 	DWORD GetMainThreadID();
@@ -569,16 +553,16 @@ public:
 	float GetSceneWetness();
 
 	/** Saves the users settings from the menu */
-	XRESULT SaveMenuSettings(const std::string& file);
+	XRESULT SaveMenuSettings(const std::string & file);
 
 	/** Loads the users settings from the menu */
-	XRESULT LoadMenuSettings(const std::string& file);
+	XRESULT LoadMenuSettings(const std::string & file);
 
 	/** Clears the array of this frame loaded textures */
 	void ClearFrameLoadedTextures();
 
 	/** Adds a texture to the list of the loaded textures for this frame */
-	void AddFrameLoadedTexture(MyDirectDrawSurface7* srf);
+	void AddFrameLoadedTexture(MyDirectDrawSurface7 * srf);
 
 	/** Sets loaded textures of this frame ready */
 	void SetFrameProcessedTexturesReady();
@@ -587,10 +571,10 @@ public:
 	void MoveLoadedTexturesToProcessedList();
 
 	/** Returns if the given vob is registered in the world */
-	SkeletalVobInfo* GetSkeletalVobByVob(zCVob* vob);
+	SkeletalVobInfo * GetSkeletalVobByVob(zCVob * vob);
 
 	/** Returns the frame particle info collected from all DrawParticleFX-Calls */
-	std::map<zCTexture*, ParticleRenderInfo>& GetFrameParticleInfo();
+	std::map<zCTexture *, ParticleRenderInfo> & GetFrameParticleInfo();
 
 	/** Checks if the normalmaps are there */
 	bool CheckNormalmapFilesOld();
@@ -602,74 +586,67 @@ public:
 	float GetBrightnessValue();
 
 	/** Returns the sections intersecting the given boundingboxes */
-	void GetIntersectingSections(const D3DXVECTOR3& min, const D3DXVECTOR3& max, std::vector<WorldMeshSectionInfo*>& sections);
+	void GetIntersectingSections(const D3DXVECTOR3 & min, const D3DXVECTOR3 & max, std::vector<WorldMeshSectionInfo *> & sections);
 
 	/** Generates zCPolygons for the loaded sections */
 	void CreatezCPolygonsForSections();
 
 	/** Collects polygons in the given AABB */
-	void CollectPolygonsInAABB(const zTBBox3D& bbox, zCPolygon **& polyList, int& numFound);
+	void CollectPolygonsInAABB(const zTBBox3D & bbox, zCPolygon **& polyList, int & numFound);
 
 	/** Returns the current ocean-object */
-	GOcean* GetOcean();
+	GOcean * GetOcean();
 
 	/** Loads the data out of a zCModel and stores it in the cache */
-	SkeletalMeshVisualInfo* LoadzCModelData(zCModel* model);
+	SkeletalMeshVisualInfo * LoadzCModelData(zCModel * model);
 
 	/** Prints a message to the screen for the given amount of time */
-	void PrintMessageTimed(const INT2& position, const std::string& strMessage, float time = 3000.0f, DWORD color = 0xFFFFFFFF);
+	void PrintMessageTimed(const INT2 & position, const std::string & strMessage, float time = 3000.0f, DWORD color = 0xFFFFFFFF);
 
 	/** Prints information about the mod to the screen for a couple of seconds */
 	void PrintModInfo();
 
 private:
 	/** Collects polygons in the given AABB */
-	void CollectPolygonsInAABBRec(BspInfo* base, const zTBBox3D& bbox, std::vector<zCPolygon *>& list);
+	void CollectPolygonsInAABBRec(BspInfo * base, const zTBBox3D & bbox, std::vector<zCPolygon *> & list);
 
 	/** Cleans empty BSPNodes */
 	void CleanBSPNodes();
 
 	/** Helper function for going through the bsp-tree */
-	void BuildBspVobMapCacheHelper(zCBspBase* base);
+	void BuildBspVobMapCacheHelper(zCBspBase * base);
 
 	/** Recursive helper function to draw collect the vobs */
-	void CollectVisibleVobsHelper(BspInfo* base, zTBBox3D boxCell, int clipFlags, std::vector<VobInfo *>& vobs, std::vector<VobLightInfo  *>& lights, std::vector<SkeletalVobInfo *>& mobs);
+	void CollectVisibleVobsHelper(BspInfo * base, zTBBox3D boxCell, int clipFlags, std::vector<VobInfo *> & vobs, std::vector<VobLightInfo  *> & lights, std::vector<SkeletalVobInfo *> & mobs);
 
 	/** Applys the suppressed textures */
 	void ApplySuppressedSectionTextures();
-	 
 
 	/** Puts the custom-polygons into the bsp-tree */
 	void PutCustomPolygonsIntoBspTree();
-	void PutCustomPolygonsIntoBspTreeRec(BspInfo* base);
+	void PutCustomPolygonsIntoBspTreeRec(BspInfo * base);
 
 	/** Hooked Window-Proc from the game */
-	static LRESULT CALLBACK GothicWndProc(
-		HWND hWnd,
-		UINT msg,
-		WPARAM wParam,
-		LPARAM lParam
-		);
-
+	static LRESULT CALLBACK GothicWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 	/** Goes through the given zCTree and registeres all found vobs */
-	void TraverseVobTree(zCTree<zCVob>* tree);
+	void TraverseVobTree(zCTree<zCVob> * tree);
 
 	/** Saved Graphics state */
 	GothicRendererState RendererState;
 
 	/** Loaded world mitpoint */
-	WorldInfo* LoadedWorldInfo;
+	WorldInfo * LoadedWorldInfo;
 
 	/** Currently bound textures from gothic */
-	zCTexture* BoundTextures[8];
+	zCTexture * BoundTextures[8];
 
-	std::map<zCTexture*, std::vector<ParticleInstanceInfo>> FrameParticles;
-	std::map<zCTexture*, ParticleRenderInfo> FrameParticleInfo;
+	std::map<zCTexture *, std::vector<ParticleInstanceInfo>> FrameParticles;
+	std::map<zCTexture *, ParticleRenderInfo> FrameParticleInfo;
 
 	/** Loaded game sections */
 	std::map<int, std::map<int, WorldMeshSectionInfo>> WorldSections;
-	MeshInfo* WrappedWorldMesh;
+	MeshInfo * WrappedWorldMesh;
 
 	/** List of vobs with skeletal meshes (Having a zCModel-Visual) */
 	std::list<SkeletalVobInfo *> SkeletalMeshVobs;
@@ -687,34 +664,34 @@ private:
 	std::set<MeshVisualInfo *> FrameMeshInstances;
 
 	/** Map for static mesh visuals */
-	std::unordered_map<zCProgMeshProto*, MeshVisualInfo*> StaticMeshVisuals;
+	std::unordered_map<zCProgMeshProto *, MeshVisualInfo *> StaticMeshVisuals;
 
 	/** Map for skeletal mesh visuals */
-	std::unordered_map<std::string, SkeletalMeshVisualInfo*> SkeletalMeshVisuals;
+	std::unordered_map<std::string, SkeletalMeshVisualInfo *> SkeletalMeshVisuals;
 
 	/** Set of all vobs we registered by now */
-	std::set<zCVob*> RegisteredVobs;
+	std::set<zCVob *> RegisteredVobs;
 
 	/** List of dynamically added vobs */
-	std::list<VobInfo*> DynamicallyAddedVobs;
+	std::list<VobInfo *> DynamicallyAddedVobs;
 
 	/** Map of vobs and VobIndfos */
-	std::unordered_map<zCVob*, VobInfo*> VobMap;
-	std::unordered_map<zCVobLight*, VobLightInfo*> VobLightMap;
-	std::unordered_map<zCVob*, SkeletalVobInfo*> SkeletalVobMap;
+	std::unordered_map<zCVob *, VobInfo *> VobMap;
+	std::unordered_map<zCVobLight *, VobLightInfo *> VobLightMap;
+	std::unordered_map<zCVob *, SkeletalVobInfo *> SkeletalVobMap;
 
 
 	/** Map of VobInfo-Lists for zCBspLeafs */
 	std::unordered_map<zCBspBase *, BspInfo> BspLeafVobLists;
 
 	/** Map for the material infos */
-	std::unordered_map<zCTexture*, MaterialInfo> MaterialInfos;
+	std::unordered_map<zCTexture *, MaterialInfo> MaterialInfos;
 
 	/** Maps visuals to vobs */
-	std::unordered_map<zCVisual*, std::list<BaseVobInfo *>> VobsByVisual;
+	std::unordered_map<zCVisual *, std::list<BaseVobInfo *>> VobsByVisual;
 
 	/** Map of textures */
-	std::unordered_map<std::string, MyDirectDrawSurface7*> SurfacesByName;
+	std::unordered_map<std::string, MyDirectDrawSurface7 *> SurfacesByName;
 
 	/** Directory we started in */
 	std::string StartDirectory;
@@ -724,10 +701,10 @@ private:
 	std::mutex ResourceMutex;
 
 	/** Sky renderer */
-	GSky* SkyRenderer;
+	GSky * SkyRenderer;
 
 	/** Inventory manager */
-	GInventory* Inventory;
+	GInventory * Inventory;
 
 	/** Saved Wnd-Proc pointer from the game */
 	LONG_PTR OriginalGothicWndProc;
@@ -737,25 +714,25 @@ private:
 	std::string BoundTestTexture;
 
 	/** Replacement values for the camera */
-	CameraReplacement* CameraReplacementPtr;
+	CameraReplacement * CameraReplacementPtr;
 
 	/** List of available GVegetationBoxes */
-	std::list<GVegetationBox*> VegetationBoxes;
+	std::list<GVegetationBox *> VegetationBoxes;
 
 	/** Gothics output window */
 	HWND OutputWindow;
 
 	/** Ocean */
-	GOcean* Ocean;
+	GOcean * Ocean;
 
 	/** Suppressed textures for the sections */
-	std::map<WorldMeshSectionInfo*, std::vector<std::string>> SuppressedTexturesBySection;
+	std::map<WorldMeshSectionInfo *, std::vector<std::string>> SuppressedTexturesBySection;
 
 	/** Current camera, stored to find out about camera switches */
-	zCCamera* CurrentCamera;
+	zCCamera * CurrentCamera;
 
 	/** Currently pending movie frame */
-	D3D11Texture* PendingMovieFrame;
+	D3D11Texture * PendingMovieFrame;
 
 	/** The id of the main thread */
 	DWORD MainThreadID;
@@ -765,7 +742,7 @@ private:
 	std::vector<MyDirectDrawSurface7 *> FrameProcessedTextures;
 
 	/** Quad marks loaded in the world */
-	stdext::unordered_map<zCQuadMark*, QuadMarkInfo> QuadMarks;
+	stdext::unordered_map<zCQuadMark *, QuadMarkInfo> QuadMarks;
 
 	/** Map of parameters from the .ini */
 	std::map<std::string, int> ConfigIntValues;
@@ -776,4 +753,3 @@ private:
 	/** Internal list of futures, so they can run until they are finished */
 	std::vector<std::future<void>> FutureList;
 };
-
