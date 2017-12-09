@@ -1,6 +1,7 @@
 #pragma once
 
 #include "HookedFunctions.h"
+#include "zCMaterial.h"
 #include "zCVisual.h"
 
 struct DecalSettings {
