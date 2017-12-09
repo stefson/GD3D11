@@ -5072,7 +5072,7 @@ void D3D11GraphicsEngine::DrawDecalList(const std::vector<zCVob *> & decals, boo
 
 	int lastAlphaFunc = -1;
 	for (unsigned int i = 0; i < decals.size(); i++) {
-		zCDecal * d = dynamic_cast<zCDecal *>(decals[i]->GetVisual());
+		zCDecal * d = (zCDecal *) decals[i]->GetVisual();
 
 		LogInfo() << decals[i]->GetVisual() << " " << d;
 
