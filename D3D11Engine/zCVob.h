@@ -15,13 +15,13 @@ enum EVisualCamAlignType
 	zVISUAL_CAM_ALIGN_FULL = 2
 };
 
-class zCVisual;
 class zCBspLeaf;
+class zCVisual;
 class zCWorld;
+
 class zCVob
 {
 public:
-
 	/** Hooks the functions of this Class */
 	static void Hook()
 	{

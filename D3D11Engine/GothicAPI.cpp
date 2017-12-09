@@ -226,7 +226,7 @@ void GothicAPI::OnWorldUpdate() {
 
 	// Fix the ice-texture if it is loaded, this is for the original game and only a quick fix
 	// TODO: Fix properly!
-	if (LoadedWorldInfo->WorldName == "OLDWORLD") {
+	/*if (LoadedWorldInfo->WorldName == "OLDWORLD") {
 		static bool s_fixed = false;
 		if (!s_fixed) {
 			// Get material, this is nullptr when the texture isn't loaded which is why we need to check for it every frame until we got it
@@ -245,7 +245,7 @@ void GothicAPI::OnWorldUpdate() {
 				}
 			}
 		}
-	}
+	}*/
 
 	// Do rain-effects
 	if (oCGame::GetGame()->_zCSession_world && oCGame::GetGame()->_zCSession_world->GetSkyControllerOutdoor())
@@ -627,46 +627,39 @@ void GothicAPI::OnWorldLoaded()
 #endif
 }
 
-/** Goes through the given zCTree and registeres all found vobs */
-void GothicAPI::TraverseVobTree(zCTree<zCVob>* tree)
+/** Goes through the given zCTree and registers all found vobs */
+void GothicAPI::TraverseVobTree(zCTree<zCVob> * tree)
 {
 	// Iterate through the nodes
-	if (tree->FirstChild != nullptr)
-	{
+	if (tree->FirstChild != nullptr) {
 		TraverseVobTree(tree->FirstChild);
 	}
 
-	if (tree->Next != nullptr)
-	{
+	if (tree->Next != nullptr) {
 		TraverseVobTree(tree->Next);
 	}
 
 	// Add the vob if it exists and has a visual
-	if (tree->Data)
-	{
+	if (tree->Data) {
 		if (tree->Data->GetVisual())
 			OnAddVob(tree->Data, (zCWorld *)oCGame::GetGame()->_zCSession_world);
 	}
 }
 
 /** Returns in which directory we started in */
-const std::string& GothicAPI::GetStartDirectory()
-{
+const std::string & GothicAPI::GetStartDirectory() {
 	return StartDirectory;
 }
 
 /** Builds the static mesh instancing cache */
-void GothicAPI::BuildStaticMeshInstancingCache()
-{
-	for (std::unordered_map<zCProgMeshProto*, MeshVisualInfo *>::iterator it = StaticMeshVisuals.begin(); it != StaticMeshVisuals.end(); ++it)
-	{
+void GothicAPI::BuildStaticMeshInstancingCache() {
+	for (std::unordered_map<zCProgMeshProto *, MeshVisualInfo *>::iterator it = StaticMeshVisuals.begin(); it != StaticMeshVisuals.end(); ++it) {
 		it->second->StartNewFrame();
 	}
 }
 
 /** Draws the world-mesh */
-void GothicAPI::DrawWorldMeshNaive()
-{
+void GothicAPI::DrawWorldMeshNaive() {
 	if (!zCCamera::GetCamera() || !oCGame::GetGame())
 		return;
 
@@ -695,17 +688,13 @@ void GothicAPI::DrawWorldMeshNaive()
 	FrameParticles.clear();
 	FrameMeshInstances.clear();
 
-	//for (int i=0;i<100;i++)
-	
 	START_TIMING();
 	Engine::GraphicsEngine->DrawWorldMesh();
 	STOP_TIMING(GothicRendererTiming::TT_WorldMesh);
 
-	for (std::list<GVegetationBox *>::iterator it = VegetationBoxes.begin(); it != VegetationBoxes.end();++it)
-	{
+	for (std::list<GVegetationBox *>::iterator it = VegetationBoxes.begin(); it != VegetationBoxes.end(); ++it) {
 		(*it)->RenderVegetation(GetCameraPosition());
 	}
-
 
 	//Engine::GraphicsEngine->SetActivePixelShader("PS_Simple");
 
@@ -724,14 +713,12 @@ void GothicAPI::DrawWorldMeshNaive()
 	int sectionViewDist = Engine::GAPI->GetRendererState()->RendererSettings.SectionDrawRadius;
 
 	START_TIMING();
-	if (RendererState.RendererSettings.DrawSkeletalMeshes)
-	{
+	if (RendererState.RendererSettings.DrawSkeletalMeshes) {
 		Engine::GraphicsEngine->SetActivePixelShader("PS_World");
 		// Set up frustum for the camera
 		zCCamera::GetCamera()->Activate();
 
-		for (std::list<SkeletalVobInfo *>::iterator it = AnimatedSkeletalVobs.begin(); it != AnimatedSkeletalVobs.end(); ++it)
-		{
+		for (std::list<SkeletalVobInfo *>::iterator it = AnimatedSkeletalVobs.begin(); it != AnimatedSkeletalVobs.end(); ++it) {
 			// Don't render if sleeping and has skeletal meshes available
 			if (!(*it)->VisualInfo)// || ((*it)->Vob->GetSleepingMode() == 0 && !((SkeletalMeshVisualInfo *)(*it)->VisualInfo)->SkeletalMeshes.empty()))
 				continue;
@@ -781,7 +768,6 @@ void GothicAPI::DrawWorldMeshNaive()
 
 	// Draw vobs in view
 	Engine::GraphicsEngine->DrawVOBs();
-
 
 	// Draw ocean
 	//if (Ocean)
@@ -884,26 +870,22 @@ void GothicAPI::GetVisibleParticleEffectsList(std::vector<zCVob*>& pfxList)
 	}
 }
 
-static bool DecalSortcmpFunc(const std::pair<zCVob *, float>& a, const std::pair<zCVob *, float>& b)
-{
+static bool DecalSortcmpFunc(const std::pair<zCVob *, float> & a, const std::pair<zCVob *, float> & b) {
 	return a.second > b.second; // Back to front
 }
 
 /** Gets a list of visible decals */
-void GothicAPI::GetVisibleDecalList(std::vector<zCVob *>& decals)
-{
+void GothicAPI::GetVisibleDecalList(std::vector<zCVob *> & decals) {
 	D3DXVECTOR3 camPos = GetCameraPosition();
 	static std::vector<std::pair<zCVob *, float>> decalDistances; // Static to get around reallocations
 
-	for (std::list<zCVob *>::iterator it = DecalVobs.begin(); it != DecalVobs.end(); ++it)
-	{
+	for (std::list<zCVob *>::iterator it = DecalVobs.begin(); it != DecalVobs.end(); ++it) {
 		float dist = D3DXVec3Length(&((*it)->GetPositionWorld() - camPos));
 		if (dist > RendererState.RendererSettings.VisualFXDrawRadius)
 			continue;
 
-		if ((*it)->GetVisual())
-		{
-			decalDistances.push_back(std::make_pair((*it), dist));
+		if ((*it)->GetVisual()) {
+			decalDistances.push_back(std::make_pair(*it, dist));
 		}
 	}
 
@@ -911,18 +893,15 @@ void GothicAPI::GetVisibleDecalList(std::vector<zCVob *>& decals)
 	std::sort(decalDistances.begin(), decalDistances.end(), DecalSortcmpFunc);
 
 	// Put into output list
-	for (auto it = decalDistances.begin(); it != decalDistances.end(); ++it)
-	{
+	for (auto it = decalDistances.begin(); it != decalDistances.end(); ++it) {
 		decals.push_back(it->first);
 	}
 
 	decalDistances.clear();
-
 }
 
 /** Called when a material got removed */
-void GothicAPI::OnMaterialDeleted(zCMaterial * mat)
-{
+void GothicAPI::OnMaterialDeleted(zCMaterial * mat) {
 	LoadedMaterials.erase(mat);
 	if (!mat)
 		return;
@@ -939,7 +918,6 @@ void GothicAPI::OnMaterialDeleted(zCMaterial * mat)
 		}
 	}*/
 	
-	
 	for (std::unordered_map<std::string, SkeletalMeshVisualInfo *>::iterator it = SkeletalMeshVisuals.begin(); it != SkeletalMeshVisuals.end(); ++it) {
 		it->second->Meshes.erase(mat);
 		it->second->SkeletalMeshes.erase(mat);
@@ -952,13 +930,10 @@ void GothicAPI::OnMaterialDeleted(zCMaterial * mat)
 			}
 		}*/
 	}
-
-	
 }
 
-/** Called when a material got removed */
-void GothicAPI::OnMaterialCreated(zCMaterial* mat)
-{
+/** Called when a material got created */
+void GothicAPI::OnMaterialCreated(zCMaterial * mat) {
 	LoadedMaterials.insert(mat);
 }
 
@@ -1352,8 +1327,7 @@ void GothicAPI::OnRemovedVob(zCVob * vob, zCWorld * world) {
 }
 
 /** Called on a SetVisual-Call of a vob */
-void GothicAPI::OnSetVisual(zCVob* vob)
-{
+void GothicAPI::OnSetVisual(zCVob * vob) {
 	if (!oCGame::GetGame() || !oCGame::GetGame()->_zCSession_world || !vob->GetHomeWorld())
 		return;
 
@@ -1365,12 +1339,9 @@ void GothicAPI::OnSetVisual(zCVob* vob)
 
 	// Add the vob to the set
 	std::set<zCVob *>::iterator it = RegisteredVobs.find(vob);
-	if (it != RegisteredVobs.end())
-	{
-		for (std::list<SkeletalVobInfo *>::iterator it = SkeletalMeshVobs.begin(); it != SkeletalMeshVobs.end(); ++it)
-		{
-			if ((*it)->VisualInfo && (*it)->Vob == vob && (*it)->VisualInfo->Visual == (zCModel *)vob->GetVisual())
-			{
+	if (it != RegisteredVobs.end()) {
+		for (std::list<SkeletalVobInfo *>::iterator it = SkeletalMeshVobs.begin(); it != SkeletalMeshVobs.end(); ++it) {
+			if ((*it)->VisualInfo && (*it)->Vob == vob && (*it)->VisualInfo->Visual == (zCModel *)vob->GetVisual()) {
 				return; // No change, skip this.
 			}
 		}
@@ -1474,8 +1445,6 @@ void GothicAPI::OnAddVob(zCVob * vob, zCWorld * world) {
 			if (str.empty()) // Happens when the model has no skeletal-mesh
 				str = mds;
 
-			LogInfo() << str;
-
 			if (str == "HAMMEL_BODY") {
 				str == "SHEEP_BODY"; // FIXME: HAMMEL_BODY seems to have fucked up bones, but only this model! Replace with usual sheep before I fix this
 				if (!SkeletalMeshVisuals[str]) {
@@ -1530,8 +1499,7 @@ void GothicAPI::OnAddVob(zCVob * vob, zCWorld * world) {
 }
 
 /** Loads the data out of a zCModel */
-SkeletalMeshVisualInfo * GothicAPI::LoadzCModelData(zCModel * model)
-{
+SkeletalMeshVisualInfo * GothicAPI::LoadzCModelData(zCModel * model) {
 	std::string mds = model->GetModelName().ToChar();
 	std::string str = model->GetVisualName();
 
@@ -1540,8 +1508,7 @@ SkeletalMeshVisualInfo * GothicAPI::LoadzCModelData(zCModel * model)
 
 	SkeletalMeshVisualInfo * mi = SkeletalMeshVisuals[str];
 
-	if (!mi || mi->Meshes.empty())
-	{
+	if (!mi || mi->Meshes.empty()) {
 		// Load the new visual
 		if (!mi)
 			mi = new SkeletalMeshVisualInfo;

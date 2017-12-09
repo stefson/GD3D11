@@ -50,8 +50,8 @@ void WorldConverter::WorldMeshCollectPolyRange(const D3DXVECTOR3 & position, flo
 				WorldMeshSectionInfo & section = (*ity).second;
 
 				// Check all polys from all meshes
-				for (std::map<MeshKey, WorldMeshInfo*>::const_iterator it = section.WorldMeshes.begin(); it != section.WorldMeshes.end(); ++it) {
-					WorldMeshInfo* m;
+				for (std::map<MeshKey, WorldMeshInfo *>::const_iterator it = section.WorldMeshes.begin(); it != section.WorldMeshes.end(); ++it) {
+					WorldMeshInfo * m;
 					
 					// Create new mesh-part for alphatested surfaces
 					if (it->first.Texture && it->first.Texture->HasAlphaChannel()) {
@@ -105,7 +105,7 @@ void WorldConverter::WorldMeshCollectPolyRange(const D3DXVECTOR3 & position, flo
 }
 
 /** Converts a loaded custommesh to be the worldmesh */
-XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string& file, std::map<int, std::map<int, WorldMeshSectionInfo>>* outSections, WorldInfo* info, MeshInfo** outWrappedMesh)
+XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string& file, std::map<int, std::map<int, WorldMeshSectionInfo>>* outSections, WorldInfo* info, MeshInfo ** outWrappedMesh)
 {
 	GMesh* mesh = new GMesh();
 
@@ -145,7 +145,7 @@ XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string& file, std::map<
 	for(unsigned int m = 0;m<meshes.size();m++)
 	{
 		D3D11Texture* customTexture = nullptr;
-		zCMaterial* mat = Engine::GAPI->GetMaterialByTextureName(textures[m]);
+		zCMaterial * mat = Engine::GAPI->GetMaterialByTextureName(textures[m]);
 		MeshKey key;
 		key.Material = mat;
 		key.Texture = mat != nullptr ? mat->GetTexture() : nullptr;
@@ -288,7 +288,7 @@ XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string& file, std::map<
 			numSections++;
 			avgSections += D3DXVECTOR2((float)(*itx).first, (float)(*ity).first);
 
-			for(std::map<MeshKey, WorldMeshInfo*>::iterator it = section.WorldMeshes.begin(); it != section.WorldMeshes.end();it++)
+			for(std::map<MeshKey, WorldMeshInfo *>::iterator it = section.WorldMeshes.begin(); it != section.WorldMeshes.end();it++)
 			{
 				std::vector<ExVertexStruct> indexedVertices;
 				std::vector<VERTEX_INDEX> indices;
@@ -342,7 +342,7 @@ XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string& file, std::map<
 			WorldMeshSectionInfo& section = (*ity).second;
 
 			int numIndices = 0;
-			for(std::map<MeshKey, WorldMeshInfo*>::iterator it = section.WorldMeshes.begin(); it != section.WorldMeshes.end();it++)
+			for(std::map<MeshKey, WorldMeshInfo *>::iterator it = section.WorldMeshes.begin(); it != section.WorldMeshes.end();it++)
 			{
 				it->second->BaseIndexLocation = offsets[i];
 				numIndices += it->second->Indices.size();
@@ -358,7 +358,7 @@ XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string& file, std::map<
 	}
 
 	// Create the buffers for wrapped mesh
-	MeshInfo* wmi = new MeshInfo;
+	MeshInfo * wmi = new MeshInfo;
 	Engine::GraphicsEngine->CreateVertexBuffer(&wmi->MeshVertexBuffer);
 	Engine::GraphicsEngine->CreateVertexBuffer(&wmi->MeshIndexBuffer);
 	
@@ -386,7 +386,7 @@ XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string& file, std::map<
 }
 
 /** Converts the worldmesh into a PNAEN-buffer */
-HRESULT WorldConverter::ConvertWorldMeshPNAEN(zCPolygon** polys, unsigned int numPolygons, std::map<int, std::map<int, WorldMeshSectionInfo>>* outSections, WorldInfo* info, MeshInfo** outWrappedMesh)
+HRESULT WorldConverter::ConvertWorldMeshPNAEN(zCPolygon** polys, unsigned int numPolygons, std::map<int, std::map<int, WorldMeshSectionInfo>>* outSections, WorldInfo* info, MeshInfo ** outWrappedMesh)
 {
 	// Go through every polygon and put it into it's section
 	for(unsigned int i=0;i<numPolygons;i++)
@@ -466,7 +466,7 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN(zCPolygon** polys, unsigned int nu
 
 		// Use the map to put the polygon to those using the same material
 
-		zCMaterial* mat = poly->GetMaterial();
+		zCMaterial * mat = poly->GetMaterial();
 		MeshKey key;
 		key.Texture = mat != nullptr ? mat->GetTexture() : nullptr;
 		key.Material = mat;
@@ -540,7 +540,7 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN(zCPolygon** polys, unsigned int nu
 			numSections++;
 			avgSections += D3DXVECTOR2((float)(*itx).first, (float)(*ity).first);
 
-			for(std::map<MeshKey, WorldMeshInfo*>::iterator it = section.WorldMeshes.begin(); it != section.WorldMeshes.end();it++)
+			for(std::map<MeshKey, WorldMeshInfo *>::iterator it = section.WorldMeshes.begin(); it != section.WorldMeshes.end();it++)
 			{
 				std::vector<ExVertexStruct> indexedVertices;
 				std::vector<VERTEX_INDEX> indices;
@@ -597,7 +597,7 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN(zCPolygon** polys, unsigned int nu
 		{
 			WorldMeshSectionInfo& section = (*ity).second;
 
-			for(std::map<MeshKey, WorldMeshInfo*>::iterator it = section.WorldMeshes.begin(); it != section.WorldMeshes.end();it++)
+			for(std::map<MeshKey, WorldMeshInfo *>::iterator it = section.WorldMeshes.begin(); it != section.WorldMeshes.end();it++)
 			{
 				MaterialInfo* info = Engine::GAPI->GetMaterialInfoFrom(it->first.Texture);
 				info->TesselationShaderPair = "PNAEN_Tesselation";
@@ -610,7 +610,7 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN(zCPolygon** polys, unsigned int nu
 	}
 
 	// Create the buffers for wrapped mesh
-	MeshInfo* wmi = new MeshInfo;
+	MeshInfo * wmi = new MeshInfo;
 	Engine::GraphicsEngine->CreateVertexBuffer(&wmi->MeshVertexBuffer);
 	Engine::GraphicsEngine->CreateVertexBuffer(&wmi->MeshIndexBuffer);
 	
@@ -634,7 +634,7 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN(zCPolygon** polys, unsigned int nu
 }
 
 /** Converts the worldmesh into a more usable format */
-HRESULT WorldConverter::ConvertWorldMesh(zCPolygon** polys, unsigned int numPolygons, std::map<int, std::map<int, WorldMeshSectionInfo>>* outSections, WorldInfo* info, MeshInfo** outWrappedMesh)
+HRESULT WorldConverter::ConvertWorldMesh(zCPolygon** polys, unsigned int numPolygons, std::map<int, std::map<int, WorldMeshSectionInfo>>* outSections, WorldInfo* info, MeshInfo ** outWrappedMesh)
 {
 	// Go through every polygon and put it into its section
 	for (unsigned int i = 0; i < numPolygons; i++) {
@@ -708,7 +708,7 @@ HRESULT WorldConverter::ConvertWorldMesh(zCPolygon** polys, unsigned int numPoly
 
 		// Use the map to put the polygon to those using the same material
 
-		zCMaterial* mat = poly->GetMaterial();
+		zCMaterial * mat = poly->GetMaterial();
 		MeshKey key;
 		key.Texture = mat != nullptr ? mat->GetTexture() : nullptr;
 		key.Material = mat;
@@ -768,7 +768,7 @@ HRESULT WorldConverter::ConvertWorldMesh(zCPolygon** polys, unsigned int numPoly
 			numSections++;
 			avgSections += D3DXVECTOR2((float)(*itx).first, (float)(*ity).first);
 
-			for (std::map<MeshKey, WorldMeshInfo*>::iterator it = section.WorldMeshes.begin(); it != section.WorldMeshes.end(); ++it) {
+			for (std::map<MeshKey, WorldMeshInfo *>::iterator it = section.WorldMeshes.begin(); it != section.WorldMeshes.end(); ++it) {
 				std::vector<ExVertexStruct> indexedVertices;
 				std::vector<VERTEX_INDEX> indices;
 				IndexVertices(&it->second->Vertices[0], it->second->Vertices.size(), indexedVertices, indices);
@@ -822,7 +822,7 @@ HRESULT WorldConverter::ConvertWorldMesh(zCPolygon** polys, unsigned int numPoly
 		for(std::map<int, WorldMeshSectionInfo>::iterator ity = (*itx).second.begin(); ity != (*itx).second.end(); ++ity) {
 			WorldMeshSectionInfo& section = (*ity).second;
 
-			for (std::map<MeshKey, WorldMeshInfo*>::iterator it = section.WorldMeshes.begin(); it != section.WorldMeshes.end(); ++it) {
+			for (std::map<MeshKey, WorldMeshInfo *>::iterator it = section.WorldMeshes.begin(); it != section.WorldMeshes.end(); ++it) {
 				it->second->BaseIndexLocation = offsets[i];
 
 				i++;
@@ -873,7 +873,7 @@ HRESULT WorldConverter::ConvertWorldMesh(zCPolygon** polys, unsigned int numPoly
 void WorldConverter::GenerateFullSectionMesh(WorldMeshSectionInfo& section)
 {
 	std::vector<ExVertexStruct> vx;
-	for (std::map<MeshKey, WorldMeshInfo*>::iterator it = section.WorldMeshes.begin(); it != section.WorldMeshes.end(); ++it) {
+	for (std::map<MeshKey, WorldMeshInfo *>::iterator it = section.WorldMeshes.begin(); it != section.WorldMeshes.end(); ++it) {
 		if (!it->first.Material ||
 			it->first.Material->HasAlphaTest())
 			continue;
@@ -898,7 +898,7 @@ void WorldConverter::GenerateFullSectionMesh(WorldMeshSectionInfo& section)
 		D3DXMatrixTranspose(&world, &world);
 
 		// Insert the vob
-		for(std::map<zCMaterial *, std::vector<MeshInfo*>>::iterator itm = (*it)->VisualInfo->Meshes.begin(); itm != (*it)->VisualInfo->Meshes.end();itm++)
+		for(std::map<zCMaterial *, std::vector<MeshInfo *>>::iterator itm = (*it)->VisualInfo->Meshes.begin(); itm != (*it)->VisualInfo->Meshes.end();itm++)
 		{
 			if (!(*itm).first ||
 				(*itm).first->HasAlphaTest())
@@ -1005,7 +1005,7 @@ void WorldConverter::SaveSectionsToObjUnindexed(const char* file, const std::map
 		{
 			const WorldMeshSectionInfo& section = (*ity).second;
 
-			for(std::map<MeshKey, WorldMeshInfo*>::const_iterator it = section.WorldMeshes.begin(); it != section.WorldMeshes.end();it++)
+			for(std::map<MeshKey, WorldMeshInfo *>::const_iterator it = section.WorldMeshes.begin(); it != section.WorldMeshes.end();it++)
 			{
 				for(unsigned int i=0;i<it->second->Vertices.size();i++)
 				{
@@ -1068,9 +1068,9 @@ void WorldConverter::Extract3DSMeshFromVisual(zCProgMeshProto* visual, MeshVisua
 			indices.push_back(visual->GetSubmesh(i)->WedgeList.Get(visual->GetSubmesh(i)->TriList.Get(n).wedge[2]).position);
 		}
 		
-		zCMaterial* mat = visual->GetSubmesh(i)->Material;
+		zCMaterial * mat = visual->GetSubmesh(i)->Material;
 
-		MeshInfo* mi = new MeshInfo;
+		MeshInfo * mi = new MeshInfo;
 
 		mi->Vertices = vertices;
 		mi->Indices = indices;
@@ -1090,22 +1090,19 @@ void WorldConverter::Extract3DSMeshFromVisual(zCProgMeshProto* visual, MeshVisua
 }
 
 /** Extracts a skeletal mesh from a zCMeshSoftSkin */
-void WorldConverter::ExtractSkeletalMeshFromVob(zCModel* model, SkeletalMeshVisualInfo* skeletalMeshInfo)
-{
+void WorldConverter::ExtractSkeletalMeshFromVob(zCModel * model, SkeletalMeshVisualInfo * skeletalMeshInfo) {
 	// This type has multiple skinned meshes inside
-	for(int i=0;i<model->GetMeshSoftSkinList()->NumInArray;i++)
-	{
-		zCMeshSoftSkin* s = model->GetMeshSoftSkinList()->Array[i];
+	for (int i = 0; i < model->GetMeshSoftSkinList()->NumInArray; i++) {
+		zCMeshSoftSkin * s = model->GetMeshSoftSkinList()->Array[i];
 		std::vector<ExSkelVertexStruct> posList;
 
 		// This stream is built as the following:
 		// 4byte int - Num of nodes
 		// sizeof(zTWeightEntry) - The entry
-		char* stream = s->GetVertWeightStream();
+		char * stream = s->GetVertWeightStream();
 
 		// Get bone weights for each vertex
-		for(int i=0; i<s->GetPositionList()->NumInArray;i++)
-		{
+		for (int i = 0; i < s->GetPositionList()->NumInArray; i++) {
 			// Get num of nodes
 			int numNodes = *(int *)stream;
 			stream += 4;
@@ -1118,8 +1115,7 @@ void WorldConverter::ExtractSkeletalMeshFromVob(zCModel* model, SkeletalMeshVisu
 			ZeroMemory(vx.Position, sizeof(vx.Position));
 			ZeroMemory(vx.boneIndices, sizeof(vx.boneIndices));
 
-			for(int n=0;n<numNodes;n++)
-			{
+			for (int n = 0; n < numNodes; n++) {
 				// Get entry
 				zTWeightEntry weightEntry = *(zTWeightEntry *)stream;
 				stream += sizeof(zTWeightEntry);
@@ -1128,8 +1124,7 @@ void WorldConverter::ExtractSkeletalMeshFromVob(zCModel* model, SkeletalMeshVisu
 				//	(*vx.Normal.toD3DXVECTOR3()) += weightEntry.Weight * (*s->GetNormalsList()->Array[i].toD3DXVECTOR3());
 
 				// Get index and weight
-				if (n < 4)
-				{
+				if (n < 4) {
 					vx.weights[n] = weightEntry.Weight;
 					vx.boneIndices[n] = weightEntry.NodeIndex;
 					vx.Position[n] = weightEntry.VertexPosition;
@@ -1139,11 +1134,8 @@ void WorldConverter::ExtractSkeletalMeshFromVob(zCModel* model, SkeletalMeshVisu
 			posList.push_back(vx);
 		}
 
-		
-
 		// The rest is the same as a zCProgMeshProto, but with a different vertex type
-		for(int i=0;i<s->GetNumSubmeshes();i++)
-		{
+		for (int i = 0; i < s->GetNumSubmeshes(); i++) {
 			std::vector<ExSkelVertexStruct> vertices;
 			std::vector<ExVertexStruct> bindPoseVertices;
 			std::vector<VERTEX_INDEX> indices;
@@ -1151,17 +1143,14 @@ void WorldConverter::ExtractSkeletalMeshFromVob(zCModel* model, SkeletalMeshVisu
 			zCSubMesh* m = s->GetSubmesh(i);
 
 			// Get indices
-			for(int t=0;t<m->TriList.NumInArray;t++)
-			{				
-				for(int v=0;v<3;v++)
-				{
+			for (int t = 0; t < m->TriList.NumInArray; t++) {				
+				for (int v = 0; v < 3; v++) {
 					indices.push_back(m->TriList.Array[t].wedge[v]);
 				}
 			}
 
 			// Get vertices
-			for(int v=0;v<m->WedgeList.NumInArray;v++)
-			{
+			for (int v = 0; v < m->WedgeList.NumInArray; v++) {
 				ExSkelVertexStruct vx;
 				vx = posList[m->WedgeList.Array[v].position];
 				vx.TexCoord	= m->WedgeList.Array[v].texUV;
@@ -1180,9 +1169,9 @@ void WorldConverter::ExtractSkeletalMeshFromVob(zCModel* model, SkeletalMeshVisu
 				bindPoseVertices.push_back(pvx);
 			}
 		
-			zCMaterial* mat = s->GetSubmesh(i)->Material;
+			zCMaterial * mat = s->GetSubmesh(i)->Material;
 
-			SkeletalMeshInfo* mi = new SkeletalMeshInfo;
+			SkeletalMeshInfo * mi = new SkeletalMeshInfo;
 			mi->Vertices = vertices;
 			mi->Indices = indices;
 			mi->visual = s;
@@ -1209,8 +1198,7 @@ void WorldConverter::ExtractSkeletalMeshFromVob(zCModel* model, SkeletalMeshVisu
 			mi->MeshVertexBuffer->Init(&mi->Vertices[0], mi->Vertices.size() * sizeof(ExSkelVertexStruct), D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_IMMUTABLE);
 			mi->MeshIndexBuffer->Init(&mi->Indices[0], mi->Indices.size() * sizeof(VERTEX_INDEX), D3D11VertexBuffer::B_INDEXBUFFER, D3D11VertexBuffer::U_IMMUTABLE);
 
-
-			MeshInfo* bmi = new MeshInfo;
+			MeshInfo * bmi = new MeshInfo;
 			bmi->Indices = indices;
 			bmi->Vertices = bindPoseVertices;
 			
@@ -1219,8 +1207,6 @@ void WorldConverter::ExtractSkeletalMeshFromVob(zCModel* model, SkeletalMeshVisu
 
 			bmi->MeshVertexBuffer->Init(&bmi->Vertices[0], bmi->Vertices.size() * sizeof(ExVertexStruct), D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_IMMUTABLE);
 			bmi->MeshIndexBuffer->Init(&bmi->Indices[0], bmi->Indices.size() * sizeof(VERTEX_INDEX), D3D11VertexBuffer::B_INDEXBUFFER, D3D11VertexBuffer::U_IMMUTABLE);
-
-			
 
 			Engine::GAPI->GetRendererState()->RendererInfo.SkeletalVerticesDataSize += mi->Vertices.size() * sizeof(ExVertexStruct);
 			Engine::GAPI->GetRendererState()->RendererInfo.SkeletalVerticesDataSize += mi->Indices.size() * sizeof(VERTEX_INDEX);
@@ -1250,12 +1236,12 @@ void WorldConverter::ExtractSkeletalMeshFromVob(zCModel* model, SkeletalMeshVisu
 }
 
 /** Extracts a skeletal mesh from a zCMeshSoftSkin */
-void WorldConverter::ExtractSkeletalMeshFromProto(zCModelMeshLib* model, SkeletalMeshVisualInfo* skeletalMeshInfo)
+void WorldConverter::ExtractSkeletalMeshFromProto(zCModelMeshLib* model, SkeletalMeshVisualInfo * skeletalMeshInfo)
 {
 	// This type has multiple skinned meshes inside
 	for(int i=0;i<model->GetMeshSoftSkinList()->NumInArray;i++)
 	{
-		zCMeshSoftSkin* s = model->GetMeshSoftSkinList()->Array[i];
+		zCMeshSoftSkin * s = model->GetMeshSoftSkinList()->Array[i];
 		std::vector<ExSkelVertexStruct> posList;
 
 		// This stream is built as the following:
@@ -1340,9 +1326,9 @@ void WorldConverter::ExtractSkeletalMeshFromProto(zCModelMeshLib* model, Skeleta
 				bindPoseVertices.push_back(pvx);
 			}
 		
-			zCMaterial* mat = s->GetSubmesh(i)->Material;
+			zCMaterial * mat = s->GetSubmesh(i)->Material;
 
-			SkeletalMeshInfo* mi = new SkeletalMeshInfo;
+			SkeletalMeshInfo * mi = new SkeletalMeshInfo;
 			mi->Vertices = vertices;
 			mi->Indices = indices;
 			mi->visual = s;
@@ -1370,7 +1356,7 @@ void WorldConverter::ExtractSkeletalMeshFromProto(zCModelMeshLib* model, Skeleta
 			mi->MeshIndexBuffer->Init(&mi->Indices[0], mi->Indices.size() * sizeof(VERTEX_INDEX), D3D11VertexBuffer::B_INDEXBUFFER, D3D11VertexBuffer::U_IMMUTABLE);
 
 
-			MeshInfo* bmi = new MeshInfo;
+			MeshInfo * bmi = new MeshInfo;
 			bmi->Indices = indices;
 			bmi->Vertices = bindPoseVertices;
 			
@@ -1479,7 +1465,7 @@ void WorldConverter::Extract3DSMeshFromVisual2PNAEN(zCProgMeshProto* visual, Mes
 
 	std::list<std::vector<ExVertexStruct>*> vertexBuffers;
 	std::list<std::vector<VERTEX_INDEX>*> indexBuffers;
-	std::list<MeshInfo*> meshInfos;
+	std::list<MeshInfo *> meshInfos;
 
 	// Construct unindexed mesh
 	for(int i=0; i < visual->GetNumSubmeshes(); i++)
@@ -1517,7 +1503,7 @@ void WorldConverter::Extract3DSMeshFromVisual2PNAEN(zCProgMeshProto* visual, Mes
 		}
 
 		// Create the buffers and sort the mesh into the structure
-		MeshInfo* mi = new MeshInfo;
+		MeshInfo * mi = new MeshInfo;
 
 		// Create the indexed mesh
 		std::vector<ExVertexStruct> ixVertices;
@@ -1542,7 +1528,7 @@ void WorldConverter::Extract3DSMeshFromVisual2PNAEN(zCProgMeshProto* visual, Mes
 		Engine::GAPI->GetRendererState()->RendererInfo.VOBVerticesDataSize += mi->Vertices.size() * sizeof(ExVertexStruct);
 		Engine::GAPI->GetRendererState()->RendererInfo.VOBVerticesDataSize += mi->Indices.size() * sizeof(VERTEX_INDEX);
 
-		zCMaterial* mat = visual->GetSubmesh(i)->Material;
+		zCMaterial * mat = visual->GetSubmesh(i)->Material;
 		meshInfo->Meshes[mat].push_back(mi);
 
 		MeshKey key;
@@ -1572,14 +1558,14 @@ void WorldConverter::Extract3DSMeshFromVisual2PNAEN(zCProgMeshProto* visual, Mes
 
 	// Propergate the offsets
 	int i=0;
-	for(std::list<MeshInfo*>::iterator it = meshInfos.begin(); it != meshInfos.end();it++)
+	for(std::list<MeshInfo *>::iterator it = meshInfos.begin(); it != meshInfos.end();it++)
 	{	
 		(*it)->BaseIndexLocation = offsets[i] * 6;
 
 		i++;
 	}
 
-	MeshInfo* wmi = new MeshInfo;
+	MeshInfo * wmi = new MeshInfo;
 	Engine::GraphicsEngine->CreateVertexBuffer(&wmi->MeshVertexBuffer);
 	Engine::GraphicsEngine->CreateVertexBuffer(&wmi->MeshIndexBuffer);
 	
@@ -1616,7 +1602,7 @@ void WorldConverter::Extract3DSMeshFromVisual2(zCProgMeshProto* visual, MeshVisu
 
 	std::list<std::vector<ExVertexStruct>*> vertexBuffers;
 	std::list<std::vector<VERTEX_INDEX>*> indexBuffers;
-	std::list<MeshInfo*> meshInfos;
+	std::list<MeshInfo *> meshInfos;
 
 	// Construct unindexed mesh
 	for(int i=0; i < visual->GetNumSubmeshes(); i++)
@@ -1659,7 +1645,7 @@ void WorldConverter::Extract3DSMeshFromVisual2(zCProgMeshProto* visual, MeshVisu
 		}
 
 		// Create the buffers and sort the mesh into the structure
-		MeshInfo* mi = new MeshInfo;
+		MeshInfo * mi = new MeshInfo;
 
 		// Create the indexed mesh
 		if (vertices.empty())
@@ -1697,7 +1683,7 @@ void WorldConverter::Extract3DSMeshFromVisual2(zCProgMeshProto* visual, MeshVisu
 		Engine::GAPI->GetRendererState()->RendererInfo.VOBVerticesDataSize += mi->Vertices.size() * sizeof(ExVertexStruct);
 		Engine::GAPI->GetRendererState()->RendererInfo.VOBVerticesDataSize += mi->Indices.size() * sizeof(VERTEX_INDEX);
 
-		zCMaterial* mat = visual->GetSubmesh(i)->Material;
+		zCMaterial * mat = visual->GetSubmesh(i)->Material;
 		meshInfo->Meshes[mat].push_back(mi);
 
 		MeshKey key;
@@ -1723,14 +1709,14 @@ void WorldConverter::Extract3DSMeshFromVisual2(zCProgMeshProto* visual, MeshVisu
 
 		// Propergate the offsets
 		int i = 0;
-		for(std::list<MeshInfo*>::iterator it = meshInfos.begin(); it != meshInfos.end(); it++)
+		for(std::list<MeshInfo *>::iterator it = meshInfos.begin(); it != meshInfos.end(); it++)
 		{
 			(*it)->BaseIndexLocation = offsets[i];
 
 			i++;
 		}
 
-		MeshInfo* wmi = new MeshInfo;
+		MeshInfo * wmi = new MeshInfo;
 		Engine::GraphicsEngine->CreateVertexBuffer(&wmi->MeshVertexBuffer);
 		Engine::GraphicsEngine->CreateVertexBuffer(&wmi->MeshIndexBuffer);
 
@@ -2159,7 +2145,7 @@ void WorldConverter::UpdateQuadMarkInfo(QuadMarkInfo* info, zCQuadMark* mark, co
 }
 
 /** Turns a MeshInfo into PNAEN */
-void WorldConverter::CreatePNAENInfoFor(MeshInfo* mesh, bool softNormals)
+void WorldConverter::CreatePNAENInfoFor(MeshInfo * mesh, bool softNormals)
 {
 	delete mesh->MeshIndexBufferPNAEN;
 	Engine::GraphicsEngine->CreateVertexBuffer(&mesh->MeshIndexBufferPNAEN);
@@ -2175,7 +2161,7 @@ void WorldConverter::CreatePNAENInfoFor(MeshInfo* mesh, bool softNormals)
 }
 
 
-void WorldConverter::CreatePNAENInfoFor(WorldMeshInfo* mesh, bool softNormals)
+void WorldConverter::CreatePNAENInfoFor(WorldMeshInfo * mesh, bool softNormals)
 {
 	delete mesh->MeshIndexBufferPNAEN;
 	Engine::GraphicsEngine->CreateVertexBuffer(&mesh->MeshIndexBufferPNAEN);
@@ -2191,7 +2177,7 @@ void WorldConverter::CreatePNAENInfoFor(WorldMeshInfo* mesh, bool softNormals)
 }
 
 /** Turns a MeshInfo into PNAEN */
-void WorldConverter::CreatePNAENInfoFor(SkeletalMeshInfo* mesh, MeshInfo* bindPoseMesh, bool softNormals)
+void WorldConverter::CreatePNAENInfoFor(SkeletalMeshInfo * mesh, MeshInfo * bindPoseMesh, bool softNormals)
 {
 	delete mesh->MeshIndexBufferPNAEN;
 	Engine::GraphicsEngine->CreateVertexBuffer(&mesh->MeshIndexBufferPNAEN);
@@ -2230,7 +2216,7 @@ void WorldConverter::CreatePNAENInfoFor(SkeletalMeshInfo* mesh, MeshInfo* bindPo
 }
 
 /** Converts ExVertexStruct into a zCPolygon*-Attay */
-void WorldConverter::ConvertExVerticesTozCPolygons(const std::vector<ExVertexStruct>& vertices, const std::vector<VERTEX_INDEX>& indices, zCMaterial* material, std::vector<zCPolygon *>& polyArray)
+void WorldConverter::ConvertExVerticesTozCPolygons(const std::vector<ExVertexStruct>& vertices, const std::vector<VERTEX_INDEX>& indices, zCMaterial * material, std::vector<zCPolygon *>& polyArray)
 {
 	for(size_t i=0;i<indices.size();i+=3)
 	{
@@ -2272,7 +2258,7 @@ void WorldConverter::ConvertExVerticesTozCPolygons(const std::vector<ExVertexStr
 }
 
 /** Tesselates the given mesh the given amount of times */
-void WorldConverter::TesselateMesh(WorldMeshInfo* mesh, int amount)
+void WorldConverter::TesselateMesh(WorldMeshInfo * mesh, int amount)
 {
 	// Copy old vertices so we can directly write to the vectors again
 	std::vector<ExVertexStruct> vxOld = mesh->Vertices;

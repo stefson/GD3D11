@@ -1,16 +1,10 @@
 #pragma once
-#include "pch.h"
+
 #include "HookedFunctions.h"
-#include "zCPolygon.h"
-#include "Engine.h"
-#include "GothicAPI.h"
-#include "zSTRING.h"
-#include "zCMaterial.h"
 #include "zCVisual.h"
 
-struct DecalSettings
-{
-	zCMaterial* DecalMaterial;
+struct DecalSettings {
+	zCMaterial * DecalMaterial;
 	D3DXVECTOR2 DecalSize;
 	D3DXVECTOR2 DecalOffset;
 	BOOL DecalTwoSided;
@@ -18,17 +12,13 @@ struct DecalSettings
 	BOOL DecalOnTop;
 };
 
-class zCDecal : public zCVisual
-{
+class zCDecal : public zCVisual {
 public:
-
-	DecalSettings* GetDecalSettings()
-	{
+	DecalSettings * GetDecalSettings() {
 		return (DecalSettings *)THISPTR_OFFSET(GothicMemoryLocations::zCDecal::Offset_DecalSettings);
 	}
 
-	bool GetAlphaTestEnabled()
-	{
+	bool GetAlphaTestEnabled() {
 #ifdef BUILD_GOTHIC_1_08k
 		return GetDecalSettings()->DecalMaterial->GetAlphaFunc() == zMAT_ALPHA_FUNC_TEST;
 #else

@@ -1,17 +1,13 @@
 #pragma once
-#include "pch.h"
-#include "HookedFunctions.h"
-#include "zCPolygon.h"
+
 #include "Engine.h"
 #include "GothicAPI.h"
+#include "HookedFunctions.h"
 #include "zSTRING.h"
 
-class zCVisual
-{
+class zCVisual {
 public:
-
-	enum EVisualType 
-	{
+	enum EVisualType {
 		VT_OTHER,
 		VT_PROGMESHPROTO,
 		VT_MODEL,
@@ -21,51 +17,44 @@ public:
 	};
 
 	/** Hooks the functions of this Class */
-	static void Hook()
-	{
+	static void Hook() {
 		HookedFunctions::OriginalFunctions.original_zCVisualDestructor = (GenericDestructor)DetourFunction((BYTE *)GothicMemoryLocations::zCVisual::Destructor, (BYTE *)zCVisual::Hooked_Destructor);
 	}
 
-	static void __fastcall Hooked_Destructor(void* thisptr, void* unknwn)
-	{
+	static void __fastcall Hooked_Destructor(void * thisptr, void * unknwn) {
 		hook_infunc
 		// Notify the world
 		if (Engine::GAPI)
 			Engine::GAPI->OnVisualDeleted((zCVisual *)thisptr);
 
 		HookedFunctions::OriginalFunctions.original_zCVisualDestructor(thisptr);
-
 		hook_outfunc
 	}
 
 	/** File extension this visual uses. Handy for finding out what class this is */
-	const char* GetFileExtension(int i)
-	{
-		if (__GetFileExtension(i))
-			return __GetFileExtension(i)->ToChar();
+	const char * GetFileExtension(int i) {
+		const zSTRING * extension = __GetFileExtension(i);
+		if (extension)
+			return extension->ToChar();
 
 		return "";
 	}
 
-	const char* GetObjectName()
-	{
+	const char * GetObjectName() {
 		return __GetObjectName().ToChar();
 	}
 
 	/** Returns the class-type of this visual */
-	EVisualType GetVisualType()
-	{
+	EVisualType GetVisualType() {
 		std::vector<std::string> extv;
 	
-		int e=0;
-		while(strlen(GetFileExtension(e)) > 0)
-		{
+		int e = 0;
+		while (strlen(GetFileExtension(e)) > 0) {
 			extv.push_back(GetFileExtension(e));
 			e++;
 		}
 
-		for(unsigned int i=0; i<extv.size();i++)
-		{
+		for (unsigned int i = 0; i < extv.size(); i++) {
 			std::string ext = extv[i];
 
 			if (ext == ".3DS")
@@ -84,17 +73,14 @@ public:
 	}
 
 private:
-	zSTRING& __GetObjectName()
-	{
+	zSTRING & __GetObjectName() {
 		XCALL(GothicMemoryLocations::zCObject::GetObjectName);
 	}
 
-	const zSTRING* __GetFileExtension(int i)
-	{
-		int* vtbl = (int*)((int*)this)[0];
+	const zSTRING * __GetFileExtension(int i) {
+		int * vtbl = (int *)((int *)this)[0];
 
 		zCVisualGetFileExtension fn = (zCVisualGetFileExtension)vtbl[GothicMemoryLocations::zCVisual::VTBL_GetFileExtension];
 		return fn(this, i);
-
 	}
 };
