@@ -25,9 +25,9 @@ struct zTBBox3D {
 	};
 
 	int ClassifyToPlane (float planeDist, int axis) const {
-		if (planeDist>=((float*)&Max)[axis])	
+		if (planeDist>=((float *)&Max)[axis])	
 			return zPLANE_BEHIND;	
-		else if (planeDist<=((float*)&Max)[axis])	
+		else if (planeDist<=((float *)&Max)[axis])	
 			return zPLANE_INFRONT;	
 		else return zPLANE_SPANNING;
 	}

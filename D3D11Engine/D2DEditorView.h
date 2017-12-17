@@ -33,7 +33,7 @@ struct SelectionInfo
 		SelectedSkeletalVob = nullptr;
 	}
 
-	MeshInfo* SelectedMesh;
+	MeshInfo * SelectedMesh;
 	zCMaterial* SelectedMaterial;
 	VobInfo* SelectedVobInfo;
 	SkeletalVobInfo* SelectedSkeletalVob;
@@ -44,7 +44,7 @@ class D2DEditorView :
 	public D2DSubView
 {
 public:
-	D2DEditorView(D2DView* view, D2DSubView* parent);
+	D2DEditorView(D2DView * view, D2DSubView * parent);
 	virtual ~D2DEditorView();
 
 	enum EditorMode
@@ -59,23 +59,23 @@ public:
 	virtual XRESULT InitControls();
 
 	/** Draws this sub-view */
-	virtual void Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime);
+	virtual void Draw(const D2D1_RECT_F & clientRectAbs, float deltaTime);
 
 	/** Updates the subview */
 	void Update(float deltaTime);
 
 	/** Processes a window-message. Return false to stop the message from going to children */
-	virtual bool OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wParam, LPARAM lParam, const D2D1_RECT_F& clientRectAbs);
+	virtual bool OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wParam, LPARAM lParam, const D2D1_RECT_F & clientRectAbs);
 
 	/** Finds the GVegetationBox from it's mesh-info */
-	GVegetationBox* FindVegetationFromMeshInfo(MeshInfo* info);
+	GVegetationBox* FindVegetationFromMeshInfo(MeshInfo * info);
 
 	/** Called when a vob was removed from the world */
-	XRESULT OnVobRemovedFromWorld(zCVob* vob);
+	XRESULT OnVobRemovedFromWorld(zCVob * vob);
 
 protected:
 	/** Visualizes a mesh info */
-	void VisualizeMeshInfo(MeshInfo* m, const D3DXVECTOR4& color = D3DXVECTOR4(1,1,1,1), bool showBounds = false, const D3DXMATRIX* world = nullptr);
+	void VisualizeMeshInfo(MeshInfo * m, const D3DXVECTOR4 & color = D3DXVECTOR4(1, 1, 1, 1), bool showBounds = false, const D3DXMATRIX* world = nullptr);
 
 	/** Sets the editor-mode */
 	void SetEditorMode(EditorMode mode);
@@ -115,46 +115,46 @@ protected:
 	GVegetationBox* PlaceDraggedVegetationBox();
 
 	/** Traces the set of placed vegatation boxes */
-	GVegetationBox* TraceVegetationBoxes(const D3DXVECTOR3& wPos, const D3DXVECTOR3& wDir);
+	GVegetationBox* TraceVegetationBoxes(const D3DXVECTOR3 & wPos, const D3DXVECTOR3 & wDir);
 
 
 	/** Callbacks */
 	/** Button to add a vegetation-volume was pressed */
-	static void AddVegButtonPressed(SV_Button* sender, void* userdata);
+	static void AddVegButtonPressed(SV_Button * sender, void * userdata);
 
 	/** Button to add a vegetation-volume was pressed */
-	static void FillVegButtonPressed(SV_Button* sender, void* userdata);
+	static void FillVegButtonPressed(SV_Button * sender, void * userdata);
 
 	/** Tab in main tab-control was switched */
-	static void MainTabSwitched(SV_TabControl* sender, void* userdata);
+	static void MainTabSwitched(SV_TabControl * sender, void * userdata);
 
 	/** Tab in main tab-control was switched */
-	static void RemoveVegButtonPressed(SV_Button* sender, void* userdata);
+	static void RemoveVegButtonPressed(SV_Button * sender, void * userdata);
 
 	/** Save/Load-Buttons */
-	static void SaveLevelPressed(SV_Button* sender, void* userdata);
-	static void LoadLevelPressed(SV_Button* sender, void* userdata);
-	static void InfoPressed(SV_Button* sender, void* userdata);
+	static void SaveLevelPressed(SV_Button * sender, void * userdata);
+	static void LoadLevelPressed(SV_Button * sender, void * userdata);
+	static void InfoPressed(SV_Button * sender, void * userdata);
 
 	/** Tab in main tab-control was switched */
-	static void VegetationAmountSliderChanged(SV_Slider* sender, void* userdata);
+	static void VegetationAmountSliderChanged(SV_Slider * sender, void * userdata);
 
 	/** Tab in main tab-control was switched */
-	static void VegetationScaleSliderChanged(SV_Slider* sender, void* userdata);
-	static void TextureSettingsSliderChanged(SV_Slider* sender, void* userdata);
+	static void VegetationScaleSliderChanged(SV_Slider * sender, void * userdata);
+	static void TextureSettingsSliderChanged(SV_Slider * sender, void * userdata);
 
 	
 	/** Editor enabled? */
 	bool IsEnabled;
 
 	/** Main editor panel */
-	SV_Panel* MainPanel;
-	SV_TabControl* MainTabControl;
-	SV_TabControl* SelectionTabControl;
+	SV_Panel * MainPanel;
+	SV_TabControl * MainTabControl;
+	SV_TabControl * SelectionTabControl;
 
 	/** Selection panel */
-	SV_Panel* SelectedImagePanel;
-	SV_Label* SelectedImageNameLabel;
+	SV_Panel * SelectedImagePanel;
+	SV_Label * SelectedImageNameLabel;
 
 	SV_NamedSlider* SelectedTexNrmStrSlider;
 	SV_NamedSlider* SelectedTexSpecIntensSlider;
@@ -164,9 +164,9 @@ protected:
 	SV_NamedSlider* SelectedMeshTessAmountSlider;
 	SV_NamedSlider* SelectedMeshRoundnessSlider;
 
-	SV_Slider* SelectedVegSizeSlider;
-	SV_Slider* SelectedVegAmountSlider;
-	SV_Label* SelectedVegModifiedWarningLabel;
+	SV_Slider * SelectedVegSizeSlider;
+	SV_Slider * SelectedVegAmountSlider;
+	SV_Label * SelectedVegModifiedWarningLabel;
 
 	D2DVobSettingsDialog* VobSettingsDialog;
 
@@ -188,7 +188,7 @@ protected:
 	bool SelectedSomething;
 	D3DXVECTOR3 SelectedTriangle[3];
 	D3DXVECTOR3 TracedPosition;
-	MeshInfo* TracedMesh;
+	MeshInfo * TracedMesh;
 	GVegetationBox* TracedVegetationBox;
 	zCMaterial* TracedMaterial;
 	VobInfo* TracedVobInfo;
@@ -212,6 +212,6 @@ protected:
 	/** Vegetation settings */
 	float VegLastUniformScale;
 
-	WidgetContainer* Widgets;
+	WidgetContainer * Widgets;
 };
 

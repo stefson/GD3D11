@@ -17,7 +17,7 @@ public:
 		//(zCBspNodeRenderOutdoor)DetourFunction((BYTE *)GothicMemoryLocations::zCBspNode::RenderOutdoor, (BYTE *)zCBspNode::hooked_zCBspNodeRenderOutdoor);
 	}
 
-	static int __fastcall hooked_Open(void* thisptr, void* unknwn, zSTRING& str, bool b)
+	static int __fastcall hooked_Open(void * thisptr, void * unknwn, zSTRING& str, bool b)
 	{
 		// File looks like this:  \_WORK\DATA\TEXTURES\_COMPILED\NW_CITY_PFLASTERSTEIN_01-C.TEX
 		std::string file = str.ToChar();

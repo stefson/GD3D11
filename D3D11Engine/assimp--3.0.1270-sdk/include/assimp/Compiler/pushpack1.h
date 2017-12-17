@@ -22,9 +22,9 @@
 #endif
 
 #if defined(_MSC_VER) ||  defined(__BORLANDC__) ||	defined (__BCPLUSPLUS__)
-#	pragma pack(push,1)
+#	pragma pack(push, 1)
 #	define PACK_STRUCT
-#elif defined( __GNUC__ )
+#elif defined(__GNUC__)
 #	define PACK_STRUCT	__attribute__((packed))
 #else
 #	error Compiler not supported

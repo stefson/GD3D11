@@ -37,7 +37,7 @@ struct ParticleInstanceInfo
 
 struct MeshKey
 {
-	zCTexture* Texture;
+	zCTexture * Texture;
 	zCMaterial* Material;
 	MaterialInfo* Info;
 	//zCLightmap* Lightmap;
@@ -137,10 +137,10 @@ struct WorldMeshInfo : public MeshInfo
 	}
 
 	/** Saves the info for this visual */
-	void SaveWorldMeshInfo(const std::string& name);
+	void SaveWorldMeshInfo(const std::string & name);
 
 	/** Loads the info for this visual */
-	void LoadWorldMeshInfo(const std::string& name);
+	void LoadWorldMeshInfo(const std::string & name);
 
 	VisualTesselationSettings TesselationSettings;
 
@@ -204,10 +204,10 @@ struct BaseVisualInfo
 
 	virtual ~BaseVisualInfo()
 	{
-		for(std::map<zCMaterial *, std::vector<MeshInfo*>>::iterator it = Meshes.begin(); it != Meshes.end(); it++)
+		for(std::map<zCMaterial *, std::vector<MeshInfo *>>::iterator it = Meshes.begin(); it != Meshes.end(); it++)
 		{
-			for(unsigned int i=0;i<(*it).second.size();i++)
-				delete (*it).second[i];
+			for(unsigned int i=0;i<it->second.size();i++)
+				delete it->second[i];
 		}
 	}
 
@@ -218,12 +218,12 @@ struct BaseVisualInfo
 	virtual void ClearPNAENInfo();
 
 	/** Saves the info for this visual */
-	virtual void SaveMeshVisualInfo(const std::string& name);
+	virtual void SaveMeshVisualInfo(const std::string & name);
 
 	/** Loads the info for this visual */
-	virtual void LoadMeshVisualInfo(const std::string& name);
+	virtual void LoadMeshVisualInfo(const std::string & name);
 
-	std::map<zCMaterial *, std::vector<MeshInfo*>> Meshes;
+	std::map<zCMaterial *, std::vector<MeshInfo *>> Meshes;
 
 	/** Tesselation settings for this vob */
 	VisualTesselationSettings TesselationInfo;
@@ -271,17 +271,17 @@ struct MeshVisualInfo : public BaseVisualInfo
 	/** Creates PNAEN-Info for all meshes if not already there */
 	void CreatePNAENInfo(bool softNormals = false);
 
-	std::map<MeshKey, std::vector<MeshInfo*>, cmpMeshKey> MeshesByTexture;
+	std::map<MeshKey, std::vector<MeshInfo *>, cmpMeshKey> MeshesByTexture;
 
 	// Vector of the MeshesByTexture-Map for faster access, since map iterations aren't Cache friendly
-	std::vector<std::pair<MeshKey, std::vector<MeshInfo*>>> MeshesCached;
+	std::vector<std::pair<MeshKey, std::vector<MeshInfo *>>> MeshesCached;
 
 	//zCProgMeshProto* Visual;
 	std::vector<VobInstanceInfo> Instances;
 	unsigned int StartInstanceNum;
 
 	/** Full mesh of this */
-	MeshInfo* FullMesh;
+	MeshInfo * FullMesh;
 
 	/** This is true if we can't actually render something on this. TODO: Try to fix this! */
 	bool UnloadedSomething;
@@ -301,8 +301,8 @@ struct SkeletalMeshVisualInfo : public BaseVisualInfo
 	{
 		for(std::map<zCMaterial *, std::vector<SkeletalMeshInfo*>>::iterator it = SkeletalMeshes.begin(); it != SkeletalMeshes.end(); it++)
 		{
-			for(unsigned int i=0;i<(*it).second.size();i++)
-				delete (*it).second[i];
+			for(unsigned int i=0;i<it->second.size();i++)
+				delete it->second[i];
 		}
 	}
 
@@ -324,10 +324,10 @@ struct BaseVobInfo
 	{
 	}
 	/** Visual for this vob */
-	BaseVisualInfo* VisualInfo;
+	BaseVisualInfo * VisualInfo;
 
 	/** Vob the data came from */
-	zCVob* Vob;
+	zCVob * Vob;
 };
 
 struct WorldMeshSectionInfo;
@@ -435,8 +435,8 @@ struct SkeletalVobInfo : public BaseVobInfo
 		
 		for(std::map<int, std::vector<MeshVisualInfo *>>::iterator it = NodeAttachments.begin(); it != NodeAttachments.end(); it++)
 		{
-			for(unsigned int i=0;i<(*it).second.size();i++)
-				delete (*it).second[i];
+			for(unsigned int i=0;i<it->second.size();i++)
+				delete it->second[i];
 		}
 
 		delete VobConstantBuffer;
@@ -497,19 +497,19 @@ struct WorldMeshSectionInfo
 	{
 		for(std::map<MeshKey, WorldMeshInfo*>::iterator it = WorldMeshes.begin(); it != WorldMeshes.end(); it++)
 		{
-			delete (*it).second;
+			delete it->second;
 		}
 		WorldMeshes.clear();
 
-		for(std::map<MeshKey, MeshInfo*>::iterator it = SuppressedMeshes.begin(); it != SuppressedMeshes.end(); it++)
+		for(std::map<MeshKey, MeshInfo *>::iterator it = SuppressedMeshes.begin(); it != SuppressedMeshes.end(); it++)
 		{
-			delete (*it).second;
+			delete it->second;
 		}
 		SuppressedMeshes.clear();
 		
-		for(std::map<D3D11Texture *, std::vector<MeshInfo*>>::iterator it = WorldMeshesByCustomTexture.begin(); it != WorldMeshesByCustomTexture.end(); it++)
+		for(std::map<D3D11Texture *, std::vector<MeshInfo *>>::iterator it = WorldMeshesByCustomTexture.begin(); it != WorldMeshesByCustomTexture.end(); it++)
 		{
-			delete (*it).first; // Meshes are stored in "WorldMeshes". Only delete the texture
+			delete it->first; // Meshes are stored in "WorldMeshes". Only delete the texture
 		}
 		WorldMeshesByCustomTexture.clear();
 
@@ -531,18 +531,18 @@ struct WorldMeshSectionInfo
 	}
 
 	/** Saves this sections mesh to a file */
-	void SaveSectionMeshToFile(const std::string& name);
+	void SaveSectionMeshToFile(const std::string & name);
 
 	/** Saves the mesh infos for this section */
-	void SaveMeshInfos(const std::string& worldName, INT2 sectionPos);
+	void SaveMeshInfos(const std::string & worldName, INT2 sectionPos);
 
 	/** Saves the mesh infos for this section */
-	void LoadMeshInfos(const std::string& worldName, INT2 sectionPos);
+	void LoadMeshInfos(const std::string & worldName, INT2 sectionPos);
 
 	std::map<MeshKey, WorldMeshInfo*, cmpMeshKey> WorldMeshes;
-	std::map<D3D11Texture *, std::vector<MeshInfo*>> WorldMeshesByCustomTexture;
-	std::map<zCMaterial *, std::vector<MeshInfo*>> WorldMeshesByCustomTextureOriginal;
-	std::map<MeshKey, MeshInfo*, cmpMeshKey> SuppressedMeshes;
+	std::map<D3D11Texture *, std::vector<MeshInfo *>> WorldMeshesByCustomTexture;
+	std::map<zCMaterial *, std::vector<MeshInfo *>> WorldMeshesByCustomTextureOriginal;
+	std::map<MeshKey, MeshInfo *, cmpMeshKey> SuppressedMeshes;
 	std::list<VobInfo*> Vobs;
 
 	/** Loaded ocean-polys of this section */
@@ -552,7 +552,7 @@ struct WorldMeshSectionInfo
 	std::vector<zCPolygon *> SectionPolygons;
 
 	/** The whole section as one single mesh, without alpha-test materials */
-	MeshInfo* FullStaticMesh;
+	MeshInfo * FullStaticMesh;
 
 	/** This sections bounding box */
 	zTBBox3D BoundingBox;

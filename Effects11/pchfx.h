@@ -49,7 +49,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 
-#define offsetof_fx( a, b ) (uint32_t)offsetof( a, b )
+#define offsetof_fx(a, b) (uint32_t)offsetof(a, b)
 
 #include "d3dxGlobal.h"
 

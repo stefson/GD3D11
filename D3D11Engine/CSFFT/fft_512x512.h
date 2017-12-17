@@ -39,7 +39,7 @@ typedef struct CSFFT_512x512_Data_t
 	// Temporary buffers
 	ID3D11Buffer* pBuffer_Tmp;
 	ID3D11UnorderedAccessView* pUAV_Tmp;
-	ID3D11ShaderResourceView* pSRV_Tmp;
+	ID3D11ShaderResourceView * pSRV_Tmp;
 } CSFFT512x512_Plan;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -59,5 +59,5 @@ void fft512x512_destroy_plan(CSFFT512x512_Plan* plan);
 
 void fft_512x512_c2c(CSFFT512x512_Plan* fft_plan, 
 					 ID3D11UnorderedAccessView* pUAV_Dst,
-					 ID3D11ShaderResourceView* pSRV_Dst,
-					 ID3D11ShaderResourceView* pSRV_Src);
+					 ID3D11ShaderResourceView * pSRV_Dst,
+					 ID3D11ShaderResourceView * pSRV_Src);

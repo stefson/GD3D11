@@ -64,7 +64,7 @@ HRESULT D3DX11CreateEffectFromFile_RES(
 		{
 			LogError() << ErrorsBuffer->GetBufferPointer();
 			return E_FAIL;
-		}else
+		} else
 		{
 			//MessageBoxA(nullptr,(char *)ErrorsBuffer->GetBufferPointer(),"There are warnings in that fx file!",MB_OK | MB_ICONWARNING | MB_TOPMOST);
 		}
@@ -83,7 +83,7 @@ bool D3D11PFX_SMAA::Init()
 {
 	HRESULT hr;
 
-	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
+	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 
 	LE(D3DX11CreateEffectFromFile_RES("System\\GD3D11\\Shaders\\SMAA.fx", nullptr, "fx_5_0", D3D10_SHADER_ENABLE_STRICTNESS | D3D10_SHADER_OPTIMIZATION_LEVEL3, 0, engine->GetDevice(), nullptr,&SMAAShader, nullptr));
 	
@@ -124,9 +124,9 @@ bool D3D11PFX_SMAA::Init()
 }
 
 /** Renders the PostFX */
-void D3D11PFX_SMAA::RenderPostFX(ID3D11ShaderResourceView* renderTargetSRV)
+void D3D11PFX_SMAA::RenderPostFX(ID3D11ShaderResourceView * renderTargetSRV)
 {
-	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
+	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 	engine->SetDefaultStates();
 	engine->UpdateRenderStates();
 
@@ -140,15 +140,15 @@ void D3D11PFX_SMAA::RenderPostFX(ID3D11ShaderResourceView* renderTargetSRV)
 
 	engine->GetShaderManager()->GetVShader("VS_PFX")->Apply(); // Apply vertexlayout for PP-Effects
 
-	RenderToTextureBuffer* TempRTV = FxRenderer->GetTempBuffer();
+	RenderToTextureBuffer * TempRTV = FxRenderer->GetTempBuffer();
 
 	if (!EdgesTex)
 	{
 		OnResize(INT2(engine->GetResolution().x, engine->GetResolution().y));
 	}
 
-	engine->GetContext()->ClearRenderTargetView(EdgesTex->GetRenderTargetView(), D3DXVECTOR4(0,0,0,0));
-	engine->GetContext()->ClearRenderTargetView(BlendTex->GetRenderTargetView(), D3DXVECTOR4(0,0,0,0));
+	engine->GetContext()->ClearRenderTargetView(EdgesTex->GetRenderTargetView(), D3DXVECTOR4(0, 0, 0, 0));
+	engine->GetContext()->ClearRenderTargetView(BlendTex->GetRenderTargetView(), D3DXVECTOR4(0, 0, 0, 0));
 
 	ID3D11RenderTargetView* RTV=nullptr;
 	ID3D11RenderTargetView* OldRTV=nullptr;
@@ -168,7 +168,7 @@ void D3D11PFX_SMAA::RenderPostFX(ID3D11ShaderResourceView* renderTargetSRV)
 	LumaEdgeDetection->GetPassByIndex(0)->Apply(0, engine->GetContext());
 	FxRenderer->DrawFullScreenQuad();
 
-	//FxRenderer->CopyTextureToRTV(renderTargetSRV, RTV, INT2(0,0), true);
+	//FxRenderer->CopyTextureToRTV(renderTargetSRV, RTV, INT2(0, 0), true);
 
 	SMAAShader->GetVariableByName("colorTexGamma")->AsShaderResource()->SetResource(nullptr);
 
@@ -212,13 +212,13 @@ void D3D11PFX_SMAA::RenderPostFX(ID3D11ShaderResourceView* renderTargetSRV)
 	engine->DrawSRVToBackbuffer(TempRTV->GetShaderResView());
 	goto end;*/
 
-	ID3D11ShaderResourceView* srv = TempRTV->GetShaderResView();
+	ID3D11ShaderResourceView * srv = TempRTV->GetShaderResView();
 	engine->GetContext()->PSSetShaderResources(0, 1, &srv);
 
 
 	if (Engine::GAPI->GetRendererState()->RendererSettings.SharpenFactor > 0.0f)
 	{	
-		D3D11PShader* sharpenPS = engine->GetShaderManager()->GetPShader("PS_PFX_Sharpen");
+		D3D11PShader * sharpenPS = engine->GetShaderManager()->GetPShader("PS_PFX_Sharpen");
 		sharpenPS->Apply();
 
 		GammaCorrectConstantBuffer gcb;
@@ -230,8 +230,8 @@ void D3D11PFX_SMAA::RenderPostFX(ID3D11ShaderResourceView* renderTargetSRV)
 		sharpenPS->GetConstantBuffer()[0]->UpdateBuffer(&gcb);
 		sharpenPS->GetConstantBuffer()[0]->BindToPixelShader(0);
 
-		FxRenderer->CopyTextureToRTV(TempRTV->GetShaderResView(), OldRTV, INT2(0,0), true);
-	}else
+		FxRenderer->CopyTextureToRTV(TempRTV->GetShaderResView(), OldRTV, INT2(0, 0), true);
+	} else
 	{
 		FxRenderer->CopyTextureToRTV(TempRTV->GetShaderResView(), OldRTV);
 	}
@@ -246,9 +246,9 @@ void D3D11PFX_SMAA::RenderPostFX(ID3D11ShaderResourceView* renderTargetSRV)
 }
 
 /** Called on resize */
-void D3D11PFX_SMAA::OnResize(const INT2& size)
+void D3D11PFX_SMAA::OnResize(const INT2 & size)
 {
-	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
+	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 
 	delete EdgesTex;
 	delete BlendTex;

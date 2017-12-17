@@ -49,7 +49,7 @@ struct zCModelNode
 
 struct zTMdl_NodeVobAttachment
 {
-	zCVob* Vob;
+	zCVob * Vob;
 	zCModelNodeInst* NodeInst;
 };
 
@@ -141,7 +141,7 @@ public:
 	}
 
 	/** This is called on load time for models */
-	static int __fastcall Hooked_LoadModelASC(void* thisptr, void* unknwn, const zSTRING& file)
+	static int __fastcall Hooked_LoadModelASC(void * thisptr, void * unknwn, const zSTRING& file)
 	{
 		LogInfo() << "Loading Model: " << file.ToChar();
 		int r = HookedFunctions::OriginalFunctions.original_zCModelPrototypeLoadModelASC(thisptr, file);
@@ -156,7 +156,7 @@ public:
 	}
 
 	/** This is called on load time for models */
-	static int __fastcall Hooked_ReadMeshAndTreeMSB(void* thisptr, void* unknwn, int& i, class zCFileBIN& f)
+	static int __fastcall Hooked_ReadMeshAndTreeMSB(void * thisptr, void * unknwn, int& i, class zCFileBIN& f)
 	{
 		LogInfo() << "Loading Model!";
 		int r = HookedFunctions::OriginalFunctions.original_zCModelPrototypeReadMeshAndTreeMSB(thisptr, i, f);
@@ -217,7 +217,7 @@ public:
 
 
 	/** Creates an array of matrices for the bone transforms */
-	void __fastcall RenderNodeList( zTRenderContext& renderContext, zCArray<D3DXMATRIX*>& boneTransforms, zCRenderLightContainer& lightContainer, int lightingMode = 0)
+	void __fastcall RenderNodeList(zTRenderContext& renderContext, zCArray<D3DXMATRIX*> & boneTransforms, zCRenderLightContainer& lightContainer, int lightingMode = 0)
 	{
 		XCALL(GothicMemoryLocations::zCModel::RenderNodeList);
 	}
@@ -280,7 +280,7 @@ public:
 	D3DXVECTOR3 GetModelScale()
 	{
 #ifdef BUILD_GOTHIC_1_08k
-		return D3DXVECTOR3(1,1,1);
+		return D3DXVECTOR3(1, 1, 1);
 #endif
 
 		return *(D3DXVECTOR3 *)THISPTR_OFFSET(GothicMemoryLocations::zCModel::Offset_ModelScale);
@@ -335,7 +335,7 @@ public:
 	}
 
 	/** Fills a vector of (viewspace) bone-transformation matrices for this frame */
-	void GetBoneTransforms(std::vector<D3DXMATRIX>* transforms, zCVob* vob = nullptr)
+	void GetBoneTransforms(std::vector<D3DXMATRIX>* transforms, zCVob * vob = nullptr)
 	{
 		if (!GetNodeList())
 			return;
@@ -353,7 +353,7 @@ public:
 			if (parent)	
 			{
 				node->TrafoObjToCam = parent->TrafoObjToCam * node->Trafo;
-			}else
+			} else
 			{
 				node->TrafoObjToCam = node->Trafo;
 			}

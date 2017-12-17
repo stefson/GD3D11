@@ -91,7 +91,7 @@ public:
 		REPLACE_CALL(GothicMemoryLocations::zCBspTree::CALL_RenderTrivIndoor, INST_NOP);*/
 	}
 
-	static int _fastcall hooked_zCBspBaseCheckRayAgainstPolysNearestHit(void* thisptr, const D3DXVECTOR3& start, const D3DXVECTOR3& end, D3DXVECTOR3& intersection)
+	static int _fastcall hooked_zCBspBaseCheckRayAgainstPolysNearestHit(void * thisptr, const D3DXVECTOR3 & start, const D3DXVECTOR3 & end, D3DXVECTOR3 & intersection)
 	{
 		// Get our version of this node
 		//Engine::GAPI->Get
@@ -122,7 +122,7 @@ public:
 	#endif
 
 			return r;
-		}else
+		} else
 		{
 			return HookedFunctions::OriginalFunctions.original_zCBspBaseCheckRayAgainstPolysNearestHit(thisptr, start, end, intersection);
 		}
@@ -130,7 +130,7 @@ public:
 		
 	}
 
-	static int _fastcall hooked_zCBspBaseCheckRayAgainstPolysCache(void* thisptr, const D3DXVECTOR3& start, const D3DXVECTOR3& end, D3DXVECTOR3& intersection)
+	static int _fastcall hooked_zCBspBaseCheckRayAgainstPolysCache(void * thisptr, const D3DXVECTOR3 & start, const D3DXVECTOR3 & end, D3DXVECTOR3 & intersection)
 	{
 		// Get our version of this node
 		//Engine::GAPI->Get
@@ -162,13 +162,13 @@ public:
 			Engine::GraphicsEngine->GetLineRenderer()->AddPointLocator(intersection, 25.0f);
 	#endif
 			return r;
-		}else
+		} else
 		{
 			return HookedFunctions::OriginalFunctions.original_zCBspBaseCheckRayAgainstPolysCache(thisptr, start, end, intersection);
 		}
 	}
 
-	static int _fastcall hooked_zCBspBaseCheckRayAgainstPolys(void* thisptr, const D3DXVECTOR3& start, const D3DXVECTOR3& end, D3DXVECTOR3& intersection)
+	static int _fastcall hooked_zCBspBaseCheckRayAgainstPolys(void * thisptr, const D3DXVECTOR3 & start, const D3DXVECTOR3 & end, D3DXVECTOR3 & intersection)
 	{
 #ifdef DEBUG_SHOW_COLLISION
 		Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(start, 0xFF0000FF), LineVertex(end, 0xFFFFFFFF));
@@ -195,13 +195,13 @@ public:
 			Engine::GraphicsEngine->GetLineRenderer()->AddPointLocator(intersection, 25.0f);
 	#endif
 			return r;
-		}else
+		} else
 		{
 			return HookedFunctions::OriginalFunctions.original_zCBspBaseCheckRayAgainstPolys(thisptr, start, end, intersection);
 		}
 	}
 	
-	static int __fastcall hooked_zCBspBaseCollectPolysInBBox3D(void* thisptr, const zTBBox3D& bbox, zCPolygon **& polyList, int& numFound)
+	static int __fastcall hooked_zCBspBaseCollectPolysInBBox3D(void * thisptr, const zTBBox3D& bbox, zCPolygon **& polyList, int& numFound)
 	{
 		if (Engine::GAPI->GetLoadedWorldInfo()->CustomWorldLoaded)
 		{
@@ -217,7 +217,7 @@ public:
 			}
 
 
-			Engine::GraphicsEngine->GetLineRenderer()->AddAABBMinMax(bbox.Min, bbox.Max, D3DXVECTOR4(1,0,0,1));
+			Engine::GraphicsEngine->GetLineRenderer()->AddAABBMinMax(bbox.Min, bbox.Max, D3DXVECTOR4(1, 0, 0, 1));
 	#endif
 
 			return numFound != 0;
@@ -228,19 +228,19 @@ public:
 		}
 	}
 
-	static void __fastcall hooked_zCBspNodeRender(void* thisptr, void* unkwn)
+	static void __fastcall hooked_zCBspNodeRender(void * thisptr, void * unkwn)
 	{
 		// Start world rendering here
 		Engine::GraphicsEngine->OnStartWorldRendering();
 	}
 
-	static void __fastcall hooked_zCBspNodeRenderIndoor(void* thisptr, int clipFlags)
+	static void __fastcall hooked_zCBspNodeRenderIndoor(void * thisptr, int clipFlags)
 	{
 		LogInfo() << "Render indoor!";
 		//HookedFunctions::OriginalFunctions.original_zCBspTreeAddVob(thisptr, vob);
 	}
 
-	static void __fastcall hooked_zCBspNodeRenderOutdoor(void* thisptr, zCBspBase* node, zTBBox3D bbox, int clipFlags, int crossingVobPlane)
+	static void __fastcall hooked_zCBspNodeRenderOutdoor(void * thisptr, zCBspBase* node, zTBBox3D bbox, int clipFlags, int crossingVobPlane)
 	{
 		LogInfo() << "Render outdoor!";
 		//HookedFunctions::OriginalFunctions.original_zCBspTreeAddVob(thisptr, vob);
@@ -259,7 +259,7 @@ class zCBspLeaf : public zCBspBase
 {
 public:
 	int LastTimeLighted;
-	zCArray<zCVob*>	LeafVobList;
+	zCArray<zCVob *>	LeafVobList;
 	zCArray<zCVobLight*> LightVobList;
 
 	UINT				lastTimeActivated;		// last time activated by portal
@@ -278,7 +278,7 @@ public:
 	}
 
 	/** Called when a vob gets added to a bsp-tree */
-	static void __fastcall hooked_AddVob(void* thisptr, void* unknwn, zCVob* vob)
+	static void __fastcall hooked_AddVob(void * thisptr, void * unknwn, zCVob * vob)
 	{
 		HookedFunctions::OriginalFunctions.original_zCBspTreeAddVob(thisptr, vob);
 
@@ -290,7 +290,7 @@ public:
 	}
 
 	/** Called on level load. */
-	static int __fastcall hooked_LoadBIN(void* thisptr, void* unknwn, zCFileBIN& file, int skip)
+	static int __fastcall hooked_LoadBIN(void * thisptr, void * unknwn, zCFileBIN& file, int skip)
 	{
 		LogInfo() << "Loading world!";
 		int r = HookedFunctions::OriginalFunctions.original_zCBspTreeLoadBIN(thisptr, file, skip);
@@ -323,7 +323,7 @@ public:
 	}
 
 	/** Returns only the polygons used in LOD0 of the world */
-	void GetLOD0Polygons(std::vector<zCPolygon *>& target)
+	void GetLOD0Polygons(std::vector<zCPolygon *> & target)
 	{
 		int num = GetNumLeafes();
 
@@ -345,7 +345,7 @@ public:
 			{
 				target.push_back(leaf->PolyList[i]);
 			}
-		}else
+		} else
 		{
 			zCBspNode* node = (zCBspNode *)nodeBase;
 			GetLOD0Polygons(node->Front, target);
@@ -355,7 +355,7 @@ public:
 
 	int GetNumLeafes()
 	{
-		return *(int*)THISPTR_OFFSET(GothicMemoryLocations::zCBspTree::Offset_NumLeafes);
+		return *(int *)THISPTR_OFFSET(GothicMemoryLocations::zCBspTree::Offset_NumLeafes);
 	}
 
 	zTBspMode GetBspTreeMode()

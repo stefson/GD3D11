@@ -16,7 +16,7 @@ public:
 	}
 
 	/** Overwritten to only accept windowed */
-	static void __fastcall hooked_zCRndD3DVidSetScreenMode(void* thisptr, void* unknwn, int mode)
+	static void __fastcall hooked_zCRndD3DVidSetScreenMode(void * thisptr, void * unknwn, int mode)
 	{
 		hook_infunc
 		// Pass Windowed only.
@@ -26,7 +26,7 @@ public:
 	}
 
 	/** Overwritten to only accept windowed */
-	static void __fastcall hooked_zCRndD3DDrawLineZ(void* thisptr, void* unknwn, float x1, float y1, float z1, float x2, float y2, float z2, DWORD color)
+	static void __fastcall hooked_zCRndD3DDrawLineZ(void * thisptr, void * unknwn, float x1, float y1, float z1, float x2, float y2, float z2, DWORD color)
 	{
 		// Do nothing here yet.
 		// TODO: Implement!

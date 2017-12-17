@@ -20,7 +20,7 @@ public:
 #endif
 	}
 
-	static void __fastcall Hooked_CreateQuadMark(void* thisptr, void* unknwn, zCPolygon* poly, const D3DXVECTOR3& position, const D3DXVECTOR2& size, struct zTEffectParams* params)
+	static void __fastcall Hooked_CreateQuadMark(void * thisptr, void * unknwn, zCPolygon* poly, const D3DXVECTOR3 & position, const D3DXVECTOR2 & size, struct zTEffectParams* params)
 	{
 		hook_infunc
 
@@ -40,7 +40,7 @@ public:
 		hook_outfunc
 	}
 
-	static void __fastcall Hooked_Constructor(void* thisptr, void* unknwn)
+	static void __fastcall Hooked_Constructor(void * thisptr, void * unknwn)
 	{
 		hook_infunc
 
@@ -49,7 +49,7 @@ public:
 		hook_outfunc
 	}
 
-	static void __fastcall Hooked_Destructor(void* thisptr, void* unknwn)
+	static void __fastcall Hooked_Destructor(void * thisptr, void * unknwn)
 	{
 		hook_infunc
 
@@ -70,7 +70,7 @@ public:
 		return *(zCMaterial**)THISPTR_OFFSET(GothicMemoryLocations::zCQuadMark::Offset_Material);
 	}
 
-	zCVob* GetConnectedVob()
+	zCVob * GetConnectedVob()
 	{
 		return *(zCVob **)THISPTR_OFFSET(GothicMemoryLocations::zCQuadMark::Offset_ConnectedVob);
 	}

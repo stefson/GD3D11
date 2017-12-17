@@ -171,9 +171,9 @@ typedef void (TW_CALL * TwCopyCDStringToClient)(char **destinationClientStringPt
 TW_API void     TW_CALL TwCopyCDStringToClientFunc(TwCopyCDStringToClient copyCDStringFunc);
 TW_API void     TW_CALL TwCopyCDStringToLibrary(char **destinationLibraryStringPtr, const char *sourceClientString);
 #ifdef __cplusplus
-typedef void (TW_CALL * TwCopyStdStringToClient)(std::string& destinationClientString, const std::string& sourceString);
+typedef void (TW_CALL * TwCopyStdStringToClient)(std::string & destinationClientString, const std::string & sourceString);
 TW_API void     TW_CALL TwCopyStdStringToClientFunc(TwCopyStdStringToClient copyStdStringToClientFunc);
-TW_API void     TW_CALL TwCopyStdStringToLibrary(std::string& destinationLibraryString, const std::string& sourceClientString);
+TW_API void     TW_CALL TwCopyStdStringToLibrary(std::string & destinationLibraryString, const std::string & sourceClientString);
 #endif // __cplusplus
 
 typedef enum ETwParamValueType
@@ -361,10 +361,10 @@ TW_COMPILE_TIME_ASSERT(TW_DOUBLE,  sizeof(double)  == 8);
 #if !defined(_WIN64) && defined(_WIN32)
     // If the following assert failed, the platform is not 32-bit and _WIN64 is not defined.
     // When targetting 64-bit Windows platform, _WIN64 must be defined.
-    TW_COMPILE_TIME_ASSERT(TW_PTR32, sizeof(void*) == 4);
+    TW_COMPILE_TIME_ASSERT(TW_PTR32, sizeof(void *) == 4);
 #elif defined(_WIN64)
     // If the following assert failed, _WIN64 is defined but the targeted platform is not 64-bit.
-    TW_COMPILE_TIME_ASSERT(TW_PTR64, sizeof(void*) == 8);
+    TW_COMPILE_TIME_ASSERT(TW_PTR64, sizeof(void *) == 8);
 #endif
 
 //  ---------------------------------------------------------------------------

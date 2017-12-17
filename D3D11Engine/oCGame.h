@@ -32,7 +32,7 @@ public:
 		HookedFunctions::OriginalFunctions.original_oCGameEnterWorld = (oCGameEnterWorld)DetourFunction((BYTE *)GothicMemoryLocations::oCGame::EnterWorld, (BYTE *)oCGame::hooked_EnterWorld);
 	}
 
-	static void __fastcall hooked_EnterWorld(void* thisptr, void* unknwn, oCNPC* playerVob, int changePlayerPos, const zSTRING& startpoint)
+	static void __fastcall hooked_EnterWorld(void * thisptr, void * unknwn, oCNPC* playerVob, int changePlayerPos, const zSTRING& startpoint)
 	{
 		HookedFunctions::OriginalFunctions.original_oCGameEnterWorld(thisptr, playerVob, changePlayerPos, startpoint);
 
@@ -83,7 +83,7 @@ public:
     zCWorld* _zCSession_world;        //zCWorld*
     int _zCSession_camera;       //zCCamera*
     int _zCSession_aiCam;        //zCAICamera*
-    zCVob* _zCSession_camVob;       //zCVob*
+    zCVob * _zCSession_camVob;       //zCVob *
     zCView* _zCSession_viewport;     //zCView*
 
 	static oCGame* GetGame() { return *(oCGame**)GothicMemoryLocations::GlobalObjects::oCGame; };

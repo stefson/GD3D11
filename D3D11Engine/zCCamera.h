@@ -51,7 +51,7 @@ public:
 #endif
 	}
 
-	void GetFOV(float& fovH, float& fovV)
+	void GetFOV(float & fovH, float & fovV)
 	{
 #ifdef BUILD_GOTHIC_2_6_fix
 		XCALL(GothicMemoryLocations::zCCamera::GetFOV_f2);
@@ -103,14 +103,14 @@ public:
 #endif
 	}
 
-	/*void GetCameraPosition(D3DXVECTOR3& v)
+	/*void GetCameraPosition(D3DXVECTOR3 & v)
 	{
 		XCALL(GADDR::zCCamera_GetCameraPosition);
 	}*/
 
 	/*static void SetFreeLook(bool freeLook)
 	{
-		bool* f = (bool *)GothicMemoryLocations::zCCamera::Var_FreeLook;
+		bool * f = (bool *)GothicMemoryLocations::zCCamera::Var_FreeLook;
 		*f = freeLook;
 	}*/
 

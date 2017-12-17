@@ -22,9 +22,9 @@ D3D11PFX_HeightFog::~D3D11PFX_HeightFog()
 }
 
 /** Draws this effect to the given buffer */
-XRESULT D3D11PFX_HeightFog::Render(RenderToTextureBuffer* fxbuffer)
+XRESULT D3D11PFX_HeightFog::Render(RenderToTextureBuffer * fxbuffer)
 {
-	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
+	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 
 	// Save old rendertargets
 	ID3D11RenderTargetView* oldRTV = nullptr;
@@ -32,7 +32,7 @@ XRESULT D3D11PFX_HeightFog::Render(RenderToTextureBuffer* fxbuffer)
 	engine->GetContext()->OMGetRenderTargets(1, &oldRTV, &oldDSV);
 
 	D3D11VShader* vs = engine->GetShaderManager()->GetVShader("VS_PFX");
-	D3D11PShader* hfPS = engine->GetShaderManager()->GetPShader("PS_PFX_Heightfog");
+	D3D11PShader * hfPS = engine->GetShaderManager()->GetPShader("PS_PFX_Heightfog");
 
 	hfPS->Apply();
 	vs->Apply();
@@ -53,21 +53,21 @@ XRESULT D3D11PFX_HeightFog::Render(RenderToTextureBuffer* fxbuffer)
 
 	D3DXVECTOR3 vecFrustum[4];
 	/*vecFrustum[0] = D3DXVECTOR3(-1.0f, -1.0f,  0.0f); // xyz
-	vecFrustum[1] = D3DXVECTOR3( 1.0f, -1.0f,  0.0f); // Xyz
+	vecFrustum[1] = D3DXVECTOR3(1.0f, -1.0f,  0.0f); // Xyz
 	vecFrustum[2] = D3DXVECTOR3(-1.0f,  1.0f,  0.0f); // xYz
-	vecFrustum[3] = D3DXVECTOR3( 1.0f,  1.0f,  0.0f); // XYz*/
+	vecFrustum[3] = D3DXVECTOR3(1.0f,  1.0f,  0.0f); // XYz*/
 	vecFrustum[0] = D3DXVECTOR3(-1.0f, -1.0f,  1.0f); // xyZ
-	vecFrustum[1] = D3DXVECTOR3( 1.0f, -1.0f,  1.0f); // XyZ
+	vecFrustum[1] = D3DXVECTOR3(1.0f, -1.0f,  1.0f); // XyZ
 	vecFrustum[2] = D3DXVECTOR3(-1.0f,  1.0f,  1.0f); // xYZ
-	vecFrustum[3] = D3DXVECTOR3( 1.0f,  1.0f,  1.0f); // XYZ
+	vecFrustum[3] = D3DXVECTOR3(1.0f,  1.0f,  1.0f); // XYZ
 
 	// Get world space frustum corners
 	PFXVS_ConstantBuffer vcb;
-	for( int i = 0; i < 4; i++ )
+	for(int i = 0; i < 4; i++)
 	{
-		D3DXVec3TransformCoord( &vecFrustum[i], &vecFrustum[i], &cb.InvProj );
+		D3DXVec3TransformCoord(&vecFrustum[i], &vecFrustum[i], &cb.InvProj);
 		D3DXVec3Normalize(&vecFrustum[i], &vecFrustum[i]);
-		D3DXVec3TransformNormal( &vecFrustum[i], &vecFrustum[i], &cb.InvView );
+		D3DXVec3TransformNormal(&vecFrustum[i], &vecFrustum[i], &cb.InvView);
 		
 	}
 
@@ -189,8 +189,8 @@ XRESULT D3D11PFX_HeightFog::Render(RenderToTextureBuffer* fxbuffer)
 
 
 	// Restore rendertargets
-	ID3D11ShaderResourceView* srv = nullptr;
-	engine->GetContext()->PSSetShaderResources(1,1,&srv);
+	ID3D11ShaderResourceView * srv = nullptr;
+	engine->GetContext()->PSSetShaderResources(1, 1,&srv);
 
 	engine->GetContext()->OMSetRenderTargets(1, &oldRTV, oldDSV);
 	if (oldRTV)oldRTV->Release();

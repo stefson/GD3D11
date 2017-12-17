@@ -27,7 +27,7 @@ XRESULT D3D11ShaderManager::Init()
 {
 	Shaders = std::vector<ShaderInfo>();
 	VShaders = std::unordered_map<std::string, D3D11VShader*>();
-	PShaders = std::unordered_map<std::string, D3D11PShader*>();
+	PShaders = std::unordered_map<std::string, D3D11PShader *>();
 
 	Shaders.push_back(ShaderInfo("VS_Ex", "VS_Ex.hlsl", "v", 1));
 	Shaders.back().cBufferSizes.push_back(sizeof(VS_ExConstantBuffer_PerFrame));
@@ -464,7 +464,7 @@ XRESULT D3D11ShaderManager::LoadShaders()
 						LogError() << "Failed to reload shader: " << Shaders[i].fileName;
 
 						delete vs;
-					}else
+					} else
 					{
 						// Compilation succeeded, switch the shader
 						delete VShaders[Shaders[i].name];
@@ -475,7 +475,7 @@ XRESULT D3D11ShaderManager::LoadShaders()
 							VShaders[Shaders[i].name]->GetConstantBuffer().push_back(new D3D11ConstantBuffer(Shaders[i].cBufferSizes[j], nullptr));
 						}
 					}
-				}else
+				} else
 				{
 					LogInfo() << "Reloading shader: " << Shaders[i].name;
 
@@ -492,13 +492,13 @@ XRESULT D3D11ShaderManager::LoadShaders()
 				// See if this is a reload
 				if (PShaders.count(Shaders[i].name) > 0)
 				{
-					D3D11PShader* ps = new D3D11PShader();
+					D3D11PShader * ps = new D3D11PShader();
 					if (XR_SUCCESS != ps->LoadShader(("system\\GD3D11\\shaders\\" + Shaders[i].fileName).c_str(), Shaders[i].shaderMakros))
 					{
 						LogError() << "Failed to reload shader: " << Shaders[i].fileName;
 
 						delete ps;
-					}else
+					} else
 					{
 						// Compilation succeeded, switch the shader
 						delete PShaders[Shaders[i].name];
@@ -509,7 +509,7 @@ XRESULT D3D11ShaderManager::LoadShaders()
 							PShaders[Shaders[i].name]->GetConstantBuffer().push_back(new D3D11ConstantBuffer(Shaders[i].cBufferSizes[j], nullptr));
 						}
 					}
-				}else
+				} else
 				{
 					PShaders[Shaders[i].name] = new D3D11PShader();
 					XLE(PShaders[Shaders[i].name]->LoadShader(("system\\GD3D11\\shaders\\" + Shaders[i].fileName).c_str(), Shaders[i].shaderMakros));
@@ -518,7 +518,7 @@ XRESULT D3D11ShaderManager::LoadShaders()
 						PShaders[Shaders[i].name]->GetConstantBuffer().push_back(new D3D11ConstantBuffer(Shaders[i].cBufferSizes[j], nullptr));
 					}
 				}
-			}else if (Shaders[i].type == "g")
+			} else if (Shaders[i].type == "g")
 			{
 				// See if this is a reload
 				if (GShaders.count(Shaders[i].name) > 0)
@@ -529,7 +529,7 @@ XRESULT D3D11ShaderManager::LoadShaders()
 						LogError() << "Failed to reload shader: " << Shaders[i].fileName;
 
 						delete gs;
-					}else
+					} else
 					{
 						// Compilation succeeded, switch the shader
 						delete GShaders[Shaders[i].name];
@@ -540,7 +540,7 @@ XRESULT D3D11ShaderManager::LoadShaders()
 							GShaders[Shaders[i].name]->GetConstantBuffer().push_back(new D3D11ConstantBuffer(Shaders[i].cBufferSizes[j], nullptr));
 						}
 					}
-				}else
+				} else
 				{
 					GShaders[Shaders[i].name] = new D3D11GShader();
 					XLE(GShaders[Shaders[i].name]->LoadShader(("system\\GD3D11\\shaders\\" + Shaders[i].fileName).c_str(), Shaders[i].shaderMakros, Shaders[i].layout != 0, Shaders[i].layout));
@@ -567,7 +567,7 @@ XRESULT D3D11ShaderManager::LoadShaders()
 					LogError() << "Failed to reload shader: " << Shaders[i].fileName;
 
 					delete hds;
-				}else
+				} else
 				{
 					// Compilation succeeded, switch the shader
 					delete HDShaders[Shaders[i].name];
@@ -578,7 +578,7 @@ XRESULT D3D11ShaderManager::LoadShaders()
 						HDShaders[Shaders[i].name]->GetConstantBuffer().push_back(new D3D11ConstantBuffer(Shaders[i].cBufferSizes[j], nullptr));
 					}
 				}
-			}else
+			} else
 			{
 				HDShaders[Shaders[i].name] = new D3D11HDShader();
 				XLE(HDShaders[Shaders[i].name]->LoadShader(("system\\GD3D11\\shaders\\" + Shaders[i].fileName).c_str(), 
@@ -625,7 +625,7 @@ XRESULT D3D11ShaderManager::DeleteShaders()
 	}
 	VShaders.clear();
 
-	std::unordered_map<std::string, D3D11PShader*>::iterator pIter;
+	std::unordered_map<std::string, D3D11PShader *>::iterator pIter;
 	for (pIter = PShaders.begin(); pIter != PShaders.end(); pIter++)
 	{
 		delete pIter->second;
@@ -647,7 +647,7 @@ D3D11VShader* D3D11ShaderManager::GetVShader(std::string shader)
 {
 	return VShaders[shader];
 }
-D3D11PShader* D3D11ShaderManager::GetPShader(std::string shader)
+D3D11PShader * D3D11ShaderManager::GetPShader(std::string shader)
 {
 	return PShaders[shader];
 }

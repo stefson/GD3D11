@@ -84,7 +84,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define INITIAL_HASH_SZ 64  /*needs to be power of 2: 32,64,128,256...etc */
+#define INITIAL_HASH_SZ 64  /*needs to be power of 2: 32,64, 128,256...etc */
 
 #define REDZONE_SIZE 4
 #define REDZONE_STR "xxxx"
@@ -178,7 +178,7 @@ int MT_modify_entry (unsigned long int old_address, unsigned long int new_addres
 void MT_dump_stats();
 void MT_dump_hash();
 _HASH_ENTRY** MT_all_entries();
-int MT_compare_seq(const void* vpa, const void* vpb);
+int MT_compare_seq(const void * vpa, const void * vpb);
 void MT_dump_he(_HASH_ENTRY *p);
 int MT_report_blocks_allocated(int speak);
 void MT_FreeAllMyMemory();
@@ -190,7 +190,7 @@ void *MT_Calloc(size_t numMembers, size_t size, int line, const char* func_name,
 const char* file_name);
 void *MT_Realloc(void *ptr, size_t size, int line, const char* func_name,
 const char* file_name);
-void MT_Free (void* ptr, int line, const char *func, const char *file_name);
+void MT_Free (void * ptr, int line, const char *func, const char *file_name);
 
 void MT_AddError(const char* allocation_TLA,const char* deallocation_TLA,unsigned int source_line,const char* function_name,const char* file_name);
 void MT_AddLeak(const char* file_name,const char * function_name,unsigned int source_line,unsigned int size_mem);
@@ -383,7 +383,7 @@ unsigned int MT_gen_hash_bits (unsigned long int address)
 unsigned int MT_gen_hash_array_index (unsigned long int address)
 {
   unsigned int all_bits = MT_gen_hash_bits(address);
-  return( all_bits & _hashtable.current_bit_mask );
+  return(all_bits & _hashtable.current_bit_mask);
 }
 
 int MT_should_double() /* hash table automagically doubles when needed */
@@ -399,7 +399,7 @@ _HASH_ENTRY* MT_find_entry(unsigned long int address)
   
   while (mover)
     {
-      if ( mover->address == address)
+      if (mover->address == address)
 return mover;     /* found!! */
       mover = mover -> next;
     }
@@ -429,31 +429,31 @@ int MT_is_deallocater_wrong(const char* alloc_TLA, const char* dealloc_TLA)
   int ok =0;
   int bad=1;
   
-  if (    ( strcmp(dealloc_TLA,"FRE") == 0 || strcmp(dealloc_TLA,"RAL") == 0)
- && ( strcmp(alloc_TLA,"MAL") == 0   || strcmp(alloc_TLA,"CAL") == 0
+  if (   (strcmp(dealloc_TLA,"FRE") == 0 || strcmp(dealloc_TLA,"RAL") == 0)
+ && (strcmp(alloc_TLA,"MAL") == 0   || strcmp(alloc_TLA,"CAL") == 0
       || strcmp(alloc_TLA,"RAL") == 0)
- ) { return ok; }
+) { return ok; }
   
-  if (    strcmp(dealloc_TLA,"DEL") == 0 /* C++ scalar delete */
+  if (   strcmp(dealloc_TLA,"DEL") == 0 /* C++ scalar delete */
  &&   strcmp(alloc_TLA,"NEW") == 0
- ) return ok;
+) return ok;
   
-  if (    strcmp(dealloc_TLA,"VDE") == 0  /* C++ vector delete */
+  if (   strcmp(dealloc_TLA,"VDE") == 0  /* C++ vector delete */
  &&   strcmp(alloc_TLA,"VEC") == 0
- ) return ok;
+) return ok;
   
   _hashtable.err_total_incompatible++;
   return bad;
 }
 
-void MT_init_redzone(  void *address, unsigned long int size )
+void MT_init_redzone( void *address, unsigned long int size)
 {
   char *start = (char *)address + size - REDZONE_SIZE;
   
   strncpy(start, REDZONE_STR, REDZONE_SIZE);
 }
 
-int MT_check_redzone(  void *address, unsigned long int size )
+int MT_check_redzone( void *address, unsigned long int size)
 {
   char *start = (char *)address + size - REDZONE_SIZE;
   
@@ -461,14 +461,14 @@ int MT_check_redzone(  void *address, unsigned long int size )
   return 1;
 }
 
-int MT_delete_entry (  unsigned long int address,  const char* TLA, int line,
-      const char* func, const char* file_name )
+int MT_delete_entry ( unsigned long int address,  const char* TLA, int line,
+      const char* func, const char* file_name)
 {
   _HASH_ENTRY*  mover = nullptr;
   _HASH_ENTRY*  prev  = nullptr;
   unsigned int i;
   
-  if (_hashtable.hash_array == nullptr )
+  if (_hashtable.hash_array == nullptr)
     return (1); /* Probable cause: MemTrackerFinalReport() called too early */
   /* C++ is continuing to run destructor methods */
   /* I consider that "ok" */
@@ -492,12 +492,12 @@ int MT_delete_entry (  unsigned long int address,  const char* TLA, int line,
     {
       if (mover->address == address)
 {
- if ( !MT_check_redzone((void *)address, mover->size_mem))
+ if (!MT_check_redzone((void *)address, mover->size_mem))
    {
      fprintf (stderr, "MemTracker: %s:%u func:%s()  Heap corruption before deallocator called!\n",
       file_name, line, func);
    }
- if ( MT_is_deallocater_wrong(mover->allocation_TLA, TLA) )
+ if (MT_is_deallocater_wrong(mover->allocation_TLA, TLA))
    {
      /* fprintf (stderr, "MemTracker: %s:%u func:%s()  Deallocator %s not compatible with %s!\n", */
      /*       file_name, line, func, mover->allocation_TLA, TLA); */
@@ -514,7 +514,7 @@ int MT_delete_entry (  unsigned long int address,  const char* TLA, int line,
    _hashtable.hash_array[i] = mover->next;
  else prev->next = mover->next;
  
- if ( !_hashtable.hash_array[i] )
+ if (!_hashtable.hash_array[i])
    _hashtable.rows_used--;
  
  _hashtable.total_entries--;
@@ -552,13 +552,13 @@ void MT_double_hash()
       exit(2);
     }
   
-  for ( i=0; i<n_rows; i++)
+  for (i=0; i<n_rows; i++)
     {
       mover = old_hash[i];
       while (mover)
 {
  _HASH_ENTRY  *mover_next = mover -> next;
- unsigned int new_row = (   mover->hash_allbits
+ unsigned int new_row = (  mover->hash_allbits
     & _hashtable.current_bit_mask);
  
  /*add to front of new stack */
@@ -592,7 +592,7 @@ unsigned int source_line,  const char* func_name, const char* file_name)
   
   if (MT_should_double()) MT_double_hash();
   
-  if ( MT_find_entry(address)  ) /* O/S or internal error */
+  if (MT_find_entry(address) ) /* O/S or internal error */
     {
       fprintf (stderr, "MemTracker: Table Error: Address %lu already in use! %s:%u func:%s()\n",
       address, file_name, source_line, func_name);
@@ -601,7 +601,7 @@ unsigned int source_line,  const char* func_name, const char* file_name)
   
   all_bits = MT_gen_hash_bits (address);
   i = all_bits & _hashtable.current_bit_mask;
-  p_new_entry = (_HASH_ENTRY*) calloc(1, sizeof (_HASH_ENTRY) );
+  p_new_entry = (_HASH_ENTRY*) calloc(1, sizeof (_HASH_ENTRY));
   if (!p_new_entry)
     {
       fprintf (stderr, "MemTracker: Internal error: calloc failed for new hash entry\n");
@@ -661,7 +661,7 @@ int MT_modify_entry (unsigned long int old_address, unsigned long int new_addres
   
   _HASH_ENTRY* ptr;
   
-  if (! (ptr = MT_find_entry(old_address) ) )
+  if (! (ptr = MT_find_entry(old_address)))
     {
       fprintf (stderr, "MemTracker: %s:%u func:%s()  realloc called but 0x%lX not allocated!\n",
       file_name, source_line, function_name, old_address);
@@ -689,7 +689,7 @@ void MT_dump_stats()
 void MT_dump_hash()
 {
   unsigned int i;
-  for ( i =0; i< _hashtable.total_rows; i++)
+  for (i =0; i< _hashtable.total_rows; i++)
     {
       _HASH_ENTRY* mover = _hashtable.hash_array[i];
       printf ("\nrow[%u]",i);
@@ -737,11 +737,11 @@ _HASH_ENTRY** MT_all_entries()  /* list of all current hash table entries */
   return list;
 }
 
-int MT_compare_seq(const void* vpa, const void* vpb)
+int MT_compare_seq(const void * vpa, const void * vpb)
 {
   _HASH_ENTRY** a = (_HASH_ENTRY**)vpa;
   _HASH_ENTRY** b = (_HASH_ENTRY**)vpb;
-  return ( ((*a)->sequence_num) -  ((*b)->sequence_num) );
+  return (((*a)->sequence_num) -  ((*b)->sequence_num));
 }
 
 void MT_dump_he(_HASH_ENTRY *p)  /* dump a hash entry */
@@ -936,19 +936,19 @@ if ((int)ptr->source_line != lastLineNum) {
 const char * getTLA(char *TLA) {
   if (strcmp(TLA,"DEL") == 0) {
     return "delete";
-  }else if (strcmp(TLA,"VDE") == 0) {
+  } else if (strcmp(TLA,"VDE") == 0) {
     return "delete[]";
-  }else if (strcmp(TLA,"NEW") == 0) {
+  } else if (strcmp(TLA,"NEW") == 0) {
     return "new";
-  }else if (strcmp(TLA,"VEC") == 0) {
+  } else if (strcmp(TLA,"VEC") == 0) {
     return "new[]";
-  }else if (strcmp(TLA,"MAL") == 0) {
+  } else if (strcmp(TLA,"MAL") == 0) {
     return "malloc";
-  }else if (strcmp(TLA,"CAL") == 0) {
+  } else if (strcmp(TLA,"CAL") == 0) {
     return "calloc";
-  }else if (strcmp(TLA,"RAL") == 0) {
+  } else if (strcmp(TLA,"RAL") == 0) {
     return "realloc";
-  }else if (strcmp(TLA,"FRE") == 0) {
+  } else if (strcmp(TLA,"FRE") == 0) {
     return "free";
   }
   return "WTF";
@@ -1026,7 +1026,7 @@ const char* file_name)
   return newptr;
 }
 
-void MT_Free (void* ptr, int line, const char* func, const char* file_name)
+void MT_Free (void * ptr, int line, const char* func, const char* file_name)
 {
   if (MT_delete_entry((unsigned long int)ptr, "FRE", line, func, file_name))
     free(ptr);
@@ -1040,7 +1040,7 @@ void MT_Free (void* ptr, int line, const char* func, const char* file_name)
 /*this appears to be a very slightly documented interface and */
 /*the ramifications of this are unknown*/
 
-void operator delete(void* pMem, char* pszFilename, int nLine)
+void operator delete(void * pMem, char* pszFilename, int nLine)
 {
   fprintf (stderr, "WOW, WOWIE ***********\n");
   fprintf (stderr, "This function shouldn't be called! \n");
@@ -1048,7 +1048,7 @@ void operator delete(void* pMem, char* pszFilename, int nLine)
   free(pMem); /* http://msdn.microsoft.com/en-us/library/cxdxz3x6%28VS.80%29.aspx */
 }
 
-void* operator new(size_t size, unsigned int line,  const char* func_name,
+void * operator new(size_t size, unsigned int line,  const char* func_name,
   const char* file_name)
 {
   void *ptr;
@@ -1064,7 +1064,7 @@ void* operator new(size_t size, unsigned int line,  const char* func_name,
   return ptr;
 }
 
-void* operator new [] (size_t size, unsigned int line, const char* func_name,
+void * operator new [] (size_t size, unsigned int line, const char* func_name,
       const char* file_name)
 {
   void *ptr;
@@ -1084,7 +1084,7 @@ void* operator new [] (size_t size, unsigned int line, const char* func_name,
 /* C++ scalar delete */
 /* The default delete "throws" (), I should claim the same     */
 /* even if I don't throw anything! Some compilers require this */
-void operator delete(void* ptr) throw ()
+void operator delete(void * ptr) throw ()
 {
 	if (!ptr)
 		return;
@@ -1096,7 +1096,7 @@ void operator delete(void* ptr) throw ()
 /* C++ vector delete */
 /* The default delete[] "throws" (), I should claim the same    */
 /* even if I don't throw anything!  Some compilers require this */
-void operator delete [] (void* ptr) throw ()
+void operator delete [] (void * ptr) throw ()
 {
 	if (!ptr)
 		return;

@@ -92,8 +92,8 @@ public:
 		{
 			ExVertexStruct vx;
 			vx.Position = pl->Get(i);
-			vx.Normal = float3(0,0,0);
-			vx.TexCoord = float2(0,0);
+			vx.Normal = float3(0, 0, 0);
+			vx.TexCoord = float2(0, 0);
 			vx.Color = 0xFFFFFFFF;
 			vertices->push_back(vx);
 		}

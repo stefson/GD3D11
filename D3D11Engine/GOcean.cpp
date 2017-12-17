@@ -33,7 +33,7 @@ GOcean::~GOcean()
 /** Initializes the ocean */
 XRESULT GOcean::InitOcean()
 {
-	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
+	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 
 	PlaneMesh = new GMesh;
 	if (XR_SUCCESS != PlaneMesh->LoadMesh("system\\GD3D11\\Meshes\\PlaneSubdiv.3ds"))
@@ -84,7 +84,7 @@ void GOcean::Draw()
 	if (Patches.empty())
 		return;
 
-	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
+	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 
 	engine->SetDefaultStates();
 	FFTOceanSimulator->updateDisplacementMap(Engine::GAPI->GetTimeSeconds());
@@ -93,7 +93,7 @@ void GOcean::Draw()
 }
 
 /** Gets the oceans fft resources. Does not do addref() */
-void GOcean::GetFFTResources(ID3D11ShaderResourceView** tex_displacement, ID3D11ShaderResourceView** tex_gradient, ID3D11ShaderResourceView** fresnelMap, OceanSettingsConstantBuffer* settingsCB)
+void GOcean::GetFFTResources(ID3D11ShaderResourceView ** tex_displacement, ID3D11ShaderResourceView ** tex_gradient, ID3D11ShaderResourceView ** fresnelMap, OceanSettingsConstantBuffer* settingsCB)
 {
 	*tex_displacement = FFTOceanSimulator->getD3D11DisplacementMap();
 	*tex_gradient = FFTOceanSimulator->getD3D11GradientMap();
@@ -183,13 +183,13 @@ WaterPatchInfo& GOcean::AddWaterPatchAt(int x, int y)
 }
 
 /** Returns a vector of the patch locations */
-void GOcean::GetPatchLocations(std::vector<D3DXVECTOR3>& patchLocations)
+void GOcean::GetPatchLocations(std::vector<D3DXVECTOR3> & patchLocations)
 {
 	for(std::map<std::pair<int, int>, WaterPatchInfo>::iterator it = Patches.begin(); it != Patches.end(); it++)
 	{
-		patchLocations.push_back(D3DXVECTOR3(	(float)((*it).first.first * OCEAN_PATCH_SIZE), 
-												(float)((*it).second.PatchHeight), 
-												(float)((*it).first.second * OCEAN_PATCH_SIZE)));
+		patchLocations.push_back(D3DXVECTOR3(	(float)(it->first.first * OCEAN_PATCH_SIZE), 
+												(float)(it->second.PatchHeight), 
+												(float)(it->first.second * OCEAN_PATCH_SIZE)));
 	}
 }
 
@@ -200,7 +200,7 @@ void GOcean::ClearPatches()
 }
 
 /** Saves the patches to a file */
-XRESULT GOcean::SavePatches(const std::string& file)
+XRESULT GOcean::SavePatches(const std::string & file)
 {
 	FILE* f = fopen(file.c_str(), "wb");
 
@@ -215,13 +215,13 @@ XRESULT GOcean::SavePatches(const std::string& file)
 
 	for(std::map<std::pair<int, int>, WaterPatchInfo>::iterator it = Patches.begin(); it != Patches.end(); it++)
 	{
-		INT2 xz = INT2((*it).first.first, (*it).first.second);
+		INT2 xz = INT2(it->first.first, it->first.second);
 
 		// Write xz-coord
 		fwrite(&xz, sizeof(xz), 1, f);
 
 		// Write info-struct
-		fwrite(&(*it).second, sizeof(WaterPatchInfo), 1, f);
+		fwrite(&it->second, sizeof(WaterPatchInfo), 1, f);
 	}
 
 	fclose(f);
@@ -229,7 +229,7 @@ XRESULT GOcean::SavePatches(const std::string& file)
 
 
 /** Loads the patches from a file */
-XRESULT GOcean::LoadPatches(const std::string& file)
+XRESULT GOcean::LoadPatches(const std::string & file)
 {
 	FILE* f = fopen(file.c_str(), "rb");
 

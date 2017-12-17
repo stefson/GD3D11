@@ -227,7 +227,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	//////////////////////////////////////////////////////////////////////////
 
 /* This is PI. Hi PI. */
-#define AI_MATH_PI			(3.141592653589793238462643383279 )
+#define AI_MATH_PI			(3.141592653589793238462643383279)
 #define AI_MATH_TWO_PI		(AI_MATH_PI * 2.0)
 #define AI_MATH_HALF_PI		(AI_MATH_PI * 0.5)
 

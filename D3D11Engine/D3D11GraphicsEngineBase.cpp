@@ -239,12 +239,12 @@ XRESULT D3D11GraphicsEngineBase::OnResize(INT2 newSize)
 	}
 
 	// Successfully resized swapchain, re-get buffers
-	ID3D11Texture2D* backbuffer = nullptr;
+	ID3D11Texture2D * backbuffer = nullptr;
 	SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void **)&backbuffer);
 
 	// Recreate RenderTargetView
 	ID3D11RenderTargetView* backbufferRTV;
-	ID3D11ShaderResourceView* backbufferSRV;
+	ID3D11ShaderResourceView * backbufferSRV;
 	LE(Device->CreateRenderTargetView(backbuffer, nullptr, &backbufferRTV));
 	LE(Device->CreateShaderResourceView(backbuffer, nullptr, &backbufferSRV));
 
@@ -349,7 +349,7 @@ D3D11ShaderManager* D3D11GraphicsEngineBase::GetShaderManager()
 }
 
 /** Called when the game wants to clear the bound rendertarget */
-XRESULT D3D11GraphicsEngineBase::Clear(const float4& color)
+XRESULT D3D11GraphicsEngineBase::Clear(const float4 & color)
 {
 	Context->ClearDepthStencilView(DepthStencilBuffer->GetDepthStencilView(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	Context->ClearRenderTargetView(HDRBackBuffer->GetRenderTargetView(), (float *)&color);
@@ -374,7 +374,7 @@ XRESULT D3D11GraphicsEngineBase::CreateTexture(D3D11Texture** outTexture)
 }
 
 /** Creates a constantbuffer object (Not registered inside) */
-XRESULT D3D11GraphicsEngineBase::CreateConstantBuffer(D3D11ConstantBuffer** outCB, void* data, int size)
+XRESULT D3D11GraphicsEngineBase::CreateConstantBuffer(D3D11ConstantBuffer** outCB, void * data, int size)
 {
 	*outCB = new D3D11ConstantBuffer(size, data);
 
@@ -559,7 +559,7 @@ XRESULT D3D11GraphicsEngineBase::DrawVertexArray(ExVertexStruct* vertices, unsig
 {
 	UpdateRenderStates();
 	D3D11VShader* vShader = ShaderManager->GetVShader("VS_TransformedEx");
-	D3D11PShader* pShader = ShaderManager->GetPShader("PS_FixedFunctionPipe");
+	D3D11PShader * pShader = ShaderManager->GetPShader("PS_FixedFunctionPipe");
 
 	// Bind the FF-Info to the first PS slot
 	pShader->GetConstantBuffer()[0]->UpdateBuffer(&Engine::GAPI->GetRendererState()->GraphicsState);
@@ -686,7 +686,7 @@ XRESULT D3D11GraphicsEngineBase::UpdateRenderStates()
 
 
 /** Constructs the makro list for shader compilation */
-void D3D11GraphicsEngineBase::ConstructShaderMakroList(std::vector<D3D10_SHADER_MACRO>& list)
+void D3D11GraphicsEngineBase::ConstructShaderMakroList(std::vector<D3D10_SHADER_MACRO> & list)
 {
 	GothicRendererSettings& s = Engine::GAPI->GetRendererState()->RendererSettings;
 	D3D10_SHADER_MACRO m;
@@ -743,28 +743,28 @@ void D3D11GraphicsEngineBase::SetupVS_ExPerInstanceConstantBuffer()
 }
 
 /** Sets the active pixel shader object */
-XRESULT D3D11GraphicsEngineBase::SetActivePixelShader(const std::string& shader)
+XRESULT D3D11GraphicsEngineBase::SetActivePixelShader(const std::string & shader)
 {
 	ActivePS = ShaderManager->GetPShader(shader);
 
 	return XR_SUCCESS;
 }
 
-XRESULT D3D11GraphicsEngineBase::SetActiveVertexShader(const std::string& shader)
+XRESULT D3D11GraphicsEngineBase::SetActiveVertexShader(const std::string & shader)
 {
 	ActiveVS = ShaderManager->GetVShader(shader);
 
 	return XR_SUCCESS;
 }
 
-XRESULT D3D11GraphicsEngineBase::SetActiveHDShader(const std::string& shader)
+XRESULT D3D11GraphicsEngineBase::SetActiveHDShader(const std::string & shader)
 {
 	ActiveHDS = ShaderManager->GetHDShader(shader);
 
 	return XR_SUCCESS;
 }
 
-XRESULT D3D11GraphicsEngineBase::SetActiveGShader(const std::string& shader)
+XRESULT D3D11GraphicsEngineBase::SetActiveGShader(const std::string & shader)
 {
 	ActiveGS = ShaderManager->GetGShader(shader);
 	
@@ -833,7 +833,7 @@ XRESULT D3D11GraphicsEngineBase::DrawVertexBufferFF(D3D11VertexBuffer* vb, unsig
 
 
 /** Binds viewport information to the given constantbuffer slot */
-XRESULT D3D11GraphicsEngineBase::BindViewportInformation(const std::string& shader, int slot) 
+XRESULT D3D11GraphicsEngineBase::BindViewportInformation(const std::string & shader, int slot) 
 {
 	D3D11_VIEWPORT vp;
 	UINT num = 1;
@@ -847,7 +847,7 @@ XRESULT D3D11GraphicsEngineBase::BindViewportInformation(const std::string& shad
 	f2[1].x = vp.Width / scale;
 	f2[1].y = vp.Height / scale;
 
-	D3D11PShader* ps = ShaderManager->GetPShader(shader);
+	D3D11PShader * ps = ShaderManager->GetPShader(shader);
 	D3D11VShader* vs = ShaderManager->GetVShader(shader);
 
 	if (vs)

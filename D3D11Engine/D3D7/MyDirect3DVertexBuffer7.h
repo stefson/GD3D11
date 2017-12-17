@@ -32,7 +32,7 @@ public:
 
 	
     /*** IUnknown methods ***/
-    HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppvObj) {
+    HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void ** ppvObj) {
         //DebugWrite("MyDirect3DVertexBuffer7::QueryInterface\n");
         //return this->direct3DVertexBuffer7->QueryInterface(riid, ppvObj);
 
@@ -70,7 +70,7 @@ public:
         return S_OK;
     }
 
-    HRESULT STDMETHODCALLTYPE Lock(DWORD dwFlags, LPVOID* lplpData, LPDWORD lpdwSize) {
+    HRESULT STDMETHODCALLTYPE Lock(DWORD dwFlags, LPVOID * lplpData, LPDWORD lpdwSize) {
         DebugWrite("MyDirect3DVertexBuffer7::Lock\n");
 
 		// Pass the lock-call through to our engine

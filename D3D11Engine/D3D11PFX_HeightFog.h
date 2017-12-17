@@ -8,6 +8,6 @@ public:
 	~D3D11PFX_HeightFog();
 
 	/** Draws this effect to the given buffer */
-	XRESULT Render(RenderToTextureBuffer* fxbuffer);
+	XRESULT Render(RenderToTextureBuffer * fxbuffer);
 };
 

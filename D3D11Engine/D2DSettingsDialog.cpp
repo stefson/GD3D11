@@ -218,7 +218,7 @@ XRESULT D2DSettingsDialog::InitControls() {
 	SV_Slider * dynShadowSlider = new SV_Slider(MainView, MainPanel);
 	dynShadowSlider->SetPositionAndSize(D2D1::Point2F(10, 22), D2D1::SizeF(150, 15));
 	dynShadowSlider->AlignUnder(dynShadowLabel, 5);
-	dynShadowSlider->SetDataToUpdate((int*)&Engine::GAPI->GetRendererState()->RendererSettings.EnablePointlightShadows);
+	dynShadowSlider->SetDataToUpdate((int *)&Engine::GAPI->GetRendererState()->RendererSettings.EnablePointlightShadows);
 	dynShadowSlider->SetIsIntegralSlider(true);
 	dynShadowSlider->SetMinMax(0.0f, GothicRendererSettings::_PLS_NUM_SETTINGS-1);
 

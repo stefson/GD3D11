@@ -28,8 +28,8 @@ GSky::GSky() {
 	Atmosphere.G = -0.995f;
 	//Atmosphere.WaveLengths = float3(0.65f, 0.57f, 0.475f);
 	Atmosphere.WaveLengths = float3(0.63f, 0.57f, 0.50f);
-	Atmosphere.SpherePosition = D3DXVECTOR3(0,0,0);
-	Atmosphere.LightDirection = D3DXVECTOR3(1,1,1);
+	Atmosphere.SpherePosition = D3DXVECTOR3(0, 0, 0);
+	Atmosphere.LightDirection = D3DXVECTOR3(1, 1, 1);
 	Atmosphere.SphereOffsetY = -820000;
 	Atmosphere.SkyTimeScale = 1.0f;
 	D3DXVec3Normalize(&Atmosphere.LightDirection, &Atmosphere.LightDirection);
@@ -56,10 +56,10 @@ XRESULT GSky::InitSky()
 	const float sizeY = 10000;
 
 
-	/*SkyPlaneVertices[0].Position = float3(+sizeX, sizeY, -sizeX); // 1,0
-	SkyPlaneVertices[1].Position = float3(+sizeX, sizeY, +sizeX); // 1,1
-	SkyPlaneVertices[2].Position = float3(-sizeX, sizeY, +sizeX); // 0,1
-	SkyPlaneVertices[3].Position = float3(-sizeX, sizeY, -sizeX); // 0,0*/
+	/*SkyPlaneVertices[0].Position = float3(+sizeX, sizeY, -sizeX); // 1, 0
+	SkyPlaneVertices[1].Position = float3(+sizeX, sizeY, +sizeX); // 1, 1
+	SkyPlaneVertices[2].Position = float3(-sizeX, sizeY, +sizeX); // 0, 1
+	SkyPlaneVertices[3].Position = float3(-sizeX, sizeY, -sizeX); // 0, 0*/
 
 	SkyPlaneVertices[0].Position = float3(-sizeX, sizeY, -sizeX); // 0
 	SkyPlaneVertices[1].Position = float3(+sizeX, sizeY, -sizeX); // 1
@@ -70,8 +70,8 @@ XRESULT GSky::InitSky()
 	SkyPlaneVertices[5].Position = float3(-sizeX, sizeY, +sizeX); // 2
 
 	const float scale = 20.0f;
-	D3DXVECTOR2 displacement = D3DXVECTOR2(0,0);
-	float4 color = float4(1,1,1,1);
+	D3DXVECTOR2 displacement = D3DXVECTOR2(0, 0);
+	float4 color = float4(1, 1, 1, 1);
 
 	// Construct vertices
 	// 0
@@ -104,13 +104,13 @@ XRESULT GSky::InitSky()
 }
 
 /** Returns the skyplane */
-MeshInfo* GSky::GetSkyPlane()
+MeshInfo * GSky::GetSkyPlane()
 {
 	return SkyPlane;
 }
 
 /** Adds a sky texture. Sky textures must be in order to make the daytime work */
-XRESULT GSky::AddSkyTexture(const std::string& file)
+XRESULT GSky::AddSkyTexture(const std::string & file)
 {
 	D3D11Texture* t;
 	XLE(Engine::GraphicsEngine->CreateTexture(&t));
@@ -148,7 +148,7 @@ XRESULT GSky::LoadSkyResources()
 	XLE(Engine::GraphicsEngine->CreateTexture(&NightTexture));
 	XLE(NightTexture->Init("system\\GD3D11\\Textures\\starsh.jpg"));
 
-	VERTEX_INDEX indices[] = {0,1,2,3,4,5};
+	VERTEX_INDEX indices[] = {0, 1,2,3,4,5};
 	SkyPlane = new MeshInfo;
 	SkyPlane->Create(SkyPlaneVertices, 6, indices, 6);
 
@@ -179,7 +179,7 @@ void GSky::SetSkyTexture(ESkyTexture texture)
 }
 
 /** Returns the sky-texture for the passed daytime (0..1) */
-void GSky::GetTextureOfDaytime(float time, D3D11Texture** t1, D3D11Texture** t2, float* factor)
+void GSky::GetTextureOfDaytime(float time, D3D11Texture** t1, D3D11Texture** t2, float * factor)
 {
 	if (!SkyTextures.size())
 		return;
@@ -276,7 +276,7 @@ GMesh* GSky::GetSkyDome() {
 /** Returns the current sky-light color */
 float4 GSky::GetSkylightColor() {
 	zCSkyController_Outdoor* sc = oCGame::GetGame()->_zCSession_world->GetSkyControllerOutdoor();
-	float4 color = float4(1,1,1,1);
+	float4 color = float4(1, 1, 1, 1);
 
 	if (sc) {
 		DWORD* clut = sc->PolyLightCLUTPtr;
@@ -356,7 +356,7 @@ float3 GSky::GetSunColor()
 	//return float4(abs(AC_SpherePosition), 1);
 	
 	//if (AC_CameraHeight < AC_InnerRadius)
-	//	return float4(1,0,0,1);
+	//	return float4(1, 0, 0, 1);
 	
 	// Calculate the closest intersection of the ray with the outer atmosphere (which is the near point of the ray passing through the atmosphere)
 	float fNear = AC_getNearIntersection(camPos, vRay, AtmosphereCB.AC_CameraHeight * AtmosphereCB.AC_CameraHeight, AtmosphereCB.AC_OuterRadius * AtmosphereCB.AC_OuterRadius);

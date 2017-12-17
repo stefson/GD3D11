@@ -75,8 +75,8 @@ public:
 	const aiVector3t& operator /= (TReal f);
 
 	// transform vector by matrix
-	aiVector3t& operator *= (const aiMatrix3x3t<TReal>& mat);
-	aiVector3t& operator *= (const aiMatrix4x4t<TReal>& mat);
+	aiVector3t& operator *= (const aiMatrix3x3t<TReal> & mat);
+	aiVector3t& operator *= (const aiMatrix4x4t<TReal> & mat);
 
 	// access a single element
 	TReal operator[](unsigned int i) const;
@@ -95,7 +95,7 @@ public:
 	 *  @param pX X component
 	 *  @param pY Y component
 	 *  @param pZ Z component  */
-	void Set( TReal pX, TReal pY, TReal pZ);
+	void Set(TReal pX, TReal pY, TReal pZ);
 
 	/** @brief Get the squared length of the vector
 	 *  @return Square length */

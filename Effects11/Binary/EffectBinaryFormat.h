@@ -36,9 +36,9 @@ struct EVersionTag
 // versions must be listed in ascending order
 static const EVersionTag g_EffectVersions[] = 
 {
-    { "fx_4_0", D3DX11_FXL_VERSION(4,0),   0xFEFF1001 },
-    { "fx_4_1", D3DX11_FXL_VERSION(4,1),   0xFEFF1011 },
-    { "fx_5_0", D3DX11_FXL_VERSION(5,0),   0xFEFF2001 },
+    { "fx_4_0", D3DX11_FXL_VERSION(4, 0),   0xFEFF1001 },
+    { "fx_4_1", D3DX11_FXL_VERSION(4, 1),   0xFEFF1011 },
+    { "fx_5_0", D3DX11_FXL_VERSION(5, 0),   0xFEFF2001 },
 };
 
 
@@ -651,29 +651,29 @@ struct SBinaryConstant
     };
 };
 
-static_assert( sizeof(SBinaryHeader) == 76, "FX11 binary size mismatch" );
-static_assert( sizeof(SBinaryHeader::SVarCounts) == 12, "FX11 binary size mismatch" );
-static_assert( sizeof(SBinaryHeader5) == 96, "FX11 binary size mismatch" );
-static_assert( sizeof(SBinaryConstantBuffer) == 20, "FX11 binary size mismatch" );
-static_assert( sizeof(SBinaryAnnotation) == 8, "FX11 binary size mismatch" );
-static_assert( sizeof(SBinaryNumericVariable) == 24, "FX11 binary size mismatch" );
-static_assert( sizeof(SBinaryInterfaceVariable) == 16, "FX11 binary size mismatch" );
-static_assert( sizeof(SBinaryInterfaceInitializer) == 8, "FX11 binary size mismatch" );
-static_assert( sizeof(SBinaryObjectVariable) == 16, "FX11 binary size mismatch" );
-static_assert( sizeof(SBinaryGSSOInitializer) == 8, "FX11 binary size mismatch" );
-static_assert( sizeof(SBinaryShaderData5) == 36, "FX11 binary size mismatch" );
-static_assert( sizeof(SBinaryType) == 24, "FX11 binary size mismatch" );
-static_assert( sizeof(SBinaryType::SBinaryMember) == 16, "FX11 binary size mismatch" );
-static_assert( sizeof(SBinaryNumericType) == 4, "FX11 binary size mismatch" );
-static_assert( sizeof(SBinaryTypeInheritance) == 8, "FX11 binary size mismatch" );
-static_assert( sizeof(SBinaryGroup) == 8, "FX11 binary size mismatch" );
-static_assert( sizeof(SBinaryTechnique) == 8, "FX11 binary size mismatch" );
-static_assert( sizeof(SBinaryPass) == 8, "FX11 binary size mismatch" );
-static_assert( sizeof(SBinaryAssignment) == 16, "FX11 binary size mismatch" );
-static_assert( sizeof(SBinaryAssignment::SConstantIndex) == 8, "FX11 binary size mismatch" );
-static_assert( sizeof(SBinaryAssignment::SVariableIndex) == 8, "FX11 binary size mismatch" );
-static_assert( sizeof(SBinaryAssignment::SIndexedObjectExpression) == 8, "FX11 binary size mismatch" );
-static_assert( sizeof(SBinaryAssignment::SInlineShader) == 8, "FX11 binary size mismatch" );
+static_assert(sizeof(SBinaryHeader) == 76, "FX11 binary size mismatch");
+static_assert(sizeof(SBinaryHeader::SVarCounts) == 12, "FX11 binary size mismatch");
+static_assert(sizeof(SBinaryHeader5) == 96, "FX11 binary size mismatch");
+static_assert(sizeof(SBinaryConstantBuffer) == 20, "FX11 binary size mismatch");
+static_assert(sizeof(SBinaryAnnotation) == 8, "FX11 binary size mismatch");
+static_assert(sizeof(SBinaryNumericVariable) == 24, "FX11 binary size mismatch");
+static_assert(sizeof(SBinaryInterfaceVariable) == 16, "FX11 binary size mismatch");
+static_assert(sizeof(SBinaryInterfaceInitializer) == 8, "FX11 binary size mismatch");
+static_assert(sizeof(SBinaryObjectVariable) == 16, "FX11 binary size mismatch");
+static_assert(sizeof(SBinaryGSSOInitializer) == 8, "FX11 binary size mismatch");
+static_assert(sizeof(SBinaryShaderData5) == 36, "FX11 binary size mismatch");
+static_assert(sizeof(SBinaryType) == 24, "FX11 binary size mismatch");
+static_assert(sizeof(SBinaryType::SBinaryMember) == 16, "FX11 binary size mismatch");
+static_assert(sizeof(SBinaryNumericType) == 4, "FX11 binary size mismatch");
+static_assert(sizeof(SBinaryTypeInheritance) == 8, "FX11 binary size mismatch");
+static_assert(sizeof(SBinaryGroup) == 8, "FX11 binary size mismatch");
+static_assert(sizeof(SBinaryTechnique) == 8, "FX11 binary size mismatch");
+static_assert(sizeof(SBinaryPass) == 8, "FX11 binary size mismatch");
+static_assert(sizeof(SBinaryAssignment) == 16, "FX11 binary size mismatch");
+static_assert(sizeof(SBinaryAssignment::SConstantIndex) == 8, "FX11 binary size mismatch");
+static_assert(sizeof(SBinaryAssignment::SVariableIndex) == 8, "FX11 binary size mismatch");
+static_assert(sizeof(SBinaryAssignment::SIndexedObjectExpression) == 8, "FX11 binary size mismatch");
+static_assert(sizeof(SBinaryAssignment::SInlineShader) == 8, "FX11 binary size mismatch");
 
 } // end namespace D3DX11Effects
 

@@ -13,8 +13,8 @@ struct RenderToTextureBuffer
 		ReleaseAll();
 	}
 
-	RenderToTextureBuffer(	ID3D11Texture2D* texture,
-							ID3D11ShaderResourceView* shaderResView,
+	RenderToTextureBuffer(	ID3D11Texture2D * texture,
+							ID3D11ShaderResourceView * shaderResView,
 							ID3D11RenderTargetView* renderTargetView,
 							UINT sizeX,
 							UINT sizeY)
@@ -52,7 +52,7 @@ struct RenderToTextureBuffer
 
 		//Create a new render target texture
 		D3D11_TEXTURE2D_DESC Desc = CD3D11_TEXTURE2D_DESC();
-		ZeroMemory( &Desc, sizeof( D3D10_TEXTURE2D_DESC ) );
+		ZeroMemory(&Desc, sizeof(D3D10_TEXTURE2D_DESC));
 		Desc.ArraySize = arraySize;
 		Desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 		Desc.Usage = D3D11_USAGE_DEFAULT;
@@ -91,10 +91,10 @@ struct RenderToTextureBuffer
 		{
 			// Create the one-face render target views
 			DescRT.Texture2DArray.ArraySize = 1;
-			for( int i = 0; i < 6; ++i )
+			for(int i = 0; i < 6; ++i)
 			{
 				DescRT.Texture2DArray.FirstArraySlice = i;
-				LE( device->CreateRenderTargetView( Texture, &DescRT, &CubeMapRTVs[i] ) );
+				LE(device->CreateRenderTargetView(Texture, &DescRT, &CubeMapRTVs[i]));
 			}
 		}
 
@@ -109,17 +109,17 @@ struct RenderToTextureBuffer
 
 		DescRV.Texture2D.MipLevels = MipLevels;
 		DescRV.Texture2D.MostDetailedMip = 0;
-		LE(device->CreateShaderResourceView( (ID3D11Resource *)Texture, &DescRV, &ShaderResView ));
+		LE(device->CreateShaderResourceView((ID3D11Resource *)Texture, &DescRV, &ShaderResView));
 
 		if (arraySize > 1)
 		{
 			// Create the one-face render target views
 			DescRV.Texture2DArray.ArraySize = 1;
 			DescRV.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
-			for( int i = 0; i < 6; ++i )
+			for(int i = 0; i < 6; ++i)
 			{
 				DescRV.Texture2DArray.FirstArraySlice = i;
-				LE( device->CreateShaderResourceView( Texture, &DescRV, &CubeMapSRVs[i] ) );
+				LE(device->CreateShaderResourceView(Texture, &DescRV, &CubeMapSRVs[i]));
 			}
 		}
 
@@ -141,33 +141,33 @@ struct RenderToTextureBuffer
 		context->PSSetShaderResources(slot, 1, &ShaderResView);
 	};
 
-	ID3D11Texture2D* GetTexture(){return Texture;}
-	ID3D11ShaderResourceView* GetShaderResView(){return ShaderResView;}
-	ID3D11ShaderResourceView** GetShaderResViewPtr(){return &ShaderResView;}
+	ID3D11Texture2D * GetTexture(){return Texture;}
+	ID3D11ShaderResourceView * GetShaderResView(){return ShaderResView;}
+	ID3D11ShaderResourceView ** GetShaderResViewPtr(){return &ShaderResView;}
 	ID3D11RenderTargetView* GetRenderTargetView(){return RenderTargetView;}
 	ID3D11RenderTargetView** GetRenderTargetViewPtr(){return &RenderTargetView;}
 
-	void SetTexture(ID3D11Texture2D* tx){Texture = tx;}
-	void SetShaderResView(ID3D11ShaderResourceView* srv){ShaderResView = srv;}
+	void SetTexture(ID3D11Texture2D * tx){Texture = tx;}
+	void SetShaderResView(ID3D11ShaderResourceView * srv){ShaderResView = srv;}
 	void SetRenderTargetView(ID3D11RenderTargetView* rtv){RenderTargetView = rtv;}
 
 	ID3D11RenderTargetView* GetRTVCubemapFace(UINT i){return CubeMapRTVs[i];} 
-	ID3D11ShaderResourceView* GetSRVCubemapFace(UINT i){return CubeMapSRVs[i];}
+	ID3D11ShaderResourceView * GetSRVCubemapFace(UINT i){return CubeMapSRVs[i];}
 
 	UINT GetSizeX(){return SizeX;}
 	UINT GetSizeY(){return SizeY;}
 private:
 
 	/** The Texture object */
-	ID3D11Texture2D* Texture;
+	ID3D11Texture2D * Texture;
 
 	/** Shader and rendertarget resource views */
-	ID3D11ShaderResourceView* ShaderResView;
+	ID3D11ShaderResourceView * ShaderResView;
 	ID3D11RenderTargetView* RenderTargetView;
 
 	// Rendertargets for the cubemap-faces, if this is a cubemap
 	ID3D11RenderTargetView* CubeMapRTVs[6];
-	ID3D11ShaderResourceView* CubeMapSRVs[6];
+	ID3D11ShaderResourceView * CubeMapSRVs[6];
 
 	UINT SizeX;
 	UINT SizeY;
@@ -225,7 +225,7 @@ struct RenderToDepthStencilBuffer
 
 		//Create a new render target texture
 		D3D11_TEXTURE2D_DESC Desc = CD3D11_TEXTURE2D_DESC();
-		ZeroMemory( &Desc, sizeof( D3D10_TEXTURE2D_DESC ) );
+		ZeroMemory(&Desc, sizeof(D3D10_TEXTURE2D_DESC));
 		Desc.ArraySize = arraySize;
 		Desc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 		Desc.Usage = D3D11_USAGE_DEFAULT;
@@ -243,7 +243,7 @@ struct RenderToDepthStencilBuffer
 
 		//Create a render target view
 		D3D11_DEPTH_STENCIL_VIEW_DESC DescDSV = CD3D11_DEPTH_STENCIL_VIEW_DESC();
-		ZeroMemory( &DescDSV, sizeof( DescDSV ) );
+		ZeroMemory(&DescDSV, sizeof(DescDSV));
 		DescDSV.Format = (DSVFormat != DXGI_FORMAT_UNKNOWN ? DSVFormat : Desc.Format);
 
 		if (arraySize == 1)
@@ -264,10 +264,10 @@ struct RenderToDepthStencilBuffer
 		{
 			// Create the one-face render target views
 			DescDSV.Texture2DArray.ArraySize = 1;
-			for( int i = 0; i < 6; ++i )
+			for(int i = 0; i < 6; ++i)
 			{
 				DescDSV.Texture2DArray.FirstArraySlice = i;
-				LE( device->CreateDepthStencilView( Texture, &DescDSV, &CubeMapDSVs[i] ) );
+				LE(device->CreateDepthStencilView(Texture, &DescDSV, &CubeMapDSVs[i]));
 			}
 		}
 
@@ -281,17 +281,17 @@ struct RenderToDepthStencilBuffer
 
 		DescRV.Texture2D.MipLevels = 1;
 		DescRV.Texture2D.MostDetailedMip = 0;
-		LE(device->CreateShaderResourceView( (ID3D11Resource *)Texture, &DescRV, &ShaderResView ));
+		LE(device->CreateShaderResourceView((ID3D11Resource *)Texture, &DescRV, &ShaderResView));
 		
 		if (arraySize > 1)
 		{
 			// Create the one-face render target views
 			DescRV.Texture2DArray.ArraySize = 1;
 			DescRV.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
-			for( int i = 0; i < 6; ++i )
+			for(int i = 0; i < 6; ++i)
 			{
 				DescRV.Texture2DArray.FirstArraySlice = i;
-				LE( device->CreateShaderResourceView( Texture, &DescRV, &CubeMapSRVs[i] ) );
+				LE(device->CreateShaderResourceView(Texture, &DescRV, &CubeMapSRVs[i]));
 			}
 		}
 
@@ -318,34 +318,34 @@ struct RenderToDepthStencilBuffer
 		context->PSSetShaderResources(slot, 1, &ShaderResView);
 	}
 
-	ID3D11Texture2D* GetTexture(){return Texture;}
-	ID3D11ShaderResourceView* GetShaderResView(){return ShaderResView;}
+	ID3D11Texture2D * GetTexture(){return Texture;}
+	ID3D11ShaderResourceView * GetShaderResView(){return ShaderResView;}
 	ID3D11DepthStencilView* GetDepthStencilView(){return DepthStencilView;}
 	UINT GetSizeX(){return SizeX;}
 	UINT GetSizeY(){return SizeY;}
 
 	ID3D11DepthStencilView* GetDSVCubemapFace(UINT i){return CubeMapDSVs[i];} 
-	ID3D11ShaderResourceView* GetSRVCubemapFace(UINT i){return CubeMapSRVs[i];}
+	ID3D11ShaderResourceView * GetSRVCubemapFace(UINT i){return CubeMapSRVs[i];}
 
-	void SetTexture(ID3D11Texture2D* tx){Texture = tx;}
-	void SetShaderResView(ID3D11ShaderResourceView* srv){ShaderResView = srv;}
+	void SetTexture(ID3D11Texture2D * tx){Texture = tx;}
+	void SetShaderResView(ID3D11ShaderResourceView * srv){ShaderResView = srv;}
 	void SetDepthStencilView(ID3D11DepthStencilView* dsv){DepthStencilView = dsv;}
 
 private:
 
 	// The Texture object
-	ID3D11Texture2D* Texture;
+	ID3D11Texture2D * Texture;
 
 	UINT SizeX;
 	UINT SizeY;
 
 	// Shader and rendertarget resource views
-	ID3D11ShaderResourceView* ShaderResView;
+	ID3D11ShaderResourceView * ShaderResView;
 	ID3D11DepthStencilView* DepthStencilView;
 
 	// Rendertargets for the cubemap-faces, if this is a cubemap
 	ID3D11DepthStencilView* CubeMapDSVs[6];
-	ID3D11ShaderResourceView* CubeMapSRVs[6];
+	ID3D11ShaderResourceView * CubeMapSRVs[6];
 
 	void ReleaseAll()
 	{

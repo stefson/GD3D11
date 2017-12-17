@@ -13,7 +13,7 @@
 #include "SV_NamedSlider.h"
 #include "zCVisual.h"
 
-D2DVobSettingsDialog::D2DVobSettingsDialog(D2DView* view, D2DSubView* parent) : D2DDialog(view, parent)
+D2DVobSettingsDialog::D2DVobSettingsDialog(D2DView * view, D2DSubView * parent) : D2DDialog(view, parent)
 {
 	SetPositionCentered(D2D1::Point2F(view->GetRenderTarget()->GetSize().width / 2, view->GetRenderTarget()->GetSize().height / 2), D2D1::SizeF(700, 450));
 	Header->SetCaption("VOB Settings");
@@ -94,20 +94,20 @@ XRESULT D2DVobSettingsDialog::InitControls()
 }
 
 /** Close button */
-void D2DVobSettingsDialog::CloseButtonPressed(SV_Button* sender, void* userdata)
+void D2DVobSettingsDialog::CloseButtonPressed(SV_Button * sender, void * userdata)
 {
 	D2DVobSettingsDialog* d = (D2DVobSettingsDialog*)userdata;
 	d->SetHidden(true);
 }
 
-void D2DVobSettingsDialog::SliderDragged(SV_Slider* sender, void* userdata)
+void D2DVobSettingsDialog::SliderDragged(SV_Slider * sender, void * userdata)
 {
 	D2DVobSettingsDialog* d = (D2DVobSettingsDialog*)userdata;
 
 	if (!d->Vob)
 		return;
 
-	VisualTesselationSettings* ts = nullptr;
+	VisualTesselationSettings * ts = nullptr;
 	if (d->Vob)
 		ts = &d->Vob->VisualInfo->TesselationInfo;
 
@@ -125,7 +125,7 @@ void D2DVobSettingsDialog::SliderDragged(SV_Slider* sender, void* userdata)
 				d->Vob->VisualInfo->ClearPNAENInfo();
 				d->Vob->VisualInfo->CreatePNAENInfo(false);
 			}
-		}else if (oldValue == 0.0f)
+		} else if (oldValue == 0.0f)
 		{
 			// Here we just set it to something higher than 0.0f, Smooth the normals!
 			if (d->Vob)
@@ -134,19 +134,19 @@ void D2DVobSettingsDialog::SliderDragged(SV_Slider* sender, void* userdata)
 				d->Vob->VisualInfo->CreatePNAENInfo(true);
 			}
 		}
-	}else if (sender == d->RoundnessSetting->GetSlider())
+	} else if (sender == d->RoundnessSetting->GetSlider())
 	{
 		ts->buffer.VT_Roundness = sender->GetValue();
-	}else if (sender == d->TesselationFactorSetting->GetSlider())
+	} else if (sender == d->TesselationFactorSetting->GetSlider())
 	{
 		ts->buffer.VT_TesselationFactor = sender->GetValue();
 
-		if ( ts->buffer.VT_TesselationFactor > 0.0f)
+		if (ts->buffer.VT_TesselationFactor > 0.0f)
 		{
 			if (d->Vob)
 				d->Vob->VisualInfo->CreatePNAENInfo(ts->buffer.VT_DisplacementStrength > 0.0f); // This only creates missing infos
 		}
-	}else if (sender == d->RenderMode->GetSlider())
+	} else if (sender == d->RenderMode->GetSlider())
 	{
 		d->MeshView->SetRenderMode((SV_GMeshInfoView::ERenderMode)(int)(sender->GetValue() + 0.5f));
 	}
@@ -160,7 +160,7 @@ void D2DVobSettingsDialog::SliderDragged(SV_Slider* sender, void* userdata)
 }
 
 /** Sets the Vob to do settings on */
-void D2DVobSettingsDialog::SetVobInfo(BaseVobInfo* vob)
+void D2DVobSettingsDialog::SetVobInfo(BaseVobInfo * vob)
 {
 #ifdef BUILD_SPACER
 	return;
@@ -168,10 +168,10 @@ void D2DVobSettingsDialog::SetVobInfo(BaseVobInfo* vob)
 
 	Vob = nullptr; // Reset the dialog first without messing with the vobs settings
 
-	std::map<zCTexture*, MeshInfo*> meshes;
+	std::map<zCTexture *, MeshInfo *> meshes;
 
 	// Filter meshes by texture
-	for(std::map<zCMaterial *, std::vector<MeshInfo*>>::iterator itm = vob->VisualInfo->Meshes.begin(); itm != vob->VisualInfo->Meshes.end();itm++)
+	for(std::map<zCMaterial *, std::vector<MeshInfo *>>::iterator itm = vob->VisualInfo->Meshes.begin(); itm != vob->VisualInfo->Meshes.end();itm++)
 	{
 		if (!(*itm).first)
 			continue;

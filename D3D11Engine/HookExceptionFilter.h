@@ -35,8 +35,8 @@ static LONG WINAPI ExpFilter(EXCEPTION_POINTERS* pExp, DWORD dwExpCode)
 
 //#define RESET_STACK {	BYTE* pStack; 	BYTE* pBase; __asm{	mov pStack, esp} __asm{mov pBase, ebp} for(; pStack < pBase && *pStack != 0x0001003f; pStack++);	CONTEXT* context = (CONTEXT *)pStack;MyStackWalker sw;	sw.ShowCallstack(GetCurrentThread(), context); }
 
-__declspec( selectany ) std::vector<std::string> _functions;
-static void __AddDbgFuncCall(const std::string& fn, int threadID, bool out)
+__declspec(selectany) std::vector<std::string> _functions;
+static void __AddDbgFuncCall(const std::string & fn, int threadID, bool out)
 {
 	std::string o;
 	if (out)

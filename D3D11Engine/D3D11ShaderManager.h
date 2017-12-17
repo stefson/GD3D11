@@ -13,7 +13,7 @@ public:
 	std::vector<int> cBufferSizes;	//Vector with size for each constant buffer to be created for this shader
 	std::vector<D3D10_SHADER_MACRO> shaderMakros;
 	//Constructor
-	ShaderInfo(std::string n, std::string fn, std::string t, int l, std::vector<D3D10_SHADER_MACRO>& makros = std::vector<D3D10_SHADER_MACRO>())
+	ShaderInfo(std::string n, std::string fn, std::string t, int l, std::vector<D3D10_SHADER_MACRO> & makros = std::vector<D3D10_SHADER_MACRO>())
 	{
 		name = n;
 		fileName = fn;
@@ -25,7 +25,7 @@ public:
 	}
 
 	//Constructor
-	ShaderInfo(std::string n, std::string fn, std::string t, std::vector<D3D10_SHADER_MACRO>& makros = std::vector<D3D10_SHADER_MACRO>())
+	ShaderInfo(std::string n, std::string fn, std::string t, std::vector<D3D10_SHADER_MACRO> & makros = std::vector<D3D10_SHADER_MACRO>())
 	{
 		name = n;
 		fileName = fn;
@@ -65,7 +65,7 @@ public:
 
 	/** Return a specific shader */
 	D3D11VShader* GetVShader(std::string shader);
-	D3D11PShader* GetPShader(std::string shader);
+	D3D11PShader * GetPShader(std::string shader);
 	D3D11HDShader* GetHDShader(std::string shader);
 	D3D11GShader* GetGShader(std::string shader);
 	
@@ -73,7 +73,7 @@ public:
 private:
 	std::vector<ShaderInfo> Shaders;							//Initial shader list for loading
 	std::unordered_map<std::string, D3D11VShader*> VShaders;
-	std::unordered_map<std::string, D3D11PShader*> PShaders;
+	std::unordered_map<std::string, D3D11PShader *> PShaders;
 	std::unordered_map<std::string, D3D11HDShader*> HDShaders;
 	std::unordered_map<std::string, D3D11GShader*> GShaders;
 	

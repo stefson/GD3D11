@@ -12,7 +12,7 @@
 #define USE_LOG
 
 const int MAX_LOG_MESSAGES_TO_CACHE = 200;
-__declspec( selectany ) std::string LOGFILE;
+__declspec(selectany) std::string LOGFILE;
 
 //#ifdef BUILD_DESKTOP
 #ifdef BLERGH__
@@ -124,12 +124,12 @@ namespace LogCache
 class Log
 {
 public:
-	Log(const char* Type,const  char* File, int Line,const  char* Function, bool bIncludeInfo=false, UINT MessageBox=0 )
+	Log(const char* Type,const  char* File, int Line,const  char* Function, bool bIncludeInfo=false, UINT MessageBox=0)
 	{
 		if (bIncludeInfo)
 		{
 			Info << Type << ": ["<< File << "("<<Line<<"), "<<Function<<"]: "; 
-		}else
+		} else
 		{
 			Info << Type << ": ";
 		}
@@ -158,13 +158,13 @@ public:
 
 	/** STL stringstream feature */
 	template< typename T >
-	inline Log& operator << ( const T &obj )
+	inline Log& operator << (const T &obj)
 	{
 		Message << obj;
 		return *this;
 	}
 
-	inline Log& operator << ( std::wostream& (*fn)(std::wostream&) )
+	inline Log& operator << (std::wostream& (*fn)(std::wostream&))
 	{
 		Message << fn;
 		return *this;
@@ -228,7 +228,7 @@ private:
 class Log
 {
 public:
-	Log(const char* Type,const  char* File, int Line,const  char* Function, bool bIncludeInfo=false, UINT MessageBox=0 )
+	Log(const char* Type,const  char* File, int Line,const  char* Function, bool bIncludeInfo=false, UINT MessageBox=0)
 	{
 
 	}
@@ -246,12 +246,12 @@ public:
 
 	/** STL stringstream feature */
 	template< typename T >
-	inline Log& operator << ( const T &obj )
+	inline Log& operator << (const T &obj)
 	{
 		return *this;
 	}
 
-	inline Log& operator << ( std::wostream& (*fn)(std::wostream&) )
+	inline Log& operator << (std::wostream& (*fn)(std::wostream&))
 	{
 		return *this;
 	}

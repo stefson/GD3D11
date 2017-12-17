@@ -18,7 +18,7 @@ ZipArchive::~ZipArchive()
 }
 
 /** unzips the given archive */
-XRESULT ZipArchive::Unzip(const std::string& zip, const std::string& target)
+XRESULT ZipArchive::Unzip(const std::string & zip, const std::string & target)
 {
 	LogInfo() << "Unzipping file: " << zip;
 
@@ -55,7 +55,7 @@ XRESULT ZipArchive::Unzip(const std::string& zip, const std::string& target)
 	return XR_SUCCESS;
 }
 
-XRESULT ZipArchive::UnzipThreaded(const std::string& zip, const std::string& target, UnzipDoneCallback callback, void* cbUserdata)
+XRESULT ZipArchive::UnzipThreaded(const std::string & zip, const std::string & target, UnzipDoneCallback callback, void * cbUserdata)
 {
 	if (UnzipThread)
 		return XR_FAILED; // Already doing something
@@ -67,7 +67,7 @@ XRESULT ZipArchive::UnzipThreaded(const std::string& zip, const std::string& tar
 	return XR_SUCCESS;
 }
 
-void ZipArchive::UnzipThreadFunc(const std::string& zip, const std::string& target, UnzipDoneCallback callback, void* cbUserdata)
+void ZipArchive::UnzipThreadFunc(const std::string & zip, const std::string & target, UnzipDoneCallback callback, void * cbUserdata)
 {
 	LogInfo() << "Unzipping file: " << zip;
 

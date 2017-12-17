@@ -64,7 +64,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef __cplusplus
 #include <new>		// for std::nothrow_t
-#include <string>	// for aiString::Set(const std::string&)
+#include <string>	// for aiString::Set(const std::string &)
 
 namespace Assimp	{
 	//! @cond never
@@ -87,14 +87,14 @@ namespace Intern		{
 		// http://www.gotw.ca/publications/mill15.htm
 
 		// new/delete overload
-		void *operator new    ( size_t num_bytes) /* throw( std::bad_alloc ) */;
-		void *operator new    ( size_t num_bytes, const std::nothrow_t& ) throw();
-		void  operator delete ( void* data);
+		void *operator new    (size_t num_bytes) /* throw(std::bad_alloc) */;
+		void *operator new    (size_t num_bytes, const std::nothrow_t&) throw();
+		void  operator delete (void * data);
 
 		// array new/delete overload
-		void *operator new[]    ( size_t num_bytes) /* throw( std::bad_alloc ) */;
-		void *operator new[]    ( size_t num_bytes, const std::nothrow_t& )  throw();
-		void  operator delete[] ( void* data);
+		void *operator new[]    (size_t num_bytes) /* throw(std::bad_alloc) */;
+		void *operator new[]    (size_t num_bytes, const std::nothrow_t&)  throw();
+		void  operator delete[] (void * data);
 
 	}; // struct AllocateFromAssimpHeap
 #endif
@@ -197,14 +197,14 @@ struct aiColor3D
 	}
 
 	/** Access a specific color component */
-	float& operator[](unsigned int i) {
+	float & operator[](unsigned int i) {
 		return *(&r + i);
 	}
 
 	/** Check whether a color is black */
 	bool IsBlack() const {
 		static const float epsilon = 10e-3f;
-		return fabs( r ) < epsilon && fabs( g ) < epsilon && fabs( b ) < epsilon;
+		return fabs(r) < epsilon && fabs(g) < epsilon && fabs(b) < epsilon;
 	}
 
 #endif // !__cplusplus
@@ -256,37 +256,37 @@ struct aiString
 	{
 		// Crop the string to the maximum length
 		length = length>=MAXLEN?MAXLEN-1:length;
-		memcpy( data, rOther.data, length);
+		memcpy(data, rOther.data, length);
 		data[length] = '\0';
 	}
 
 	/** Constructor from std::string */
-	explicit aiString(const std::string& pString) : 
+	explicit aiString(const std::string & pString) : 
 		length(pString.length()) 
 	{
 		length = length>=MAXLEN?MAXLEN-1:length;
-		memcpy( data, pString.c_str(), length);
+		memcpy(data, pString.c_str(), length);
 		data[length] = '\0';
 	}
 
 	/** Copy a std::string to the aiString */
-	void Set( const std::string& pString) {
-		if ( pString.length() > MAXLEN - 1) {
+	void Set(const std::string & pString) {
+		if (pString.length() > MAXLEN - 1) {
 			return;
 		}
 		length = pString.length();
-		memcpy( data, pString.c_str(), length);
+		memcpy(data, pString.c_str(), length);
 		data[length] = 0;
 	}
 
 	/** Copy a const char* to the aiString */
-	void Set( const char* sz) {
+	void Set(const char* sz) {
 		const size_t len = ::strlen(sz);
-		if ( len > MAXLEN - 1) {
+		if (len > MAXLEN - 1) {
 			return;
 		}
 		length = len;
-		memcpy( data, sz, len);
+		memcpy(data, sz, len);
 		data[len] = 0;
 	}
 
@@ -297,7 +297,7 @@ struct aiString
 	}
 
 	/** Assign a cstd::string to the string */
-	aiString& operator = ( const std::string& pString) {
+	aiString& operator = (const std::string & pString) {
 		Set(pString);
 		return *this;
 	}

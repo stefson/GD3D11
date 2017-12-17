@@ -15,16 +15,16 @@ const int LUM_SIZE = 512;
 
 D3D11PFX_HDR::D3D11PFX_HDR(D3D11PfxRenderer* rnd) : D3D11PFX_Effect(rnd)
 {
-	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
+	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 
 	// Create lum-buffer
 	LumBuffer1 = new RenderToTextureBuffer(engine->GetDevice(), LUM_SIZE, LUM_SIZE, DXGI_FORMAT_R16_FLOAT, nullptr, DXGI_FORMAT_UNKNOWN, DXGI_FORMAT_UNKNOWN, (int)(log(LUM_SIZE) / log(2)));
 	LumBuffer2 = new RenderToTextureBuffer(engine->GetDevice(), LUM_SIZE, LUM_SIZE, DXGI_FORMAT_R16_FLOAT, nullptr, DXGI_FORMAT_UNKNOWN, DXGI_FORMAT_UNKNOWN, (int)(log(LUM_SIZE) / log(2)));
 	LumBuffer3 = new RenderToTextureBuffer(engine->GetDevice(), LUM_SIZE, LUM_SIZE, DXGI_FORMAT_R16_FLOAT, nullptr, DXGI_FORMAT_UNKNOWN, DXGI_FORMAT_UNKNOWN, (int)(log(LUM_SIZE) / log(2)));
 
-	engine->GetContext()->ClearRenderTargetView(LumBuffer1->GetRenderTargetView(), (float *)&D3DXVECTOR4(0,0,0,0));
-	engine->GetContext()->ClearRenderTargetView(LumBuffer2->GetRenderTargetView(), (float *)&D3DXVECTOR4(0,0,0,0));
-	engine->GetContext()->ClearRenderTargetView(LumBuffer3->GetRenderTargetView(), (float *)&D3DXVECTOR4(0,0,0,0));
+	engine->GetContext()->ClearRenderTargetView(LumBuffer1->GetRenderTargetView(), (float *)&D3DXVECTOR4(0, 0, 0, 0));
+	engine->GetContext()->ClearRenderTargetView(LumBuffer2->GetRenderTargetView(), (float *)&D3DXVECTOR4(0, 0, 0, 0));
+	engine->GetContext()->ClearRenderTargetView(LumBuffer3->GetRenderTargetView(), (float *)&D3DXVECTOR4(0, 0, 0, 0));
 	ActiveLumBuffer = 0;
 }
 
@@ -37,9 +37,9 @@ D3D11PFX_HDR::~D3D11PFX_HDR()
 }
 
 /** Draws this effect to the given buffer */
-XRESULT D3D11PFX_HDR::Render(RenderToTextureBuffer* fxbuffer)
+XRESULT D3D11PFX_HDR::Render(RenderToTextureBuffer * fxbuffer)
 {
-	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
+	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 	
 	Engine::GAPI->GetRendererState()->BlendState.BlendEnabled = false;
 	Engine::GAPI->GetRendererState()->BlendState.SetDirty();
@@ -50,7 +50,7 @@ XRESULT D3D11PFX_HDR::Render(RenderToTextureBuffer* fxbuffer)
 	engine->GetContext()->OMGetRenderTargets(1, &oldRTV, &oldDSV);
 
 
-	RenderToTextureBuffer* lum = CalcLuminance();
+	RenderToTextureBuffer * lum = CalcLuminance();
 	CreateBloom(lum);
 
 	// Copy the original image to our temp-buffer
@@ -64,7 +64,7 @@ XRESULT D3D11PFX_HDR::Render(RenderToTextureBuffer* fxbuffer)
 	FxRenderer->GetTempBufferDS4_1()->BindToPixelShader(engine->GetContext(), 2);
 
 	// Draw the HDR-Shader
-	D3D11PShader* hps = engine->GetShaderManager()->GetPShader("PS_PFX_HDR");
+	D3D11PShader * hps = engine->GetShaderManager()->GetPShader("PS_PFX_HDR");
 	hps->Apply();
 
 	HDRSettingsConstantBuffer hcb;
@@ -81,8 +81,8 @@ XRESULT D3D11PFX_HDR::Render(RenderToTextureBuffer* fxbuffer)
 	//FxRenderer->CopyTextureToRTV(currentLum->GetShaderResView(), oldRTV, INT2(LUM_SIZE,LUM_SIZE), false);
 
 	// Restore rendertargets
-	ID3D11ShaderResourceView* srv = nullptr;
-	engine->GetContext()->PSSetShaderResources(1,1,&srv);
+	ID3D11ShaderResourceView * srv = nullptr;
+	engine->GetContext()->PSSetShaderResources(1, 1,&srv);
 	engine->GetContext()->OMSetRenderTargets(1, &oldRTV, oldDSV);
 	if (oldRTV)oldRTV->Release();
 	if (oldDSV)oldDSV->Release();
@@ -91,13 +91,13 @@ XRESULT D3D11PFX_HDR::Render(RenderToTextureBuffer* fxbuffer)
 }
 
 /** Blurs the backbuffer and puts the result into TempBufferDS4_2*/
-void D3D11PFX_HDR::CreateBloom(RenderToTextureBuffer* lum)
+void D3D11PFX_HDR::CreateBloom(RenderToTextureBuffer * lum)
 {
-	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
+	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 	
 	INT2 dsRes = INT2(Engine::GraphicsEngine->GetResolution().x / 4, Engine::GraphicsEngine->GetResolution().y / 4);
 	engine->GetShaderManager()->GetVShader("VS_PFX")->Apply();
-	D3D11PShader* tonemapPS = engine->GetShaderManager()->GetPShader("PS_PFX_Tonemap");
+	D3D11PShader * tonemapPS = engine->GetShaderManager()->GetPShader("PS_PFX_Tonemap");
 	tonemapPS->Apply();
 
 	HDRSettingsConstantBuffer hcb;
@@ -110,12 +110,12 @@ void D3D11PFX_HDR::CreateBloom(RenderToTextureBuffer* lum)
 	lum->BindToPixelShader(engine->GetContext(), 1);
 	FxRenderer->CopyTextureToRTV(engine->GetHDRBackBuffer()->GetShaderResView(), FxRenderer->GetTempBufferDS4_1()->GetRenderTargetView(), dsRes, true);
 
-	D3D11PShader* gaussPS = engine->GetShaderManager()->GetPShader("PS_PFX_GaussBlur");
+	D3D11PShader * gaussPS = engine->GetShaderManager()->GetPShader("PS_PFX_GaussBlur");
 
 
 	/** Pass 1: Blur-H */
 	// Apply PFX-VS
-	D3D11PShader* simplePS = engine->GetShaderManager()->GetPShader("PS_PFX_Simple");
+	D3D11PShader * simplePS = engine->GetShaderManager()->GetPShader("PS_PFX_Simple");
 
 	// Apply blur-H shader
 	gaussPS->Apply();
@@ -145,13 +145,13 @@ void D3D11PFX_HDR::CreateBloom(RenderToTextureBuffer* lum)
 }
 
 /** Calcualtes the luminance */
-RenderToTextureBuffer* D3D11PFX_HDR::CalcLuminance()
+RenderToTextureBuffer * D3D11PFX_HDR::CalcLuminance()
 {
-	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
+	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 
-	RenderToTextureBuffer* lumRTV = nullptr;
-	RenderToTextureBuffer* lastLum = nullptr;
-	RenderToTextureBuffer* currentLum = nullptr;
+	RenderToTextureBuffer * lumRTV = nullptr;
+	RenderToTextureBuffer * lastLum = nullptr;
+	RenderToTextureBuffer * currentLum = nullptr;
 
 	// Figure out which buffers to use where
 	switch(ActiveLumBuffer)
@@ -178,7 +178,7 @@ RenderToTextureBuffer* D3D11PFX_HDR::CalcLuminance()
 	}
 	}
 
-	D3D11PShader* lps = engine->GetShaderManager()->GetPShader("PS_PFX_LumConvert");
+	D3D11PShader * lps = engine->GetShaderManager()->GetPShader("PS_PFX_LumConvert");
 	lps->Apply();
 
 	// Convert the backbuffer to our luminance buffer
@@ -187,7 +187,7 @@ RenderToTextureBuffer* D3D11PFX_HDR::CalcLuminance()
 	// Create the average luminance
 	engine->GetContext()->GenerateMips(currentLum->GetShaderResView());
 
-	D3D11PShader* aps = engine->GetShaderManager()->GetPShader("PS_PFX_LumAdapt");
+	D3D11PShader * aps = engine->GetShaderManager()->GetPShader("PS_PFX_LumAdapt");
 	aps->Apply();
 
 	LumAdaptConstantBuffer lcb;

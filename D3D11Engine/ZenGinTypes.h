@@ -116,7 +116,7 @@ public:
 		return *(zCMaterial **)(((char *)this) + GADDR::Offset_zCPolygon::Offset_Material);
 	}
 
-	zCTexture* GetLightmap() const
+	zCTexture * GetLightmap() const
 	{
 		return *(zCTexture **)(((char *)this) + GADDR::Offset_zCPolygon::Offset_Lightmap);
 	}

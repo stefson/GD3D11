@@ -56,24 +56,24 @@ static const RValue g_rvFILL[] =
 
 static const RValue g_rvFILTER[] =
 {
-    RVALUE_ENTRY(D3D11_FILTER_,     MIN_MAG_MIP_POINT                           ),
-    RVALUE_ENTRY(D3D11_FILTER_,     MIN_MAG_POINT_MIP_LINEAR                    ),
-    RVALUE_ENTRY(D3D11_FILTER_,     MIN_POINT_MAG_LINEAR_MIP_POINT              ),
-    RVALUE_ENTRY(D3D11_FILTER_,     MIN_POINT_MAG_MIP_LINEAR                    ),
-    RVALUE_ENTRY(D3D11_FILTER_,     MIN_LINEAR_MAG_MIP_POINT                    ),
-    RVALUE_ENTRY(D3D11_FILTER_,     MIN_LINEAR_MAG_POINT_MIP_LINEAR             ),
-    RVALUE_ENTRY(D3D11_FILTER_,     MIN_MAG_LINEAR_MIP_POINT                    ),
-    RVALUE_ENTRY(D3D11_FILTER_,     MIN_MAG_MIP_LINEAR                          ),
-    RVALUE_ENTRY(D3D11_FILTER_,     ANISOTROPIC                                 ),
-    RVALUE_ENTRY(D3D11_FILTER_,     COMPARISON_MIN_MAG_MIP_POINT                ),
-    RVALUE_ENTRY(D3D11_FILTER_,     COMPARISON_MIN_MAG_POINT_MIP_LINEAR         ),
-    RVALUE_ENTRY(D3D11_FILTER_,     COMPARISON_MIN_POINT_MAG_LINEAR_MIP_POINT   ),
-    RVALUE_ENTRY(D3D11_FILTER_,     COMPARISON_MIN_POINT_MAG_MIP_LINEAR         ),
-    RVALUE_ENTRY(D3D11_FILTER_,     COMPARISON_MIN_LINEAR_MAG_MIP_POINT         ),
-    RVALUE_ENTRY(D3D11_FILTER_,     COMPARISON_MIN_LINEAR_MAG_POINT_MIP_LINEAR  ),
-    RVALUE_ENTRY(D3D11_FILTER_,     COMPARISON_MIN_MAG_LINEAR_MIP_POINT         ),
-    RVALUE_ENTRY(D3D11_FILTER_,     COMPARISON_MIN_MAG_MIP_LINEAR               ),
-    RVALUE_ENTRY(D3D11_FILTER_,     COMPARISON_ANISOTROPIC                      ),
+    RVALUE_ENTRY(D3D11_FILTER_,     MIN_MAG_MIP_POINT                          ),
+    RVALUE_ENTRY(D3D11_FILTER_,     MIN_MAG_POINT_MIP_LINEAR                   ),
+    RVALUE_ENTRY(D3D11_FILTER_,     MIN_POINT_MAG_LINEAR_MIP_POINT             ),
+    RVALUE_ENTRY(D3D11_FILTER_,     MIN_POINT_MAG_MIP_LINEAR                   ),
+    RVALUE_ENTRY(D3D11_FILTER_,     MIN_LINEAR_MAG_MIP_POINT                   ),
+    RVALUE_ENTRY(D3D11_FILTER_,     MIN_LINEAR_MAG_POINT_MIP_LINEAR            ),
+    RVALUE_ENTRY(D3D11_FILTER_,     MIN_MAG_LINEAR_MIP_POINT                   ),
+    RVALUE_ENTRY(D3D11_FILTER_,     MIN_MAG_MIP_LINEAR                         ),
+    RVALUE_ENTRY(D3D11_FILTER_,     ANISOTROPIC                                ),
+    RVALUE_ENTRY(D3D11_FILTER_,     COMPARISON_MIN_MAG_MIP_POINT               ),
+    RVALUE_ENTRY(D3D11_FILTER_,     COMPARISON_MIN_MAG_POINT_MIP_LINEAR        ),
+    RVALUE_ENTRY(D3D11_FILTER_,     COMPARISON_MIN_POINT_MAG_LINEAR_MIP_POINT  ),
+    RVALUE_ENTRY(D3D11_FILTER_,     COMPARISON_MIN_POINT_MAG_MIP_LINEAR        ),
+    RVALUE_ENTRY(D3D11_FILTER_,     COMPARISON_MIN_LINEAR_MAG_MIP_POINT        ),
+    RVALUE_ENTRY(D3D11_FILTER_,     COMPARISON_MIN_LINEAR_MAG_POINT_MIP_LINEAR ),
+    RVALUE_ENTRY(D3D11_FILTER_,     COMPARISON_MIN_MAG_LINEAR_MIP_POINT        ),
+    RVALUE_ENTRY(D3D11_FILTER_,     COMPARISON_MIN_MAG_MIP_LINEAR              ),
+    RVALUE_ENTRY(D3D11_FILTER_,     COMPARISON_ANISOTROPIC                     ),
     RVALUE_END()
 };
 
@@ -159,7 +159,7 @@ static const RValue g_rvBLENDOP[] =
 // Effect HLSL states
 //////////////////////////////////////////////////////////////////////////
 
-#define strideof( s, m ) offsetof_fx(s,m[1]) - offsetof_fx(s,m[0])
+#define strideof(s, m) offsetof_fx(s,m[1]) - offsetof_fx(s,m[0])
 
 const LValue g_lvGeneral[] =
 {

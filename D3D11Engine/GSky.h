@@ -51,7 +51,7 @@ public:
 	void SetSkyTexture(ESkyTexture texture);
 
 	/** Returns the skyplane */
-	MeshInfo* GetSkyPlane();
+	MeshInfo * GetSkyPlane();
 
 	/** Returns the cloud meshes */
 	std::vector<GMesh *> & GetCloudMeshes();

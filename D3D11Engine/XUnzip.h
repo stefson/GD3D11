@@ -135,9 +135,9 @@ typedef struct
 HZIP OpenZip(void *z, unsigned int len, DWORD flags);
 // OpenZip - opens a zip file and returns a handle with which you can
 // subsequently examine its contents. You can open a zip file from:
-// from a pipe:             OpenZip(hpipe_read,0, ZIP_HANDLE);
-// from a file (by handle): OpenZip(hfile,0,      ZIP_HANDLE);
-// from a file (by name):   OpenZip("c:\\test.zip",0, ZIP_FILENAME);
+// from a pipe:             OpenZip(hpipe_read, 0, ZIP_HANDLE);
+// from a file (by handle): OpenZip(hfile, 0,      ZIP_HANDLE);
+// from a file (by name):   OpenZip("c:\\test.zip", 0, ZIP_FILENAME);
 // from a memory block:     OpenZip(bufstart, buflen, ZIP_MEMORY);
 // If the file is opened through a pipe, then items may only be
 // accessed in increasing order, and an item may only be unzipped once,
@@ -232,9 +232,9 @@ ZRESULT FindZipItemW(HZIP hz, const TCHAR *name, bool ic, int *index, ZIPENTRYW 
 
 ZRESULT UnzipItem(HZIP hz, int index, void *dst, unsigned int len, DWORD flags);
 // UnzipItem - given an index to an item, unzips it. You can unzip to:
-// to a pipe:             UnzipItem(hz,i, hpipe_write,0,ZIP_HANDLE);
-// to a file (by handle): UnzipItem(hz,i, hfile,0,ZIP_HANDLE);
-// to a file (by name):   UnzipItem(hz,i, ze.name,0,ZIP_FILENAME);
+// to a pipe:             UnzipItem(hz,i, hpipe_write, 0,ZIP_HANDLE);
+// to a file (by handle): UnzipItem(hz,i, hfile, 0,ZIP_HANDLE);
+// to a file (by name):   UnzipItem(hz,i, ze.name, 0,ZIP_FILENAME);
 // to a memory block:     UnzipItem(hz,i, buf,buflen,ZIP_MEMORY);
 // In the final case, if the buffer isn't large enough to hold it all,
 // then the return code indicates that more is yet to come. If it was
@@ -304,11 +304,11 @@ unsigned int FormatZipMessage(ZRESULT code, char *buf,unsigned int len);
 // e.g.
 //
 // SetCurrentDirectory("c:\\docs\\stuff");
-// HZIP hz = OpenZip("c:\\stuff.zip",0,ZIP_FILENAME);
+// HZIP hz = OpenZip("c:\\stuff.zip", 0,ZIP_FILENAME);
 // ZIPENTRY ze; GetZipItem(hz,-1,&ze); int numitems=ze.index;
 // for (int i=0; i<numitems; i++)
 // { GetZipItem(hz,i,&ze);
-//   UnzipItem(hz,i,ze.name,0,ZIP_FILENAME);
+//   UnzipItem(hz,i,ze.name, 0,ZIP_FILENAME);
 // }
 // CloseZip(hz);
 //
@@ -327,14 +327,14 @@ unsigned int FormatZipMessage(ZRESULT code, char *buf,unsigned int len);
 // ZIPENTRY ze; int i; FindZipItem(hz,"file.dat",&i,&ze);
 // char ibuf[1024]; ZIPRESULT zr=ZR_MORE; unsigned long totsize=0;
 // while (zr==ZR_MORE)
-// { zr = UnzipItem(hz,i, ibuf,1024,ZIP_MEMORY);
+// { zr = UnzipItem(hz,i, ibuf, 1024,ZIP_MEMORY);
 //   unsigned long bufsize=1024; if (zr==ZR_OK) bufsize=ze.unc_size-totsize;
 //   totsize+=bufsize;
 // }
 //   - unzip to a pipe -
 // HANDLE hthread=CreateWavReaderThread(&hread,&hwrite);
 // FindZipItem(hz,"sound.wav",&i,&ze);
-// UnzipItem(hz,i, hwrite,0,ZIP_HANDLE);
+// UnzipItem(hz,i, hwrite, 0,ZIP_HANDLE);
 // CloseHandle(hwrite);
 // WaitForSingleObject(hthread,INFINITE);
 // CloseHandle(hread); CloseHandle(hthread);
@@ -346,11 +346,11 @@ unsigned int FormatZipMessage(ZRESULT code, char *buf,unsigned int len);
 // SetCurrentDirectory("c:\\docs\\pipedzipstuff");
 // HANDLE hread,hwrite; CreatePipe(&hread,&hwrite);
 // CreateZipWriterThread(hwrite);
-// HZIP hz = OpenZip(hread,0,ZIP_HANDLE);
+// HZIP hz = OpenZip(hread, 0,ZIP_HANDLE);
 // for (int i=0; ; i++)
 // { ZIPENTRY ze; ZRESULT res = GetZipItem(hz,i,&ze);
 //   if (res!=ZE_OK) break; // no more
-//   UnzipItem(hz,i, ze.name,0,ZIP_FILENAME);
+//   UnzipItem(hz,i, ze.name, 0,ZIP_FILENAME);
 // }
 // CloseZip(hz);
 //

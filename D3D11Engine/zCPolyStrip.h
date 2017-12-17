@@ -17,12 +17,12 @@ public:
 
 	int GetNumPolys()
 	{
-		return *(int*)THISPTR_OFFSET(GothicMemoryLocations::zCPolyStrip::Offset_NumPolys);
+		return *(int *)THISPTR_OFFSET(GothicMemoryLocations::zCPolyStrip::Offset_NumPolys);
 	}
 
 
 	/** Generates a vertex-buffer from the poly-list */
-	void GenerateVertexBuffer(std::vector<ExVertexStruct>& vx)
+	void GenerateVertexBuffer(std::vector<ExVertexStruct> & vx)
 	{
 		int num = GetNumPolys();
 		zCPolygon* polyArray = GetPolyList();

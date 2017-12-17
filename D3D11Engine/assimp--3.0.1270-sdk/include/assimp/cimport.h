@@ -105,7 +105,7 @@ typedef int aiBool;
  *   #aiPostProcessSteps flags.
  * @return Pointer to the imported data or nullptr if the import failed. 
  */
-ASSIMP_API const C_STRUCT aiScene* aiImportFile( 
+ASSIMP_API const C_STRUCT aiScene* aiImportFile(
 	const char* pFile, 
 	unsigned int pFlags);
 
@@ -130,7 +130,7 @@ ASSIMP_API const C_STRUCT aiScene* aiImportFile(
  * @return Pointer to the imported data or nullptr if the import failed.  
  * @note Include <aiFileIO.h> for the definition of #aiFileIO.
  */
-ASSIMP_API const C_STRUCT aiScene* aiImportFileEx( 
+ASSIMP_API const C_STRUCT aiScene* aiImportFileEx(
 	const char* pFile,
 	unsigned int pFlags,
 	C_STRUCT aiFileIO* pFS);
@@ -141,7 +141,7 @@ ASSIMP_API const C_STRUCT aiScene* aiImportFileEx(
  * @param pProps #aiPropertyStore instance containing import settings. 
  * @see aiImportFileEx
  */
-ASSIMP_API const C_STRUCT aiScene* aiImportFileExWithProperties( 
+ASSIMP_API const C_STRUCT aiScene* aiImportFileExWithProperties(
 	const char* pFile,
 	unsigned int pFlags,
 	C_STRUCT aiFileIO* pFS,
@@ -176,7 +176,7 @@ ASSIMP_API const C_STRUCT aiScene* aiImportFileExWithProperties(
  * stuff into external scripts. If you need the full functionality, provide a custom 
  * IOSystem to make Assimp find these files.
  */
-ASSIMP_API const C_STRUCT aiScene* aiImportFileFromMemory( 
+ASSIMP_API const C_STRUCT aiScene* aiImportFileFromMemory(
 	const char* pBuffer,
 	unsigned int pLength,
 	unsigned int pFlags,
@@ -188,7 +188,7 @@ ASSIMP_API const C_STRUCT aiScene* aiImportFileFromMemory(
  * @param pProps #aiPropertyStore instance containing import settings. 
  * @see aiImportFileFromMemory
  */
-ASSIMP_API const C_STRUCT aiScene* aiImportFileFromMemoryWithProperties( 
+ASSIMP_API const C_STRUCT aiScene* aiImportFileFromMemoryWithProperties(
 	const char* pBuffer,
 	unsigned int pLength,
 	unsigned int pFlags,
@@ -288,7 +288,7 @@ ASSIMP_API void aiDetachAllLogStreams();
  * Call this function after you're done with the imported data.
  * @param pScene The imported data to release. nullptr is a valid value.
  */
-ASSIMP_API void aiReleaseImport( 
+ASSIMP_API void aiReleaseImport(
 	const C_STRUCT aiScene* pScene);
 
 // --------------------------------------------------------------------------------

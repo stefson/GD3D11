@@ -12,9 +12,9 @@ public:
 	{
 #ifndef BUILD_GOTHIC_1_08k
 		// Get vtable-entry
-		int* vtbl = (int*)((int*)this)[0];
+		int * vtbl = (int *)((int *)this)[0];
 
-		typedef void(__thiscall* pFun)(void*,int, float);
+		typedef void(__thiscall* pFun)(void *,int, float);
 
 		pFun fn = (pFun)vtbl[GothicMemoryLocations::zCSoundSystem::VTBL_SetGlobalReverbPreset];
 		fn(this, preset, weight);

@@ -4,7 +4,7 @@
 
 // ---------------------------------------------------------------------------
 // Copy input to Windows clipboard
-// Data lines must be terminated by the CR LF pair (0xD,0xA)
+// Data lines must be terminated by the CR LF pair (0xD, 0xA)
 // data in: line1CRLFline2CRLFline3CRLF --- Caller must format
 // "this is a line\n" is not acceptable,
 // "this is a line\r\n" is acceptable.

@@ -41,10 +41,10 @@ D3D11Effect::~D3D11Effect()
 }
 
 /** Loads a texturearray. Use like the following: Put path and prefix as parameter. The files must then be called name_xxxx.dds */
-HRESULT LoadTextureArray( ID3D11Device* pd3dDevice, ID3D11DeviceContext* context, char* sTexturePrefix, int iNumTextures, ID3D11Texture2D** ppTex2D, ID3D11ShaderResourceView** ppSRV);
+HRESULT LoadTextureArray(ID3D11Device* pd3dDevice, ID3D11DeviceContext* context, char* sTexturePrefix, int iNumTextures, ID3D11Texture2D ** ppTex2D, ID3D11ShaderResourceView ** ppSRV);
 
 /** Fills a vector of random raindrop data */
-void D3D11Effect::FillRandomRaindropData(std::vector<ParticleInstanceInfo>& data)
+void D3D11Effect::FillRandomRaindropData(std::vector<ParticleInstanceInfo> & data)
 {
 	/** Base taken from Nvidias Rain-Sample **/
 
@@ -54,7 +54,7 @@ void D3D11Effect::FillRandomRaindropData(std::vector<ParticleInstanceInfo>& data
 	for(size_t i=0;i<data.size();i++)
 	{
 		ParticleInstanceInfo raindrop;
-		//use rejection sampling to generate random points inside a circle of radius 1 centered at 0,0
+		//use rejection sampling to generate random points inside a circle of radius 1 centered at 0, 0
 		float SeedX;
 		float SeedZ;
 		bool pointIsInside = false;
@@ -62,7 +62,7 @@ void D3D11Effect::FillRandomRaindropData(std::vector<ParticleInstanceInfo>& data
 		{ 
 			SeedX = Toolbox::frand() - 0.5f;
 			SeedZ = Toolbox::frand() - 0.5f;
-			if ( sqrt( SeedX*SeedX + SeedZ*SeedZ ) <= 0.5f )
+			if (sqrt(SeedX*SeedX + SeedZ*SeedZ) <= 0.5f)
 				pointIsInside = true;
 		}
 		//save these random locations for reinitializing rain particles that have fallen out of bounds
@@ -92,7 +92,7 @@ void D3D11Effect::FillRandomRaindropData(std::vector<ParticleInstanceInfo>& data
 		//this number is used to randomly increase the brightness of some rain particles
 		float intensity = 1.0f;
 		float randomIncrease = Toolbox::frand();
-		if ( randomIncrease > 0.8f)
+		if (randomIncrease > 0.8f)
 			intensity += randomIncrease;
 
 		raindrop.color = float4(SeedX, SeedY, SeedZ, randomIncrease);
@@ -115,7 +115,7 @@ XRESULT D3D11Effect::DrawRain()
 	D3D11GShader* particleGS = e->GetShaderManager()->GetGShader("GS_Raindrops");
 	D3D11VShader* particleAdvanceVS = e->GetShaderManager()->GetVShader("VS_AdvanceRain");
 	D3D11VShader* particleVS = e->GetShaderManager()->GetVShader("VS_ParticlePointShaded");
-	D3D11PShader* rainPS = e->GetShaderManager()->GetPShader("PS_Rain");
+	D3D11PShader * rainPS = e->GetShaderManager()->GetPShader("PS_Rain");
 
 	UINT numParticles = Engine::GAPI->GetRendererState()->RendererSettings.RainNumParticles;
 
@@ -281,7 +281,7 @@ XRESULT D3D11Effect::DrawRainShadowmap()
 	if (!RainShadowmap)
 		return XR_SUCCESS;
 
-	D3D11GraphicsEngine* e = (D3D11GraphicsEngine *)Engine::GraphicsEngine; // TODO: This has to be a cast to D3D11GraphicsEngineBase!
+	D3D11GraphicsEngine * e = (D3D11GraphicsEngine *)Engine::GraphicsEngine; // TODO: This has to be a cast to D3D11GraphicsEngineBase!
 	GothicRendererState& state = *Engine::GAPI->GetRendererState();
 
 	CameraReplacement& cr = RainShadowmapCameraRepl;
@@ -297,7 +297,7 @@ XRESULT D3D11Effect::DrawRainShadowmap()
 	lookAt -= dir;
 
 	// Create shadowmap view-matrix
-	D3DXMatrixLookAtLH(&cr.ViewReplacement, &p, &lookAt, &D3DXVECTOR3(0,1,0));
+	D3DXMatrixLookAtLH(&cr.ViewReplacement, &p, &lookAt, &D3DXVECTOR3(0, 1, 0));
 	D3DXMatrixTranspose(&cr.ViewReplacement, &cr.ViewReplacement);
 
 	D3DXMatrixOrthoLH(&cr.ProjectionReplacement, RainShadowmap->GetSizeX() * Engine::GAPI->GetRendererState()->RendererSettings.WorldShadowRangeScale, 
@@ -317,7 +317,7 @@ XRESULT D3D11Effect::DrawRainShadowmap()
 	Engine::GAPI->GetRendererState()->GraphicsState.FF_AlphaRef = -1.0f;
 
 	// Bind the FF-Info to the first PS slot
-	D3D11PShader* PS_Diffuse = e->GetShaderManager()->GetPShader("PS_Diffuse");
+	D3D11PShader * PS_Diffuse = e->GetShaderManager()->GetPShader("PS_Diffuse");
 	if (PS_Diffuse)
 	{
 		PS_Diffuse->GetConstantBuffer()[0]->UpdateBuffer(&Engine::GAPI->GetRendererState()->GraphicsState);
@@ -352,11 +352,11 @@ XRESULT D3D11Effect::DrawRainShadowmap()
 // LoadTextureArray loads a texture array and associated view from a series
 // of textures on disk.
 //--------------------------------------------------------------------------------------
-HRESULT LoadTextureArray( ID3D11Device* pd3dDevice, ID3D11DeviceContext* context, char* sTexturePrefix, int iNumTextures, ID3D11Texture2D** ppTex2D, ID3D11ShaderResourceView** ppSRV)
+HRESULT LoadTextureArray(ID3D11Device* pd3dDevice, ID3D11DeviceContext* context, char* sTexturePrefix, int iNumTextures, ID3D11Texture2D ** ppTex2D, ID3D11ShaderResourceView ** ppSRV)
 {
 	HRESULT hr = S_OK;
 	D3D11_TEXTURE2D_DESC desc;
-	ZeroMemory( &desc, sizeof(D3D11_TEXTURE2D_DESC) );
+	ZeroMemory(&desc, sizeof(D3D11_TEXTURE2D_DESC));
 
 //	CHAR szTextureName[MAX_PATH];
 	CHAR str[MAX_PATH];
@@ -366,7 +366,7 @@ HRESULT LoadTextureArray( ID3D11Device* pd3dDevice, ID3D11DeviceContext* context
 
 		ID3D11Resource *pRes = nullptr;
 		D3DX11_IMAGE_LOAD_INFO loadInfo;
-		ZeroMemory( &loadInfo, sizeof( D3DX11_IMAGE_LOAD_INFO ) );
+		ZeroMemory(&loadInfo, sizeof(D3DX11_IMAGE_LOAD_INFO));
 		loadInfo.Width = D3DX_FROM_FILE;
 		loadInfo.Height  = D3DX_FROM_FILE;
 		loadInfo.Depth  = D3DX_FROM_FILE;
@@ -380,12 +380,12 @@ HRESULT LoadTextureArray( ID3D11Device* pd3dDevice, ID3D11DeviceContext* context
 		loadInfo.Filter = D3DX11_FILTER_TRIANGLE;
 		loadInfo.MipFilter = D3DX11_FILTER_TRIANGLE;
 
-		LE(D3DX11CreateTextureFromFile( pd3dDevice, str, &loadInfo, nullptr, &pRes, &hr ));
-		if ( pRes )
+		LE(D3DX11CreateTextureFromFile(pd3dDevice, str, &loadInfo, nullptr, &pRes, &hr));
+		if (pRes)
 		{
-			ID3D11Texture2D* pTemp;
-			pRes->QueryInterface( __uuidof( ID3D11Texture2D ), (LPVOID*)&pTemp );
-			pTemp->GetDesc( &desc );
+			ID3D11Texture2D * pTemp;
+			pRes->QueryInterface(__uuidof(ID3D11Texture2D), (LPVOID *)&pTemp);
+			pTemp->GetDesc(&desc);
 
 
 			if (DXGI_FORMAT_R8_UNORM != desc.Format)   
@@ -399,7 +399,7 @@ HRESULT LoadTextureArray( ID3D11Device* pd3dDevice, ID3D11DeviceContext* context
 				desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 				desc.CPUAccessFlags = 0;
 				desc.ArraySize = iNumTextures;
-				LE(pd3dDevice->CreateTexture2D( &desc, nullptr, ppTex2D));
+				LE(pd3dDevice->CreateTexture2D(&desc, nullptr, ppTex2D));
 			}
 
 
@@ -409,17 +409,17 @@ HRESULT LoadTextureArray( ID3D11Device* pd3dDevice, ID3D11DeviceContext* context
 				context->Map(pTemp, iMip, D3D11_MAP_READ, 0, &mappedTex2D);
 
 				context->UpdateSubresource(		(*ppTex2D), 
-					D3D11CalcSubresource( iMip, i, desc.MipLevels ),
+					D3D11CalcSubresource(iMip, i, desc.MipLevels),
 					nullptr,
 					mappedTex2D.pData,
 					mappedTex2D.RowPitch,
-					0 );
+					0);
 
 				context->Unmap(pTemp, iMip);
 			}
 
-			SAFE_RELEASE( pRes );
-			SAFE_RELEASE( pTemp );
+			SAFE_RELEASE(pRes);
+			SAFE_RELEASE(pTemp);
 		}
 		else
 		{
@@ -428,12 +428,12 @@ HRESULT LoadTextureArray( ID3D11Device* pd3dDevice, ID3D11DeviceContext* context
 	}
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc;
-	ZeroMemory( &SRVDesc, sizeof(SRVDesc) );
+	ZeroMemory(&SRVDesc, sizeof(SRVDesc));
 	SRVDesc.Format = desc.Format;
 	SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
 	SRVDesc.Texture2DArray.MipLevels = desc.MipLevels;
 	SRVDesc.Texture2DArray.ArraySize = iNumTextures;
-	LE(pd3dDevice->CreateShaderResourceView( *ppTex2D, &SRVDesc, ppSRV ));
+	LE(pd3dDevice->CreateShaderResourceView(*ppTex2D, &SRVDesc, ppSRV));
 
 	return hr;
 }

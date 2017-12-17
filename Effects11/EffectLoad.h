@@ -45,7 +45,7 @@ D3D_SHADER_VARIABLE_TYPE GetSimpleParameterTypeFromObjectType(EObjectType Object
 // A class to facilitate loading an Effect.  This class is a friend of CEffect.
 class CEffectLoader
 {
-    friend HRESULT CEffect::CloneEffect(_In_ uint32_t Flags, _Outptr_ ID3DX11Effect** ppClonedEffect );
+    friend HRESULT CEffect::CloneEffect(_In_ uint32_t Flags, _Outptr_ ID3DX11Effect** ppClonedEffect);
 
 protected:
     // Load-time allocations that eventually get moved happen out of the TempHeap. This heap will grow as needed
@@ -99,24 +99,24 @@ protected:
 
     HRESULT LoadTypeAndAddToPool(_Outptr_ SType **ppType, _In_ uint32_t dwOffset);
     HRESULT LoadStringAndAddToPool(_Outptr_result_maybenull_z_ char **ppString, _In_ uint32_t  dwOffset);
-    HRESULT LoadAssignments( _In_ uint32_t Assignments, _Out_writes_(Assignments) SAssignment **pAssignments,
-                             _In_ uint8_t *pBackingStore, _Out_opt_ uint32_t *pRTVAssignments, _Out_opt_ uint32_t *pFinalAssignments );
+    HRESULT LoadAssignments(_In_ uint32_t Assignments, _Out_writes_(Assignments) SAssignment **pAssignments,
+                             _In_ uint8_t *pBackingStore, _Out_opt_ uint32_t *pRTVAssignments, _Out_opt_ uint32_t *pFinalAssignments);
     HRESULT LoadGroups();
-    HRESULT LoadTechnique( STechnique* pTech );
+    HRESULT LoadTechnique(STechnique* pTech);
     HRESULT LoadAnnotations(uint32_t  *pcAnnotations, SAnnotation **ppAnnotations);
 
     HRESULT ExecuteConstantAssignment(_In_ const SBinaryConstant *pConstant, _Out_writes_bytes_(4) void *pLHS, _In_ D3D_SHADER_VARIABLE_TYPE lhsType);
     uint32_t UnpackData(uint8_t *pDestData, uint8_t *pSrcData, uint32_t PackedDataSize, SType *pType, uint32_t  *pBytesRead);
 
     // Build shader blocks
-    HRESULT ConvertRangesToBindings(SShaderBlock *pShaderBlock, CEffectVector<SRange> *pvRanges );
+    HRESULT ConvertRangesToBindings(SShaderBlock *pShaderBlock, CEffectVector<SRange> *pvRanges);
     HRESULT GrabShaderData(SShaderBlock *pShaderBlock);
     HRESULT BuildShaderBlock(SShaderBlock *pShaderBlock);
 
     // Memory compactors
-    HRESULT InitializeReflectionDataAndMoveStrings( uint32_t KnownSize = 0 );
-    HRESULT ReallocateReflectionData( bool Cloning = false );
-    HRESULT ReallocateEffectData( bool Cloning = false );
+    HRESULT InitializeReflectionDataAndMoveStrings(uint32_t KnownSize = 0);
+    HRESULT ReallocateReflectionData(bool Cloning = false);
+    HRESULT ReallocateEffectData(bool Cloning = false);
     HRESULT ReallocateShaderBlocks();
     template<class T> HRESULT ReallocateBlockAssignments(T* &pBlocks, uint32_t  cBlocks, T* pOldBlocks = nullptr);
     HRESULT ReallocateAnnotationData(uint32_t  cAnnotations, SAnnotation **ppAnnotations);
@@ -146,7 +146,7 @@ protected:
     HRESULT GetStringAndAddToReflection(_In_ uint32_t offset, _Outptr_result_maybenull_z_ char **ppPointer);  // Returns a string from the file string block, updates m_EffectMemory
     HRESULT GetUnstructuredDataBlock(_In_ uint32_t offset, _Out_ uint32_t *pdwSize, _Outptr_result_buffer_(*pdwSize) void **ppData);
     // This function makes a copy of the array of SInterfaceParameters, but not a copy of the strings
-    HRESULT GetInterfaceParametersAndAddToReflection( _In_ uint32_t InterfaceCount, _In_ uint32_t offset, _Outptr_result_buffer_all_maybenull_(InterfaceCount) SShaderBlock::SInterfaceParameter **ppInterfaces );
+    HRESULT GetInterfaceParametersAndAddToReflection(_In_ uint32_t InterfaceCount, _In_ uint32_t offset, _Outptr_result_buffer_all_maybenull_(InterfaceCount) SShaderBlock::SInterfaceParameter **ppInterfaces);
 public:
 
     HRESULT LoadEffect(_In_ CEffect *pEffect, _In_reads_bytes_(cbEffectBuffer) const void *pEffectBuffer, _In_ uint32_t cbEffectBuffer);

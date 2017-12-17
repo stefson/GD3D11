@@ -34,7 +34,7 @@ D3D11VShader::~D3D11VShader()
 //--------------------------------------------------------------------------------------
 // Find and compile the specified shader
 //--------------------------------------------------------------------------------------
-HRESULT D3D11VShader::CompileShaderFromFile(const CHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut, std::vector<D3D10_SHADER_MACRO>& makros)
+HRESULT D3D11VShader::CompileShaderFromFile(const CHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut, std::vector<D3D10_SHADER_MACRO> & makros)
 {
 	HRESULT hr = S_OK;
 
@@ -43,7 +43,7 @@ HRESULT D3D11VShader::CompileShaderFromFile(const CHAR* szFileName, LPCSTR szEnt
 	SetCurrentDirectoryA(Engine::GAPI->GetStartDirectory().c_str());
 
 	DWORD dwShaderFlags = 0;
-#if defined( DEBUG ) || defined( _DEBUG )
+#if defined(DEBUG) || defined(_DEBUG)
 	// Set the D3DCOMPILE_DEBUG flag to embed debug information in the shaders.
 	// Setting this flag improves the shader debugging experience, but still allows 
 	// the shaders to be optimized and to run exactly the way they will run in 
@@ -90,7 +90,7 @@ HRESULT D3D11VShader::CompileShaderFromFile(const CHAR* szFileName, LPCSTR szEnt
 
 
 /** Loads shader */
-XRESULT D3D11VShader::LoadShader(const char* vertexShader, int layout, std::vector<D3D10_SHADER_MACRO>& makros)
+XRESULT D3D11VShader::LoadShader(const char* vertexShader, int layout, std::vector<D3D10_SHADER_MACRO> & makros)
 {
 	HRESULT hr;
 	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase *)Engine::GraphicsEngine;
@@ -311,7 +311,7 @@ XRESULT D3D11VShader::Apply()
 }
 
 /** Returns a reference to the constantBuffer vector */
-std::vector<D3D11ConstantBuffer*>& D3D11VShader::GetConstantBuffer()
+std::vector<D3D11ConstantBuffer*> & D3D11VShader::GetConstantBuffer()
 {
 	return ConstantBuffers;
 }

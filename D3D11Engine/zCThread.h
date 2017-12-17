@@ -19,7 +19,7 @@ public:
 	}
 
 	/** Reads config stuff */
-	static int __fastcall hooked_SuspendThread(void* thisptr, void* unknwn)
+	static int __fastcall hooked_SuspendThread(void * thisptr, void * unknwn)
 	{
 		//hook_infunc
 		//Engine::GAPI->EnterResourceCriticalSection(); // Protect the game from running into a deadlock
@@ -45,7 +45,7 @@ public:
 		return r;*/
 
 		zCThread* t = (zCThread *)thisptr;
-		int* suspCount = t->GetSuspendCounter();
+		int * suspCount = t->GetSuspendCounter();
 
 		if ((*suspCount) > 0)
 			return 0;
@@ -58,7 +58,7 @@ public:
 		return 1;
 	}
 
-	int* GetSuspendCounter()
+	int * GetSuspendCounter()
 	{
 		return (int *)THISPTR_OFFSET(GothicMemoryLocations::zCThread::Offset_SuspendCount);
 	}

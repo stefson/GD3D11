@@ -10,12 +10,12 @@ class zCLightmap
 {
 public:
 
-	D3DXVECTOR2 GetLightmapUV(const D3DXVECTOR3& worldPos)
+	D3DXVECTOR2 GetLightmapUV(const D3DXVECTOR3 & worldPos)
 	{
 		D3DXVECTOR3 q = worldPos - LightmapOrigin;
 
-		return D3DXVECTOR2( D3DXVec3Dot(&q, &LightmapUVRight),
-							D3DXVec3Dot(&q, &LightmapUVUp) );
+		return D3DXVECTOR2(D3DXVec3Dot(&q, &LightmapUVRight),
+							D3DXVec3Dot(&q, &LightmapUVUp));
 	}
 
 
@@ -25,5 +25,5 @@ public:
 	D3DXVECTOR3	LightmapUVUp;
 	D3DXVECTOR3	LightmapUVRight;
 
-    zCTexture* Texture;
+    zCTexture * Texture;
 };

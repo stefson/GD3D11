@@ -40,7 +40,7 @@ public:
 	bool NotYetDrawn();
 
 	/** Called when a vob got removed from the world */
-	virtual void OnVobRemovedFromWorld(BaseVobInfo* vob);
+	virtual void OnVobRemovedFromWorld(BaseVobInfo * vob);
 
 protected:
 	/** Renders the scene with the given view-proj-matrices */
@@ -55,7 +55,7 @@ protected:
 	bool WorldCacheInvalid;
 
 	VobLightInfo* LightInfo;
-	RenderToDepthStencilBuffer* DepthCubemap;
+	RenderToDepthStencilBuffer * DepthCubemap;
 	D3DXMATRIX CubeMapViewMatrices[6];
 	D3DXVECTOR3 LastUpdatePosition;
 	DWORD LastUpdateColor;

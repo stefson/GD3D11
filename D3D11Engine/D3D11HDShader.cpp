@@ -54,7 +54,7 @@ HRESULT D3D11HDShader::CompileShaderFromFile(const CHAR* szFileName, LPCSTR szEn
 	SetCurrentDirectoryA(Engine::GAPI->GetStartDirectory().c_str());
 
 	DWORD dwShaderFlags = 0;
-#if defined( DEBUG ) || defined( _DEBUG )
+#if defined(DEBUG) || defined(_DEBUG)
 	// Set the D3DCOMPILE_DEBUG flag to embed debug information in the shaders.
 	// Setting this flag improves the shader debugging experience, but still allows 
 	// the shaders to be optimized and to run exactly the way they will run in 
@@ -151,7 +151,7 @@ void D3D11HDShader::Unbind()
 }
 
 /** Returns a reference to the constantBuffer vector*/
-std::vector<D3D11ConstantBuffer*>& D3D11HDShader::GetConstantBuffer()
+std::vector<D3D11ConstantBuffer*> & D3D11HDShader::GetConstantBuffer()
 {
 	return ConstantBuffers;
 }

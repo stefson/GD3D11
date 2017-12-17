@@ -22,9 +22,9 @@ D3D11PFX_Blur::~D3D11PFX_Blur()
 }
 
 /** Draws this effect to the given buffer */
-XRESULT D3D11PFX_Blur::RenderBlur(RenderToTextureBuffer* fxbuffer, bool leaveResultInD4_2, float threshold, float scale, const D3DXVECTOR4& colorMod, const std::string& finalCopyShader)
+XRESULT D3D11PFX_Blur::RenderBlur(RenderToTextureBuffer * fxbuffer, bool leaveResultInD4_2, float threshold, float scale, const D3DXVECTOR4 & colorMod, const std::string & finalCopyShader)
 {
-	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
+	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 
 	// Save old rendertargets
 	ID3D11RenderTargetView* oldRTV = nullptr;
@@ -36,8 +36,8 @@ XRESULT D3D11PFX_Blur::RenderBlur(RenderToTextureBuffer* fxbuffer, bool leaveRes
 	/** Pass 1: Downscale/Blur-H */
 	// Apply PFX-VS
 	engine->GetShaderManager()->GetVShader("VS_PFX")->Apply();
-	D3D11PShader* gaussPS = engine->GetShaderManager()->GetPShader("PS_PFX_GaussBlur");
-	D3D11PShader* simplePS = engine->GetShaderManager()->GetPShader(finalCopyShader);
+	D3D11PShader * gaussPS = engine->GetShaderManager()->GetPShader("PS_PFX_GaussBlur");
+	D3D11PShader * simplePS = engine->GetShaderManager()->GetPShader(finalCopyShader);
 
 	// Apply blur-H shader
 	gaussPS->Apply();
@@ -74,7 +74,7 @@ XRESULT D3D11PFX_Blur::RenderBlur(RenderToTextureBuffer* fxbuffer, bool leaveRes
 	if (!leaveResultInD4_2)
 	{
 		simplePS->Apply();
-		FxRenderer->CopyTextureToRTV(FxRenderer->GetTempBufferDS4_2()->GetShaderResView(), fxbuffer->GetRenderTargetView(), INT2(0,0), true);
+		FxRenderer->CopyTextureToRTV(FxRenderer->GetTempBufferDS4_2()->GetShaderResView(), fxbuffer->GetRenderTargetView(), INT2(0, 0), true);
 	}
 
 	engine->GetContext()->OMSetRenderTargets(1, &oldRTV, oldDSV);
@@ -85,7 +85,7 @@ XRESULT D3D11PFX_Blur::RenderBlur(RenderToTextureBuffer* fxbuffer, bool leaveRes
 }
 
 /** Draws this effect to the given buffer */
-XRESULT D3D11PFX_Blur::Render(RenderToTextureBuffer* fxbuffer)
+XRESULT D3D11PFX_Blur::Render(RenderToTextureBuffer * fxbuffer)
 {
 	return RenderBlur(fxbuffer);
 }

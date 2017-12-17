@@ -225,8 +225,8 @@ enum aiAnimBehaviour
  *
  *  @note All keys are returned in their correct, chronological order.
  *  Duplicate keys don't pass the validation step. Most likely there
- *  will be no negative time values, but they are not forbidden also ( so 
- *  implementations need to cope with them! ) */
+ *  will be no negative time values, but they are not forbidden also (so 
+ *  implementations need to cope with them!) */
 struct aiNodeAnim
 {
 	/** The name of the node affected by this animation. The node 
@@ -382,14 +382,14 @@ struct aiAnimation
 	{
 		// DO NOT REMOVE THIS ADDITIONAL CHECK
 		if (mNumChannels && mChannels)	{
-			for( unsigned int a = 0; a < mNumChannels; a++) {
+			for(unsigned int a = 0; a < mNumChannels; a++) {
 				delete mChannels[a];
 			}
 
 		delete [] mChannels;
 		}
 		if (mNumMeshChannels && mMeshChannels)	{
-			for( unsigned int a = 0; a < mNumMeshChannels; a++) {
+			for(unsigned int a = 0; a < mNumMeshChannels; a++) {
 				delete mMeshChannels[a];
 			}
 

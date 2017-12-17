@@ -23,7 +23,7 @@ D3D11PfxRenderer::D3D11PfxRenderer()
 
 	FX_Blur = nullptr;
 
-	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
+	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 	ScreenQuad = new D3D11FullscreenQuad;
 	ScreenQuad->CreateQuad(engine->GetDevice());
 
@@ -62,7 +62,7 @@ XRESULT D3D11PfxRenderer::RenderDistanceBlur()
 }
 
 /** Blurs the given texture */
-XRESULT D3D11PfxRenderer::BlurTexture(RenderToTextureBuffer* texture, bool leaveResultInD4_2, float scale, const D3DXVECTOR4& colorMod, const std::string& finalCopyShader)
+XRESULT D3D11PfxRenderer::BlurTexture(RenderToTextureBuffer * texture, bool leaveResultInD4_2, float scale, const D3DXVECTOR4 & colorMod, const std::string & finalCopyShader)
 {
 	FX_Blur->RenderBlur(texture, leaveResultInD4_2, 0.0f, scale, colorMod, finalCopyShader);
 	return XR_SUCCESS;
@@ -89,7 +89,7 @@ XRESULT D3D11PfxRenderer::RenderHDR()
 /** Renders the SMAA-Effect */
 XRESULT D3D11PfxRenderer::RenderSMAA()
 {
-	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
+	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 	FX_SMAA->RenderPostFX(engine->GetHDRBackBuffer()->GetShaderResView());
 
 	return XR_SUCCESS;
@@ -98,7 +98,7 @@ XRESULT D3D11PfxRenderer::RenderSMAA()
 /** Draws a fullscreenquad */
 XRESULT D3D11PfxRenderer::DrawFullScreenQuad()
 {
-	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
+	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 	engine->UpdateRenderStates();
 
 	engine->GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -106,13 +106,13 @@ XRESULT D3D11PfxRenderer::DrawFullScreenQuad()
 	UINT offset = 0;
 	UINT uStride = sizeof(SimpleVertexStruct);
 	ID3D11Buffer* buffers = ScreenQuad->GetBuffer();
-	engine->GetContext()->IASetVertexBuffers( 0, 1, &buffers, &uStride, &offset );
+	engine->GetContext()->IASetVertexBuffers(0, 1, &buffers, &uStride, &offset);
 
 	//ID3D11Buffer* cb = nullptr;
 	//engine->GetContext()->VSSetConstantBuffers(0, 1, &cb);
 
 	//Draw the mesh
-	engine->GetContext()->Draw(6, 0 );
+	engine->GetContext()->Draw(6, 0);
 	
 	return XR_SUCCESS;
 }
@@ -120,10 +120,10 @@ XRESULT D3D11PfxRenderer::DrawFullScreenQuad()
 /** Unbinds texturesamplers from the pixel-shader */
 XRESULT D3D11PfxRenderer::UnbindPSResources(int num)
 {
-	ID3D11ShaderResourceView** srv = new ID3D11ShaderResourceView*[num];
-	ZeroMemory(srv, sizeof(ID3D11ShaderResourceView*) * num);
+	ID3D11ShaderResourceView ** srv = new ID3D11ShaderResourceView *[num];
+	ZeroMemory(srv, sizeof(ID3D11ShaderResourceView *) * num);
 
-	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
+	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 	engine->GetContext()->PSSetShaderResources(0, num, srv);
 
 	delete[] srv;
@@ -132,9 +132,9 @@ XRESULT D3D11PfxRenderer::UnbindPSResources(int num)
 }
 
 /** Copies the given texture to the given RTV */
-XRESULT D3D11PfxRenderer::CopyTextureToRTV(ID3D11ShaderResourceView* texture, ID3D11RenderTargetView* rtv, INT2 targetResolution, bool useCustomPS, INT2 offset)
+XRESULT D3D11PfxRenderer::CopyTextureToRTV(ID3D11ShaderResourceView * texture, ID3D11RenderTargetView* rtv, INT2 targetResolution, bool useCustomPS, INT2 offset)
 {
-	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
+	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 	
 	D3D11_VIEWPORT oldVP;
 	if (targetResolution.x != 0 && targetResolution.y != 0)
@@ -161,23 +161,23 @@ XRESULT D3D11PfxRenderer::CopyTextureToRTV(ID3D11ShaderResourceView* texture, ID
 	// Bind shaders
 	if (!useCustomPS)
 	{
-		D3D11PShader* simplePS = engine->GetShaderManager()->GetPShader("PS_PFX_Simple");
+		D3D11PShader * simplePS = engine->GetShaderManager()->GetPShader("PS_PFX_Simple");
 		simplePS->Apply();
 	}
 
 	engine->GetShaderManager()->GetVShader("VS_PFX")->Apply();
 	
-	ID3D11ShaderResourceView* srv = nullptr;
-	engine->GetContext()->PSSetShaderResources(0,1,&srv);
+	ID3D11ShaderResourceView * srv = nullptr;
+	engine->GetContext()->PSSetShaderResources(0, 1,&srv);
 
 	engine->GetContext()->OMSetRenderTargets(1, &rtv, nullptr);
 
 	if (texture)
-		engine->GetContext()->PSSetShaderResources(0,1, &texture);
+		engine->GetContext()->PSSetShaderResources(0, 1, &texture);
 
 	DrawFullScreenQuad();
 
-	engine->GetContext()->PSSetShaderResources(0,1,&srv);
+	engine->GetContext()->PSSetShaderResources(0, 1,&srv);
 	engine->GetContext()->OMSetRenderTargets(1, &oldRTV, oldDSV);
 	if (oldRTV)oldRTV->Release();
 	if (oldDSV)oldDSV->Release();
@@ -191,9 +191,9 @@ XRESULT D3D11PfxRenderer::CopyTextureToRTV(ID3D11ShaderResourceView* texture, ID
 }
 
 /** Called on resize */
-XRESULT D3D11PfxRenderer::OnResize(const INT2& newResolution)
+XRESULT D3D11PfxRenderer::OnResize(const INT2 & newResolution)
 {
-	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
+	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 
 	// Create temp-buffer
 	delete TempBuffer;

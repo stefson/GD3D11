@@ -22,7 +22,7 @@ public:
 	}
 
 	/*** IUnknown methods ***/
-	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppvObj) {
+	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void ** ppvObj) {
 		DebugWrite("MyDirectDraw::QueryInterface\n");
 		HRESULT hr = S_OK;//this->directDraw7->QueryInterface(riid, ppvObj);
 		if (riid == IID_IDirect3D7) {
@@ -211,7 +211,7 @@ public:
 				fmt = DXGI_FORMAT_BC3_UNORM;
 				break;
 			}
-		}else
+		} else
 		{
 			fmt = DXGI_FORMAT_R8G8B8A8_UNORM;
 			bpp = 32;
@@ -221,7 +221,7 @@ public:
 			bpp=16;
 
 		// Create surface
-		MyDirectDrawSurface7* mySurface = new MyDirectDrawSurface7();
+		MyDirectDrawSurface7 * mySurface = new MyDirectDrawSurface7();
 
 		// Create a fake mipmap chain if needed
 		if (lpDDSurfaceDesc2->ddsCaps.dwCaps & DDSCAPS_MIPMAP)

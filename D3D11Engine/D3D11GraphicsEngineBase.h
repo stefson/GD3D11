@@ -80,7 +80,7 @@ public:
 	virtual XRESULT SetViewport(const ViewportInfo& viewportInfo);
 
 	/** Called when the game wants to clear the bound rendertarget */
-	virtual XRESULT Clear(const float4& color);
+	virtual XRESULT Clear(const float4 & color);
 
 	/** Creates a vertexbuffer object (Not registered inside) */
 	virtual XRESULT CreateVertexBuffer(D3D11VertexBuffer** outBuffer);
@@ -89,7 +89,7 @@ public:
 	virtual XRESULT CreateTexture(D3D11Texture** outTexture);
 
 	/** Creates a constantbuffer object (Not registered inside) */
-	virtual XRESULT CreateConstantBuffer(D3D11ConstantBuffer** outCB, void* data, int size);
+	virtual XRESULT CreateConstantBuffer(D3D11ConstantBuffer** outCB, void * data, int size);
 
 	/** Creates a bufferobject for a shadowed point light */
 	virtual XRESULT CreateShadowedPointLight(BaseShadowedPointLight** outPL, VobLightInfo* lightInfo, bool dynamic = false);
@@ -122,7 +122,7 @@ public:
 	virtual XRESULT DrawVertexBufferFF(D3D11VertexBuffer* vb, unsigned int numVertices, unsigned int startVertex, unsigned int stride = sizeof(ExVertexStruct));
 
 	/** Binds viewport information to the given constantbuffer slot */
-	XRESULT D3D11GraphicsEngineBase::BindViewportInformation(const std::string& shader, int slot);
+	XRESULT D3D11GraphicsEngineBase::BindViewportInformation(const std::string & shader, int slot);
 
 	/** Returns the Device/Context */
 	ID3D11Device* GetDevice() { return Device; }
@@ -136,7 +136,7 @@ public:
 	XRESULT UpdateRenderStates();
 
 	/** Constructs the makro list for shader compilation */
-	static void ConstructShaderMakroList(std::vector<D3D10_SHADER_MACRO>& list);
+	static void ConstructShaderMakroList(std::vector<D3D10_SHADER_MACRO> & list);
 
 	/** Sets up the default rendering state */
 	void SetDefaultStates();
@@ -150,10 +150,10 @@ public:
 	void SetupPerInstanceConstantBuffer(int slot = 1);
 
 	/** Sets the active pixel shader object */
-	virtual XRESULT SetActivePixelShader(const std::string& shader);
-	virtual XRESULT SetActiveVertexShader(const std::string& shader);
-	virtual XRESULT SetActiveHDShader(const std::string& shader);
-	virtual XRESULT SetActiveGShader(const std::string& shader);
+	virtual XRESULT SetActivePixelShader(const std::string & shader);
+	virtual XRESULT SetActiveVertexShader(const std::string & shader);
+	virtual XRESULT SetActiveHDShader(const std::string & shader);
+	virtual XRESULT SetActiveGShader(const std::string & shader);
 
 protected:
 	/** Updates the transformsCB with new values from the GAPI */
@@ -176,9 +176,9 @@ protected:
 
 	/** Swapchain and resources */
 	IDXGISwapChain* SwapChain;
-	RenderToTextureBuffer* Backbuffer;
-	RenderToDepthStencilBuffer* DepthStencilBuffer;
-	RenderToTextureBuffer* HDRBackBuffer;
+	RenderToTextureBuffer * Backbuffer;
+	RenderToDepthStencilBuffer * DepthStencilBuffer;
+	RenderToTextureBuffer * HDRBackBuffer;
 
 	/** States */
 	ID3D11SamplerState* DefaultSamplerState;
@@ -199,15 +199,15 @@ protected:
 	D3D11ConstantBuffer* TransformsCB; // Holds View/Proj-Transforms
 
 	/** Shaders */
-	D3D11PShader* PS_DiffuseNormalmapped;
-	D3D11PShader* PS_DiffuseNormalmappedFxMap;
-	D3D11PShader* PS_Diffuse;
-	D3D11PShader* PS_DiffuseNormalmappedAlphatest;
-	D3D11PShader* PS_DiffuseNormalmappedAlphatestFxMap;
-	D3D11PShader* PS_DiffuseAlphatest;
-	D3D11PShader* PS_Simple;
-	D3D11PShader* PS_SimpleAlphaTest;
-	D3D11PShader* PS_LinDepth;
+	D3D11PShader * PS_DiffuseNormalmapped;
+	D3D11PShader * PS_DiffuseNormalmappedFxMap;
+	D3D11PShader * PS_Diffuse;
+	D3D11PShader * PS_DiffuseNormalmappedAlphatest;
+	D3D11PShader * PS_DiffuseNormalmappedAlphatestFxMap;
+	D3D11PShader * PS_DiffuseAlphatest;
+	D3D11PShader * PS_Simple;
+	D3D11PShader * PS_SimpleAlphaTest;
+	D3D11PShader * PS_LinDepth;
 	D3D11VShader* VS_Ex;
 	D3D11VShader* VS_ExInstancedObj;
 	D3D11VShader* VS_ExRemapInstancedObj;
@@ -215,7 +215,7 @@ protected:
 	D3D11GShader* GS_Billboard;
 
 	D3D11VShader* ActiveVS;
-	D3D11PShader* ActivePS;
+	D3D11PShader * ActivePS;
 	D3D11HDShader* ActiveHDS;
 	D3D11GShader* ActiveGS;
 

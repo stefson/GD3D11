@@ -84,7 +84,7 @@ HRESULT CMemoryStream::Read(uint32_t *pDword)
     uint32_t *pTempDword;
     HRESULT hr;
 
-    hr = Read((void**) &pTempDword, sizeof(uint32_t));
+    hr = Read((void **) &pTempDword, sizeof(uint32_t));
     if (FAILED(hr))
         return E_FAIL;
 
@@ -160,7 +160,7 @@ HRESULT CDataBlock::AddData(const void *pvNewData, uint32_t bufferSize, CDataBlo
         // This is a brand new DataBlock, fill it up
         m_maxSize = std::max<uint32_t>(8192, bufferSize);
 
-        VN( m_pData = new uint8_t[m_maxSize] );
+        VN(m_pData = new uint8_t[m_maxSize]);
     }
 
     assert(m_pData == AlignToPowerOf2(m_pData, c_DataAlignment));
@@ -187,12 +187,12 @@ HRESULT CDataBlock::AddData(const void *pvNewData, uint32_t bufferSize, CDataBlo
         assert(nullptr == m_pNext); // make sure we're not overwriting anything
 
         // Couldn't fit all data into this block, spill over into next
-        VN( m_pNext = new CDataBlock() );
+        VN(m_pNext = new CDataBlock());
         if (m_IsAligned)
         {
             m_pNext->EnableAlignment();
         }
-        VH( m_pNext->AddData(pNewData, bufferSize, ppBlock) );
+        VH(m_pNext->AddData(pNewData, bufferSize, ppBlock));
     }
 
 lExit:
@@ -200,7 +200,7 @@ lExit:
 }
 
 _Use_decl_annotations_
-void* CDataBlock::Allocate(uint32_t bufferSize, CDataBlock **ppBlock)
+void * CDataBlock::Allocate(uint32_t bufferSize, CDataBlock **ppBlock)
 {
     void *pRetValue;
     uint32_t temp = m_size + bufferSize;
@@ -291,7 +291,7 @@ _Use_decl_annotations_
 HRESULT CDataBlockStore::AddString(LPCSTR pString, uint32_t *pOffset)
 {
     size_t strSize = strlen(pString) + 1;
-    assert( strSize <= 0xffffffff );
+    assert(strSize <= 0xffffffff);
     return AddData(pString, (uint32_t)strSize, pOffset);
 }
 
@@ -311,7 +311,7 @@ HRESULT CDataBlockStore::AddData(const void *pNewData, uint32_t bufferSize, uint
 
     if (!m_pFirst)
     {
-        VN( m_pFirst = new CDataBlock() );
+        VN(m_pFirst = new CDataBlock());
         if (m_IsAligned)
         {
             m_pFirst->EnableAlignment();
@@ -322,14 +322,14 @@ HRESULT CDataBlockStore::AddData(const void *pNewData, uint32_t bufferSize, uint
     if (pCurOffset)
         *pCurOffset = m_Size + m_Offset;
 
-    VH( m_pLast->AddData(pNewData, bufferSize, &m_pLast) );
+    VH(m_pLast->AddData(pNewData, bufferSize, &m_pLast));
     m_Size += bufferSize;
 
 lExit:
     return hr;
 }
 
-void* CDataBlockStore::Allocate(_In_ uint32_t bufferSize)
+void * CDataBlockStore::Allocate(_In_ uint32_t bufferSize)
 {
     void *pRetValue = nullptr;
 

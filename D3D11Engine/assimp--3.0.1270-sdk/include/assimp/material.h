@@ -517,7 +517,7 @@ struct aiUVTransform
 
 #ifdef __cplusplus
 	aiUVTransform()
-		:	mScaling	(1.f,1.f)
+		:	mScaling	(1.f, 1.f)
 		,	mRotation	(0.f)
 	{
 		// nothing to be done here ...
@@ -681,7 +681,7 @@ public:
      */
     template <typename Type>
     aiReturn Get(const char* pKey,unsigned int type,
-		unsigned int idx, Type* pOut, unsigned int* pMax) const;
+		unsigned int idx, Type* pOut, unsigned int * pMax) const;
 
     // -------------------------------------------------------------------
     /** @brief Retrieve a Type value with a specific key 
@@ -736,8 +736,8 @@ public:
 		unsigned int  index,
 		C_STRUCT aiString* path,
 		aiTextureMapping* mapping	= nullptr,
-		unsigned int* uvindex		= nullptr,
-		float* blend				   = nullptr,
+		unsigned int * uvindex		= nullptr,
+		float * blend				   = nullptr,
 		aiTextureOp* op				= nullptr,
 		aiTextureMapMode* mapmode	= nullptr) const; 
 
@@ -755,7 +755,7 @@ public:
 	 *  @param type Set by the AI_MATKEY_XXX macro
 	 *  @param index Set by the AI_MATKEY_XXX macro
 	 *  @param pType Type information hint */
-	aiReturn AddBinaryProperty (const void* pInput,
+	aiReturn AddBinaryProperty (const void * pInput,
 		unsigned int pSizeInBytes,
 		const char* pKey,
 		unsigned int type ,
@@ -831,24 +831,24 @@ extern "C" {
 #endif
 
 // ---------------------------------------------------------------------------
-#define AI_MATKEY_NAME "?mat.name",0,0
-#define AI_MATKEY_TWOSIDED "$mat.twosided",0,0
-#define AI_MATKEY_SHADING_MODEL "$mat.shadingm",0,0
-#define AI_MATKEY_ENABLE_WIREFRAME "$mat.wireframe",0,0
-#define AI_MATKEY_BLEND_FUNC "$mat.blend",0,0
-#define AI_MATKEY_OPACITY "$mat.opacity",0,0
-#define AI_MATKEY_BUMPSCALING "$mat.bumpscaling",0,0
-#define AI_MATKEY_SHININESS "$mat.shininess",0,0
-#define AI_MATKEY_REFLECTIVITY "$mat.reflectivity",0,0
-#define AI_MATKEY_SHININESS_STRENGTH "$mat.shinpercent",0,0
-#define AI_MATKEY_REFRACTI "$mat.refracti",0,0
-#define AI_MATKEY_COLOR_DIFFUSE "$clr.diffuse",0,0
-#define AI_MATKEY_COLOR_AMBIENT "$clr.ambient",0,0
-#define AI_MATKEY_COLOR_SPECULAR "$clr.specular",0,0
-#define AI_MATKEY_COLOR_EMISSIVE "$clr.emissive",0,0
-#define AI_MATKEY_COLOR_TRANSPARENT "$clr.transparent",0,0
-#define AI_MATKEY_COLOR_REFLECTIVE "$clr.reflective",0,0
-#define AI_MATKEY_GLOBAL_BACKGROUND_IMAGE "?bg.global",0,0
+#define AI_MATKEY_NAME "?mat.name", 0, 0
+#define AI_MATKEY_TWOSIDED "$mat.twosided", 0, 0
+#define AI_MATKEY_SHADING_MODEL "$mat.shadingm", 0, 0
+#define AI_MATKEY_ENABLE_WIREFRAME "$mat.wireframe", 0, 0
+#define AI_MATKEY_BLEND_FUNC "$mat.blend", 0, 0
+#define AI_MATKEY_OPACITY "$mat.opacity", 0, 0
+#define AI_MATKEY_BUMPSCALING "$mat.bumpscaling", 0, 0
+#define AI_MATKEY_SHININESS "$mat.shininess", 0, 0
+#define AI_MATKEY_REFLECTIVITY "$mat.reflectivity", 0, 0
+#define AI_MATKEY_SHININESS_STRENGTH "$mat.shinpercent", 0, 0
+#define AI_MATKEY_REFRACTI "$mat.refracti", 0, 0
+#define AI_MATKEY_COLOR_DIFFUSE "$clr.diffuse", 0, 0
+#define AI_MATKEY_COLOR_AMBIENT "$clr.ambient", 0, 0
+#define AI_MATKEY_COLOR_SPECULAR "$clr.specular", 0, 0
+#define AI_MATKEY_COLOR_EMISSIVE "$clr.emissive", 0, 0
+#define AI_MATKEY_COLOR_TRANSPARENT "$clr.transparent", 0, 0
+#define AI_MATKEY_COLOR_REFLECTIVE "$clr.reflective", 0, 0
+#define AI_MATKEY_GLOBAL_BACKGROUND_IMAGE "?bg.global", 0, 0
 
 // ---------------------------------------------------------------------------
 // Pure key names for all texture-related properties
@@ -1288,8 +1288,8 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialProperty(
  * @code
  * aiUVTransform trafo;
  * unsigned int max = sizeof(aiUVTransform);
- * if (AI_SUCCESS != aiGetMaterialFloatArray(mat, AI_MATKEY_UVTRANSFORM(aiTextureType_DIFFUSE,0),
- *    (float*)&trafo, &max) || sizeof(aiUVTransform) != max)
+ * if (AI_SUCCESS != aiGetMaterialFloatArray(mat, AI_MATKEY_UVTRANSFORM(aiTextureType_DIFFUSE, 0),
+ *    (float *)&trafo, &max) || sizeof(aiUVTransform) != max)
  * {
  *   // error handling 
  * }
@@ -1310,8 +1310,8 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialFloatArray(
     const char* pKey,
 	 unsigned int type,
     unsigned int index,
-    float* pOut,
-    unsigned int* pMax);
+    float * pOut,
+    unsigned int * pMax);
 
 
 #ifdef __cplusplus
@@ -1324,7 +1324,7 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialFloatArray(
 * @code
 * float specStrength = 1.f; // default value, remains unmodified if we fail.
 * aiGetMaterialFloat(mat, AI_MATKEY_SHININESS_STRENGTH,
-*    (float*)&specStrength);
+*    (float *)&specStrength);
 * @endcode
 *
 * @param pMat Pointer to the input material. May not be nullptr
@@ -1339,9 +1339,9 @@ inline aiReturn aiGetMaterialFloat(const aiMaterial* pMat,
 	const char* pKey,
 	unsigned int type,
    unsigned int index,
-	float* pOut)
+	float * pOut)
 {
-	return aiGetMaterialFloatArray(pMat,pKey,type,index,pOut,(unsigned int*)0x0);
+	return aiGetMaterialFloatArray(pMat,pKey,type,index,pOut,(unsigned int *)0x0);
 }
 
 #else 
@@ -1362,8 +1362,8 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialIntegerArray(const C_STRUCT aiMaterial* 
     const char* pKey,
 	 unsigned int  type,
 	 unsigned int  index,
-    int* pOut,
-    unsigned int* pMax);
+    int * pOut,
+    unsigned int * pMax);
 
 
 #ifdef __cplusplus
@@ -1377,9 +1377,9 @@ inline aiReturn aiGetMaterialInteger(const C_STRUCT aiMaterial* pMat,
 	const char* pKey,
 	unsigned int type,
    unsigned int index,
-	int* pOut)
+	int * pOut)
 {
-	return aiGetMaterialIntegerArray(pMat,pKey,type,index,pOut,(unsigned int*)0x0);
+	return aiGetMaterialIntegerArray(pMat,pKey,type,index,pOut,(unsigned int *)0x0);
 }
 
 #else 
@@ -1464,22 +1464,22 @@ ASSIMP_API aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
     unsigned int  index,
     aiString* path,
 	aiTextureMapping* mapping	= nullptr,
-    unsigned int* uvindex		= nullptr,
-    float* blend				= nullptr,
+    unsigned int * uvindex		= nullptr,
+    float * blend				= nullptr,
     aiTextureOp* op				= nullptr,
 	aiTextureMapMode* mapmode	= nullptr,
-	unsigned int* flags         = nullptr); 
+	unsigned int * flags         = nullptr); 
 #else
 C_ENUM aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
     C_ENUM aiTextureType type,
     unsigned int  index,
     C_STRUCT aiString* path,
 	C_ENUM aiTextureMapping* mapping	/*= nullptr*/,
-    unsigned int* uvindex				/*= nullptr*/,
-    float* blend						/*= nullptr*/,
+    unsigned int * uvindex				/*= nullptr*/,
+    float * blend						/*= nullptr*/,
     C_ENUM aiTextureOp* op				/*= nullptr*/,
 	C_ENUM aiTextureMapMode* mapmode	/*= nullptr*/,
-	unsigned int* flags                 /*= nullptr*/); 
+	unsigned int * flags                 /*= nullptr*/); 
 #endif // !#ifdef __cplusplus
 
 #ifdef __cplusplus

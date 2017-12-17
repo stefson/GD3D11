@@ -15,7 +15,7 @@
 
 // reset packing to the original value
 #if defined(_MSC_VER) ||  defined(__BORLANDC__) || defined (__BCPLUSPLUS__)
-#	pragma pack( pop )
+#	pragma pack(pop)
 #endif
 #undef PACK_STRUCT
 

@@ -65,7 +65,7 @@ public:
 	}
 
     /*** IUnknown methods ***/
-    HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppvObj) {
+    HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void ** ppvObj) {
         DebugWrite("MyDirect3DDevice7::QueryInterface");
         return S_OK; //return this->direct3DDevice7->QueryInterface(riid, ppvObj);
     }
@@ -87,7 +87,7 @@ public:
     }
 
     /*** IDirect3DDevice7 methods ***/
-    HRESULT STDMETHODCALLTYPE GetCaps(LPD3DDEVICEDESC7 lpD3DDevDesc ) {
+    HRESULT STDMETHODCALLTYPE GetCaps(LPD3DDEVICEDESC7 lpD3DDevDesc) {
         DebugWrite("MyDirect3DDevice7::GetCaps");
 
 		/*ZeroMemory(lpD3DDevDesc, sizeof(D3DDEVICEDESC7));
@@ -102,7 +102,7 @@ public:
         return S_OK; //return this->direct3DDevice7->GetCaps(lpD3DDevDesc);
     }
 
-    HRESULT STDMETHODCALLTYPE GetClipPlane(DWORD Index,float* pPlane) {
+    HRESULT STDMETHODCALLTYPE GetClipPlane(DWORD Index,float * pPlane) {
         DebugWrite("MyDirect3DDevice7::GetClipPlane");
         return S_OK; //return this->direct3DDevice7->GetClipPlane(Index, pPlane);
     }
@@ -191,7 +191,7 @@ public:
 			{
 				BYTE a = Value >> 24;
 				BYTE r = (Value >> 16) & 0xFF;
-				BYTE g = (Value >> 8 ) & 0xFF;
+				BYTE g = (Value >> 8) & 0xFF;
 				BYTE b = Value & 0xFF;
 				state->GraphicsState.FF_FogColor = float3(r / 255.0f, g / 255.0f, b / 255.0f);
 			}
@@ -201,7 +201,7 @@ public:
 			{
 				BYTE a = Value >> 24;
 				BYTE r = (Value >> 16) & 0xFF;
-				BYTE g = (Value >> 8 ) & 0xFF;
+				BYTE g = (Value >> 8) & 0xFF;
 				BYTE b = Value & 0xFF;
 				state->GraphicsState.FF_AmbientLighting = float3(r / 255.0f, g / 255.0f, b / 255.0f);
 				
@@ -256,17 +256,17 @@ public:
 		case D3DRENDERSTATE_WRAP6              		: LOG_UNIMPLMENTED_RENDERSTATE(D3DRENDERSTATE_WRAP6              		);break;
 		case D3DRENDERSTATE_WRAP7              		: LOG_UNIMPLMENTED_RENDERSTATE(D3DRENDERSTATE_WRAP7              		);break;
 		case D3DRENDERSTATE_CLIPPING           		: LOG_UNIMPLMENTED_RENDERSTATE(D3DRENDERSTATE_CLIPPING           		);break;
-		case D3DRENDERSTATE_COLORVERTEX        		: LOG_UNIMPLMENTED_RENDERSTATE( D3DRENDERSTATE_COLORVERTEX        		);break;
-		case D3DRENDERSTATE_LOCALVIEWER        		: LOG_UNIMPLMENTED_RENDERSTATE( D3DRENDERSTATE_LOCALVIEWER        		);break;
-		case D3DRENDERSTATE_NORMALIZENORMALS   		: LOG_UNIMPLMENTED_RENDERSTATE( D3DRENDERSTATE_NORMALIZENORMALS   		);break;
-		case D3DRENDERSTATE_COLORKEYBLENDENABLE		: LOG_UNIMPLMENTED_RENDERSTATE( D3DRENDERSTATE_COLORKEYBLENDENABLE		);break;
-		case D3DRENDERSTATE_DIFFUSEMATERIALSOURCE   : LOG_UNIMPLMENTED_RENDERSTATE( D3DRENDERSTATE_DIFFUSEMATERIALSOURCE   );break;
-		case D3DRENDERSTATE_SPECULARMATERIALSOURCE  : LOG_UNIMPLMENTED_RENDERSTATE( D3DRENDERSTATE_SPECULARMATERIALSOURCE  );break;
-		case D3DRENDERSTATE_AMBIENTMATERIALSOURCE   : LOG_UNIMPLMENTED_RENDERSTATE( D3DRENDERSTATE_AMBIENTMATERIALSOURCE   );break;
-		case D3DRENDERSTATE_EMISSIVEMATERIALSOURCE  : LOG_UNIMPLMENTED_RENDERSTATE( D3DRENDERSTATE_EMISSIVEMATERIALSOURCE  );break;
-		case D3DRENDERSTATE_VERTEXBLEND             : LOG_UNIMPLMENTED_RENDERSTATE( D3DRENDERSTATE_VERTEXBLEND             );break;
-		case D3DRENDERSTATE_CLIPPLANEENABLE         : LOG_UNIMPLMENTED_RENDERSTATE( D3DRENDERSTATE_CLIPPLANEENABLE         );break;
-		case D3DRENDERSTATE_EXTENTS            		: LOG_UNIMPLMENTED_RENDERSTATE( D3DRENDERSTATE_EXTENTS            		);break;
+		case D3DRENDERSTATE_COLORVERTEX        		: LOG_UNIMPLMENTED_RENDERSTATE(D3DRENDERSTATE_COLORVERTEX        		);break;
+		case D3DRENDERSTATE_LOCALVIEWER        		: LOG_UNIMPLMENTED_RENDERSTATE(D3DRENDERSTATE_LOCALVIEWER        		);break;
+		case D3DRENDERSTATE_NORMALIZENORMALS   		: LOG_UNIMPLMENTED_RENDERSTATE(D3DRENDERSTATE_NORMALIZENORMALS   		);break;
+		case D3DRENDERSTATE_COLORKEYBLENDENABLE		: LOG_UNIMPLMENTED_RENDERSTATE(D3DRENDERSTATE_COLORKEYBLENDENABLE		);break;
+		case D3DRENDERSTATE_DIFFUSEMATERIALSOURCE   : LOG_UNIMPLMENTED_RENDERSTATE(D3DRENDERSTATE_DIFFUSEMATERIALSOURCE  );break;
+		case D3DRENDERSTATE_SPECULARMATERIALSOURCE  : LOG_UNIMPLMENTED_RENDERSTATE(D3DRENDERSTATE_SPECULARMATERIALSOURCE );break;
+		case D3DRENDERSTATE_AMBIENTMATERIALSOURCE   : LOG_UNIMPLMENTED_RENDERSTATE(D3DRENDERSTATE_AMBIENTMATERIALSOURCE  );break;
+		case D3DRENDERSTATE_EMISSIVEMATERIALSOURCE  : LOG_UNIMPLMENTED_RENDERSTATE(D3DRENDERSTATE_EMISSIVEMATERIALSOURCE );break;
+		case D3DRENDERSTATE_VERTEXBLEND             : LOG_UNIMPLMENTED_RENDERSTATE(D3DRENDERSTATE_VERTEXBLEND            );break;
+		case D3DRENDERSTATE_CLIPPLANEENABLE         : LOG_UNIMPLMENTED_RENDERSTATE(D3DRENDERSTATE_CLIPPLANEENABLE        );break;
+		case D3DRENDERSTATE_EXTENTS            		: LOG_UNIMPLMENTED_RENDERSTATE(D3DRENDERSTATE_EXTENTS            		);break;
 		case D3DRENDERSTATE_FOGVERTEXMODE      		: blk->RenderStates.vertexFog = Value == 3 ? 1.0f : 0.0f; break;
 		case D3DRENDERSTATE_ALPHAFUNC          		: LOG_UNIMPLMENTED_RENDERSTATE(D3DRENDERSTATE_ALPHAFUNC);break;*/
 		}
@@ -274,7 +274,7 @@ public:
         return S_OK; 
     }
 
-    HRESULT STDMETHODCALLTYPE GetRenderTarget(LPDIRECTDRAWSURFACE7 *lplpRenderTarget ) {
+    HRESULT STDMETHODCALLTYPE GetRenderTarget(LPDIRECTDRAWSURFACE7 *lplpRenderTarget) {
         DebugWrite("MyDirect3DDevice7::GetRenderTarget");
 
 		LogWarn() << "GetRenderTarget not supported!";
@@ -298,12 +298,12 @@ public:
         DebugWrite("MyDirect3DDevice7::SetTexture");
 		
 		// Bind the texture
-		MyDirectDrawSurface7* surface = (MyDirectDrawSurface7 *)lplpTexture;
+		MyDirectDrawSurface7 * surface = (MyDirectDrawSurface7 *)lplpTexture;
 		
 		if (surface)
 		{
 			surface->BindToSlot(dwStage);
-		}else
+		} else
 		{
 			//Engine::GraphicsEngine->UnbindTexture(dwStage);
 		}
@@ -489,7 +489,7 @@ public:
 				if (Value > 7) // This means that some other flag was set, and the only case that happens is for reflections
 				{
 					state->GraphicsState.SetGraphicsSwitch(GSWITCH_REFLECTIONS, true);
-				}else
+				} else
 				{
 					state->GraphicsState.SetGraphicsSwitch(GSWITCH_REFLECTIONS, false);
 				}
@@ -617,7 +617,7 @@ public:
 
 		BYTE a = dwColor >> 24;
 		BYTE r = (dwColor >> 16) & 0xFF;
-		BYTE g = (dwColor >> 8 ) & 0xFF;
+		BYTE g = (dwColor >> 8) & 0xFF;
 		BYTE b = dwColor & 0xFF;
 
 		Engine::GraphicsEngine->Clear(float4(r / 255.0f, g/ 255.0f, b / 255.0f, a / 255.0f));
@@ -731,7 +731,7 @@ public:
 			WorldConverter::TriangleFanToList(&exv[0], dwVertexCount, &vertexList);
 
 			Engine::GraphicsEngine->DrawVertexArray(&vertexList[0], vertexList.size());
-		}else
+		} else
 		{
 			if (dptPrimitiveType ==  D3DPT_TRIANGLELIST)
 				Engine::GraphicsEngine->DrawVertexArray(&exv[0], dwVertexCount);
@@ -802,7 +802,7 @@ public:
 			CONTEXT* context = nullptr;
 			for(UINT32 i = pStack; i > pStack - 0x1000; i--)
 			{
-				if (*(UINT32 *)i == 0x0001003f || *(UINT32 *)i == 0x0001001f )
+				if (*(UINT32 *)i == 0x0001003f || *(UINT32 *)i == 0x0001001f)
 				{
 					context = (CONTEXT *)i;
 					break;
@@ -832,7 +832,7 @@ public:
 		LPVOID originalUserArg;
 	};
 	/** This function has to be used with a working D3D7-Device to spit out all textureformats gothic needs */
-	static HRESULT WINAPI PixelFormatCallback( LPDDPIXELFORMAT fmt, LPVOID lpContext)
+	static HRESULT WINAPI PixelFormatCallback(LPDDPIXELFORMAT fmt, LPVOID lpContext)
 	{
 		LPD3DENUMPIXELFORMATSCALLBACK fn = ((DeviceEnumInfo *)lpContext)->originalFn;
 		static int num=0;

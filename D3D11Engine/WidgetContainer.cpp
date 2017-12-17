@@ -1,43 +1,34 @@
-#include "pch.h"
 #include "WidgetContainer.h"
-#include "BaseWidget.h"
-#include "Widget_TransRot.h"
-#include "WorldConverter.h"
 
-WidgetContainer::WidgetContainer()
-{
+#include "Widget_TransRot.h"
+#include "WorldObjects.h"
+
+WidgetContainer::WidgetContainer() {
 	Widgets.push_back(new Widget_TransRot(this));
 }
 
-
-WidgetContainer::~WidgetContainer()
-{
+WidgetContainer::~WidgetContainer() {
 	Toolbox::DeleteElements(Widgets);
 }
 
 /** Renders the active widget */
-void WidgetContainer::Render()
-{
-	for(auto it = Widgets.begin(); it != Widgets.end(); it++)
-	{
+void WidgetContainer::Render() {
+	for (auto it = Widgets.cbegin(); it != Widgets.cend(); ++it) {
 		(*it)->RenderWidget();
 	}
 }
 
 /** Adds a selectiontarget */
-void WidgetContainer::AddSelection(BaseVobInfo* vob)
-{
+void WidgetContainer::AddSelection(BaseVobInfo * vob) {
 	Selection.insert(vob);
 	
-	for(auto it = Widgets.begin(); it != Widgets.end(); it++)
-	{
+	for (auto it = Widgets.cbegin(); it != Widgets.cend(); ++it) {
 		(*it)->OnSelectionAdded(vob->Vob);
 	}
 }
 
 /** Clears the selection */
-void WidgetContainer::ClearSelection()
-{
+void WidgetContainer::ClearSelection() {
 	Selection.clear();
 }
 
@@ -47,16 +38,13 @@ void WidgetContainer::RemoveSelection(BaseVobInfo * vob) {
 }
 
 /** Returns the current selection-set */
-std::set<BaseVobInfo*>& WidgetContainer::GetSelection()
-{
+std::set<BaseVobInfo *> & WidgetContainer::GetSelection() {
 	return Selection;
 }
 
 /** Returns if one of the widgets is currently clicked */
-bool WidgetContainer::IsWidgetClicked()
-{
-	for(auto it = Widgets.begin(); it != Widgets.end(); it++)
-	{
+bool WidgetContainer::IsWidgetClicked() const {
+	for (auto it = Widgets.cbegin(); it != Widgets.cend(); ++it) {
 		if ((*it)->IsActive())
 			return true;
 	}
@@ -65,10 +53,8 @@ bool WidgetContainer::IsWidgetClicked()
 }
 
 /** Called when the owning window got a message */
-void WidgetContainer::OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	for(auto it = Widgets.begin(); it != Widgets.end(); it++)
-	{
+void WidgetContainer::OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+	for (auto it = Widgets.cbegin(); it != Widgets.cend(); ++it) {
 		(*it)->OnWindowMessage(hWnd, msg, wParam, lParam);
 	}
 }

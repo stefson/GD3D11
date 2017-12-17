@@ -21,10 +21,10 @@
 namespace D3DX11Debug
 {
     // Helper sets a D3D resource name string (used by PIX and debug layer leak reporting).
-    inline void SetDebugObjectName(_In_ ID3D11DeviceChild* resource, _In_z_ const char *name )
+    inline void SetDebugObjectName(_In_ ID3D11DeviceChild* resource, _In_z_ const char *name)
     {
-        #if !defined(NO_D3D11_DEBUG_NAME) && ( defined(_DEBUG) || defined(PROFILE) )
-            resource->SetPrivateData( WKPDID_D3DDebugObjectName, static_cast<UINT>(strlen(name)), name );
+        #if !defined(NO_D3D11_DEBUG_NAME) && (defined(_DEBUG) || defined(PROFILE))
+            resource->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<UINT>(strlen(name)), name);
         #else
             UNREFERENCED_PARAMETER(resource);
             UNREFERENCED_PARAMETER(name);
@@ -34,7 +34,7 @@ namespace D3DX11Debug
     template<UINT TNameLength>
     inline void SetDebugObjectName(_In_ ID3D11DeviceChild* resource, _In_z_ const char (&name)[TNameLength])
     {
-        #if !defined(NO_D3D11_DEBUG_NAME) && ( defined(_DEBUG) || defined(PROFILE) )
+        #if !defined(NO_D3D11_DEBUG_NAME) && (defined(_DEBUG) || defined(PROFILE))
             resource->SetPrivateData(WKPDID_D3DDebugObjectName, TNameLength - 1, name);
         #else
             UNREFERENCED_PARAMETER(resource);
@@ -227,7 +227,7 @@ public:
     {
         HRESULT hr = S_OK;
         Clear();
-        VN( m_pData = new uint8_t[vOther.m_MaxSize * sizeof(T)] );
+        VN(m_pData = new uint8_t[vOther.m_MaxSize * sizeof(T)]);
         
         m_CurSize = vOther.m_CurSize;
         m_MaxSize = vOther.m_MaxSize;
@@ -576,7 +576,7 @@ public:
 
     // Allocate reserves bufferSize bytes of contiguous memory and returns a pointer to the user
     _Success_(return != nullptr)
-    void*   Allocate(_In_ uint32_t bufferSize, _Outptr_ CDataBlock **ppBlock);
+    void *   Allocate(_In_ uint32_t bufferSize, _Outptr_ CDataBlock **ppBlock);
 
     void    EnableAlignment();
 
@@ -609,7 +609,7 @@ public:
         // Writes data block to buffer
 
     // Memory allocator support
-    void*   Allocate(_In_ uint32_t bufferSize);
+    void *   Allocate(_In_ uint32_t bufferSize);
     uint32_t GetSize();
     void    EnableAlignment();
 
@@ -621,15 +621,15 @@ public:
 // The trick is that we never free, so we don't have to keep as much state around
 // Use PRIVATENEW in CEffectLoader
 
-inline void* __cdecl operator new(_In_ size_t s, _In_ CDataBlockStore &pAllocator)
+inline void * __cdecl operator new(_In_ size_t s, _In_ CDataBlockStore &pAllocator)
 {
 #ifdef _M_X64
-    assert( s <= 0xffffffff );
+    assert(s <= 0xffffffff);
 #endif
-    return pAllocator.Allocate( (uint32_t)s );
+    return pAllocator.Allocate((uint32_t)s);
 }
 
-inline void __cdecl operator delete(_In_opt_ void* p, _In_ CDataBlockStore &pAllocator)
+inline void __cdecl operator delete(_In_opt_ void * p, _In_ CDataBlockStore &pAllocator)
 {
     UNREFERENCED_PARAMETER(p);
     UNREFERENCED_PARAMETER(pAllocator);
@@ -711,7 +711,7 @@ static uint32_t ComputeHashLower(_In_reads_bytes_(cbToHash) const uint8_t *pb, _
     while (cbLeft >= 12)
     {
         uint8_t pbT[12];
-        for( size_t i = 0; i < 12; i++ )
+        for(size_t i = 0; i < 12; i++)
             pbT[i] = (uint8_t)tolower(pb[i]);
 
         uint32_t *pdw = reinterpret_cast<uint32_t *>(pbT);
@@ -728,7 +728,7 @@ static uint32_t ComputeHashLower(_In_reads_bytes_(cbToHash) const uint8_t *pb, _
     c += cbToHash;
 
     uint8_t pbT[12];
-    for( size_t i = 0; i < cbLeft; i++ )
+    for(size_t i = 0; i < cbLeft; i++)
         pbT[i] = (uint8_t)tolower(pb[i]);
 
     switch(cbLeft) // all the case statements fall through
@@ -852,7 +852,7 @@ public:
         Cleanup();
 
         actualSize = pOther->m_NumHashSlots;
-        VN( rgpNewHashEntries = new SHashEntry*[actualSize] );
+        VN(rgpNewHashEntries = new SHashEntry*[actualSize]);
 
         ZeroMemory(rgpNewHashEntries, sizeof(SHashEntry*) * actualSize);
 
@@ -871,7 +871,7 @@ public:
 
             // seize this hash entry, migrate it to the new table
             SHashEntry *pNewEntry;
-            VN( pNewEntry = new SHashEntry );
+            VN(pNewEntry = new SHashEntry);
             
             pNewEntry->pNext = rgpNewHashEntries[index];
             pNewEntry->Data = iter.pHashEntry->Data;
@@ -891,7 +891,7 @@ public:
         rgpNewHashEntries = nullptr;
 
 lExit:
-        SAFE_DELETE_ARRAY( rgpNewHashEntries );
+        SAFE_DELETE_ARRAY(rgpNewHashEntries);
         return hr;
     }
 
@@ -933,7 +933,7 @@ public:
     static uint32_t GetNextHashTableSize(_In_ uint32_t DesiredSize)
     {
         // figure out the next logical size to use
-        for (size_t i = 0; i < _countof(c_PrimeSizes); ++i )
+        for (size_t i = 0; i < _countof(c_PrimeSizes); ++i)
         {
             if (c_PrimeSizes[i] >= DesiredSize)
             {
@@ -949,7 +949,7 @@ public:
     // DesiredSize is merely a suggestion
     HRESULT Grow(_In_ uint32_t DesiredSize,
                  _In_ uint32_t ProvidedArraySize = 0,
-                 _In_reads_opt_(ProvidedArraySize) void** ProvidedArray = nullptr,
+                 _In_reads_opt_(ProvidedArraySize) void ** ProvidedArray = nullptr,
                  _In_ bool OwnProvidedArray = false)
     {
         HRESULT hr = S_OK;
@@ -957,7 +957,7 @@ public:
         uint32_t valuesMigrated = 0;
         uint32_t actualSize;
 
-        VB( DesiredSize > m_NumHashSlots );
+        VB(DesiredSize > m_NumHashSlots);
 
         actualSize = GetNextHashTableSize(DesiredSize);
 
@@ -970,7 +970,7 @@ public:
         {
             OwnProvidedArray = true;
             
-            VN( rgpNewHashEntries = new SHashEntry*[actualSize] );
+            VN(rgpNewHashEntries = new SHashEntry*[actualSize]);
         }
         
         ZeroMemory(rgpNewHashEntries, sizeof(SHashEntry*) * actualSize);
@@ -1130,7 +1130,7 @@ lExit:
         SHashEntry *pHashEntry;
         uint32_t index = Hash % m_NumHashSlots;
 
-        VN( pHashEntry = new SHashEntry );
+        VN(pHashEntry = new SHashEntry);
         pHashEntry->pNext = m_rgpHashEntries[index];
         pHashEntry->Data = Data;
         pHashEntry->Hash = Hash;
@@ -1270,7 +1270,7 @@ public:
         SHashEntry *pHashEntry;
         uint32_t index = Hash % m_NumHashSlots;
 
-        VN( pHashEntry = new(*m_pPrivateHeap) SHashEntry );
+        VN(pHashEntry = new(*m_pPrivateHeap) SHashEntry);
         pHashEntry->pNext = m_rgpHashEntries[index];
         pHashEntry->Data = Data;
         pHashEntry->Hash = Hash;

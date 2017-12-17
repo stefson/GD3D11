@@ -10,19 +10,19 @@ public:
 	~D3D11PFX_HDR();
 
 	/** Draws this effect to the given buffer */
-	XRESULT Render(RenderToTextureBuffer* fxbuffer);
+	XRESULT Render(RenderToTextureBuffer * fxbuffer);
 
 protected:
 	/** Calcualtes the luminance */
-	RenderToTextureBuffer* CalcLuminance();
+	RenderToTextureBuffer * CalcLuminance();
 
 	/** Blurs the backbuffer and puts the result into TempBufferDS4_1*/
-	void CreateBloom(RenderToTextureBuffer* lum);
+	void CreateBloom(RenderToTextureBuffer * lum);
 
 
-	RenderToTextureBuffer* LumBuffer1;
-	RenderToTextureBuffer* LumBuffer2;
-	RenderToTextureBuffer* LumBuffer3;
+	RenderToTextureBuffer * LumBuffer1;
+	RenderToTextureBuffer * LumBuffer2;
+	RenderToTextureBuffer * LumBuffer3;
 	int ActiveLumBuffer;
 };
 

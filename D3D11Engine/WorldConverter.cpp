@@ -105,7 +105,7 @@ void WorldConverter::WorldMeshCollectPolyRange(const D3DXVECTOR3 & position, flo
 }
 
 /** Converts a loaded custommesh to be the worldmesh */
-XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string& file, std::map<int, std::map<int, WorldMeshSectionInfo>>* outSections, WorldInfo* info, MeshInfo ** outWrappedMesh)
+XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string & file, std::map<int, std::map<int, WorldMeshSectionInfo>>* outSections, WorldInfo* info, MeshInfo ** outWrappedMesh)
 {
 	GMesh* mesh = new GMesh();
 
@@ -116,18 +116,18 @@ XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string& file, std::map<
 	{
 		// Load the meshfile, cached
 		mesh->LoadMesh((file + ".mcache").c_str(), worldScale);
-	}else
+	} else
 	{
 		// Create cache-file
 		mesh->LoadMesh(file, worldScale);
 
-		std::vector<MeshInfo *>& meshes = mesh->GetMeshes();
-		std::vector<std::string>& textures = mesh->GetTextures();
+		std::vector<MeshInfo *> & meshes = mesh->GetMeshes();
+		std::vector<std::string> & textures = mesh->GetTextures();
 		std::map<std::string, std::vector<std::pair<std::vector<ExVertexStruct>, std::vector<VERTEX_INDEX>>>> gm;
 
 		for(unsigned int m = 0;m<meshes.size();m++)
 		{
-			std::vector<std::pair<std::vector<ExVertexStruct>, std::vector<VERTEX_INDEX>>>& meshData = gm[textures[m]];
+			std::vector<std::pair<std::vector<ExVertexStruct>, std::vector<VERTEX_INDEX>>> & meshData = gm[textures[m]];
 
 			meshData.push_back(std::make_pair(meshes[m]->Vertices, meshes[m]->Indices));
 		}
@@ -136,8 +136,8 @@ XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string& file, std::map<
 	}
 	
 
-	std::vector<MeshInfo *>& meshes = mesh->GetMeshes();
-	std::vector<std::string>& textures = mesh->GetTextures();
+	std::vector<MeshInfo *> & meshes = mesh->GetMeshes();
+	std::vector<std::string> & textures = mesh->GetTextures();
 	std::map<std::string, D3D11Texture*> loadedTextures;
 	std::set<std::string> missingTextures;
 
@@ -154,7 +154,7 @@ XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string& file, std::map<
 		if (!mat)
 		{
 			missingTextures.insert(textures[m]);
-		}else
+		} else
 		{
 			if (mat->GetMatGroup() == zMAT_GROUP_WATER)
 			{
@@ -234,23 +234,23 @@ XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string& file, std::map<
 						if (XR_SUCCESS != tx->Init(rep))
 						{
 							delete tx;
-						}else
+						} else
 						{
 							section.WorldMeshesByCustomTexture[tx].push_back(section.WorldMeshes[key]);
 							loadedTextures[rep] = tx;
 						}		
-					}else
+					} else
 					{			
 						section.WorldMeshesByCustomTextureOriginal[mat].push_back(section.WorldMeshes[key]);
 					}
-				}else
+				} else
 				{
 					section.WorldMeshesByCustomTexture[loadedTextures[rep]].push_back(section.WorldMeshes[key]);
 				}*/
 
 			}
 
-			for(int i=0;i<3;i++)
+			for (int i = 0; i < 3; i++)
 			{
 				section.WorldMeshes[key]->Vertices.push_back(*v[i]);
 			}
@@ -273,7 +273,7 @@ XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string& file, std::map<
 	// Dont need that anymore
 	delete mesh;
 
-	D3DXVECTOR2 avgSections = D3DXVECTOR2(0,0);
+	D3DXVECTOR2 avgSections = D3DXVECTOR2(0, 0);
 	int numSections = 0;
 
 	std::list<std::vector<ExVertexStruct>*> vertexBuffers;
@@ -444,7 +444,7 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN(zCPolygon** polys, unsigned int nu
 			{
 				t.TexCoord2 = poly->GetLightmap()->GetLightmapUV(*t.Position.toD3DXVECTOR3());
 				t.Color = DEFAULT_LIGHTMAP_POLY_COLOR;
-			}else
+			} else
 			{
 				t.Color = 0xFFFFFFFF;
 				t.TexCoord2.x = 0.0f;
@@ -452,7 +452,7 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN(zCPolygon** polys, unsigned int nu
 
 				if (poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER)
 				{
-					t.Normal = float3(0,1,0); // Get rid of ugly shadows on water
+					t.Normal = float3(0, 1, 0); // Get rid of ugly shadows on water
 				}
 
 				/*if ((poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER) ||
@@ -525,7 +525,7 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN(zCPolygon** polys, unsigned int nu
 			(*outSections)[section.x][section.y].WorldMeshes[key]->Vertices.push_back(finalVertices[v]);
 	}
 	
-	D3DXVECTOR2 avgSections = D3DXVECTOR2(0,0);
+	D3DXVECTOR2 avgSections = D3DXVECTOR2(0, 0);
 	int numSections = 0;
 
 	std::list<std::vector<ExVertexStruct>*> vertexBuffers;
@@ -694,7 +694,7 @@ HRESULT WorldConverter::ConvertWorldMesh(zCPolygon** polys, unsigned int numPoly
 				t.TexCoord2.y = 0.0f;
 
 				if (poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER) {
-					t.Normal = float3(0,1,0); // Get rid of ugly shadows on water
+					t.Normal = float3(0, 1, 0); // Get rid of ugly shadows on water
 				}
 
 				/*if ((poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER) ||
@@ -755,7 +755,7 @@ HRESULT WorldConverter::ConvertWorldMesh(zCPolygon** polys, unsigned int numPoly
 		}
 	}
 	
-	D3DXVECTOR2 avgSections = D3DXVECTOR2(0,0);
+	D3DXVECTOR2 avgSections = D3DXVECTOR2(0, 0);
 	int numSections = 0;
 
 	std::list<std::vector<ExVertexStruct>*> vertexBuffers;
@@ -987,7 +987,7 @@ void WorldConverter::TriangleFanToList(ExVertexStruct* input, unsigned int numIn
 }
 
 /** Saves the given section-array to an obj file */
-void WorldConverter::SaveSectionsToObjUnindexed(const char* file, const std::map<int, std::map<int, WorldMeshSectionInfo>>& sections)
+void WorldConverter::SaveSectionsToObjUnindexed(const char* file, const std::map<int, std::map<int, WorldMeshSectionInfo>> & sections)
 {
 	FILE* f = fopen(file, "w");
 
@@ -1110,7 +1110,7 @@ void WorldConverter::ExtractSkeletalMeshFromVob(zCModel * model, SkeletalMeshVis
 			ExSkelVertexStruct vx;
 			//vx.Position = s->GetPositionList()->Array[i];
 			vx.Color = 0xFFFFFFFF;
-			vx.Normal = float3(0,0,0);
+			vx.Normal = float3(0, 0, 0);
 			ZeroMemory(vx.weights, sizeof(vx.weights));
 			ZeroMemory(vx.Position, sizeof(vx.Position));
 			ZeroMemory(vx.boneIndices, sizeof(vx.boneIndices));
@@ -1259,7 +1259,7 @@ void WorldConverter::ExtractSkeletalMeshFromProto(zCModelMeshLib* model, Skeleta
 			ExSkelVertexStruct vx;
 			//vx.Position = s->GetPositionList()->Array[i];
 			vx.Color = 0xFFFFFFFF;
-			vx.Normal = float3(0,0,0);
+			vx.Normal = float3(0, 0, 0);
 			ZeroMemory(vx.weights, sizeof(vx.weights));
 			ZeroMemory(vx.Position, sizeof(vx.Position));
 			ZeroMemory(vx.boneIndices, sizeof(vx.boneIndices));
@@ -1389,7 +1389,7 @@ void WorldConverter::ExtractSkeletalMeshFromProto(zCModelMeshLib* model, Skeleta
 }
 
 /** Extracts a node-visual */
-void WorldConverter::ExtractNodeVisual(int index, zCModelNodeInst* node, std::map<int, std::vector<MeshVisualInfo *>>& attachments)
+void WorldConverter::ExtractNodeVisual(int index, zCModelNodeInst* node, std::map<int, std::vector<MeshVisualInfo *>> & attachments)
 {
 	// Only allow 1 attachment
 	if (!attachments[index].empty())
@@ -1426,7 +1426,7 @@ void WorldConverter::ExtractNodeVisual(int index, zCModelNodeInst* node, std::ma
 
 			attachments[index].push_back(mi);
 
-		}else if (strcmp(ext, ".MMS") == 0)
+		} else if (strcmp(ext, ".MMS") == 0)
 		{
 			// These are zCMorphMeshes
 			zCProgMeshProto* pm = ((zCMorphMesh *)node->NodeVisual)->GetMorphMesh();
@@ -1461,7 +1461,7 @@ void WorldConverter::Extract3DSMeshFromVisual2PNAEN(zCProgMeshProto* visual, Mes
 	bbmin = D3DXVECTOR3(FLT_MAX, FLT_MAX, FLT_MAX);
 	bbmax = D3DXVECTOR3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
-	D3DXVECTOR3* posList = (D3DXVECTOR3 *)visual->GetPositionList()->Array;
+	D3DXVECTOR3 * posList = (D3DXVECTOR3 *)visual->GetPositionList()->Array;
 
 	std::list<std::vector<ExVertexStruct>*> vertexBuffers;
 	std::list<std::vector<VERTEX_INDEX>*> indexBuffers;
@@ -1598,7 +1598,7 @@ void WorldConverter::Extract3DSMeshFromVisual2(zCProgMeshProto* visual, MeshVisu
 	bbmin = D3DXVECTOR3(FLT_MAX, FLT_MAX, FLT_MAX);
 	bbmax = D3DXVECTOR3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
-	D3DXVECTOR3* posList = (D3DXVECTOR3 *)visual->GetPositionList()->Array;
+	D3DXVECTOR3 * posList = (D3DXVECTOR3 *)visual->GetPositionList()->Array;
 
 	std::list<std::vector<ExVertexStruct>*> vertexBuffers;
 	std::list<std::vector<VERTEX_INDEX>*> indexBuffers;
@@ -1751,7 +1751,7 @@ const float eps = 0.001f;
 
 struct CmpClass // class comparing vertices in the set
 {
-    bool operator() (const std::pair<ExVertexStruct, int>& p1, const std::pair<ExVertexStruct, int>& p2) const
+    bool operator() (const std::pair<ExVertexStruct, int> & p1, const std::pair<ExVertexStruct, int> & p2) const
     {
 		/*if (p1.first.Position.x < p2.first.Position.x)
 			return true;
@@ -1782,7 +1782,7 @@ struct CmpClass // class comparing vertices in the set
 
 
 /** Indexes the given vertex array */
-void WorldConverter::IndexVertices(ExVertexStruct* input, unsigned int numInputVertices, std::vector<ExVertexStruct>& outVertices, std::vector<VERTEX_INDEX>& outIndices)
+void WorldConverter::IndexVertices(ExVertexStruct* input, unsigned int numInputVertices, std::vector<ExVertexStruct> & outVertices, std::vector<VERTEX_INDEX> & outIndices)
 {
 	std::set<std::pair<ExVertexStruct, int>, CmpClass> vertices;
 	int index = 0;
@@ -1860,7 +1860,7 @@ void WorldConverter::IndexVertices(ExVertexStruct* input, unsigned int numInputV
 	}
 }
 
-void WorldConverter::IndexVertices(ExVertexStruct* input, unsigned int numInputVertices, std::vector<ExVertexStruct>& outVertices, std::vector<unsigned int>& outIndices)
+void WorldConverter::IndexVertices(ExVertexStruct* input, unsigned int numInputVertices, std::vector<ExVertexStruct> & outVertices, std::vector<unsigned int> & outIndices)
 {
 	std::set<std::pair<ExVertexStruct, int>, CmpClass> vertices;
 	unsigned int index = 0;
@@ -1886,7 +1886,7 @@ void WorldConverter::IndexVertices(ExVertexStruct* input, unsigned int numInputV
 
 struct CmpClassSkel // class comparing vertices in the set
 {
-    bool operator() (const std::pair<ExSkelVertexStruct, int>& p1, const std::pair<ExSkelVertexStruct, int>& p2) const
+    bool operator() (const std::pair<ExSkelVertexStruct, int> & p1, const std::pair<ExSkelVertexStruct, int> & p2) const
     {
 		for(int i=0;i<4;i++)
 		{
@@ -1902,7 +1902,7 @@ struct CmpClassSkel // class comparing vertices in the set
     }
 };
 
-void WorldConverter::IndexVertices(ExSkelVertexStruct* input, unsigned int numInputVertices, std::vector<ExSkelVertexStruct>& outVertices, std::vector<VERTEX_INDEX>& outIndices)
+void WorldConverter::IndexVertices(ExSkelVertexStruct* input, unsigned int numInputVertices, std::vector<ExSkelVertexStruct> & outVertices, std::vector<VERTEX_INDEX> & outIndices)
 {
 	std::set<std::pair<ExSkelVertexStruct, int>, CmpClassSkel> vertices;
 	int index = 0;
@@ -1931,9 +1931,9 @@ void WorldConverter::IndexVertices(ExSkelVertexStruct* input, unsigned int numIn
 }
 
 /** Computes vertex normals for a mesh with face normals */
-void WorldConverter::GenerateVertexNormals(std::vector<ExVertexStruct>& vertices, std::vector<VERTEX_INDEX>& indices)
+void WorldConverter::GenerateVertexNormals(std::vector<ExVertexStruct> & vertices, std::vector<VERTEX_INDEX> & indices)
 {
-	std::vector<D3DXVECTOR3> normals(vertices.size(), D3DXVECTOR3(0,0,0));
+	std::vector<D3DXVECTOR3> normals(vertices.size(), D3DXVECTOR3(0, 0, 0));
 
 	for(unsigned int i=0;i<indices.size(); i+=3)
 	{
@@ -1969,7 +1969,7 @@ ExVertexStruct TessTriLerpVertex(ExVertexStruct& a, ExVertexStruct& b, float w)
 }
 
 /** Outputs 4 new triangles for 1 input triangle */
-static void TessSingleTri(ExVertexStruct* tri, std::vector<ExVertexStruct>& tesselated)
+static void TessSingleTri(ExVertexStruct* tri, std::vector<ExVertexStruct> & tesselated)
 {
 	ExVertexStruct half[3];
 	half[0] = TessTriLerpVertex(tri[0], tri[1], 0.5f);
@@ -1994,7 +1994,7 @@ static void TessSingleTri(ExVertexStruct* tri, std::vector<ExVertexStruct>& tess
 }
 
 /** Tesselates the given triangle and adds the values to the list */
-void WorldConverter::TesselateTriangle(ExVertexStruct* tri, std::vector<ExVertexStruct>& tesselated, int amount)
+void WorldConverter::TesselateTriangle(ExVertexStruct* tri, std::vector<ExVertexStruct> & tesselated, int amount)
 {
 	if (amount == 0)
 	{
@@ -2014,17 +2014,17 @@ void WorldConverter::TesselateTriangle(ExVertexStruct* tri, std::vector<ExVertex
 }
 
 /** Marks the edges of the mesh */
-void WorldConverter::MarkEdges(std::vector<ExVertexStruct>& vertices, std::vector<VERTEX_INDEX>& indices)
+void WorldConverter::MarkEdges(std::vector<ExVertexStruct> & vertices, std::vector<VERTEX_INDEX> & indices)
 {
 
 }
 
 /** Builds a big vertexbuffer from the world sections */
-void WorldConverter::WrapVertexBuffers( const std::list<std::vector<ExVertexStruct>*>& vertexBuffers, 
-										const std::list<std::vector<VERTEX_INDEX>*>& indexBuffers, 
-										std::vector<ExVertexStruct>& outVertices, 
-										std::vector<unsigned int>& outIndices, 
-										std::vector<unsigned int>& outOffsets)
+void WorldConverter::WrapVertexBuffers(const std::list<std::vector<ExVertexStruct>*> & vertexBuffers, 
+										const std::list<std::vector<VERTEX_INDEX>*> & indexBuffers, 
+										std::vector<ExVertexStruct> & outVertices, 
+										std::vector<unsigned int> & outIndices, 
+										std::vector<unsigned int> & outOffsets)
 {
 	std::vector<unsigned int> vxOffsets;
 	vxOffsets.push_back(0);
@@ -2032,7 +2032,7 @@ void WorldConverter::WrapVertexBuffers( const std::list<std::vector<ExVertexStru
 	// Pack vertices
 	for(std::list<std::vector<ExVertexStruct>*>::const_iterator itv = vertexBuffers.begin(); itv != vertexBuffers.end(); itv++)
 	{
-		outVertices.insert( outVertices.end(), (*itv)->begin(), (*itv)->end() );
+		outVertices.insert(outVertices.end(), (*itv)->begin(), (*itv)->end());
 
 		vxOffsets.push_back(vxOffsets.back() + (*itv)->size());
 	}
@@ -2053,8 +2053,7 @@ void WorldConverter::WrapVertexBuffers( const std::list<std::vector<ExVertexStru
 }
 
 /** Caches a mesh */
-void WorldConverter::CacheMesh(const std::map<std::string, std::vector<std::pair<std::vector<ExVertexStruct>, std::vector<VERTEX_INDEX>>>> geometry, const std::string& file)
-{
+void WorldConverter::CacheMesh(const std::map<std::string, std::vector<std::pair<std::vector<ExVertexStruct>, std::vector<VERTEX_INDEX>>>> geometry, const std::string & file) {
 	FILE* f = fopen(file.c_str(), "wb");
 	// Write version
 	int Version = 1;
@@ -2064,10 +2063,7 @@ void WorldConverter::CacheMesh(const std::map<std::string, std::vector<std::pair
 	int numTextures = geometry.size();
 	fwrite(&numTextures, sizeof(numTextures), 1, f);
 
-	for(std::map<std::string, std::vector<std::pair<std::vector<ExVertexStruct>, std::vector<VERTEX_INDEX>>>>::const_iterator it = geometry.begin();
-		it != geometry.end();
-		it++)
-	{
+	for (std::map<std::string, std::vector<std::pair<std::vector<ExVertexStruct>, std::vector<VERTEX_INDEX>>>>::const_iterator it = geometry.cbegin(); it != geometry.cend(); ++it) {
 		// Save texture name
 		unsigned char numTxNameChars = it->first.size();
 		fwrite(&numTxNameChars, sizeof(numTxNameChars), 1, f);
@@ -2077,8 +2073,7 @@ void WorldConverter::CacheMesh(const std::map<std::string, std::vector<std::pair
 		unsigned char numSubmeshes = it->second.size();
 		fwrite(&numSubmeshes, sizeof(numSubmeshes), 1, f);
 
-		for(int i=0;i<numSubmeshes;i++)
-		{
+		for (int i = 0; i < numSubmeshes; i++) {
 			// Save vertices
 			int numVertices = it->second[i].first.size();
 			fwrite(&numVertices, sizeof(numVertices), 1, f);
@@ -2216,7 +2211,7 @@ void WorldConverter::CreatePNAENInfoFor(SkeletalMeshInfo * mesh, MeshInfo * bind
 }
 
 /** Converts ExVertexStruct into a zCPolygon*-Attay */
-void WorldConverter::ConvertExVerticesTozCPolygons(const std::vector<ExVertexStruct>& vertices, const std::vector<VERTEX_INDEX>& indices, zCMaterial * material, std::vector<zCPolygon *>& polyArray)
+void WorldConverter::ConvertExVerticesTozCPolygons(const std::vector<ExVertexStruct> & vertices, const std::vector<VERTEX_INDEX> & indices, zCMaterial * material, std::vector<zCPolygon *> & polyArray)
 {
 	for(size_t i=0;i<indices.size();i+=3)
 	{

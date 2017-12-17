@@ -67,7 +67,7 @@ public:
     LPCSTR szSymPath = nullptr, 
     DWORD dwProcessId = GetCurrentProcessId(), 
     HANDLE hProcess = GetCurrentProcess()
-    );
+   );
   StackWalker(DWORD dwProcessId, HANDLE hProcess);
   virtual ~StackWalker();
 
@@ -78,7 +78,7 @@ public:
     DWORD       nSize,
     LPDWORD     lpNumberOfBytesRead,
     LPVOID      pUserData  // optional data, which was passed in "ShowCallstack"
-    );
+   );
 
   BOOL LoadModules();
 
@@ -87,7 +87,7 @@ public:
     const CONTEXT *context = nullptr, 
     PReadProcessMemoryRoutine readMemoryFunction = nullptr,
     LPVOID pUserData = nullptr  // optional to identify some data in the 'readMemoryFunction'-callback
-    );
+   );
 
 #if _MSC_VER >= 1300
 // due to some reasons, the "STACKWALK_MAX_NAMELEN" must be declared as "public" 
@@ -158,7 +158,7 @@ protected:
     EXCEPTION_POINTERS *pExp = nullptr; \
     __try { \
       throw 0; \
-    } __except( ( (pExp = GetExceptionInformation()) ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_EXECUTE_HANDLER)) {} \
+    } __except(((pExp = GetExceptionInformation()) ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_EXECUTE_HANDLER)) {} \
     if (pExp != nullptr) \
       memcpy(&c, pExp->ContextRecord, sizeof(CONTEXT)); \
       c.ContextFlags = contextFlags; \

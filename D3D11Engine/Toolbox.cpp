@@ -6,7 +6,7 @@
 namespace Toolbox
 {
 	/** Checks if one of a series of strings is found within the input-string */
-	bool StringContainsOneOf(const std::string& string, const std::string* checkStrings, int numStrings)
+	bool StringContainsOneOf(const std::string & string, const std::string* checkStrings, int numStrings)
 	{
 		std::string us = string;
 
@@ -44,7 +44,7 @@ namespace Toolbox
 				continue;
 
 			// Still not sure how these clipflags work
-			if (!(clipFlags & (1<<i)) ) 
+			if (!(clipFlags & (1<<i))) 
 				continue;
 
 			float dist;
@@ -92,15 +92,15 @@ namespace Toolbox
 				tmpCache = -1;
 				i = 6; // Would be 5, but we are decrementing it right after this
 			}
-		} while( i-- ); 
+		} while(i--); 
 	
 		// If we got this far, the box is visible and we can reset the cache
 		cache = -1;
 
-		return ( clipFlags> 0 ) ? ZTCAM_CLIPTYPE_CROSSING : ZTCAM_CLIPTYPE_IN;
+		return (clipFlags> 0) ? ZTCAM_CLIPTYPE_CROSSING : ZTCAM_CLIPTYPE_IN;
 	}
 
-	bool FolderExists(const std::string& dirName_in)
+	bool FolderExists(const std::string & dirName_in)
 	{
 	  DWORD ftyp = GetFileAttributesA(dirName_in.c_str());
 	  if (ftyp == INVALID_FILE_ATTRIBUTES)
@@ -136,21 +136,21 @@ namespace Toolbox
 	}
 
 	/** Returns true if the given position is inside the box */
-	bool PositionInsideBox(const D3DXVECTOR3& p, const D3DXVECTOR3& min, const D3DXVECTOR3& max)
+	bool PositionInsideBox(const D3DXVECTOR3 & p, const D3DXVECTOR3 & min, const D3DXVECTOR3 & max)
 	{
-		if ( p.x > min.x &&
+		if (p.x > min.x &&
 			p.y > min.y &&
 			p.z > min.z &&
 			p.x < max.x &&
 			p.y < max.y &&
-			p.z < max.z )
+			p.z < max.z)
 			return true;
 
 		return false;
 	}
 
 	/** Computes the Distance of a point to an AABB */
-	float ComputePointAABBDistance(const D3DXVECTOR3& p, const D3DXVECTOR3& min, const D3DXVECTOR3& max)
+	float ComputePointAABBDistance(const D3DXVECTOR3 & p, const D3DXVECTOR3 & min, const D3DXVECTOR3 & max)
 	{
 		float dx = std::max(std::max(min.x - p.x, 0.0f), p.x - max.x);
 		float dy = std::max(std::max(min.y - p.y, 0.0f), p.y - max.y);
@@ -159,7 +159,7 @@ namespace Toolbox
 	}
 
 	/** Computes the Normal of a triangle */
-	D3DXVECTOR3 ComputeNormal(const D3DXVECTOR3& v0, const D3DXVECTOR3& v1, const D3DXVECTOR3& v2)
+	D3DXVECTOR3 ComputeNormal(const D3DXVECTOR3 & v0, const D3DXVECTOR3 & v1, const D3DXVECTOR3 & v2)
 	{
 		D3DXVECTOR3 Normal;
 		D3DXVec3Cross(&Normal, &(v1 - v0), &(v2 - v0));
@@ -169,7 +169,7 @@ namespace Toolbox
 	}
 
 	/** Does a ray vs aabb test */
-	bool IntersectTri(const D3DXVECTOR3& v0, const D3DXVECTOR3& v1, const D3DXVECTOR3& v2, const D3DXVECTOR3& origin, const D3DXVECTOR3& direction, float& u, float& v, float& t)
+	bool IntersectTri(const D3DXVECTOR3 & v0, const D3DXVECTOR3 & v1, const D3DXVECTOR3 & v2, const D3DXVECTOR3 & origin, const D3DXVECTOR3 & direction, float & u, float & v, float & t)
 	{
 		const float EPSILON = 0.00001f;
 		D3DXVECTOR3 edge1 = v1 - v0; 
@@ -193,7 +193,7 @@ namespace Toolbox
 	}
 
 	/** Does a ray vs aabb test */
-	bool IntersectBox(const D3DXVECTOR3& min, const D3DXVECTOR3& max, const D3DXVECTOR3& origin, const D3DXVECTOR3& direction, float& t)
+	bool IntersectBox(const D3DXVECTOR3 & min, const D3DXVECTOR3 & max, const D3DXVECTOR3 & origin, const D3DXVECTOR3 & direction, float & t)
 	{
 		D3DXVECTOR3 dirfrac;
 
@@ -232,10 +232,10 @@ namespace Toolbox
 	}
 
 	/** Returns whether two AABBs are intersecting or not */
-	bool AABBsOverlapping(const D3DXVECTOR3& minA, const D3DXVECTOR3& maxA, const D3DXVECTOR3& minB, const D3DXVECTOR3& maxB)
+	bool AABBsOverlapping(const D3DXVECTOR3 & minA, const D3DXVECTOR3 & maxA, const D3DXVECTOR3 & minB, const D3DXVECTOR3 & maxB)
 	{
 		//Check if Box1's max is greater than Box2's min and Box1's min is less than Box2's max
-		return( maxA.x > minB.x &&
+		return(maxA.x > minB.x &&
 				minA.x < maxB.x &&
 				maxA.y > minB.y &&
 				minA.y < maxB.y &&
@@ -244,7 +244,7 @@ namespace Toolbox
 		}
 
 	/** Converts a multi-byte-string to wide-char */
-	std::wstring ToWideChar(const std::string& str)
+	std::wstring ToWideChar(const std::string & str)
 	{
 		return std::wstring(str.begin(), str.end());
 	}
@@ -287,12 +287,12 @@ namespace Toolbox
 	}
 
 	/** Returns the number of bits inside a bitmask */
-	WORD GetNumberOfBits( DWORD dwMask )
+	WORD GetNumberOfBits(DWORD dwMask)
 	{
 		WORD wBits = 0;
-		while( dwMask )
+		while(dwMask)
 		{
-			dwMask = dwMask & ( dwMask - 1 );  
+			dwMask = dwMask & (dwMask - 1);  
 			wBits++;
 		}
 		return wBits;
@@ -302,7 +302,7 @@ namespace Toolbox
 	unsigned int GetDDSStorageRequirements(unsigned int width, unsigned int height, bool dxt1)
 	{
 		// compute the storage requirements
-		int blockcount = ( ( width + 3 )/4 ) * ( ( height + 3 )/4 );
+		int blockcount = ((width + 3)/4) * ((height + 3)/4);
 		int blocksize = dxt1 ? 8 : 16;
 		return blockcount*blocksize;	
 	}
@@ -317,7 +317,7 @@ namespace Toolbox
 	}
 
 	/** Returns whether the given file exists */
-	bool FileExists(const std::string& file)
+	bool FileExists(const std::string & file)
 	{
 		FILE* f = fopen(file.c_str(), "rb");
 
@@ -330,7 +330,7 @@ namespace Toolbox
 	}
 
 	/** Saves a std::string to a FILE* */
-	void SaveStringToFILE(FILE* f, const std::string& str)
+	void SaveStringToFILE(FILE* f, const std::string & str)
 	{
 		unsigned int numChars = str.size();
 		fwrite(&numChars, sizeof(numChars), 1, f);
@@ -356,7 +356,7 @@ namespace Toolbox
 	}
 
 	/** sse2 memcpy implementation by William Chan and Google */
-	void X_aligned_memcpy_sse2(void* dest, const void* src, const unsigned long size_t)
+	void X_aligned_memcpy_sse2(void * dest, const void * src, const unsigned long size_t)
 	{
 	  __asm
 	  {

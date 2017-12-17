@@ -29,7 +29,7 @@
 #include "Widget_TransRot.h"
 #include "WidgetContainer.h"
 
-D2DEditorView::D2DEditorView(D2DView* view, D2DSubView* parent) : D2DSubView(view, parent)
+D2DEditorView::D2DEditorView(D2DView * view, D2DSubView * parent) : D2DSubView(view, parent)
 {
 	InitControls();
 
@@ -38,7 +38,7 @@ D2DEditorView::D2DEditorView(D2DView* view, D2DSubView* parent) : D2DSubView(vie
 	Mode = EM_IDLE;
 	DraggedBoxMinLocal = D3DXVECTOR3(-700,-500,-700);
 	DraggedBoxMaxLocal = D3DXVECTOR3(700,500,700);
-	DraggedBoxCenter = D3DXVECTOR3(0,0,0);
+	DraggedBoxCenter = D3DXVECTOR3(0, 0, 0);
 
 	memset(SelectedTriangle, 0, sizeof(SelectedTriangle));
 	memset(MButtons, 0, sizeof(MButtons));
@@ -77,7 +77,7 @@ D2DEditorView::~D2DEditorView()
 /** Initializes the controls of this view */
 XRESULT D2DEditorView::InitControls()
 {
-	SV_Panel* subPanel = new SV_Panel(MainView, this);
+	SV_Panel * subPanel = new SV_Panel(MainView, this);
 	subPanel->SetRect(D2D1::RectF(0, 0, 290, MainView->GetRenderTarget()->GetSize().height));
 	subPanel->SetPanelShadow(true, 50.0f);
 	MainPanel = subPanel;
@@ -88,28 +88,28 @@ XRESULT D2DEditorView::InitControls()
 
 	/** Save/Load */
 	float thirdSize = (290 - 5 * 5) / 3.0f;
-	SV_Button* saveLevelButton = new SV_Button(MainView, subPanel);
+	SV_Button * saveLevelButton = new SV_Button(MainView, subPanel);
 	saveLevelButton->SetPositionAndSize(D2D1::Point2F(5, MainView->GetRenderTarget()->GetSize().height - 30), D2D1::SizeF(thirdSize, 25));
 	saveLevelButton->SetPressedCallback(SaveLevelPressed, this);
 	saveLevelButton->SetCaption("Save level");
 
-	SV_Button* loadLevelButton = new SV_Button(MainView, subPanel);
+	SV_Button * loadLevelButton = new SV_Button(MainView, subPanel);
 	loadLevelButton->SetPositionAndSize(D2D1::Point2F(5, MainView->GetRenderTarget()->GetSize().height - 30), D2D1::SizeF(thirdSize, 25));
 	loadLevelButton->SetPressedCallback(LoadLevelPressed, this);
 	loadLevelButton->SetCaption("Load level");
 	loadLevelButton->AlignRightTo(saveLevelButton, 5);
 
-	/*SV_Button* infoButton = new SV_Button(MainView, subPanel);
+	/*SV_Button * infoButton = new SV_Button(MainView, subPanel);
 	infoButton->SetPositionAndSize(D2D1::Point2F(5, MainView->GetRenderTarget()->GetSize().height - 30), D2D1::SizeF(thirdSize, 25));
 	infoButton->SetPressedCallback(InfoPressed, this);
 	infoButton->SetCaption("Info");
 	infoButton->AlignRightTo(loadLevelButton, 5);*/
 
-	//SV_Panel* vegPanel = new SV_Panel(MainView, subPanel);
+	//SV_Panel * vegPanel = new SV_Panel(MainView, subPanel);
 	//vegPanel->SetRect(D2D1::RectF(20, 20, 270, 180));
 	//vegPanel->SetPanelShadow(true, 20.0f);
 
-	//SV_Button* subButton = new SV_Button(MainView, subPanel);
+	//SV_Button * subButton = new SV_Button(MainView, subPanel);
 	//subButton->SetPositionAndSize(D2D1::Point2F(20, 30), D2D1::SizeF(70, 40));
 
 	// Test Tab-Control
@@ -120,13 +120,13 @@ XRESULT D2DEditorView::InitControls()
 	MainTabControl->SetTabSwitchedCallback(MainTabSwitched, this);
 
 	/** Vegetation placement */
-	SV_Button* addVegButton = new SV_Button(MainView, MainTabControl->GetTabPanel());
+	SV_Button * addVegButton = new SV_Button(MainView, MainTabControl->GetTabPanel());
 	addVegButton->SetPositionAndSize(D2D1::Point2F(10, 10), D2D1::SizeF(100, 25));
 	addVegButton->SetPressedCallback(AddVegButtonPressed, this);
 	addVegButton->SetCaption("Place Volume");
 	MainTabControl->AddControlToTab(addVegButton, "Vegetation");
 
-	SV_Button* fillVegButton = new SV_Button(MainView, MainTabControl->GetTabPanel());
+	SV_Button * fillVegButton = new SV_Button(MainView, MainTabControl->GetTabPanel());
 	fillVegButton->SetPositionAndSize(D2D1::Point2F(10, 10), D2D1::SizeF(100, 25));
 	fillVegButton->SetPressedCallback(FillVegButtonPressed, this);
 	fillVegButton->AlignRightTo(addVegButton, 10.0f);
@@ -146,7 +146,7 @@ XRESULT D2DEditorView::InitControls()
 	VegCircularShapeCheckBox->SetCaption("Circular shape");
 	MainTabControl->AddControlToTab(VegCircularShapeCheckBox, "Vegetation");
 
-	SV_Button* removeVegButton = new SV_Button(MainView, MainTabControl->GetTabPanel());
+	SV_Button * removeVegButton = new SV_Button(MainView, MainTabControl->GetTabPanel());
 	removeVegButton->SetPositionAndSize(D2D1::Point2F(10, 10), D2D1::SizeF(100, 25));
 	removeVegButton->SetPressedCallback(RemoveVegButtonPressed, this);
 	removeVegButton->AlignUnder(VegCircularShapeCheckBox, 30.0f);
@@ -161,12 +161,12 @@ XRESULT D2DEditorView::InitControls()
 	MainTabControl->AddControlToTab(SelectTrianglesOnlyCheckBox, "Selection");
 	SelectTrianglesOnlyCheckBox->SetChecked(false);
 
-	SV_Button* testbutton1 = new SV_Button(MainView, MainTabControl->GetTabPanel());
+	SV_Button * testbutton1 = new SV_Button(MainView, MainTabControl->GetTabPanel());
 	testbutton1->SetPositionAndSize(D2D1::Point2F(10, 10), D2D1::SizeF(120, 25));
 	testbutton1->SetCaption("Vegetation");
 	MainTabControl->AddControlToTab(testbutton1, "Test 1");
 
-	SV_Button* testbutton2 = new SV_Button(MainView, MainTabControl->GetTabPanel());
+	SV_Button * testbutton2 = new SV_Button(MainView, MainTabControl->GetTabPanel());
 	testbutton2->SetPositionAndSize(D2D1::Point2F(10, 40), D2D1::SizeF(120, 25));
 	testbutton2->SetCaption("Test 2");
 	MainTabControl->AddControlToTab(testbutton2, "Test 2");
@@ -230,7 +230,7 @@ XRESULT D2DEditorView::InitControls()
 	SelectionTabControl->AddControlToTab(SelectedTexSpecPowerSlider, "Selection/Texture");
 
 	
-	SV_Label* worldMeshSettingsInfoLabel = new SV_Label(MainView, SelectionTabControl->GetTabPanel());
+	SV_Label * worldMeshSettingsInfoLabel = new SV_Label(MainView, SelectionTabControl->GetTabPanel());
 	worldMeshSettingsInfoLabel->SetSize(D2D1::SizeF(270, 15));
 	worldMeshSettingsInfoLabel->AlignUnder(SelectedTexSpecPowerSlider, alignDistance);
 	worldMeshSettingsInfoLabel->SetDrawBackground(true);
@@ -270,7 +270,7 @@ XRESULT D2DEditorView::InitControls()
 	SelectedMeshRoundnessSlider->GetSlider()->SetValue(1.0f);
 	SelectionTabControl->AddControlToTab(SelectedMeshRoundnessSlider, "Selection/Texture");
 	
-	SV_Label* subdivInfoLabel = new SV_Label(MainView, SelectionTabControl->GetTabPanel());
+	SV_Label * subdivInfoLabel = new SV_Label(MainView, SelectionTabControl->GetTabPanel());
 	subdivInfoLabel->SetSize(D2D1::SizeF(270, 15));
 	subdivInfoLabel->AlignUnder(SelectedMeshRoundnessSlider, 2.0f);
 	subdivInfoLabel->SetDrawBackground(false);
@@ -304,7 +304,7 @@ XRESULT D2DEditorView::InitControls()
 	SelectedVegSizeSlider->SetSliderChangedCallback(VegetationScaleSliderChanged, this);
 	SelectionTabControl->AddControlToTab(SelectedVegSizeSlider, "Selection/Vegetation");
 
-	SV_Label* selVegSizeLabel = new SV_Label(MainView, SelectionTabControl->GetTabPanel());
+	SV_Label * selVegSizeLabel = new SV_Label(MainView, SelectionTabControl->GetTabPanel());
 	selVegSizeLabel->SetPositionAndSize(D2D1::Point2F(10, 10), D2D1::SizeF(150, 12));
 	selVegSizeLabel->SetCaption("Vegetation size:");
 	SelectionTabControl->AddControlToTab(selVegSizeLabel, "Selection/Vegetation");
@@ -319,7 +319,7 @@ XRESULT D2DEditorView::InitControls()
 	SelectedVegAmountSlider->SetValue(1.0f);
 	SelectionTabControl->AddControlToTab(SelectedVegAmountSlider, "Selection/Vegetation");
 
-	SV_Label* selVegAmountLabel = new SV_Label(MainView, SelectionTabControl->GetTabPanel());
+	SV_Label * selVegAmountLabel = new SV_Label(MainView, SelectionTabControl->GetTabPanel());
 	selVegAmountLabel->SetPositionAndSize(D2D1::Point2F(10, 10), D2D1::SizeF(150, 12));
 	selVegAmountLabel->SetCaption("Vegetation density:");
 	SelectionTabControl->AddControlToTab(selVegAmountLabel, "Selection/Vegetation");
@@ -330,7 +330,7 @@ XRESULT D2DEditorView::InitControls()
 	SelectedVegModifiedWarningLabel = new SV_Label(MainView, SelectionTabControl->GetTabPanel());
 	SelectedVegModifiedWarningLabel->SetPositionAndSize(D2D1::Point2F(10, 10), D2D1::SizeF(150, 12));
 	SelectedVegModifiedWarningLabel->SetCaption("You may lose changes made to the volume after changing its density!");
-	SelectedVegModifiedWarningLabel->SetTextColor(D2D1::ColorF(1,0,0,1));
+	SelectedVegModifiedWarningLabel->SetTextColor(D2D1::ColorF(1, 0, 0, 1));
 	SelectedVegModifiedWarningLabel->SetTextSize(9);
 	SelectionTabControl->AddControlToTab(SelectedVegModifiedWarningLabel, "Selection/Vegetation");
 	SelectedVegModifiedWarningLabel->AlignUnder(SelectedVegAmountSlider, 5);
@@ -342,7 +342,7 @@ XRESULT D2DEditorView::InitControls()
 }
 
 /** Draws this sub-view */
-void D2DEditorView::Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime)
+void D2DEditorView::Draw(const D2D1_RECT_F & clientRectAbs, float deltaTime)
 {
 	// If the editor is not open, dont draw it. Slide it in otherwise.
 
@@ -352,8 +352,8 @@ void D2DEditorView::Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime)
 		// Draw GD3D11-Text
 		str = (L"Development preview\n" + Toolbox::ToWideChar(VERSION_STRING));
 
-		MainView->GetBrush()->SetColor(D2D1::ColorF(1,1,1,0.5f));
-		MainView->GetRenderTarget()->DrawText(str.c_str(), str.length(), MainView->GetTextFormatBig(), D2D1::RectF(0,0, 300, 50), MainView->GetBrush());
+		MainView->GetBrush()->SetColor(D2D1::ColorF(1, 1, 1, 0.5f));
+		MainView->GetRenderTarget()->DrawText(str.c_str(), str.length(), MainView->GetTextFormatBig(), D2D1::RectF(0, 0, 300, 50), MainView->GetBrush());
 	}
 
 
@@ -373,7 +373,7 @@ void D2DEditorView::Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime)
 		}
 
 		return;
-	}else
+	} else
 	{
 		p.x = Toolbox::lerp(MainPanel->GetPosition().x, 0, std::min(deltaTime * 8.0f, 1.0f));
 
@@ -419,7 +419,7 @@ void D2DEditorView::Draw(const D2D1_RECT_F& clientRectAbs, float deltaTime)
 			str = L"";
 		}
 
-		MainView->GetBrush()->SetColor(D2D1::ColorF(1,1,1,0.5f));
+		MainView->GetBrush()->SetColor(D2D1::ColorF(1, 1, 1, 0.5f));
 		float helpTextX = (MainPanel->GetRect().right + 20) + (MainPanel->GetPosition().x * 2.0f); // Pos.x is negative or zero, so it doubles up and hides the text
 
 		MainView->GetRenderTarget()->DrawText(str.c_str(), str.length(), MainView->GetTextFormatBig(), D2D1::RectF(helpTextX, 0, 900, 600), MainView->GetBrush());
@@ -438,13 +438,13 @@ void D2DEditorView::Update(float deltaTime)
 
 	if (Selection.SelectedMesh)
 	{
-		VisualizeMeshInfo(Selection.SelectedMesh, D3DXVECTOR4(1,0,0,1));
+		VisualizeMeshInfo(Selection.SelectedMesh, D3DXVECTOR4(1, 0, 0, 1));
 	}
 
 	if (Selection.SelectedVegetationBox)
 	{
 		if (Selection.SelectedVegetationBox)
-			Selection.SelectedVegetationBox->VisualizeGrass(D3DXVECTOR4(1,0,0,1));
+			Selection.SelectedVegetationBox->VisualizeGrass(D3DXVECTOR4(1, 0, 0, 1));
 	}
 
 	if (IsMouseInsideEditorWindow() || Widgets->IsWidgetClicked())
@@ -457,15 +457,15 @@ void D2DEditorView::Update(float deltaTime)
 		if (Mode == EM_PLACE_VEGETATION)
 		{
 			DoVegetationPlacement();
-		}else if (Mode == EM_SELECT_POLY || Mode == EM_IDLE)
+		} else if (Mode == EM_SELECT_POLY || Mode == EM_IDLE)
 		{
 			DoSelection();
-		}else if (Mode == EM_REMOVE_VEGETATION)
+		} else if (Mode == EM_REMOVE_VEGETATION)
 		{
 			DoVegetationRemove();
 		}
 
-	}else if (!Keys[VK_CONTROL])
+	} else if (!Keys[VK_CONTROL])
 	{
 		// Clicked and moving
 		DoEditorMovement();
@@ -505,10 +505,10 @@ void D2DEditorView::DoVegetationRemove()
 					Selection.SelectedVegetationBox = nullptr;
 				}
 
-				c = D3DXVECTOR4(1,0,0,1);
-			}else
+				c = D3DXVECTOR4(1, 0, 0, 1);
+			} else
 			{
-				c = D3DXVECTOR4(1,1,1,1);
+				c = D3DXVECTOR4(1, 1, 1, 1);
 			}
 
 			Engine::GraphicsEngine->GetLineRenderer()->AddAABB(hit, D3DXVECTOR3(removeRange, removeRange, removeRange), c);
@@ -546,7 +546,7 @@ void D2DEditorView::DoVegetationPlacement()
 }
 
 /** Finds the GVegetationBox from its mesh-info */
-GVegetationBox* D2DEditorView::FindVegetationFromMeshInfo(MeshInfo* info)
+GVegetationBox* D2DEditorView::FindVegetationFromMeshInfo(MeshInfo * info)
 {
 	for(std::list<GVegetationBox *>::const_iterator it = Engine::GAPI->GetVegetationBoxes().begin(); it != Engine::GAPI->GetVegetationBoxes().end();it++)
 	{
@@ -565,7 +565,7 @@ void D2DEditorView::DoSelection()
 	D3DXVECTOR3 wDir = Engine::GAPI->UnprojectCursor();
 	D3DXVECTOR3 hitVob(FLT_MAX,FLT_MAX,FLT_MAX), hitSkel(FLT_MAX,FLT_MAX,FLT_MAX), hitWorld(FLT_MAX,FLT_MAX,FLT_MAX);
 	D3DXVECTOR3 hitTri[3];
-	MeshInfo* hitMesh;
+	MeshInfo * hitMesh;
 	zCMaterial* hitMaterial = nullptr, *hitMaterialVob = nullptr;
 	TracedTexture = "";
 
@@ -580,7 +580,7 @@ void D2DEditorView::DoSelection()
 	TracedVegetationBox = TraceVegetationBoxes(Engine::GAPI->GetCameraPosition(), wDir);
 	if (TracedVegetationBox)
 	{			
-		TracedVegetationBox->VisualizeGrass(D3DXVECTOR4(1,1,1,1));
+		TracedVegetationBox->VisualizeGrass(D3DXVECTOR4(1, 1, 1, 1));
 		return;
 	}
 
@@ -609,14 +609,14 @@ void D2DEditorView::DoSelection()
 			Engine::GraphicsEngine->GetLineRenderer()->AddTriangle(hitTri[0] + nrm, hitTri[1] + nrm, hitTri[2] + nrm);
 
 			TracedMaterial = hitMaterial;
-		}else
+		} else
 		{
 			// Try to find a vegetationbox for this mesh
 			TracedVegetationBox = FindVegetationFromMeshInfo(hitMesh);
 			if (TracedVegetationBox)
 			{
 				if (Selection.SelectedVegetationBox != TracedVegetationBox)
-					TracedVegetationBox->VisualizeGrass(D3DXVECTOR4(1,1,1,1));
+					TracedVegetationBox->VisualizeGrass(D3DXVECTOR4(1, 1, 1, 1));
 				return; // Vegetation has priority over mesh
 			}
 
@@ -636,7 +636,7 @@ void D2DEditorView::DoSelection()
 		TracedSkeletalVobInfo = tSkelVob;
 		Engine::GraphicsEngine->GetLineRenderer()->AddAABBMinMax(TracedSkeletalVobInfo->Vob->GetBBoxLocal().Min + TracedSkeletalVobInfo->Vob->GetPositionWorld(), 
 									TracedSkeletalVobInfo->Vob->GetBBoxLocal().Max + TracedSkeletalVobInfo->Vob->GetPositionWorld(),
-									D3DXVECTOR4(1,1,1,1));
+									D3DXVECTOR4(1, 1, 1, 1));
 
 		if (!TracedSkeletalVobInfo->VisualInfo->Meshes.empty())
 			TracedMaterial = (*TracedSkeletalVobInfo->VisualInfo->Meshes.begin()).first;
@@ -650,14 +650,14 @@ void D2DEditorView::DoSelection()
 		TracedVobInfo = tVob;
 		Engine::GraphicsEngine->GetLineRenderer()->AddAABBMinMax(TracedVobInfo->Vob->GetBBoxLocal().Min + TracedVobInfo->Vob->GetPositionWorld(), 
 									TracedVobInfo->Vob->GetBBoxLocal().Max + TracedVobInfo->Vob->GetPositionWorld(),
-									D3DXVECTOR4(1,1,1,1));
+									D3DXVECTOR4(1, 1, 1, 1));
 		
 		TracedMaterial = hitMaterialVob;
 
 		if (Selection.SelectedVobInfo != TracedVobInfo && hitMaterialVob)
 		{
 			D3DXMATRIX world; D3DXMatrixTranspose(&world,  TracedVobInfo->Vob->GetWorldMatrixPtr());
-			VisualizeMeshInfo(TracedVobInfo->VisualInfo->Meshes[hitMaterialVob][0], D3DXVECTOR4(1,1,1,1), false, &world);
+			VisualizeMeshInfo(TracedVobInfo->VisualInfo->Meshes[hitMaterialVob][0], D3DXVECTOR4(1, 1, 1, 1), false, &world);
 		}
 
 		return;
@@ -666,7 +666,7 @@ void D2DEditorView::DoSelection()
 }
 
 /** Visualizes a mesh info */
-void D2DEditorView::VisualizeMeshInfo(MeshInfo* m, const D3DXVECTOR4& color, bool showBounds, const D3DXMATRIX* world)
+void D2DEditorView::VisualizeMeshInfo(MeshInfo * m, const D3DXVECTOR4 & color, bool showBounds, const D3DXMATRIX* world)
 {
 	for(unsigned int i=0;i<m->Indices.size();i+=3)
 	{
@@ -694,10 +694,10 @@ void D2DEditorView::VisualizeMeshInfo(MeshInfo* m, const D3DXVECTOR4& color, boo
 
 		if (showBounds)
 		{
-			Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(tri[0], D3DXVECTOR4(1,edge[0],0,1)), LineVertex(tri[1], D3DXVECTOR4(1,edge[1],0,1)));
-			Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(tri[0], D3DXVECTOR4(1,edge[0],0,1)), LineVertex(tri[1], D3DXVECTOR4(1,edge[1],0,1)));
-			Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(tri[1], D3DXVECTOR4(1,edge[1],0,1)), LineVertex(tri[2], D3DXVECTOR4(1,edge[2],0,1)));
-		}else
+			Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(tri[0], D3DXVECTOR4(1,edge[0], 0, 1)), LineVertex(tri[1], D3DXVECTOR4(1,edge[1], 0, 1)));
+			Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(tri[0], D3DXVECTOR4(1,edge[0], 0, 1)), LineVertex(tri[1], D3DXVECTOR4(1,edge[1], 0, 1)));
+			Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(tri[1], D3DXVECTOR4(1,edge[1], 0, 1)), LineVertex(tri[2], D3DXVECTOR4(1,edge[2], 0, 1)));
+		} else
 		{
 			Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(tri[0], color), LineVertex(tri[1], color));
 			Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(tri[0], color), LineVertex(tri[1], color));
@@ -771,7 +771,7 @@ void D2DEditorView::OnMouseButtonUp(int button)
 	if (!(MButtons[0] || MButtons[1] || MButtons[2]) && !MMovedAfterClick)
 	{
 		OnMouseClick(button);
-	}else // This was a drag
+	} else // This was a drag
 	{
 		
 	}
@@ -788,11 +788,11 @@ void D2DEditorView::OnMouseClick(int button)
 		{
 			LogInfo() << "Setting player position to: " << float3(TracedPosition).toString();
 			Engine::GAPI->SetPlayerPosition(TracedPosition + D3DXVECTOR3(0, 500.0f, 0));
-		}else if (Mode == EM_PLACE_VEGETATION)
+		} else if (Mode == EM_PLACE_VEGETATION)
 		{
 			// Place the currently dragged vegetationbox
 			PlaceDraggedVegetationBox();
-		}else if (Mode == EM_SELECT_POLY || Mode == EM_IDLE)
+		} else if (Mode == EM_SELECT_POLY || Mode == EM_IDLE)
 		{
 			// Reset selection and apply what ever has the most priority
 			MMWDelta = 0;
@@ -818,7 +818,7 @@ void D2DEditorView::OnMouseClick(int button)
 				Widgets->ClearSelection();
 				Widgets->AddSelection(TracedVobInfo);
 
-			}else if (TracedSkeletalVobInfo)
+			} else if (TracedSkeletalVobInfo)
 			{
 				Selection.SelectedSkeletalVob = TracedSkeletalVobInfo;
 
@@ -832,7 +832,7 @@ void D2DEditorView::OnMouseClick(int button)
 
 				Widgets->ClearSelection();
 				Widgets->AddSelection(TracedSkeletalVobInfo);
-			}else if (TracedVegetationBox)
+			} else if (TracedVegetationBox)
 			{
 				Selection.SelectedVegetationBox = TracedVegetationBox;
 
@@ -845,7 +845,7 @@ void D2DEditorView::OnMouseClick(int button)
 				Selection.SelectedVegetationBox = nullptr;
 				SelectedVegAmountSlider->SetValue(d);
 				Selection.SelectedVegetationBox = TracedVegetationBox;
-			}else // Vegetation has priority over mesh
+			} else // Vegetation has priority over mesh
 			{
 				Selection.SelectedMesh = TracedMesh;
 				Selection.SelectedMaterial = TracedMaterial;
@@ -877,11 +877,11 @@ void D2DEditorView::UpdateSelectionPanel()
 		SelectedImageNameLabel->SetCaption(Selection.SelectedMaterial->GetTexture()->GetNameWithoutExt());
 
 		// Update thumbnail
-		MyDirectDrawSurface7* surface = Engine::GAPI->GetSurface(Selection.SelectedMaterial->GetTexture()->GetNameWithoutExt());
+		MyDirectDrawSurface7 * surface = Engine::GAPI->GetSurface(Selection.SelectedMaterial->GetTexture()->GetNameWithoutExt());
 
 		if (surface)
 		{
-			ID3D11Texture2D* thumb = ((D3D11Texture*)surface->GetEngineTexture())->GetThumbnail();
+			ID3D11Texture2D * thumb = ((D3D11Texture*)surface->GetEngineTexture())->GetThumbnail();
 			if (!thumb)
 			{
 				XLE(((D3D11Texture*)surface->GetEngineTexture())->CreateThumbnail());
@@ -907,7 +907,7 @@ void D2DEditorView::UpdateSelectionPanel()
 			SelectedTexDisplacementSlider->GetSlider()->SetValue(mi->TextureTesselationSettings.buffer.VT_DisplacementStrength);
 			SelectedMeshRoundnessSlider->GetSlider()->SetValue(mi->TextureTesselationSettings.buffer.VT_Roundness);
 			SelectedMeshTessAmountSlider->GetSlider()->SetValue(mi->TextureTesselationSettings.buffer.VT_TesselationFactor);
-		}else
+		} else
 		{
 			SelectedTexDisplacementSlider->GetSlider()->SetValue(info->TesselationSettings.buffer.VT_DisplacementStrength);
 			SelectedMeshRoundnessSlider->GetSlider()->SetValue(info->TesselationSettings.buffer.VT_Roundness);
@@ -925,7 +925,7 @@ void D2DEditorView::OnMouseWheel(int delta)
 		if (Mode == EM_IDLE)
 		{
 			Selection.SelectedVegetationBox->ApplyUniformScaling(delta < 0 ? 0.9f : 1.1f);
-		}else if (Mode == EM_REMOVE_VEGETATION)
+		} else if (Mode == EM_REMOVE_VEGETATION)
 		{
 			// Resizing the BBox of the remove-brush is handled elsewhere
 		}
@@ -940,9 +940,9 @@ void D2DEditorView::ResetEditorCamera()
 	// Save current camera-matrix
 	CStartWorld = *oCGame::GetGame()->_zCSession_camVob->GetWorldMatrixPtr();
 
-	D3DXVECTOR3 dir; D3DXVec3TransformNormal(&dir, &D3DXVECTOR3(1,0,0), &CStartWorld);
+	D3DXVECTOR3 dir; D3DXVec3TransformNormal(&dir, &D3DXVECTOR3(1, 0, 0), &CStartWorld);
 	CYaw = asinf(-dir.z / D3DXVec3Length(&dir)) + (float)D3DX_PI / 2.0f;
-	CPitch = 0;//atan( - CStartWorld._31 / sqrt(CStartWorld._32 * CStartWorld._32 + CStartWorld._33 * CStartWorld._33));
+	CPitch = 0;//atan(- CStartWorld._31 / sqrt(CStartWorld._32 * CStartWorld._32 + CStartWorld._33 * CStartWorld._33));
 }
 
 /** Handles the editor movement */
@@ -971,7 +971,7 @@ void D2DEditorView::DoEditorMovement()
 	SetCursorPos(mid.x, mid.y);
 
 	// Move the camera-vob
-	zCVob* cVob = oCGame::GetGame()->_zCSession_camVob;
+	zCVob * cVob = oCGame::GetGame()->_zCSession_camVob;
 
 	D3DXMATRIX* m = cVob->GetWorldMatrixPtr();
 
@@ -990,7 +990,7 @@ void D2DEditorView::DoEditorMovement()
 		CPitch += diff.y * rSpeed;
 		CYaw += diff.x * rSpeed;
 
-	}else if (MButtons[0] && !MButtons[1]) // Leftclick -> Rotate yaw and move xz
+	} else if (MButtons[0] && !MButtons[1]) // Leftclick -> Rotate yaw and move xz
 	{
 		D3DXVECTOR2 fwd2d = D3DXVECTOR2(sinf(CYaw), cosf(CYaw));
 
@@ -999,11 +999,11 @@ void D2DEditorView::DoEditorMovement()
 
 		// Rotate yaw only
 		CYaw += diff.x * rSpeed;
-	}else if (MButtons[0] && MButtons[1]) // Both, move sideways
+	} else if (MButtons[0] && MButtons[1]) // Both, move sideways
 	{
 		D3DXVECTOR3 fwd = D3DXVECTOR3(sinf(CYaw), 0, cosf(CYaw));
 
-		D3DXVECTOR3 up = D3DXVECTOR3(0,1,0);
+		D3DXVECTOR3 up = D3DXVECTOR3(0, 1, 0);
 		D3DXVECTOR3 side;
 		D3DXVec3Cross(&side, &fwd, &up);
 
@@ -1067,7 +1067,7 @@ GVegetationBox* D2DEditorView::PlaceDraggedVegetationBox()
 }
 
 /** Processes a window-message. Return false to stop the message from going to children */
-bool D2DEditorView::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wParam, LPARAM lParam, const D2D1_RECT_F& clientRectAbs)
+bool D2DEditorView::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wParam, LPARAM lParam, const D2D1_RECT_F & clientRectAbs)
 {
 	// Don't do anything if the AntTweakBar is open
 	if (Engine::AntTweakBar->GetActive())
@@ -1103,7 +1103,7 @@ bool D2DEditorView::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wParam, 
 
 			// Reset the selection, so it doesn't crash on levelchange
 			Selection.Reset();
-		}else
+		} else
 		{
 			// Disable free-cam, the easy way
 			oCGame::GetGame()->TestKey(GOTHIC_KEY_F4);
@@ -1254,9 +1254,9 @@ void D2DEditorView::OnDelete()
 }
 
 /** Button to add a vegetation-volume was pressed */
-void D2DEditorView::AddVegButtonPressed(SV_Button* sender, void* userdata)
+void D2DEditorView::AddVegButtonPressed(SV_Button * sender, void * userdata)
 {
-	D2DEditorView* v = (D2DEditorView *)userdata;
+	D2DEditorView * v = (D2DEditorView *)userdata;
 
 	v->MMWDelta = 0;
 
@@ -1270,7 +1270,7 @@ void D2DEditorView::AddVegButtonPressed(SV_Button* sender, void* userdata)
 }
 
 /** Traces the set of placed vegatation boxes */
-GVegetationBox* D2DEditorView::TraceVegetationBoxes(const D3DXVECTOR3& wPos, const D3DXVECTOR3& wDir)
+GVegetationBox* D2DEditorView::TraceVegetationBoxes(const D3DXVECTOR3 & wPos, const D3DXVECTOR3 & wDir)
 {
 	float nearest = FLT_MAX;
 	GVegetationBox* b = nullptr;
@@ -1298,9 +1298,9 @@ GVegetationBox* D2DEditorView::TraceVegetationBoxes(const D3DXVECTOR3& wPos, con
 }
 
 /** Button to add a vegetation-volume was pressed */
-void D2DEditorView::FillVegButtonPressed(SV_Button* sender, void* userdata)
+void D2DEditorView::FillVegButtonPressed(SV_Button * sender, void * userdata)
 {
-	D2DEditorView* v = (D2DEditorView *)userdata;
+	D2DEditorView * v = (D2DEditorView *)userdata;
 
 	if (v->Selection.SelectedMesh && !v->FindVegetationFromMeshInfo(v->Selection.SelectedMesh))
 	{
@@ -1311,7 +1311,7 @@ void D2DEditorView::FillVegButtonPressed(SV_Button* sender, void* userdata)
 		{
 			Engine::GAPI->AddVegetationBox(box);
 			//v->Selection.SelectedVegetationBox = box;
-		}else
+		} else
 		{
 			delete box;
 		}
@@ -1319,28 +1319,28 @@ void D2DEditorView::FillVegButtonPressed(SV_Button* sender, void* userdata)
 }
 
 /** Tab in main tab-control was switched */
-void D2DEditorView::MainTabSwitched(SV_TabControl* sender, void* userdata)
+void D2DEditorView::MainTabSwitched(SV_TabControl * sender, void * userdata)
 {
-	D2DEditorView* v = (D2DEditorView *)userdata;
+	D2DEditorView * v = (D2DEditorView *)userdata;
 
 	//v->SetEditorMode(D2DEditorView::EM_SELECT_POLY);
 
 	/*if (sender->GetActiveTab() == "Selection")
 	{
 		v->SetEditorMode(D2DEditorView::EM_SELECT_POLY);
-	}else if (sender->GetActiveTab() == "Vegetation")
+	} else if (sender->GetActiveTab() == "Vegetation")
 	{
 		v->SetEditorMode(D2DEditorView::EM_PLACE_VEGETATION);
-	}else
+	} else
 	{
 		v->SetEditorMode(D2DEditorView::EM_IDLE);
 	}*/
 }
 
 /** Tab in main tab-control was switched */
-void D2DEditorView::RemoveVegButtonPressed(SV_Button* sender, void* userdata)
+void D2DEditorView::RemoveVegButtonPressed(SV_Button * sender, void * userdata)
 {
-	D2DEditorView* v = (D2DEditorView *)userdata;
+	D2DEditorView * v = (D2DEditorView *)userdata;
 
 	v->MMWDelta = 0;
 
@@ -1348,7 +1348,7 @@ void D2DEditorView::RemoveVegButtonPressed(SV_Button* sender, void* userdata)
 	{
 		v->SetEditorMode(EM_REMOVE_VEGETATION);
 		sender->SetCaption("Stop rem.");
-	}else
+	} else
 	{
 		v->SetEditorMode(EM_IDLE);
 		sender->SetCaption("Remove");
@@ -1357,33 +1357,33 @@ void D2DEditorView::RemoveVegButtonPressed(SV_Button* sender, void* userdata)
 
 
 /** Save/Load-Buttons */
-void D2DEditorView::SaveLevelPressed(SV_Button* sender, void* userdata)
+void D2DEditorView::SaveLevelPressed(SV_Button * sender, void * userdata)
 {
-	D2DEditorView* v = (D2DEditorView *)userdata;
+	D2DEditorView * v = (D2DEditorView *)userdata;
 
 	//Engine::GAPI->SaveCustomZENResources();
 
 	v->MainView->AddMessageBox("Saved!", "Custom ZEN-Resources were saved!");
 }
 
-void D2DEditorView::LoadLevelPressed(SV_Button* sender, void* userdata)
+void D2DEditorView::LoadLevelPressed(SV_Button * sender, void * userdata)
 {
-	D2DEditorView* v = (D2DEditorView *)userdata;
+	D2DEditorView * v = (D2DEditorView *)userdata;
 
 	v->Selection.Reset();
 	v->SelectionTabControl->SetActiveTab("Selection/Texture");
 	Engine::GAPI->LoadCustomZENResources();
 }
 
-void D2DEditorView::InfoPressed(SV_Button* sender, void* userdata)
+void D2DEditorView::InfoPressed(SV_Button * sender, void * userdata)
 {
 	// TODO
 }
 
 /** Tab in main tab-control was switched */
-void D2DEditorView::VegetationAmountSliderChanged(SV_Slider* sender, void* userdata)
+void D2DEditorView::VegetationAmountSliderChanged(SV_Slider * sender, void * userdata)
 {
-	D2DEditorView* v = (D2DEditorView *)userdata;
+	D2DEditorView * v = (D2DEditorView *)userdata;
 
 	if (v->Selection.SelectedVegetationBox)
 	{
@@ -1395,9 +1395,9 @@ void D2DEditorView::VegetationAmountSliderChanged(SV_Slider* sender, void* userd
 }
 
 /** Tab in main tab-control was switched */
-void D2DEditorView::VegetationScaleSliderChanged(SV_Slider* sender, void* userdata)
+void D2DEditorView::VegetationScaleSliderChanged(SV_Slider * sender, void * userdata)
 {
-	D2DEditorView* v = (D2DEditorView *)userdata;
+	D2DEditorView * v = (D2DEditorView *)userdata;
 
 	if (v->Selection.SelectedVegetationBox)
 	{
@@ -1406,9 +1406,9 @@ void D2DEditorView::VegetationScaleSliderChanged(SV_Slider* sender, void* userda
 	}
 }
 
-void D2DEditorView::TextureSettingsSliderChanged(SV_Slider* sender, void* userdata)
+void D2DEditorView::TextureSettingsSliderChanged(SV_Slider * sender, void * userdata)
 {
-	D2DEditorView* v = (D2DEditorView *)userdata;
+	D2DEditorView * v = (D2DEditorView *)userdata;
 
 	if (v->Selection.SelectedMaterial && v->Selection.SelectedMaterial->GetTexture())
 	{
@@ -1417,20 +1417,20 @@ void D2DEditorView::TextureSettingsSliderChanged(SV_Slider* sender, void* userda
 		if (sender == v->SelectedTexNrmStrSlider->GetSlider())
 		{
 			info->buffer.NormalmapStrength = sender->GetValue();
-		}else if (sender == v->SelectedTexSpecIntensSlider->GetSlider())
+		} else if (sender == v->SelectedTexSpecIntensSlider->GetSlider())
 		{
 			info->buffer.SpecularIntensity = sender->GetValue();
-		}else if (sender == v->SelectedTexSpecPowerSlider->GetSlider())
+		} else if (sender == v->SelectedTexSpecPowerSlider->GetSlider())
 		{
 			info->buffer.SpecularPower = sender->GetValue();
-		}else if (sender == v->SelectedTexDisplacementSlider->GetSlider() && v->Selection.SelectedMesh)
+		} else if (sender == v->SelectedTexDisplacementSlider->GetSlider() && v->Selection.SelectedMesh)
 		{
 			WorldMeshInfo* mesh = (WorldMeshInfo *)v->Selection.SelectedMesh; // FIXME: Make this nicer
 			mesh->TesselationSettings.buffer.VT_DisplacementStrength = sender->GetValue();
 			mesh->TesselationSettings.UpdateConstantbuffer();
 
 			info->TextureTesselationSettings.buffer.VT_DisplacementStrength = sender->GetValue();
-		}else if (sender == v->SelectedMeshTessAmountSlider->GetSlider() && v->Selection.SelectedMesh)
+		} else if (sender == v->SelectedMeshTessAmountSlider->GetSlider() && v->Selection.SelectedMesh)
 		{
 			WorldMeshInfo* mesh = (WorldMeshInfo *)v->Selection.SelectedMesh; // FIXME: Make this nicer
 
@@ -1444,7 +1444,7 @@ void D2DEditorView::TextureSettingsSliderChanged(SV_Slider* sender, void* userda
 			mesh->TesselationSettings.UpdateConstantbuffer();
 
 			info->TextureTesselationSettings.buffer.VT_TesselationFactor = sender->GetValue();
-		}else if (sender == v->SelectedMeshRoundnessSlider->GetSlider() && v->Selection.SelectedMesh)
+		} else if (sender == v->SelectedMeshRoundnessSlider->GetSlider() && v->Selection.SelectedMesh)
 		{
 			WorldMeshInfo* mesh = (WorldMeshInfo *)v->Selection.SelectedMesh; // FIXME: Make this nicer
 			mesh->TesselationSettings.buffer.VT_Roundness = sender->GetValue();
@@ -1546,7 +1546,7 @@ void D2DEditorView::SmoothMesh(WorldMeshInfo* mesh, bool tesselate)
 }
 
 /** Called when a vob was removed from the world */
-XRESULT D2DEditorView::OnVobRemovedFromWorld(zCVob* vob)
+XRESULT D2DEditorView::OnVobRemovedFromWorld(zCVob * vob)
 {
 	bool reset = false;
 	if (TracedSkeletalVobInfo && TracedSkeletalVobInfo->Vob == vob)
@@ -1559,7 +1559,7 @@ XRESULT D2DEditorView::OnVobRemovedFromWorld(zCVob* vob)
 		TracedVobInfo = nullptr;
 	}
 
-	if ( (Selection.SelectedSkeletalVob && Selection.SelectedSkeletalVob->Vob == vob) ||
+	if ((Selection.SelectedSkeletalVob && Selection.SelectedSkeletalVob->Vob == vob) ||
 		(Selection.SelectedVobInfo && Selection.SelectedVobInfo->Vob == vob))
 	{
 		Selection.Reset();

@@ -27,7 +27,7 @@ D3D11OcclusionQuerry::~D3D11OcclusionQuerry()
 /** Creates a new predication-object and returns its ID */
 unsigned int D3D11OcclusionQuerry::AddPredicationObject()
 {
-	D3D11GraphicsEngine* g = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
+	D3D11GraphicsEngine * g = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 
 	HRESULT hr;
 	ID3D11Predicate* p = nullptr;
@@ -49,7 +49,7 @@ void D3D11OcclusionQuerry::DoOcclusionForBSP(BspInfo* root)
 	if (!root || !root->OriginalNode)
 		return;
 
-	D3D11GraphicsEngine* g = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
+	D3D11GraphicsEngine * g = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 
 	// Check if this node has it's queryID
 	if (root->OcclusionInfo.QueryID == -1)
@@ -61,7 +61,7 @@ void D3D11OcclusionQuerry::DoOcclusionForBSP(BspInfo* root)
 		CreateOcclusionNodeMeshFor(root);
 	}
 
-	D3DXVECTOR4 c = D3DXVECTOR4(1,1,1,1);
+	D3DXVECTOR4 c = D3DXVECTOR4(1, 1, 1, 1);
 
 	// Check last frustum-culling state
 	int clipFlags = 63;
@@ -113,10 +113,10 @@ void D3D11OcclusionQuerry::DoOcclusionForBSP(BspInfo* root)
 		ID3D11Predicate* p = Predicates[root->OcclusionInfo.QueryID];
 
 		// Check if there is data available from the last query
-		if ( root->OcclusionInfo.LastVisitedFrameID != 0 && // Always do the first query
+		if (root->OcclusionInfo.LastVisitedFrameID != 0 && // Always do the first query
 			S_OK != g->GetContext()->GetData(p, nullptr, 0, D3D11_ASYNC_GETDATA_DONOTFLUSH))
 		{
-			c = D3DXVECTOR4(0,0,1,1);
+			c = D3DXVECTOR4(0, 0, 1, 1);
 
 			// Query is in progress and still not done, wait for it...
 			if (!root->OcclusionInfo.VisibleLastFrame)
@@ -126,7 +126,7 @@ void D3D11OcclusionQuerry::DoOcclusionForBSP(BspInfo* root)
 				DoOcclusionForBSP(root->Front);
 				DoOcclusionForBSP(root->Back);
 			}
-		}else
+		} else
 		{
 			// Query is done. Save the result!
 			UINT32 data;
@@ -138,7 +138,7 @@ void D3D11OcclusionQuerry::DoOcclusionForBSP(BspInfo* root)
 				// Mark entire subtree invisible and don't waste draw-calls for it
 				MarkTreeVisible(root->Front, false);
 				MarkTreeVisible(root->Back, false);
-			}else
+			} else
 			{
 				// Try to check the next nodes as well
 				DoOcclusionForBSP(root->Front);
@@ -146,12 +146,12 @@ void D3D11OcclusionQuerry::DoOcclusionForBSP(BspInfo* root)
 			}
 
 			if (data > 0)
-				c = D3DXVECTOR4(0,1,0,1);
+				c = D3DXVECTOR4(0, 1, 0, 1);
 			else
-				c = D3DXVECTOR4(1,0,0,1);
+				c = D3DXVECTOR4(1, 0, 0, 1);
 
 			// Issue the new query
-			MeshInfo* mi = root->OcclusionInfo.NodeMesh;
+			MeshInfo * mi = root->OcclusionInfo.NodeMesh;
 
 			g->GetContext()->Begin(p);
 			g->DrawVertexBufferIndexed(mi->MeshVertexBuffer, mi->MeshIndexBuffer, mi->Indices.size());
@@ -175,7 +175,7 @@ void D3D11OcclusionQuerry::DoOcclusionForBSP(BspInfo* root)
 /** Begins the occlusion-checks */
 void D3D11OcclusionQuerry::BeginOcclusionPass()
 {
-	D3D11GraphicsEngine* g = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
+	D3D11GraphicsEngine * g = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 
 	// Bind shaders and constant buffers
 	g->SetupVS_ExMeshDrawCall();
@@ -202,11 +202,11 @@ void D3D11OcclusionQuerry::AdvanceFrameCounter()
 /** Creates the occlusion-node-mesh for the specific bsp-node */
 void D3D11OcclusionQuerry::CreateOcclusionNodeMeshFor(BspInfo* node)
 {
-	MeshInfo* mi = new MeshInfo;
+	MeshInfo * mi = new MeshInfo;
 	float3 bbmin = node->OriginalNode->BBox3D.Min;
 	float3 bbmax = node->OriginalNode->BBox3D.Max;
-	float3 n3 = float3(0,0,0);
-	float2 n2 = float2(0,0);
+	float3 n3 = float3(0, 0, 0);
+	float2 n2 = float2(0, 0);
 
 	ExVertexStruct vx[8] = {
 	{bbmin, n3, n2, n2, 0},								// front bot left 0
@@ -250,7 +250,7 @@ void D3D11OcclusionQuerry::CreateOcclusionNodeMeshFor(BspInfo* node)
 	node->OcclusionInfo.NodeMesh = mi;
 }
 
-void D3D11OcclusionQuerry::DebugVisualizeNodeMesh(MeshInfo* m, const D3DXVECTOR4& color)
+void D3D11OcclusionQuerry::DebugVisualizeNodeMesh(MeshInfo * m, const D3DXVECTOR4 & color)
 {
 	for(unsigned int i=0;i<m->Indices.size();i+=3)
 	{

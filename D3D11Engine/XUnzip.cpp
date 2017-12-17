@@ -176,7 +176,7 @@ void *zmalloc(unsigned int len)
   { buf[i]=i;
     buf[len+31-i]=i;
   }
-  *((unsigned int*)buf) = len;
+  *((unsigned int *)buf) = len;
   char c[1000]; wsprintf(c,"malloc 0x%lx  - %lu",buf+16,len);
   OutputDebugString(c);
   return buf+16;
@@ -186,7 +186,7 @@ void zfree(void *buf)
 { char c[1000]; wsprintf(c,"free   0x%lx",buf);
   OutputDebugString(c);
   char *p = ((char*)buf)-16;
-  unsigned int len = *((unsigned int*)p);
+  unsigned int len = *((unsigned int *)p);
   bool blown=false;
   for (int i=0; i<16; i++)
   { char lo = p[i];
@@ -209,7 +209,7 @@ typedef struct tm_unz_s
   unsigned int tm_min;            // minutes after the hour - [0,59]
   unsigned int tm_hour;           // hours since midnight - [0,23]
   unsigned int tm_mday;           // day of the month - [1,31]
-  unsigned int tm_mon;            // months since January - [0,11]
+  unsigned int tm_mon;            // months since January - [0, 11]
   unsigned int tm_year;           // years - [1980..2044]
 } tm_unz;
 
@@ -761,7 +761,7 @@ typedef struct inflate_codes_state inflate_codes_statef;
 inflate_codes_statef *inflate_codes_new (
     uInt, uInt,
     const inflate_huft *, const inflate_huft *,
-    z_streamp );
+    z_streamp);
 
 int inflate_codes (
     inflate_blocks_statef *,
@@ -770,7 +770,7 @@ int inflate_codes (
 
 void inflate_codes_free (
     inflate_codes_statef *,
-    z_streamp );
+    z_streamp);
 
 
 
@@ -859,151 +859,151 @@ const uInt inflate_mask[17] = {
 // copy as much as possible from the sliding window to the output area
 int inflate_flush (inflate_blocks_statef *, z_streamp, int);
 
-int inflate_fast (uInt, uInt, const inflate_huft *, const inflate_huft *, inflate_blocks_statef *, z_streamp );
+int inflate_fast (uInt, uInt, const inflate_huft *, const inflate_huft *, inflate_blocks_statef *, z_streamp);
 
 
 
 const uInt fixed_bl = 9;
 const uInt fixed_bd = 5;
 const inflate_huft fixed_tl[] = {
-    {{{96,7}},256}, {{{0,8}},80}, {{{0,8}},16}, {{{84,8}},115},
-    {{{82,7}},31}, {{{0,8}},112}, {{{0,8}},48}, {{{0,9}},192},
-    {{{80,7}},10}, {{{0,8}},96}, {{{0,8}},32}, {{{0,9}},160},
-    {{{0,8}},0}, {{{0,8}},128}, {{{0,8}},64}, {{{0,9}},224},
-    {{{80,7}},6}, {{{0,8}},88}, {{{0,8}},24}, {{{0,9}},144},
-    {{{83,7}},59}, {{{0,8}},120}, {{{0,8}},56}, {{{0,9}},208},
-    {{{81,7}},17}, {{{0,8}},104}, {{{0,8}},40}, {{{0,9}},176},
-    {{{0,8}},8}, {{{0,8}},136}, {{{0,8}},72}, {{{0,9}},240},
+    {{{96,7}},256}, {{{0,8}},80}, {{{0,8}}, 16}, {{{84,8}}, 115},
+    {{{82,7}},31}, {{{0,8}}, 112}, {{{0,8}},48}, {{{0,9}}, 192},
+    {{{80,7}}, 10}, {{{0,8}},96}, {{{0,8}},32}, {{{0,9}}, 160},
+    {{{0,8}}, 0}, {{{0,8}}, 128}, {{{0,8}},64}, {{{0,9}},224},
+    {{{80,7}},6}, {{{0,8}},88}, {{{0,8}},24}, {{{0,9}}, 144},
+    {{{83,7}},59}, {{{0,8}}, 120}, {{{0,8}},56}, {{{0,9}},208},
+    {{{81,7}}, 17}, {{{0,8}}, 104}, {{{0,8}},40}, {{{0,9}}, 176},
+    {{{0,8}},8}, {{{0,8}}, 136}, {{{0,8}},72}, {{{0,9}},240},
     {{{80,7}},4}, {{{0,8}},84}, {{{0,8}},20}, {{{85,8}},227},
-    {{{83,7}},43}, {{{0,8}},116}, {{{0,8}},52}, {{{0,9}},200},
-    {{{81,7}},13}, {{{0,8}},100}, {{{0,8}},36}, {{{0,9}},168},
-    {{{0,8}},4}, {{{0,8}},132}, {{{0,8}},68}, {{{0,9}},232},
-    {{{80,7}},8}, {{{0,8}},92}, {{{0,8}},28}, {{{0,9}},152},
-    {{{84,7}},83}, {{{0,8}},124}, {{{0,8}},60}, {{{0,9}},216},
-    {{{82,7}},23}, {{{0,8}},108}, {{{0,8}},44}, {{{0,9}},184},
-    {{{0,8}},12}, {{{0,8}},140}, {{{0,8}},76}, {{{0,9}},248},
-    {{{80,7}},3}, {{{0,8}},82}, {{{0,8}},18}, {{{85,8}},163},
-    {{{83,7}},35}, {{{0,8}},114}, {{{0,8}},50}, {{{0,9}},196},
-    {{{81,7}},11}, {{{0,8}},98}, {{{0,8}},34}, {{{0,9}},164},
-    {{{0,8}},2}, {{{0,8}},130}, {{{0,8}},66}, {{{0,9}},228},
-    {{{80,7}},7}, {{{0,8}},90}, {{{0,8}},26}, {{{0,9}},148},
-    {{{84,7}},67}, {{{0,8}},122}, {{{0,8}},58}, {{{0,9}},212},
-    {{{82,7}},19}, {{{0,8}},106}, {{{0,8}},42}, {{{0,9}},180},
-    {{{0,8}},10}, {{{0,8}},138}, {{{0,8}},74}, {{{0,9}},244},
-    {{{80,7}},5}, {{{0,8}},86}, {{{0,8}},22}, {{{192,8}},0},
-    {{{83,7}},51}, {{{0,8}},118}, {{{0,8}},54}, {{{0,9}},204},
-    {{{81,7}},15}, {{{0,8}},102}, {{{0,8}},38}, {{{0,9}},172},
-    {{{0,8}},6}, {{{0,8}},134}, {{{0,8}},70}, {{{0,9}},236},
-    {{{80,7}},9}, {{{0,8}},94}, {{{0,8}},30}, {{{0,9}},156},
-    {{{84,7}},99}, {{{0,8}},126}, {{{0,8}},62}, {{{0,9}},220},
-    {{{82,7}},27}, {{{0,8}},110}, {{{0,8}},46}, {{{0,9}},188},
-    {{{0,8}},14}, {{{0,8}},142}, {{{0,8}},78}, {{{0,9}},252},
-    {{{96,7}},256}, {{{0,8}},81}, {{{0,8}},17}, {{{85,8}},131},
-    {{{82,7}},31}, {{{0,8}},113}, {{{0,8}},49}, {{{0,9}},194},
-    {{{80,7}},10}, {{{0,8}},97}, {{{0,8}},33}, {{{0,9}},162},
-    {{{0,8}},1}, {{{0,8}},129}, {{{0,8}},65}, {{{0,9}},226},
-    {{{80,7}},6}, {{{0,8}},89}, {{{0,8}},25}, {{{0,9}},146},
-    {{{83,7}},59}, {{{0,8}},121}, {{{0,8}},57}, {{{0,9}},210},
-    {{{81,7}},17}, {{{0,8}},105}, {{{0,8}},41}, {{{0,9}},178},
-    {{{0,8}},9}, {{{0,8}},137}, {{{0,8}},73}, {{{0,9}},242},
+    {{{83,7}},43}, {{{0,8}}, 116}, {{{0,8}},52}, {{{0,9}},200},
+    {{{81,7}}, 13}, {{{0,8}}, 100}, {{{0,8}},36}, {{{0,9}}, 168},
+    {{{0,8}},4}, {{{0,8}}, 132}, {{{0,8}},68}, {{{0,9}},232},
+    {{{80,7}},8}, {{{0,8}},92}, {{{0,8}},28}, {{{0,9}}, 152},
+    {{{84,7}},83}, {{{0,8}}, 124}, {{{0,8}},60}, {{{0,9}},216},
+    {{{82,7}},23}, {{{0,8}}, 108}, {{{0,8}},44}, {{{0,9}}, 184},
+    {{{0,8}}, 12}, {{{0,8}}, 140}, {{{0,8}},76}, {{{0,9}},248},
+    {{{80,7}},3}, {{{0,8}},82}, {{{0,8}}, 18}, {{{85,8}}, 163},
+    {{{83,7}},35}, {{{0,8}}, 114}, {{{0,8}},50}, {{{0,9}}, 196},
+    {{{81,7}}, 11}, {{{0,8}},98}, {{{0,8}},34}, {{{0,9}}, 164},
+    {{{0,8}},2}, {{{0,8}}, 130}, {{{0,8}},66}, {{{0,9}},228},
+    {{{80,7}},7}, {{{0,8}},90}, {{{0,8}},26}, {{{0,9}}, 148},
+    {{{84,7}},67}, {{{0,8}}, 122}, {{{0,8}},58}, {{{0,9}},212},
+    {{{82,7}}, 19}, {{{0,8}}, 106}, {{{0,8}},42}, {{{0,9}}, 180},
+    {{{0,8}}, 10}, {{{0,8}}, 138}, {{{0,8}},74}, {{{0,9}},244},
+    {{{80,7}},5}, {{{0,8}},86}, {{{0,8}},22}, {{{192,8}}, 0},
+    {{{83,7}},51}, {{{0,8}}, 118}, {{{0,8}},54}, {{{0,9}},204},
+    {{{81,7}}, 15}, {{{0,8}}, 102}, {{{0,8}},38}, {{{0,9}}, 172},
+    {{{0,8}},6}, {{{0,8}}, 134}, {{{0,8}},70}, {{{0,9}},236},
+    {{{80,7}},9}, {{{0,8}},94}, {{{0,8}},30}, {{{0,9}}, 156},
+    {{{84,7}},99}, {{{0,8}}, 126}, {{{0,8}},62}, {{{0,9}},220},
+    {{{82,7}},27}, {{{0,8}}, 110}, {{{0,8}},46}, {{{0,9}}, 188},
+    {{{0,8}}, 14}, {{{0,8}}, 142}, {{{0,8}},78}, {{{0,9}},252},
+    {{{96,7}},256}, {{{0,8}},81}, {{{0,8}}, 17}, {{{85,8}}, 131},
+    {{{82,7}},31}, {{{0,8}}, 113}, {{{0,8}},49}, {{{0,9}}, 194},
+    {{{80,7}}, 10}, {{{0,8}},97}, {{{0,8}},33}, {{{0,9}}, 162},
+    {{{0,8}}, 1}, {{{0,8}}, 129}, {{{0,8}},65}, {{{0,9}},226},
+    {{{80,7}},6}, {{{0,8}},89}, {{{0,8}},25}, {{{0,9}}, 146},
+    {{{83,7}},59}, {{{0,8}}, 121}, {{{0,8}},57}, {{{0,9}},210},
+    {{{81,7}}, 17}, {{{0,8}}, 105}, {{{0,8}},41}, {{{0,9}}, 178},
+    {{{0,8}},9}, {{{0,8}}, 137}, {{{0,8}},73}, {{{0,9}},242},
     {{{80,7}},4}, {{{0,8}},85}, {{{0,8}},21}, {{{80,8}},258},
-    {{{83,7}},43}, {{{0,8}},117}, {{{0,8}},53}, {{{0,9}},202},
-    {{{81,7}},13}, {{{0,8}},101}, {{{0,8}},37}, {{{0,9}},170},
-    {{{0,8}},5}, {{{0,8}},133}, {{{0,8}},69}, {{{0,9}},234},
-    {{{80,7}},8}, {{{0,8}},93}, {{{0,8}},29}, {{{0,9}},154},
-    {{{84,7}},83}, {{{0,8}},125}, {{{0,8}},61}, {{{0,9}},218},
-    {{{82,7}},23}, {{{0,8}},109}, {{{0,8}},45}, {{{0,9}},186},
-    {{{0,8}},13}, {{{0,8}},141}, {{{0,8}},77}, {{{0,9}},250},
-    {{{80,7}},3}, {{{0,8}},83}, {{{0,8}},19}, {{{85,8}},195},
-    {{{83,7}},35}, {{{0,8}},115}, {{{0,8}},51}, {{{0,9}},198},
-    {{{81,7}},11}, {{{0,8}},99}, {{{0,8}},35}, {{{0,9}},166},
-    {{{0,8}},3}, {{{0,8}},131}, {{{0,8}},67}, {{{0,9}},230},
-    {{{80,7}},7}, {{{0,8}},91}, {{{0,8}},27}, {{{0,9}},150},
-    {{{84,7}},67}, {{{0,8}},123}, {{{0,8}},59}, {{{0,9}},214},
-    {{{82,7}},19}, {{{0,8}},107}, {{{0,8}},43}, {{{0,9}},182},
-    {{{0,8}},11}, {{{0,8}},139}, {{{0,8}},75}, {{{0,9}},246},
-    {{{80,7}},5}, {{{0,8}},87}, {{{0,8}},23}, {{{192,8}},0},
-    {{{83,7}},51}, {{{0,8}},119}, {{{0,8}},55}, {{{0,9}},206},
-    {{{81,7}},15}, {{{0,8}},103}, {{{0,8}},39}, {{{0,9}},174},
-    {{{0,8}},7}, {{{0,8}},135}, {{{0,8}},71}, {{{0,9}},238},
-    {{{80,7}},9}, {{{0,8}},95}, {{{0,8}},31}, {{{0,9}},158},
-    {{{84,7}},99}, {{{0,8}},127}, {{{0,8}},63}, {{{0,9}},222},
-    {{{82,7}},27}, {{{0,8}},111}, {{{0,8}},47}, {{{0,9}},190},
-    {{{0,8}},15}, {{{0,8}},143}, {{{0,8}},79}, {{{0,9}},254},
-    {{{96,7}},256}, {{{0,8}},80}, {{{0,8}},16}, {{{84,8}},115},
-    {{{82,7}},31}, {{{0,8}},112}, {{{0,8}},48}, {{{0,9}},193},
-    {{{80,7}},10}, {{{0,8}},96}, {{{0,8}},32}, {{{0,9}},161},
-    {{{0,8}},0}, {{{0,8}},128}, {{{0,8}},64}, {{{0,9}},225},
-    {{{80,7}},6}, {{{0,8}},88}, {{{0,8}},24}, {{{0,9}},145},
-    {{{83,7}},59}, {{{0,8}},120}, {{{0,8}},56}, {{{0,9}},209},
-    {{{81,7}},17}, {{{0,8}},104}, {{{0,8}},40}, {{{0,9}},177},
-    {{{0,8}},8}, {{{0,8}},136}, {{{0,8}},72}, {{{0,9}},241},
+    {{{83,7}},43}, {{{0,8}}, 117}, {{{0,8}},53}, {{{0,9}},202},
+    {{{81,7}}, 13}, {{{0,8}}, 101}, {{{0,8}},37}, {{{0,9}}, 170},
+    {{{0,8}},5}, {{{0,8}}, 133}, {{{0,8}},69}, {{{0,9}},234},
+    {{{80,7}},8}, {{{0,8}},93}, {{{0,8}},29}, {{{0,9}}, 154},
+    {{{84,7}},83}, {{{0,8}}, 125}, {{{0,8}},61}, {{{0,9}},218},
+    {{{82,7}},23}, {{{0,8}}, 109}, {{{0,8}},45}, {{{0,9}}, 186},
+    {{{0,8}}, 13}, {{{0,8}}, 141}, {{{0,8}},77}, {{{0,9}},250},
+    {{{80,7}},3}, {{{0,8}},83}, {{{0,8}}, 19}, {{{85,8}}, 195},
+    {{{83,7}},35}, {{{0,8}}, 115}, {{{0,8}},51}, {{{0,9}}, 198},
+    {{{81,7}}, 11}, {{{0,8}},99}, {{{0,8}},35}, {{{0,9}}, 166},
+    {{{0,8}},3}, {{{0,8}}, 131}, {{{0,8}},67}, {{{0,9}},230},
+    {{{80,7}},7}, {{{0,8}},91}, {{{0,8}},27}, {{{0,9}}, 150},
+    {{{84,7}},67}, {{{0,8}}, 123}, {{{0,8}},59}, {{{0,9}},214},
+    {{{82,7}}, 19}, {{{0,8}}, 107}, {{{0,8}},43}, {{{0,9}}, 182},
+    {{{0,8}}, 11}, {{{0,8}}, 139}, {{{0,8}},75}, {{{0,9}},246},
+    {{{80,7}},5}, {{{0,8}},87}, {{{0,8}},23}, {{{192,8}}, 0},
+    {{{83,7}},51}, {{{0,8}}, 119}, {{{0,8}},55}, {{{0,9}},206},
+    {{{81,7}}, 15}, {{{0,8}}, 103}, {{{0,8}},39}, {{{0,9}}, 174},
+    {{{0,8}},7}, {{{0,8}}, 135}, {{{0,8}},71}, {{{0,9}},238},
+    {{{80,7}},9}, {{{0,8}},95}, {{{0,8}},31}, {{{0,9}}, 158},
+    {{{84,7}},99}, {{{0,8}}, 127}, {{{0,8}},63}, {{{0,9}},222},
+    {{{82,7}},27}, {{{0,8}}, 111}, {{{0,8}},47}, {{{0,9}}, 190},
+    {{{0,8}}, 15}, {{{0,8}}, 143}, {{{0,8}},79}, {{{0,9}},254},
+    {{{96,7}},256}, {{{0,8}},80}, {{{0,8}}, 16}, {{{84,8}}, 115},
+    {{{82,7}},31}, {{{0,8}}, 112}, {{{0,8}},48}, {{{0,9}}, 193},
+    {{{80,7}}, 10}, {{{0,8}},96}, {{{0,8}},32}, {{{0,9}}, 161},
+    {{{0,8}}, 0}, {{{0,8}}, 128}, {{{0,8}},64}, {{{0,9}},225},
+    {{{80,7}},6}, {{{0,8}},88}, {{{0,8}},24}, {{{0,9}}, 145},
+    {{{83,7}},59}, {{{0,8}}, 120}, {{{0,8}},56}, {{{0,9}},209},
+    {{{81,7}}, 17}, {{{0,8}}, 104}, {{{0,8}},40}, {{{0,9}}, 177},
+    {{{0,8}},8}, {{{0,8}}, 136}, {{{0,8}},72}, {{{0,9}},241},
     {{{80,7}},4}, {{{0,8}},84}, {{{0,8}},20}, {{{85,8}},227},
-    {{{83,7}},43}, {{{0,8}},116}, {{{0,8}},52}, {{{0,9}},201},
-    {{{81,7}},13}, {{{0,8}},100}, {{{0,8}},36}, {{{0,9}},169},
-    {{{0,8}},4}, {{{0,8}},132}, {{{0,8}},68}, {{{0,9}},233},
-    {{{80,7}},8}, {{{0,8}},92}, {{{0,8}},28}, {{{0,9}},153},
-    {{{84,7}},83}, {{{0,8}},124}, {{{0,8}},60}, {{{0,9}},217},
-    {{{82,7}},23}, {{{0,8}},108}, {{{0,8}},44}, {{{0,9}},185},
-    {{{0,8}},12}, {{{0,8}},140}, {{{0,8}},76}, {{{0,9}},249},
-    {{{80,7}},3}, {{{0,8}},82}, {{{0,8}},18}, {{{85,8}},163},
-    {{{83,7}},35}, {{{0,8}},114}, {{{0,8}},50}, {{{0,9}},197},
-    {{{81,7}},11}, {{{0,8}},98}, {{{0,8}},34}, {{{0,9}},165},
-    {{{0,8}},2}, {{{0,8}},130}, {{{0,8}},66}, {{{0,9}},229},
-    {{{80,7}},7}, {{{0,8}},90}, {{{0,8}},26}, {{{0,9}},149},
-    {{{84,7}},67}, {{{0,8}},122}, {{{0,8}},58}, {{{0,9}},213},
-    {{{82,7}},19}, {{{0,8}},106}, {{{0,8}},42}, {{{0,9}},181},
-    {{{0,8}},10}, {{{0,8}},138}, {{{0,8}},74}, {{{0,9}},245},
-    {{{80,7}},5}, {{{0,8}},86}, {{{0,8}},22}, {{{192,8}},0},
-    {{{83,7}},51}, {{{0,8}},118}, {{{0,8}},54}, {{{0,9}},205},
-    {{{81,7}},15}, {{{0,8}},102}, {{{0,8}},38}, {{{0,9}},173},
-    {{{0,8}},6}, {{{0,8}},134}, {{{0,8}},70}, {{{0,9}},237},
-    {{{80,7}},9}, {{{0,8}},94}, {{{0,8}},30}, {{{0,9}},157},
-    {{{84,7}},99}, {{{0,8}},126}, {{{0,8}},62}, {{{0,9}},221},
-    {{{82,7}},27}, {{{0,8}},110}, {{{0,8}},46}, {{{0,9}},189},
-    {{{0,8}},14}, {{{0,8}},142}, {{{0,8}},78}, {{{0,9}},253},
-    {{{96,7}},256}, {{{0,8}},81}, {{{0,8}},17}, {{{85,8}},131},
-    {{{82,7}},31}, {{{0,8}},113}, {{{0,8}},49}, {{{0,9}},195},
-    {{{80,7}},10}, {{{0,8}},97}, {{{0,8}},33}, {{{0,9}},163},
-    {{{0,8}},1}, {{{0,8}},129}, {{{0,8}},65}, {{{0,9}},227},
-    {{{80,7}},6}, {{{0,8}},89}, {{{0,8}},25}, {{{0,9}},147},
-    {{{83,7}},59}, {{{0,8}},121}, {{{0,8}},57}, {{{0,9}},211},
-    {{{81,7}},17}, {{{0,8}},105}, {{{0,8}},41}, {{{0,9}},179},
-    {{{0,8}},9}, {{{0,8}},137}, {{{0,8}},73}, {{{0,9}},243},
+    {{{83,7}},43}, {{{0,8}}, 116}, {{{0,8}},52}, {{{0,9}},201},
+    {{{81,7}}, 13}, {{{0,8}}, 100}, {{{0,8}},36}, {{{0,9}}, 169},
+    {{{0,8}},4}, {{{0,8}}, 132}, {{{0,8}},68}, {{{0,9}},233},
+    {{{80,7}},8}, {{{0,8}},92}, {{{0,8}},28}, {{{0,9}}, 153},
+    {{{84,7}},83}, {{{0,8}}, 124}, {{{0,8}},60}, {{{0,9}},217},
+    {{{82,7}},23}, {{{0,8}}, 108}, {{{0,8}},44}, {{{0,9}}, 185},
+    {{{0,8}}, 12}, {{{0,8}}, 140}, {{{0,8}},76}, {{{0,9}},249},
+    {{{80,7}},3}, {{{0,8}},82}, {{{0,8}}, 18}, {{{85,8}}, 163},
+    {{{83,7}},35}, {{{0,8}}, 114}, {{{0,8}},50}, {{{0,9}}, 197},
+    {{{81,7}}, 11}, {{{0,8}},98}, {{{0,8}},34}, {{{0,9}}, 165},
+    {{{0,8}},2}, {{{0,8}}, 130}, {{{0,8}},66}, {{{0,9}},229},
+    {{{80,7}},7}, {{{0,8}},90}, {{{0,8}},26}, {{{0,9}}, 149},
+    {{{84,7}},67}, {{{0,8}}, 122}, {{{0,8}},58}, {{{0,9}},213},
+    {{{82,7}}, 19}, {{{0,8}}, 106}, {{{0,8}},42}, {{{0,9}}, 181},
+    {{{0,8}}, 10}, {{{0,8}}, 138}, {{{0,8}},74}, {{{0,9}},245},
+    {{{80,7}},5}, {{{0,8}},86}, {{{0,8}},22}, {{{192,8}}, 0},
+    {{{83,7}},51}, {{{0,8}}, 118}, {{{0,8}},54}, {{{0,9}},205},
+    {{{81,7}}, 15}, {{{0,8}}, 102}, {{{0,8}},38}, {{{0,9}}, 173},
+    {{{0,8}},6}, {{{0,8}}, 134}, {{{0,8}},70}, {{{0,9}},237},
+    {{{80,7}},9}, {{{0,8}},94}, {{{0,8}},30}, {{{0,9}}, 157},
+    {{{84,7}},99}, {{{0,8}}, 126}, {{{0,8}},62}, {{{0,9}},221},
+    {{{82,7}},27}, {{{0,8}}, 110}, {{{0,8}},46}, {{{0,9}}, 189},
+    {{{0,8}}, 14}, {{{0,8}}, 142}, {{{0,8}},78}, {{{0,9}},253},
+    {{{96,7}},256}, {{{0,8}},81}, {{{0,8}}, 17}, {{{85,8}}, 131},
+    {{{82,7}},31}, {{{0,8}}, 113}, {{{0,8}},49}, {{{0,9}}, 195},
+    {{{80,7}}, 10}, {{{0,8}},97}, {{{0,8}},33}, {{{0,9}}, 163},
+    {{{0,8}}, 1}, {{{0,8}}, 129}, {{{0,8}},65}, {{{0,9}},227},
+    {{{80,7}},6}, {{{0,8}},89}, {{{0,8}},25}, {{{0,9}}, 147},
+    {{{83,7}},59}, {{{0,8}}, 121}, {{{0,8}},57}, {{{0,9}},211},
+    {{{81,7}}, 17}, {{{0,8}}, 105}, {{{0,8}},41}, {{{0,9}}, 179},
+    {{{0,8}},9}, {{{0,8}}, 137}, {{{0,8}},73}, {{{0,9}},243},
     {{{80,7}},4}, {{{0,8}},85}, {{{0,8}},21}, {{{80,8}},258},
-    {{{83,7}},43}, {{{0,8}},117}, {{{0,8}},53}, {{{0,9}},203},
-    {{{81,7}},13}, {{{0,8}},101}, {{{0,8}},37}, {{{0,9}},171},
-    {{{0,8}},5}, {{{0,8}},133}, {{{0,8}},69}, {{{0,9}},235},
-    {{{80,7}},8}, {{{0,8}},93}, {{{0,8}},29}, {{{0,9}},155},
-    {{{84,7}},83}, {{{0,8}},125}, {{{0,8}},61}, {{{0,9}},219},
-    {{{82,7}},23}, {{{0,8}},109}, {{{0,8}},45}, {{{0,9}},187},
-    {{{0,8}},13}, {{{0,8}},141}, {{{0,8}},77}, {{{0,9}},251},
-    {{{80,7}},3}, {{{0,8}},83}, {{{0,8}},19}, {{{85,8}},195},
-    {{{83,7}},35}, {{{0,8}},115}, {{{0,8}},51}, {{{0,9}},199},
-    {{{81,7}},11}, {{{0,8}},99}, {{{0,8}},35}, {{{0,9}},167},
-    {{{0,8}},3}, {{{0,8}},131}, {{{0,8}},67}, {{{0,9}},231},
-    {{{80,7}},7}, {{{0,8}},91}, {{{0,8}},27}, {{{0,9}},151},
-    {{{84,7}},67}, {{{0,8}},123}, {{{0,8}},59}, {{{0,9}},215},
-    {{{82,7}},19}, {{{0,8}},107}, {{{0,8}},43}, {{{0,9}},183},
-    {{{0,8}},11}, {{{0,8}},139}, {{{0,8}},75}, {{{0,9}},247},
-    {{{80,7}},5}, {{{0,8}},87}, {{{0,8}},23}, {{{192,8}},0},
-    {{{83,7}},51}, {{{0,8}},119}, {{{0,8}},55}, {{{0,9}},207},
-    {{{81,7}},15}, {{{0,8}},103}, {{{0,8}},39}, {{{0,9}},175},
-    {{{0,8}},7}, {{{0,8}},135}, {{{0,8}},71}, {{{0,9}},239},
-    {{{80,7}},9}, {{{0,8}},95}, {{{0,8}},31}, {{{0,9}},159},
-    {{{84,7}},99}, {{{0,8}},127}, {{{0,8}},63}, {{{0,9}},223},
-    {{{82,7}},27}, {{{0,8}},111}, {{{0,8}},47}, {{{0,9}},191},
-    {{{0,8}},15}, {{{0,8}},143}, {{{0,8}},79}, {{{0,9}},255}
+    {{{83,7}},43}, {{{0,8}}, 117}, {{{0,8}},53}, {{{0,9}},203},
+    {{{81,7}}, 13}, {{{0,8}}, 101}, {{{0,8}},37}, {{{0,9}}, 171},
+    {{{0,8}},5}, {{{0,8}}, 133}, {{{0,8}},69}, {{{0,9}},235},
+    {{{80,7}},8}, {{{0,8}},93}, {{{0,8}},29}, {{{0,9}}, 155},
+    {{{84,7}},83}, {{{0,8}}, 125}, {{{0,8}},61}, {{{0,9}},219},
+    {{{82,7}},23}, {{{0,8}}, 109}, {{{0,8}},45}, {{{0,9}}, 187},
+    {{{0,8}}, 13}, {{{0,8}}, 141}, {{{0,8}},77}, {{{0,9}},251},
+    {{{80,7}},3}, {{{0,8}},83}, {{{0,8}}, 19}, {{{85,8}}, 195},
+    {{{83,7}},35}, {{{0,8}}, 115}, {{{0,8}},51}, {{{0,9}}, 199},
+    {{{81,7}}, 11}, {{{0,8}},99}, {{{0,8}},35}, {{{0,9}}, 167},
+    {{{0,8}},3}, {{{0,8}}, 131}, {{{0,8}},67}, {{{0,9}},231},
+    {{{80,7}},7}, {{{0,8}},91}, {{{0,8}},27}, {{{0,9}}, 151},
+    {{{84,7}},67}, {{{0,8}}, 123}, {{{0,8}},59}, {{{0,9}},215},
+    {{{82,7}}, 19}, {{{0,8}}, 107}, {{{0,8}},43}, {{{0,9}}, 183},
+    {{{0,8}}, 11}, {{{0,8}}, 139}, {{{0,8}},75}, {{{0,9}},247},
+    {{{80,7}},5}, {{{0,8}},87}, {{{0,8}},23}, {{{192,8}}, 0},
+    {{{83,7}},51}, {{{0,8}}, 119}, {{{0,8}},55}, {{{0,9}},207},
+    {{{81,7}}, 15}, {{{0,8}}, 103}, {{{0,8}},39}, {{{0,9}}, 175},
+    {{{0,8}},7}, {{{0,8}}, 135}, {{{0,8}},71}, {{{0,9}},239},
+    {{{80,7}},9}, {{{0,8}},95}, {{{0,8}},31}, {{{0,9}}, 159},
+    {{{84,7}},99}, {{{0,8}}, 127}, {{{0,8}},63}, {{{0,9}},223},
+    {{{82,7}},27}, {{{0,8}}, 111}, {{{0,8}},47}, {{{0,9}}, 191},
+    {{{0,8}}, 15}, {{{0,8}}, 143}, {{{0,8}},79}, {{{0,9}},255}
   };
 const inflate_huft fixed_td[] = {
-    {{{80,5}},1}, {{{87,5}},257}, {{{83,5}},17}, {{{91,5}},4097},
-    {{{81,5}},5}, {{{89,5}},1025}, {{{85,5}},65}, {{{93,5}},16385},
+    {{{80,5}}, 1}, {{{87,5}},257}, {{{83,5}}, 17}, {{{91,5}},4097},
+    {{{81,5}},5}, {{{89,5}}, 1025}, {{{85,5}},65}, {{{93,5}}, 16385},
     {{{80,5}},3}, {{{88,5}},513}, {{{84,5}},33}, {{{92,5}},8193},
-    {{{82,5}},9}, {{{90,5}},2049}, {{{86,5}},129}, {{{192,5}},24577},
+    {{{82,5}},9}, {{{90,5}},2049}, {{{86,5}}, 129}, {{{192,5}},24577},
     {{{80,5}},2}, {{{87,5}},385}, {{{83,5}},25}, {{{91,5}},6145},
-    {{{81,5}},7}, {{{89,5}},1537}, {{{85,5}},97}, {{{93,5}},24577},
-    {{{80,5}},4}, {{{88,5}},769}, {{{84,5}},49}, {{{92,5}},12289},
-    {{{82,5}},13}, {{{90,5}},3073}, {{{86,5}},193}, {{{192,5}},24577}
+    {{{81,5}},7}, {{{89,5}}, 1537}, {{{85,5}},97}, {{{93,5}},24577},
+    {{{80,5}},4}, {{{88,5}},769}, {{{84,5}},49}, {{{92,5}}, 12289},
+    {{{82,5}}, 13}, {{{90,5}},3073}, {{{86,5}}, 193}, {{{192,5}},24577}
   };
 
 
@@ -1138,7 +1138,7 @@ z_streamp z)
   inflate_codes_statef *c;
 
   if ((c = (inflate_codes_statef *)
-       ZALLOC(z,1,sizeof(struct inflate_codes_state))) != Z_NULL)
+       ZALLOC(z, 1,sizeof(struct inflate_codes_state))) != Z_NULL)
   {
     c->mode = START;
     c->lbits = (Byte)bl;
@@ -1355,7 +1355,7 @@ const uInt border[] = { // Order of the bit length code lengths
 //    The exception is that a single code would not be complete (see #4).
 // 8. The five bits following the block type is really the number of
 //    literal codes sent minus 257.
-// 9. Length codes 8,16,16 are interpreted as 13 length codes of 8 bits
+// 9. Length codes 8, 16, 16 are interpreted as 13 length codes of 8 bits
 //    (1+6+6).  Therefore, to output three times the length, you output
 //    three codes (1+1+1), whereas to output four times the same length,
 //    you only need two codes (1+3).  Hmm.
@@ -1395,7 +1395,7 @@ inflate_blocks_statef *inflate_blocks_new(z_streamp z, check_func c, uInt w)
   inflate_blocks_statef *s;
 
   if ((s = (inflate_blocks_statef *)ZALLOC
-       (z,1,sizeof(struct inflate_blocks_state))) == Z_NULL)
+       (z, 1,sizeof(struct inflate_blocks_state))) == Z_NULL)
     return s;
   if ((s->hufts =
        (inflate_huft *)ZALLOC(z, sizeof(inflate_huft), MANY)) == Z_NULL)
@@ -1700,7 +1700,7 @@ int huft_build (
     uInt *,            // maximum lookup bits (returns actual) 
     inflate_huft *,     // space for trees 
     uInt *,             // hufts used in space 
-    uInt * );         // space for values 
+    uInt *);         // space for values 
 
 // Tables for deflate from PKZIP's appnote.txt. 
 const uInt cplens[31] = { // Copy lengths for literal codes 257..285
@@ -2050,7 +2050,7 @@ uInt *bl,               // literal desired/actual bit depth
 uInt *bd,               // distance desired/actual bit depth
 const inflate_huft * * tl,     // literal/length tree result
 const inflate_huft * *td,     // distance tree result
-z_streamp )             // for memory allocation
+z_streamp)             // for memory allocation
 {
   *bl = fixed_bl;
   *bd = fixed_bd;
@@ -2327,7 +2327,7 @@ uLong ucrc32(uLong crc, const Byte *buf, uInt len)
 #define AD_DO2(buf,i)  AD_DO1(buf,i); AD_DO1(buf,i+1);
 #define AD_DO4(buf,i)  AD_DO2(buf,i); AD_DO2(buf,i+2);
 #define AD_DO8(buf,i)  AD_DO4(buf,i); AD_DO4(buf,i+4);
-#define AD_DO16(buf)   AD_DO8(buf,0); AD_DO8(buf,8);
+#define AD_DO16(buf)   AD_DO8(buf, 0); AD_DO8(buf,8);
 
 // =========================================================================
 uLong adler32(uLong adler, const Byte *buf, uInt len)
@@ -2496,7 +2496,7 @@ int inflateInit2(z_streamp z)
   }
   if (z->zfree == Z_NULL) z->zfree = zcfree;
   if ((z->state = (struct internal_state *)
-       ZALLOC(z,1,sizeof(struct internal_state))) == Z_NULL)
+       ZALLOC(z, 1,sizeof(struct internal_state))) == Z_NULL)
     return Z_MEM_ERROR;
   z->state->blocks = Z_NULL;
 
@@ -2743,7 +2743,7 @@ LUFILE *lufopen(void *z,unsigned int len,DWORD flags,ZRESULT *err)
 		{ 
 			HANDLE hf = z;
 		
-			BOOL res = DuplicateHandle(GetCurrentProcess(),hf,GetCurrentProcess(),&h,0,FALSE,DUPLICATE_SAME_ACCESS);
+			BOOL res = DuplicateHandle(GetCurrentProcess(),hf,GetCurrentProcess(),&h, 0,FALSE,DUPLICATE_SAME_ACCESS);
 		
 			if (!res) 
 			{
@@ -2773,7 +2773,7 @@ LUFILE *lufopen(void *z,unsigned int len,DWORD flags,ZRESULT *err)
 		lf->h=h; lf->herr=false;
 		lf->initial_offset=0;
 		if (canseek) 
-			lf->initial_offset = SetFilePointer(h,0,nullptr,FILE_CURRENT);
+			lf->initial_offset = SetFilePointer(h, 0,nullptr,FILE_CURRENT);
 	}
 	else
 	{ 
@@ -2802,14 +2802,14 @@ int luferror(LUFILE *stream)
 }
 
 long int luftell(LUFILE *stream)
-{ if (stream->is_handle && stream->canseek) return SetFilePointer(stream->h,0,nullptr,FILE_CURRENT)-stream->initial_offset;
+{ if (stream->is_handle && stream->canseek) return SetFilePointer(stream->h, 0,nullptr,FILE_CURRENT)-stream->initial_offset;
   else if (stream->is_handle) return 0;
   else return stream->pos;
 }
 
 int lufseek(LUFILE *stream, long offset, int whence)
 { if (stream->is_handle && stream->canseek)
-  { if (whence==SEEK_SET) SetFilePointer(stream->h,stream->initial_offset+offset,0,FILE_BEGIN);
+  { if (whence==SEEK_SET) SetFilePointer(stream->h,stream->initial_offset+offset, 0,FILE_BEGIN);
     else if (whence==SEEK_CUR) SetFilePointer(stream->h,offset,nullptr,FILE_CURRENT);
     else if (whence==SEEK_END) SetFilePointer(stream->h,offset,nullptr,FILE_END);
     else return 19; // EINVAL
@@ -3019,7 +3019,7 @@ int unzStringFileNameCompare (const char*fileName1,const char*fileName2,int iCas
 //  Locate the Central directory of a zipfile (at the end, just before
 // the global comment)
 uLong unzlocal_SearchCentralDir(LUFILE *fin)
-{ if (lufseek(fin,0,SEEK_END) != 0) return 0;
+{ if (lufseek(fin, 0,SEEK_END) != 0) return 0;
   uLong uSizeFile = luftell(fin);
 
   uLong uMaxBack=0xffff; // maximum size of global comment
@@ -3038,7 +3038,7 @@ uLong unzlocal_SearchCentralDir(LUFILE *fin)
     uReadPos = uSizeFile-uBackRead ;
     uReadSize = ((BUFREADCOMMENT+4) < (uSizeFile-uReadPos)) ? (BUFREADCOMMENT+4) : (uSizeFile-uReadPos);
     if (lufseek(fin,uReadPos,SEEK_SET)!=0) break;
-    if (lufread(buf,(uInt)uReadSize,1,fin)!=1) break;
+    if (lufread(buf,(uInt)uReadSize, 1,fin)!=1) break;
     for (i=(int)uReadSize-3; (i--)>0;)
     { if (((*(buf+i))==0x50) && ((*(buf+i+1))==0x4b) &&	((*(buf+i+2))==0x05) && ((*(buf+i+3))==0x06))
       { uPosFound = uReadPos+i;	break;
@@ -3255,7 +3255,7 @@ int unzlocal_GetCurrentFileInfoInternal (unzFile file, unz_file_info *pfile_info
 			uSizeRead = fileNameBufferSize;
 
 		if ((file_info.size_filename>0) && (fileNameBufferSize>0))
-			if (lufread(szFileName,(uInt)uSizeRead,1,s->file)!=1)
+			if (lufread(szFileName,(uInt)uSizeRead, 1,s->file)!=1)
 				err=UNZ_ERRNO;
 		lSeek -= uSizeRead;
 	}
@@ -3275,7 +3275,7 @@ int unzlocal_GetCurrentFileInfoInternal (unzFile file, unz_file_info *pfile_info
 			else
 				err=UNZ_ERRNO;
 		if ((file_info.size_file_extra>0) && (extraFieldBufferSize>0))
-			if (lufread(extraField,(uInt)uSizeRead,1,s->file)!=1)
+			if (lufread(extraField,(uInt)uSizeRead, 1,s->file)!=1)
 				err=UNZ_ERRNO;
 		lSeek += file_info.size_file_extra - uSizeRead;
 	}
@@ -3300,7 +3300,7 @@ int unzlocal_GetCurrentFileInfoInternal (unzFile file, unz_file_info *pfile_info
 			else
 				err=UNZ_ERRNO;
 		if ((file_info.size_file_comment>0) && (commentBufferSize>0))
-			if (lufread(szComment,(uInt)uSizeRead,1,s->file)!=1)
+			if (lufread(szComment,(uInt)uSizeRead, 1,s->file)!=1)
 				err=UNZ_ERRNO;
 		//unused lSeek+=file_info.size_file_comment - uSizeRead;
 	}
@@ -3340,7 +3340,7 @@ int unzGoToFirstFile (unzFile file)
 	s->num_file=0;
 	err=unzlocal_GetCurrentFileInfoInternal(file,&s->cur_file_info,
 											 &s->cur_file_info_internal,
-											 nullptr,0,nullptr,0,nullptr,0);
+											 nullptr, 0,nullptr, 0,nullptr, 0);
 	s->current_file_ok = (err == UNZ_OK);
 	return err;
 }
@@ -3367,7 +3367,7 @@ int unzGoToNextFile (unzFile file)
 	s->num_file++;
 	err = unzlocal_GetCurrentFileInfoInternal(file,&s->cur_file_info,
 											   &s->cur_file_info_internal,
-											   nullptr,0,nullptr,0,nullptr,0);
+											   nullptr, 0,nullptr, 0,nullptr, 0);
 	s->current_file_ok = (err == UNZ_OK);
 	return err;
 }
@@ -3414,7 +3414,7 @@ int unzLocateFile (unzFile file, const TCHAR *szFileName, int iCaseSensitivity)
 		char szCurrentFileName[UNZ_MAXFILENAMEINZIP+1];
 		unzGetCurrentFileInfo(file,nullptr,
 								szCurrentFileName,sizeof(szCurrentFileName)-1,
-								nullptr,0,nullptr,0);
+								nullptr, 0,nullptr, 0);
 		if (unzStringFileNameCompare(szCurrentFileName,szFileNameA,iCaseSensitivity)==0)
 			return UNZ_OK;
 		err = unzGoToNextFile(file);
@@ -3635,7 +3635,7 @@ int unzReadCurrentFile  (unzFile file, voidp buf, unsigned len)
       if (pfile_in_zip_read_info->rest_read_compressed<uReadThis) uReadThis = (uInt)pfile_in_zip_read_info->rest_read_compressed;
       if (uReadThis == 0) return UNZ_EOF;
       if (lufseek(pfile_in_zip_read_info->file, pfile_in_zip_read_info->pos_in_zipfile + pfile_in_zip_read_info->byte_before_the_zipfile,SEEK_SET)!=0) return UNZ_ERRNO;
-      if (lufread(pfile_in_zip_read_info->read_buffer,uReadThis,1,pfile_in_zip_read_info->file)!=1) return UNZ_ERRNO;
+      if (lufread(pfile_in_zip_read_info->read_buffer,uReadThis, 1,pfile_in_zip_read_info->file)!=1) return UNZ_ERRNO;
       pfile_in_zip_read_info->pos_in_zipfile += uReadThis;
       pfile_in_zip_read_info->rest_read_compressed-=uReadThis;
       pfile_in_zip_read_info->stream.next_in = (Byte*)pfile_in_zip_read_info->read_buffer;
@@ -3764,7 +3764,7 @@ int unzGetLocalExtrafield (unzFile file,voidp buf,unsigned len)
 	if (lufseek(pfile_in_zip_read_info->file, pfile_in_zip_read_info->offset_local_extrafield +  pfile_in_zip_read_info->pos_local_extrafield,SEEK_SET)!=0)
 		return UNZ_ERRNO;
 
-	if (lufread(buf,(uInt)size_to_read,1,pfile_in_zip_read_info->file)!=1)
+	if (lufread(buf,(uInt)size_to_read, 1,pfile_in_zip_read_info->file)!=1)
 		return UNZ_ERRNO;
 
 	return (int)read_now;
@@ -3826,7 +3826,7 @@ int unzGetGlobalComment (unzFile file, char *szComment, uLong uSizeBuf)
   if (lufseek(s->file,s->central_pos+22,SEEK_SET)!=0) return UNZ_ERRNO;
   if (uReadThis>0)
   { *szComment='\0';
-    if (lufread(szComment,(uInt)uReadThis,1,s->file)!=1) return UNZ_ERRNO;
+    if (lufread(szComment,(uInt)uReadThis, 1,s->file)!=1) return UNZ_ERRNO;
   }
   if ((szComment != nullptr) && (uSizeBuf > s->gi.size_comment)) *(szComment+s->gi.size_comment)='\0';
   return (int)uReadThis;
@@ -3918,7 +3918,7 @@ ZRESULT TUnzip::Get(int index,ZIPENTRY *ze)
   while ((int)uf->num_file<index) unzGoToNextFile(uf);
   unz_file_info ufi; 
   char fn[MAX_PATH];
-  unzGetCurrentFileInfo(uf,&ufi,fn,MAX_PATH,nullptr,0,nullptr,0);
+  unzGetCurrentFileInfo(uf,&ufi,fn,MAX_PATH,nullptr, 0,nullptr, 0);
 
   // now get the extra header. We do this ourselves, instead of
   // calling unzOpenCurrentFile &c., to avoid allocating more than necessary.
@@ -3927,7 +3927,7 @@ ZRESULT TUnzip::Get(int index,ZIPENTRY *ze)
   if (res!=UNZ_OK) return ZR_CORRUPT;
   if (lufseek(uf->file,offset,SEEK_SET)!=0) return ZR_READ;
   char *extra = new char[extralen];
-  if (lufread(extra,1,(uInt)extralen,uf->file)!=extralen) {delete[] extra; return ZR_READ;}
+  if (lufread(extra, 1,(uInt)extralen,uf->file)!=extralen) {delete[] extra; return ZR_READ;}
   //
   ze->index=uf->num_file;
   strcpy(ze->name,fn);
@@ -4142,7 +4142,7 @@ ZRESULT TUnzip::Unzip(int index,void *dst,unsigned int len,DWORD flags)
 	
 	for (;;)
 	{ 
-		int res = unzReadCurrentFile(uf,buf,16384);
+		int res = unzReadCurrentFile(uf,buf, 16384);
 		if (res<0) 
 		{
 			haderr=true; 

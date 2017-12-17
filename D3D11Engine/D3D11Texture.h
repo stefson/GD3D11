@@ -15,16 +15,16 @@ public:
 	};
 
 	/** Initializes the texture object */
-	XRESULT Init(INT2 size, ETextureFormat format, UINT mipMapCount = 1, void* data = nullptr, const std::string& fileName = "");
+	XRESULT Init(INT2 size, ETextureFormat format, UINT mipMapCount = 1, void * data = nullptr, const std::string & fileName = "");
 
 	/** Initializes the texture from a file */
-	XRESULT Init(const std::string& file);
+	XRESULT Init(const std::string & file);
 
 	/** Updates the Texture-Object */
-	XRESULT UpdateData(void* data, int mip = 0);
+	XRESULT UpdateData(void * data, int mip = 0);
 
 	/** Updates the Texture-Object using the deferred context (For loading in an other thread) */
-	XRESULT UpdateDataDeferred(void* data, int mip, bool noLock = false);
+	XRESULT UpdateDataDeferred(void * data, int mip, bool noLock = false);
 
 	/** Returns the RowPitch-Bytes */
 	UINT GetRowPitchBytes(int mip);
@@ -42,16 +42,16 @@ public:
 	XRESULT BindToDomainShader(int slot);
 
 	/** Returns the texture-object */
-	ID3D11Texture2D* GetTextureObject(){return Texture;}
+	ID3D11Texture2D * GetTextureObject(){return Texture;}
 
 	/** Returns the shader resource view */
-	ID3D11ShaderResourceView* GetShaderResourceView(){return ShaderResourceView;}
+	ID3D11ShaderResourceView * GetShaderResourceView(){return ShaderResourceView;}
 
 	/** Creates a thumbnail for this */
 	XRESULT CreateThumbnail();
 
 	/** Returns the thumbnail of this texture. If this returns nullptr, you need to create one first */
-	ID3D11Texture2D* GetThumbnail();
+	ID3D11Texture2D * GetThumbnail();
 
 	/** Generates mipmaps for this texture (may be slow!) */
 	XRESULT GenerateMipMaps();
@@ -64,13 +64,13 @@ private:
 	UINT16 ID;
 
 	/** D3D11 objects */
-	ID3D11Texture2D* Texture;
-	ID3D11ShaderResourceView* ShaderResourceView;
+	ID3D11Texture2D * Texture;
+	ID3D11ShaderResourceView * ShaderResourceView;
 	DXGI_FORMAT TextureFormat;
 	INT2 TextureSize;
 	int MipMapCount;
 
 	/** Thumbnail */
-	ID3D11Texture2D* Thumbnail;
+	ID3D11Texture2D * Thumbnail;
 };
 

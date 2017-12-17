@@ -199,7 +199,7 @@ enum GFSDK_SSAO_Status
     GFSDK_SSAO_INVALID_WORLD_TO_VIEW_MATRIX,                // The world-to-view matrix is not valid (transposing it may help)
     GFSDK_SSAO_INVALID_NORMAL_TEXTURE_RESOLUTION,           // The normal-texture resolution does not match the depth-texture resolution
     GFSDK_SSAO_INVALID_NORMAL_TEXTURE_SAMPLE_COUNT,         // The normal-texture sample count does not match the depth-texture sample count
-    GFSDK_SSAO_INVALID_VIEWPORT_DEPTH_RANGE,                // The viewport depth range is not a sub-range of [0.f,1.f]
+    GFSDK_SSAO_INVALID_VIEWPORT_DEPTH_RANGE,                // The viewport depth range is not a sub-range of [0.f, 1.f]
     GFSDK_SSAO_INVALID_OUTPUT_MSAA_SAMPLE_COUNT,            // (MSAAMode == PER_SAMPLE_AO) && (SampleCount(OutputColorRT) != SampleCount(InputDepthTexture))
     GFSDK_SSAO_MEMORY_ALLOCATION_FAILED,                    // Failed to allocate memory on the heap
     //
@@ -217,7 +217,7 @@ enum GFSDK_SSAO_Status
 
 enum GFSDK_SSAO_DepthTextureType
 {
-    GFSDK_SSAO_HARDWARE_DEPTHS,                             // Non-linear depths in the range [0.f,1.f]
+    GFSDK_SSAO_HARDWARE_DEPTHS,                             // Non-linear depths in the range [0.f, 1.f]
     GFSDK_SSAO_HARDWARE_DEPTHS_SUB_RANGE,                   // Non-linear depths in the range [Viewport.MinDepth,Viewport.MaxDepth]
     GFSDK_SSAO_VIEW_DEPTHS,                                 // Linear depths in the range [ZNear,ZFar]
 };
@@ -311,7 +311,7 @@ struct GFSDK_SSAO_InputDepthData
 
 struct GFSDK_SSAO_InputDepthData_D3D11 : GFSDK_SSAO_InputDepthData
 {
-    ID3D11ShaderResourceView*       pFullResDepthTextureSRV;    // Full-resolution depth texture
+    ID3D11ShaderResourceView *       pFullResDepthTextureSRV;    // Full-resolution depth texture
     const D3D11_VIEWPORT*           pViewport;                  // Viewport from the depth generation pass
 
     GFSDK_SSAO_InputDepthData_D3D11()
@@ -367,7 +367,7 @@ struct GFSDK_SSAO_InputDepthData_GL : GFSDK_SSAO_InputDepthData
 //
 // Remarks:
 //    * The actual view-space normal used for the AO rendering is:
-//      N = normalize( mul( FetchedNormal.xyz * DecodeScale + DecodeBias, (float3x3)WorldToViewMatrix ) )
+//      N = normalize(mul(FetchedNormal.xyz * DecodeScale + DecodeBias, (float3x3)WorldToViewMatrix))
 //    * Using bent normals as input may result in false-occlusion (overdarkening) artifacts.
 //      Such artifacts may be alleviated by increasing the AO Bias parameter.
 //---------------------------------------------------------------------------------------------------
@@ -392,7 +392,7 @@ struct GFSDK_SSAO_InputNormalData
 
 struct GFSDK_SSAO_InputNormalData_D3D11 : GFSDK_SSAO_InputNormalData
 {
-    ID3D11ShaderResourceView*   pFullResNormalTextureSRV;       // Full-resolution world-space normal texture
+    ID3D11ShaderResourceView *   pFullResNormalTextureSRV;       // Full-resolution world-space normal texture
 
     GFSDK_SSAO_InputNormalData_D3D11()
         : pFullResNormalTextureSRV(nullptr)
@@ -598,8 +598,8 @@ struct GFSDK_SSAO_Parameters_GL : GFSDK_SSAO_Parameters
 
 struct GFSDK_SSAO_CustomHeap
 {
-    void* (*new_)(size_t);
-    void (*delete_)(void*);
+    void * (*new_)(size_t);
+    void (*delete_)(void *);
 };
 
 /*====================================================================================================
@@ -644,7 +644,7 @@ public:
 // Returns:
 //     GFSDK_SSAO_NULL_ARGUMENT                        - One of the required argument pointers is nullptr
 //     GFSDK_SSAO_INVALID_PROJECTION_MATRIX            - The projection matrix is not valid
-//     GFSDK_SSAO_INVALID_VIEWPORT_DEPTH_RANGE         - The viewport depth range is not a sub-range of [0.f,1.f]
+//     GFSDK_SSAO_INVALID_VIEWPORT_DEPTH_RANGE         - The viewport depth range is not a sub-range of [0.f, 1.f]
 //     GFSDK_SSAO_INVALID_WORLD_TO_VIEW_MATRIX         - The world-to-view matrix is not valid (transposing it may help)
 //     GFSDK_SSAO_INVALID_NORMAL_TEXTURE_RESOLUTION    - The normal-texture resolution does not match the depth-texture resolution
 //     GFSDK_SSAO_INVALID_NORMAL_TEXTURE_SAMPLE_COUNT  - The normal-texture sample count does not match the depth-texture sample count
@@ -725,7 +725,7 @@ public:
 // Returns:
 //     GFSDK_SSAO_NULL_ARGUMENT                        - One of the required argument pointers is nullptr
 //     GFSDK_SSAO_INVALID_PROJECTION_MATRIX            - The projection matrix is not valid
-//     GFSDK_SSAO_INVALID_VIEWPORT_DEPTH_RANGE         - The viewport depth range is not a sub-range of [0.f,1.f]
+//     GFSDK_SSAO_INVALID_VIEWPORT_DEPTH_RANGE         - The viewport depth range is not a sub-range of [0.f, 1.f]
 //     GFSDK_SSAO_GL_INVALID_TEXTURE_TARGET            - One of the input textures is not GL_TEXTURE_2D or GL_TEXTURE_2D_MULTISAMPLE
 //     GFSDK_SSAO_GL_RESOURCE_CREATION_FAILED          - A GL resource-creation call has failed (running out of memory?)
 //     GFSDK_SSAO_OK                                   - Success
@@ -775,7 +775,7 @@ struct GFSDK_SSAO_GLFunctions
     void (GFSDK_SSAO_STDCALL* glBlendColor) (GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
     void (GFSDK_SSAO_STDCALL* glBlendEquationSeparate) (GLenum modeRGB, GLenum modeAlpha);
     void (GFSDK_SSAO_STDCALL* glBlendFuncSeparate) (GLenum sfactorRGB, GLenum dfactorRGB, GLenum sfactorAlpha, GLenum dfactorAlpha);
-    void (GFSDK_SSAO_STDCALL* glBufferData) (GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage);
+    void (GFSDK_SSAO_STDCALL* glBufferData) (GLenum target, GLsizeiptr size, const GLvoid * data, GLenum usage);
     void (GFSDK_SSAO_STDCALL* glBufferSubData) (GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid *data);
     void (GFSDK_SSAO_STDCALL* glColorMaski) (GLuint, GLboolean, GLboolean, GLboolean, GLboolean);
     void (GFSDK_SSAO_STDCALL* glCompileShader) (GLuint shader);

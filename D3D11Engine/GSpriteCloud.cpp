@@ -13,7 +13,7 @@ GSpriteCloud::~GSpriteCloud()
 
 struct CloudBB
 {
-	void MakeRandom(const D3DXVECTOR3& center, const D3DXVECTOR3& minSize, const D3DXVECTOR3& maxSize)
+	void MakeRandom(const D3DXVECTOR3 & center, const D3DXVECTOR3 & minSize, const D3DXVECTOR3 & maxSize)
 	{
 		D3DXVECTOR3 d = maxSize - minSize;
 		
@@ -41,10 +41,10 @@ struct CloudBB
 };
 
 /** Initializes this cloud */
-void GSpriteCloud::CreateCloud(const D3DXVECTOR3& size, int numSprites)
+void GSpriteCloud::CreateCloud(const D3DXVECTOR3 & size, int numSprites)
 {
 	CloudBB c;
-	c.MakeRandom(D3DXVECTOR3(0,0,0), size / 2.0f, size);
+	c.MakeRandom(D3DXVECTOR3(0, 0, 0), size / 2.0f, size);
 
 	// Fill the bb with sprites
 	for(int i=0;i<numSprites;i++)

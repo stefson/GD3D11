@@ -26,8 +26,8 @@
 #include <d3d11shader.h>
 #endif
 
-#pragma comment( lib, "d3dcompiler.lib" )
-#pragma comment( lib, "dxguid.lib" )
+#pragma comment(lib, "d3dcompiler.lib")
+#pragma comment(lib, "dxguid.lib")
 
 #include <stdint.h>
 
@@ -43,7 +43,7 @@
 #endif // D3DX11_BYTES_FROM_BITS
 
 #ifndef D3DERR_INVALIDCALL
-#define D3DERR_INVALIDCALL MAKE_HRESULT( 1, 0x876, 2156 )
+#define D3DERR_INVALIDCALL MAKE_HRESULT(1, 0x876, 2156)
 #endif
 
 struct D3DX11_STATE_BLOCK_MASK
@@ -1038,7 +1038,7 @@ DECLARE_INTERFACE_(ID3DX11Effect, IUnknown)
     
     STDMETHOD_(ID3D11ClassLinkage*, GetClassLinkage)(THIS) PURE;
 
-    STDMETHOD(CloneEffect)(THIS_ _In_ uint32_t Flags, _Outptr_ ID3DX11Effect** ppClonedEffect ) PURE;
+    STDMETHOD(CloneEffect)(THIS_ _In_ uint32_t Flags, _Outptr_ ID3DX11Effect** ppClonedEffect) PURE;
     STDMETHOD(Optimize)(THIS) PURE;
     STDMETHOD_(bool, IsOptimized)(THIS) PURE;
 };
@@ -1078,12 +1078,12 @@ extern "C" {
 //
 //----------------------------------------------------------------------------
 
-HRESULT WINAPI D3DX11CreateEffectFromMemory( _In_reads_bytes_(DataLength) LPCVOID pData,
+HRESULT WINAPI D3DX11CreateEffectFromMemory(_In_reads_bytes_(DataLength) LPCVOID pData,
                                              _In_ SIZE_T DataLength,
                                              _In_ UINT FXFlags,
                                              _In_ ID3D11Device *pDevice,
                                              _Outptr_ ID3DX11Effect **ppEffect,
-                                             _In_opt_z_ LPCSTR srcName = nullptr );
+                                             _In_opt_z_ LPCSTR srcName = nullptr);
 
 //----------------------------------------------------------------------------
 // D3DX11CreateEffectFromFile
@@ -1108,10 +1108,10 @@ HRESULT WINAPI D3DX11CreateEffectFromMemory( _In_reads_bytes_(DataLength) LPCVOI
 //
 //----------------------------------------------------------------------------
 
-HRESULT WINAPI D3DX11CreateEffectFromFile( _In_z_ LPCWSTR pFileName,
+HRESULT WINAPI D3DX11CreateEffectFromFile(_In_z_ LPCWSTR pFileName,
                                            _In_ UINT FXFlags,
                                            _In_ ID3D11Device *pDevice,
-                                           _Outptr_ ID3DX11Effect **ppEffect );
+                                           _Outptr_ ID3DX11Effect **ppEffect);
 
 //----------------------------------------------------------------------------
 // D3DX11CompileEffectFromMemory
@@ -1146,7 +1146,7 @@ HRESULT WINAPI D3DX11CreateEffectFromFile( _In_z_ LPCWSTR pFileName,
 //
 //----------------------------------------------------------------------------
 
-HRESULT D3DX11CompileEffectFromMemory( _In_reads_bytes_(DataLength) LPCVOID pData,
+HRESULT D3DX11CompileEffectFromMemory(_In_reads_bytes_(DataLength) LPCVOID pData,
                                        _In_ SIZE_T DataLength, 
                                        _In_opt_z_ LPCSTR srcName,
                                        _In_opt_ const D3D_SHADER_MACRO *pDefines,
@@ -1155,7 +1155,7 @@ HRESULT D3DX11CompileEffectFromMemory( _In_reads_bytes_(DataLength) LPCVOID pDat
                                        _In_ UINT FXFlags,
                                        _In_ ID3D11Device *pDevice,
                                        _Out_ ID3DX11Effect **ppEffect,
-                                       _Outptr_opt_result_maybenull_ ID3DBlob **ppErrors );
+                                       _Outptr_opt_result_maybenull_ ID3DBlob **ppErrors);
 
 //----------------------------------------------------------------------------
 // D3DX11CompileEffectFromFile
@@ -1186,14 +1186,14 @@ HRESULT D3DX11CompileEffectFromMemory( _In_reads_bytes_(DataLength) LPCVOID pDat
 //
 //----------------------------------------------------------------------------
 
-HRESULT D3DX11CompileEffectFromFile( _In_z_ LPCWSTR pFileName,
+HRESULT D3DX11CompileEffectFromFile(_In_z_ LPCWSTR pFileName,
                                      _In_opt_ const D3D_SHADER_MACRO *pDefines,
                                      _In_opt_ ID3DInclude *pInclude,
                                      _In_ UINT HLSLFlags,
                                      _In_ UINT FXFlags,
                                      _In_ ID3D11Device *pDevice,
                                      _Out_ ID3DX11Effect **ppEffect,
-                                     _Outptr_opt_result_maybenull_ ID3DBlob **ppErrors );
+                                     _Outptr_opt_result_maybenull_ ID3DBlob **ppErrors);
 
 #ifdef __cplusplus
 }

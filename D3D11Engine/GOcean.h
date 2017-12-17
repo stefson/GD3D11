@@ -36,22 +36,22 @@ public:
 	GMesh* GetPlaneMesh(){return PlaneMesh;}
 
 	/** Gets the oceans fft resources. Does not do addref() */
-	void GetFFTResources(ID3D11ShaderResourceView** tex_displacement, ID3D11ShaderResourceView** tex_gradient, ID3D11ShaderResourceView** fresnelMap, OceanSettingsConstantBuffer* settingsCB);
+	void GetFFTResources(ID3D11ShaderResourceView ** tex_displacement, ID3D11ShaderResourceView ** tex_gradient, ID3D11ShaderResourceView ** fresnelMap, OceanSettingsConstantBuffer* settingsCB);
 
 	/** Adds a patch at the given location */
 	WaterPatchInfo& AddWaterPatchAt(int x, int y);
 
 	/** Returns a vector of the patch locations */
-	void GetPatchLocations(std::vector<D3DXVECTOR3>& patchLocations);
+	void GetPatchLocations(std::vector<D3DXVECTOR3> & patchLocations);
 
 	/** Clears all patches */
 	void ClearPatches();
 
 	/** Saves the patches to a file */
-	XRESULT SavePatches(const std::string& file);
+	XRESULT SavePatches(const std::string & file);
 
 	/** Loads the patches from a file */
-	XRESULT LoadPatches(const std::string& file);
+	XRESULT LoadPatches(const std::string & file);
 
 protected:
 	/** Creates the fresnel map */
@@ -64,7 +64,7 @@ protected:
 	OceanSimulator* FFTOceanSimulator;
 
 	/** Fresnel map */
-	ID3D11ShaderResourceView* FresnelMapSRV;
+	ID3D11ShaderResourceView * FresnelMapSRV;
 	ID3D11Texture1D* FresnelMap;
 
 

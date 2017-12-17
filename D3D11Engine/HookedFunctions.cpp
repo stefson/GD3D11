@@ -97,7 +97,7 @@ int __stdcall HookedFunctionInfo::hooked_HandledWinMain(HINSTANCE hInstance, HIN
 	return r;
 }
 
-void __fastcall HookedFunctionInfo::hooked_zCActiveSndAutoCalcObstruction(void* thisptr, void* unknwn, int i)
+void __fastcall HookedFunctionInfo::hooked_zCActiveSndAutoCalcObstruction(void * thisptr, void * unknwn, int i)
 {
 	// Just do nothing here. Something was inside zCBspTree::Render that managed this and thus voices get really quiet in indoor locations
 	// This function is for calculating the automatic volume-changes when the camera goes in/out buildings
@@ -117,9 +117,9 @@ long __stdcall HookedFunctionInfo::hooked_zCExceptionHandlerUnhandledExceptionFi
 }
 
 /** Returns the pixelformat of a bink-surface */
-long __fastcall HookedFunctionInfo::hooked_zBinkPlayerGetPixelFormat(void* thisptr, void* unknwn, zTRndSurfaceDesc& desc)
+long __fastcall HookedFunctionInfo::hooked_zBinkPlayerGetPixelFormat(void * thisptr, void * unknwn, zTRndSurfaceDesc& desc)
 {
-	int* cd = (int *)&desc;
+	int * cd = (int *)&desc;
 
 	// Resolution is at pos [2] and [3]
 	//cd[2] = Engine::GraphicsEngine->GetResolution().x;
@@ -134,7 +134,7 @@ long __fastcall HookedFunctionInfo::hooked_zBinkPlayerGetPixelFormat(void* thisp
 	//Global::HookedFunctions.zBinkPlayerGetPixelFormat(thisptr, desc);
 }
 
-int __fastcall HookedFunctionInfo::hooked_zBinkPlayerOpenVideo(void* thisptr, void* unknwn, zSTRING str)
+int __fastcall HookedFunctionInfo::hooked_zBinkPlayerOpenVideo(void * thisptr, void * unknwn, zSTRING str)
 {
 	int r = HookedFunctions::OriginalFunctions.original_zCBinkPlayerOpenVideo(thisptr, str);
 

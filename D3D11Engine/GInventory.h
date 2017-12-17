@@ -13,7 +13,7 @@ public:
 	void OnAddVob(VobInfo* vob, zCWorld* world);
 
 	/** Called when a VOB got removed from the world */
-	bool OnRemovedVob(zCVob* vob, zCWorld* world);
+	bool OnRemovedVob(zCVob * vob, zCWorld* world);
 
 	/** Draws the inventory for the given world */
 	void DrawInventory(zCWorld* world, zCCamera& camera);

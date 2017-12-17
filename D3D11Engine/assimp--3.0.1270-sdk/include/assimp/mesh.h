@@ -129,7 +129,7 @@ struct aiFace
 	unsigned int mNumIndices; 
 
 	//! Pointer to the indices array. Size of the array is given in numIndices.
-	unsigned int* mIndices;   
+	unsigned int * mIndices;   
 
 #ifdef __cplusplus
 
@@ -146,14 +146,14 @@ struct aiFace
 	}
 
 	//! Copy constructor. Copy the index array
-	aiFace( const aiFace& o)
+	aiFace(const aiFace& o)
 	{
 		mIndices = nullptr;
 		*this = o;
 	}
 
 	//! Assignment operator. Copy the index array
-	const aiFace& operator = ( const aiFace& o)
+	const aiFace& operator = (const aiFace& o)
 	{
 		if (&o == this)
 			return *this;
@@ -161,7 +161,7 @@ struct aiFace
 		delete[] mIndices;
 		mNumIndices = o.mNumIndices;
 		mIndices = new unsigned int[mNumIndices];
-		::memcpy( mIndices, o.mIndices, mNumIndices * sizeof( unsigned int));
+		::memcpy(mIndices, o.mIndices, mNumIndices * sizeof(unsigned int));
 		return *this;
 	}
 
@@ -209,8 +209,8 @@ struct aiVertexWeight
 	//! Initialisation from a given index and vertex weight factor
 	//! \param pID ID
 	//! \param pWeight Vertex weight factor
-	aiVertexWeight( unsigned int pID, float pWeight) 
-		: mVertexId( pID), mWeight( pWeight) 
+	aiVertexWeight(unsigned int pID, float pWeight) 
+		: mVertexId(pID), mWeight(pWeight) 
 	{ /* nothing to do here */ }
 
 #endif // __cplusplus
@@ -379,10 +379,10 @@ struct aiAnimMesh
 		, mBitangents()
 	{
 		// fixme consider moving this to the ctor initializer list as well
-		for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++){
+		for(unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++){
 			mTextureCoords[a] = nullptr;
 		}
-		for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++) {
+		for(unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++) {
 			mColors[a] = nullptr;
 		}
 	}
@@ -393,10 +393,10 @@ struct aiAnimMesh
 		delete [] mNormals;
 		delete [] mTangents;
 		delete [] mBitangents;
-		for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++) {
+		for(unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++) {
 			delete [] mTextureCoords[a];
 		}
-		for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++) {
+		for(unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++) {
 			delete [] mColors[a];
 		}
 	}
@@ -423,14 +423,14 @@ struct aiAnimMesh
 	/** Check whether the anim mesh overrides a particular
 	 * set of vertex colors on his host mesh. 
 	 *  @param pIndex 0<index<AI_MAX_NUMBER_OF_COLOR_SETS */ 
-	bool HasVertexColors( unsigned int pIndex) const	{ 
+	bool HasVertexColors(unsigned int pIndex) const	{ 
 		return pIndex >= AI_MAX_NUMBER_OF_COLOR_SETS ? false : mColors[pIndex] != nullptr; 
 	}
 
 	/** Check whether the anim mesh overrides a particular
 	 * set of texture coordinates on his host mesh. 
 	 *  @param pIndex 0<index<AI_MAX_NUMBER_OF_TEXTURECOORDS */ 
-	bool HasTextureCoords( unsigned int pIndex) const	{ 
+	bool HasTextureCoords(unsigned int pIndex) const	{ 
 		return pIndex >= AI_MAX_NUMBER_OF_TEXTURECOORDS ? false : mTextureCoords[pIndex] != nullptr; 
 	}
 
@@ -616,12 +616,12 @@ struct aiMesh
 		mBitangents = nullptr;
 		mAnimMeshes = nullptr;
 
-		for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++)
+		for(unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++)
 		{
 			mNumUVComponents[a] = 0;
 			mTextureCoords[a] = nullptr;
 		}
-		for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++)
+		for(unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++)
 			mColors[a] = nullptr;
 		mNumBones = 0; mBones = nullptr;
 		mMaterialIndex = 0;
@@ -636,23 +636,23 @@ struct aiMesh
 		delete [] mNormals;
 		delete [] mTangents;
 		delete [] mBitangents;
-		for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++) {
+		for(unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++) {
 			delete [] mTextureCoords[a];
 		}
-		for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++) {
+		for(unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++) {
 			delete [] mColors[a];
 		}
 
 		// DO NOT REMOVE THIS ADDITIONAL CHECK
 		if (mNumBones && mBones)	{
-			for( unsigned int a = 0; a < mNumBones; a++) {
+			for(unsigned int a = 0; a < mNumBones; a++) {
 				delete mBones[a];
 			}
 			delete [] mBones;
 		}
 
 		if (mNumAnimMeshes && mAnimMeshes)	{
-			for( unsigned int a = 0; a < mNumAnimMeshes; a++) {
+			for(unsigned int a = 0; a < mNumAnimMeshes; a++) {
 				delete mAnimMeshes[a];
 			}
 			delete [] mAnimMeshes;
@@ -685,9 +685,9 @@ struct aiMesh
 
 	//! Check whether the mesh contains a vertex color set
 	//! \param pIndex Index of the vertex color set
-	bool HasVertexColors( unsigned int pIndex) const
+	bool HasVertexColors(unsigned int pIndex) const
 	{ 
-		if ( pIndex >= AI_MAX_NUMBER_OF_COLOR_SETS) 
+		if (pIndex >= AI_MAX_NUMBER_OF_COLOR_SETS) 
 			return false; 
 		else 
 			return mColors[pIndex] != nullptr && mNumVertices > 0; 
@@ -695,9 +695,9 @@ struct aiMesh
 
 	//! Check whether the mesh contains a texture coordinate set
 	//! \param pIndex Index of the texture coordinates set
-	bool HasTextureCoords( unsigned int pIndex) const
+	bool HasTextureCoords(unsigned int pIndex) const
 	{ 
-		if ( pIndex >= AI_MAX_NUMBER_OF_TEXTURECOORDS) 
+		if (pIndex >= AI_MAX_NUMBER_OF_TEXTURECOORDS) 
 			return false; 
 		else 
 			return mTextureCoords[pIndex] != nullptr && mNumVertices > 0; 

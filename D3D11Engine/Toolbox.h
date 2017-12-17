@@ -32,7 +32,7 @@ namespace Toolbox {
 	template<typename T, typename S>
 	void EraseByElement(std::map<T, S> & map, S value) {
 		for (auto it = map.begin(); it != map.end();) {
-			if ((*it).second == value) {
+			if (it->second == value) {
 				it = map.erase(it);
 			} else {
 				++it;

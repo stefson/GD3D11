@@ -24,9 +24,9 @@ public:
 	/*void Destructor(char arg)
 	{
 		// Get vtable-entry
-		int* vtbl = (int*)((int*)this)[0];
+		int * vtbl = (int *)((int *)this)[0];
 
-		typedef void(__thiscall* pFun)(void*, char);
+		typedef void(__thiscall* pFun)(void *, char);
 
 		pFun fn = (pFun)vtbl[GothicMemoryLocations::zCObject::VTBL_ScalarDestructor];
 		fn(this, arg);

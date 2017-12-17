@@ -77,7 +77,7 @@ public:
 
 
 	/** construction from 3x3 matrix, remaining elements are set to identity */
-	explicit aiMatrix4x4t( const aiMatrix3x3t<TReal>& m);
+	explicit aiMatrix4x4t(const aiMatrix3x3t<TReal> & m);
 
 public:
 
@@ -124,8 +124,8 @@ public:
 	 *   quaternion 
 	 *  @param position Receives the output position for the x,y,z axes
 	 */
-	void Decompose (aiVector3t<TReal>& scaling, aiQuaterniont<TReal>& rotation,
-		aiVector3t<TReal>& position) const;
+	void Decompose (aiVector3t<TReal> & scaling, aiQuaterniont<TReal> & rotation,
+		aiVector3t<TReal> & position) const;
 
 	// -------------------------------------------------------------------
 	/** @brief Decompose a trafo matrix with no scaling into its 
@@ -134,8 +134,8 @@ public:
 	 *    quaternion 
 	 *  @param position Receives the output position for the x,y,z axes
 	 */
-	void DecomposeNoScaling (aiQuaterniont<TReal>& rotation,
-		aiVector3t<TReal>& position) const;
+	void DecomposeNoScaling (aiQuaterniont<TReal> & rotation,
+		aiVector3t<TReal> & position) const;
 
 
 	// -------------------------------------------------------------------
@@ -145,7 +145,7 @@ public:
 	 *  @param z Rotation angle for the z-axis, in radians
 	 */
 	aiMatrix4x4t& FromEulerAnglesXYZ(TReal x, TReal y, TReal z);
-	aiMatrix4x4t& FromEulerAnglesXYZ(const aiVector3t<TReal>& blubb);
+	aiMatrix4x4t& FromEulerAnglesXYZ(const aiVector3t<TReal> & blubb);
 
 public:
 	// -------------------------------------------------------------------
@@ -179,7 +179,7 @@ public:
 	 *  @param out Receives the output matrix
 	 *  @return Reference to the output matrix
 	 */
-	static aiMatrix4x4t& Rotation(TReal a, const aiVector3t<TReal>& axis, 
+	static aiMatrix4x4t& Rotation(TReal a, const aiVector3t<TReal> & axis, 
 		aiMatrix4x4t& out);
 
 	// -------------------------------------------------------------------
@@ -188,7 +188,7 @@ public:
 	 *  @param out Receives the output matrix
 	 *  @return Reference to the output matrix
 	 */
-	static aiMatrix4x4t& Translation( const aiVector3t<TReal>& v, aiMatrix4x4t& out);
+	static aiMatrix4x4t& Translation(const aiVector3t<TReal> & v, aiMatrix4x4t& out);
 
 	// -------------------------------------------------------------------
 	/** @brief Returns a scaling matrix 
@@ -196,7 +196,7 @@ public:
 	 *  @param out Receives the output matrix
 	 *  @return Reference to the output matrix
 	 */
-	static aiMatrix4x4t& Scaling( const aiVector3t<TReal>& v, aiMatrix4x4t& out);
+	static aiMatrix4x4t& Scaling(const aiVector3t<TReal> & v, aiMatrix4x4t& out);
 
 	// -------------------------------------------------------------------
 	/** @brief A function for creating a rotation matrix that rotates a
@@ -207,8 +207,8 @@ public:
 	 *          "Efficiently Building a Matrix to Rotate One Vector to Another"
 	 *          Journal of Graphics Tools, 4(4):1-4, 1999
 	 */
-	static aiMatrix4x4t& FromToMatrix(const aiVector3t<TReal>& from, 
-		const aiVector3t<TReal>& to, aiMatrix4x4t& out);
+	static aiMatrix4x4t& FromToMatrix(const aiVector3t<TReal> & from, 
+		const aiVector3t<TReal> & to, aiMatrix4x4t& out);
 
 public:
 

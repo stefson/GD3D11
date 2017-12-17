@@ -1,4 +1,5 @@
 #pragma once
+
 #include "pch.h"
 
 const float BASEWIDGET_TRANS_LENGTH = 1.5;
@@ -12,10 +13,10 @@ const int BASEWIDGET_MODE_SCALE = 1;
 class EditorLinePrimitive;
 class WidgetContainer;
 class zCVob;
-class BaseWidget
-{
+
+class BaseWidget {
 public:
-	BaseWidget(WidgetContainer* container);
+	BaseWidget(WidgetContainer * container);
 	virtual ~BaseWidget();
 
 	/** Renders the widget */
@@ -28,18 +29,18 @@ public:
 	virtual void OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 	/** Called when an object was added to the selection */
-	virtual void OnSelectionAdded(zCVob* vob);
+	virtual void OnSelectionAdded(zCVob * vob);
 
 	/** Widget primitives */
-	void CreateArrowCone(int Detail, int Axis, D3DXVECTOR4* Color, EditorLinePrimitive* Prim);
-	void CreateArrowCube(D3DXVECTOR3* Offset, float Extends, D3DXVECTOR4* Color, EditorLinePrimitive* Prim);
+	void CreateArrowCone(int Detail, int Axis, D3DXVECTOR4 * Color, EditorLinePrimitive * Prim);
+	void CreateArrowCube(D3DXVECTOR3 * Offset, float Extends, D3DXVECTOR4 * Color, EditorLinePrimitive * Prim);
 
 	/** Returns whether this widget is active or not */
-	virtual bool IsActive(){return false;}
+	virtual bool IsActive() const { return false; }
 
 protected:
 	/** Captures the mouse in the middle of the screen and returns the delta since last frame */
-	D3DXVECTOR2 GetMouseDelta();
+	D3DXVECTOR2 GetMouseDelta() const;
 
 	/** Hides/Shows the mouse */
 	void SetMouseVisibility(bool visible);
@@ -50,8 +51,7 @@ protected:
 	D3DXVECTOR3 Scale;
 
 	/** Owning widgetcontainer */
-	WidgetContainer* OwningContainer;
+	WidgetContainer * OwningContainer;
 
-	EditorLinePrimitive* testPrim;
+	EditorLinePrimitive * testPrim;
 };
-

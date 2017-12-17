@@ -18,7 +18,7 @@ extern "C"
 		- Size: Size of the cross. (About 25 is the size of a human head) */
 	__declspec(dllexport) void __cdecl GDX_AddPointLocator(float3* position, float size)
 	{
-		Engine::GraphicsEngine->GetLineRenderer()->AddPointLocator(*position->toD3DXVECTOR3(), size, D3DXVECTOR4(1,0,0,1));
+		Engine::GraphicsEngine->GetLineRenderer()->AddPointLocator(*position->toD3DXVECTOR3(), size, D3DXVECTOR4(1, 0, 0, 1));
 	}
 
 	/** Sets the fog-color to use when not in fog-zone */
@@ -78,9 +78,9 @@ extern "C"
 	}
 
 	/** Callback for the messageboxes */
-	static void MB_Callback(ED2D_MB_ACTION action, void* userdata)
+	static void MB_Callback(ED2D_MB_ACTION action, void * userdata)
 	{
-		int* id = (int *)userdata;
+		int * id = (int *)userdata;
 
 #ifndef BUILD_SPACER
 		// Call script-callback
@@ -97,7 +97,7 @@ extern "C"
 		- Callback: Script-Function ID to use as a callback. */
 	__declspec(dllexport) void __cdecl GDX_OpenMessageBox(zSTRING* message, zSTRING* caption, int type, int callbackID)
 	{
-		D3D11GraphicsEngine* g = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
+		D3D11GraphicsEngine * g = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 
 		// Initialize the UI-Framework. Will do nothing if already done
 		g->CreateMainUIView();
@@ -106,7 +106,7 @@ extern "C"
 		if (g->GetUIView())
 		{
 			// Store the callback ID in memory
-			int* d = new int;
+			int * d = new int;
 			*d = callbackID;
 
 			// Register the messagebox

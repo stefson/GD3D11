@@ -17,10 +17,10 @@ public:
 	~D3D11PfxRenderer();
 
 	/** Called on resize */
-	XRESULT OnResize(const INT2& newResolution);
+	XRESULT OnResize(const INT2 & newResolution);
 
 	/** Blurs the given texture */
-	XRESULT BlurTexture(RenderToTextureBuffer* texture, bool leaveResultInD4_2 = false, float scale = 1.0f, const D3DXVECTOR4& colorMod = D3DXVECTOR4(1,1,1,1), const std::string& finalCopyShader = "PS_PFX_Simple");
+	XRESULT BlurTexture(RenderToTextureBuffer * texture, bool leaveResultInD4_2 = false, float scale = 1.0f, const D3DXVECTOR4 & colorMod = D3DXVECTOR4(1, 1, 1, 1), const std::string & finalCopyShader = "PS_PFX_Simple");
 
 	/** Renders the heightfog */
 	XRESULT RenderHeightfog();
@@ -38,7 +38,7 @@ public:
 	XRESULT RenderGodRays();
 
 	/** Copies the given texture to the given RTV */
-	XRESULT CopyTextureToRTV(ID3D11ShaderResourceView* texture, ID3D11RenderTargetView* rtv, INT2 targetResolution = INT2(0,0), bool useCustomPS = false, INT2 offset = INT2(0,0));
+	XRESULT CopyTextureToRTV(ID3D11ShaderResourceView * texture, ID3D11RenderTargetView* rtv, INT2 targetResolution = INT2(0, 0), bool useCustomPS = false, INT2 offset = INT2(0, 0));
 
 	/** Unbinds texturesamplers from the pixel-shader */
 	XRESULT UnbindPSResources(int num);
@@ -50,17 +50,17 @@ public:
 	XRESULT DrawHBAO(ID3D11RenderTargetView* rtv);
 
 	/** Accessors */
-	RenderToTextureBuffer* GetTempBuffer(){return TempBuffer;}
-	RenderToTextureBuffer* GetTempBufferDS4_1(){return TempBufferDS4_1;}
-	RenderToTextureBuffer* GetTempBufferDS4_2(){return TempBufferDS4_2;}
+	RenderToTextureBuffer * GetTempBuffer(){return TempBuffer;}
+	RenderToTextureBuffer * GetTempBufferDS4_1(){return TempBufferDS4_1;}
+	RenderToTextureBuffer * GetTempBufferDS4_2(){return TempBufferDS4_2;}
 
 private:
 	/** Temporary buffer in the same size/format as the backbuffer */
-	RenderToTextureBuffer* TempBuffer;
+	RenderToTextureBuffer * TempBuffer;
 
 	/** Temporary buffer with the resolution divided by 4 */
-	RenderToTextureBuffer* TempBufferDS4_1;
-	RenderToTextureBuffer* TempBufferDS4_2;
+	RenderToTextureBuffer * TempBufferDS4_1;
+	RenderToTextureBuffer * TempBufferDS4_2;
 
 	/** Blur effect referenced here because it's often needed by PFX */
 	D3D11PFX_Blur* FX_Blur;

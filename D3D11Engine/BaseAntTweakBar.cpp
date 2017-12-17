@@ -455,7 +455,7 @@ void BaseAntTweakBar::InitTextureSettingsBar()
 
 	std::string enumDef = "";
 
-	const std::set<zCTexture *>& frameTextures = Engine::GraphicsEngine->GetFrameTextures();
+	const std::set<zCTexture *> & frameTextures = Engine::GraphicsEngine->GetFrameTextures();
 	if (!frameTextures.size())
 		return;
 
@@ -498,7 +498,7 @@ void BaseAntTweakBar::InitTextureSettingsBar()
 
 
 /** Sets the preferred texture for the texture settings */
-void BaseAntTweakBar::SetPreferredTextureForSettings(const std::string& texture)
+void BaseAntTweakBar::SetPreferredTextureForSettings(const std::string & texture)
 {
 	TS_PreferredTexture = texture;
 }
@@ -519,7 +519,7 @@ void TW_CALL BaseAntTweakBar::LoadZENResourcesCallback(void *clientData)
 }
 
 /** Called on load ZEN resources */
-void TW_CALL BaseAntTweakBar::OpenSettingsCallback(void* clientdata)
+void TW_CALL BaseAntTweakBar::OpenSettingsCallback(void * clientdata)
 {
 	Engine::GraphicsEngine->OnUIEvent(BaseGraphicsEngine::EUIEvent::UI_OpenSettings);
 }

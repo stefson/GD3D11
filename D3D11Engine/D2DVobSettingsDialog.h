@@ -10,19 +10,19 @@ class D2DVobSettingsDialog :
 	public D2DDialog
 {
 public:
-	D2DVobSettingsDialog(D2DView* view, D2DSubView* parent);
+	D2DVobSettingsDialog(D2DView * view, D2DSubView * parent);
 	~D2DVobSettingsDialog();
 
 	/** Initializes the controls of this view */
 	virtual XRESULT InitControls();
 
 	/** Sets the Vob to do settings on */
-	void SetVobInfo(BaseVobInfo* vob);
+	void SetVobInfo(BaseVobInfo * vob);
 
 private:
 	/** Close button */
-	static void CloseButtonPressed(SV_Button* sender, void* userdata);
-	static void SliderDragged(SV_Slider* sender, void* userdata);
+	static void CloseButtonPressed(SV_Button * sender, void * userdata);
+	static void SliderDragged(SV_Slider * sender, void * userdata);
 
 	/** Controls */
 	SV_GMeshInfoView* MeshView;
@@ -32,6 +32,6 @@ private:
 	SV_NamedSlider* RenderMode;
 
 	/** Settings */
-	BaseVobInfo* Vob;
+	BaseVobInfo * Vob;
 };
 

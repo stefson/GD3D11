@@ -21,7 +21,7 @@ public:
 	static void Unbind();
 
 	/** Returns a reference to the constantBuffer vector*/
-	std::vector<D3D11ConstantBuffer*>& GetConstantBuffer();
+	std::vector<D3D11ConstantBuffer*> & GetConstantBuffer();
 
 	/** Returns the shader */
 	ID3D11HullShader* GetHShader(){return HullShader;}

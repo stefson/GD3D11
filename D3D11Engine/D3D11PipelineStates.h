@@ -20,7 +20,7 @@ public:
 		if (ds.DepthWriteEnabled)
 		{
 			depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-		}else
+		} else
 		{
 			depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
 		}

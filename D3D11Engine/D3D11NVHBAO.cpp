@@ -20,7 +20,7 @@ D3D11NVHBAO::~D3D11NVHBAO()
 /** Initializes the library */
 XRESULT D3D11NVHBAO::Init()
 {
-	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
+	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 
 	GFSDK_SSAO_CustomHeap CustomHeap;
 	CustomHeap.new_ = ::operator new;
@@ -42,7 +42,7 @@ XRESULT D3D11NVHBAO::Init()
 /** Renders the HBAO-Effect onto the given RTV */
 XRESULT D3D11NVHBAO::Render(ID3D11RenderTargetView* rtv)
 {
-	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
+	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 
 	D3D11_VIEWPORT vp;
 	UINT num = 1;

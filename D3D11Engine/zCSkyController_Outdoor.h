@@ -11,7 +11,7 @@ class zCSkyPlanet
 {
 public:
 	int vtbl;
-	void* mesh; // 0
+	void * mesh; // 0
 	D3DXVECTOR4 color0; // 4 
 	D3DXVECTOR4 color1; // 20
 	float		size; // 36
@@ -31,7 +31,7 @@ class zCSkyLayerData
 {
 public:
 	zESkyLayerMode SkyMode;
-	zCTexture* Tex;
+	zCTexture * Tex;
 	char zSTring_TexName[20];
 	
 	float TexAlpha;
@@ -62,14 +62,14 @@ enum zTWeather
 
 class zCSkyLayer;
 
-typedef void (__thiscall* zCSkyControllerRenderSkyPre)(void*);
-typedef void (__thiscall* zCSkyControllerRenderSkyPost)(void*, int);
+typedef void (__thiscall* zCSkyControllerRenderSkyPre)(void *);
+typedef void (__thiscall* zCSkyControllerRenderSkyPost)(void *, int);
 class zCSkyController : public zCObject
 {
 public:
 	void RenderSkyPre()
 	{
-		int* vtbl = (int*)((int*)this)[0];
+		int * vtbl = (int *)((int *)this)[0];
 
 		zCSkyControllerRenderSkyPre fn = (zCSkyControllerRenderSkyPre)vtbl[GothicMemoryLocations::zCSkyController::VTBL_RenderSkyPre];
 		fn(this);
@@ -77,7 +77,7 @@ public:
 
 	void RenderSkyPost()
 	{
-		int* vtbl = (int*)((int*)this)[0];
+		int * vtbl = (int *)((int *)this)[0];
 
 		zCSkyControllerRenderSkyPost fn = (zCSkyControllerRenderSkyPost)vtbl[GothicMemoryLocations::zCSkyController::VTBL_RenderSkyPost];
 		fn(this, 1);
@@ -162,7 +162,7 @@ public:
 	/** Returns the master-time wrapped between 0 and 1 */
 	float GetMasterTime()
 	{
-		return *(float*)(((char *)this) + GothicMemoryLocations::zCSkyController_Outdoor::Offset_MasterTime);
+		return *(float *)(((char *)this) + GothicMemoryLocations::zCSkyController_Outdoor::Offset_MasterTime);
 	}
 
 	int GetUnderwaterFX()
@@ -173,9 +173,9 @@ public:
 	D3DXVECTOR3 GetOverrideColor()
 	{
 #ifndef BUILD_GOTHIC_1_08k
-		return *(D3DXVECTOR3*)THISPTR_OFFSET(GothicMemoryLocations::zCSkyController_Outdoor::Offset_OverrideColor);
+		return *(D3DXVECTOR3 *)THISPTR_OFFSET(GothicMemoryLocations::zCSkyController_Outdoor::Offset_OverrideColor);
 #else
-		return D3DXVECTOR3(0,0,0);
+		return D3DXVECTOR3(0, 0, 0);
 #endif
 	}
 
@@ -194,7 +194,7 @@ public:
 	D3DXVECTOR3 GetSunWorldPosition(float timeScale = 1.0f) {
 		/*if (!GetSun())
 		{
-			return D3DXVECTOR3(0,0,0);
+			return D3DXVECTOR3(0, 0, 0);
 		}*/
 
 		//float angle = GetMasterTime() * 2.0f * (float)D3DX_PI; // Get mastertime into rad, 0 and 12 are now at the horizon, 18 is in the sky
@@ -204,7 +204,7 @@ public:
 		D3DXVECTOR3 sunPos = D3DXVECTOR3(-60, 0, 100);
 		D3DXVec3Normalize(&sunPos, &sunPos);
 
-		D3DXVECTOR3 rotAxis = D3DXVECTOR3(1,0,0);
+		D3DXVECTOR3 rotAxis = D3DXVECTOR3(1, 0, 0);
 
 		D3DXMATRIX r = HookedFunctions::OriginalFunctions.original_Alg_Rotation3DNRad(rotAxis, -angle);
 		D3DXMatrixTranspose(&r, &r);

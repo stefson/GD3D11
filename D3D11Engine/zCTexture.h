@@ -33,7 +33,7 @@ public:
 		zCTextureCacheHack::ForceCacheIn = false;
 	}
 
-	static int __fastcall hooked_LoadResourceData(void* thisptr)
+	static int __fastcall hooked_LoadResourceData(void * thisptr)
 	{
 		Engine::GAPI->SetBoundTexture(7, (zCTexture *)thisptr); // Slot 7 is reserved for this
 		int ret = HookedFunctions::OriginalFunctions.ofiginal_zCTextureLoadResourceData(thisptr);
@@ -42,8 +42,8 @@ public:
 
 		/*if (ret)
 		{
-			zCTexture* tx = (zCTexture *)thisptr;
-			MyDirectDrawSurface7* srf = tx->GetSurface();
+			zCTexture * tx = (zCTexture *)thisptr;
+			MyDirectDrawSurface7 * srf = tx->GetSurface();
 
 			if (srf)
 			{
@@ -56,7 +56,7 @@ public:
 	}
 
 
-	static int __fastcall hooked_XTEX_BuildSurfaces(void* thisptr, void* unknwn, int iVal)
+	static int __fastcall hooked_XTEX_BuildSurfaces(void * thisptr, void * unknwn, int iVal)
 	{
 		// Notify the texture and load resources
 		int ret = HookedFunctions::OriginalFunctions.original_zCTex_D3DXTEX_BuildSurfaces(thisptr, iVal);
@@ -81,7 +81,7 @@ public:
 		return n;
 	}
 
-	MyDirectDrawSurface7* GetSurface()
+	MyDirectDrawSurface7 * GetSurface()
 	{
 		return *(MyDirectDrawSurface7 **)THISPTR_OFFSET(GothicMemoryLocations::zCTexture::Offset_Surface);
 	}
@@ -141,7 +141,7 @@ public:
 			zCResourceManager::GetResourceManager()->CacheIn(this, zCTextureCacheHack::ForceCacheIn ? -1 : priority);
 		}
 
-		MyDirectDrawSurface7* surface = GetSurface();
+		MyDirectDrawSurface7 * surface = GetSurface();
 		if (!surface || !surface->IsSurfaceReady())
 		{
 			if (zCTextureCacheHack::ForceCacheIn)
@@ -175,7 +175,7 @@ public:
 	}*/
 
 /*#ifdef BUILD_GOTHIC_1_08k
-	zCTexture* GetAniTexture()
+	zCTexture * GetAniTexture()
 	{
 		XCALL(GothicMemoryLocations::zCTexture::GetAniTexture);
 	}

@@ -100,7 +100,7 @@ struct aiNode
 	unsigned int mNumMeshes;
 
 	/** The meshes of this node. Each entry is an index into the mesh */
-	unsigned int* mMeshes;
+	unsigned int * mMeshes;
 
 #ifdef __cplusplus
 	/** Constructor */
@@ -113,7 +113,7 @@ struct aiNode
 	}
 
 	/** Construction from a specific name */
-	aiNode(const std::string& name) 
+	aiNode(const std::string & name) 
 	{ 
 		// set all members to zero by default
 		mParent = nullptr; 
@@ -129,7 +129,7 @@ struct aiNode
 		// to make sure we won't crash if the data is invalid ...
 		if (mChildren && mNumChildren)  
 		{
-			for( unsigned int a = 0; a < mNumChildren; a++)
+			for(unsigned int a = 0; a < mNumChildren; a++)
 				delete mChildren[a];
 		}
 		delete [] mChildren;
@@ -152,7 +152,7 @@ struct aiNode
 	 */
 	inline aiNode* FindNode(const char* name)
 	{
-		if (!::strcmp( mName.data,name))return this;
+		if (!::strcmp(mName.data,name))return this;
 		for (unsigned int i = 0; i < mNumChildren;++i)
 		{
 			aiNode* p = mChildren[i]->FindNode(name);
@@ -364,7 +364,7 @@ struct aiScene
 
 	/**  Internal data, do not touch */
 #ifdef __cplusplus
-	void* mPrivate;
+	void * mPrivate;
 #else
 	char* mPrivate;
 #endif

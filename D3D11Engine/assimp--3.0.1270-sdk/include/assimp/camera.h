@@ -79,11 +79,11 @@ extern "C" {
  *      if (is-animated(nd))
  *         cur = eval-animation(nd)
  *      else cur = nd->mTransformation;
- *      cmt = mult-matrices( cmt, cur )
+ *      cmt = mult-matrices(cmt, cur)
  *    end for
  *
  *    // now multiply with the camera's own local transform
- *    cam = mult-matrices (cam, get-camera-matrix(cmt) )
+ *    cam = mult-matrices (cam, get-camera-matrix(cmt))
  * }
  * @endcode
  *
@@ -172,8 +172,8 @@ struct aiCamera
 #ifdef __cplusplus
 
 	aiCamera()
-		: mUp				(0.f,1.f,0.f)
-		, mLookAt			(0.f,0.f,1.f)
+		: mUp				(0.f, 1.f, 0.f)
+		, mLookAt			(0.f, 0.f, 1.f)
 		, mHorizontalFOV	(0.25f * (float)AI_MATH_PI)
 		, mClipPlaneNear	(0.1f)
 		, mClipPlaneFar		(1000.f)

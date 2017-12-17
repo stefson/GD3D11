@@ -95,7 +95,7 @@ public:
 		unsigned int mEnforcePP;
 
 		// Constructor to fill all entries
-		ExportFormatEntry( const char* pId, const char* pDesc, const char* pExtension, fpExportFunc pFunction, unsigned int pEnforcePP = 0u)
+		ExportFormatEntry(const char* pId, const char* pDesc, const char* pExtension, fpExportFunc pFunction, unsigned int pEnforcePP = 0u)
 		{
 			mDescription.id = pId;
 			mDescription.description = pDesc;
@@ -132,7 +132,7 @@ public:
 	 *
 	 * @param pIOHandler The IO handler to be used in all file accesses 
 	 *   of the Importer. */
-	void SetIOHandler( IOSystem* pIOHandler);
+	void SetIOHandler(IOSystem* pIOHandler);
 
 	// -------------------------------------------------------------------
 	/** Retrieves the IO handler that is currently set.
@@ -168,8 +168,8 @@ public:
 	* @note If the Exporter instance did already hold a blob from
 	*   a previous call to #ExportToBlob, it will be disposed. 
 	*   Any IO handlers set via #SetIOHandler are ignored here.*/
-	const aiExportDataBlob* ExportToBlob(  const aiScene* pScene, const char* pFormatId, unsigned int pPreprocessing = 0u );
-	inline const aiExportDataBlob* ExportToBlob(  const aiScene* pScene, const std::string& pFormatId, unsigned int pPreprocessing = 0u );
+	const aiExportDataBlob* ExportToBlob( const aiScene* pScene, const char* pFormatId, unsigned int pPreprocessing = 0u);
+	inline const aiExportDataBlob* ExportToBlob( const aiScene* pScene, const std::string & pFormatId, unsigned int pPreprocessing = 0u);
 
 
 	// -------------------------------------------------------------------
@@ -197,8 +197,8 @@ public:
 	 *   the #aiProcess_Triangulate flag, most export formats support only
 	 *  triangulate data so they would run the step even if it wasn't requested.
 	 * @return AI_SUCCESS if everything was fine. */
-	aiReturn Export( const aiScene* pScene, const char* pFormatId, const char* pPath, unsigned int pPreprocessing = 0u);
-	inline aiReturn Export( const aiScene* pScene, const std::string& pFormatId, const std::string& pPath,  unsigned int pPreprocessing = 0u);
+	aiReturn Export(const aiScene* pScene, const char* pFormatId, const char* pPath, unsigned int pPreprocessing = 0u);
+	inline aiReturn Export(const aiScene* pScene, const std::string & pFormatId, const std::string & pPath,  unsigned int pPreprocessing = 0u);
 
 
 	// -------------------------------------------------------------------
@@ -234,7 +234,7 @@ public:
 	 *  automatically by the destructor. The only reason to call
 	 *  it manually would be to reclain as much storage as possible
 	 *  without giving up the #Exporter instance yet. */
-	void FreeBlob( );
+	void FreeBlob();
 
 
 	// -------------------------------------------------------------------
@@ -252,7 +252,7 @@ public:
 	 *  for. Valid range is 0 to #Exporter::GetExportFormatCount
 	 * @return A description of that specific export format. 
 	 *  nullptr if pIndex is out of range. */
-	const aiExportFormatDesc* GetExportFormatDescription( size_t pIndex ) const;
+	const aiExportFormatDesc* GetExportFormatDescription(size_t pIndex) const;
 
 
 	// -------------------------------------------------------------------
@@ -287,13 +287,13 @@ protected:
 
 
 // ----------------------------------------------------------------------------------
-inline const aiExportDataBlob* Exporter :: ExportToBlob(  const aiScene* pScene, const std::string& pFormatId,unsigned int pPreprocessing ) 
+inline const aiExportDataBlob* Exporter :: ExportToBlob( const aiScene* pScene, const std::string & pFormatId,unsigned int pPreprocessing) 
 {
 	return ExportToBlob(pScene,pFormatId.c_str(),pPreprocessing);
 }
 
 // ----------------------------------------------------------------------------------
-inline aiReturn Exporter :: Export( const aiScene* pScene, const std::string& pFormatId, const std::string& pPath, unsigned int pPreprocessing )
+inline aiReturn Exporter :: Export(const aiScene* pScene, const std::string & pFormatId, const std::string & pPath, unsigned int pPreprocessing)
 {
 	return Export(pScene,pFormatId.c_str(),pPath.c_str(),pPreprocessing);
 }

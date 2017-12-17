@@ -26,8 +26,8 @@ struct ExTraits : public OpenMesh::DefaultTraits
 
 struct ExVertexStructOM : public OpenMesh::DefaultTraits
 {
-	VertexAttributes( OpenMesh::Attributes::Normal | OpenMesh::Attributes::Color | OpenMesh::Attributes::TexCoord2D);
-	HalfedgeAttributes( OpenMesh::Attributes::PrevHalfedge );
+	VertexAttributes(OpenMesh::Attributes::Normal | OpenMesh::Attributes::Color | OpenMesh::Attributes::TexCoord2D);
+	HalfedgeAttributes(OpenMesh::Attributes::PrevHalfedge);
 
 	ExTraits::Point Position;
 	ExTraits::Normal Normal;
@@ -57,7 +57,7 @@ MeshModifier::~MeshModifier()
 }
 
 /** Puts vertext data into a MyMesh *//*
-static void PutVertexData(MyMesh& mesh, const std::vector<ExVertexStruct>& inVertices, const std::vector<unsigned short>& inIndices)
+static void PutVertexData(MyMesh& mesh, const std::vector<ExVertexStruct> & inVertices, const std::vector<unsigned short> & inIndices)
 {
 	mesh.request_vertex_normals();
 	mesh.request_vertex_colors();
@@ -90,7 +90,7 @@ static void PutVertexData(MyMesh& mesh, const std::vector<ExVertexStruct>& inVer
 }*/
 
 /** Extracts the vertexdata from a MyMesh *//*
-static void PullVertexData(MyMesh& mesh, std::vector<ExVertexStruct>& outVertices, std::vector<unsigned short>& outIndices)
+static void PullVertexData(MyMesh& mesh, std::vector<ExVertexStruct> & outVertices, std::vector<unsigned short> & outIndices)
 {
 	// Get data back out
 	for (MyMesh::VertexIter v_it=mesh.vertices_begin(); v_it!=mesh.vertices_end(); ++v_it) 
@@ -105,7 +105,7 @@ static void PullVertexData(MyMesh& mesh, std::vector<ExVertexStruct>& outVertice
 		if (mesh.is_boundary(*v_it))
 		{
 			v.TexCoord2.x = 0.0f;
-		}else
+		} else
 		{
 			v.TexCoord2.x = 1.0f;
 		}
@@ -125,7 +125,7 @@ static void PullVertexData(MyMesh& mesh, std::vector<ExVertexStruct>& outVertice
 }*/
 
 /** Performs catmul-clark smoothing on the mesh */
-void MeshModifier::DoCatmulClark(const std::vector<ExVertexStruct>& inVertices, const std::vector<unsigned short>& inIndices, std::vector<ExVertexStruct>& outVertices, std::vector<unsigned short>& outIndices, int iterations)
+void MeshModifier::DoCatmulClark(const std::vector<ExVertexStruct> & inVertices, const std::vector<unsigned short> & inIndices, std::vector<ExVertexStruct> & outVertices, std::vector<unsigned short> & outIndices, int iterations)
 {
 	/*
 	MyMesh mesh;
@@ -145,7 +145,7 @@ void MeshModifier::DoCatmulClark(const std::vector<ExVertexStruct>& inVertices, 
 }
 
 /** Detects borders on the mesh */
-void MeshModifier::DetectBorders(const std::vector<ExVertexStruct>& inVertices, const std::vector<unsigned short>& inIndices, std::vector<ExVertexStruct>& outVertices, std::vector<unsigned short>& outIndices)
+void MeshModifier::DetectBorders(const std::vector<ExVertexStruct> & inVertices, const std::vector<unsigned short> & inIndices, std::vector<ExVertexStruct> & outVertices, std::vector<unsigned short> & outIndices)
 {
 	/*
 	MyMesh mesh;
@@ -159,11 +159,11 @@ void MeshModifier::DetectBorders(const std::vector<ExVertexStruct>& inVertices, 
 }
 
 /** Drops texcoords on the given mesh, making it appear crackless */
-void MeshModifier::DropTexcoords(const std::vector<ExVertexStruct>& inVertices, const std::vector<unsigned short>& inIndices, std::vector<ExVertexStruct>& outVertices, std::vector<VERTEX_INDEX>& outIndices)
+void MeshModifier::DropTexcoords(const std::vector<ExVertexStruct> & inVertices, const std::vector<unsigned short> & inIndices, std::vector<ExVertexStruct> & outVertices, std::vector<VERTEX_INDEX> & outIndices)
 {
 	/*struct CmpClass // class comparing vertices in the set
 	{
-		bool operator() (const std::pair<ExVertexStruct, int>& p1, const std::pair<ExVertexStruct, int>& p2) const
+		bool operator() (const std::pair<ExVertexStruct, int> & p1, const std::pair<ExVertexStruct, int> & p2) const
 		{
 			const float eps = 0.001f;
 
@@ -197,7 +197,7 @@ void MeshModifier::DropTexcoords(const std::vector<ExVertexStruct>& inVertices, 
 }
 
 /** Decimates the mesh, reducing its complexity */
-void MeshModifier::Decimate(const std::vector<ExVertexStruct>& inVertices, const std::vector<unsigned short>& inIndices, std::vector<ExVertexStruct>& outVertices, std::vector<VERTEX_INDEX>& outIndices)
+void MeshModifier::Decimate(const std::vector<ExVertexStruct> & inVertices, const std::vector<unsigned short> & inIndices, std::vector<ExVertexStruct> & outVertices, std::vector<VERTEX_INDEX> & outIndices)
 {
 	/*MyMesh mesh;
 
@@ -208,17 +208,17 @@ void MeshModifier::Decimate(const std::vector<ExVertexStruct>& inVertices, const
 	//HModQuadric hModQuadric; // use a quadric module
 	HModRoundnessT hModRoundness;
 
-	decimater.add( hModRoundness ); // register module at the decimater
+	decimater.add(hModRoundness); // register module at the decimater
 
 	//
 	//since we need exactly one priority module (non-binary)
 	//we have to call set_binary(false) for our priority module
 	//in the case of HModQuadric, unset_max_err() calls set_binary(false) internally
 	//
-	//decimater.module( hModRoundness ).set_binary(false);//.unset_max_err();
-	decimater.module( hModRoundness ).set_min_roundness(0.05f);
-	//decimater.module( hModRoundness ).set_min_angle(
-	decimater.module( hModRoundness ).initialize();
+	//decimater.module(hModRoundness).set_binary(false);//.unset_max_err();
+	decimater.module(hModRoundness).set_min_roundness(0.05f);
+	//decimater.module(hModRoundness).set_min_angle(
+	decimater.module(hModRoundness).initialize();
 	decimater.initialize(); // let the decimater initialize the mesh and the
 	// modules
 	decimater.decimate(); // do decimation
@@ -311,7 +311,7 @@ struct PNAENKeyHasher
     }*/
 };
 
-void MeshModifier::ComputePNAENIndices(const std::vector<ExVertexStruct>& inVertices, const std::vector<unsigned short>& inIndices, std::vector<VERTEX_INDEX>& outIndices)
+void MeshModifier::ComputePNAENIndices(const std::vector<ExVertexStruct> & inVertices, const std::vector<unsigned short> & inIndices, std::vector<VERTEX_INDEX> & outIndices)
 {
 	std::vector<unsigned int> ix;
 	std::vector<unsigned int> out;
@@ -324,7 +324,7 @@ void MeshModifier::ComputePNAENIndices(const std::vector<ExVertexStruct>& inVert
 }
 
 /** Computes PNAEN-Indices for the given mesh */
-void MeshModifier::ComputePNAENIndices(const std::vector<ExVertexStruct>& inVertices, const std::vector<unsigned int>& inIndices, std::vector<unsigned int>& outIndices)
+void MeshModifier::ComputePNAENIndices(const std::vector<ExVertexStruct> & inVertices, const std::vector<unsigned int> & inIndices, std::vector<unsigned int> & outIndices)
 {
 	// PNAEN algorithm from NVIDIA (http://developer.download.nvidia.com/whitepapers/2010/PN-AEN-Triangles-Whitepaper.pdf)
 	
@@ -486,7 +486,7 @@ struct Float3KeyHasher
 		seed ^= hash_value(value) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 	}
 
-	std::size_t operator()(const float3& k) const
+	std::size_t operator()(const float3 & k) const
 	{
 		// Start with a hash value of 0    .
 		std::size_t seed = 0;
@@ -506,7 +506,7 @@ struct Float3KeyHasher
 	}
 };
 
-void MeshModifier::ComputePNAEN18Indices(std::vector<ExVertexStruct>& inVertices, const std::vector<unsigned short>& inIndices, std::vector<VERTEX_INDEX>& outIndices, bool detectBorders, bool softNormals)
+void MeshModifier::ComputePNAEN18Indices(std::vector<ExVertexStruct> & inVertices, const std::vector<unsigned short> & inIndices, std::vector<VERTEX_INDEX> & outIndices, bool detectBorders, bool softNormals)
 {
 	std::vector<unsigned int> ix;
 	std::vector<unsigned int> out;
@@ -519,7 +519,7 @@ void MeshModifier::ComputePNAEN18Indices(std::vector<ExVertexStruct>& inVertices
 }
 
 /** Computes PNAEN-Indices for the given mesh */
-void MeshModifier::ComputePNAEN18Indices(std::vector<ExVertexStruct>& inVertices, const std::vector<unsigned int>& inIndices, std::vector<unsigned int>& outIndices, bool detectBorders, bool softNormals)
+void MeshModifier::ComputePNAEN18Indices(std::vector<ExVertexStruct> & inVertices, const std::vector<unsigned int> & inIndices, std::vector<unsigned int> & outIndices, bool detectBorders, bool softNormals)
 {
 	// PNAEN algorithm from NVIDIA (http://developer.download.nvidia.com/whitepapers/2010/PN-AEN-Triangles-Whitepaper.pdf)
 	
@@ -543,9 +543,9 @@ void MeshModifier::ComputePNAEN18Indices(std::vector<ExVertexStruct>& inVertices
 	unsigned int num = 0;
 	for(auto it = VertexMap.begin(); it != VertexMap.end(); it++)
 	{
-		std::vector<ExVertexStruct *>& vx = (*it).second.second;
+		std::vector<ExVertexStruct *> & vx = it->second.second;
 
-		D3DXVECTOR3 nrm = D3DXVECTOR3(0,0,0);
+		D3DXVECTOR3 nrm = D3DXVECTOR3(0, 0, 0);
 		if (softNormals)
 		{
 			// Average normal of all adj. vertices			
@@ -666,7 +666,7 @@ void MeshModifier::ComputePNAEN18Indices(std::vector<ExVertexStruct>& inVertices
 				outIndices[i + k + 1] = second.iD;
 
 				domEdge = second;
-			}else
+			} else
 			{
 				temp.ReverseEdge();
 				foundIt = EdgeReverseMap.find(temp);
@@ -675,7 +675,7 @@ void MeshModifier::ComputePNAEN18Indices(std::vector<ExVertexStruct>& inVertices
 					const PNAENEdge& second = foundIt->second;
 					domEdge = second;
 					domEdge.ReverseEdge();
-				}else
+				} else
 				{
 					
 				}
@@ -717,7 +717,7 @@ void MeshModifier::ComputePNAEN18Indices(std::vector<ExVertexStruct>& inVertices
 						outIndices[i + 6 + k] = temp.iO;
 						outIndices[i + 6 + k + 1] = temp.iD;
 					}*/
-				}else
+				} else
 				{
 				
 
@@ -734,7 +734,7 @@ void MeshModifier::ComputePNAEN18Indices(std::vector<ExVertexStruct>& inVertices
 			for(int k=0;k<3;k++)
 			{
 				float3 v = inVertices[outIndices[(i - 3) + k]].Position;
-				std::pair<std::vector<unsigned int>, std::vector<ExVertexStruct*>>& adj = VertexMap[v];
+				std::pair<std::vector<unsigned int>, std::vector<ExVertexStruct*>> & adj = VertexMap[v];
 
 
 				float2 smallest = float2(FLT_MAX, FLT_MAX);
@@ -770,7 +770,7 @@ void MeshModifier::ComputePNAEN18Indices(std::vector<ExVertexStruct>& inVertices
 
 bool TexcoordSame(float2 a, float2 b)
 {
-	if (( abs(a.x - 		b.x) > 0.001f &&
+	if ((abs(a.x - 		b.x) > 0.001f &&
 		abs((a.x + 1) - b.x) > 0.001f &&
 		abs((a.x - 1) - b.x) > 0.001f) ||
 		(abs(a.y - 		b.y) > 0.001f &&
@@ -782,7 +782,7 @@ bool TexcoordSame(float2 a, float2 b)
 };
 
 /** Computes smooth normals for the given mesh */
-void MeshModifier::ComputeSmoothNormals(std::vector<ExVertexStruct>& inVertices)
+void MeshModifier::ComputeSmoothNormals(std::vector<ExVertexStruct> & inVertices)
 {
 
 
@@ -801,9 +801,9 @@ void MeshModifier::ComputeSmoothNormals(std::vector<ExVertexStruct>& inVertices)
 	// Run through all the adj. vertices and average the normals between them
 	for(auto it = VertexMap.begin(); it != VertexMap.end(); it++)
 	{
-		std::vector<ExVertexStruct *>& vx = (*it).second;
+		std::vector<ExVertexStruct *> & vx = it->second;
 		// Average all face normals
-		D3DXVECTOR3 avgNormal = D3DXVECTOR3(0,0,0);
+		D3DXVECTOR3 avgNormal = D3DXVECTOR3(0, 0, 0);
 		for(unsigned int i=0;i<vx.size();i++)
 		{
 			avgNormal += *vx[i]->Normal.toD3DXVECTOR3();
@@ -831,7 +831,7 @@ void MeshModifier::ComputeSmoothNormals(std::vector<ExVertexStruct>& inVertices)
 }
 
 /** Fills an index array for a non-indexed mesh */
-void MeshModifier::FillIndexArrayFor(unsigned int numVertices, std::vector<unsigned int>& outIndices)
+void MeshModifier::FillIndexArrayFor(unsigned int numVertices, std::vector<unsigned int> & outIndices)
 {
 	for(unsigned int i=0;i<numVertices;i++)
 	{
@@ -841,7 +841,7 @@ void MeshModifier::FillIndexArrayFor(unsigned int numVertices, std::vector<unsig
 
 
 /** Fills an index array for a non-indexed mesh */
-void MeshModifier::FillIndexArrayFor(unsigned int numVertices, std::vector<VERTEX_INDEX>& outIndices)
+void MeshModifier::FillIndexArrayFor(unsigned int numVertices, std::vector<VERTEX_INDEX> & outIndices)
 {
 	for(unsigned int i=0;i<numVertices;i++)
 	{

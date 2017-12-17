@@ -20,7 +20,7 @@ public:
 	}
 
 	/** Returns true if the given string is in the commandline of the game */
-	bool IsParameter(const std::string& str)
+	bool IsParameter(const std::string & str)
 	{
 #ifdef BUILD_GOTHIC_1_08k
 		return false; // FIXME
@@ -50,7 +50,7 @@ public:
 	}
 
 	/** Returns the value of the given parameter. If the parameter is not in the commandline, it returns "" */
-	std::string ParameterValue(const std::string& str)
+	std::string ParameterValue(const std::string & str)
 	{
 #ifdef BUILD_GOTHIC_1_08k
 		return ""; // TODO
@@ -85,7 +85,7 @@ public:
 	}
 
 	/** Reads config stuff */
-	static int __fastcall hooked_zOptionReadBool(void* thisptr, void* unknwn,zSTRING const& section, char const* var, int def)
+	static int __fastcall hooked_zOptionReadBool(void * thisptr, void * unknwn,zSTRING const& section, char const* var, int def)
 	{
 		
 		int r = HookedFunctions::OriginalFunctions.original_zCOptionReadBool(thisptr, section, var, def);
@@ -93,15 +93,15 @@ public:
 		{
 			Engine::GAPI->SetIntParamFromConfig("zWaterAniEnabled", 0);
 			return 0; // Disable water animations
-		}else if (_stricmp(var, "scaleVideos") == 0) // Force scaleVideos to get them into the upper left corner
+		} else if (_stricmp(var, "scaleVideos") == 0) // Force scaleVideos to get them into the upper left corner
 		{
 			Engine::GAPI->SetIntParamFromConfig("scaleVideos", 0);
 			return 0;
-		}else if (_stricmp(var, "zStartupWindowed") == 0)
+		} else if (_stricmp(var, "zStartupWindowed") == 0)
 		{
 			Engine::GAPI->SetIntParamFromConfig("zStartupWindowed", r);
 			return 1;
-		}else if (_stricmp(var, "gameAbnormalExit") == 0)
+		} else if (_stricmp(var, "gameAbnormalExit") == 0)
 		{
 #ifndef PUBLIC_RELEASE
 			// No VDFS bullshit when testing
@@ -117,7 +117,7 @@ public:
 	}
 
 	/** Reads config stuff */
-	static long __fastcall Do_hooked_zOptionReadInt(void* thisptr, zSTRING const& section, char const* var, int def)
+	static long __fastcall Do_hooked_zOptionReadInt(void * thisptr, zSTRING const& section, char const* var, int def)
 	{
 		BaseGraphicsEngine* engine = Engine::GraphicsEngine;
 		LogInfo() << "Reading Gothic-Config: " << var;
@@ -134,29 +134,29 @@ public:
 				LogInfo() << "Forcing zVidResFullscreenX: " << engine->GetResolution().x;
 				return engine->GetResolution().x;
 			}
-		}else if (_stricmp(var, "zVidResFullscreenY") == 0)
+		} else if (_stricmp(var, "zVidResFullscreenY") == 0)
 		{
 			if (engine)
 			{
 				LogInfo() << "Forcing zVidResFullscreenY: " << engine->GetResolution().y;
 				return engine->GetResolution().y;
 			}
-		}else if (_stricmp(var, "zVidResFullscreenBPP") == 0)
+		} else if (_stricmp(var, "zVidResFullscreenBPP") == 0)
 		{
 			return 32;
-		}else if (_stricmp(var, "zTexMaxSize") == 0)
+		} else if (_stricmp(var, "zTexMaxSize") == 0)
 		{
 			return 16384;
-		}else if (_stricmp(var, "zTexCacheOutTimeMSec") == 0) // Following values are from Marcellos L'Hiver config
+		} else if (_stricmp(var, "zTexCacheOutTimeMSec") == 0) // Following values are from Marcellos L'Hiver config
 		{
 			return 9120000; 
-		}else if (_stricmp(var, "zTexCacheSizeMaxBytes") == 0)
+		} else if (_stricmp(var, "zTexCacheSizeMaxBytes") == 0)
 		{
 			return 1000000000; 
-		}else if (_stricmp(var, "zSndCacheOutTimeMSec") == 0) 
+		} else if (_stricmp(var, "zSndCacheOutTimeMSec") == 0) 
 		{
 			return 10000; 
-		}else if (_stricmp(var, "zSndCacheSizeMaxBytes") == 0)
+		} else if (_stricmp(var, "zSndCacheSizeMaxBytes") == 0)
 		{
 			return 40000000; 
 		}
@@ -165,7 +165,7 @@ public:
 	}
 
 	/** Reads config stuff */
-	static unsigned long __fastcall hooked_zOptionReadDWORD(void* thisptr, void* unknwn, zSTRING const& section, char const* var, unsigned long def)
+	static unsigned long __fastcall hooked_zOptionReadDWORD(void * thisptr, void * unknwn, zSTRING const& section, char const* var, unsigned long def)
 	{
 		BaseGraphicsEngine* engine = Engine::GraphicsEngine;
 		LogInfo() << "Reading Gothic-Config: " << var;
@@ -173,13 +173,13 @@ public:
 		if (_stricmp(var, "zTexCacheOutTimeMSec") == 0) // Following values are from Marcellos L'Hiver config
 		{
 			return 9120000; 
-		}else if (_stricmp(var, "zTexCacheSizeMaxBytes") == 0)
+		} else if (_stricmp(var, "zTexCacheSizeMaxBytes") == 0)
 		{
 			return 1000000000; 
-		}else if (_stricmp(var, "zSndCacheOutTimeMSec") == 0) 
+		} else if (_stricmp(var, "zSndCacheOutTimeMSec") == 0) 
 		{
 			return 10000; 
-		}else if (_stricmp(var, "zSndCacheSizeMaxBytes") == 0)
+		} else if (_stricmp(var, "zSndCacheSizeMaxBytes") == 0)
 		{
 			return 40000000; 
 		}
@@ -189,7 +189,7 @@ public:
 
 	
 
-	static long __fastcall hooked_zOptionReadInt(void* thisptr, void* unknwn,zSTRING const& section, char const* var, int def)
+	static long __fastcall hooked_zOptionReadInt(void * thisptr, void * unknwn,zSTRING const& section, char const* var, int def)
 	{		
 		int i = Do_hooked_zOptionReadInt(thisptr,section, var, def);
 

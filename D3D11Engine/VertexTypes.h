@@ -1,12 +1,11 @@
 #pragma once
-#include "pch.h"
+
+#include "Types.h"
 
 typedef unsigned short VERTEX_INDEX;
 
-
 /** We pack most of Gothics FVF-formats into this vertex-struct */
-struct ExVertexStruct
-{
+struct ExVertexStruct {
 	float3 Position;
 	float3 Normal;
 	float2 TexCoord;
@@ -14,28 +13,22 @@ struct ExVertexStruct
 	DWORD Color;
 };
 
-
-
-struct SimpleObjectVertexStruct
-{
+struct SimpleObjectVertexStruct {
 	float3 Position;
 	float2 TexCoord;
 };
 
-struct ObjVertexStruct
-{
+struct ObjVertexStruct {
 	float3 Position;
 	float3 Normal;
 	float2 TexCoord;
 };
 
-struct BasicVertexStruct
-{
+struct BasicVertexStruct {
 	float3 Position;
 };
 
-struct ExSkelVertexStruct
-{
+struct ExSkelVertexStruct {
 	float3 Position[4];
 	float3 Normal;
 	float2 TexCoord;
@@ -44,24 +37,20 @@ struct ExSkelVertexStruct
 	float weights[4];
 };
 
-struct Gothic_XYZ_DIF_T1_Vertex
-{
+struct Gothic_XYZ_DIF_T1_Vertex {
 	float3 xyz;
 	DWORD color;
 	float2 texCoord;
 };
 
-struct Gothic_XYZRHW_DIF_T1_Vertex
-{
+struct Gothic_XYZRHW_DIF_T1_Vertex {
 	float3 xyz;
 	float rhw;
 	DWORD color;
 	float2 texCoord;
 };
 
-
-struct Gothic_XYZRHW_DIF_SPEC_T1_Vertex
-{
+struct Gothic_XYZRHW_DIF_SPEC_T1_Vertex {
 	float3 xyz;
 	float rhw;
 	DWORD color;
@@ -69,8 +58,7 @@ struct Gothic_XYZRHW_DIF_SPEC_T1_Vertex
 	float2 texCoord;
 };
 
-struct Gothic_XYZ_NRM_T1_Vertex
-{
+struct Gothic_XYZ_NRM_T1_Vertex {
 	float3 xyz;
 	float3 nrm;
 	float2 texCoord;

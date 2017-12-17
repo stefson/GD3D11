@@ -148,7 +148,7 @@ struct SMemberDataPointer
         ID3D11RasterizerState   *pD3DEffectsManagedRasterizerState;
         ID3D11SamplerState      *pD3DEffectsManagedSamplerState;
         ID3D11Buffer            *pD3DEffectsManagedConstantBuffer;
-        ID3D11ShaderResourceView*pD3DEffectsManagedTextureBuffer;
+        ID3D11ShaderResourceView *pD3DEffectsManagedTextureBuffer;
     } Data;
 };
 
@@ -197,7 +197,7 @@ struct SType : public ID3DX11EffectType
             BOOL        ImplementsInterface;    // true if this type implements an interface
             BOOL        HasSuperClass;          // true if this type has a parent class
         }               StructType;
-        void*           InterfaceType;          // nothing for interfaces
+        void *           InterfaceType;          // nothing for interfaces
     };
 
 
@@ -209,10 +209,10 @@ struct SType : public ID3DX11EffectType
        Stride(0),
        PackedSize(0)
     {
-        C_ASSERT( sizeof(NumericType) <= sizeof(StructType) );
-        C_ASSERT( sizeof(ObjectType) <= sizeof(StructType) );
-        C_ASSERT( sizeof(InterfaceType) <= sizeof(StructType) );
-        ZeroMemory( &StructType, sizeof(StructType) );
+        C_ASSERT(sizeof(NumericType) <= sizeof(StructType));
+        C_ASSERT(sizeof(ObjectType) <= sizeof(StructType));
+        C_ASSERT(sizeof(InterfaceType) <= sizeof(StructType));
+        ZeroMemory(&StructType, sizeof(StructType));
     }
 
     bool IsEqual(SType *pOtherType) const;
@@ -316,31 +316,31 @@ struct SBaseBlock
 
     inline SSamplerBlock *AsSampler() const
     {
-        assert( BlockType == EBT_Sampler );
+        assert(BlockType == EBT_Sampler);
         return (SSamplerBlock*) this;
     }
 
     inline SDepthStencilBlock *AsDepthStencil() const
     {
-        assert( BlockType == EBT_DepthStencil );
+        assert(BlockType == EBT_DepthStencil);
         return (SDepthStencilBlock*) this;
     }
 
     inline SBlendBlock *AsBlend() const
     {
-        assert( BlockType == EBT_Blend );
+        assert(BlockType == EBT_Blend);
         return (SBlendBlock*) this;
     }
 
     inline SRasterizerBlock *AsRasterizer() const
     {
-        assert( BlockType == EBT_Rasterizer );
+        assert(BlockType == EBT_Rasterizer);
         return (SRasterizerBlock*) this;
     }
 
     inline SPassBlock *AsPass() const
     {
-        assert( BlockType == EBT_Pass );
+        assert(BlockType == EBT_Pass);
         return (SPassBlock*) this;
     }
 };
@@ -444,7 +444,7 @@ struct SPassBlock : SBaseBlock, public ID3DX11EffectPass
     SPassBlock();
 
     void ApplyPassAssignments();
-    bool CheckShaderDependencies( _In_ const SShaderBlock* pBlock );
+    bool CheckShaderDependencies(_In_ const SShaderBlock* pBlock);
     bool CheckDependencies();
 
     template<EObjectType EShaderType>
@@ -576,7 +576,7 @@ template<class T, class D3DTYPE> struct SShaderDependency
 
 typedef SShaderDependency<SConstantBuffer*, ID3D11Buffer*> SShaderCBDependency;
 typedef SShaderDependency<SSamplerBlock*, ID3D11SamplerState*> SShaderSamplerDependency;
-typedef SShaderDependency<SShaderResource*, ID3D11ShaderResourceView*> SShaderResourceDependency;
+typedef SShaderDependency<SShaderResource*, ID3D11ShaderResourceView *> SShaderResourceDependency;
 typedef SShaderDependency<SUnorderedAccessView*, ID3D11UnorderedAccessView*> SUnorderedAccessViewDependency;
 typedef SShaderDependency<SInterface*, ID3D11ClassInstance*> SInterfaceDependency;
 
@@ -584,11 +584,11 @@ typedef SShaderDependency<SInterface*, ID3D11ClassInstance*> SInterfaceDependenc
 // The effect owns one D3DShaderVTables for each shader stage
 struct SD3DShaderVTable
 {
-    void ( __stdcall ID3D11DeviceContext::*pSetShader)(ID3D11DeviceChild* pShader, ID3D11ClassInstance*const* ppClassInstances, uint32_t NumClassInstances);
-    void ( __stdcall ID3D11DeviceContext::*pSetConstantBuffers)(uint32_t StartConstantSlot, uint32_t NumBuffers, ID3D11Buffer *const *pBuffers);
-    void ( __stdcall ID3D11DeviceContext::*pSetSamplers)(uint32_t Offset, uint32_t NumSamplers, ID3D11SamplerState*const* pSamplers);
-    void ( __stdcall ID3D11DeviceContext::*pSetShaderResources)(uint32_t Offset, uint32_t NumResources, ID3D11ShaderResourceView *const *pResources);
-    HRESULT ( __stdcall ID3D11Device::*pCreateShader)(const void *pShaderBlob, size_t ShaderBlobSize, ID3D11ClassLinkage* pClassLinkage, ID3D11DeviceChild **ppShader);
+    void (__stdcall ID3D11DeviceContext::*pSetShader)(ID3D11DeviceChild* pShader, ID3D11ClassInstance*const* ppClassInstances, uint32_t NumClassInstances);
+    void (__stdcall ID3D11DeviceContext::*pSetConstantBuffers)(uint32_t StartConstantSlot, uint32_t NumBuffers, ID3D11Buffer *const *pBuffers);
+    void (__stdcall ID3D11DeviceContext::*pSetSamplers)(uint32_t Offset, uint32_t NumSamplers, ID3D11SamplerState*const* pSamplers);
+    void (__stdcall ID3D11DeviceContext::*pSetShaderResources)(uint32_t Offset, uint32_t NumResources, ID3D11ShaderResourceView *const *pResources);
+    HRESULT (__stdcall ID3D11Device::*pCreateShader)(const void *pShaderBlob, size_t ShaderBlobSize, ID3D11ClassLinkage* pClassLinkage, ID3D11DeviceChild **ppShader);
 };
 
 
@@ -1026,7 +1026,7 @@ public:
 
     // Allocate behaves like a standard new - it will allocate memory, move m_dwSize. The caller is 
     //   expected to use the returned pointer
-    void* Allocate(uint32_t dwSize);
+    void * Allocate(uint32_t dwSize);
 
     // Move data from the general heap and optional free memory
     HRESULT MoveData(_Inout_updates_bytes_(size) void **ppData, _In_ uint32_t size);
@@ -1173,8 +1173,8 @@ protected:
     bool ApplySamplerBlock(_In_ SSamplerBlock *pBlock);
     void ApplyPassBlock(_Inout_ SPassBlock *pBlock);
     bool EvaluateAssignment(_Inout_  SAssignment *pAssignment);
-    bool ValidateShaderBlock(_Inout_ SShaderBlock* pBlock );
-    bool ValidatePassBlock(_Inout_ SPassBlock* pBlock );
+    bool ValidateShaderBlock(_Inout_ SShaderBlock* pBlock);
+    bool ValidatePassBlock(_Inout_ SPassBlock* pBlock);
     
     //////////////////////////////////////////////////////////////////////////    
     // Non-runtime functions (not performance critical)    
@@ -1185,13 +1185,13 @@ protected:
     SConstantBuffer *FindCB(_In_z_ LPCSTR pName);
     void ReplaceCBReference(_In_ SConstantBuffer *pOldBufferBlock, _In_ ID3D11Buffer *pNewBuffer); // Used by user-managed CBs
     void ReplaceSamplerReference(_In_ SSamplerBlock *pOldSamplerBlock, _In_ ID3D11SamplerState *pNewSampler);
-    void AddRefAllForCloning( _In_ CEffect* pEffectSource );
-    HRESULT CopyMemberInterfaces( _In_ CEffect* pEffectSource );
-    HRESULT CopyStringPool( _In_ CEffect* pEffectSource, _Inout_ CPointerMappingTable& mappingTable );
-    HRESULT CopyTypePool( _In_ CEffect* pEffectSource, _Inout_ CPointerMappingTable& mappingTableTypes, _Inout_ CPointerMappingTable& mappingTableStrings );
-    HRESULT CopyOptimizedTypePool( _In_ CEffect* pEffectSource, _Inout_ CPointerMappingTable& mappingTableTypes );
+    void AddRefAllForCloning(_In_ CEffect* pEffectSource);
+    HRESULT CopyMemberInterfaces(_In_ CEffect* pEffectSource);
+    HRESULT CopyStringPool(_In_ CEffect* pEffectSource, _Inout_ CPointerMappingTable& mappingTable);
+    HRESULT CopyTypePool(_In_ CEffect* pEffectSource, _Inout_ CPointerMappingTable& mappingTableTypes, _Inout_ CPointerMappingTable& mappingTableStrings);
+    HRESULT CopyOptimizedTypePool(_In_ CEffect* pEffectSource, _Inout_ CPointerMappingTable& mappingTableTypes);
     HRESULT RecreateCBs();
-    HRESULT FixupMemberInterface( _Inout_ SMember* pMember, _In_ CEffect* pEffectSource, _Inout_ CPointerMappingTable& mappingTableStrings );
+    HRESULT FixupMemberInterface(_Inout_ SMember* pMember, _In_ CEffect* pEffectSource, _Inout_ CPointerMappingTable& mappingTableStrings);
 
     void ValidateIndex(_In_ uint32_t Elements);
 
@@ -1201,7 +1201,7 @@ protected:
     friend struct SConstantBuffer;
 
 public:
-    CEffect( uint32_t Flags = 0 );
+    CEffect(uint32_t Flags = 0);
     virtual ~CEffect();
     void ReleaseShaderRefection();
 
@@ -1209,7 +1209,7 @@ public:
     HRESULT LoadEffect(_In_reads_bytes_(cbEffectBuffer) const void *pEffectBuffer, _In_ uint32_t cbEffectBuffer);
 
     // Once the effect is fully loaded, call BindToDevice to attach it to a device
-    HRESULT BindToDevice(_In_ ID3D11Device *pDevice, _In_z_ LPCSTR srcName );
+    HRESULT BindToDevice(_In_ ID3D11Device *pDevice, _In_z_ LPCSTR srcName);
 
     Timer GetCurrentTime() const { return m_LocalTimer; }
     

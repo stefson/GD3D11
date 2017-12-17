@@ -79,7 +79,7 @@ public:
 	 *
 	 * See fread() for more details
 	 * This fails for write-only files */
-    virtual size_t Read(void* pvBuffer, 
+    virtual size_t Read(void * pvBuffer, 
 		size_t pSize, 
 		size_t pCount) = 0;
 
@@ -88,7 +88,7 @@ public:
 	*
 	* See fwrite() for more details
 	* This fails for read-only files */
-    virtual size_t Write(const void* pvBuffer, 
+    virtual size_t Write(const void * pvBuffer, 
 		size_t pSize,
 		size_t pCount) = 0;
 

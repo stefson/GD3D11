@@ -8,10 +8,10 @@ public:
 	~GSpriteCloud();
 
 	/** Initializes this cloud */
-	void CreateCloud(const D3DXVECTOR3& size, int numSprites = 10);
+	void CreateCloud(const D3DXVECTOR3 & size, int numSprites = 10);
 
 	/** Returns the sprite world matrices */
-	const std::vector<D3DXMATRIX>& GetWorldMatrices();
+	const std::vector<D3DXMATRIX> & GetWorldMatrices();
 
 protected:
 	/** World matrices for the sprites */

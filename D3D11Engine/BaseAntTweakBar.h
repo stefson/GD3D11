@@ -12,7 +12,7 @@ struct TS_TextureInfo {
 
 	MaterialInfo * Info;
 	std::string Name;
-	zCTexture* Texture;
+	zCTexture * Texture;
 };
 
 class BaseAntTweakBar {

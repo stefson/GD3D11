@@ -30,7 +30,7 @@
 #define BLOCK_SIZE_X 16
 #define BLOCK_SIZE_Y 16
 
-HRESULT CompileShaderFromFile( WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut );
+HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut);
 
 // Generating gaussian random number with mean 0 and standard deviation 1.
 float Gauss()
@@ -63,8 +63,8 @@ float Phillips(D3DXVECTOR2 K, D3DXVECTOR2 W, float v, float a, float dir_depend)
 	return phillips * expf(-Ksqr * w * w);
 }
 
-void createBufferAndUAV(ID3D11Device* pd3dDevice, void* data, UINT byte_width, UINT byte_stride,
-						ID3D11Buffer** ppBuffer, ID3D11UnorderedAccessView** ppUAV, ID3D11ShaderResourceView** ppSRV)
+void createBufferAndUAV(ID3D11Device* pd3dDevice, void * data, UINT byte_width, UINT byte_stride,
+						ID3D11Buffer** ppBuffer, ID3D11UnorderedAccessView** ppUAV, ID3D11ShaderResourceView ** ppSRV)
 {
 	// Create buffer
 	D3D11_BUFFER_DESC buf_desc;
@@ -103,7 +103,7 @@ void createBufferAndUAV(ID3D11Device* pd3dDevice, void* data, UINT byte_width, U
 }
 
 void createTextureAndViews(ID3D11Device* pd3dDevice, UINT width, UINT height, DXGI_FORMAT format,
-						   ID3D11Texture2D** ppTex, ID3D11ShaderResourceView** ppSRV, ID3D11RenderTargetView** ppRTV)
+						   ID3D11Texture2D ** ppTex, ID3D11ShaderResourceView ** ppSRV, ID3D11RenderTargetView** ppRTV)
 {
 	// Create 2D texture
 	D3D11_TEXTURE2D_DESC tex_desc;
@@ -159,8 +159,8 @@ OceanSimulator::OceanSimulator(OceanParameter& params, ID3D11Device* pd3dDevice)
 
 	// Height map H(0)
 	int height_map_size = (params.dmap_dim + 4) * (params.dmap_dim + 1);
-	D3DXVECTOR2* h0_data = new D3DXVECTOR2[height_map_size * sizeof(D3DXVECTOR2)];
-	float* omega_data = new float[height_map_size * sizeof(float)];
+	D3DXVECTOR2 * h0_data = new D3DXVECTOR2[height_map_size * sizeof(D3DXVECTOR2)];
+	float * omega_data = new float[height_map_size * sizeof(float)];
 	initHeightMap(params, h0_data, omega_data);
 
 	m_param = params;
@@ -385,7 +385,7 @@ OceanSimulator::~OceanSimulator()
 // Initialize the vector field.
 // wlen_x: width of wave tile, in meters
 // wlen_y: length of wave tile, in meters
-void OceanSimulator::initHeightMap(OceanParameter& params, D3DXVECTOR2* out_h0, float* out_omega)
+void OceanSimulator::initHeightMap(OceanParameter& params, D3DXVECTOR2 * out_h0, float * out_omega)
 {
 	int i, j;
 	D3DXVECTOR2 K, Kn;
@@ -436,7 +436,7 @@ void OceanSimulator::updateDisplacementMap(float time)
 	m_pd3dImmediateContext->CSSetShader(m_pUpdateSpectrumCS, nullptr, 0);
 
 	// Buffers
-	ID3D11ShaderResourceView* cs0_srvs[2] = {m_pSRV_H0, m_pSRV_Omega};
+	ID3D11ShaderResourceView * cs0_srvs[2] = {m_pSRV_H0, m_pSRV_Omega};
 	m_pd3dImmediateContext->CSSetShaderResources(0, 2, cs0_srvs);
 
 	ID3D11UnorderedAccessView* cs0_uavs[1] = {m_pUAV_Ht};
@@ -446,7 +446,7 @@ void OceanSimulator::updateDisplacementMap(float time)
 	D3D11_MAPPED_SUBRESOURCE mapped_res;            
 	m_pd3dImmediateContext->Map(m_pPerFrameCB, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_res);
 	assert(mapped_res.pData);
-	float* per_frame_data = (float*)mapped_res.pData;
+	float * per_frame_data = (float *)mapped_res.pData;
 	// g_Time
 	per_frame_data[0] = time * m_param.time_scale;
 	// g_ChoppyScale
@@ -499,7 +499,7 @@ void OceanSimulator::updateDisplacementMap(float time)
 	m_pd3dImmediateContext->PSSetConstantBuffers(0, 2, ps_cbs);
 
 	// Buffer resources
-	ID3D11ShaderResourceView* ps_srvs[1] = {m_pSRV_Dxyz};
+	ID3D11ShaderResourceView * ps_srvs[1] = {m_pSRV_Dxyz};
     m_pd3dImmediateContext->PSSetShaderResources(0, 1, ps_srvs);
 
 	// IA setup
@@ -558,10 +558,10 @@ void OceanSimulator::updateDisplacementMap(float time)
         m_pd3dImmediateContext->Map(m_pDebugBuffer, 0, D3D11_MAP_READ, 0, &mapped_res);
         
 		// set a break point below, and drag MappedResource.pData into in your Watch window
-		// and cast it as (float*)
+		// and cast it as (float *)
 
 		// Write to disk
-		D3DXVECTOR2* v = (D3DXVECTOR2*)mapped_res.pData;
+		D3DXVECTOR2 * v = (D3DXVECTOR2 *)mapped_res.pData;
 
 		FILE* fp = fopen(".\\tmp\\Ht_raw.dat", "wb");
 		fwrite(v, 512*512*sizeof(float)*2*3, 1, fp);
@@ -572,12 +572,12 @@ void OceanSimulator::updateDisplacementMap(float time)
 #endif
 }
 
-ID3D11ShaderResourceView* OceanSimulator::getD3D11DisplacementMap()
+ID3D11ShaderResourceView * OceanSimulator::getD3D11DisplacementMap()
 {
 	return m_pDisplacementSRV;
 }
 
-ID3D11ShaderResourceView* OceanSimulator::getD3D11GradientMap()
+ID3D11ShaderResourceView * OceanSimulator::getD3D11GradientMap()
 {
 	return m_pGradientSRV;
 }
@@ -588,53 +588,53 @@ const OceanParameter& OceanSimulator::getParameters()
 	return m_param;
 }
 
-HRESULT CompileShaderFromFile( WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut )
+HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut)
 {
     HRESULT hr = S_OK;
 
     // find the file
     WCHAR str[MAX_PATH];
 	wcscpy(str,(std::wstring(L"system\\GD3D11\\Shaders\\") + szFileName).c_str());
-	//V_RETURN( DXUTFindDXSDKMediaFileCch( str, MAX_PATH, szFileName ) );
+	//V_RETURN(DXUTFindDXSDKMediaFileCch(str, MAX_PATH, szFileName));
 
     // open the file
-    HANDLE hFile = CreateFileW( str, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
-        FILE_FLAG_SEQUENTIAL_SCAN, nullptr );
-    if ( INVALID_HANDLE_VALUE == hFile )
+    HANDLE hFile = CreateFileW(str, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
+        FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
+    if (INVALID_HANDLE_VALUE == hFile)
         return E_FAIL;
 
     // Get the file size
     LARGE_INTEGER FileSize;
-    GetFileSizeEx( hFile, &FileSize );
+    GetFileSizeEx(hFile, &FileSize);
 
     // create enough space for the file data
     BYTE* pFileData = new BYTE[ FileSize.LowPart ];
-    if ( !pFileData )
+    if (!pFileData)
         return E_OUTOFMEMORY;
 
     // read the data in
     DWORD BytesRead;
-    if ( !ReadFile( hFile, pFileData, FileSize.LowPart, &BytesRead, nullptr ) )
+    if (!ReadFile(hFile, pFileData, FileSize.LowPart, &BytesRead, nullptr))
         return E_FAIL; 
 
-    CloseHandle( hFile );
+    CloseHandle(hFile);
 
     // Compile the shader
     char pFilePathName[MAX_PATH];        
     WideCharToMultiByte(CP_ACP, 0, str, -1, pFilePathName, MAX_PATH, nullptr, nullptr);
     ID3DBlob* pErrorBlob;
-    hr = D3DCompile( pFileData, FileSize.LowPart, pFilePathName, nullptr, nullptr, szEntryPoint, szShaderModel, D3D10_SHADER_ENABLE_STRICTNESS, 0, ppBlobOut, &pErrorBlob );
+    hr = D3DCompile(pFileData, FileSize.LowPart, pFilePathName, nullptr, nullptr, szEntryPoint, szShaderModel, D3D10_SHADER_ENABLE_STRICTNESS, 0, ppBlobOut, &pErrorBlob);
 
     delete []pFileData;
 
-    if ( FAILED(hr) )
+    if (FAILED(hr))
     {
-        OutputDebugStringA( (char*)pErrorBlob->GetBufferPointer() );
+        OutputDebugStringA((char*)pErrorBlob->GetBufferPointer());
 		LogError() << "(char*)pErrorBlob->GetBufferPointer()";
-        SAFE_RELEASE( pErrorBlob );
+        SAFE_RELEASE(pErrorBlob);
         return hr;
     }
-    SAFE_RELEASE( pErrorBlob );
+    SAFE_RELEASE(pErrorBlob);
 
     return S_OK;
 }

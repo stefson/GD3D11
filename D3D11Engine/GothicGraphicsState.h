@@ -546,21 +546,21 @@ struct GothicRendererSettings {
 	void SetupOldWorldSpecificValues() {
 		FogGlobalDensity = 0.00002f;
 		FogHeightFalloff = 0.00018f;
-		FogColorMod = float3::FromColor(189,146,107);
+		FogColorMod = float3::FromColor(189, 146, 107);
 		FogHeight = 4000;
 	}
 
 	void SetupNewWorldSpecificValues() {
 		FogGlobalDensity = 0.00004f;
 		FogHeightFalloff = 0.0005f;
-		FogColorMod = float3::FromColor(180,180,255);
+		FogColorMod = float3::FromColor(180, 180,255);
 		FogHeight = 800;
 	}
 
 	void SetupAddonWorldSpecificValues() {
 		FogGlobalDensity = 0.00004f;
 		FogHeightFalloff = 0.0005f;
-		FogColorMod = float3::FromColor(180,180,255);
+		FogColorMod = float3::FromColor(180, 180,255);
 		FogHeight = 0;
 	}
 

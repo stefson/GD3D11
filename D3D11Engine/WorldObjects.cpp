@@ -11,7 +11,7 @@ const int WORLDMESHINFO_VERSION = 5;
 const int VISUALINFO_VERSION = 5;
 
 /** Saves the info for this visual */
-void WorldMeshInfo::SaveWorldMeshInfo(const std::string& name)
+void WorldMeshInfo::SaveWorldMeshInfo(const std::string & name)
 {
 	FILE* f = fopen(("system\\GD3D11\\meshes\\infos\\" + name + ".wi").c_str(), "wb");
 
@@ -34,7 +34,7 @@ void WorldMeshInfo::SaveWorldMeshInfo(const std::string& name)
 }
 
 /** Loads the info for this visual */
-void WorldMeshInfo::LoadWorldMeshInfo(const std::string& name)
+void WorldMeshInfo::LoadWorldMeshInfo(const std::string & name)
 {
 	FILE* f = fopen(("system\\GD3D11\\meshes\\infos\\" + name + ".wi").c_str(), "rb");
 
@@ -79,7 +79,7 @@ void VobInfo::UpdateVobConstantBuffer()
 	{
 		// All lightmapped polys have this color, so just use it
 		GroundColor = DEFAULT_LIGHTMAP_POLY_COLOR;
-	}else
+	} else
 	{
 		// Get the color of the first found feature of the ground poly
 		GroundColor = Vob->GetGroundPoly() ? Vob->GetGroundPoly()->getFeatures()[0]->lightStatic : 0xFFFFFFFF;
@@ -108,7 +108,7 @@ void VisualTesselationSettings::UpdateConstantbuffer()
 	if (Constantbuffer)
 	{
 		Constantbuffer->UpdateBuffer(&buffer);
-	}else
+	} else
 	{
 		Engine::GraphicsEngine->CreateConstantBuffer(&Constantbuffer, &buffer, sizeof(buffer));
 	}
@@ -120,10 +120,10 @@ void SkeletalMeshVisualInfo::CreatePNAENInfo(bool softNormals)
 {
 	for(std::map<zCMaterial *, std::vector<SkeletalMeshInfo*>>::iterator it = SkeletalMeshes.begin(); it != SkeletalMeshes.end(); it++)
 	{
-		for(unsigned int i=0;i<(*it).second.size();i++)
+		for(unsigned int i=0;i<it->second.size();i++)
 		{
-			if ((*it).second[i]->IndicesPNAEN.empty())
-				WorldConverter::CreatePNAENInfoFor((*it).second[i], Meshes[(*it).first][i], softNormals);
+			if (it->second[i]->IndicesPNAEN.empty())
+				WorldConverter::CreatePNAENInfoFor(it->second[i], Meshes[it->first][i], softNormals);
 		}
 	}
 }
@@ -133,12 +133,12 @@ void SkeletalMeshVisualInfo::ClearPNAENInfo()
 {
 	for(std::map<zCMaterial *, std::vector<SkeletalMeshInfo*>>::iterator it = SkeletalMeshes.begin(); it != SkeletalMeshes.end(); it++)
 	{
-		for(unsigned int i=0;i<(*it).second.size();i++)
+		for(unsigned int i=0;i<it->second.size();i++)
 		{
-			delete (*it).second[i]->MeshIndexBufferPNAEN;
-			(*it).second[i]->MeshIndexBufferPNAEN = nullptr;
+			delete it->second[i]->MeshIndexBufferPNAEN;
+			it->second[i]->MeshIndexBufferPNAEN = nullptr;
 
-			(*it).second[i]->IndicesPNAEN.clear();	
+			it->second[i]->IndicesPNAEN.clear();	
 		}
 	}
 
@@ -148,12 +148,12 @@ void SkeletalMeshVisualInfo::ClearPNAENInfo()
 /** Creates PNAEN-Info for all meshes if not already there */
 void MeshVisualInfo::CreatePNAENInfo(bool softNormals)
 {
-	for(std::map<zCMaterial *, std::vector<MeshInfo*>>::iterator it = Meshes.begin(); it != Meshes.end(); it++)
+	for(std::map<zCMaterial *, std::vector<MeshInfo *>>::iterator it = Meshes.begin(); it != Meshes.end(); it++)
 	{
-		for(unsigned int i=0;i<(*it).second.size();i++)
+		for(unsigned int i=0;i<it->second.size();i++)
 		{
-			if ((*it).second[i]->IndicesPNAEN.empty())
-				WorldConverter::CreatePNAENInfoFor((*it).second[i], softNormals);
+			if (it->second[i]->IndicesPNAEN.empty())
+				WorldConverter::CreatePNAENInfoFor(it->second[i], softNormals);
 		}
 	}
 }
@@ -161,21 +161,21 @@ void MeshVisualInfo::CreatePNAENInfo(bool softNormals)
 /** Removes PNAEN info from this visual */
 void BaseVisualInfo::ClearPNAENInfo()
 {
-	for(std::map<zCMaterial *, std::vector<MeshInfo*>>::iterator it = Meshes.begin(); it != Meshes.end(); it++)
+	for(std::map<zCMaterial *, std::vector<MeshInfo *>>::iterator it = Meshes.begin(); it != Meshes.end(); it++)
 	{
-		for(unsigned int i=0;i<(*it).second.size();i++)
+		for(unsigned int i=0;i<it->second.size();i++)
 		{
-			delete (*it).second[i]->MeshIndexBufferPNAEN;
-			(*it).second[i]->MeshIndexBufferPNAEN = nullptr;
+			delete it->second[i]->MeshIndexBufferPNAEN;
+			it->second[i]->MeshIndexBufferPNAEN = nullptr;
 
-			(*it).second[i]->VerticesPNAEN.clear();
-			(*it).second[i]->IndicesPNAEN.clear();	
+			it->second[i]->VerticesPNAEN.clear();
+			it->second[i]->IndicesPNAEN.clear();	
 		}
 	}
 }
 
 /** Saves the info for this visual */
-void BaseVisualInfo::SaveMeshVisualInfo(const std::string& name)
+void BaseVisualInfo::SaveMeshVisualInfo(const std::string & name)
 {
 	FILE* f = fopen(("system\\GD3D11\\meshes\\infos\\" + name + ".vi").c_str(), "wb");
 
@@ -198,7 +198,7 @@ void BaseVisualInfo::SaveMeshVisualInfo(const std::string& name)
 }
 
 /** Loads the info for this visual */
-void BaseVisualInfo::LoadMeshVisualInfo(const std::string& name)
+void BaseVisualInfo::LoadMeshVisualInfo(const std::string & name)
 {
 	FILE* f = fopen(("system\\GD3D11\\meshes\\infos\\" + name + ".vi").c_str(), "rb");
 
@@ -225,7 +225,7 @@ SectionInstanceCache::~SectionInstanceCache()
 {
 	for(std::map<MeshVisualInfo *, D3D11VertexBuffer*>::iterator it = InstanceCache.begin(); it != InstanceCache.end(); it++)
 	{
-		delete (*it).second;
+		delete it->second;
 	}
 }
 
@@ -263,7 +263,7 @@ void SectionInstanceCache::ClearCacheForStatic(MeshVisualInfo* pm)
 }
 
 /** Saves this sections mesh to a file */
-void WorldMeshSectionInfo::SaveSectionMeshToFile(const std::string& name)
+void WorldMeshSectionInfo::SaveSectionMeshToFile(const std::string & name)
 {
 	FILE* f;
 	fopen_s(&f, name.c_str(), "wb");
@@ -276,34 +276,34 @@ void WorldMeshSectionInfo::SaveSectionMeshToFile(const std::string& name)
 
 
 /** Saves the mesh infos for this section */
-void WorldMeshSectionInfo::SaveMeshInfos(const std::string& worldName, INT2 sectionPos)
+void WorldMeshSectionInfo::SaveMeshInfos(const std::string & worldName, INT2 sectionPos)
 {
 	for(auto it = WorldMeshes.begin(); it != WorldMeshes.end(); it++)
 	{
 		// TODO: Custom mesh!
-		if ((*it).first.Texture)
+		if (it->first.Texture)
 		{
-			std::string tx = (*it).first.Texture->GetNameWithoutExt();
+			std::string tx = it->first.Texture->GetNameWithoutExt();
 			std::string name = "WS_" + worldName + "_" + std::to_string(sectionPos.x) + "_" + std::to_string(sectionPos.y) + "_" + tx;
 
-			if ((*it).second->SaveInfo) /// Save only if marked dirty
-				(*it).second->SaveWorldMeshInfo(name);
+			if (it->second->SaveInfo) /// Save only if marked dirty
+				it->second->SaveWorldMeshInfo(name);
 		}
 	}
 }
 
 /** Saves the mesh infos for this section */
-void WorldMeshSectionInfo::LoadMeshInfos(const std::string& worldName, INT2 sectionPos)
+void WorldMeshSectionInfo::LoadMeshInfos(const std::string & worldName, INT2 sectionPos)
 {
 	for(auto it = WorldMeshes.begin(); it != WorldMeshes.end(); it++)
 	{
 		// TODO: Custom mesh!
-		if ((*it).first.Texture)
+		if (it->first.Texture)
 		{
-			std::string tx = (*it).first.Texture->GetNameWithoutExt();
+			std::string tx = it->first.Texture->GetNameWithoutExt();
 			std::string name = "WS_" + worldName + "_" + std::to_string(sectionPos.x) + "_" + std::to_string(sectionPos.y) + "_" + tx;
 
-			(*it).second->LoadWorldMeshInfo(name);
+			it->second->LoadWorldMeshInfo(name);
 		}
 	}
 }

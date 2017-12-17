@@ -46,7 +46,7 @@ class zCParticleEmitter
 public:
 	
 
-	zCTexture* GetVisTexture()
+	zCTexture * GetVisTexture()
 	{	
 		return *(zCTexture **)THISPTR_OFFSET(GothicMemoryLocations::zCParticleEmitter::Offset_VisTexture); 
 	}
@@ -129,7 +129,7 @@ public:
 		HookedFunctions::OriginalFunctions.original_zCParticleFXDestructor = (GenericDestructor)DetourFunction((BYTE *)GothicMemoryLocations::zCParticleFX::Destructor, (BYTE *)zCParticleFX::Hooked_Destructor);
 	}
 	 
-	static void __fastcall Hooked_Destructor(void* thisptr, void* unknwn)
+	static void __fastcall Hooked_Destructor(void * thisptr, void * unknwn)
 	{
 		hook_infunc
 		// Notify the world
@@ -175,7 +175,7 @@ public:
 	}
 
 
-	/*zCVob* GetConntectedVob()
+	/*zCVob * GetConntectedVob()
 	{
 		return *(zCVob **)THISPTR_OFFSET(GothicMemoryLocations::zCParticleFX::Offset_ConnectedVob); 
 	}*/
@@ -185,7 +185,7 @@ public:
 		return *(float *)THISPTR_OFFSET(GothicMemoryLocations::zCParticleFX::Offset_TimeScale); 
 	}
 
-	float* GetPrivateTotalTime()
+	float * GetPrivateTotalTime()
 	{
 		return (float *)THISPTR_OFFSET(GothicMemoryLocations::zCParticleFX::Offset_PrivateTotalTime); 
 	}
@@ -235,7 +235,7 @@ public:
 		XCALL(GothicMemoryLocations::zCParticleFX::UpdateParticle);
 	}
 
-	void SetVisualUsedBy(zCVob* vob)
+	void SetVisualUsedBy(zCVob * vob)
 	{
 		XCALL(GothicMemoryLocations::zCParticleFX::SetVisualUsedBy);
 	}

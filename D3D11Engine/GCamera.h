@@ -16,10 +16,10 @@ public:
 	D3DXMATRIX& GetView(){return View;}
 
 	/** Returns the WorldPosition */
-	D3DXVECTOR3& GetWorldPosition(){return WorldPosition;}
+	D3DXVECTOR3 & GetWorldPosition(){return WorldPosition;}
 
 	/** Returns the WorldPosition */
-	D3DXVECTOR3& GetLookAt(){return LookAt;}
+	D3DXVECTOR3 & GetLookAt(){return LookAt;}
 
 protected:
 	/** Cameras view matrix */

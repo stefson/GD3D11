@@ -41,7 +41,7 @@ public:
 
 	}
 
-	static void __fastcall Hooked_Destructor(void* thisptr, void* unknwn)
+	static void __fastcall Hooked_Destructor(void * thisptr, void * unknwn)
 	{
 		hook_infunc
 
@@ -54,7 +54,7 @@ public:
 		hook_outfunc
 	}
 
-	static void __fastcall Hooked_Constructor(void* thisptr, void* unknwn)
+	static void __fastcall Hooked_Constructor(void * thisptr, void * unknwn)
 	{
 		hook_infunc
 		// Notify the world
@@ -65,7 +65,7 @@ public:
 		hook_outfunc
 	}
 
-	static void __fastcall Hooked_InitValues(void* thisptr, void* unknwn)
+	static void __fastcall Hooked_InitValues(void * thisptr, void * unknwn)
 	{
 		hook_infunc
 
@@ -84,7 +84,7 @@ public:
 	}
 
 	/** Returns AniTexture */
-	zCTexture* GetTexture()
+	zCTexture * GetTexture()
 	{		
 		//return GetTextureSingle(); // FIXME: GetAniTexture crashes sometimes
 		XCALL(GothicMemoryLocations::zCMaterial::GetAniTexture);
@@ -97,13 +97,13 @@ public:
 	}
 
 	/** Returns single texture, because not all seem to be animated and returned by GetAniTexture? */
-	zCTexture* GetTextureSingle()
+	zCTexture * GetTextureSingle()
 	{
 		return *(zCTexture **)(((char *)this) + GothicMemoryLocations::zCMaterial::Offset_Texture);
 	}
 
 	/** Returns the current texture from GetAniTexture */
-	zCTexture* GetAniTexture()
+	zCTexture * GetAniTexture()
 	{
 		XCALL(GothicMemoryLocations::zCMaterial::GetAniTexture);
 	}

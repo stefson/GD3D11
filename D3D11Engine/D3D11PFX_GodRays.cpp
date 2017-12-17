@@ -22,9 +22,9 @@ D3D11PFX_GodRays::~D3D11PFX_GodRays()
 }
 
 /** Draws this effect to the given buffer */
-XRESULT D3D11PFX_GodRays::Render(RenderToTextureBuffer* fxbuffer)
+XRESULT D3D11PFX_GodRays::Render(RenderToTextureBuffer * fxbuffer)
 {
-	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
+	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 
 	engine->SetDefaultStates();
 
@@ -71,8 +71,8 @@ XRESULT D3D11PFX_GodRays::Render(RenderToTextureBuffer* fxbuffer)
 	engine->GetContext()->OMGetRenderTargets(1, &oldRTV, &oldDSV);
 
 	D3D11VShader* vs = engine->GetShaderManager()->GetVShader("VS_PFX");
-	D3D11PShader* maskPS = engine->GetShaderManager()->GetPShader("PS_PFX_GodRayMask");
-	D3D11PShader* zoomPS = engine->GetShaderManager()->GetPShader("PS_PFX_GodRayZoom");
+	D3D11PShader * maskPS = engine->GetShaderManager()->GetPShader("PS_PFX_GodRayMask");
+	D3D11PShader * zoomPS = engine->GetShaderManager()->GetPShader("PS_PFX_GodRayZoom");
 	
 	maskPS->Apply();
 	vs->Apply();
@@ -101,7 +101,7 @@ XRESULT D3D11PFX_GodRays::Render(RenderToTextureBuffer* fxbuffer)
 	zoomPS->GetConstantBuffer()[0]->UpdateBuffer(&gcb);
 	zoomPS->GetConstantBuffer()[0]->BindToPixelShader(0);
 
-	FxRenderer->CopyTextureToRTV(FxRenderer->GetTempBufferDS4_1()->GetShaderResView(), FxRenderer->GetTempBufferDS4_2()->GetRenderTargetView(), INT2(0,0), true);
+	FxRenderer->CopyTextureToRTV(FxRenderer->GetTempBufferDS4_1()->GetShaderResView(), FxRenderer->GetTempBufferDS4_2()->GetRenderTargetView(), INT2(0, 0), true);
 
 	// Upscale and blend
 	Engine::GAPI->GetRendererState()->BlendState.SetAdditiveBlending();

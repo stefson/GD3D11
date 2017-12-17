@@ -203,7 +203,7 @@ public:
 	 *   GetPropertyFloat() to read the property, but it won't be there.
 	 */
 	void SetPropertyInteger(const char* szName, int iValue, 
-		bool* bWasExisting = nullptr);
+		bool * bWasExisting = nullptr);
 
 	// -------------------------------------------------------------------
 	/** Set a boolean configuration property. Boolean properties
@@ -212,7 +212,7 @@ public:
 	 *  #GetPropertyBool and vice versa.
 	 * @see SetPropertyInteger()
 	 */
-	void SetPropertyBool(const char* szName, bool value, bool* bWasExisting = nullptr)	{
+	void SetPropertyBool(const char* szName, bool value, bool * bWasExisting = nullptr)	{
 		SetPropertyInteger(szName,value,bWasExisting);
 	}
 
@@ -221,14 +221,14 @@ public:
 	 * @see SetPropertyInteger()
 	 */
 	void SetPropertyFloat(const char* szName, float fValue, 
-		bool* bWasExisting = nullptr);
+		bool * bWasExisting = nullptr);
 
 	// -------------------------------------------------------------------
 	/** Set a string configuration property.
 	 * @see SetPropertyInteger()
 	 */
-	void SetPropertyString(const char* szName, const std::string& sValue, 
-		bool* bWasExisting = nullptr);
+	void SetPropertyString(const char* szName, const std::string & sValue, 
+		bool * bWasExisting = nullptr);
 
 	// -------------------------------------------------------------------
 	/** Get a configuration property.
@@ -270,8 +270,8 @@ public:
 	 *  The return value remains valid until the property is modified.
 	 * @see GetPropertyInteger()
 	 */
-	const std::string& GetPropertyString(const char* szName,
-		const std::string& sErrorReturn = "") const;
+	const std::string & GetPropertyString(const char* szName,
+		const std::string & sErrorReturn = "") const;
 
 	// -------------------------------------------------------------------
 	/** Supplies a custom IO handler to the importer to use to open and
@@ -288,7 +288,7 @@ public:
 	 * @param pIOHandler The IO handler to be used in all file accesses 
 	 *   of the Importer. 
 	 */
-	void SetIOHandler( IOSystem* pIOHandler);
+	void SetIOHandler(IOSystem* pIOHandler);
 
 	// -------------------------------------------------------------------
 	/** Retrieves the IO handler that is currently set.
@@ -319,7 +319,7 @@ public:
 	 *    disable progress reporting. 
 	 *  @note Progress handlers can be used to abort the loading
 	 *    at almost any time.*/
-	void SetProgressHandler ( ProgressHandler* pHandler );
+	void SetProgressHandler (ProgressHandler* pHandler);
 
 	// -------------------------------------------------------------------
 	/** Retrieves the progress handler that is currently set. 
@@ -415,8 +415,8 @@ public:
 	 * external scripts. If you need the full functionality, provide
 	 * a custom IOSystem to make Assimp find these files.
 	 */
-	const aiScene* ReadFileFromMemory( 
-		const void* pBuffer,
+	const aiScene* ReadFileFromMemory(
+		const void * pBuffer,
 		size_t pLength,
 		unsigned int pFlags,
 		const char* pHint = "");
@@ -448,7 +448,7 @@ public:
 	 * See the const char* version for detailled docs.
 	 * @see ReadFile(const char*, pFlags)  */
 	const aiScene* ReadFile(
-		const std::string& pFile, 
+		const std::string & pFile, 
 		unsigned int pFlags);
 
 	// -------------------------------------------------------------------
@@ -457,7 +457,7 @@ public:
 	 *  The function does nothing if no scene has previously been 
 	 *  read via ReadFile(). FreeScene() is called automatically by the
 	 *  destructor and ReadFile() itself.  */
-	void FreeScene( );
+	void FreeScene();
 
 	// -------------------------------------------------------------------
 	/** Returns an error description of an error that occurred in ReadFile(). 
@@ -515,7 +515,7 @@ public:
 	 * This function is provided for backward compatibility.
 	 * See the const char* version for detailed and up-to-date docs.
 	 * @see IsExtensionSupported(const char*) */
-	inline bool IsExtensionSupported(const std::string& szExtension) const;
+	inline bool IsExtensionSupported(const std::string & szExtension) const;
 
 	// -------------------------------------------------------------------
 	/** Get a full list of all file extensions supported by ASSIMP.
@@ -535,7 +535,7 @@ public:
 	 * This function is provided for backward compatibility.
 	 * See the aiString version for detailed and up-to-date docs.
 	 * @see GetExtensionList(aiString&)*/
-	inline void GetExtensionList(std::string& szOut) const;
+	inline void GetExtensionList(std::string & szOut) const;
 
 	// -------------------------------------------------------------------
 	/** Get the number of importrs currently registered with Assimp. */
@@ -624,17 +624,17 @@ protected:
 // ----------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------
-AI_FORCE_INLINE const aiScene* Importer::ReadFile( const std::string& pFile,unsigned int pFlags){
+AI_FORCE_INLINE const aiScene* Importer::ReadFile(const std::string & pFile,unsigned int pFlags){
 	return ReadFile(pFile.c_str(),pFlags);
 }
 // ----------------------------------------------------------------------------
-AI_FORCE_INLINE void Importer::GetExtensionList(std::string& szOut) const	{
+AI_FORCE_INLINE void Importer::GetExtensionList(std::string & szOut) const	{
 	aiString s;
 	GetExtensionList(s);
 	szOut = s.data;
 }
 // ----------------------------------------------------------------------------
-AI_FORCE_INLINE bool Importer::IsExtensionSupported(const std::string& szExtension) const	{
+AI_FORCE_INLINE bool Importer::IsExtensionSupported(const std::string & szExtension) const	{
 	return IsExtensionSupported(szExtension.c_str());
 }
 

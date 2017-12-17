@@ -19,12 +19,12 @@
 
 #include "fft_512x512.h"
 
-HRESULT CompileShaderFromFile( WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut );
+HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut);
 
 
 void radix008A(CSFFT512x512_Plan* fft_plan,
 			   ID3D11UnorderedAccessView* pUAV_Dst,
-			   ID3D11ShaderResourceView* pSRV_Src,
+			   ID3D11ShaderResourceView * pSRV_Src,
 			   UINT thread_count,
 			   UINT istride)
 {
@@ -33,7 +33,7 @@ void radix008A(CSFFT512x512_Plan* fft_plan,
 	ID3D11DeviceContext* pd3dImmediateContext = fft_plan->pd3dImmediateContext;
 
 	// Buffers
-	ID3D11ShaderResourceView* cs_srvs[1] = {pSRV_Src};
+	ID3D11ShaderResourceView * cs_srvs[1] = {pSRV_Src};
 	pd3dImmediateContext->CSSetShaderResources(0, 1, cs_srvs);
 
 	ID3D11UnorderedAccessView* cs_uavs[1] = {pUAV_Dst};
@@ -58,12 +58,12 @@ void radix008A(CSFFT512x512_Plan* fft_plan,
 
 void fft_512x512_c2c(CSFFT512x512_Plan* fft_plan,
 					 ID3D11UnorderedAccessView* pUAV_Dst,
-					 ID3D11ShaderResourceView* pSRV_Dst,
-					 ID3D11ShaderResourceView* pSRV_Src)
+					 ID3D11ShaderResourceView * pSRV_Dst,
+					 ID3D11ShaderResourceView * pSRV_Src)
 {
 	const UINT thread_count = fft_plan->slices * (512 * 512) / 8;
 	ID3D11UnorderedAccessView* pUAV_Tmp = fft_plan->pUAV_Tmp;
-	ID3D11ShaderResourceView* pSRV_Tmp = fft_plan->pSRV_Tmp;
+	ID3D11ShaderResourceView * pSRV_Tmp = fft_plan->pSRV_Tmp;
 	ID3D11DeviceContext* pd3dContext = fft_plan->pd3dImmediateContext;
 	ID3D11Buffer* cs_cbs[1];
 

@@ -539,11 +539,11 @@ enum aiPostProcessSteps
  *
  *  @deprecated 
  */
-#define aiProcess_ConvertToLeftHanded ( \
+#define aiProcess_ConvertToLeftHanded (\
 	aiProcess_MakeLeftHanded     | \
 	aiProcess_FlipUVs            | \
 	aiProcess_FlipWindingOrder   | \
-	0 ) 
+	0) 
 
 
 // ---------------------------------------------------------------------------------------
@@ -560,14 +560,14 @@ enum aiPostProcessSteps
  *  Some of them offer further configurable properties, while some of them might not be of
  *  use for you so it might be better to not specify them.
  */
-#define aiProcessPreset_TargetRealtime_Fast ( \
+#define aiProcessPreset_TargetRealtime_Fast (\
 	aiProcess_CalcTangentSpace		|  \
 	aiProcess_GenNormals			|  \
 	aiProcess_JoinIdenticalVertices |  \
 	aiProcess_Triangulate			|  \
 	aiProcess_GenUVCoords           |  \
 	aiProcess_SortByPType           |  \
-	0 )
+	0)
 
  // ---------------------------------------------------------------------------------------
  /** @def aiProcessPreset_TargetRealtime_Quality
@@ -585,7 +585,7 @@ enum aiPostProcessSteps
   *  Some of them offer further configurable properties, while some of them might not be
   *  of use for you so it might be better to not specify them.
   */
-#define aiProcessPreset_TargetRealtime_Quality ( \
+#define aiProcessPreset_TargetRealtime_Quality (\
 	aiProcess_CalcTangentSpace				|  \
 	aiProcess_GenSmoothNormals				|  \
 	aiProcess_JoinIdenticalVertices			|  \
@@ -598,7 +598,7 @@ enum aiPostProcessSteps
 	aiProcess_SortByPType                   |  \
 	aiProcess_FindDegenerates               |  \
 	aiProcess_FindInvalidData               |  \
-	0 )
+	0)
 
  // ---------------------------------------------------------------------------------------
  /** @def aiProcessPreset_TargetRealtime_MaxQuality
@@ -615,13 +615,13 @@ enum aiPostProcessSteps
   *  Some of them offer further configurable properties, while some of them might not be
   *  of use for you so it might be better to not specify them.
   */
-#define aiProcessPreset_TargetRealtime_MaxQuality ( \
+#define aiProcessPreset_TargetRealtime_MaxQuality (\
 	aiProcessPreset_TargetRealtime_Quality   |  \
 	aiProcess_FindInstances                  |  \
 	aiProcess_ValidateDataStructure          |  \
 	aiProcess_OptimizeMeshes                 |  \
 	aiProcess_Debone						 |  \
-	0 )
+	0)
 
 
 #ifdef __cplusplus

@@ -12,17 +12,17 @@ BaseLineRenderer::~BaseLineRenderer()
 }
 
 /** Plots a vector of floats */
-void BaseLineRenderer::PlotNumbers(const std::vector<float>& values, const D3DXVECTOR3& location, const D3DXVECTOR3& direction, float distance, float heightScale, const D3DXVECTOR4& color)
+void BaseLineRenderer::PlotNumbers(const std::vector<float> & values, const D3DXVECTOR3 & location, const D3DXVECTOR3 & direction, float distance, float heightScale, const D3DXVECTOR4 & color)
 {
 	for(unsigned int i=1;i<values.size();i++)
 	{
-		AddLine(LineVertex(location + (direction * (float)(i-1) * distance) + D3DXVECTOR3(0,0,values[i-1]*heightScale), color), 
-				LineVertex(location + (direction * (float)i * distance) + D3DXVECTOR3(0,0,values[i]*heightScale), color));
+		AddLine(LineVertex(location + (direction * (float)(i-1) * distance) + D3DXVECTOR3(0, 0,values[i-1]*heightScale), color), 
+				LineVertex(location + (direction * (float)i * distance) + D3DXVECTOR3(0, 0,values[i]*heightScale), color));
 	}
 }
 
 /** Adds a triangle to the renderlist */
-void BaseLineRenderer::AddTriangle(const D3DXVECTOR3& t0, const D3DXVECTOR3& t1, const D3DXVECTOR3& t2, const D3DXVECTOR4& color)
+void BaseLineRenderer::AddTriangle(const D3DXVECTOR3 & t0, const D3DXVECTOR3 & t1, const D3DXVECTOR3 & t2, const D3DXVECTOR4 & color)
 {
 	AddLine(LineVertex(t0, color), LineVertex(t1, color));
 	AddLine(LineVertex(t0, color), LineVertex(t2, color));
@@ -30,7 +30,7 @@ void BaseLineRenderer::AddTriangle(const D3DXVECTOR3& t0, const D3DXVECTOR3& t1,
 }
 
 /** Adds a point locator to the renderlist */
-void BaseLineRenderer::AddPointLocator(const D3DXVECTOR3& location, float size, const D3DXVECTOR4& color)
+void BaseLineRenderer::AddPointLocator(const D3DXVECTOR3 & location, float size, const D3DXVECTOR4 & color)
 {
 	D3DXVECTOR3 u = location; u.z += size;
 	D3DXVECTOR3 d = location; d.z -= size;
@@ -47,7 +47,7 @@ void BaseLineRenderer::AddPointLocator(const D3DXVECTOR3& location, float size, 
 }
 
 /** Adds a plane to the renderlist */
-void BaseLineRenderer::AddPlane(const D3DXVECTOR4& plane, const D3DXVECTOR3& origin, float size, const D3DXVECTOR4& color)
+void BaseLineRenderer::AddPlane(const D3DXVECTOR4 & plane, const D3DXVECTOR3 & origin, float size, const D3DXVECTOR4 & color)
 {
 	D3DXVECTOR3 pNormal = D3DXVECTOR3(plane);
 
@@ -62,8 +62,8 @@ void BaseLineRenderer::AddPlane(const D3DXVECTOR4& plane, const D3DXVECTOR3& ori
 	D3DXVec3Cross(&DebugPlaneP2, &pNormal, &DebugPlaneP1);
 
 	//DebugPlaneP2 += SlidingPlaneOrigin;
-	D3DXVECTOR3& p1 = DebugPlaneP1;
-	D3DXVECTOR3& p2 = DebugPlaneP2;
+	D3DXVECTOR3 & p1 = DebugPlaneP1;
+	D3DXVECTOR3 & p2 = DebugPlaneP2;
 	D3DXVECTOR3 O = origin;
 
 	D3DXVECTOR3 from; D3DXVECTOR3 to;
@@ -85,7 +85,7 @@ void BaseLineRenderer::AddPlane(const D3DXVECTOR4& plane, const D3DXVECTOR3& ori
 }
 
 /** Adds an AABB-Box to the renderlist */
-void BaseLineRenderer::AddAABB(const D3DXVECTOR3& location, float halfSize, const D3DXVECTOR4& color)
+void BaseLineRenderer::AddAABB(const D3DXVECTOR3 & location, float halfSize, const D3DXVECTOR4 & color)
 {
 	// Bottom -x -y -z to +x -y -z
 	AddLine(LineVertex(D3DXVECTOR3(location.x - halfSize, location.y - halfSize, location.z - halfSize), color), LineVertex(D3DXVECTOR3(location.x + halfSize, location.y - halfSize, location.z - halfSize), color));
@@ -117,7 +117,7 @@ void BaseLineRenderer::AddAABB(const D3DXVECTOR3& location, float halfSize, cons
 }
 
 /** Adds an AABB-Box to the renderlist */
-void BaseLineRenderer::AddAABB(const D3DXVECTOR3& location, const D3DXVECTOR3&  halfSize, const D3DXVECTOR4& color)
+void BaseLineRenderer::AddAABB(const D3DXVECTOR3 & location, const D3DXVECTOR3 &  halfSize, const D3DXVECTOR4 & color)
 {
 	AddAABBMinMax(D3DXVECTOR3(	location.x - halfSize.x, 
 						location.y - halfSize.y, 
@@ -128,7 +128,7 @@ void BaseLineRenderer::AddAABB(const D3DXVECTOR3& location, const D3DXVECTOR3&  
 
 
 
-void BaseLineRenderer::AddAABBMinMax(const D3DXVECTOR3& min, const D3DXVECTOR3& max, const D3DXVECTOR4& color)
+void BaseLineRenderer::AddAABBMinMax(const D3DXVECTOR3 & min, const D3DXVECTOR3 & max, const D3DXVECTOR4 & color)
 {
 	AddLine(LineVertex(D3DXVECTOR3(min.x, min.y, min.z), color), LineVertex(D3DXVECTOR3(max.x, min.y, min.z), color));
 	AddLine(LineVertex(D3DXVECTOR3(max.x, min.y, min.z), color), LineVertex(D3DXVECTOR3(max.x, max.y, min.z), color));
@@ -147,7 +147,7 @@ void BaseLineRenderer::AddAABBMinMax(const D3DXVECTOR3& min, const D3DXVECTOR3& 
 }
 
 /** Adds a ring to the renderlist */
-void BaseLineRenderer::AddRingZ(const D3DXVECTOR3& location, float size, const D3DXVECTOR4& color, int res)
+void BaseLineRenderer::AddRingZ(const D3DXVECTOR3 & location, float size, const D3DXVECTOR4 & color, int res)
 {
 	std::vector<D3DXVECTOR3> points;
 	float step = (float)(D3DX_PI * 2) / (float)res;
@@ -166,7 +166,7 @@ void BaseLineRenderer::AddRingZ(const D3DXVECTOR3& location, float size, const D
 }
 
 /** Draws a wireframe mesh */
-void BaseLineRenderer::AddWireframeMesh(const std::vector<ExVertexStruct>& vertices, const std::vector<VERTEX_INDEX>& indices, const D3DXVECTOR4& color, const D3DXMATRIX* world)
+void BaseLineRenderer::AddWireframeMesh(const std::vector<ExVertexStruct> & vertices, const std::vector<VERTEX_INDEX> & indices, const D3DXVECTOR4 & color, const D3DXMATRIX* world)
 {
 	for(size_t i=0;i<indices.size();i+=3)
 	{

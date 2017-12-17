@@ -9,7 +9,7 @@ public:
 	virtual ~GMeshSimple();
 
 	/** Load a mesh from file */
-	XRESULT LoadMesh(const std::string& file);
+	XRESULT LoadMesh(const std::string & file);
 
 	/** Draws all buffers this holds */
 	void DrawMesh();

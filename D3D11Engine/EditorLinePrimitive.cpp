@@ -25,7 +25,7 @@ EditorLinePrimitive::EditorLinePrimitive()
 
 	NumVertices = 0;
 
-	RotationMatrixAngles=D3DXVECTOR3(0,0,0);
+	RotationMatrixAngles=D3DXVECTOR3(0, 0, 0);
 	D3DXMatrixIdentity(&RotationMatrix);
 	bLocalRotation=false;
 
@@ -54,10 +54,10 @@ void EditorLinePrimitive::DeleteContent()
 }
 
 /** Creates a grid of lines */
-HRESULT EditorLinePrimitive::CreateLineGrid(int LinesX,int LinesY,D3DXVECTOR2* Middle, D3DXVECTOR4* Color)
+HRESULT EditorLinePrimitive::CreateLineGrid(int LinesX,int LinesY,D3DXVECTOR2 * Middle, D3DXVECTOR4 * Color)
 {
 	HRESULT hr;
-	LineVertex* vx = new LineVertex[(LinesX+1)*(LinesY+1)*4];
+	LineVertex * vx = new LineVertex[(LinesX+1)*(LinesY+1)*4];
 	UINT CurVertex=0;
 
 	//Fill X based lines
@@ -66,10 +66,10 @@ HRESULT EditorLinePrimitive::CreateLineGrid(int LinesX,int LinesY,D3DXVECTOR2* M
 	for(x= -0.5; x<=0.5f+SpacingX; x+=SpacingX)
 	{
 
-		vx[CurVertex].Position=D3DXVECTOR3(x,0,-0.5)+D3DXVECTOR3(Middle->x,0,Middle->y);
+		vx[CurVertex].Position=D3DXVECTOR3(x, 0,-0.5)+D3DXVECTOR3(Middle->x, 0,Middle->y);
 		EncodeColor(&vx[CurVertex], Color);
 		CurVertex++;
-		vx[CurVertex].Position=D3DXVECTOR3(x,0,0.5)+D3DXVECTOR3(Middle->x,0,Middle->y);
+		vx[CurVertex].Position=D3DXVECTOR3(x, 0, 0.5)+D3DXVECTOR3(Middle->x, 0,Middle->y);
 		EncodeColor(&vx[CurVertex], Color);
 		CurVertex++;
 	}
@@ -79,10 +79,10 @@ HRESULT EditorLinePrimitive::CreateLineGrid(int LinesX,int LinesY,D3DXVECTOR2* M
 	float SpacingY=(1.0f/LinesY);
 	for(z= -0.5; z<=0.5f+SpacingY; z+=SpacingY)
 	{
-		vx[CurVertex].Position=D3DXVECTOR3(-0.5,0,z)+D3DXVECTOR3(Middle->x,0,Middle->y);
+		vx[CurVertex].Position=D3DXVECTOR3(-0.5, 0,z)+D3DXVECTOR3(Middle->x, 0,Middle->y);
 		EncodeColor(&vx[CurVertex], Color);
 		CurVertex++;
-		vx[CurVertex].Position=D3DXVECTOR3(0.5,0,z)+D3DXVECTOR3(Middle->x,0,Middle->y);
+		vx[CurVertex].Position=D3DXVECTOR3(0.5, 0,z)+D3DXVECTOR3(Middle->x, 0,Middle->y);
 		EncodeColor(&vx[CurVertex], Color);
 		CurVertex++;
 	}
@@ -95,7 +95,7 @@ HRESULT EditorLinePrimitive::CreateLineGrid(int LinesX,int LinesY,D3DXVECTOR2* M
 }
 
 /** Creates a box of lines */
-HRESULT EditorLinePrimitive::CreateLineBoxPrimitive(D3DXVECTOR4* Color)
+HRESULT EditorLinePrimitive::CreateLineBoxPrimitive(D3DXVECTOR4 * Color)
 {
 	LineVertex vx[24];
 
@@ -107,15 +107,15 @@ HRESULT EditorLinePrimitive::CreateLineBoxPrimitive(D3DXVECTOR4* Color)
 
 	vx[2].Position = D3DXVECTOR3(1,-1,-1);
 	EncodeColor(&vx[2], Color);
-	vx[3].Position = D3DXVECTOR3(1,-1,1);
+	vx[3].Position = D3DXVECTOR3(1,-1, 1);
 	EncodeColor(&vx[3], Color);
 
-	vx[4].Position = D3DXVECTOR3(1,-1,1);
+	vx[4].Position = D3DXVECTOR3(1,-1, 1);
 	EncodeColor(&vx[4], Color);
-	vx[5].Position = D3DXVECTOR3(-1,-1,1);
+	vx[5].Position = D3DXVECTOR3(-1,-1, 1);
 	EncodeColor(&vx[5], Color);
 
-	vx[6].Position = D3DXVECTOR3(-1,-1,1);
+	vx[6].Position = D3DXVECTOR3(-1,-1, 1);
 	EncodeColor(&vx[6], Color);
 	vx[7].Position = D3DXVECTOR3(-1,-1,-1);
 	EncodeColor(&vx[7], Color);
@@ -124,43 +124,43 @@ HRESULT EditorLinePrimitive::CreateLineBoxPrimitive(D3DXVECTOR4* Color)
 
 	vx[8].Position = D3DXVECTOR3(-1,-1,-1);
 	EncodeColor(&vx[8], Color);
-	vx[9].Position = D3DXVECTOR3(-1,1,-1);
+	vx[9].Position = D3DXVECTOR3(-1, 1,-1);
 	EncodeColor(&vx[9], Color);
 
 	vx[10].Position = D3DXVECTOR3(1,-1,-1);
 	EncodeColor(&vx[10], Color);
-	vx[11].Position = D3DXVECTOR3(1,1,-1);
+	vx[11].Position = D3DXVECTOR3(1, 1,-1);
 	EncodeColor(&vx[11], Color);
 
-	vx[12].Position = D3DXVECTOR3(1,-1,1);
+	vx[12].Position = D3DXVECTOR3(1,-1, 1);
 	EncodeColor(&vx[12], Color);
-	vx[13].Position = D3DXVECTOR3(1,1,1);
+	vx[13].Position = D3DXVECTOR3(1, 1, 1);
 	EncodeColor(&vx[13], Color);
 
-	vx[14].Position = D3DXVECTOR3(-1,-1,1);
+	vx[14].Position = D3DXVECTOR3(-1,-1, 1);
 	EncodeColor(&vx[14], Color);
-	vx[15].Position = D3DXVECTOR3(-1,1,1);
+	vx[15].Position = D3DXVECTOR3(-1, 1, 1);
 	EncodeColor(&vx[15], Color);
 
 	// Top
-	vx[16].Position = D3DXVECTOR3(-1,1,-1);
+	vx[16].Position = D3DXVECTOR3(-1, 1,-1);
 	EncodeColor(&vx[16], Color);
-	vx[17].Position = D3DXVECTOR3(1,1,-1);
+	vx[17].Position = D3DXVECTOR3(1, 1,-1);
 	EncodeColor(&vx[17], Color);
 
-	vx[18].Position = D3DXVECTOR3(1,1,-1);
+	vx[18].Position = D3DXVECTOR3(1, 1,-1);
 	EncodeColor(&vx[18], Color);
-	vx[19].Position = D3DXVECTOR3(1,1,1);
+	vx[19].Position = D3DXVECTOR3(1, 1, 1);
 	EncodeColor(&vx[19], Color);
 
-	vx[20].Position = D3DXVECTOR3(1,1,1);
+	vx[20].Position = D3DXVECTOR3(1, 1, 1);
 	EncodeColor(&vx[20], Color);
-	vx[21].Position = D3DXVECTOR3(-1,1,1);
+	vx[21].Position = D3DXVECTOR3(-1, 1, 1);
 	EncodeColor(&vx[21], Color);
 
-	vx[22].Position = D3DXVECTOR3(-1,1,1);
+	vx[22].Position = D3DXVECTOR3(-1, 1, 1);
 	EncodeColor(&vx[22], Color);
-	vx[23].Position = D3DXVECTOR3(-1,1,-1);
+	vx[23].Position = D3DXVECTOR3(-1, 1,-1);
 	EncodeColor(&vx[23], Color);
 
 	HRESULT hr;
@@ -170,7 +170,7 @@ HRESULT EditorLinePrimitive::CreateLineBoxPrimitive(D3DXVECTOR4* Color)
 }
 
 /** Creates a solid box */
-HRESULT EditorLinePrimitive::CreateSolidBoxPrimitive(D3DXVECTOR4* Color, float Extends)
+HRESULT EditorLinePrimitive::CreateSolidBoxPrimitive(D3DXVECTOR4 * Color, float Extends)
 {
 	LineVertex vx[36];
 	int i=0;
@@ -178,10 +178,10 @@ HRESULT EditorLinePrimitive::CreateSolidBoxPrimitive(D3DXVECTOR4* Color, float E
 	vx[i].Position = D3DXVECTOR3(-1,-1,-1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1,-1,1);
+	vx[i].Position = D3DXVECTOR3(1,-1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(-1,-1,1);
+	vx[i].Position = D3DXVECTOR3(-1,-1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
 	vx[i].Position = D3DXVECTOR3(-1,-1,-1);
@@ -190,97 +190,97 @@ HRESULT EditorLinePrimitive::CreateSolidBoxPrimitive(D3DXVECTOR4* Color, float E
 	vx[i].Position = D3DXVECTOR3(1,-1,-1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1,-1,1);
+	vx[i].Position = D3DXVECTOR3(1,-1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(-1,1,-1);
+	vx[i].Position = D3DXVECTOR3(-1, 1,-1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(-1,1,1);
+	vx[i].Position = D3DXVECTOR3(-1, 1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1,1,1);
+	vx[i].Position = D3DXVECTOR3(1, 1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(-1,1,-1);
+	vx[i].Position = D3DXVECTOR3(-1, 1,-1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1,1,1);
+	vx[i].Position = D3DXVECTOR3(1, 1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1,1,-1);
-	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
-
-	vx[i].Position = D3DXVECTOR3(-1,-1,-1);
-	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
-
-	vx[i].Position = D3DXVECTOR3(-1,-1,1);
-	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
-
-	vx[i].Position = D3DXVECTOR3(-1,1,1);
+	vx[i].Position = D3DXVECTOR3(1, 1,-1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
 	vx[i].Position = D3DXVECTOR3(-1,-1,-1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(-1,1,1);
+	vx[i].Position = D3DXVECTOR3(-1,-1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(-1,1,-1);
+	vx[i].Position = D3DXVECTOR3(-1, 1, 1);
+	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
+
+	vx[i].Position = D3DXVECTOR3(-1,-1,-1);
+	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
+
+	vx[i].Position = D3DXVECTOR3(-1, 1, 1);
+	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
+
+	vx[i].Position = D3DXVECTOR3(-1, 1,-1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
 	vx[i].Position = D3DXVECTOR3(1,-1,-1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1,1,1);
+	vx[i].Position = D3DXVECTOR3(1, 1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1,-1,1);
-	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
-
-	vx[i].Position = D3DXVECTOR3(1,-1,-1);
-	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
-
-	vx[i].Position = D3DXVECTOR3(1,1,-1);
-	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
-
-	vx[i].Position = D3DXVECTOR3(1,1,1);
-	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
-
-	vx[i].Position = D3DXVECTOR3(-1,-1,-1);
-	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
-
-	vx[i].Position = D3DXVECTOR3(1,1,-1);
+	vx[i].Position = D3DXVECTOR3(1,-1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
 	vx[i].Position = D3DXVECTOR3(1,-1,-1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
+	vx[i].Position = D3DXVECTOR3(1, 1,-1);
+	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
+
+	vx[i].Position = D3DXVECTOR3(1, 1, 1);
+	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
+
 	vx[i].Position = D3DXVECTOR3(-1,-1,-1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(-1,1,-1);
+	vx[i].Position = D3DXVECTOR3(1, 1,-1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1,1,-1);
+	vx[i].Position = D3DXVECTOR3(1,-1,-1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(-1,-1,1);
+	vx[i].Position = D3DXVECTOR3(-1,-1,-1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1,-1,1);
+	vx[i].Position = D3DXVECTOR3(-1, 1,-1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1,1,1);
+	vx[i].Position = D3DXVECTOR3(1, 1,-1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(-1,-1,1);
+	vx[i].Position = D3DXVECTOR3(-1,-1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1,1,1);
+	vx[i].Position = D3DXVECTOR3(1,-1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(-1,1,1);
+	vx[i].Position = D3DXVECTOR3(1, 1, 1);
+	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
+
+	vx[i].Position = D3DXVECTOR3(-1,-1, 1);
+	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
+
+	vx[i].Position = D3DXVECTOR3(1, 1, 1);
+	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
+
+	vx[i].Position = D3DXVECTOR3(-1, 1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
 	// Loop through all vertices and apply the extends
@@ -296,7 +296,7 @@ HRESULT EditorLinePrimitive::CreateSolidBoxPrimitive(D3DXVECTOR4* Color, float E
 }
 
 /** Creates the buffers and sets up the rest od the object */
-HRESULT EditorLinePrimitive::CreateSolidPrimitive(LineVertex* PrimVerts, UINT NumVertices, D3D11_PRIMITIVE_TOPOLOGY Topology)
+HRESULT EditorLinePrimitive::CreateSolidPrimitive(LineVertex * PrimVerts, UINT NumVertices, D3D11_PRIMITIVE_TOPOLOGY Topology)
 {
 	HRESULT hr=S_OK;
 
@@ -333,10 +333,10 @@ HRESULT EditorLinePrimitive::CreateSolidPrimitive(LineVertex* PrimVerts, UINT Nu
 
 
 /** Creates a plate, not of lines. Can't use intersection on this*/
-HRESULT EditorLinePrimitive::CreateFilledCirclePrimitive(float Radius, UINT Detail, const D3DXVECTOR4* Color, int Axis)
+HRESULT EditorLinePrimitive::CreateFilledCirclePrimitive(float Radius, UINT Detail, const D3DXVECTOR4 * Color, int Axis)
 {
 	UINT NumVerts = Detail*3;
-	LineVertex* vx = new LineVertex[NumVerts];
+	LineVertex * vx = new LineVertex[NumVerts];
 
 	float Step = (D3DX_PI*2)/((float)(Detail)-1);
 	float s = 0;
@@ -400,9 +400,9 @@ HRESULT EditorLinePrimitive::CreateFilledCirclePrimitive(float Radius, UINT Deta
 }
 
 /** Creates a circle of lines */
-HRESULT EditorLinePrimitive::CreateCirclePrimitive(float Radius, UINT Detail, const D3DXVECTOR4* Color, int Axis)
+HRESULT EditorLinePrimitive::CreateCirclePrimitive(float Radius, UINT Detail, const D3DXVECTOR4 * Color, int Axis)
 {
-	LineVertex* vx = new LineVertex[Detail];
+	LineVertex * vx = new LineVertex[Detail];
 
 	float Step = (D3DX_PI*2)/((float)Detail-1);
 	float s = 0;
@@ -439,10 +439,10 @@ HRESULT EditorLinePrimitive::CreateCirclePrimitive(float Radius, UINT Detail, co
 }
 
 /** Creates a ball of lines.*/
-HRESULT EditorLinePrimitive::CreateLineBallPrimitive(UINT Detail, const D3DXVECTOR4* Color)
+HRESULT EditorLinePrimitive::CreateLineBallPrimitive(UINT Detail, const D3DXVECTOR4 * Color)
 {
 	// Allocate enough memory for all 3 slices
-	LineVertex* vx = new LineVertex[(Detail*3)];
+	LineVertex * vx = new LineVertex[(Detail*3)];
 
 	float Step = (D3DX_PI*2)/((float)Detail-1);
 	float s = 0;
@@ -492,7 +492,7 @@ HRESULT EditorLinePrimitive::CreateLineBallPrimitive(UINT Detail, const D3DXVECT
 
 
 /** Creates an arrow of lines */
-HRESULT EditorLinePrimitive::CreateArrowPrimitive(const D3DXVECTOR4* Color,float ArrowRadius, float ArrowOffset)
+HRESULT EditorLinePrimitive::CreateArrowPrimitive(const D3DXVECTOR4 * Color,float ArrowRadius, float ArrowOffset)
 {
 	LineVertex vx[10];
 
@@ -524,13 +524,13 @@ HRESULT EditorLinePrimitive::CreateArrowPrimitive(const D3DXVECTOR4* Color,float
 }
 
 /** Creates a cone of lines */
-HRESULT EditorLinePrimitive::CreateSimpleConePrimitive(float Length, float Radius, UINT Detail, const D3DXVECTOR4* Color)
+HRESULT EditorLinePrimitive::CreateSimpleConePrimitive(float Length, float Radius, UINT Detail, const D3DXVECTOR4 * Color)
 {
 	UINT NumVerts;
 	NumVerts = Detail*2; // Two for each connection line
 	NumVerts += Detail*2; // Two for each circle line
 
-	LineVertex* vx = new LineVertex[NumVerts];
+	LineVertex * vx = new LineVertex[NumVerts];
 
 	float Step = (D3DX_PI*2)/((float)Detail-1);
 	float s = 0;
@@ -574,14 +574,14 @@ HRESULT EditorLinePrimitive::CreateSimpleConePrimitive(float Length, float Radiu
 }
 
 /** Puts the color into the Normal and TexCoord channels */
-void EditorLinePrimitive::EncodeColor(LineVertex* vx,const D3DXVECTOR4* Color)
+void EditorLinePrimitive::EncodeColor(LineVertex * vx,const D3DXVECTOR4 * Color)
 {
 	vx->Color = *Color;
 }
 
 
 /** Intersects the whole primitive. If hit, it returns a distance other than -1 */
-float EditorLinePrimitive::IntersectPrimitive(D3DXVECTOR3* RayOrigin, D3DXVECTOR3* RayDirection, float Epsilon)
+float EditorLinePrimitive::IntersectPrimitive(D3DXVECTOR3 * RayOrigin, D3DXVECTOR3 * RayDirection, float Epsilon)
 {
 	UINT i;
 	float Shortest = -1;
@@ -617,22 +617,22 @@ float EditorLinePrimitive::IntersectPrimitive(D3DXVECTOR3* RayOrigin, D3DXVECTOR
 		int NumIntersections=0;
 		Shortest = FLT_MAX;
 		
-		for( DWORD i = 0; i < NumSolidVertices; i+=3 )
+		for(DWORD i = 0; i < NumSolidVertices; i+=3)
 		{
 			D3DXVECTOR3 v0 = *SolidVertices[i + 0].Position.toD3DXVECTOR3();
 			D3DXVECTOR3 v1 = *SolidVertices[i + 1].Position.toD3DXVECTOR3();
 			D3DXVECTOR3 v2 = *SolidVertices[i + 2].Position.toD3DXVECTOR3();
 
 			// Check if the pick ray passes through this point
-			if ( IntersectTriangle( &Origin, &Dir, v0, v1, v2,
-				&fDist, &fBary1, &fBary2 ) )
+			if (IntersectTriangle(&Origin, &Dir, v0, v1, v2,
+				&fDist, &fBary1, &fBary2))
 			{
-				if ( fDist < Shortest  || Shortest == -1)
+				if (fDist < Shortest  || Shortest == -1)
 				{
 					NumIntersections++;
 					Shortest=0;
 								
-					//if ( NumIntersections == MAX_INTERSECTIONS )
+					//if (NumIntersections == MAX_INTERSECTIONS)
 					//	break;
 				}
 			}
@@ -642,9 +642,9 @@ float EditorLinePrimitive::IntersectPrimitive(D3DXVECTOR3* RayOrigin, D3DXVECTOR
 	return Shortest;
 }
 
-bool EditorLinePrimitive::IntersectTriangle( const D3DXVECTOR3* orig, const D3DXVECTOR3* dir,
-                        D3DXVECTOR3& v0, D3DXVECTOR3& v1, D3DXVECTOR3& v2,
-                        FLOAT* t, FLOAT* u, FLOAT* v )
+bool EditorLinePrimitive::IntersectTriangle(const D3DXVECTOR3 * orig, const D3DXVECTOR3 * dir,
+                        D3DXVECTOR3 & v0, D3DXVECTOR3 & v1, D3DXVECTOR3 & v2,
+                        FLOAT* t, FLOAT* u, FLOAT* v)
 {
     // Find vectors for two edges sharing vert0
     D3DXVECTOR3 edge1 = v1 - v0;
@@ -652,13 +652,13 @@ bool EditorLinePrimitive::IntersectTriangle( const D3DXVECTOR3* orig, const D3DX
 
     // Begin calculating determinant - also used to calculate U parameter
     D3DXVECTOR3 pvec;
-    D3DXVec3Cross( &pvec, dir, &edge2 );
+    D3DXVec3Cross(&pvec, dir, &edge2);
 
     // If determinant is near zero, ray lies in plane of triangle
-    FLOAT det = D3DXVec3Dot( &edge1, &pvec );
+    FLOAT det = D3DXVec3Dot(&edge1, &pvec);
 
     D3DXVECTOR3 tvec;
-    if ( det > 0 )
+    if (det > 0)
     {
         tvec = (*orig) - v0;
     }
@@ -668,25 +668,25 @@ bool EditorLinePrimitive::IntersectTriangle( const D3DXVECTOR3* orig, const D3DX
         det = -det;
     }
 
-    if ( det < 0.0001f )
+    if (det < 0.0001f)
         return FALSE;
 
     // Calculate U parameter and test bounds
-    *u = D3DXVec3Dot( &tvec, &pvec );
-    if ( *u < 0.0f || *u > det )
+    *u = D3DXVec3Dot(&tvec, &pvec);
+    if (*u < 0.0f || *u > det)
         return FALSE;
 
     // Prepare to test V parameter
     D3DXVECTOR3 qvec;
-    D3DXVec3Cross( &qvec, &tvec, &edge1 );
+    D3DXVec3Cross(&qvec, &tvec, &edge1);
 
     // Calculate V parameter and test bounds
-    *v = D3DXVec3Dot( dir, &qvec );
-    if ( *v < 0.0f || *u + *v > det )
+    *v = D3DXVec3Dot(dir, &qvec);
+    if (*v < 0.0f || *u + *v > det)
         return FALSE;
 
     // Calculate t, scale parameters, ray intersects triangle
-    *t = D3DXVec3Dot( &edge2, &qvec );
+    *t = D3DXVec3Dot(&edge2, &qvec);
     FLOAT fInvDet = 1.0f / det;
     *t *= fInvDet;
     *u *= fInvDet;
@@ -696,7 +696,7 @@ bool EditorLinePrimitive::IntersectTriangle( const D3DXVECTOR3* orig, const D3DX
 }
 
 
-float EditorLinePrimitive::IntersectLineSegment(const D3DXVECTOR3* rayOrigin,const D3DXVECTOR3* rayVec,const D3DXVECTOR3* lineStart,const D3DXVECTOR3* lineEnd, float Epsilon)
+float EditorLinePrimitive::IntersectLineSegment(const D3DXVECTOR3 * rayOrigin,const D3DXVECTOR3 * rayVec,const D3DXVECTOR3 * lineStart,const D3DXVECTOR3 * lineEnd, float Epsilon)
 {
 	
 	D3DXVECTOR3 u = *rayVec;
@@ -762,7 +762,7 @@ float EditorLinePrimitive::IntersectLineSegment(const D3DXVECTOR3* rayOrigin,con
 	return D3DXVec3Length(&dP);	// return the closest distance
 }
 
-void EditorLinePrimitive::SetWorldMatrix(const D3DXMATRIX* World,const D3DXVECTOR3* Loc,const D3DXVECTOR3* Rot,const D3DXVECTOR3* Scale)
+void EditorLinePrimitive::SetWorldMatrix(const D3DXMATRIX* World,const D3DXVECTOR3 * Loc,const D3DXVECTOR3 * Rot,const D3DXVECTOR3 * Scale)
 {
 	Location=*Loc;
 	Rotation=*Rot;
@@ -770,19 +770,19 @@ void EditorLinePrimitive::SetWorldMatrix(const D3DXMATRIX* World,const D3DXVECTO
 	WorldMatrix = *World;
 }
 
-void EditorLinePrimitive::SetLocation(const D3DXVECTOR3& NewLoc)
+void EditorLinePrimitive::SetLocation(const D3DXVECTOR3 & NewLoc)
 {
 	Location=NewLoc;
 	RecalcTransforms();
 }
 
-void EditorLinePrimitive::SetRotation(const D3DXVECTOR3& NewRotation)
+void EditorLinePrimitive::SetRotation(const D3DXVECTOR3 & NewRotation)
 {
 	Rotation=NewRotation;
 	RecalcTransforms();
 }
 
-void EditorLinePrimitive::SetScale(const D3DXVECTOR3& NewScale)
+void EditorLinePrimitive::SetScale(const D3DXVECTOR3 & NewScale)
 {
 	Scale=NewScale;
 	RecalcTransforms();
@@ -811,7 +811,7 @@ void EditorLinePrimitive::RecalcTransforms()
 	D3DXMatrixTranslation(&matWorld,Trans.x,Trans.y,Trans.z);
 
 	//Now scale another matrix
-	D3DXMatrixScaling( &matScale, Scale.x, Scale.y, Scale.z );
+	D3DXMatrixScaling(&matScale, Scale.x, Scale.y, Scale.z);
 
 	
 
@@ -821,13 +821,13 @@ void EditorLinePrimitive::RecalcTransforms()
 
 	D3DXVECTOR3 DeltaRot = Rotation - RotationMatrixAngles;
 
-	if (Rotation != D3DXVECTOR3(0,0,0))
+	if (Rotation != D3DXVECTOR3(0, 0, 0))
 	{
 		// Calculate matrix with the new angles
 		if (bLocalRotation)
 		{
-			D3DXVECTOR3 Up(0,1,0);
-			D3DXVECTOR3 Front(1,0,0);
+			D3DXVECTOR3 Up(0, 1, 0);
+			D3DXVECTOR3 Front(1, 0, 0);
 			D3DXVECTOR3 Right;
 			
 
@@ -845,26 +845,26 @@ void EditorLinePrimitive::RecalcTransforms()
 			D3DXMatrixRotationAxis(&Z, &Right, DeltaRot.z);
 
 			RotationMatrix *= X * Y * Z;
-		}else
+		} else
 		{
 			D3DXMatrixIdentity(&MatRot);
 
-			D3DXMatrixRotationAxis(&MatTemp, &D3DXVECTOR3(1,0,0), Rotation.x);        // Pitch
+			D3DXMatrixRotationAxis(&MatTemp, &D3DXVECTOR3(1, 0, 0), Rotation.x);        // Pitch
 			D3DXMatrixMultiply(&MatRot, &MatRot, &MatTemp);
-			D3DXMatrixRotationAxis(&MatTemp, &D3DXVECTOR3(0,1,0), Rotation.y);         // Yaw
+			D3DXMatrixRotationAxis(&MatTemp, &D3DXVECTOR3(0, 1, 0), Rotation.y);         // Yaw
 			D3DXMatrixMultiply(&MatRot, &MatRot, &MatTemp);
-			D3DXMatrixRotationAxis(&MatTemp, &D3DXVECTOR3(0,0,1), Rotation.z);       // Roll
+			D3DXMatrixRotationAxis(&MatTemp, &D3DXVECTOR3(0, 0, 1), Rotation.z);       // Roll
 			D3DXMatrixMultiply(&RotationMatrix, &MatRot, &MatTemp);
 
 			//RotationMatrix = X * Y * Z;
 		}
 
 		RotationMatrixAngles = Rotation;
-	}else if (!bJustUseRotationMatrix)
+	} else if (!bJustUseRotationMatrix)
 	{
 		// Reset matrix to identity (Todo: ROTATION! Ò.ó Y U NO WORK!? (As I want))
 		D3DXMatrixIdentity(&RotationMatrix);
-		RotationMatrixAngles = D3DXVECTOR3(0,0,0);
+		RotationMatrixAngles = D3DXVECTOR3(0, 0, 0);
 	}
 
 
@@ -873,7 +873,7 @@ void EditorLinePrimitive::RecalcTransforms()
 }
 
 /** Creates the buffers and sets up the rest od the object */
-HRESULT EditorLinePrimitive::CreatePrimitive(LineVertex* PrimVerts, UINT NumVertices, D3D11_PRIMITIVE_TOPOLOGY Topology)
+HRESULT EditorLinePrimitive::CreatePrimitive(LineVertex * PrimVerts, UINT NumVertices, D3D11_PRIMITIVE_TOPOLOGY Topology)
 {
 	HRESULT hr=S_OK;
 
@@ -908,19 +908,19 @@ HRESULT EditorLinePrimitive::CreatePrimitive(LineVertex* PrimVerts, UINT NumVert
 }
 
 /** Sets the shader to render with */
-void EditorLinePrimitive::SetShader(D3D11PShader* Shader)
+void EditorLinePrimitive::SetShader(D3D11PShader * Shader)
 {
 	PrimShader = Shader;
 }
 
 /** Sets the solid shader to render with */
-void EditorLinePrimitive::SetSolidShader(D3D11PShader* SolidShader)
+void EditorLinePrimitive::SetSolidShader(D3D11PShader * SolidShader)
 {
 	SolidPrimShader = SolidShader;
 }
 
 /** Renders a vertexbuffer with the given shader */
-void EditorLinePrimitive::RenderVertexBuffer(ID3D11Buffer* VB, UINT NumVertices, D3D11PShader* Shader, D3D11_PRIMITIVE_TOPOLOGY Topology, int Pass)
+void EditorLinePrimitive::RenderVertexBuffer(ID3D11Buffer* VB, UINT NumVertices, D3D11PShader * Shader, D3D11_PRIMITIVE_TOPOLOGY Topology, int Pass)
 {
 	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase*)Engine::GraphicsEngine;
 
@@ -942,12 +942,12 @@ void EditorLinePrimitive::RenderVertexBuffer(ID3D11Buffer* VB, UINT NumVertices,
 	Shader->Apply();
 
 	// Set vertex buffer
-	UINT stride = sizeof( LineVertex);
+	UINT stride = sizeof(LineVertex);
 	UINT offset = 0;
 	engine->GetContext()->IASetVertexBuffers(0, 1, &VB, &stride, &offset);
 	engine->GetContext()->IASetIndexBuffer(nullptr, DXGI_FORMAT_UNKNOWN, 0);
 	
-	engine->GetContext()->IASetPrimitiveTopology( Topology );
+	engine->GetContext()->IASetPrimitiveTopology(Topology);
 
 	engine->GetContext()->Draw(NumVertices, 0);
 }

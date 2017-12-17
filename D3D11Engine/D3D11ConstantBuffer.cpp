@@ -4,7 +4,7 @@
 #include "Engine.h"
 #include "GothicAPI.h"
 
-D3D11ConstantBuffer::D3D11ConstantBuffer(int size, void* data)
+D3D11ConstantBuffer::D3D11ConstantBuffer(int size, void * data)
 {
 	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase *)Engine::GraphicsEngine;
 
@@ -38,7 +38,7 @@ D3D11ConstantBuffer::~D3D11ConstantBuffer()
 }
 
 /** Updates the buffer */
-void D3D11ConstantBuffer::UpdateBuffer(void* data)
+void D3D11ConstantBuffer::UpdateBuffer(void * data)
 {
 	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase *)Engine::GraphicsEngine;
 	//engine->GetContext()->UpdateSubresource(Buffer, 0, nullptr, data, 0, 0);

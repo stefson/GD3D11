@@ -89,7 +89,7 @@ void MyDirectDrawSurface7::BindToSlot(int slot)
 	{
 		Normalmap->BindToPixelShader(slot + 1);
 		Normalmap->BindToVertexShader(0);
-	}else
+	} else
 	{
 		//EngineTexture->BindToPixelShader(slot + 1);
 		Engine::GraphicsEngine->UnbindTexture(slot + 1);
@@ -182,7 +182,7 @@ void MyDirectDrawSurface7::LoadAdditionalResources(zCTexture * ownedTexture) {
 	FxMap = fxMapTexture;
 }
 
-HRESULT MyDirectDrawSurface7::QueryInterface(REFIID riid, LPVOID* ppvObj)
+HRESULT MyDirectDrawSurface7::QueryInterface(REFIID riid, LPVOID * ppvObj)
 {
 	DebugWriteTex("IDirectDrawSurface7(%p)::QueryInterface(%s)");
 	return S_OK; 
@@ -414,7 +414,7 @@ HRESULT MyDirectDrawSurface7::Lock(LPRECT lpDestRect, LPDDSURFACEDESC2 lpDDSurfa
 		if (!LockedData)
 			LockedData = new unsigned char[EngineTexture->GetSizeInBytes(0) / divisor];
 
-	}else
+	} else
 	{
 		// Allocate some temporary data
 		delete[] LockedData; LockedData = nullptr;
@@ -500,7 +500,7 @@ HRESULT MyDirectDrawSurface7::Unlock(LPRECT lpRect)
 		// so that it says the texture is fully loaded
 		QueuedMipMaps = OriginalSurfaceDesc.dwMipMapCount - 1;
 		
-	}else
+	} else
 	{
 		/*unsigned char* convertedData = new unsigned char[OriginalSurfaceDesc.dwWidth * OriginalSurfaceDesc.dwHeight * 4];
 		ZeroMemory(convertedData, OriginalSurfaceDesc.dwWidth * OriginalSurfaceDesc.dwHeight * 4);
@@ -598,10 +598,10 @@ HRESULT MyDirectDrawSurface7::Unlock(LPRECT lpRect)
 			Engine::GraphicsEngine->DrawQuad(	INT2(tlx, tly), 
 												INT2(brx - tlx, bry - tly));
 #else
-			Engine::GraphicsEngine->DrawQuad(	INT2(0,0), 
+			Engine::GraphicsEngine->DrawQuad(	INT2(0, 0), 
 												Engine::GraphicsEngine->GetResolution());
 #endif
-		}else
+		} else
 		{
 			// No conversion needed
 			if (Engine::GAPI->GetMainThreadID() != GetCurrentThreadId())
@@ -693,7 +693,7 @@ HRESULT MyDirectDrawSurface7::UpdateOverlayZOrder(DWORD dwFlags, LPDIRECTDRAWSUR
 	return S_OK; 
 }
 
-HRESULT MyDirectDrawSurface7::GetDDInterface(LPVOID* lplpDD)
+HRESULT MyDirectDrawSurface7::GetDDInterface(LPVOID * lplpDD)
 {
 	DebugWriteTex("IDirectDrawSurface7(%p)::GetDDInterface()");
 	return S_OK; 
@@ -840,7 +840,7 @@ HRESULT MyDirectDrawSurface7::GetLOD(LPDWORD dwLOD)
 }
 
 /** Returns the name of this surface */
-const std::string& MyDirectDrawSurface7::GetTextureName()
+const std::string & MyDirectDrawSurface7::GetTextureName()
 {
 	return TextureName;
 }

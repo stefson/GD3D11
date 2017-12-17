@@ -14,6 +14,6 @@ public:
 	}
 
 	int	NumNodeTex;
-	zCTexture** NodeTexList;
+	zCTexture ** NodeTexList;
 	int	ActAniFrames[8];
 };

@@ -15,7 +15,7 @@ public:
     }
 
     /*** IUnknown methods ***/
-    HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppvObj) {
+    HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void ** ppvObj) {
         DebugWrite("MyDirect3D7::QueryInterface\n");
         return S_OK;
     }
@@ -67,7 +67,7 @@ public:
 
 	static HRESULT WINAPI DeviceEnumCallback(LPSTR strDesc,
                                   LPSTR strName, D3DDEVICEDESC7* pDesc,
-                                  VOID* pParentInfo )
+                                  void * pParentInfo)
 	{
 		
 		DeviceEnumInfo info = *(DeviceEnumInfo *)pParentInfo;

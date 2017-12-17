@@ -133,7 +133,7 @@ struct aiLight
 	 *  The intensity of the light source at a given distance 'd' from
 	 *  the light's position is
 	 *  @code
-	 *  Atten = 1/( att0 + att1 * d + att2 * d*d)
+	 *  Atten = 1/(att0 + att1 * d + att2 * d*d)
 	 *  @endcode
 	 *  This member corresponds to the att0 variable in the equation.
 	 *  Naturally undefined for directional lights.
@@ -145,7 +145,7 @@ struct aiLight
 	 *  The intensity of the light source at a given distance 'd' from
 	 *  the light's position is
 	 *  @code
-	 *  Atten = 1/( att0 + att1 * d + att2 * d*d)
+	 *  Atten = 1/(att0 + att1 * d + att2 * d*d)
 	 *  @endcode
 	 *  This member corresponds to the att1 variable in the equation.
 	 *  Naturally undefined for directional lights.
@@ -157,7 +157,7 @@ struct aiLight
 	 *  The intensity of the light source at a given distance 'd' from
 	 *  the light's position is
 	 *  @code
-	 *  Atten = 1/( att0 + att1 * d + att2 * d*d)
+	 *  Atten = 1/(att0 + att1 * d + att2 * d*d)
 	 *  @endcode
 	 *  This member corresponds to the att2 variable in the equation.
 	 *  Naturally undefined for directional lights.

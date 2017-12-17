@@ -52,7 +52,7 @@ namespace Engine {
 
 	/** Loads the needed dll files from subdir */
 	void LoadDLLFiles() {
-		//volatile int* i = new int;
+		//volatile int * i = new int;
 		//*i = 0;
 
 		// Load dll files from subdir

@@ -4,7 +4,7 @@
 #include "SV_Panel.h"
 #include "D2DView.h"
 
-D2DMessageBox::D2DMessageBox(D2DView* view, D2DSubView* parent, ED2D_MB_TYPE type) : D2DDialog(view, parent)
+D2DMessageBox::D2DMessageBox(D2DView * view, D2DSubView * parent, ED2D_MB_TYPE type) : D2DDialog(view, parent)
 {
 	Callback = nullptr;
 	CallbackUserData = nullptr;
@@ -53,7 +53,7 @@ XRESULT D2DMessageBox::InitControls(ED2D_MB_TYPE type)
 	return XR_SUCCESS;
 }
 
-void D2DMessageBox::ButtonPressed(SV_Button* sender, void* userdata)
+void D2DMessageBox::ButtonPressed(SV_Button * sender, void * userdata)
 {
 	D2DMessageBox* b = (D2DMessageBox *)userdata;
 
@@ -63,13 +63,13 @@ void D2DMessageBox::ButtonPressed(SV_Button* sender, void* userdata)
 
 		if (b->Callback)
 			b->Callback(D2D_MB_OK, b->CallbackUserData);
-	}else if (sender == b->YesButton)
+	} else if (sender == b->YesButton)
 	{
 		b->SetHidden(true);
 
 		if (b->Callback)
 			b->Callback(D2D_MB_YES, b->CallbackUserData);
-	}else if (sender == b->NoButton)
+	} else if (sender == b->NoButton)
 	{
 		b->SetHidden(true);
 
@@ -82,20 +82,20 @@ void D2DMessageBox::ButtonPressed(SV_Button* sender, void* userdata)
 }
 
 /** Sets the callback for this box */
-void D2DMessageBox::SetCallback(D2DMessageBoxCallback callback, void* userdata)
+void D2DMessageBox::SetCallback(D2DMessageBoxCallback callback, void * userdata)
 {
 	Callback = callback;
 	CallbackUserData = userdata;
 }
 
 /** Sets the text displayed in the messagebox */
-void D2DMessageBox::SetMessage(const std::string& text)
+void D2DMessageBox::SetMessage(const std::string & text)
 {
 	Message->SetCaption(text);
 }
 
 /** Sets the position and size of this sub-view */
-void D2DMessageBox::SetRect(const D2D1_RECT_F& rect)
+void D2DMessageBox::SetRect(const D2D1_RECT_F & rect)
 {
 	D2DDialog::SetRect(rect);
 

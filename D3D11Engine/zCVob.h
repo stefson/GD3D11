@@ -1,15 +1,13 @@
 #pragma once
-#include "pch.h"
-#include "HookedFunctions.h"
-#include "zCPolygon.h"
-#include "Engine.h"
-#include "GothicAPI.h"
-#include "zSTRING.h"
-#include "zCObject.h"
-#include "zCArray.h"
 
-enum EVisualCamAlignType
-{
+#include "GothicAPI.h"
+#include "HookedFunctions.h"
+#include "zCArray.h"
+#include "zCObject.h"
+#include "zCPolygon.h"
+#include "zSTRING.h"
+
+enum EVisualCamAlignType {
 	zVISUAL_CAM_ALIGN_NONE = 0,
 	zVISUAL_CAM_ALIGN_YAW = 1,
 	zVISUAL_CAM_ALIGN_FULL = 2
@@ -19,12 +17,10 @@ class zCBspLeaf;
 class zCVisual;
 class zCWorld;
 
-class zCVob
-{
+class zCVob {
 public:
 	/** Hooks the functions of this Class */
-	static void Hook()
-	{
+	static void Hook() {
 		HookedFunctions::OriginalFunctions.original_zCVobSetVisual = (zCVobSetVisual)DetourFunction((BYTE *)GothicMemoryLocations::zCVob::SetVisual, (BYTE *)zCVob::Hooked_SetVisual);
 		HookedFunctions::OriginalFunctions.original_zCVobDestructor = (GenericDestructor)DetourFunction((BYTE *)GothicMemoryLocations::zCVob::Destructor, (BYTE *)zCVob::Hooked_Destructor);
 
@@ -33,8 +29,7 @@ public:
 
 	/** Called when this vob got it's world-matrix changed */
 #ifdef BUILD_GOTHIC_1_08k
-	static void __fastcall Hooked_EndMovement(void* thisptr, void* unknwn)
-	{
+	static void __fastcall Hooked_EndMovement(void * thisptr, void * unknwn) {
 		hook_infunc
 
 		HookedFunctions::OriginalFunctions.original_zCVobEndMovement(thisptr);
@@ -45,7 +40,7 @@ public:
 		hook_outfunc
 	}
 #else
-	static void __fastcall Hooked_EndMovement(void* thisptr, void* unknwn, int transformChanged) // G2 has one parameter more
+	static void __fastcall Hooked_EndMovement(void * thisptr, void * unknwn, int transformChanged) // G2 has one parameter more
 	{
 		hook_infunc
 
@@ -59,7 +54,7 @@ public:
 #endif
 
 	/** Called on destruction */
-	static void __fastcall Hooked_Destructor(void* thisptr, void* unknwn)
+	static void __fastcall Hooked_Destructor(void * thisptr, void * unknwn)
 	{
 		hook_infunc
 
@@ -73,7 +68,7 @@ public:
 	}
 
 	/** Called when this vob is about to change the visual */
-	static void __fastcall Hooked_SetVisual(void* thisptr, void* unknwn, zCVisual* visual)
+	static void __fastcall Hooked_SetVisual(void * thisptr, void * unknwn, zCVisual* visual)
 	{
 		hook_infunc
 
@@ -81,7 +76,7 @@ public:
 
 		// Notify the world
 		if (Engine::GAPI)
-			Engine::GAPI->OnSetVisual((zCVob*)thisptr);
+			Engine::GAPI->OnSetVisual((zCVob *)thisptr);
 
 		hook_outfunc
 	}
@@ -153,7 +148,7 @@ public:
 	}
 
 	/** Sets this vobs position */
-	void SetPositionWorld(const D3DXVECTOR3& v) 
+	void SetPositionWorld(const D3DXVECTOR3 & v) 
 	{
 #ifdef BUILD_SPACER
 		XCALL(GothicMemoryLocations::zCVob::SetPositionWorld);

@@ -10,7 +10,7 @@ public:
 	virtual ~D3D11PFX_Effect();
 
 	/** Draws this effect to the given buffer */
-	virtual XRESULT Render(RenderToTextureBuffer* fxbuffer) = 0;
+	virtual XRESULT Render(RenderToTextureBuffer * fxbuffer) = 0;
 protected:
 	/** FX-Object */
 	D3D11PfxRenderer* FxRenderer;

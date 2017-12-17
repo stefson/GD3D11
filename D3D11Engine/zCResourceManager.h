@@ -24,7 +24,7 @@ public:
 		//HookedFunctions::OriginalFunctions.original_zCResourceManagerCacheOut = (zCResourceManagerCacheOut)DetourFunction((BYTE *)GothicMemoryLocations::zCResourceManager::CacheOut, (BYTE *)zCResourceManager::hooked_CacheOut);
 	}
 
-	static void __fastcall hooked_CacheOut(void* thisptr, void* unknwn, class zCResource* res)
+	static void __fastcall hooked_CacheOut(void * thisptr, void * unknwn, class zCResource* res)
 	{
 		hook_infunc
 		//Engine::GAPI->EnterResourceCriticalSection(); // Protect the game from running into a deadlock
@@ -51,7 +51,7 @@ public:
 		return mutex;
 	}
 
-	void PurgeCaches(void* classDef)
+	void PurgeCaches(void * classDef)
 	{
 #ifndef BUILD_GOTHIC_1_08k
 		XCALL(GothicMemoryLocations::zCResourceManager::PurgeCaches);

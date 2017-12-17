@@ -91,7 +91,7 @@ public:
 	/** @brief For backward compatibility
 	 *  @see Exists(const char*)
 	 */
-	AI_FORCE_INLINE bool Exists( const std::string& pFile) const;
+	AI_FORCE_INLINE bool Exists(const std::string & pFile) const;
 
 	// -------------------------------------------------------------------
 	/** @brief Tests for the existence of a file at the given path. 
@@ -100,7 +100,7 @@ public:
 	 * @return true if there is a file with this path, else false.
 	 */
 
-	virtual bool Exists( const char* pFile) const = 0;
+	virtual bool Exists(const char* pFile) const = 0;
 
 
 
@@ -133,8 +133,8 @@ public:
 	/** @brief For backward compatibility
 	 *  @see Open(const char*, const char*)
 	 */
-	inline IOStream* Open(const std::string& pFile,
-		const std::string& pMode = std::string("rb"));
+	inline IOStream* Open(const std::string & pFile,
+		const std::string & pMode = std::string("rb"));
 
 
 
@@ -143,7 +143,7 @@ public:
 	 *    associated with it.
 	 *  @param pFile The file instance previously created by Open().
 	 */
-	virtual void Close( IOStream* pFile) = 0;
+	virtual void Close(IOStream* pFile) = 0;
 
 	// -------------------------------------------------------------------
 	/** @brief Compares two paths and check whether the point to
@@ -165,8 +165,8 @@ public:
 	/** @brief For backward compatibility
 	 *  @see ComparePaths(const char*, const char*)
 	 */
-	inline bool ComparePaths (const std::string& one, 
-		const std::string& second) const;
+	inline bool ComparePaths (const std::string & one, 
+		const std::string & second) const;
 };
 
 // ----------------------------------------------------------------------------
@@ -188,8 +188,8 @@ AI_FORCE_INLINE IOSystem::~IOSystem()
 // ----------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------
-AI_FORCE_INLINE IOStream* IOSystem::Open(const std::string& pFile,
-	const std::string& pMode)
+AI_FORCE_INLINE IOStream* IOSystem::Open(const std::string & pFile,
+	const std::string & pMode)
 {
 	// NOTE:
 	// For compatibility, interface was changed to const char* to
@@ -198,7 +198,7 @@ AI_FORCE_INLINE IOStream* IOSystem::Open(const std::string& pFile,
 }
 
 // ----------------------------------------------------------------------------
-AI_FORCE_INLINE bool IOSystem::Exists( const std::string& pFile) const
+AI_FORCE_INLINE bool IOSystem::Exists(const std::string & pFile) const
 {
 	// NOTE:
 	// For compatibility, interface was changed to const char* to
@@ -207,8 +207,8 @@ AI_FORCE_INLINE bool IOSystem::Exists( const std::string& pFile) const
 }
 
 // ----------------------------------------------------------------------------
-inline bool IOSystem::ComparePaths (const std::string& one, 
-	const std::string& second) const
+inline bool IOSystem::ComparePaths (const std::string & one, 
+	const std::string & second) const
 {
 	// NOTE:
 	// For compatibility, interface was changed to const char* to

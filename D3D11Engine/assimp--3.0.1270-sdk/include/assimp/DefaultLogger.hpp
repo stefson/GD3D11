@@ -157,7 +157,7 @@ private:
 
 	// ----------------------------------------------------------------------
 	/**	@brief Writes a message to all streams */
-	void WriteToStreams(const char* message, ErrorSeverity ErrorSev );
+	void WriteToStreams(const char* message, ErrorSeverity ErrorSev);
 
 	// ----------------------------------------------------------------------
 	/** @brief Returns the thread id.

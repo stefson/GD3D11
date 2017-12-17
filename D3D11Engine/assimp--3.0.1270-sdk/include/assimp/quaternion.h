@@ -60,16 +60,16 @@ public:
 		: w(w), x(x), y(y), z(z) {}
 
 	/** Construct from rotation matrix. Result is undefined if the matrix is not orthonormal. */
-	aiQuaterniont( const aiMatrix3x3t<TReal>& pRotMatrix);
+	aiQuaterniont(const aiMatrix3x3t<TReal> & pRotMatrix);
 
 	/** Construct from euler angles */
-	aiQuaterniont( TReal rotx, TReal roty, TReal rotz);
+	aiQuaterniont(TReal rotx, TReal roty, TReal rotz);
 
 	/** Construct from an axis-angle pair */
-	aiQuaterniont( aiVector3t<TReal> axis, TReal angle);
+	aiQuaterniont(aiVector3t<TReal> axis, TReal angle);
 
 	/** Construct from a normalized quaternion stored in a vec3 */
-	aiQuaterniont( aiVector3t<TReal> normalized);
+	aiQuaterniont(aiVector3t<TReal> normalized);
 
 	/** Returns a matrix representation of the quaternion */
 	aiMatrix3x3t<TReal> GetMatrix() const;
@@ -88,7 +88,7 @@ public:
 	aiQuaterniont& Conjugate ();
 
 	/** Rotate a point by this quaternion */
-	aiVector3t<TReal> Rotate (const aiVector3t<TReal>& in);
+	aiVector3t<TReal> Rotate (const aiVector3t<TReal> & in);
 
 	/** Multiply two quaternions */
 	aiQuaterniont operator* (const aiQuaterniont& two) const;
@@ -101,7 +101,7 @@ public:
 	 * @param pEnd End rotation, factor == 1.
 	 * @param pFactor Interpolation factor between 0 and 1. Values outside of this range yield undefined results.
 	 */
-	static void Interpolate( aiQuaterniont& pOut, const aiQuaterniont& pStart, 
+	static void Interpolate(aiQuaterniont& pOut, const aiQuaterniont& pStart, 
 		const aiQuaterniont& pEnd, TReal pFactor);
 
 public:

@@ -11,15 +11,15 @@
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dwrite.lib")
 
-const D2D1::ColorF GUI_Color1=D2D1::ColorF(0.4f,0.4f,0.4f,1.0f);
-const D2D1::ColorF GUI_Color2=D2D1::ColorF(0.2f,0.2f,0.2f,1.0f);
-const D2D1::ColorF GUI_Color3=D2D1::ColorF(0.1f,0.1f,0.1f,1.0f);
+const D2D1::ColorF GUI_Color1=D2D1::ColorF(0.4f, 0.4f, 0.4f, 1.0f);
+const D2D1::ColorF GUI_Color2=D2D1::ColorF(0.2f, 0.2f, 0.2f, 1.0f);
+const D2D1::ColorF GUI_Color3=D2D1::ColorF(0.1f, 0.1f, 0.1f, 1.0f);
 
-const D2D1::ColorF ReflectColor1 = D2D1::ColorF(0.616f*0.8f, 0.87f*0.8f,0.98f*0.8f,1.0f);
-const D2D1::ColorF ReflectColor2 = D2D1::ColorF(0.22f,0.54f,0.725f,1.0f);
+const D2D1::ColorF ReflectColor1 = D2D1::ColorF(0.616f*0.8f, 0.87f*0.8f, 0.98f*0.8f, 1.0f);
+const D2D1::ColorF ReflectColor2 = D2D1::ColorF(0.22f, 0.54f, 0.725f, 1.0f);
 
-const D2D1::ColorF DefBackgroundColor1 = D2D1::ColorF(0.4f,0.4f,0.4f,1.0f);
-const D2D1::ColorF DefBackgroundColor2 = D2D1::ColorF(0.0f,0.0f,0.0f,1.0f);
+const D2D1::ColorF DefBackgroundColor1 = D2D1::ColorF(0.4f, 0.4f, 0.4f, 1.0f);
+const D2D1::ColorF DefBackgroundColor2 = D2D1::ColorF(0.0f, 0.0f, 0.0f, 1.0f);
 
 D2DView::D2DView()
 {
@@ -90,7 +90,7 @@ XRESULT D2DView::Init(HWND hwnd)
 		D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, 
 		D2D1_ALPHA_MODE_PREMULTIPLIED)),	
 		D2D1::HwndRenderTargetProperties(	hwnd, D2D1::SizeU(windowSize.right - windowSize.left, windowSize.bottom - windowSize.top),
-			D2D1_PRESENT_OPTIONS_IMMEDIATELY ), 
+			D2D1_PRESENT_OPTIONS_IMMEDIATELY), 
 			(ID2D1HwndRenderTarget**)&RenderTarget)))
 	{
 		Factory->Release();
@@ -105,7 +105,7 @@ XRESULT D2DView::Init(HWND hwnd)
 }
 
 /** Inits this d2d-view */
-XRESULT D2DView::Init(const INT2& initialResolution, ID3D11Texture2D* rendertarget)
+XRESULT D2DView::Init(const INT2 & initialResolution, ID3D11Texture2D * rendertarget)
 {
 	// Create factory
 	D2D1_FACTORY_OPTIONS options;
@@ -156,16 +156,16 @@ HRESULT D2DView::InitResources()
 
 	// Create a linear gradient.
 	D2D1_GRADIENT_STOP stops[4];
-	stops[0].color = D2D1::ColorF(0,0,0,1);
+	stops[0].color = D2D1::ColorF(0, 0, 0, 1);
 	stops[0].position = 0.0f;
 
-	stops[1].color = D2D1::ColorF(0,0,0,0.3f);
+	stops[1].color = D2D1::ColorF(0, 0, 0, 0.3f);
 	stops[1].position = 0.5f;
 
-	stops[2].color = D2D1::ColorF(0,0,0,0.1f);
+	stops[2].color = D2D1::ColorF(0, 0, 0, 0.1f);
 	stops[2].position = 0.7f;
 
-	stops[3].color = D2D1::ColorF(0,0,0,0);
+	stops[3].color = D2D1::ColorF(0, 0, 0, 0);
 	stops[3].position = 1.0f;
 
 	ID2D1GradientStopCollection* pGradientStops; 
@@ -186,7 +186,7 @@ HRESULT D2DView::InitResources()
 		&LinearBrush
 		);
 
-	RenderTarget->CreateRadialGradientBrush(D2D1::RadialGradientBrushProperties(D2D1::Point2F(0,0),D2D1::Point2F(0,0),1,1),pGradientStops,&RadialBrush);
+	RenderTarget->CreateRadialGradientBrush(D2D1::RadialGradientBrushProperties(D2D1::Point2F(0, 0),D2D1::Point2F(0, 0), 1, 1),pGradientStops,&RadialBrush);
 
 	pGradientStops->Release();
 
@@ -387,7 +387,7 @@ XRESULT D2DView::PrepareResize()
 }
 
 /** Resizes this d2d-view */
-XRESULT D2DView::Resize(const INT2& initialResolution, ID3D11Texture2D* rendertarget)
+XRESULT D2DView::Resize(const INT2 & initialResolution, ID3D11Texture2D * rendertarget)
 {
 
 	IDXGISurface *dxgiBackbuffer;
@@ -406,7 +406,7 @@ XRESULT D2DView::Resize(const INT2& initialResolution, ID3D11Texture2D* renderta
 	return XR_SUCCESS;
 }
 
-void D2DView::ShrinkRect(D2D1_RECT_F* Rect,float Offset)
+void D2DView::ShrinkRect(D2D1_RECT_F * Rect,float Offset)
 {
 	Rect->left+=Offset;
 	Rect->top+=Offset;
@@ -415,7 +415,7 @@ void D2DView::ShrinkRect(D2D1_RECT_F* Rect,float Offset)
 	Rect->bottom-=Offset;
 }
 
-void D2DView::DrawSmoothShadow(const D2D1_RECT_F* Rectangle, 
+void D2DView::DrawSmoothShadow(const D2D1_RECT_F * Rectangle, 
 		float Size, 
 		float Opacity, 
 		bool bDoNotShrink, 
@@ -426,8 +426,8 @@ void D2DView::DrawSmoothShadow(const D2D1_RECT_F* Rectangle,
 		bool bBottom)
 {
 	
-	ID2D1RadialGradientBrush* RadBrush = RadialBrush;
-	ID2D1LinearGradientBrush* LinBrush = LinearBrush;
+	ID2D1RadialGradientBrush * RadBrush = RadialBrush;
+	ID2D1LinearGradientBrush * LinBrush = LinearBrush;
 
 	D2D1_RECT_F TempRect=*Rectangle;
 
@@ -449,8 +449,8 @@ void D2DView::DrawSmoothShadow(const D2D1_RECT_F* Rectangle,
 	{
 		Rect.right=Rect.left;
 		Rect.left-=Size;
-		LinBrush->SetEndPoint(D2D1::Point2F(Rect.left,0));
-		LinBrush->SetStartPoint(D2D1::Point2F(Rect.right,0));
+		LinBrush->SetEndPoint(D2D1::Point2F(Rect.left, 0));
+		LinBrush->SetStartPoint(D2D1::Point2F(Rect.right, 0));
 		RenderTarget->FillRectangle(&Rect,LinBrush);
 	}
 
@@ -460,8 +460,8 @@ void D2DView::DrawSmoothShadow(const D2D1_RECT_F* Rectangle,
 		Rect=TempRect;
 		Rect.left=Rect.right;
 		Rect.right+=Size;
-		LinBrush->SetEndPoint(D2D1::Point2F(Rect.right,0));
-		LinBrush->SetStartPoint(D2D1::Point2F(Rect.left,0));
+		LinBrush->SetEndPoint(D2D1::Point2F(Rect.right, 0));
+		LinBrush->SetStartPoint(D2D1::Point2F(Rect.left, 0));
 		RenderTarget->FillRectangle(&Rect,LinBrush);
 	}
 	//Upper edge
@@ -553,7 +553,7 @@ bool D2DView::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wParam, LPARAM
 	return MainSubView->OnWindowMessage(hWnd, msg, wParam, lParam, D2D1::RectF(0, 0, RenderTarget->GetSize().width, RenderTarget->GetSize().height));
 }
 
-float D2DView::GetLabelTextWidth(IDWriteTextLayout* layout, const std::string& text)
+float D2DView::GetLabelTextWidth(IDWriteTextLayout * layout, const std::string & text)
 {
 	DWRITE_CLUSTER_METRICS* m = new DWRITE_CLUSTER_METRICS[text.length()];
 	UINT32 lc;
@@ -574,7 +574,7 @@ float D2DView::GetLabelTextWidth(IDWriteTextLayout* layout, const std::string& t
 	return width; 
 }
 
-float D2DView::GetTextHeight(IDWriteTextLayout* layout, const std::string& text)
+float D2DView::GetTextHeight(IDWriteTextLayout * layout, const std::string & text)
 {
 	unsigned int i=0;
 	float y=0;
@@ -596,7 +596,7 @@ POINT D2DView::GetCursorPosition()
 }
 
 /** Adds a message box */
-void D2DView::AddMessageBox(const std::string& caption, const std::string& message, D2DMessageBoxCallback callback, void* userdata, ED2D_MB_TYPE type)
+void D2DView::AddMessageBox(const std::string & caption, const std::string & message, D2DMessageBoxCallback callback, void * userdata, ED2D_MB_TYPE type)
 {
 	D2DMessageBox* box = new D2DMessageBox(this, MainSubView, type);
 

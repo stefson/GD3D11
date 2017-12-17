@@ -65,7 +65,7 @@ public:
 
 public:
 
-	void Set( TReal pX, TReal pY);
+	void Set(TReal pX, TReal pY);
 	TReal SquareLength() const ;
 	TReal Length() const ;
 	aiVector2t& Normalize();

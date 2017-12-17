@@ -23,20 +23,20 @@ public:
 	CameraReplacement& GetRainShadowmapCameraRepl(){return RainShadowmapCameraRepl;}
 	
 	/** Returns the rain shadowmap */
-	RenderToDepthStencilBuffer* GetRainShadowmap(){return RainShadowmap;}
+	RenderToDepthStencilBuffer * GetRainShadowmap(){return RainShadowmap;}
 protected:
 
 	/** Fills a vector of random raindrop data */
-	void FillRandomRaindropData(std::vector<ParticleInstanceInfo>& data);
+	void FillRandomRaindropData(std::vector<ParticleInstanceInfo> & data);
 
 	/** Rain */
 	D3D11VertexBuffer* RainBufferInitial;
 	D3D11VertexBuffer* RainBufferDrawFrom;
 	D3D11VertexBuffer* RainBufferStreamTo;
 
-	ID3D11Texture2D* RainTextureArray;
-	ID3D11ShaderResourceView* RainTextureArraySRV;
-	RenderToDepthStencilBuffer* RainShadowmap;
+	ID3D11Texture2D * RainTextureArray;
+	ID3D11ShaderResourceView * RainTextureArraySRV;
+	RenderToDepthStencilBuffer * RainShadowmap;
 	CameraReplacement RainShadowmapCameraRepl;
 
 };

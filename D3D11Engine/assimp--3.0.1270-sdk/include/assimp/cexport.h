@@ -91,7 +91,7 @@ ASSIMP_API size_t aiGetExportFormatCount();
  *    0 to #aiGetExportFormatCount()
  * @return A description of that specific export format. nullptr if pIndex is out of range.
  */
-ASSIMP_API const C_STRUCT aiExportFormatDesc* aiGetExportFormatDescription( size_t pIndex);
+ASSIMP_API const C_STRUCT aiExportFormatDesc* aiGetExportFormatDescription(size_t pIndex);
 
 
 // --------------------------------------------------------------------------------
@@ -139,7 +139,7 @@ ASSIMP_API void aiCopyScene(const C_STRUCT aiScene* pIn,
 *   triangulate data so they would run the step anyway.
 * @return a status code indicating the result of the export
 */
-ASSIMP_API aiReturn aiExportScene( const C_STRUCT aiScene* pScene, 
+ASSIMP_API aiReturn aiExportScene(const C_STRUCT aiScene* pScene, 
 	const char* pFormatId, 
 	const char* pFileName,  
 	unsigned int pPreprocessing);
@@ -158,11 +158,11 @@ ASSIMP_API aiReturn aiExportScene( const C_STRUCT aiScene* pScene,
 * @return a status code indicating the result of the export
 * @note Include <aiFileIO.h> for the definition of #aiFileIO.
 */
-ASSIMP_API aiReturn aiExportSceneEx( const C_STRUCT aiScene* pScene, 
+ASSIMP_API aiReturn aiExportSceneEx(const C_STRUCT aiScene* pScene, 
 	const char* pFormatId, 
 	const char* pFileName, 
 	C_STRUCT aiFileIO* pIO,  
-	unsigned int pPreprocessing );
+	unsigned int pPreprocessing);
 
 
 // --------------------------------------------------------------------------------
@@ -181,7 +181,7 @@ struct aiExportDataBlob
 	size_t size;
 
 	/// The data. 
-	void* data;
+	void * data;
 
 	/** Name of the blob. An empty string always
 	    indicates the first (and primary) blob,
@@ -204,12 +204,12 @@ struct aiExportDataBlob
 	/// Default constructor
 	aiExportDataBlob() { size = 0; data = next = nullptr; }
 	/// Releases the data
-	~aiExportDataBlob() { delete [] static_cast<unsigned char*>( data ); delete next; }
+	~aiExportDataBlob() { delete [] static_cast<unsigned char*>(data); delete next; }
 
 private:
 	// no copying
-	aiExportDataBlob(const aiExportDataBlob& );
-	aiExportDataBlob& operator= (const aiExportDataBlob& );
+	aiExportDataBlob(const aiExportDataBlob&);
+	aiExportDataBlob& operator= (const aiExportDataBlob&);
 #endif // __cplusplus
 };
 
@@ -223,7 +223,7 @@ private:
 * @param pPreprocessing Please see the documentation for #aiExportScene
 * @return the exported data or nullptr in case of error
 */
-ASSIMP_API const C_STRUCT aiExportDataBlob* aiExportSceneToBlob( const C_STRUCT aiScene* pScene, const char* pFormatId,  unsigned int pPreprocessing );
+ASSIMP_API const C_STRUCT aiExportDataBlob* aiExportSceneToBlob(const C_STRUCT aiScene* pScene, const char* pFormatId,  unsigned int pPreprocessing);
 
 
 // --------------------------------------------------------------------------------
@@ -231,7 +231,7 @@ ASSIMP_API const C_STRUCT aiExportDataBlob* aiExportSceneToBlob( const C_STRUCT 
 * returned by aiExportScene(). 
 * @param pData the data blob returned by #aiExportSceneToBlob
 */
-ASSIMP_API C_STRUCT void aiReleaseExportBlob( const C_STRUCT aiExportDataBlob* pData );
+ASSIMP_API C_STRUCT void aiReleaseExportBlob(const C_STRUCT aiExportDataBlob* pData);
 
 #ifdef __cplusplus
 }

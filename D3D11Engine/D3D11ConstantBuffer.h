@@ -3,11 +3,11 @@
 class D3D11ConstantBuffer
 {
 public:
-	D3D11ConstantBuffer(int size, void* data);
+	D3D11ConstantBuffer(int size, void * data);
 	~D3D11ConstantBuffer();
 
 	/** Updates the buffer */
-	void UpdateBuffer(void* data);
+	void UpdateBuffer(void * data);
 
 	/** Binds the buffer */
 	void BindToVertexShader(int slot);

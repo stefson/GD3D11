@@ -56,7 +56,7 @@ struct BspInfo {
 		bool VisibleLastFrame;
 		int QueryID;
 		bool QueryInProgress;
-		MeshInfo* NodeMesh;
+		MeshInfo * NodeMesh;
 		int LastCameraClipType;
 	} OcclusionInfo;
 

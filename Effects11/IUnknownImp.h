@@ -22,7 +22,7 @@
  \
 HRESULT STDMETHODCALLTYPE Class##::QueryInterface(REFIID iid, _COM_Outptr_ LPVOID *ppv) override \
 { \
-    if ( !ppv ) \
+    if (!ppv) \
         return E_INVALIDARG; \
  \
     *ppv = nullptr; \

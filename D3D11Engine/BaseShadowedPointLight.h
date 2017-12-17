@@ -8,6 +8,6 @@ public:
 	virtual ~BaseShadowedPointLight();
 
 	/** Called when a vob got removed from the world */
-	virtual void OnVobRemovedFromWorld(BaseVobInfo* vob){};
+	virtual void OnVobRemovedFromWorld(BaseVobInfo * vob){};
 };
 

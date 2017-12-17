@@ -14,30 +14,30 @@ FakeDirectDrawSurface7::FakeDirectDrawSurface7()
 	Data = nullptr;
 }
 
-void FakeDirectDrawSurface7::InitFakeSurface(const DDSURFACEDESC2* desc, MyDirectDrawSurface7* Resource, int mipLevel)
+void FakeDirectDrawSurface7::InitFakeSurface(const DDSURFACEDESC2* desc, MyDirectDrawSurface7 * Resource, int mipLevel)
 {
 	OriginalDesc = *desc;
 	this->Resource = Resource;
 	MipLevel = mipLevel;
 }
 
-HRESULT FakeDirectDrawSurface7::QueryInterface( REFIID riid, LPVOID* ppvObj )
+HRESULT FakeDirectDrawSurface7::QueryInterface(REFIID riid, LPVOID * ppvObj)
 {
-	DebugWrite("FakeDirectDrawSurface7(%p)::QueryInterface( %s )");//, PRINT_DEV, buf );
-	return S_OK; //return originalSurface->QueryInterface( riid, ppvObj );
+	DebugWrite("FakeDirectDrawSurface7(%p)::QueryInterface(%s)");//, PRINT_DEV, buf);
+	return S_OK; //return originalSurface->QueryInterface(riid, ppvObj);
 }
 
 ULONG FakeDirectDrawSurface7::AddRef()
 {
 	RefCount++;
-	DebugWrite("FakeDirectDrawSurface7(%p)::AddRef( %i )");//, PRINT_DEV, pRef );
+	DebugWrite("FakeDirectDrawSurface7(%p)::AddRef(%i)");//, PRINT_DEV, pRef);
 	return RefCount;
 }
 
 ULONG FakeDirectDrawSurface7::Release()
 {
 	
-	DebugWrite("FakeDirectDrawSurface7(%p)::Release( %i )");//, PRINT_DEV, uRet );
+	DebugWrite("FakeDirectDrawSurface7(%p)::Release(%i)");//, PRINT_DEV, uRet);
 	RefCount--;
 
 	if (RefCount == 0)
@@ -50,73 +50,73 @@ ULONG FakeDirectDrawSurface7::Release()
 	return RefCount;
 }
 
-HRESULT FakeDirectDrawSurface7::AddAttachedSurface( LPDIRECTDRAWSURFACE7 lpDDSAttachedSurface )
+HRESULT FakeDirectDrawSurface7::AddAttachedSurface(LPDIRECTDRAWSURFACE7 lpDDSAttachedSurface)
 {
-	DebugWrite("FakeDirectDrawSurface7(%p)::AddAttachedSurface()");//, PRINT_DEV );
+	DebugWrite("FakeDirectDrawSurface7(%p)::AddAttachedSurface()");//, PRINT_DEV);
 	AttachedSurfaces.push_back((FakeDirectDrawSurface7 *)lpDDSAttachedSurface);
 	return S_OK;
 }
 
-HRESULT FakeDirectDrawSurface7::AddOverlayDirtyRect( LPRECT lpRect )
+HRESULT FakeDirectDrawSurface7::AddOverlayDirtyRect(LPRECT lpRect)
 {
-	DebugWrite("FakeDirectDrawSurface7(%p)::AddOverlayDirtyRect()");//, PRINT_DEV );
-	return S_OK; //return originalSurface->AddOverlayDirtyRect( lpRect );
+	DebugWrite("FakeDirectDrawSurface7(%p)::AddOverlayDirtyRect()");//, PRINT_DEV);
+	return S_OK; //return originalSurface->AddOverlayDirtyRect(lpRect);
 }
 
-HRESULT FakeDirectDrawSurface7::Blt( LPRECT lpDestRect, LPDIRECTDRAWSURFACE7 lpDDSrcSurface, LPRECT lpSrcRect, DWORD dwFlags, LPDDBLTFX lpDDBltFx )
+HRESULT FakeDirectDrawSurface7::Blt(LPRECT lpDestRect, LPDIRECTDRAWSURFACE7 lpDDSrcSurface, LPRECT lpSrcRect, DWORD dwFlags, LPDDBLTFX lpDDBltFx)
 {
-	DebugWrite("FakeDirectDrawSurface7(%p)::Blt()");//, PRINT_DEV );
+	DebugWrite("FakeDirectDrawSurface7(%p)::Blt()");//, PRINT_DEV);
 
 	// Gothic never really blts
 
 
-	return S_OK; //return originalSurface->Blt( lpDestRect, ((FakeDirectDrawSurface7 *)lpDDSrcSurface)->GetOriginalSurface(), lpSrcRect, dwFlags, lpDDBltFx );
+	return S_OK; //return originalSurface->Blt(lpDestRect, ((FakeDirectDrawSurface7 *)lpDDSrcSurface)->GetOriginalSurface(), lpSrcRect, dwFlags, lpDDBltFx);
 }
 
-HRESULT FakeDirectDrawSurface7::BltBatch( LPDDBLTBATCH lpDDBltBatch, DWORD dwCount, DWORD dwFlags )
+HRESULT FakeDirectDrawSurface7::BltBatch(LPDDBLTBATCH lpDDBltBatch, DWORD dwCount, DWORD dwFlags)
 {
-	DebugWrite("FakeDirectDrawSurface7(%p)::BltBatch()");//, PRINT_DEV );
-	return S_OK; //return originalSurface->BltBatch( lpDDBltBatch, dwCount, dwFlags );
+	DebugWrite("FakeDirectDrawSurface7(%p)::BltBatch()");//, PRINT_DEV);
+	return S_OK; //return originalSurface->BltBatch(lpDDBltBatch, dwCount, dwFlags);
 }
 
-HRESULT FakeDirectDrawSurface7::BltFast( DWORD dwX, DWORD dwY, LPDIRECTDRAWSURFACE7 lpDDSrcSurface, LPRECT lpSrcRect, DWORD dwTrans )
+HRESULT FakeDirectDrawSurface7::BltFast(DWORD dwX, DWORD dwY, LPDIRECTDRAWSURFACE7 lpDDSrcSurface, LPRECT lpSrcRect, DWORD dwTrans)
 {
-	DebugWrite("FakeDirectDrawSurface7(%p)::BltFast()");//, PRINT_DEV );
-	return S_OK; //return originalSurface->BltFast( dwX, dwY, lpDDSrcSurface, lpSrcRect, dwTrans );
+	DebugWrite("FakeDirectDrawSurface7(%p)::BltFast()");//, PRINT_DEV);
+	return S_OK; //return originalSurface->BltFast(dwX, dwY, lpDDSrcSurface, lpSrcRect, dwTrans);
 }
 
-HRESULT FakeDirectDrawSurface7::DeleteAttachedSurface( DWORD dwFlags, LPDIRECTDRAWSURFACE7 lpDDSAttachedSurface )
+HRESULT FakeDirectDrawSurface7::DeleteAttachedSurface(DWORD dwFlags, LPDIRECTDRAWSURFACE7 lpDDSAttachedSurface)
 {
-	DebugWrite("FakeDirectDrawSurface7(%p)::DeleteAttachedSurface()");//, PRINT_DEV );
-	return S_OK; //return originalSurface->DeleteAttachedSurface( dwFlags, lpDDSAttachedSurface );
+	DebugWrite("FakeDirectDrawSurface7(%p)::DeleteAttachedSurface()");//, PRINT_DEV);
+	return S_OK; //return originalSurface->DeleteAttachedSurface(dwFlags, lpDDSAttachedSurface);
 }
 
-HRESULT FakeDirectDrawSurface7::EnumAttachedSurfaces( LPVOID lpContext, LPDDENUMSURFACESCALLBACK7 lpEnumSurfacesCallback )
+HRESULT FakeDirectDrawSurface7::EnumAttachedSurfaces(LPVOID lpContext, LPDDENUMSURFACESCALLBACK7 lpEnumSurfacesCallback)
 {
-	DebugWrite("FakeDirectDrawSurface7(%p)::EnumAttachedSurfaces()");//, PRINT_DEV );
-	return S_OK; //return originalSurface->EnumAttachedSurfaces( lpContext, lpEnumSurfacesCallback );
+	DebugWrite("FakeDirectDrawSurface7(%p)::EnumAttachedSurfaces()");//, PRINT_DEV);
+	return S_OK; //return originalSurface->EnumAttachedSurfaces(lpContext, lpEnumSurfacesCallback);
 }
 
-HRESULT FakeDirectDrawSurface7::EnumOverlayZOrders( DWORD dwFlags, LPVOID lpContext, LPDDENUMSURFACESCALLBACK7 lpfnCallback )
+HRESULT FakeDirectDrawSurface7::EnumOverlayZOrders(DWORD dwFlags, LPVOID lpContext, LPDDENUMSURFACESCALLBACK7 lpfnCallback)
 {
-	DebugWrite("FakeDirectDrawSurface7(%p)::EnumOverlayZOrders()");//, PRINT_DEV );
-	return S_OK; //return originalSurface->EnumOverlayZOrders( dwFlags, lpContext, lpfnCallback );
+	DebugWrite("FakeDirectDrawSurface7(%p)::EnumOverlayZOrders()");//, PRINT_DEV);
+	return S_OK; //return originalSurface->EnumOverlayZOrders(dwFlags, lpContext, lpfnCallback);
 }
 
-HRESULT FakeDirectDrawSurface7::Flip( LPDIRECTDRAWSURFACE7 lpDDSurfaceTargetOverride, DWORD dwFlags )
+HRESULT FakeDirectDrawSurface7::Flip(LPDIRECTDRAWSURFACE7 lpDDSurfaceTargetOverride, DWORD dwFlags)
 {
-	DebugWrite("FakeDirectDrawSurface7(%p)::Flip() #####");//, PRINT_DEV );
+	DebugWrite("FakeDirectDrawSurface7(%p)::Flip() #####");//, PRINT_DEV);
 
 	//transferFrame(this);
 
-	//return S_OK; //return originalSurface->Flip( lpDDSurfaceTargetOverride, dwFlags );
+	//return S_OK; //return originalSurface->Flip(lpDDSurfaceTargetOverride, dwFlags);
 	return S_OK; // Dont actually flip this
 }
 
-HRESULT FakeDirectDrawSurface7::GetAttachedSurface( LPDDSCAPS2 lpDDSCaps2, LPDIRECTDRAWSURFACE7* lplpDDAttachedSurface )
+HRESULT FakeDirectDrawSurface7::GetAttachedSurface(LPDDSCAPS2 lpDDSCaps2, LPDIRECTDRAWSURFACE7* lplpDDAttachedSurface)
 {
-	DebugWrite("FakeDirectDrawSurface7(%p)::GetAttachedSurface()");//, PRINT_DEV );
-	//return originalSurface->GetAttachedSurface( lpDDSCaps2, lplpDDAttachedSurface );
+	DebugWrite("FakeDirectDrawSurface7(%p)::GetAttachedSurface()");//, PRINT_DEV);
+	//return originalSurface->GetAttachedSurface(lpDDSCaps2, lplpDDAttachedSurface);
 
 	if (AttachedSurfaces.empty())
 		return E_FAIL;
@@ -126,72 +126,72 @@ HRESULT FakeDirectDrawSurface7::GetAttachedSurface( LPDDSCAPS2 lpDDSCaps2, LPDIR
 	return S_OK;
 }
 
-HRESULT FakeDirectDrawSurface7::GetBltStatus( DWORD dwFlags )
+HRESULT FakeDirectDrawSurface7::GetBltStatus(DWORD dwFlags)
 {
-	DebugWrite("FakeDirectDrawSurface7(%p)::GetBltStatus()");//, PRINT_DEV );
-	return S_OK; //return originalSurface->GetBltStatus( dwFlags );
+	DebugWrite("FakeDirectDrawSurface7(%p)::GetBltStatus()");//, PRINT_DEV);
+	return S_OK; //return originalSurface->GetBltStatus(dwFlags);
 }
 
-HRESULT FakeDirectDrawSurface7::GetCaps( LPDDSCAPS2 lpDDSCaps2 )
+HRESULT FakeDirectDrawSurface7::GetCaps(LPDDSCAPS2 lpDDSCaps2)
 {
-	DebugWrite("FakeDirectDrawSurface7(%p)::GetCaps()");//, PRINT_DEV );
+	DebugWrite("FakeDirectDrawSurface7(%p)::GetCaps()");//, PRINT_DEV);
 	*lpDDSCaps2 = OriginalDesc.ddsCaps;
 
-	return S_OK; //return originalSurface->GetCaps( lpDDSCaps2 );
+	return S_OK; //return originalSurface->GetCaps(lpDDSCaps2);
 }
 
-HRESULT FakeDirectDrawSurface7::GetClipper( LPDIRECTDRAWCLIPPER* lplpDDClipper )
+HRESULT FakeDirectDrawSurface7::GetClipper(LPDIRECTDRAWCLIPPER* lplpDDClipper)
 {
-	DebugWrite("FakeDirectDrawSurface7(%p)::GetClipper()");//, PRINT_DEV );
-	return S_OK; //return originalSurface->GetClipper( lplpDDClipper );
+	DebugWrite("FakeDirectDrawSurface7(%p)::GetClipper()");//, PRINT_DEV);
+	return S_OK; //return originalSurface->GetClipper(lplpDDClipper);
 }
 
-HRESULT FakeDirectDrawSurface7::GetColorKey( DWORD dwFlags, LPDDCOLORKEY lpDDColorKey )
+HRESULT FakeDirectDrawSurface7::GetColorKey(DWORD dwFlags, LPDDCOLORKEY lpDDColorKey)
 {
-	DebugWrite("FakeDirectDrawSurface7(%p)::GetColorKey()");//, PRINT_DEV );
-	return S_OK; //return originalSurface->GetColorKey( dwFlags, lpDDColorKey );
+	DebugWrite("FakeDirectDrawSurface7(%p)::GetColorKey()");//, PRINT_DEV);
+	return S_OK; //return originalSurface->GetColorKey(dwFlags, lpDDColorKey);
 }
 
-HRESULT FakeDirectDrawSurface7::GetDC( HDC* lphDC )
+HRESULT FakeDirectDrawSurface7::GetDC(HDC* lphDC)
 {
-	DebugWrite("FakeDirectDrawSurface7(%p)::GetDC()");//, PRINT_DEV );
-	return S_OK; //return originalSurface->GetDC( lphDC );
+	DebugWrite("FakeDirectDrawSurface7(%p)::GetDC()");//, PRINT_DEV);
+	return S_OK; //return originalSurface->GetDC(lphDC);
 }
 
-HRESULT FakeDirectDrawSurface7::GetFlipStatus( DWORD dwFlags )
+HRESULT FakeDirectDrawSurface7::GetFlipStatus(DWORD dwFlags)
 {
-	DebugWrite("FakeDirectDrawSurface7(%p)::GetFlipStatus()");//, PRINT_DEV );
-	return S_OK; //return originalSurface->GetFlipStatus( dwFlags );
+	DebugWrite("FakeDirectDrawSurface7(%p)::GetFlipStatus()");//, PRINT_DEV);
+	return S_OK; //return originalSurface->GetFlipStatus(dwFlags);
 }
 
-HRESULT FakeDirectDrawSurface7::GetOverlayPosition( LPLONG lplX, LPLONG lplY )
+HRESULT FakeDirectDrawSurface7::GetOverlayPosition(LPLONG lplX, LPLONG lplY)
 {
-	DebugWrite("FakeDirectDrawSurface7(%p)::GetOverlayPosition()");//, PRINT_DEV );
-	return S_OK; //return originalSurface->GetOverlayPosition( lplX, lplY );
+	DebugWrite("FakeDirectDrawSurface7(%p)::GetOverlayPosition()");//, PRINT_DEV);
+	return S_OK; //return originalSurface->GetOverlayPosition(lplX, lplY);
 }
 
-HRESULT FakeDirectDrawSurface7::GetPalette( LPDIRECTDRAWPALETTE* lplpDDPalette )
+HRESULT FakeDirectDrawSurface7::GetPalette(LPDIRECTDRAWPALETTE* lplpDDPalette)
 {
-	DebugWrite("FakeDirectDrawSurface7(%p)::GetPalette()");//, PRINT_DEV );
-	return S_OK; //return originalSurface->GetPalette( lplpDDPalette );
+	DebugWrite("FakeDirectDrawSurface7(%p)::GetPalette()");//, PRINT_DEV);
+	return S_OK; //return originalSurface->GetPalette(lplpDDPalette);
 }
 
-HRESULT FakeDirectDrawSurface7::GetPixelFormat( LPDDPIXELFORMAT lpDDPixelFormat )
+HRESULT FakeDirectDrawSurface7::GetPixelFormat(LPDDPIXELFORMAT lpDDPixelFormat)
 {
-	DebugWrite("FakeDirectDrawSurface7(%p)::GetPixelFormat()");//, PRINT_DEV );
-	return S_OK; //return originalSurface->GetPixelFormat( lpDDPixelFormat );
+	DebugWrite("FakeDirectDrawSurface7(%p)::GetPixelFormat()");//, PRINT_DEV);
+	return S_OK; //return originalSurface->GetPixelFormat(lpDDPixelFormat);
 }
 
-HRESULT FakeDirectDrawSurface7::GetSurfaceDesc( LPDDSURFACEDESC2 lpDDSurfaceDesc )
+HRESULT FakeDirectDrawSurface7::GetSurfaceDesc(LPDDSURFACEDESC2 lpDDSurfaceDesc)
 {
 	*lpDDSurfaceDesc = OriginalDesc;
 	return S_OK;
 }
 
-HRESULT FakeDirectDrawSurface7::Initialize( LPDIRECTDRAW lpDD, LPDDSURFACEDESC2 lpDDSurfaceDesc )
+HRESULT FakeDirectDrawSurface7::Initialize(LPDIRECTDRAW lpDD, LPDDSURFACEDESC2 lpDDSurfaceDesc)
 {
-	DebugWrite("FakeDirectDrawSurface7(%p)::Initialize()");//, PRINT_DEV );
-	return S_OK; //return originalSurface->Initialize( lpDD, lpDDSurfaceDesc );
+	DebugWrite("FakeDirectDrawSurface7(%p)::Initialize()");//, PRINT_DEV);
+	return S_OK; //return originalSurface->Initialize(lpDD, lpDDSurfaceDesc);
 }
 
 HRESULT FakeDirectDrawSurface7::IsLost()
@@ -200,9 +200,9 @@ HRESULT FakeDirectDrawSurface7::IsLost()
 	return S_OK; 
 }
 
-HRESULT FakeDirectDrawSurface7::Lock( LPRECT lpDestRect, LPDDSURFACEDESC2 lpDDSurfaceDesc, DWORD dwFlags, HANDLE hEvent )
+HRESULT FakeDirectDrawSurface7::Lock(LPRECT lpDestRect, LPDDSURFACEDESC2 lpDDSurfaceDesc, DWORD dwFlags, HANDLE hEvent)
 {
-	DebugWrite("FakeDirectDrawSurface7(%p)::Lock( %s, %s )");
+	DebugWrite("FakeDirectDrawSurface7(%p)::Lock(%s, %s)");
 	*lpDDSurfaceDesc = OriginalDesc;
 
 	// Allocate some temporary data
@@ -220,7 +220,7 @@ HRESULT FakeDirectDrawSurface7::Lock( LPRECT lpDestRect, LPDDSURFACEDESC2 lpDDSu
 }
 
 #include "../lodepng.h"
-HRESULT FakeDirectDrawSurface7::Unlock( LPRECT lpRect )
+HRESULT FakeDirectDrawSurface7::Unlock(LPRECT lpRect)
 {
 	DebugWrite("FakeDirectDrawSurface7::Unlock");
 
@@ -242,7 +242,7 @@ HRESULT FakeDirectDrawSurface7::Unlock( LPRECT lpRect )
 			unsigned pixel_data = temp1 << 8 | temp0;
 
 			unsigned char blueComponent  = (pixel_data & 0x1F);
-			unsigned char greenComponent = (pixel_data >> 5 ) & 0x3F;
+			unsigned char greenComponent = (pixel_data >> 5) & 0x3F;
 			unsigned char redComponent   = (pixel_data >> 11) & 0x1F;
 
 			// Extract red, green and blue components from the 16 bits
@@ -259,7 +259,7 @@ HRESULT FakeDirectDrawSurface7::Unlock( LPRECT lpRect )
 		Resource->GetEngineTexture()->UpdateDataDeferred(dst, MipLevel);
 
 		delete[] dst;*/
-	}else
+	} else
 	{
 		Resource->GetEngineTexture()->UpdateDataDeferred(Data, MipLevel);
 		Resource->IncreaseQueuedMipMapCount();
@@ -272,7 +272,7 @@ HRESULT FakeDirectDrawSurface7::Unlock( LPRECT lpRect )
 	return S_OK;
 }
 
-HRESULT FakeDirectDrawSurface7::ReleaseDC( HDC hDC )
+HRESULT FakeDirectDrawSurface7::ReleaseDC(HDC hDC)
 {
 	DebugWrite("FakeDirectDrawSurface7(%p)::ReleaseDC()");
 	return S_OK; 
@@ -284,25 +284,25 @@ HRESULT FakeDirectDrawSurface7::Restore()
 	return S_OK; 
 }
 
-HRESULT FakeDirectDrawSurface7::SetClipper( LPDIRECTDRAWCLIPPER lpDDClipper )
+HRESULT FakeDirectDrawSurface7::SetClipper(LPDIRECTDRAWCLIPPER lpDDClipper)
 {
 	DebugWrite("FakeDirectDrawSurface7(%p)::SetClipper()");
 	return S_OK; 
 }
 
-HRESULT FakeDirectDrawSurface7::SetColorKey( DWORD dwFlags, LPDDCOLORKEY lpDDColorKey )
+HRESULT FakeDirectDrawSurface7::SetColorKey(DWORD dwFlags, LPDDCOLORKEY lpDDColorKey)
 {
-	DebugWrite("FakeDirectDrawSurface7(%p)::SetColorKey( %s, %s )");
+	DebugWrite("FakeDirectDrawSurface7(%p)::SetColorKey(%s, %s)");
 	return S_OK; 
 }
 
-HRESULT FakeDirectDrawSurface7::SetOverlayPosition( LONG lX, LONG lY )
+HRESULT FakeDirectDrawSurface7::SetOverlayPosition(LONG lX, LONG lY)
 {
 	DebugWrite("FakeDirectDrawSurface7(%p)::SetOverlayPosition()");
 	return S_OK;
 }
 
-HRESULT FakeDirectDrawSurface7::SetPalette( LPDIRECTDRAWPALETTE lpDDPalette )
+HRESULT FakeDirectDrawSurface7::SetPalette(LPDIRECTDRAWPALETTE lpDDPalette)
 {
 	DebugWrite("FakeDirectDrawSurface7(%p)::SetPalette()");
 	return S_OK; 
@@ -310,67 +310,67 @@ HRESULT FakeDirectDrawSurface7::SetPalette( LPDIRECTDRAWPALETTE lpDDPalette )
 
 
 
-HRESULT FakeDirectDrawSurface7::UpdateOverlay( LPRECT lpSrcRect, LPDIRECTDRAWSURFACE7 lpDDDestSurface, LPRECT lpDestRect, DWORD dwFlags, LPDDOVERLAYFX lpDDOverlayFx )
+HRESULT FakeDirectDrawSurface7::UpdateOverlay(LPRECT lpSrcRect, LPDIRECTDRAWSURFACE7 lpDDDestSurface, LPRECT lpDestRect, DWORD dwFlags, LPDDOVERLAYFX lpDDOverlayFx)
 {
 	DebugWrite("FakeDirectDrawSurface7(%p)::UpdateOverlay()");
 	return S_OK; 
 }
 
-HRESULT FakeDirectDrawSurface7::UpdateOverlayDisplay( DWORD dwFlags )
+HRESULT FakeDirectDrawSurface7::UpdateOverlayDisplay(DWORD dwFlags)
 {
 	DebugWrite("FakeDirectDrawSurface7(%p)::UpdateOverlayDisplay()");
 	return S_OK;
 }
 
-HRESULT FakeDirectDrawSurface7::UpdateOverlayZOrder( DWORD dwFlags, LPDIRECTDRAWSURFACE7 lpDDSReference )
+HRESULT FakeDirectDrawSurface7::UpdateOverlayZOrder(DWORD dwFlags, LPDIRECTDRAWSURFACE7 lpDDSReference)
 {
 	DebugWrite("FakeDirectDrawSurface7(%p)::UpdateOverlayZOrder()");
 	return S_OK;
 }
 
-HRESULT FakeDirectDrawSurface7::GetDDInterface( LPVOID* lplpDD )
+HRESULT FakeDirectDrawSurface7::GetDDInterface(LPVOID * lplpDD)
 {
 	DebugWrite("FakeDirectDrawSurface7(%p)::GetDDInterface()");
 	return S_OK; 
 }
 
-HRESULT FakeDirectDrawSurface7::PageLock( DWORD dwFlags )
+HRESULT FakeDirectDrawSurface7::PageLock(DWORD dwFlags)
 {
 	DebugWrite("FakeDirectDrawSurface7(%p)::PageLock()");
 	return S_OK; 
 }
 
-HRESULT FakeDirectDrawSurface7::PageUnlock( DWORD dwFlags )
+HRESULT FakeDirectDrawSurface7::PageUnlock(DWORD dwFlags)
 {
 	DebugWrite("FakeDirectDrawSurface7(%p)::PageUnlock()");
 	return S_OK; 
 }
 
-HRESULT FakeDirectDrawSurface7::SetSurfaceDesc( LPDDSURFACEDESC2 lpDDSurfaceDesc, DWORD dwFlags )
+HRESULT FakeDirectDrawSurface7::SetSurfaceDesc(LPDDSURFACEDESC2 lpDDSurfaceDesc, DWORD dwFlags)
 {
 	DebugWrite("FakeDirectDrawSurface7(%p)::PageUnlock()");
 	return S_OK;
 }
 
-HRESULT FakeDirectDrawSurface7::SetPrivateData( REFGUID guidTag, LPVOID lpData, DWORD cbSize, DWORD dwFlags )
+HRESULT FakeDirectDrawSurface7::SetPrivateData(REFGUID guidTag, LPVOID lpData, DWORD cbSize, DWORD dwFlags)
 {
 	DebugWrite("FakeDirectDrawSurface7(%p)::SetPrivateData()");
 	return S_OK; 
 }
 
-HRESULT FakeDirectDrawSurface7::GetPrivateData( REFGUID guidTag, LPVOID lpBuffer, LPDWORD lpcbBufferSize )
+HRESULT FakeDirectDrawSurface7::GetPrivateData(REFGUID guidTag, LPVOID lpBuffer, LPDWORD lpcbBufferSize)
 {
 	DebugWrite("FakeDirectDrawSurface7(%p)::GetPrivateData()");
 	return S_OK; 
 }
 
-HRESULT FakeDirectDrawSurface7::FreePrivateData( REFGUID guidTag )
+HRESULT FakeDirectDrawSurface7::FreePrivateData(REFGUID guidTag)
 {
 	DebugWrite("FakeDirectDrawSurface7(%p)::FreePrivateData()");
 	return S_OK;
 }
 
-HRESULT FakeDirectDrawSurface7::GetUniquenessValue( LPDWORD lpValue )
+HRESULT FakeDirectDrawSurface7::GetUniquenessValue(LPDWORD lpValue)
 {
 	DebugWrite("FakeDirectDrawSurface7(%p)::GetUniquenessValue()");
 	return S_OK; 
@@ -382,25 +382,25 @@ HRESULT FakeDirectDrawSurface7::ChangeUniquenessValue()
 	return S_OK; 
 }
 
-HRESULT FakeDirectDrawSurface7::SetPriority( DWORD dwPriority )
+HRESULT FakeDirectDrawSurface7::SetPriority(DWORD dwPriority)
 {
 	DebugWrite("FakeDirectDrawSurface7(%p)::SetPriority()");
 	return S_OK;
 }
 
-HRESULT FakeDirectDrawSurface7::GetPriority( LPDWORD dwPriority )
+HRESULT FakeDirectDrawSurface7::GetPriority(LPDWORD dwPriority)
 {
 	DebugWrite("FakeDirectDrawSurface7(%p)::GetPriority()");
 	return S_OK;
 }
 
-HRESULT FakeDirectDrawSurface7::SetLOD( DWORD dwLOD )
+HRESULT FakeDirectDrawSurface7::SetLOD(DWORD dwLOD)
 {
 	DebugWrite("FakeDirectDrawSurface7(%p)::SetLOD()");
 	return S_OK;
 }
 
-HRESULT FakeDirectDrawSurface7::GetLOD( LPDWORD dwLOD )
+HRESULT FakeDirectDrawSurface7::GetLOD(LPDWORD dwLOD)
 {
 	DebugWrite("FakeDirectDrawSurface7(%p)::GetLOD()");
 	return S_OK;
