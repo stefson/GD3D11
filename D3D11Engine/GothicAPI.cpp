@@ -129,6 +129,8 @@ GothicAPI::GothicAPI()
 
 	PendingMovieFrame = nullptr;
 
+	_canRain = false;
+
 	//RenderThread = new GRenderThread;
 	//XLE(RenderThread->InitThreads());
 }
@@ -248,8 +250,12 @@ void GothicAPI::OnWorldUpdate() {
 	}*/
 
 	// Do rain-effects
-	if (oCGame::GetGame()->_zCSession_world && oCGame::GetGame()->_zCSession_world->GetSkyControllerOutdoor())
+	if (oCGame::GetGame()->_zCSession_world && oCGame::GetGame()->_zCSession_world->GetSkyControllerOutdoor() && _canRain)
 		oCGame::GetGame()->_zCSession_world->GetSkyControllerOutdoor()->ProcessRainFX();
+
+	if (!_canRain) {
+		_canRain = true;
+	}
 
 	// Clean futures so we don't have an ever growing array of them
 	CleanFutures();
@@ -564,6 +570,8 @@ void GothicAPI::OnLoadWorld(const std::string & levelName, int loadMode)
 /** Called when the game is done loading the world */
 void GothicAPI::OnWorldLoaded()
 {
+	_canRain = false;
+
 	LoadCustomZENResources();
 
 	LogInfo() << "Collecting vobs...";

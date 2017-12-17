@@ -751,4 +751,6 @@ private:
 
 	/** Internal list of futures, so they can run until they are finished */
 	std::vector<std::future<void>> FutureList;
+
+	bool _canRain;
 };
