@@ -5074,8 +5074,6 @@ void D3D11GraphicsEngine::DrawDecalList(const std::vector<zCVob *> & decals, boo
 	for (unsigned int i = 0; i < decals.size(); i++) {
 		zCDecal * d = (zCDecal *) decals[i]->GetVisual();
 
-		LogInfo() << decals[i]->GetVisual() << " " << d;
-
 		if (!d) {
 			continue;
 		}
