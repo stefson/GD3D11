@@ -4893,27 +4893,21 @@ void D3D11GraphicsEngine::ConstructShaderMakroList(std::vector<D3D10_SHADER_MACR
 }
 
 /** Handles an UI-Event */
-void D3D11GraphicsEngine::OnUIEvent(EUIEvent uiEvent)
-{
-	if (!UIView)
-	{
+void D3D11GraphicsEngine::OnUIEvent(EUIEvent uiEvent) {
+	if (!UIView) {
 		CreateMainUIView();
 	}
 
-	if (uiEvent == UI_OpenSettings)
-	{	
-		if (UIView)
-		{
+	if (uiEvent == UI_OpenSettings) {	
+		if (UIView) {
 			// Show settings
 			UIView->GetSettingsDialog()->SetHidden(!UIView->GetSettingsDialog()->IsHidden());
 
 			// Free mouse
 			Engine::GAPI->SetEnableGothicInput(UIView->GetSettingsDialog()->IsHidden());
 		}
-	} else if (uiEvent == UI_OpenEditor)
-	{	
-		if (UIView)
-		{
+	} else if (uiEvent == UI_OpenEditor) {	
+		if (UIView) {
 			// Show settings
 			Engine::GAPI->GetRendererState()->RendererSettings.EnableEditorPanel = true;
 

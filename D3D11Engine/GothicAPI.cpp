@@ -335,7 +335,6 @@ void GothicAPI::SetEnableGothicInput(bool value)
 	return;
 #endif*/
 
-
 	IDirectInputDevice7A* dInputMouse = *(IDirectInputDevice7A **)GothicMemoryLocations::GlobalObjects::DInput7DeviceMouse;
 	IDirectInputDevice7A* dInputKeyboard = *(IDirectInputDevice7A **)GothicMemoryLocations::GlobalObjects::DInput7DeviceKeyboard;
 	if (dInputMouse)
@@ -631,7 +630,6 @@ void GothicAPI::OnWorldLoaded()
 	// Enable input again, disabled it when loading started
 	SetEnableGothicInput(true);
 #endif
-
 
 	// Enable the editorpanel, if in spacer
 #ifdef BUILD_SPACER
@@ -3844,7 +3842,6 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 
 	if (!f)
 		return XR_FAILED;
-
 	
 	GothicRendererSettings& s = RendererState.RendererSettings;
 
@@ -3876,14 +3873,13 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 		break;
 	}
 
-
 	INT2 res;
 	fread(&res, sizeof(res), 1, f);
 
 	// Fix the resolution if the players maximum resolution got lower
 	RECT r;
 	GetClientRect(GetDesktopWindow(), &r);
-	if (res.x > r.right ||res.y > r.bottom) {
+	if (res.x > r.right || res.y > r.bottom) {
 		LogInfo() << "Reducing resolution from (" << res.x << ", " << res.y << " to (" << r.right << ", " << r.bottom << ") because users desktop resolution got lowered";
 		res = INT2(r.right, r.bottom);
 	}
