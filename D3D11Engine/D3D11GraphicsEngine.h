@@ -68,7 +68,7 @@ public:
 	virtual XRESULT CreateVertexBuffer(D3D11VertexBuffer** outBuffer);
 
 	/** Creates a texture object (Not registered inside) */
-	virtual XRESULT CreateTexture(D3D11Texture** outTexture);
+	virtual XRESULT CreateTexture(D3D11Texture ** outTexture);
 
 	/** Creates a constantbuffer object (Not registered inside) */
 	virtual XRESULT CreateConstantBuffer(D3D11ConstantBuffer** outCB, void * data, int size);
@@ -327,9 +327,9 @@ protected:
 
 	/** Sky */
 	RenderToTextureBuffer * CloudBuffer;
-	D3D11Texture* DistortionTexture;
-	D3D11Texture* NoiseTexture;
-	D3D11Texture* WhiteTexture;
+	D3D11Texture * DistortionTexture;
+	D3D11Texture * NoiseTexture;
+	D3D11Texture * WhiteTexture;
 
 	/** Lighting */
 	GMesh* InverseUnitSphereMesh;

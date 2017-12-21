@@ -56,19 +56,19 @@ MyDirectDrawSurface7::~MyDirectDrawSurface7()
 }
 
 /** Returns the engine texture of this surface */
-D3D11Texture* MyDirectDrawSurface7::GetEngineTexture()
+D3D11Texture * MyDirectDrawSurface7::GetEngineTexture()
 {
 	return EngineTexture;
 }
 
 /** Returns the engine texture of this surface */
-D3D11Texture* MyDirectDrawSurface7::GetNormalmap()
+D3D11Texture * MyDirectDrawSurface7::GetNormalmap()
 {
 	return Normalmap;
 }
 
 /** Returns the fx-map for this surface */
-D3D11Texture* MyDirectDrawSurface7::GetFxMap()
+D3D11Texture * MyDirectDrawSurface7::GetFxMap()
 {
 	return FxMap;
 }
@@ -122,8 +122,8 @@ void MyDirectDrawSurface7::LoadAdditionalResources(zCTexture * ownedTexture) {
 		return;
 	}
 
-	D3D11Texture* fxMapTexture = nullptr;
-	D3D11Texture* nrmmapTexture = nullptr;
+	D3D11Texture * fxMapTexture = nullptr;
+	D3D11Texture * nrmmapTexture = nullptr;
 
 	// Check for normalmap in our mods folder first, then in the original games
 	int j = 0;

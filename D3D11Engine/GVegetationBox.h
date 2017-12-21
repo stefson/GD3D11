@@ -98,7 +98,7 @@ private:
 
 	D3DXVECTOR3 BoxMin;
 	D3DXVECTOR3 BoxMax;
-	D3D11Texture* VegetationTexture;
+	D3D11Texture * VegetationTexture;
 	D3D11VertexBuffer* InstancingBuffer;
 	D3D11ConstantBuffer* GrassCB;
 	bool DrawBoundingBox;

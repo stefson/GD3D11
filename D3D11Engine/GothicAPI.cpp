@@ -3934,12 +3934,12 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 	return XR_SUCCESS;
 }
 
-void GothicAPI::SetPendingMovieFrame(D3D11Texture* frame)
+void GothicAPI::SetPendingMovieFrame(D3D11Texture * frame)
 {
 	PendingMovieFrame = frame;
 }
 
-D3D11Texture* GothicAPI::GetPendingMovieFrame()
+D3D11Texture * GothicAPI::GetPendingMovieFrame()
 {
 	return PendingMovieFrame;
 }

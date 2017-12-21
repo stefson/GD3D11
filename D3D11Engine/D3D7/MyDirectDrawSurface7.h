@@ -83,13 +83,13 @@ public:
 	void BindToSlot(int slot);
 
 	/** Returns the engine texture of this surface */
-	D3D11Texture* GetEngineTexture();
+	D3D11Texture * GetEngineTexture();
 	
 	/** Returns the normalmap of this surface */
-	D3D11Texture* GetNormalmap();
+	D3D11Texture * GetNormalmap();
 
 	/** Returns the fx-map for this surface */
-	D3D11Texture* GetFxMap();
+	D3D11Texture * GetFxMap();
 
 	/** Loads additional resources if possible */
 	void LoadAdditionalResources(zCTexture * ownedTexture);
@@ -128,15 +128,15 @@ private:
 	DDSURFACEDESC2 OriginalSurfaceDesc;
 
 	/** Attached texture */
-	D3D11Texture* EngineTexture;
+	D3D11Texture * EngineTexture;
 
 	/** Associated Name */
 	std::string TextureName;
 	ETextureType TextureType;
 
 	/** Additional maps */
-	D3D11Texture* Normalmap;
-	D3D11Texture* FxMap;
+	D3D11Texture * Normalmap;
+	D3D11Texture * FxMap;
 
 	/** Locktype */
 	DWORD LockType;

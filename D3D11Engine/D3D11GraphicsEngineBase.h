@@ -14,7 +14,7 @@ class D3D11GShader;
 namespace D3D11ObjectIDs {
 
 	/** Map to get a texture by ID */
-	__declspec(selectany) std::map<UINT16, D3D11Texture*> TextureByID;
+	__declspec(selectany) std::map<UINT16, D3D11Texture *> TextureByID;
 	
 
 	__declspec(selectany) std::map<UINT8, D3D11PShader *> PShadersByID;
@@ -86,7 +86,7 @@ public:
 	virtual XRESULT CreateVertexBuffer(D3D11VertexBuffer** outBuffer);
 
 	/** Creates a texture object (Not registered inside) */
-	virtual XRESULT CreateTexture(D3D11Texture** outTexture);
+	virtual XRESULT CreateTexture(D3D11Texture ** outTexture);
 
 	/** Creates a constantbuffer object (Not registered inside) */
 	virtual XRESULT CreateConstantBuffer(D3D11ConstantBuffer** outCB, void * data, int size);

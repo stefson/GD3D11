@@ -881,11 +881,11 @@ void D2DEditorView::UpdateSelectionPanel()
 
 		if (surface)
 		{
-			ID3D11Texture2D * thumb = ((D3D11Texture*)surface->GetEngineTexture())->GetThumbnail();
+			ID3D11Texture2D * thumb = ((D3D11Texture *)surface->GetEngineTexture())->GetThumbnail();
 			if (!thumb)
 			{
-				XLE(((D3D11Texture*)surface->GetEngineTexture())->CreateThumbnail());
-				thumb = ((D3D11Texture*)surface->GetEngineTexture())->GetThumbnail();
+				XLE(((D3D11Texture *)surface->GetEngineTexture())->CreateThumbnail());
+				thumb = ((D3D11Texture *)surface->GetEngineTexture())->GetThumbnail();
 			}
 			SelectedImagePanel->SetD3D11TextureAsImage(thumb, INT2(256, 256));
 		}

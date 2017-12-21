@@ -768,7 +768,7 @@ XRESULT D3D11GraphicsEngine::CreateVertexBuffer(D3D11VertexBuffer ** outBuffer)
 }
 
 /** Creates a texture object (Not registered inside) */
-XRESULT D3D11GraphicsEngine::CreateTexture(D3D11Texture** outTexture)
+XRESULT D3D11GraphicsEngine::CreateTexture(D3D11Texture ** outTexture)
 {
 	*outTexture = new D3D11Texture;
 	return XR_SUCCESS;
@@ -2127,7 +2127,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh(bool noTextures) {
 					info->buffer.NormalmapStrength = DEFAULT_NORMALMAP_STRENGTH;
 					info->UpdateConstantbuffer();
 				}
-				srv[1] = ((D3D11Texture*)DistortionTexture)->GetShaderResourceView();
+				srv[1] = ((D3D11Texture *)DistortionTexture)->GetShaderResourceView();
 			}
 
 			boundNormalmap = srv[1];
@@ -3587,7 +3587,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 									info->buffer.NormalmapStrength = DEFAULT_NORMALMAP_STRENGTH;
 									info->UpdateConstantbuffer();
 								}
-								srv[1] = ((D3D11Texture*)DistortionTexture)->GetShaderResourceView();
+								srv[1] = ((D3D11Texture *)DistortionTexture)->GetShaderResourceView();
 							}
 							// Bind both
 							Context->PSSetShaderResources(0,3, srv);
@@ -3915,13 +3915,13 @@ XRESULT D3D11GraphicsEngine::DrawSky()
 	SetupVS_ExConstantBuffer();
 
 	// Apply sky texture
-	D3D11Texture* cloudsTex = Engine::GAPI->GetSky()->GetCloudTexture();
+	D3D11Texture * cloudsTex = Engine::GAPI->GetSky()->GetCloudTexture();
 	if (cloudsTex)
 	{
 		cloudsTex->BindToPixelShader(0);
 	}
 
-	D3D11Texture* nightTex = Engine::GAPI->GetSky()->GetNightTexture();
+	D3D11Texture * nightTex = Engine::GAPI->GetSky()->GetNightTexture();
 	if (nightTex)
 	{
 		nightTex->BindToPixelShader(1);

@@ -90,7 +90,7 @@ public:
 	virtual XRESULT CreateVertexBuffer(D3D11VertexBuffer** outBuffer) = 0;
 
 	/** Creates a texture object (Not registered inside) */
-	virtual XRESULT CreateTexture(D3D11Texture** outTexture) = 0;
+	virtual XRESULT CreateTexture(D3D11Texture ** outTexture) = 0;
 
 	/** Creates a constantbuffer object (Not registered inside) */
 	virtual XRESULT CreateConstantBuffer(D3D11ConstantBuffer** outCB, void * data, int size) = 0;

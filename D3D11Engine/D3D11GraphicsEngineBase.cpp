@@ -366,7 +366,7 @@ XRESULT D3D11GraphicsEngineBase::CreateVertexBuffer(D3D11VertexBuffer** outBuffe
 }
 
 /** Creates a texture object (Not registered inside) */
-XRESULT D3D11GraphicsEngineBase::CreateTexture(D3D11Texture** outTexture)
+XRESULT D3D11GraphicsEngineBase::CreateTexture(D3D11Texture ** outTexture)
 {
 	*outTexture = new D3D11Texture;
 

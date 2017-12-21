@@ -112,7 +112,7 @@ MeshInfo * GSky::GetSkyPlane()
 /** Adds a sky texture. Sky textures must be in order to make the daytime work */
 XRESULT GSky::AddSkyTexture(const std::string & file)
 {
-	D3D11Texture* t;
+	D3D11Texture * t;
 	XLE(Engine::GraphicsEngine->CreateTexture(&t));
 	XLE(t->Init(file));
 
@@ -179,7 +179,7 @@ void GSky::SetSkyTexture(ESkyTexture texture)
 }
 
 /** Returns the sky-texture for the passed daytime (0..1) */
-void GSky::GetTextureOfDaytime(float time, D3D11Texture** t1, D3D11Texture** t2, float * factor)
+void GSky::GetTextureOfDaytime(float time, D3D11Texture ** t1, D3D11Texture ** t2, float * factor)
 {
 	if (!SkyTextures.size())
 		return;
@@ -290,13 +290,13 @@ float4 GSky::GetSkylightColor() {
 }
 
 /** Returns the cloud texture */
-D3D11Texture* GSky::GetCloudTexture()
+D3D11Texture * GSky::GetCloudTexture()
 {
 	return CloudTexture;
 }
 
 /** Returns the cloud texture */
-D3D11Texture* GSky::GetNightTexture()
+D3D11Texture * GSky::GetNightTexture()
 {
 	return NightTexture;
 }

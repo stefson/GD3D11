@@ -138,13 +138,13 @@ XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string & file, std::map
 
 	std::vector<MeshInfo *> & meshes = mesh->GetMeshes();
 	std::vector<std::string> & textures = mesh->GetTextures();
-	std::map<std::string, D3D11Texture*> loadedTextures;
+	std::map<std::string, D3D11Texture *> loadedTextures;
 	std::set<std::string> missingTextures;
 
 	// run through meshes and pack them into sections
 	for(unsigned int m = 0;m<meshes.size();m++)
 	{
-		D3D11Texture* customTexture = nullptr;
+		D3D11Texture * customTexture = nullptr;
 		zCMaterial * mat = Engine::GAPI->GetMaterialByTextureName(textures[m]);
 		MeshKey key;
 		key.Material = mat;
@@ -229,7 +229,7 @@ XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string & file, std::map
 					{
 						fclose(f);
 
-						D3D11Texture* tx;
+						D3D11Texture * tx;
 						Engine::GraphicsEngine->CreateTexture(&tx);
 						if (XR_SUCCESS != tx->Init(rep))
 						{
