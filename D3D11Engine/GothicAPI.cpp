@@ -3918,7 +3918,7 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 
 	fread(&s.EnablePointlightShadows, sizeof(s.EnablePointlightShadows), 1, f);
 
-	if (version == 3) {
+	if (version >= 3) {
 		fread(&s.AllowWorldMeshTesselation, sizeof(s.AllowWorldMeshTesselation), 1, f);
 		fread(&s.SharpenFactor, sizeof(s.SharpenFactor), 1, f);
 		fread(&s.VisualFXDrawRadius, sizeof(s.VisualFXDrawRadius), 1, f);
