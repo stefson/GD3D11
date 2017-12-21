@@ -563,7 +563,9 @@ void GothicAPI::OnLoadWorld(const std::string & levelName, int loadMode)
 
 #ifndef PUBLIC_RELEASE
 	// Disable input here, so you can tab out
-	SetEnableGothicInput(false);
+	if (loadMode == 2) {
+		SetEnableGothicInput(false);
+	}
 #endif
 }
 

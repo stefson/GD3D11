@@ -619,11 +619,11 @@ void D2DView::CheckDeadMessageBoxes() {
 			MainSubView->DeleteChild(*it);
 
 			it = MessageBoxes.erase(it);
+
+			// Capture mouse again
+			Engine::GAPI->SetEnableGothicInput(true);
 		} else {
 			++it;
 		}
 	}
-
-	// Capture mouse again
-	Engine::GAPI->SetEnableGothicInput(true);
 }
