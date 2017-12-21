@@ -1,17 +1,12 @@
-#include "pch.h"
 #include "BaseAntTweakBar.h"
-#include "AntTweakBar.h"
-#include "GSky.h"
-#include "GothicAPI.h"
-#include "Engine.h"
-#include "zCMaterial.h"
+
 #include "BaseGraphicsEngine.h"
-#include <algorithm>
+#include "GSky.h"
+#include "zCMaterial.h"
 
 #pragma comment(lib, "AntTweakBar.lib")
 
-BaseAntTweakBar::BaseAntTweakBar()
-{
+BaseAntTweakBar::BaseAntTweakBar() {
 	IsActive = false;
 	Bar_Sky = nullptr;
 	TS_Active = false;
@@ -20,15 +15,12 @@ BaseAntTweakBar::BaseAntTweakBar()
 	LastFrameActiveMaterialInfo = 0;
 }
 
-
-BaseAntTweakBar::~BaseAntTweakBar()
-{
+BaseAntTweakBar::~BaseAntTweakBar() {
 	//TwTerminate();
 }
 
 /** Creates the resources */
-XRESULT BaseAntTweakBar::Init()
-{
+XRESULT BaseAntTweakBar::Init() {
 	// Sky
 	Bar_Sky = TwNewBar("Sky");
 	TwDefine(" Sky position='400 0'");
@@ -92,7 +84,6 @@ XRESULT BaseAntTweakBar::Init()
 	
 	Bar_General = TwNewBar("General");
 	TwDefine(" General position='600 0'");
-
 	
 	TwAddButton(Bar_General, "Save ZEN-Resources", (TwButtonCallback)SaveZENResourcesCallback, this, nullptr); 
 	TwAddButton(Bar_General, "Load ZEN-Resources", (TwButtonCallback)LoadZENResourcesCallback, this, nullptr); 
@@ -108,7 +99,6 @@ XRESULT BaseAntTweakBar::Init()
 	//TwAddVarRW(Bar_General, "Draw Sky", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.DrawSky, nullptr);
 	TwAddVarRW(Bar_General, "Draw Fog", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.DrawFog, nullptr);	
 	TwAddVarRW(Bar_General, "Tesselation", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.EnableTesselation, nullptr);
-
 	
 #ifndef PUBLIC_RELEASE
 	TwAddVarRW(Bar_General, "HDR (Broken!)", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.EnableHDR, nullptr);	
@@ -126,10 +116,8 @@ XRESULT BaseAntTweakBar::Init()
 	//TwAddVarRW(Bar_General, "FastShadows", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.FastShadows, nullptr);	
 	TwAddVarRW(Bar_General, "DrawShadowGeometry", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.DrawShadowGeometry, nullptr);
 	TwAddVarRW(Bar_General, "DoZPrepass", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.DoZPrepass, nullptr);
-
 	
 	TwAddVarRW(Bar_General, "VSync", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.EnableVSync, nullptr);
-	
 	TwAddVarRW(Bar_General, "OcclusionCulling", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.EnableOcclusionCulling, nullptr);
 	TwAddVarRW(Bar_General, "Sort RenderQueue", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.SortRenderQueue, nullptr);
 	TwAddVarRW(Bar_General, "Draw Threaded", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.DrawThreaded, nullptr);
@@ -137,7 +125,6 @@ XRESULT BaseAntTweakBar::Init()
 	TwAddVarRW(Bar_General, "AllowWorldMeshTesselation", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.AllowWorldMeshTesselation, nullptr);
 	TwAddVarRW(Bar_General, "TesselationFrustumCulling", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.TesselationFrustumCulling, nullptr);
 	TwAddVarRW(Bar_General, "AtmosphericScattering", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.AtmosphericScattering, nullptr);
-	
 
 	TwType t = TwDefineEnumFromString("ShadowmapSizeEnum", "512, 1024, 2048, 4096");
 	TwAddVarRW(Bar_General, "ShadowmapSize", t, &Engine::GAPI->GetRendererState()->RendererSettings.ShadowMapSize, nullptr);
@@ -156,9 +143,8 @@ XRESULT BaseAntTweakBar::Init()
 	TwAddVarRW(Bar_General, "ShadowStrength", TW_TYPE_FLOAT, &Engine::GAPI->GetRendererState()->RendererSettings.ShadowStrength, nullptr);
 	TwDefine(" General/ShadowStrength  step=0.01 min=0");
 
-		TwAddVarRW(Bar_General, "WireframeWorld", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.WireframeWorld, nullptr);	
+	TwAddVarRW(Bar_General, "WireframeWorld", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.WireframeWorld, nullptr);	
 	TwAddVarRW(Bar_General, "WireframeVobs", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.WireframeVobs, nullptr);	
-	
 
 	TwAddVarRW(Bar_General, "OldTesselationFactor", TW_TYPE_FLOAT, &Engine::GAPI->GetRendererState()->RendererSettings.TesselationFactor, nullptr);
 	TwDefine(" General/TesselationFactor  step=0.1 min=1");
@@ -166,10 +152,7 @@ XRESULT BaseAntTweakBar::Init()
 	TwAddVarRW(Bar_General, "TesselationEdgeLength", TW_TYPE_FLOAT, &Engine::GAPI->GetRendererState()->RendererSettings.TesselationRange, nullptr);
 	TwDefine(" General/TesselationRange  step=0.1 min=1");
 
-	
-
 	//TwAddVarRW(Bar_General, "Grass AlphaToCoverage", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.VegetationAlphaToCoverage, nullptr);	
-	
 
 	TwAddVarRW(Bar_General, "SectionDrawRadius", TW_TYPE_INT32, &Engine::GAPI->GetRendererState()->RendererSettings.SectionDrawRadius, nullptr);
 	TwDefine(" General/SectionDrawRadius  help='Draw distance for the sections' ");
@@ -249,8 +232,6 @@ XRESULT BaseAntTweakBar::Init()
 	TwAddVarRW(Bar_General, "FOVVert", TW_TYPE_FLOAT, &Engine::GAPI->GetRendererState()->RendererSettings.FOVVert, nullptr);
 	//TwAddVarRW(Bar_General, "Max Num Indices", TW_TYPE_INT32, &Engine::GAPI->GetRendererState()->RendererSettings.MaxNumFaces, nullptr);
 
-
-
 	Bar_Info = TwNewBar("FrameStats");
 	TwDefine(" FrameStats refresh=0.3");
 	TwDefine(" FrameStats position='800 0'");
@@ -291,7 +272,6 @@ XRESULT BaseAntTweakBar::Init()
 	TwAddVarRO(Bar_Info, "SC_DepthStencilState,", TW_TYPE_UINT32,		&Engine::GAPI->GetRendererState()->RendererInfo.StateChangesByState[GothicRendererInfo::SC_DSS], nullptr);
 	TwAddVarRO(Bar_Info, "SC_SamplerState,", TW_TYPE_UINT32,	&Engine::GAPI->GetRendererState()->RendererInfo.StateChangesByState[GothicRendererInfo::SC_SMPL], nullptr);
 	TwAddVarRO(Bar_Info, "SC_BlendState,", TW_TYPE_UINT32,		&Engine::GAPI->GetRendererState()->RendererInfo.StateChangesByState[GothicRendererInfo::SC_BS], nullptr);
-					
 
 	Bar_HBAO = TwNewBar("HBAO+");
 	TwDefine(" HBAO+ position='1000 0'");
@@ -333,35 +313,30 @@ XRESULT BaseAntTweakBar::Init()
 }
 
 /** On window message */
-LRESULT BaseAntTweakBar::OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	if (IsActive)
+LRESULT BaseAntTweakBar::OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+	if (IsActive) {
 		return TwEventWin(hWnd, msg, wParam, lParam);
+	}
 
 	return true;
 }
 
 /** Sets the bars active and visible */
-void BaseAntTweakBar::SetActive(bool value)
-{
+void BaseAntTweakBar::SetActive(bool value) {
 	IsActive = value;
 
-	if (IsActive)
-	{
+	if (IsActive) {
 		//InitTextureSettingsBar();
 	}
 }
 
-bool BaseAntTweakBar::GetActive()
-{
+bool BaseAntTweakBar::GetActive() {
 	return IsActive;
 }
 
 /** Draws the bars */
-void BaseAntTweakBar::Draw()
-{
-	if (IsActive)
-	{
+void BaseAntTweakBar::Draw() {
+	if (IsActive) {
 		TwDraw();
 
 		// Check texture name
@@ -412,41 +387,38 @@ void BaseAntTweakBar::Draw()
 }
  
 /** Updates the TS_Bar */
-void BaseAntTweakBar::UpdateTextureSettingsBar()
-{
-		/*TwRemoveVar(Bar_TextureSettings, "NormalmapDepth");
-		TwRemoveVar(Bar_TextureSettings, "SpecularIntensity");
-		TwRemoveVar(Bar_TextureSettings, "SpecularPower");
-		TwRemoveVar(Bar_TextureSettings, "DisplacementFactor");
-		TwRemoveVar(Bar_TextureSettings, "TriplanarTextureScale");
+void BaseAntTweakBar::UpdateTextureSettingsBar() {
+	/*TwRemoveVar(Bar_TextureSettings, "NormalmapDepth");
+	TwRemoveVar(Bar_TextureSettings, "SpecularIntensity");
+	TwRemoveVar(Bar_TextureSettings, "SpecularPower");
+	TwRemoveVar(Bar_TextureSettings, "DisplacementFactor");
+	TwRemoveVar(Bar_TextureSettings, "TriplanarTextureScale");
 
-		TwAddVarRW(Bar_TextureSettings, "NormalmapDepth", TW_TYPE_FLOAT, &TS_FrameTexturesInfos[ActiveMaterialInfo].Info->buffer.NormalmapStrength, nullptr);
-		TwDefine(" TextureSettings/NormalmapDepth  step=0.01");
+	TwAddVarRW(Bar_TextureSettings, "NormalmapDepth", TW_TYPE_FLOAT, &TS_FrameTexturesInfos[ActiveMaterialInfo].Info->buffer.NormalmapStrength, nullptr);
+	TwDefine(" TextureSettings/NormalmapDepth  step=0.01");
 
-		TwAddVarRW(Bar_TextureSettings, "SpecularIntensity", TW_TYPE_FLOAT, &TS_FrameTexturesInfos[ActiveMaterialInfo].Info->buffer.SpecularIntensity, nullptr);
-		TwDefine(" TextureSettings/SpecularIntensity  step=0.01");
+	TwAddVarRW(Bar_TextureSettings, "SpecularIntensity", TW_TYPE_FLOAT, &TS_FrameTexturesInfos[ActiveMaterialInfo].Info->buffer.SpecularIntensity, nullptr);
+	TwDefine(" TextureSettings/SpecularIntensity  step=0.01");
 
-		TwAddVarRW(Bar_TextureSettings, "SpecularPower", TW_TYPE_FLOAT, &TS_FrameTexturesInfos[ActiveMaterialInfo].Info->buffer.SpecularPower, nullptr);
-		TwDefine(" TextureSettings/SpecularPower  step=0.1");
+	TwAddVarRW(Bar_TextureSettings, "SpecularPower", TW_TYPE_FLOAT, &TS_FrameTexturesInfos[ActiveMaterialInfo].Info->buffer.SpecularPower, nullptr);
+	TwDefine(" TextureSettings/SpecularPower  step=0.1");
 
-		TwAddVarRW(Bar_TextureSettings, "DisplacementFactor", TW_TYPE_FLOAT, &TS_FrameTexturesInfos[ActiveMaterialInfo].Info->buffer.DisplacementFactor, nullptr);
-		TwDefine(" TextureSettings/DisplacementFactor  step=0.01");
+	TwAddVarRW(Bar_TextureSettings, "DisplacementFactor", TW_TYPE_FLOAT, &TS_FrameTexturesInfos[ActiveMaterialInfo].Info->buffer.DisplacementFactor, nullptr);
+	TwDefine(" TextureSettings/DisplacementFactor  step=0.01");
 
-		TwAddVarRW(Bar_TextureSettings, "TriplanarTextureScale", TW_TYPE_FLOAT, &TS_FrameTexturesInfos[ActiveMaterialInfo].Info->buffer.TextureScale, nullptr);
-		TwDefine(" TextureSettings/TriplanarTextureScale  step=0.1");
+	TwAddVarRW(Bar_TextureSettings, "TriplanarTextureScale", TW_TYPE_FLOAT, &TS_FrameTexturesInfos[ActiveMaterialInfo].Info->buffer.TextureScale, nullptr);
+	TwDefine(" TextureSettings/TriplanarTextureScale  step=0.1");
 
-		TwAddVarRW(Bar_TextureSettings, "TriplanarFresnelFactor", TW_TYPE_FLOAT, &TS_FrameTexturesInfos[ActiveMaterialInfo].Info->buffer.FresnelFactor, nullptr);
-		TwDefine(" TextureSettings/TriplanarFresnelFactor  step=0.01");*/
+	TwAddVarRW(Bar_TextureSettings, "TriplanarFresnelFactor", TW_TYPE_FLOAT, &TS_FrameTexturesInfos[ActiveMaterialInfo].Info->buffer.FresnelFactor, nullptr);
+	TwDefine(" TextureSettings/TriplanarFresnelFactor  step=0.01");*/
 }
 
-static bool FrameTexEnumCompare(TS_TextureInfo& a, TS_TextureInfo& b)
-{
-	return std::string(a.Name) < std::string(b.Name);
+static bool FrameTexEnumCompare(TS_TextureInfo & a, TS_TextureInfo & b) {
+	return a.Name < b.Name;
 }
 
 /** Initializes the TextureSettingsBar */
-void BaseAntTweakBar::InitTextureSettingsBar()
-{
+void BaseAntTweakBar::InitTextureSettingsBar() {
 	TwRemoveAllVars(Bar_TextureSettings);
 	//TwRemoveVar(Bar_TextureSettings, "FrameTextures");
 	TS_FrameTexturesInfos.clear();
@@ -456,11 +428,11 @@ void BaseAntTweakBar::InitTextureSettingsBar()
 	std::string enumDef = "";
 
 	const std::set<zCTexture *> & frameTextures = Engine::GraphicsEngine->GetFrameTextures();
-	if (!frameTextures.size())
+	if (!frameTextures.size()) {
 		return;
+	}
 
-	for(std::set<zCTexture *>::const_iterator it = frameTextures.begin(); it != frameTextures.end(); it++)
-	{
+	for (std::set<zCTexture *>::const_iterator it = frameTextures.cbegin(); it != frameTextures.cend(); ++it) {
 		e.push_back(TS_TextureInfo(Engine::GAPI->GetMaterialInfoFrom((*it)), (*it)->GetNameWithoutExt(), (*it)));
 	}
 
@@ -468,24 +440,22 @@ void BaseAntTweakBar::InitTextureSettingsBar()
 	std::sort(e.begin(), e.end(), FrameTexEnumCompare);
 
 	int prefTexIdx = 0;
-	for(unsigned int i=0;i<e.size();i++)
-	{
+	for (unsigned int i = 0; i < e.size(); i++) {
 		// Pointer to int. Since Gothic is 32-Bit this can't run in 64-bit mode anyways.
 		enumDef += std::to_string(i) + " {" + e[i].Name + "}";
 
 		TS_FrameTexturesInfos.push_back(TS_TextureInfo(e[i].Info, e[i].Name, e[i].Texture));
 
-		if (e[i].Name == TS_PreferredTexture)
-		{
+		if (e[i].Name == TS_PreferredTexture) {
 			prefTexIdx = i;
 			ActiveMaterialInfo = i;
 		}
 
-		if (i != e.size() - 1)
+		if (i != e.size() - 1) {
 			enumDef += ", ";
+		}
 	}
 
-	
 	enumDef += "";
 
 	// Add the list to the bar
@@ -496,37 +466,30 @@ void BaseAntTweakBar::InitTextureSettingsBar()
 	TS_Active = true;
 }
 
-
 /** Sets the preferred texture for the texture settings */
-void BaseAntTweakBar::SetPreferredTextureForSettings(const std::string & texture)
-{
+void BaseAntTweakBar::SetPreferredTextureForSettings(const std::string & texture) {
 	TS_PreferredTexture = texture;
 }
 
-void TW_CALL BaseAntTweakBar::ReloadShadersButtonCallback(void *clientData)
-{ 
+void TW_CALL BaseAntTweakBar::ReloadShadersButtonCallback(void * clientData) { 
     Engine::GraphicsEngine->ReloadShaders();
 }
 
-void TW_CALL BaseAntTweakBar::SaveZENResourcesCallback(void *clientData)
-{ 
+void TW_CALL BaseAntTweakBar::SaveZENResourcesCallback(void * clientData) { 
     Engine::GAPI->SaveCustomZENResources();
 }
 
-void TW_CALL BaseAntTweakBar::LoadZENResourcesCallback(void *clientData)
-{ 
+void TW_CALL BaseAntTweakBar::LoadZENResourcesCallback(void * clientData) { 
     Engine::GAPI->LoadCustomZENResources();
 }
 
 /** Called on load ZEN resources */
-void TW_CALL BaseAntTweakBar::OpenSettingsCallback(void * clientdata)
-{
+void TW_CALL BaseAntTweakBar::OpenSettingsCallback(void * clientdata) {
 	Engine::GraphicsEngine->OnUIEvent(BaseGraphicsEngine::EUIEvent::UI_OpenSettings);
 }
 
 /** Resizes the anttweakbar */
-XRESULT BaseAntTweakBar::OnResize(INT2 newRes)
-{
+XRESULT BaseAntTweakBar::OnResize(INT2 newRes) {
 	TwWindowSize(newRes.x, newRes.y);
 
 	return XR_SUCCESS;
