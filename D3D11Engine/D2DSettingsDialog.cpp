@@ -60,11 +60,19 @@ XRESULT D2DSettingsDialog::InitControls() {
 	resolutionSlider->SetDisplayValues(resStrings);
 	resolutionSlider->SetValue((float)ResolutionSetting);
 
+	SV_Checkbox * normalmapsCheckbox = new SV_Checkbox(MainView, MainPanel);
+	normalmapsCheckbox->SetSize(D2D1::SizeF(160, 20));
+	normalmapsCheckbox->SetCaption("Enable Normalmaps");
+	normalmapsCheckbox->SetDataToUpdate(&Engine::GAPI->GetRendererState()->RendererSettings.AllowNormalmaps);
+	normalmapsCheckbox->AlignUnder(resolutionSlider, 10);
+	normalmapsCheckbox->SetPosition(D2D1::Point2F(5, normalmapsCheckbox->GetPosition().y));
+	normalmapsCheckbox->SetChecked(Engine::GAPI->GetRendererState()->RendererSettings.AllowNormalmaps);
+
 	SV_Checkbox * hbaoCheckbox = new SV_Checkbox(MainView, MainPanel);
 	hbaoCheckbox->SetSize(D2D1::SizeF(160, 20));
 	hbaoCheckbox->SetCaption("Enable HBAO+");
 	hbaoCheckbox->SetDataToUpdate(&Engine::GAPI->GetRendererState()->RendererSettings.HbaoSettings.Enabled);
-	hbaoCheckbox->AlignUnder(resolutionSlider, 10);
+	hbaoCheckbox->AlignUnder(normalmapsCheckbox, 5);
 	hbaoCheckbox->SetPosition(D2D1::Point2F(5, hbaoCheckbox->GetPosition().y));
 	hbaoCheckbox->SetChecked(Engine::GAPI->GetRendererState()->RendererSettings.HbaoSettings.Enabled);
 

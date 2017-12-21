@@ -541,6 +541,8 @@ struct GothicRendererSettings {
 
 		GothicUIScale = 1.0f;
 		//DisableEverything();
+
+		AllowNormalmaps = true;
 	}
 
 	void SetupOldWorldSpecificValues() {
@@ -665,6 +667,8 @@ struct GothicRendererSettings {
 	float RainSunLightStrength;
 	D3DXVECTOR3 RainFogColor;
 	float RainFogDensity;
+
+	bool AllowNormalmaps;
 };
 
 struct GothicRendererTiming {

@@ -118,7 +118,7 @@ void MyDirectDrawSurface7::LoadAdditionalResources(zCTexture * ownedTexture) {
 		SAFE_DELETE(FxMap);
 	}
 
-	if (TextureName.empty() || Normalmap || FxMap) {
+	if (TextureName.empty() || Normalmap || FxMap || !Engine::GAPI->GetRendererState()->RendererSettings.AllowNormalmaps) {
 		return;
 	}
 

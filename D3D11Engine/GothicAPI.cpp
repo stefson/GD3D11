@@ -3789,7 +3789,7 @@ XRESULT GothicAPI::SaveMenuSettings(const std::string & file) {
 
 	GothicRendererSettings & s = RendererState.RendererSettings;
 
-	int version = 3;
+	int version = 4;
 	fwrite(&version, sizeof(version), 1, f);
 
 	fwrite(&s.EnableShadows, sizeof(s.EnableShadows), 1, f);
@@ -3827,6 +3827,9 @@ XRESULT GothicAPI::SaveMenuSettings(const std::string & file) {
 	fwrite(&s.AllowWorldMeshTesselation, sizeof(s.AllowWorldMeshTesselation), 1, f);
 	fwrite(&s.SharpenFactor, sizeof(s.SharpenFactor), 1, f);
 	fwrite(&s.VisualFXDrawRadius, sizeof(s.VisualFXDrawRadius), 1, f);
+
+	// v4
+	fwrite(&s.AllowNormalmaps, sizeof(s.AllowNormalmaps), 1, f);
 
 	fclose(f);
 
@@ -3920,6 +3923,10 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 		fread(&s.AllowWorldMeshTesselation, sizeof(s.AllowWorldMeshTesselation), 1, f);
 		fread(&s.SharpenFactor, sizeof(s.SharpenFactor), 1, f);
 		fread(&s.VisualFXDrawRadius, sizeof(s.VisualFXDrawRadius), 1, f);
+	}
+
+	if (version >= 4) {
+		fread(&s.AllowNormalmaps, sizeof(s.AllowNormalmaps), 1, f);
 	}
 
 	fclose(f);
