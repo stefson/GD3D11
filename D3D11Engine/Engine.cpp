@@ -67,15 +67,10 @@ namespace Engine {
 		LogInfo() << "Shutting down...";
 
 		SAFE_DELETE(Engine::RenderingThreadPool);
-		LogInfo() << "Shut down RenderingThreadPool";
 		SAFE_DELETE(Engine::AntTweakBar);
-		LogInfo() << "Shut down AntTweakBar";
 		SAFE_DELETE(Engine::GAPI);
-		LogInfo() << "Shut down GAPI";
 		SAFE_DELETE(Engine::GraphicsEngine);
-		LogInfo() << "Shut down GraphicsEngine";
 		SAFE_DELETE(Engine::WorkerThreadPool);
-		LogInfo() << "Shut down WorkerThreadPool";
 	}
 
 };

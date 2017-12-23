@@ -417,7 +417,7 @@ HRESULT MyDirectDrawSurface7::Lock(LPRECT lpDestRect, LPDDSURFACEDESC2 lpDDSurfa
 	} else
 	{
 		// Allocate some temporary data
-		delete[] LockedData; LockedData = nullptr;
+		delete[] LockedData;
 		LockedData = new unsigned char[EngineTexture->GetSizeInBytes(0) / divisor];
 	}
 
