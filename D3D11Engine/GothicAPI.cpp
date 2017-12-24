@@ -3095,7 +3095,7 @@ void GothicAPI::CollectVisibleVobsHelper(BspInfo * base, zTBBox3D boxCell, int c
 								Engine::GraphicsEngine->CreateShadowedPointLight(&(*vi)->LightShadowBuffers, *vi, true); // Also flag as dynamic
 						}
 
-						if (!(*vi)->VisibleInRenderPass && (*vi)->Vob->IsEnabled() && (*vi)->Vob->GetShowVisual()) {
+						if (!(*vi)->VisibleInRenderPass && (*vi)->Vob->IsEnabled() /*&& (*vi)->Vob->GetShowVisual()*/) {
 							(*vi)->VisibleInRenderPass = true;
 
 							//D3DXVECTOR3 mid = base->BBox3D.Min * 0.5f + base->BBox3D.Max * 0.5f;
