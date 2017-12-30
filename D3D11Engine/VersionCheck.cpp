@@ -11,6 +11,7 @@
 namespace VersionCheck {
 
 	static const int CHECKSUM_G2_2_6_FIX = 0x008a3e89;
+	static const int CHECKSUM_G2_2_6_FIX_4GB = 0x008a3ea9;
 	static const int CHECKSUM_G2_1_08k = 0x0000eb3d;
 
 	/** Returns whether the given file exists */
@@ -55,7 +56,7 @@ namespace VersionCheck {
 		MapFileAndCheckSum(exe.c_str(), &headersum, &checksum);
 
 #ifdef BUILD_GOTHIC_2_6_fix
-		if (headersum != CHECKSUM_G2_2_6_FIX) {
+		if (headersum != CHECKSUM_G2_2_6_FIX && headersum != CHECKSUM_G2_2_6_FIX_4GB) {
 			LogWarnBox() << "Your Gothic-Executable does not match the checksum for this Version of GD3D11!\n"
 				"This DLL only works for Gothic 2 - The Night Of The Raven, Version 2.6 (fix) or the System-Pack.\n\n"
 				"You can continue and try anyways but the game will most likely crash.\n"
