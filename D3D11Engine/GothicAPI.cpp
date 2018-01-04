@@ -210,20 +210,22 @@ void GothicAPI::OnWorldUpdate() {
 
 	// Apply the hints for the sound system to fix voices in indoor locations being quiet
 	// This was originally done in zCBspTree::Render 
-	if (IsCameraIndoor()) { 
-		// Set mode to 2, which means we are indoors, but can see the outside
-		if (zCSoundSystem::GetSoundSystem())
-			zCSoundSystem::GetSoundSystem()->SetGlobalReverbPreset(2, 0.6f);
+	if (!GMPModeActive) {
+		if (IsCameraIndoor()) {
+			// Set mode to 2, which means we are indoors, but can see the outside
+			if (zCSoundSystem::GetSoundSystem())
+				zCSoundSystem::GetSoundSystem()->SetGlobalReverbPreset(2, 0.6f);
 
-		if (oCGame::GetGame()->_zCSession_world && oCGame::GetGame()->_zCSession_world->GetSkyControllerOutdoor())
-			oCGame::GetGame()->_zCSession_world->GetSkyControllerOutdoor()->SetCameraLocationHint(1);
-	} else {
-		// Set mode to 0, which is the default
-		if (zCSoundSystem::GetSoundSystem())
-			zCSoundSystem::GetSoundSystem()->SetGlobalReverbPreset(0, 0.0f); 
+			if (oCGame::GetGame()->_zCSession_world && oCGame::GetGame()->_zCSession_world->GetSkyControllerOutdoor())
+				oCGame::GetGame()->_zCSession_world->GetSkyControllerOutdoor()->SetCameraLocationHint(1);
+		} else {
+			// Set mode to 0, which is the default
+			if (zCSoundSystem::GetSoundSystem())
+				zCSoundSystem::GetSoundSystem()->SetGlobalReverbPreset(0, 0.0f);
 
-		if (oCGame::GetGame()->_zCSession_world && oCGame::GetGame()->_zCSession_world->GetSkyControllerOutdoor())
-			oCGame::GetGame()->_zCSession_world->GetSkyControllerOutdoor()->SetCameraLocationHint(0);
+			if (oCGame::GetGame()->_zCSession_world && oCGame::GetGame()->_zCSession_world->GetSkyControllerOutdoor())
+				oCGame::GetGame()->_zCSession_world->GetSkyControllerOutdoor()->SetCameraLocationHint(0);
+		}
 	}
 
 	// Fix the ice-texture if it is loaded, this is for the original game and only a quick fix
@@ -2535,25 +2537,27 @@ LRESULT GothicAPI::OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 			break;
 
 		case VK_NUMPAD1:
-			if (!Engine::AntTweakBar->GetActive())
+			if (!Engine::AntTweakBar->GetActive() && !GMPModeActive)
 				SpawnVegetationBoxAt(GetCameraPosition());
 			break;
 
 		case VK_NUMPAD2:
 #ifdef PUBLIC_RELEASE
-			if (!Engine::AntTweakBar->GetActive())
+			if (!Engine::AntTweakBar->GetActive() && !GMPModeActive)
 #endif
 				Ocean->AddWaterPatchAt((unsigned int)(GetCameraPosition().x / OCEAN_PATCH_SIZE), (unsigned int)(GetCameraPosition().z / OCEAN_PATCH_SIZE));
 			break;
 
 		case VK_NUMPAD3:
 #ifdef PUBLIC_RELEASE
-			if (!Engine::AntTweakBar->GetActive())
+			if (!Engine::AntTweakBar->GetActive() && !GMPModeActive)
 #endif
 			{
-				for (int x=-1;x<=1;x++)
-					for (int y=-1;y<=1;y++)
-						Ocean->AddWaterPatchAt((unsigned int)((GetCameraPosition().x / OCEAN_PATCH_SIZE) + x), (unsigned int)((GetCameraPosition().z / OCEAN_PATCH_SIZE) + y));	
+				for (int x = -1; x <= 1; x++) {
+					for (int y = -1; y <= 1; y++) {
+						Ocean->AddWaterPatchAt((unsigned int)((GetCameraPosition().x / OCEAN_PATCH_SIZE) + x), (unsigned int)((GetCameraPosition().z / OCEAN_PATCH_SIZE) + y));
+					}
+				}
 			}
 			break;
 		}

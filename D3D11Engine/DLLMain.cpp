@@ -34,6 +34,8 @@ static HRESULT (WINAPI *DirectDrawCreateEx_t)(GUID FAR * lpGuid, LPVOID  *lplpDD
 typedef void (WINAPI *DirectDrawSimple)();
 typedef HRESULT (WINAPI *DirectDrawCreateEx_type)(GUID FAR*, LPVOID *, REFIID ,IUnknown FAR*);
 
+extern bool GMPModeActive;
+
 void SignalHandler(int signal)
 {
 	LogInfo() << "Signal:" << signal;
@@ -189,6 +191,12 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID) {
 		{
 			Log::Clear();
 			LogInfo() << "Starting DDRAW Proxy DLL.";
+
+			if (Toolbox::FileExists("system\\gmp.dll")) {
+				GMPModeActive = true;
+			} else {
+				GMPModeActive = false;
+			}
 
 			// Check for right version
 			VersionCheck::CheckExecutable();

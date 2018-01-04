@@ -29,11 +29,8 @@
 
 #include "StackWalker.h"
 
-
-
 /** Init all hooks here */
-void HookedFunctionInfo::InitHooks()
-{
+void HookedFunctionInfo::InitHooks() {
 	LogInfo() << "Initializing hooks";
 
 	DWORD dwProtect;
@@ -80,45 +77,40 @@ void HookedFunctionInfo::InitHooks()
 #endif
 	original_Alg_Rotation3DNRad = (Alg_Rotation3DNRad)GothicMemoryLocations::Functions::Alg_Rotation3DNRad;
 
-
 #ifdef BUILD_GOTHIC_2_6_fix
 	// Remove automatic volume change of sounds regarding whether the camera is indoor or outdoor
 	// TODO: Implement!
-	DetourFunction((BYTE *)GothicMemoryLocations::zCActiveSnd::AutoCalcObstruction, (BYTE *)HookedFunctionInfo::hooked_zCActiveSndAutoCalcObstruction);
+	if (!GMPModeActive) {
+		DetourFunction((BYTE *)GothicMemoryLocations::zCActiveSnd::AutoCalcObstruction, (BYTE *)HookedFunctionInfo::hooked_zCActiveSndAutoCalcObstruction);
+	}
 #endif
 }
 
 /** Function hooks */
-int __stdcall HookedFunctionInfo::hooked_HandledWinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
-{
-
+int __stdcall HookedFunctionInfo::hooked_HandledWinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR szCmdLine, int sw) {
 	int r = HookedFunctions::OriginalFunctions.original_HandledWinMain(hInstance, hPrev, szCmdLine, sw);
 
 	return r;
 }
 
-void __fastcall HookedFunctionInfo::hooked_zCActiveSndAutoCalcObstruction(void * thisptr, void * unknwn, int i)
-{
+void __fastcall HookedFunctionInfo::hooked_zCActiveSndAutoCalcObstruction(void * thisptr, void * unknwn, int i) {
 	// Just do nothing here. Something was inside zCBspTree::Render that managed this and thus voices get really quiet in indoor locations
 	// This function is for calculating the automatic volume-changes when the camera goes in/out buildings
 	// We keep everything on the same level by removing it
 }
 
-void __cdecl HookedFunctionInfo::hooked_ExitGameFunc()
-{
+void __cdecl HookedFunctionInfo::hooked_ExitGameFunc() {
 	Engine::OnShutDown();
 
 	HookedFunctions::OriginalFunctions.hooked_ExitGameFunc();
 }
 
-long __stdcall HookedFunctionInfo::hooked_zCExceptionHandlerUnhandledExceptionFilter(EXCEPTION_POINTERS* exceptionPtrs)
-{
+long __stdcall HookedFunctionInfo::hooked_zCExceptionHandlerUnhandledExceptionFilter(EXCEPTION_POINTERS * exceptionPtrs) {
 	return HookedFunctions::OriginalFunctions.original_zCExceptionHandler_UnhandledExceptionFilter(exceptionPtrs);
 }
 
 /** Returns the pixelformat of a bink-surface */
-long __fastcall HookedFunctionInfo::hooked_zBinkPlayerGetPixelFormat(void * thisptr, void * unknwn, zTRndSurfaceDesc& desc)
-{
+long __fastcall HookedFunctionInfo::hooked_zBinkPlayerGetPixelFormat(void * thisptr, void * unknwn, zTRndSurfaceDesc & desc) {
 	int * cd = (int *)&desc;
 
 	// Resolution is at pos [2] and [3]
@@ -134,12 +126,10 @@ long __fastcall HookedFunctionInfo::hooked_zBinkPlayerGetPixelFormat(void * this
 	//Global::HookedFunctions.zBinkPlayerGetPixelFormat(thisptr, desc);
 }
 
-int __fastcall HookedFunctionInfo::hooked_zBinkPlayerOpenVideo(void * thisptr, void * unknwn, zSTRING str)
-{
+int __fastcall HookedFunctionInfo::hooked_zBinkPlayerOpenVideo(void * thisptr, void * unknwn, zSTRING str) {
 	int r = HookedFunctions::OriginalFunctions.original_zCBinkPlayerOpenVideo(thisptr, str);
 
-	struct BinkInfo
-	{
+	struct BinkInfo {
 		unsigned int ResX;
 		unsigned int ResY;
 		// ... unimportant
@@ -147,10 +137,9 @@ int __fastcall HookedFunctionInfo::hooked_zBinkPlayerOpenVideo(void * thisptr, v
 
 	// Grab the resolution
 	// This structure stores width and height as first two parameters, as ints.
-	BinkInfo* res = *(BinkInfo **)(((char *)thisptr) + (GothicMemoryLocations::zCBinkPlayer::Offset_VideoHandle));
+	BinkInfo * res = *(BinkInfo **)(((char *)thisptr) + (GothicMemoryLocations::zCBinkPlayer::Offset_VideoHandle));
 
-	if (res)
-	{
+	if (res) {
 		Engine::GAPI->GetRendererState()->RendererInfo.PlayingMovieResolution = INT2(res->ResX, res->ResY);
 	}
 
