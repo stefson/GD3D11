@@ -26,7 +26,7 @@
 #define VERSION_NUMBER "17.6"
 __declspec(selectany) const char* VERSION_NUMBER_STR = VERSION_NUMBER;
 
-static bool GMPModeActive;
+extern bool GMPModeActive;
 
 /** D3D7-Call logging */
 #define DebugWriteValue(value, check) if (value == check) { LogInfo() << " - " << #check; }

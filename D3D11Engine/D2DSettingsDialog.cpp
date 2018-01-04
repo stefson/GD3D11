@@ -64,15 +64,23 @@ XRESULT D2DSettingsDialog::InitControls() {
 	normalmapsCheckbox->SetSize(D2D1::SizeF(160, 20));
 	normalmapsCheckbox->SetCaption("Enable Normalmaps");
 	normalmapsCheckbox->SetDataToUpdate(&Engine::GAPI->GetRendererState()->RendererSettings.AllowNormalmaps);
-	normalmapsCheckbox->AlignUnder(resolutionSlider, 10);
+	normalmapsCheckbox->AlignUnder(normalmapsCheckbox, 5);
 	normalmapsCheckbox->SetPosition(D2D1::Point2F(5, normalmapsCheckbox->GetPosition().y));
 	normalmapsCheckbox->SetChecked(Engine::GAPI->GetRendererState()->RendererSettings.AllowNormalmaps);
+
+	SV_Checkbox * numpadCheckbox = new SV_Checkbox(MainView, MainPanel);
+	numpadCheckbox->SetSize(D2D1::SizeF(160, 20));
+	numpadCheckbox->SetCaption("Enable Numpad Keys");
+	numpadCheckbox->SetDataToUpdate(&Engine::GAPI->GetRendererState()->RendererSettings.AllowNumpadKeys);
+	numpadCheckbox->AlignUnder(resolutionSlider, 10);
+	numpadCheckbox->SetPosition(D2D1::Point2F(5, numpadCheckbox->GetPosition().y));
+	numpadCheckbox->SetChecked(Engine::GAPI->GetRendererState()->RendererSettings.AllowNumpadKeys);
 
 	SV_Checkbox * hbaoCheckbox = new SV_Checkbox(MainView, MainPanel);
 	hbaoCheckbox->SetSize(D2D1::SizeF(160, 20));
 	hbaoCheckbox->SetCaption("Enable HBAO+");
 	hbaoCheckbox->SetDataToUpdate(&Engine::GAPI->GetRendererState()->RendererSettings.HbaoSettings.Enabled);
-	hbaoCheckbox->AlignUnder(normalmapsCheckbox, 5);
+	hbaoCheckbox->AlignUnder(numpadCheckbox, 5);
 	hbaoCheckbox->SetPosition(D2D1::Point2F(5, hbaoCheckbox->GetPosition().y));
 	hbaoCheckbox->SetChecked(Engine::GAPI->GetRendererState()->RendererSettings.HbaoSettings.Enabled);
 

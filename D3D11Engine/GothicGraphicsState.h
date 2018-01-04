@@ -543,6 +543,8 @@ struct GothicRendererSettings {
 		//DisableEverything();
 
 		AllowNormalmaps = true;
+
+		AllowNumpadKeys = false;
 	}
 
 	void SetupOldWorldSpecificValues() {
@@ -669,6 +671,8 @@ struct GothicRendererSettings {
 	float RainFogDensity;
 
 	bool AllowNormalmaps;
+
+	bool AllowNumpadKeys;
 };
 
 struct GothicRendererTiming {

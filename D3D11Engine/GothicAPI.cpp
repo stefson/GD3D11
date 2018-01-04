@@ -2537,20 +2537,20 @@ LRESULT GothicAPI::OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 			break;
 
 		case VK_NUMPAD1:
-			if (!Engine::AntTweakBar->GetActive() && !GMPModeActive)
+			if (!Engine::AntTweakBar->GetActive() && !GMPModeActive && Engine::GAPI->GetRendererState()->RendererSettings.AllowNumpadKeys)
 				SpawnVegetationBoxAt(GetCameraPosition());
 			break;
 
 		case VK_NUMPAD2:
 #ifdef PUBLIC_RELEASE
-			if (!Engine::AntTweakBar->GetActive() && !GMPModeActive)
+			if (!Engine::AntTweakBar->GetActive() && !GMPModeActive && Engine::GAPI->GetRendererState()->RendererSettings.AllowNumpadKeys)
 #endif
 				Ocean->AddWaterPatchAt((unsigned int)(GetCameraPosition().x / OCEAN_PATCH_SIZE), (unsigned int)(GetCameraPosition().z / OCEAN_PATCH_SIZE));
 			break;
 
 		case VK_NUMPAD3:
 #ifdef PUBLIC_RELEASE
-			if (!Engine::AntTweakBar->GetActive() && !GMPModeActive)
+			if (!Engine::AntTweakBar->GetActive() && !GMPModeActive && Engine::GAPI->GetRendererState()->RendererSettings.AllowNumpadKeys)
 #endif
 			{
 				for (int x = -1; x <= 1; x++) {
@@ -3793,7 +3793,7 @@ XRESULT GothicAPI::SaveMenuSettings(const std::string & file) {
 
 	GothicRendererSettings & s = RendererState.RendererSettings;
 
-	int version = 4;
+	int version = 5;
 	fwrite(&version, sizeof(version), 1, f);
 
 	fwrite(&s.EnableShadows, sizeof(s.EnableShadows), 1, f);
@@ -3834,6 +3834,9 @@ XRESULT GothicAPI::SaveMenuSettings(const std::string & file) {
 
 	// v4
 	fwrite(&s.AllowNormalmaps, sizeof(s.AllowNormalmaps), 1, f);
+
+	// v5
+	fwrite(&s.AllowNumpadKeys, sizeof(s.AllowNumpadKeys), 1, f);
 
 	fclose(f);
 
@@ -3931,6 +3934,10 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 
 	if (version >= 4) {
 		fread(&s.AllowNormalmaps, sizeof(s.AllowNormalmaps), 1, f);
+	}
+
+	if (version >= 5) {
+		fread(&s.AllowNumpadKeys, sizeof(s.AllowNumpadKeys), 1, f);
 	}
 
 	fclose(f);

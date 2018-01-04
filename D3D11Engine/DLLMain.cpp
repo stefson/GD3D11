@@ -34,7 +34,7 @@ static HRESULT (WINAPI *DirectDrawCreateEx_t)(GUID FAR * lpGuid, LPVOID  *lplpDD
 typedef void (WINAPI *DirectDrawSimple)();
 typedef HRESULT (WINAPI *DirectDrawCreateEx_type)(GUID FAR*, LPVOID *, REFIID ,IUnknown FAR*);
 
-extern bool GMPModeActive;
+bool GMPModeActive = false;
 
 void SignalHandler(int signal)
 {
