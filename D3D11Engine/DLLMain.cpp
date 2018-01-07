@@ -192,8 +192,9 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID) {
 			Log::Clear();
 			LogInfo() << "Starting DDRAW Proxy DLL.";
 
-			if (Toolbox::FileExists("system\\gmp.dll")) {
+			if (Toolbox::FileExists("gmp.dll")) {
 				GMPModeActive = true;
+				LogInfo() << "GMP Mode Enabled";
 			} else {
 				GMPModeActive = false;
 			}
