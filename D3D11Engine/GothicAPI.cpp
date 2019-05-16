@@ -13,7 +13,6 @@
 #include "zCCamera.h"
 #include "oCGame.h"
 #include "zCModel.h"
-//#include "ReferenceD3D11GraphicsEngine.h"
 #include "zCMorphMesh.h"
 #include "zCParticleFX.h"
 #include "GSky.h"
@@ -113,8 +112,6 @@ void MaterialInfo::UpdateConstantbuffer() {
 
 GothicAPI::GothicAPI()
 {
-	//UpdateCheck::CheckForUpdate();
-
 	OriginalGothicWndProc = 0;
 
 	TextureTestBindMode = false;
@@ -131,9 +128,6 @@ GothicAPI::GothicAPI()
 	PendingMovieFrame = nullptr;
 
 	_canRain = false;
-
-	//RenderThread = new GRenderThread;
-	//XLE(RenderThread->InitThreads());
 }
 
 GothicAPI::~GothicAPI() {
@@ -543,7 +537,8 @@ void GothicAPI::OnWorldLoaded()
 	static bool s_firstLoad = true;
 	if (s_firstLoad)
 	{
-		// Print information about the mod here. //TODO: Menu would be better, but that view doesn't exist then
+		// Print information about the mod here.
+		//TODO: Menu would be better, but that view doesn't exist then
 		PrintModInfo();
 		s_firstLoad = false;
 	}
@@ -671,12 +666,10 @@ void GothicAPI::DrawWorldMeshNaive() {
 		(*it)->RenderVegetation(GetCameraPosition());
 	}
 
-	// Get camera position (TODO: Make a function for this)
+	// TODO: Get camera position (Make a function for this)
 	D3DXVECTOR3 camPos = GetCameraPosition();
 
 	INT2 camSection = WorldConverter::GetSectionOfPos(camPos);
-	//camSection.x += 1;
-	//camSection.y += 1;
 
 	D3DXMATRIX view;
 	GetViewMatrix(&view);
@@ -710,7 +703,8 @@ void GothicAPI::DrawWorldMeshNaive() {
 			if (zCCamera::GetCamera()->BBox3DInFrustum(bb, clipFlags) == ZTCAM_CLIPTYPE_OUT)
 				continue;
 
-			// Indoor? // TODO: Double-check if this is really a simple getter. Also, is this even valid for NPCs?
+			// Indoor?
+			// TODO: Double-check if this is really a simple getter. Also, is this even valid for NPCs?
 			(*it)->IndoorVob = (*it)->Vob->GetGroundPoly() && ((*it)->Vob->GetGroundPoly()->GetLightmap() != 0);
 
 			zCModel * model = (zCModel*)(*it)->Vob->GetVisual();
@@ -878,7 +872,7 @@ void GothicAPI::OnVobMoved(zCVob * vob)
 		{
 			// No actual change
 			return;
-		}
+}
 #endif
 
 		if (!it->second->ParentBSPNodes.empty())
@@ -1150,7 +1144,6 @@ void GothicAPI::OnRemovedVob(zCVob * vob, zCWorld * world) {
 	SkeletalVobMap.erase(vob);
 
 	// Erase the vob from the section
-
 	if (vi && vi->VobSection) {
 		vi->VobSection->Vobs.remove(vi);
 	}
@@ -1361,8 +1354,7 @@ SkeletalMeshVisualInfo* GothicAPI::LoadzCModelData(zCModel * model) {
 
 	if (!mi || mi->Meshes.empty()) {
 		// Load the new visual
-		if (!mi)
-			mi = new SkeletalMeshVisualInfo;
+		if (!mi) mi = new SkeletalMeshVisualInfo;
 
 		WorldConverter::ExtractSkeletalMeshFromVob(model, mi);
 
@@ -1370,7 +1362,6 @@ SkeletalMeshVisualInfo* GothicAPI::LoadzCModelData(zCModel * model) {
 
 		SkeletalMeshVisuals[str] = mi;
 	}
-
 	return mi;
 }
 
@@ -1456,6 +1447,8 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 			static bool done = false;
 
 			if (!done)
+				// LogInfo() 
+				// TODO: Don't show ErrorBox but Log it.
 				LogErrorBox() << "Corrupted skeletal mesh error. m\n\nDraw Model: Visname: " << visName->c_str() << " Vobname: " << vobName->c_str() << "VobPos: " << float3(*pos).toString();
 			// TODO: see if "Faulty Model" happens again
 
@@ -1535,10 +1528,7 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 			WorldConverter::ExtractNodeVisual(i, node, nodeAttachments);
 		}
 
-
 		if (nodeAttachments.find(i) != nodeAttachments.end()) {
-			//RendererState.TransformState.TransformWorld = transforms[i] * RendererState.TransformState.TransformWorld;
-
 			// Go through all attachments this node has
 			for (unsigned int n = 0; n < nodeAttachments[i].size(); n++) {
 				SetWorldViewTransform(world * transforms[i], view);
@@ -1572,8 +1562,6 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 						// Update constantbuffer
 						instanceInfo.World = RendererState.TransformState.TransformWorld;
 						vi->VobConstantBuffer->UpdateBuffer(&instanceInfo);
-
-						//g->SetupVS_ExPerInstanceConstantBuffer();
 						vi->VobConstantBuffer->BindToVertexShader(1);
 
 						// Only 0.35f of the fatness wanted by gothic. 
@@ -1589,8 +1577,6 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 					mm->GetTexAniState()->UpdateTexList();
 				}
 
-				//if (!visual->SkeletalMeshes.empty())
-				//g->SetupVS_ExPerInstanceConstantBuffer();
 				instanceInfo.World = RendererState.TransformState.TransformWorld;
 				vi->VobConstantBuffer->UpdateBuffer(&instanceInfo);
 				vi->VobConstantBuffer->BindToVertexShader(1);
@@ -1674,17 +1660,17 @@ void GothicAPI::DrawParticleFX(zCVob * source, zCParticleFX * fx, ParticleFrameD
 		ParticleRenderInfo inf;
 
 		switch (fx->GetEmitter()->GetVisAlphaFunc()) {
-		case zRND_ALPHA_FUNC_ADD:
-			inf.BlendState.SetAdditiveBlending();
-			effectBrightness = 5.0f;
-			inf.BlendMode = zRND_ALPHA_FUNC_ADD;
-			break;
+			case zRND_ALPHA_FUNC_ADD:
+				inf.BlendState.SetAdditiveBlending();
+				effectBrightness = 5.0f;
+				inf.BlendMode = zRND_ALPHA_FUNC_ADD;
+				break;
 
-		case zRND_ALPHA_FUNC_BLEND:
-		default:
-			inf.BlendState.SetAlphaBlending();
-			inf.BlendMode = zRND_ALPHA_FUNC_BLEND;
-			break;
+			case zRND_ALPHA_FUNC_BLEND:
+			default:
+				inf.BlendState.SetAlphaBlending();
+				inf.BlendMode = zRND_ALPHA_FUNC_BLEND;
+				break;
 		}
 
 		std::vector<ParticleInstanceInfo>& part = FrameParticles[texture];
@@ -2161,8 +2147,6 @@ void GothicAPI::GetViewMatrix(D3DXMATRIX * view)
 	}
 
 	*view = zCCamera::GetCamera()->GetTransform(zCCamera::ETransformType::TT_VIEW);
-	//D3DXMatrixTranspose(view, oCGame::GetGame()->_zCSession_camVob->GetWorldMatrixPtr());
-	//D3DXMatrixInverse(view, nullptr, oCGame::GetGame()->_zCSession_camVob->GetWorldMatrixPtr());	
 }
 
 /** Returns the view matrix */
@@ -2175,8 +2159,6 @@ void GothicAPI::GetInverseViewMatrix(D3DXMATRIX * invView)
 	}
 
 	*invView = zCCamera::GetCamera()->GetTransform(zCCamera::ETransformType::TT_VIEW_INV);
-	//*invView = *(oCGame::GetGame()->_zCSession_camVob->GetWorldMatrixPtr());
-	//D3DXMatrixTranspose(invView, invView);
 }
 
 /** Returns the projection-matrix */
@@ -2278,58 +2260,58 @@ void GothicAPI::SendMessageToGameWindow(UINT msg, WPARAM wParam, LPARAM lParam)
 /** Message-Callback for the main window */
 LRESULT GothicAPI::OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch (msg) {
-	case WM_KEYDOWN:
-		Engine::GraphicsEngine->OnKeyDown(wParam);
-		switch (wParam) {
-		case VK_F11:
+		case WM_KEYDOWN:
+			Engine::GraphicsEngine->OnKeyDown(wParam);
+			switch (wParam) {
+				case VK_F11:
 #ifdef PUBLIC_RELEASE
-			if (GetAsyncKeyState(VK_CONTROL)) {
-				Engine::AntTweakBar->SetActive(!Engine::AntTweakBar->GetActive());
-				SetEnableGothicInput(!Engine::AntTweakBar->GetActive());
-			}
-			else {
-				Engine::AntTweakBar->SetActive(false);
-				SetEnableGothicInput(true);
-				Engine::GraphicsEngine->OnUIEvent(BaseGraphicsEngine::EUIEvent::UI_OpenSettings);
-			}
-#else
-			Engine::AntTweakBar->SetActive(!Engine::AntTweakBar->GetActive());
-			SetEnableGothicInput(!Engine::AntTweakBar->GetActive());
-#endif
-			break;
-
-		case VK_NUMPAD1:
-			if (!Engine::AntTweakBar->GetActive() && !GMPModeActive && Engine::GAPI->GetRendererState()->RendererSettings.AllowNumpadKeys)
-				SpawnVegetationBoxAt(GetCameraPosition());
-			break;
-
-		case VK_NUMPAD2:
-#ifdef PUBLIC_RELEASE
-			if (!Engine::AntTweakBar->GetActive() && !GMPModeActive && Engine::GAPI->GetRendererState()->RendererSettings.AllowNumpadKeys)
-#endif
-				Ocean->AddWaterPatchAt((unsigned int)(GetCameraPosition().x / OCEAN_PATCH_SIZE), (unsigned int)(GetCameraPosition().z / OCEAN_PATCH_SIZE));
-			break;
-
-		case VK_NUMPAD3:
-#ifdef PUBLIC_RELEASE
-			if (!Engine::AntTweakBar->GetActive() && !GMPModeActive && Engine::GAPI->GetRendererState()->RendererSettings.AllowNumpadKeys)
-#endif
-			{
-				for (int x = -1; x <= 1; x++) {
-					for (int y = -1; y <= 1; y++) {
-						Ocean->AddWaterPatchAt((unsigned int)((GetCameraPosition().x / OCEAN_PATCH_SIZE) + x), (unsigned int)((GetCameraPosition().z / OCEAN_PATCH_SIZE) + y));
+					if (GetAsyncKeyState(VK_CONTROL)) {
+						Engine::AntTweakBar->SetActive(!Engine::AntTweakBar->GetActive());
+						SetEnableGothicInput(!Engine::AntTweakBar->GetActive());
 					}
-				}
+					else {
+						Engine::AntTweakBar->SetActive(false);
+						SetEnableGothicInput(true);
+						Engine::GraphicsEngine->OnUIEvent(BaseGraphicsEngine::EUIEvent::UI_OpenSettings);
+					}
+#else
+					Engine::AntTweakBar->SetActive(!Engine::AntTweakBar->GetActive());
+					SetEnableGothicInput(!Engine::AntTweakBar->GetActive());
+#endif
+					break;
+
+				case VK_NUMPAD1:
+					if (!Engine::AntTweakBar->GetActive() && !GMPModeActive && Engine::GAPI->GetRendererState()->RendererSettings.AllowNumpadKeys)
+						SpawnVegetationBoxAt(GetCameraPosition());
+					break;
+
+				case VK_NUMPAD2:
+#ifdef PUBLIC_RELEASE
+					if (!Engine::AntTweakBar->GetActive() && !GMPModeActive && Engine::GAPI->GetRendererState()->RendererSettings.AllowNumpadKeys)
+#endif
+						Ocean->AddWaterPatchAt((unsigned int)(GetCameraPosition().x / OCEAN_PATCH_SIZE), (unsigned int)(GetCameraPosition().z / OCEAN_PATCH_SIZE));
+					break;
+
+				case VK_NUMPAD3:
+#ifdef PUBLIC_RELEASE
+					if (!Engine::AntTweakBar->GetActive() && !GMPModeActive && Engine::GAPI->GetRendererState()->RendererSettings.AllowNumpadKeys)
+#endif
+					{
+						for (int x = -1; x <= 1; x++) {
+							for (int y = -1; y <= 1; y++) {
+								Ocean->AddWaterPatchAt((unsigned int)((GetCameraPosition().x / OCEAN_PATCH_SIZE) + x), (unsigned int)((GetCameraPosition().z / OCEAN_PATCH_SIZE) + y));
+							}
+						}
+					}
+					break;
 			}
 			break;
-		}
-		break;
 
 #ifdef BUILD_SPACER
-	case WM_SIZE:
-		// Reset resolution to windowsize
-		Engine::GraphicsEngine->SetWindow(hWnd);
-		break;
+		case WM_SIZE:
+			// Reset resolution to windowsize
+			Engine::GraphicsEngine->SetWindow(hWnd);
+			break;
 #endif
 	}
 
@@ -2369,8 +2351,6 @@ void GothicAPI::DebugDrawTreeNode(zCBspBase * base, zTBBox3D boxCell, int clipFl
 				return; // Nothig to see here. Discard this node and the subtree
 		}
 
-
-
 		if (base->IsLeaf())
 		{
 			// Check if this leaf is inside the frustum
@@ -2379,7 +2359,6 @@ void GothicAPI::DebugDrawTreeNode(zCBspBase * base, zTBBox3D boxCell, int clipFl
 				if (zCCamera::GetCamera()->BBox3DInFrustum(base->BBox3D, clipFlags) == ZTCAM_CLIPTYPE_OUT)
 					return;
 			}
-
 
 			zCBspLeaf* leaf = (zCBspLeaf*)base;
 			if (!leaf->sectorIndex)
@@ -2429,7 +2408,6 @@ void GothicAPI::DebugDrawTreeNode(zCBspBase * base, zTBBox3D boxCell, int clipFl
 void GothicAPI::DebugDrawBSPTree()
 {
 	zCBspTree* tree = LoadedWorldInfo->BspTree;
-
 	zCBspBase* root = tree->GetRootNode();
 
 	// Recursively go through the tree and draw all nodes
@@ -2446,17 +2424,6 @@ void GothicAPI::CollectVisibleVobs(std::vector<VobInfo*> & vobs, std::vector<Vob
 	if (zCCamera::GetCamera()) {
 		zCCamera::GetCamera()->Activate();
 	}
-
-	/*for (auto it = VobMap.begin(); it != VobMap.end(); ++it)
-	{
-		vobs.push_back(it->second);
-
-		VobInstanceInfo vii;
-		vii.world = vobs.back()->WorldMatrix;
-		((MeshVisualInfo *)it->second->VisualInfo)->Instances.push_back(vii);
-	}
-
-	return;*/
 
 	// Recursively go through the tree and draw all nodes
 	CollectVisibleVobsHelper(root, root->OriginalNode->BBox3D, 63, vobs, lights, mobs);
@@ -2484,12 +2451,6 @@ void GothicAPI::CollectVisibleVobs(std::vector<VobInfo*> & vobs, std::vector<Vob
 					continue;
 				}
 #endif
-
-				//if (memcmp(&(*it)->LastRenderPosition, (*it)->Vob->GetPositionWorld(), sizeof(D3DXVECTOR3)) != 0)
-				{
-
-				}
-
 				if (!(*it)->Vob->GetShowVisual()) {
 					continue;
 				}
@@ -2497,11 +2458,6 @@ void GothicAPI::CollectVisibleVobs(std::vector<VobInfo*> & vobs, std::vector<Vob
 				VobInstanceInfo vii;
 				vii.world = (*it)->WorldMatrix;
 				vii.color = (*it)->GroundColor;
-
-				/*if ((*it)->IsIndoorVob)
-					vii.color = float4(DEFAULT_INDOOR_VOB_AMBIENT).ToDWORD();
-				else
-					vii.color = 0xFFFFFFFF;*/
 
 				((MeshVisualInfo*)(*it)->VisualInfo)->Instances.push_back(vii);
 
@@ -2538,11 +2494,9 @@ void GothicAPI::CollectVisibleSections(std::list<WorldMeshSectionInfo*> & sectio
 					continue;
 
 				sections.push_back(&section);
-
-				//Engine::GraphicsEngine->GetLineRenderer()->AddAABBMinMax(ity->second.BoundingBox.Min, ity->second.BoundingBox.Max, D3DXVECTOR4(0, 0, 1, 0.5f));
 			}
-		}
-	}
+}
+}
 }
 
 /** Moves the given vob from a BSP-Node to the dynamic vob list */
@@ -2658,27 +2612,9 @@ static void CVVH_AddNotDrawnVobToList(std::vector<VobInfo*> & target, std::vecto
 			float vd = D3DXVec3Length(&(Engine::GAPI->GetCameraPosition() - (*it)->LastRenderPosition));
 			if (vd < dist && (*it)->Vob->GetShowVisual())
 			{
-				// Update if near and moved
-				/*if (vd < dist / 4 && memcmp(&(*it)->LastRenderPosition, (*it)->Vob->GetPositionWorld(), sizeof(D3DXVECTOR3)) != 0)
-				{
-					(*it)->LastRenderPosition = (*it)->Vob->GetPositionWorld();
-					(*it)->UpdateVobConstantBuffer();
-
-					Engine::GAPI->GetRendererState()->RendererInfo.FrameVobUpdates++;
-
-					remVobs.push_back((*it));
-
-					continue; // Render with the other dynamic vobs
-				}*/
-
 				VobInstanceInfo vii;
 				vii.world = (*it)->WorldMatrix;
 				vii.color = (*it)->GroundColor;
-
-				//if ((*it)->IsIndoorVob)
-				//	vii.color = float4(DEFAULT_INDOOR_VOB_AMBIENT).ToDWORD();
-				//else
-				//	vii.color = 0xFFFFFFFF;
 
 				((MeshVisualInfo*)(*it)->VisualInfo)->Instances.push_back(vii);
 				target.push_back((*it));
@@ -2686,12 +2622,6 @@ static void CVVH_AddNotDrawnVobToList(std::vector<VobInfo*> & target, std::vecto
 			}
 		}
 	}
-
-	/*for (std::vector<VobInfo *>::iterator it = remVobs.begin(); it != remVobs.end(); ++it)
-	{
-		// Move to dynamic vob-list since these vobs have moved this frame
-		Engine::GAPI->MoveVobFromBspToDynamic((*it));
-	}*/
 }
 
 static void CVVH_AddNotDrawnVobToList(std::vector<VobLightInfo*> & target, std::vector<VobLightInfo*> & source, float dist)
@@ -2701,12 +2631,8 @@ static void CVVH_AddNotDrawnVobToList(std::vector<VobLightInfo*> & target, std::
 		if (!(*it)->VisibleInRenderPass)
 		{
 			float d = dist;
-			//if ((*it)->Vob->IsIndoorVob())
-			//	d *= INDOOR_LIGHT_DISTANCE_SCALE_FACTOR;
-
 			if (D3DXVec3Length(&(Engine::GAPI->GetCameraPosition() - (*it)->Vob->GetPositionWorld())) - (*it)->Vob->GetLightRange() < d)
 			{
-				//(*it)->VisualInfo->Instances.push_back((*it)->WorldMatrix);
 				target.push_back((*it));
 				(*it)->VisibleInRenderPass = true;
 			}
@@ -2723,11 +2649,8 @@ static void CVVH_AddNotDrawnVobToList(std::vector<SkeletalVobInfo*> & target, st
 			float vd = D3DXVec3Length(&(Engine::GAPI->GetCameraPosition() - (*it)->Vob->GetPositionWorld()));
 			if (vd < dist && (*it)->Vob->GetShowVisual())
 			{
-				//(*it)->VisualInfo->Instances.push_back((*it)->WorldMatrix);
 				target.push_back((*it));
 				(*it)->VisibleInRenderPass = true;
-
-
 			}
 		}
 	}
@@ -2766,8 +2689,6 @@ void GothicAPI::CollectVisibleVobsHelper(BspInfo * base, zTBBox3D boxCell, int c
 					nodeClip = (zTCam_ClipType)base->OcclusionInfo.LastCameraClipType; // If we are using occlusion-clipping, this test has already been done
 				}
 
-				//float dist = D3DXVec3Length(&(base->BBox3D.Min - camPos));
-
 				if (nodeClip == ZTCAM_CLIPTYPE_OUT) {
 					return; // Nothig to see here. Discard this node and the subtree}
 				}
@@ -2784,7 +2705,6 @@ void GothicAPI::CollectVisibleVobsHelper(BspInfo * base, zTBBox3D boxCell, int c
 			bool insideFrustum = true;
 
 			zCBspLeaf* leaf = (zCBspLeaf*)base->OriginalNode;
-			//BspInfo& bvi = BspLeafVobLists[leaf];
 			std::vector<VobInfo*>& listA = base->IndoorVobs;
 			std::vector<VobInfo*>& listB = base->SmallVobs;
 			std::vector<VobInfo*>& listC = base->Vobs;
@@ -3603,21 +3523,21 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 	// Fix the shadow range
 	switch (s.ShadowMapSize)
 	{
-	case 512:
-		s.WorldShadowRangeScale = 16.0f;
-		break;
+		case 512:
+			s.WorldShadowRangeScale = 16.0f;
+			break;
 
-	case 1024:
-		s.WorldShadowRangeScale = 16.0f;
-		break;
+		case 1024:
+			s.WorldShadowRangeScale = 16.0f;
+			break;
 
-	case 2048:
-		s.WorldShadowRangeScale = 8.0f;
-		break;
+		case 2048:
+			s.WorldShadowRangeScale = 8.0f;
+			break;
 
-	case 4096:
-		s.WorldShadowRangeScale = 4.0f;
-		break;
+		case 4096:
+			s.WorldShadowRangeScale = 4.0f;
+			break;
 	}
 
 	INT2 res;
@@ -4089,23 +4009,23 @@ void GothicAPI::CollectPolygonsInAABBRec(BspInfo * base, const zTBBox3D & bbox, 
 
 		switch (sides)
 		{
-		case zTBBox3D::zPLANE_INFRONT:
-			node = (zCBspNode*)node->Front;
-			base = base->Front;
-			break;
+			case zTBBox3D::zPLANE_INFRONT:
+				node = (zCBspNode*)node->Front;
+				base = base->Front;
+				break;
 
-		case zTBBox3D::zPLANE_BEHIND:
-			node = (zCBspNode*)node->Back;
-			base = base->Back;
-			break;
+			case zTBBox3D::zPLANE_BEHIND:
+				node = (zCBspNode*)node->Back;
+				base = base->Back;
+				break;
 
-		case zTBBox3D::zPLANE_SPANNING:
-			if (base->Front)
-				CollectPolygonsInAABBRec(base->Front, bbox, list);
+			case zTBBox3D::zPLANE_SPANNING:
+				if (base->Front)
+					CollectPolygonsInAABBRec(base->Front, bbox, list);
 
-			node = (zCBspNode*)node->Back;
-			base = base->Back;
-			break;
+				node = (zCBspNode*)node->Back;
+				base = base->Back;
+				break;
 		}
 	}
 }
