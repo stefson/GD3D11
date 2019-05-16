@@ -410,11 +410,9 @@ void GothicAPI::ResetWorld() {
 /** Resets only the vobs */
 void GothicAPI::ResetVobs() {
 	// Clear sections
-	for (std::map<int, std::map<int, WorldMeshSectionInfo>>::iterator itx = Engine::GAPI->GetWorldSections().begin(); itx != Engine::GAPI->GetWorldSections().end(); ++itx) {
-		for (std::map<int, WorldMeshSectionInfo>::iterator ity = itx->second.begin(); ity != itx->second.end(); ++ity) {
-			WorldMeshSectionInfo& section = ity->second;
-
-			section.Vobs.clear();
+	for (auto&& itx : Engine::GAPI->GetWorldSections()) {
+		for (auto&& ity : itx.second) {
+			ity.second.Vobs.clear();
 		}
 	}
 
@@ -431,34 +429,34 @@ void GothicAPI::ResetVobs() {
 	SkeletalVobMap.clear();
 
 	// Delete static mesh visuals
-	for (auto it = StaticMeshVisuals.begin(); it != StaticMeshVisuals.end(); ++it) {
-		delete it->second;
+	for (auto const& it : StaticMeshVisuals) {
+		delete it.second;
 	}
 	StaticMeshVisuals.clear();
 
 	// Delete skeletal mesh visuals
-	for (auto it = SkeletalMeshVisuals.begin(); it != SkeletalMeshVisuals.end(); ++it) {
-		delete it->second;
+	for (auto const& it : SkeletalMeshVisuals) {
+		delete it.second;
 	}
 	SkeletalMeshVisuals.clear();
 
 	// Delete static mesh vobs
-	for (auto it = VobMap.begin(); it != VobMap.end(); ++it) {
-		delete it->second;
+	for (auto const& it : VobMap) {
+		delete it.second;
 	}
 	VobMap.clear();
 
 	// Delete skeletal mesh vobs
-	for (std::list<SkeletalVobInfo*>::iterator it = SkeletalMeshVobs.begin(); it != SkeletalMeshVobs.end(); ++it) {
-		delete (*it);
+	for (auto&& it : SkeletalMeshVobs) {
+		delete it;
 	}
 	SkeletalMeshVobs.clear();
 	AnimatedSkeletalVobs.clear();
 
 	// Delete light vobs
-	for (std::unordered_map<zCVobLight*, VobLightInfo*>::iterator it = VobLightMap.begin(); it != VobLightMap.end(); ++it) {
-		Engine::GraphicsEngine->OnVobRemovedFromWorld(it->first);
-		delete it->second;
+	for (auto const& it : VobLightMap) {
+		Engine::GraphicsEngine->OnVobRemovedFromWorld(it.first);
+		delete it.second;
 	}
 	VobLightMap.clear();
 }
@@ -486,8 +484,8 @@ void GothicAPI::OnGeometryLoaded(zCPolygon * *polys, unsigned int numPolygons) {
 
 
 	// Apply tesselation
-	for (auto it = LoadedMaterials.begin(); it != LoadedMaterials.end(); ++it) {
-		MaterialInfo* info = GetMaterialInfoFrom((*it)->GetTexture());
+	for (auto const& it : LoadedMaterials) {
+		MaterialInfo* info = GetMaterialInfoFrom(it->GetTexture());
 		if (info) {
 			ApplyTesselationSettingsForAllMeshPartsUsing(info, info->TextureTesselationSettings.buffer.VT_TesselationFactor > 1.0f ? 2 : 1);
 		}
@@ -623,8 +621,8 @@ const std::string& GothicAPI::GetStartDirectory() {
 
 /** Builds the static mesh instancing cache */
 void GothicAPI::BuildStaticMeshInstancingCache() {
-	for (std::unordered_map<zCProgMeshProto*, MeshVisualInfo*>::iterator it = StaticMeshVisuals.begin(); it != StaticMeshVisuals.end(); ++it) {
-		it->second->StartNewFrame();
+	for (auto const& it : StaticMeshVisuals) {
+		it.second->StartNewFrame();
 	}
 }
 
@@ -662,8 +660,8 @@ void GothicAPI::DrawWorldMeshNaive() {
 	Engine::GraphicsEngine->DrawWorldMesh();
 	STOP_TIMING(GothicRendererTiming::TT_WorldMesh);
 
-	for (std::list<GVegetationBox*>::iterator it = VegetationBoxes.begin(); it != VegetationBoxes.end(); ++it) {
-		(*it)->RenderVegetation(GetCameraPosition());
+	for (auto const& vegetationBox : VegetationBoxes) {
+		vegetationBox->RenderVegetation(GetCameraPosition());
 	}
 
 	// TODO: Get camera position (Make a function for this)
@@ -683,19 +681,18 @@ void GothicAPI::DrawWorldMeshNaive() {
 		// Set up frustum for the camera
 		zCCamera::GetCamera()->Activate();
 
-		for (std::list<SkeletalVobInfo*>::iterator it = AnimatedSkeletalVobs.begin(); it != AnimatedSkeletalVobs.end(); ++it) {
+		for (const auto& vobInfo : AnimatedSkeletalVobs) {
 			// Don't render if sleeping and has skeletal meshes available
-			if (!(*it)->VisualInfo)
-				continue;
+			if (!vobInfo->VisualInfo) continue;
 
-			INT2 s = WorldConverter::GetSectionOfPos((*it)->Vob->GetPositionWorld());
+			const INT2 s = WorldConverter::GetSectionOfPos(vobInfo->Vob->GetPositionWorld());
 
-			float dist = D3DXVec3Length(&((*it)->Vob->GetPositionWorld() - camPos));
+			float dist = D3DXVec3Length(&(vobInfo->Vob->GetPositionWorld() - camPos));
 			if (dist > RendererState.RendererSettings.SkeletalMeshDrawRadius)
 				continue; // Skip out of range
 
-			zTBBox3D bb = (*it)->Vob->GetBBoxLocal();
-			zCCamera::GetCamera()->SetTransform(zCCamera::ETransformType::TT_WORLD, *(*it)->Vob->GetWorldMatrixPtr());
+			const zTBBox3D bb = vobInfo->Vob->GetBBoxLocal();
+			zCCamera::GetCamera()->SetTransform(zCCamera::ETransformType::TT_WORLD, *vobInfo->Vob->GetWorldMatrixPtr());
 
 			//Engine::GraphicsEngine->GetLineRenderer()->AddAABBMinMax(bb.Min, bb.Max, D3DXVECTOR4(1, 1, 1, 1));
 
@@ -704,10 +701,9 @@ void GothicAPI::DrawWorldMeshNaive() {
 				continue;
 
 			// Indoor?
-			// TODO: Double-check if this is really a simple getter. Also, is this even valid for NPCs?
-			(*it)->IndoorVob = (*it)->Vob->GetGroundPoly() && ((*it)->Vob->GetGroundPoly()->GetLightmap() != 0);
+			vobInfo->IndoorVob = vobInfo->Vob->IsIndoorVob();
 
-			zCModel * model = (zCModel*)(*it)->Vob->GetVisual();
+			zCModel * model = (zCModel*)vobInfo->Vob->GetVisual();
 
 			if (!model)
 				continue; // Gothic fortunately sets this to 0 when it throws the model out of the cache
@@ -715,7 +711,7 @@ void GothicAPI::DrawWorldMeshNaive() {
 			// This is important, because gothic only lerps between animation when this distance is set and below ~2000
 			model->SetDistanceToCamera(dist);
 
-			DrawSkeletalMeshVob((*it), dist);
+			DrawSkeletalMeshVob(vobInfo, dist);
 		}
 	}
 	STOP_TIMING(GothicRendererTiming::TT_SkeletalMeshes);
@@ -742,33 +738,33 @@ void GothicAPI::DrawParticlesSimple()
 		D3DXVECTOR3 camPos = GetCameraPosition();
 
 		std::vector<zCVob*> renderedParticleFXs;
-		for (std::list<zCVob*>::iterator it = ParticleEffectVobs.begin(); it != ParticleEffectVobs.end(); ++it)
+		for (auto const& it : ParticleEffectVobs)
 		{
-			INT2 s = WorldConverter::GetSectionOfPos((*it)->GetPositionWorld());
+			INT2 s = WorldConverter::GetSectionOfPos(it->GetPositionWorld());
 
-			float dist = D3DXVec3Length(&((*it)->GetPositionWorld() - camPos));
+			float dist = D3DXVec3Length(&(it->GetPositionWorld() - camPos));
 			if (dist > RendererState.RendererSettings.OutdoorSmallVobDrawRadius)
 				continue;
 
-			if ((*it)->GetVisual())
+			if (it->GetVisual())
 			{
-				renderedParticleFXs.push_back((*it));
+				renderedParticleFXs.push_back(it);
 			}
 		}
 
 		// now it is save to render
-		for (std::list<zCVob*>::iterator it = ParticleEffectVobs.begin(); it != ParticleEffectVobs.end(); ++it)
+		for (auto const& it : ParticleEffectVobs)
 		{
-			INT2 s = WorldConverter::GetSectionOfPos((*it)->GetPositionWorld());
+			INT2 s = WorldConverter::GetSectionOfPos(it->GetPositionWorld());
 
-			float dist = D3DXVec3Length(&((*it)->GetPositionWorld() - camPos));
+			float dist = D3DXVec3Length(&(it->GetPositionWorld() - camPos));
 			if (dist > RendererState.RendererSettings.VisualFXDrawRadius)
 				continue;
 
-			if ((*it)->GetVisual())
+			if (it->GetVisual())
 			{
 				int mod = dist > RendererState.RendererSettings.IndoorVobDrawRadius ? 2 : 1;
-				DrawParticleFX((*it), (zCParticleFX*)(*it)->GetVisual(), data);
+				DrawParticleFX(it, (zCParticleFX*)it->GetVisual(), data);
 			}
 		}
 
@@ -784,17 +780,17 @@ void GothicAPI::GetVisibleParticleEffectsList(std::vector<zCVob*> & pfxList)
 		D3DXVECTOR3 camPos = GetCameraPosition();
 
 		// now it is save to render
-		for (std::list<zCVob*>::iterator it = ParticleEffectVobs.begin(); it != ParticleEffectVobs.end(); ++it)
+		for (auto const& it : ParticleEffectVobs)
 		{
-			INT2 s = WorldConverter::GetSectionOfPos((*it)->GetPositionWorld());
+			INT2 s = WorldConverter::GetSectionOfPos(it->GetPositionWorld());
 
-			float dist = D3DXVec3Length(&((*it)->GetPositionWorld() - camPos));
+			float dist = D3DXVec3Length(&(it->GetPositionWorld() - camPos));
 			if (dist > RendererState.RendererSettings.VisualFXDrawRadius)
 				continue;
 
-			if ((*it)->GetVisual())
+			if (it->GetVisual())
 			{
-				pfxList.push_back((*it));
+				pfxList.push_back(it);
 			}
 		}
 	}
@@ -809,13 +805,13 @@ void GothicAPI::GetVisibleDecalList(std::vector<zCVob*> & decals) {
 	D3DXVECTOR3 camPos = GetCameraPosition();
 	static std::vector<std::pair<zCVob*, float>> decalDistances; // Static to get around reallocations
 
-	for (std::list<zCVob*>::iterator it = DecalVobs.begin(); it != DecalVobs.end(); ++it) {
-		float dist = D3DXVec3Length(&((*it)->GetPositionWorld() - camPos));
+	for (auto const& it : DecalVobs) {
+		float dist = D3DXVec3Length(&(it->GetPositionWorld() - camPos));
 		if (dist > RendererState.RendererSettings.VisualFXDrawRadius)
 			continue;
 
-		if ((*it)->GetVisual()) {
-			decalDistances.push_back(std::make_pair(*it, dist));
+		if (it->GetVisual()) {
+			decalDistances.push_back(std::make_pair(it, dist));
 		}
 	}
 
@@ -823,8 +819,8 @@ void GothicAPI::GetVisibleDecalList(std::vector<zCVob*> & decals) {
 	std::sort(decalDistances.begin(), decalDistances.end(), DecalSortcmpFunc);
 
 	// Put into output list
-	for (auto it = decalDistances.begin(); it != decalDistances.end(); ++it) {
-		decals.push_back(it->first);
+	for (auto const& it : decalDistances) {
+		decals.push_back(it.first);
 	}
 
 	decalDistances.clear();
@@ -835,9 +831,9 @@ void GothicAPI::OnMaterialDeleted(zCMaterial * mat) {
 	LoadedMaterials.erase(mat);
 	if (!mat)
 		return;
-	for (std::unordered_map<std::string, SkeletalMeshVisualInfo*>::iterator it = SkeletalMeshVisuals.begin(); it != SkeletalMeshVisuals.end(); ++it) {
-		it->second->Meshes.erase(mat);
-		it->second->SkeletalMeshes.erase(mat);
+	for (auto && it : SkeletalMeshVisuals) {
+		it.second->Meshes.erase(mat);
+		it.second->SkeletalMeshes.erase(mat);
 	}
 }
 
@@ -872,7 +868,7 @@ void GothicAPI::OnVobMoved(zCVob * vob)
 		{
 			// No actual change
 			return;
-}
+		}
 #endif
 
 		if (!it->second->ParentBSPNodes.empty())
@@ -1370,7 +1366,7 @@ SkeletalMeshVisualInfo* GothicAPI::LoadzCModelData(zCModel * model) {
 
 /** Draws a skeletal mesh-vob */
 void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
-	// FIXME: Put this into the renderer!!
+	// TODO: FIXME: Put this into the renderer!!
 	D3D11GraphicsEngine* g = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
 	g->SetActiveVertexShader("VS_Ex");
 
@@ -1423,9 +1419,9 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 		// TODO: FIXME
 		// Ugly stuff to get the fucking corrupt visual in returning here
 		static void Draw(SkeletalVobInfo* vi, std::vector<D3DXMATRIX>& transforms, float fatness) {
-			for (std::map<zCMaterial*, std::vector<SkeletalMeshInfo*>>::iterator itm = ((SkeletalMeshVisualInfo*)vi->VisualInfo)->SkeletalMeshes.begin(); itm != ((SkeletalMeshVisualInfo*)vi->VisualInfo)->SkeletalMeshes.end(); ++itm) {
-				for (unsigned int i = 0; i < itm->second.size(); i++) {
-					Engine::GAPI->DrawSkeletalMeshInfo(itm->first, itm->second[i], ((SkeletalMeshVisualInfo*)vi->VisualInfo), transforms, fatness);
+			for (auto const& itm : ((SkeletalMeshVisualInfo*)vi->VisualInfo)->SkeletalMeshes) {
+				for (unsigned int i = 0; i < itm.second.size(); i++) {
+					Engine::GAPI->DrawSkeletalMeshInfo(itm.first, itm.second[i], ((SkeletalMeshVisualInfo*)vi->VisualInfo), transforms, fatness);
 				}
 			}
 		}
@@ -1444,12 +1440,18 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 		}
 
 		static void Except(SkeletalVobInfo* vi, std::string* visName, std::string* vobName, D3DXVECTOR3* pos) {
-			static bool done = false;
+			// TODO: Make static again
+			/*static*/ bool done = false;
 
-			if (!done)
-				// LogInfo() 
-				// TODO: Don't show ErrorBox but Log it.
-				LogErrorBox() << "Corrupted skeletal mesh error. m\n\nDraw Model: Visname: " << visName->c_str() << " Vobname: " << vobName->c_str() << "VobPos: " << float3(*pos).toString();
+			if (!done) {
+				LogError()
+					<< "Corrupted skeletal mesh error. m\n\nDraw Model: Visname: "
+					<< visName->c_str()
+					<< " Vobname: "
+					<< vobName->c_str()
+					<< "VobPos: "
+					<< float3(*pos).toString();
+			}
 			// TODO: see if "Faulty Model" happens again
 
 			Engine::GraphicsEngine->GetLineRenderer()->AddPointLocator(*pos, 50.0f, D3DXVECTOR4(1, 0, 0, 1));
@@ -1465,7 +1467,7 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 			// Better than nothing...
 			// TODO: FIXME
 			vi->VisualInfo = nullptr;
-			LogInfo() << "Failed to draw a skeletal-mesh. Removing its visual to (hopefully) keep the game running.";
+			LogError() << "Failed to draw a skeletal-mesh. Removing its visual to (hopefully) keep the game running.";
 		}
 	}
 
@@ -1550,11 +1552,11 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 
 					if (g->GetRenderingStage() == DES_MAIN) {// Only draw this as a morphmesh when rendering the main scene
 						D3DXMATRIX fatnessScale;
-						float fs = (fatness + 1.0f) * 0.02f; // This is what gothic seems to be doing for heads, and it even looks right...
+						const float fs = (fatness + 1.0f) * 0.02f; // This is what gothic seems to be doing for heads, and it even looks right...
 
 						// Calculate "patched" scale according to fatness
 						D3DXMatrixScaling(&fatnessScale, fs, fs, fs);
-						D3DXMATRIX w = world * scale;
+						const D3DXMATRIX w = world * scale;
 
 						// Set new "fat" worldmatrix
 						SetWorldViewTransform(w * transforms[i], view);
@@ -1582,19 +1584,19 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 				vi->VobConstantBuffer->BindToVertexShader(1);
 
 				// Go through all materials registered here
-				for (std::map<zCMaterial*, std::vector<MeshInfo*>>::iterator itm = nodeAttachments[i][n]->Meshes.begin(); itm != nodeAttachments[i][n]->Meshes.end(); ++itm) {
-					if (itm->first && itm->first->GetAniTexture()) { // TODO: Crash here!
-						if (itm->first->GetAniTexture()->CacheIn(0.6f) == zRES_CACHED_IN) {
-							itm->first->GetAniTexture()->Bind(0);
-							g->BindShaderForTexture(itm->first->GetAniTexture());
+				for (auto const& itm : nodeAttachments[i][n]->Meshes) {
+					if (itm.first && itm.first->GetAniTexture()) { // TODO: Crash here!
+						if (itm.first->GetAniTexture()->CacheIn(0.6f) == zRES_CACHED_IN) {
+							itm.first->GetAniTexture()->Bind(0);
+							g->BindShaderForTexture(itm.first->GetAniTexture());
 						}
 						else
 							continue;
 					}
 
 					// Go through all meshes using that material
-					for (unsigned int m = 0; m < itm->second.size(); m++) {
-						DrawMeshInfo(itm->first, itm->second[m]);
+					for (unsigned int m = 0; m < itm.second.size(); m++) {
+						DrawMeshInfo(itm.first, itm.second[m]);
 					}
 				}
 			}
@@ -1607,7 +1609,7 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 /** Called when a particle system got removed */
 void GothicAPI::OnParticleFXDeleted(zCParticleFX * pfx) {
 	// Remove this from our list
-	for (std::list<zCVob*>::iterator it = ParticleEffectVobs.begin(); it != ParticleEffectVobs.end();) {
+	for (auto it = ParticleEffectVobs.begin(); it != ParticleEffectVobs.end();) {
 		if ((*it)->GetVisual() == (zCVisual*)pfx) {
 			it = ParticleEffectVobs.erase(it);
 		}
@@ -1948,16 +1950,16 @@ SkeletalVobInfo* GothicAPI::TraceSkeletalMeshVobsBB(const D3DXVECTOR3 & origin, 
 	float closest = FLT_MAX;
 	SkeletalVobInfo* vob = nullptr;
 
-	for (auto it = SkeletalMeshVobs.begin(); it != SkeletalMeshVobs.end(); ++it)
+	for (auto const& it : SkeletalMeshVobs)
 	{
 		float t = 0;
-		if (Toolbox::IntersectBox((*it)->Vob->GetBBoxLocal().Min + (*it)->Vob->GetPositionWorld(),
-			(*it)->Vob->GetBBoxLocal().Max + (*it)->Vob->GetPositionWorld(), origin, dir, t))
+		if (Toolbox::IntersectBox(it->Vob->GetBBoxLocal().Min + it->Vob->GetPositionWorld(),
+			it->Vob->GetBBoxLocal().Max + it->Vob->GetPositionWorld(), origin, dir, t))
 		{
 			if (t < closest)
 			{
 				closest = t;
-				vob = (*it);
+				vob = it;
 			}
 		}
 	}
@@ -1975,11 +1977,11 @@ float GothicAPI::TraceVisualInfo(const D3DXVECTOR3 & origin, const D3DXVECTOR3 &
 	float u, v, t;
 	float closest = FLT_MAX;
 
-	for (auto it = visual->Meshes.begin(); it != visual->Meshes.end(); ++it)
+	for (auto const& it : visual->Meshes)
 	{
-		for (unsigned int m = 0; m < it->second.size(); m++)
+		for (unsigned int m = 0; m < it.second.size(); m++)
 		{
-			MeshInfo* mesh = it->second[m];
+			MeshInfo* mesh = it.second[m];
 
 			for (unsigned int i = 0; i < mesh->Indices.size(); i += 3)
 			{
@@ -1993,7 +1995,7 @@ float GothicAPI::TraceVisualInfo(const D3DXVECTOR3 & origin, const D3DXVECTOR3 &
 						closest = t;
 
 						if (hitMaterial)
-							* hitMaterial = it->first;
+							* hitMaterial = it.first;
 					}
 				}
 			}
@@ -2011,11 +2013,11 @@ bool GothicAPI::TraceWorldMesh(const D3DXVECTOR3 & origin, const D3DXVECTOR3 & d
 	std::list<std::pair<WorldMeshSectionInfo*, float>> hitSections;
 
 	// Trace bounding-boxes first
-	for (std::map<int, std::map<int, WorldMeshSectionInfo>>::iterator itx = WorldSections.begin(); itx != WorldSections.end(); itx++)
+	for (auto&& itx : WorldSections)
 	{
-		for (std::map<int, WorldMeshSectionInfo>::iterator ity = itx->second.begin(); ity != itx->second.end(); ity++)
+		for (auto&& ity : itx.second)
 		{
-			WorldMeshSectionInfo& section = ity->second;
+			WorldMeshSectionInfo& section = ity.second;
 
 			if (section.WorldMeshes.empty())
 				continue;
@@ -2032,9 +2034,9 @@ bool GothicAPI::TraceWorldMesh(const D3DXVECTOR3 & origin, const D3DXVECTOR3 & d
 	hitSections.sort(TraceWorldMeshBoxCmp);
 
 	int numProcessed = 0;
-	for (std::list<std::pair<WorldMeshSectionInfo*, float>>::iterator bit = hitSections.begin(); bit != hitSections.end(); bit++)
+	for (auto const& bit : hitSections)
 	{
-		for (std::map<MeshKey, WorldMeshInfo*>::iterator it = (*bit).first->WorldMeshes.begin(); it != (*bit).first->WorldMeshes.end(); ++it)
+		for (std::map<MeshKey, WorldMeshInfo*>::iterator it = bit.first->WorldMeshes.begin(); it != bit.first->WorldMeshes.end(); ++it)
 		{
 			float u, v, t;
 
@@ -2495,8 +2497,8 @@ void GothicAPI::CollectVisibleSections(std::list<WorldMeshSectionInfo*> & sectio
 
 				sections.push_back(&section);
 			}
-}
-}
+		}
+	}
 }
 
 /** Moves the given vob from a BSP-Node to the dynamic vob list */
@@ -2562,7 +2564,7 @@ std::vector<VobInfo*>::iterator GothicAPI::MoveVobFromBspToDynamic(VobInfo * vob
 		BspInfo* node = vob->ParentBSPNodes[i];
 
 		// Remove from possible lists
-		for (std::vector<VobInfo*>::iterator it = node->IndoorVobs.begin(); it != node->IndoorVobs.end(); ++it) {
+		for (auto it = node->IndoorVobs.begin(); it != node->IndoorVobs.end(); ++it) {
 			if ((*it) == vob) {
 				itc = node->IndoorVobs.erase(it);
 				break;
@@ -2572,7 +2574,7 @@ std::vector<VobInfo*>::iterator GothicAPI::MoveVobFromBspToDynamic(VobInfo * vob
 		if (&node->IndoorVobs == source)
 			itn = itc;
 
-		for (std::vector<VobInfo*>::iterator it = node->SmallVobs.begin(); it != node->SmallVobs.end(); ++it) {
+		for (auto it = node->SmallVobs.begin(); it != node->SmallVobs.end(); ++it) {
 			if ((*it) == vob) {
 				itc = node->SmallVobs.erase(it);
 				break;
@@ -2582,7 +2584,7 @@ std::vector<VobInfo*>::iterator GothicAPI::MoveVobFromBspToDynamic(VobInfo * vob
 		if (&node->SmallVobs == source)
 			itn = itc;
 
-		for (std::vector<VobInfo*>::iterator it = node->Vobs.begin(); it != node->Vobs.end(); ++it) {
+		for (auto it = node->Vobs.begin(); it != node->Vobs.end(); ++it) {
 			if ((*it) == vob) {
 				itc = node->Vobs.erase(it);
 				break;
@@ -2603,22 +2605,22 @@ static void CVVH_AddNotDrawnVobToList(std::vector<VobInfo*> & target, std::vecto
 {
 	std::vector<VobInfo*> remVobs;
 
-	for (std::vector<VobInfo*>::iterator it = source.begin(); it != source.end(); ++it)
+	for (auto const& it : source)
 	{
-		if (!(*it)->VisibleInRenderPass)
+		if (!it->VisibleInRenderPass)
 		{
 			VobInstanceInfo vii;
 
-			float vd = D3DXVec3Length(&(Engine::GAPI->GetCameraPosition() - (*it)->LastRenderPosition));
-			if (vd < dist && (*it)->Vob->GetShowVisual())
+			float vd = D3DXVec3Length(&(Engine::GAPI->GetCameraPosition() - it->LastRenderPosition));
+			if (vd < dist && it->Vob->GetShowVisual())
 			{
 				VobInstanceInfo vii;
-				vii.world = (*it)->WorldMatrix;
-				vii.color = (*it)->GroundColor;
+				vii.world = it->WorldMatrix;
+				vii.color = it->GroundColor;
 
-				((MeshVisualInfo*)(*it)->VisualInfo)->Instances.push_back(vii);
-				target.push_back((*it));
-				(*it)->VisibleInRenderPass = true;
+				((MeshVisualInfo*)it->VisualInfo)->Instances.push_back(vii);
+				target.push_back(it);
+				it->VisibleInRenderPass = true;
 			}
 		}
 	}
@@ -2626,15 +2628,15 @@ static void CVVH_AddNotDrawnVobToList(std::vector<VobInfo*> & target, std::vecto
 
 static void CVVH_AddNotDrawnVobToList(std::vector<VobLightInfo*> & target, std::vector<VobLightInfo*> & source, float dist)
 {
-	for (std::vector<VobLightInfo*>::iterator it = source.begin(); it != source.end(); ++it)
+	for (auto const& it : source)
 	{
-		if (!(*it)->VisibleInRenderPass)
+		if (!it->VisibleInRenderPass)
 		{
 			float d = dist;
-			if (D3DXVec3Length(&(Engine::GAPI->GetCameraPosition() - (*it)->Vob->GetPositionWorld())) - (*it)->Vob->GetLightRange() < d)
+			if (D3DXVec3Length(&(Engine::GAPI->GetCameraPosition() - it->Vob->GetPositionWorld())) - it->Vob->GetLightRange() < d)
 			{
-				target.push_back((*it));
-				(*it)->VisibleInRenderPass = true;
+				target.push_back(it);
+				it->VisibleInRenderPass = true;
 			}
 		}
 	}
@@ -2642,15 +2644,15 @@ static void CVVH_AddNotDrawnVobToList(std::vector<VobLightInfo*> & target, std::
 
 static void CVVH_AddNotDrawnVobToList(std::vector<SkeletalVobInfo*> & target, std::vector<SkeletalVobInfo*> & source, float dist)
 {
-	for (std::vector<SkeletalVobInfo*>::iterator it = source.begin(); it != source.end(); ++it)
+	for (auto const& it : source)
 	{
-		if (!(*it)->VisibleInRenderPass)
+		if (!it->VisibleInRenderPass)
 		{
-			float vd = D3DXVec3Length(&(Engine::GAPI->GetCameraPosition() - (*it)->Vob->GetPositionWorld()));
-			if (vd < dist && (*it)->Vob->GetShowVisual())
+			float vd = D3DXVec3Length(&(Engine::GAPI->GetCameraPosition() - it->Vob->GetPositionWorld()));
+			if (vd < dist && it->Vob->GetShowVisual())
 			{
-				target.push_back((*it));
-				(*it)->VisibleInRenderPass = true;
+				target.push_back(it);
+				it->VisibleInRenderPass = true;
 			}
 		}
 	}
@@ -2914,7 +2916,7 @@ void GothicAPI::BuildBspVobMapCacheHelper(zCBspBase * base)
 						Engine::GraphicsEngine->CreateShadowedPointLight(&vi->LightShadowBuffers, vi);
 					}
 
-					if (((zCVob*)vi->Vob)->GetGroundPoly() && ((zCVob*)vi->Vob)->GetGroundPoly()->GetLightmap())
+					if ((zCVob*)vi->Vob->IsIndoorVob())
 					{
 						vi->IsIndoorVob = true;
 					}
@@ -2931,7 +2933,6 @@ void GothicAPI::BuildBspVobMapCacheHelper(zCBspBase * base)
 						if (std::find(bvi.Lights.begin(), bvi.Lights.end(), vi) == bvi.Lights.end())
 						{
 							vi->ParentBSPNodes.push_back(&bvi);
-
 							bvi.Lights.push_back(vi);
 						}
 					}
@@ -2941,7 +2942,6 @@ void GothicAPI::BuildBspVobMapCacheHelper(zCBspBase * base)
 						if (std::find(bvi.IndoorLights.begin(), bvi.IndoorLights.end(), vi) == bvi.IndoorLights.end())
 						{
 							vi->ParentBSPNodes.push_back(&bvi);
-
 							bvi.IndoorLights.push_back(vi);
 						}
 					}
@@ -2983,7 +2983,7 @@ void GothicAPI::BuildBspVobMapCache()
 /** Cleans empty BSPNodes */
 void GothicAPI::CleanBSPNodes()
 {
-	for (std::unordered_map<zCBspBase*, BspInfo>::iterator it = BspLeafVobLists.begin(); it != BspLeafVobLists.end();) {
+	for (auto&& it = BspLeafVobLists.begin(); it != BspLeafVobLists.end();) {
 		if (it->second.IsEmpty()) {
 			it = BspLeafVobLists.erase(it);
 		}
@@ -3044,13 +3044,13 @@ float GothicAPI::GetNearPlane()
 /** Get material by texture name */
 zCMaterial* GothicAPI::GetMaterialByTextureName(const std::string & name)
 {
-	for (std::set<zCMaterial*>::iterator it = LoadedMaterials.begin(); it != LoadedMaterials.end(); ++it)
+	for (auto const& it : LoadedMaterials)
 	{
-		if ((*it)->GetTexture())
+		if (it->GetTexture())
 		{
-			std::string tn = (*it)->GetTexture()->GetNameWithoutExt();
+			std::string tn = it->GetTexture()->GetNameWithoutExt();
 			if (_strnicmp(name.c_str(), tn.c_str(), 255) == 0)
-				return (*it);
+				return it;
 		}
 	}
 
@@ -3059,13 +3059,13 @@ zCMaterial* GothicAPI::GetMaterialByTextureName(const std::string & name)
 
 void GothicAPI::GetMaterialListByTextureName(const std::string & name, std::list<zCMaterial*> & list)
 {
-	for (std::set<zCMaterial*>::iterator it = LoadedMaterials.begin(); it != LoadedMaterials.end(); ++it)
+	for (auto const& it : LoadedMaterials)
 	{
-		if ((*it)->GetTexture())
+		if (it->GetTexture())
 		{
-			std::string tn = (*it)->GetTexture()->GetNameWithoutExt();
+			std::string tn = it->GetTexture()->GetNameWithoutExt();
 			if (_strnicmp(name.c_str(), tn.c_str(), 255) == 0)
-				list.push_back((*it));
+				list.push_back(it);
 		}
 	}
 }
@@ -3149,10 +3149,11 @@ std::list<SkeletalVobInfo*>& GothicAPI::GetAnimatedSkeletalMeshVobs()
 /** Returns a texture from the given surface */
 zCTexture* GothicAPI::GetTextureBySurface(MyDirectDrawSurface7 * surface)
 {
-	for (auto it = LoadedMaterials.begin(); it != LoadedMaterials.end(); ++it)
+	for (auto const& it : LoadedMaterials)
 	{
-		if ((*it)->GetTexture() && (*it)->GetTexture()->GetSurface() == surface)
-			return (*it)->GetTexture();
+		auto const texture = it->GetTexture();
+		if (texture && texture->GetSurface() == surface)
+			return texture;
 	}
 
 	return nullptr;
@@ -3161,9 +3162,9 @@ zCTexture* GothicAPI::GetTextureBySurface(MyDirectDrawSurface7 * surface)
 /** Resets all vob-stats drawn this frame */
 void GothicAPI::ResetVobFrameStats(std::list<VobInfo*> & vobs)
 {
-	for (std::list<VobInfo*>::iterator it = vobs.begin(); it != vobs.end(); ++it)
+	for (auto&& it : vobs)
 	{
-		(*it)->VisibleInRenderPass = false;
+		it->VisibleInRenderPass = false;
 	}
 }
 
@@ -3228,17 +3229,17 @@ void GothicAPI::SaveCustomZENResources()
 /** Applys the suppressed textures */
 void GothicAPI::ApplySuppressedSectionTextures()
 {
-	for (std::map<WorldMeshSectionInfo*, std::vector<std::string>>::iterator it = SuppressedTexturesBySection.begin(); it != SuppressedTexturesBySection.end(); ++it)
+	for (auto const& it : SuppressedTexturesBySection)
 	{
-		WorldMeshSectionInfo* section = it->first;
+		WorldMeshSectionInfo* section = it.first;
 
 		// Look into each mesh of this section and find the texture
 		for (std::map<MeshKey, WorldMeshInfo*>::iterator mit = section->WorldMeshes.begin(); mit != section->WorldMeshes.end(); mit++)
 		{
-			for (unsigned int i = 0; i < it->second.size(); i++)
+			for (unsigned int i = 0; i < it.second.size(); i++)
 			{
 				// Is this the texture we are looking for?
-				if ((*mit).first.Material && (*mit).first.Material->GetTexture() && (*mit).first.Material->GetTexture()->GetNameWithoutExt() == it->second[i])
+				if ((*mit).first.Material && (*mit).first.Material->GetTexture() && (*mit).first.Material->GetTexture()->GetNameWithoutExt() == it.second[i])
 				{
 					// Yes, move it to the suppressed map
 					section->SuppressedMeshes[(*mit).first] = (*mit).second;
@@ -3253,14 +3254,14 @@ void GothicAPI::ApplySuppressedSectionTextures()
 /** Resets the suppressed textures */
 void GothicAPI::ResetSupressedTextures()
 {
-	for (std::map<WorldMeshSectionInfo*, std::vector<std::string>>::iterator it = SuppressedTexturesBySection.begin(); it != SuppressedTexturesBySection.end(); ++it)
+	for (auto const& it : SuppressedTexturesBySection)
 	{
-		WorldMeshSectionInfo* section = it->first;
+		WorldMeshSectionInfo* section = it.first;
 
 		// Look into each mesh of this section and find the texture
-		for (std::map<MeshKey, WorldMeshInfo*>::iterator mit = section->WorldMeshes.begin(); mit != section->WorldMeshes.end(); mit++)
+		for (auto const& mit : section->WorldMeshes)
 		{
-			section->WorldMeshes[(*mit).first] = (*mit).second;
+			section->WorldMeshes[mit.first] = mit.second;
 		}
 	}
 
@@ -3270,9 +3271,9 @@ void GothicAPI::ResetSupressedTextures()
 /** Resets the vegetation */
 void GothicAPI::ResetVegetation()
 {
-	for (std::list<GVegetationBox*>::iterator it = VegetationBoxes.begin(); it != VegetationBoxes.end(); ++it)
+	for (auto&& it : VegetationBoxes)
 	{
-		delete (*it);
+		delete it;
 	}
 	VegetationBoxes.clear();
 }
@@ -3302,24 +3303,24 @@ XRESULT GothicAPI::SaveSuppressedTextures(const std::string & file)
 	int count = SuppressedTexturesBySection.size();
 	fwrite(&count, sizeof(count), 1, f);
 
-	for (std::map<WorldMeshSectionInfo*, std::vector<std::string>>::iterator it = SuppressedTexturesBySection.begin(); it != SuppressedTexturesBySection.end(); ++it)
+	for (auto const& it : SuppressedTexturesBySection)
 	{
 		// Write section xy-coords
-		fwrite(&it->first->WorldCoordinates, sizeof(INT2), 1, f);
+		fwrite(&it.first->WorldCoordinates, sizeof(INT2), 1, f);
 
-		int countTX = it->second.size();
+		int countTX = it.second.size();
 		fwrite(&countTX, sizeof(countTX), 1, f);
 
 		for (int i = 0; i < countTX; i++)
 		{
-			unsigned int numChars = it->second[i].size();
+			unsigned int numChars = it.second[i].size();
 			numChars = std::min(255, (int)numChars);
 
 			// Write num of chars
 			fwrite(&numChars, sizeof(numChars), 1, f);
 
 			// Write chars
-			fwrite(&it->second[0], numChars, 1, f);
+			fwrite(&it.second[0], numChars, 1, f);
 		}
 	}
 
@@ -3757,14 +3758,12 @@ bool GothicAPI::IsUnderWater()
 /** Saves all sections information */
 void GothicAPI::SaveSectionInfos()
 {
-	for (std::map<int, std::map<int, WorldMeshSectionInfo>>::iterator itx = Engine::GAPI->GetWorldSections().begin(); itx != Engine::GAPI->GetWorldSections().end(); itx++)
+	for (auto&& itx : Engine::GAPI->GetWorldSections())
 	{
-		for (std::map<int, WorldMeshSectionInfo>::iterator ity = itx->second.begin(); ity != itx->second.end(); ity++)
+		for (auto&& ity : itx.second)
 		{
-			WorldMeshSectionInfo& section = ity->second;
-
 			// Save this section to file
-			section.SaveMeshInfos(LoadedWorldInfo->WorldName, INT2(itx->first, ity->first));
+			ity.second.SaveMeshInfos(LoadedWorldInfo->WorldName, INT2(itx.first, ity.first));
 		}
 	}
 }
