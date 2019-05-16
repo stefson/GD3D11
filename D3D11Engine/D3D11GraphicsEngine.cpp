@@ -3972,7 +3972,24 @@ XRESULT D3D11GraphicsEngine::OnKeyDown(unsigned int key)
 			CreateMainUIView();
 		}
 		break;
-
+	case VK_F3:
+		if (SwapChain)
+		{
+			BOOL fullscreenState = FALSE;
+			SwapChain->GetFullscreenState(&fullscreenState, NULL);
+			switch (fullscreenState)
+			{
+			case TRUE:
+				SwapChain->SetFullscreenState(FALSE, NULL);
+				break;
+			case FALSE:
+				SwapChain->SetFullscreenState(TRUE, NULL);
+				break;
+			default:
+				break;
+			}
+		}
+		break;
 	default:
 		break;
 	}
