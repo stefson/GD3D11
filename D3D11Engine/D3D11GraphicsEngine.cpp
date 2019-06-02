@@ -4009,7 +4009,7 @@ BaseLineRenderer* D3D11GraphicsEngine::GetLineRenderer() {
 }
 
 /** Applys the lighting to the scene */
-XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*> & lights) {
+XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	SetDefaultStates();
 
 	// ********************************
@@ -4028,19 +4028,19 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*> & lights) {
 	if (Engine::GAPI->GetRendererState()->RendererSettings.EnablePointlightShadows > 0) {
 		std::list<VobLightInfo*> importantUpdates;
 
-		for (auto const& itv : lights) {
+		for (auto const& light : lights) {
 			// Create shadowmap in case we should have one but haven't got it yet
-			if (!itv->LightShadowBuffers && itv->UpdateShadows) {
-				Engine::GraphicsEngine->CreateShadowedPointLight(&itv->LightShadowBuffers, itv);
+			if (!light->LightShadowBuffers && light->UpdateShadows) {
+				Engine::GraphicsEngine->CreateShadowedPointLight(&light->LightShadowBuffers, light);
 			}
 
-			if (itv->LightShadowBuffers) {
+			if (light->LightShadowBuffers) {
 				// Check if this lights even needs an update
-				bool needsUpdate = ((D3D11PointLight*)itv->LightShadowBuffers)->NeedsUpdate();
-				bool wantsUpdate = ((D3D11PointLight*)itv->LightShadowBuffers)->WantsUpdate();
+				bool needsUpdate = ((D3D11PointLight*)light->LightShadowBuffers)->NeedsUpdate();
+				bool wantsUpdate = ((D3D11PointLight*)light->LightShadowBuffers)->WantsUpdate();
 
 				// Add to the updatequeue if it does
-				if (needsUpdate || itv->UpdateShadows) {
+				if (needsUpdate || light->UpdateShadows) {
 					// Always update the light if the light itself moved
 					if (partialShadowUpdate && !needsUpdate) {
 						// Only add once. This list should never be very big, so it should
@@ -4048,42 +4048,42 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*> & lights) {
 						// light will get updated only once and won't block the queue
 						if (std::find(FrameShadowUpdateLights.begin(),
 							FrameShadowUpdateLights.end(),
-							itv) == FrameShadowUpdateLights.end()) {
+							light) == FrameShadowUpdateLights.end()) {
 							// Always render the closest light to the playervob, so the player
 							// doesn't flicker when moving
 							float d = D3DXVec3LengthSq(
-								&(itv->Vob->GetPositionWorld() - playerPosition));
+								&(light->Vob->GetPositionWorld() - playerPosition));
 
-							float range = itv->Vob->GetLightRange();
+							float range = light->Vob->GetLightRange();
 							if (d < range * range &&
 								importantUpdates.size() < MAX_IMPORTANT_LIGHT_UPDATES) {
-								importantUpdates.push_back(itv);
+								importantUpdates.push_back(light);
 							}
 							else {
-								FrameShadowUpdateLights.push_back(itv);
+								FrameShadowUpdateLights.push_back(light);
 							}
 						}
 					}
 					else {
 						// Always render the closest light to the playervob, so the player
 						// doesn't flicker when moving
-						float d = D3DXVec3LengthSq(&(itv->Vob->GetPositionWorld() - playerPosition));
+						float d = D3DXVec3LengthSq(&(light->Vob->GetPositionWorld() - playerPosition));
 
-						float range = itv->Vob->GetLightRange() * 1.5f;
+						float range = light->Vob->GetLightRange() * 1.5f;
 
 						// If the engine said this light should be updated, then do so. If
 						// the light said this
 						if (needsUpdate || d < range * range)
-							importantUpdates.push_back(itv);
+							importantUpdates.push_back(light);
 					}
 				}
 			}
 		}
 
 		// Render the closest light
-		for (auto const& it : importantUpdates) {
-			((D3D11PointLight*)it->LightShadowBuffers)->RenderCubemap(it->UpdateShadows);
-			it->UpdateShadows = false;
+		for (auto const& importantUpdate : importantUpdates) {
+			((D3D11PointLight*)importantUpdate->LightShadowBuffers)->RenderCubemap(importantUpdate->UpdateShadows);
+			importantUpdate->UpdateShadows = false;
 		}
 
 		// Update only a fraction of lights, but at least some
@@ -4248,23 +4248,23 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*> & lights) {
 	bool lastOutside = true;
 
 	// Draw all lights
-	for (auto const& itv : lights) {
-		zCVobLight* vob = itv->Vob;
+	for (auto const& light : lights) {
+		zCVobLight* vob = light->Vob;
 
 		// Reset state from CollectVisibleVobs
-		itv->VisibleInRenderPass = false;
+		light->VisibleInRenderPass = false;
 
 		if (!vob->IsEnabled()) continue;
 
 		// Set right shader
 		if (Engine::GAPI->GetRendererState()
 			->RendererSettings.EnablePointlightShadows > 0) {
-			if (itv->LightShadowBuffers && ActivePS != psPointLightDynShadow) {
+			if (light->LightShadowBuffers && ActivePS != psPointLightDynShadow) {
 				// Need to update shader for shadowed pointlight
 				ActivePS = psPointLightDynShadow;
 				ActivePS->Apply();
 			}
-			else if (!itv->LightShadowBuffers && ActivePS != psPointLight) {
+			else if (!light->LightShadowBuffers && ActivePS != psPointLight) {
 				// Need to update shader for usual pointlight
 				ActivePS = psPointLight;
 				ActivePS->Apply();
@@ -4277,7 +4277,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*> & lights) {
 		plcb.PL_Color = float4(vob->GetLightColor());
 		plcb.PL_Range = vob->GetLightRange();
 		plcb.Pl_PositionWorld = vob->GetPositionWorld();
-		plcb.PL_Outdoor = itv->IsIndoorVob ? 0.0f : 1.0f;
+		plcb.PL_Outdoor = light->IsIndoorVob ? 0.0f : 1.0f;
 
 		float dist = D3DXVec3Length(&(*plcb.Pl_PositionWorld.toD3DXVECTOR3() -
 			Engine::GAPI->GetCameraPosition()));
@@ -4347,8 +4347,8 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*> & lights) {
 		if (Engine::GAPI->GetRendererState()
 			->RendererSettings.EnablePointlightShadows > 0) {
 			// Bind shadowmap, if possible
-			if (itv->LightShadowBuffers)
-				((D3D11PointLight*)itv->LightShadowBuffers)->OnRenderLight();
+			if (light->LightShadowBuffers)
+				((D3D11PointLight*)light->LightShadowBuffers)->OnRenderLight();
 		}
 
 		// Draw the mesh
