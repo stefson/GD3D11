@@ -2471,7 +2471,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMeshW(bool noTextures) {
 				continue;
 
 			// Querry the second texture slot to see if there is a normalmap bound
-			ID3D11ShaderResourceView * nrmmap;
+			ID3D11ShaderResourceView* nrmmap;
 			Context->PSGetShaderResources(1, 1, &nrmmap);
 			if (!nrmmap) {
 				if (ActivePS != defaultPS) {
@@ -2708,10 +2708,10 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 
 /** Draws everything around the given position */
 void D3D11GraphicsEngine::DrawWorldAround(
-	const D3DXVECTOR3 & position, float range, bool cullFront, bool indoor,
-	bool noNPCs, std::list<VobInfo*> * renderedVobs,
-	std::list<SkeletalVobInfo*> * renderedMobs,
-	std::map<MeshKey, WorldMeshInfo*, cmpMeshKey> * worldMeshCache) {
+	const D3DXVECTOR3& position, float range, bool cullFront, bool indoor,
+	bool noNPCs, std::list<VobInfo*>* renderedVobs,
+	std::list<SkeletalVobInfo*>* renderedMobs,
+	std::map<MeshKey, WorldMeshInfo*, cmpMeshKey>* worldMeshCache) {
 	// Setup renderstates
 	Engine::GAPI->GetRendererState()->RasterizerState.SetDefault();
 	Engine::GAPI->GetRendererState()->RasterizerState.CullMode =
@@ -3055,7 +3055,7 @@ void D3D11GraphicsEngine::DrawWorldAround(
 }
 
 /** Draws everything around the given position */
-void D3D11GraphicsEngine::DrawWorldAround(const D3DXVECTOR3 & position,
+void D3D11GraphicsEngine::DrawWorldAround(const D3DXVECTOR3& position,
 	int sectionRange, float vobXZRange,
 	bool cullFront, bool dontCull) {
 	// Setup renderstates
@@ -3363,7 +3363,7 @@ void D3D11GraphicsEngine::DrawWorldAround(const D3DXVECTOR3 & position,
 XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 	START_TIMING();
 
-	const std::unordered_map<zCProgMeshProto*, MeshVisualInfo*>& vis =
+	const std::unordered_map<zCProgMeshProto*, MeshVisualInfo*>& staticMeshVisuals =
 		Engine::GAPI->GetStaticMeshVisuals();
 
 	SetDefaultStates();
@@ -3457,13 +3457,11 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 			(void**)& data, &size);
 		static std::vector<VobInstanceInfo, AlignmentAllocator<VobInstanceInfo, 16>>
 			s_InstanceData;
-		for (std::unordered_map<zCProgMeshProto*, MeshVisualInfo*>::const_iterator
-			it = vis.begin();
-			it != vis.end(); ++it) {
-			it->second->StartInstanceNum = loc;
-			memcpy(data + loc * sizeof(VobInstanceInfo), &it->second->Instances[0],
-				sizeof(VobInstanceInfo) * it->second->Instances.size());
-			loc += it->second->Instances.size();
+		for (auto const& staticMeshVisual : staticMeshVisuals) {
+			staticMeshVisual.second->StartInstanceNum = loc;
+			memcpy(data + loc * sizeof(VobInstanceInfo), &staticMeshVisual.second->Instances[0],
+				sizeof(VobInstanceInfo) * staticMeshVisual.second->Instances.size());
+			loc += staticMeshVisual.second->Instances.size();
 		}
 		DynamicInstancingBuffer->Unmap();
 
@@ -3475,17 +3473,15 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 		// Reset buffer
 		s_InstanceData.resize(0);
 
-		for (std::unordered_map<zCProgMeshProto*, MeshVisualInfo*>::const_iterator
-			it = vis.begin();
-			it != vis.end(); ++it) {
-			if (it->second->Instances.empty()) continue;
+		for (auto const& staticMeshVisual : staticMeshVisuals) {
+			if (staticMeshVisual.second->Instances.empty()) continue;
 
-			if (it->second->MeshSize <
+			if (staticMeshVisual.second->MeshSize <
 				Engine::GAPI->GetRendererState()->RendererSettings.SmallVobSize) {
 				OutdoorSmallVobsConstantBuffer->UpdateBuffer(
 					&D3DXVECTOR4(Engine::GAPI->GetRendererState()
 						->RendererSettings.OutdoorSmallVobDrawRadius -
-						it->second->MeshSize,
+						staticMeshVisual.second->MeshSize,
 						0, 0, 0));
 				OutdoorSmallVobsConstantBuffer->BindToPixelShader(3);
 			}
@@ -3493,25 +3489,23 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 				OutdoorVobsConstantBuffer->UpdateBuffer(
 					&D3DXVECTOR4(Engine::GAPI->GetRendererState()
 						->RendererSettings.OutdoorVobDrawRadius -
-						it->second->MeshSize,
+						staticMeshVisual.second->MeshSize,
 						0, 0, 0));
 				OutdoorVobsConstantBuffer->BindToPixelShader(3);
 			}
 
 			bool doReset = true;  // Don't reset alpha-vobs here
-			for (std::map<MeshKey, std::vector<MeshInfo*>>::iterator itt =
-				it->second->MeshesByTexture.begin();
-				itt != it->second->MeshesByTexture.end(); ++itt) {
+			for (auto const& itt : staticMeshVisual.second->MeshesByTexture) {
 				std::vector<MeshInfo*>& mlist =
-					it->second->MeshesByTexture[itt->first];
+					staticMeshVisual.second->MeshesByTexture[itt.first];
 				if (mlist.empty()) continue;
 
 				// Bind buffers
-				DrawVertexBufferIndexed(it->second->FullMesh->MeshVertexBuffer,
-					it->second->FullMesh->MeshIndexBuffer, 0);
+				DrawVertexBufferIndexed(staticMeshVisual.second->FullMesh->MeshVertexBuffer,
+					staticMeshVisual.second->FullMesh->MeshIndexBuffer, 0);
 
 				for (unsigned int i = 0; i < mlist.size(); i++) {
-					zCTexture* tx = itt->first.Material->GetAniTexture();
+					zCTexture* tx = itt.first.Material->GetAniTexture();
 					MeshInfo* mi = mlist[i];
 
 					if (!tx) {
@@ -3532,17 +3526,15 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 					}
 					else {
 						// Check for alphablending on world mesh
-						bool blendAdd =
-							itt->first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_ADD;
-						bool blendBlend =
-							itt->first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_BLEND;
-						if (!doReset || blendAdd ||
-							blendBlend) {  // TODO: FIXME: if one part of the mesh uses blending, all do.
-							MeshVisualInfo* info = it->second;
+						bool blendAdd = itt.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_ADD;
+						bool blendBlend = itt.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_BLEND;
+						// TODO: FIXME: if one part of the mesh uses blending, all do.
+						if (!doReset || blendAdd || blendBlend) {
+							MeshVisualInfo* info = staticMeshVisual.second;
 							MeshInfo* mesh = mlist[i];
 
 							AlphaMeshes.push_back(
-								std::make_pair(itt->first, std::make_pair(info, mesh)));
+								std::make_pair(itt.first, std::make_pair(info, mesh)));
 
 							doReset = false;
 							continue;
@@ -3553,7 +3545,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 						if (tx->CacheIn(0.6f) == zRES_CACHED_IN) {
 							MyDirectDrawSurface7* surface = tx->GetSurface();
 							ID3D11ShaderResourceView* srv[3];
-							MaterialInfo* info = itt->first.Info;
+							MaterialInfo* info = itt.first.Info;
 
 							// Get diffuse and normalmap
 							srv[0] = ((D3D11Texture*)surface->GetEngineTexture())
@@ -3614,10 +3606,10 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 
 					if (tesselationEnabled && !mi->IndicesPNAEN.empty() &&
 						RenderingStage == DES_MAIN &&
-						it->second->TesselationInfo.buffer.VT_TesselationFactor > 0.0f) {
+						staticMeshVisual.second->TesselationInfo.buffer.VT_TesselationFactor > 0.0f) {
 						Setup_PNAEN(PNAEN_Instanced);
-						it->second->TesselationInfo.Constantbuffer->BindToDomainShader(1);
-						it->second->TesselationInfo.Constantbuffer->BindToHullShader(1);
+						staticMeshVisual.second->TesselationInfo.Constantbuffer->BindToDomainShader(1);
+						staticMeshVisual.second->TesselationInfo.Constantbuffer->BindToHullShader(1);
 					}
 					else if (ActiveHDS) {
 						Context->IASetPrimitiveTopology(
@@ -3633,15 +3625,15 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 						// Draw batch
 						DrawInstanced(mi->MeshVertexBuffer, mi->MeshIndexBuffer,
 							mi->Indices.size(), DynamicInstancingBuffer,
-							sizeof(VobInstanceInfo), it->second->Instances.size(),
-							sizeof(ExVertexStruct), it->second->StartInstanceNum);
+							sizeof(VobInstanceInfo), staticMeshVisual.second->Instances.size(),
+							sizeof(ExVertexStruct), staticMeshVisual.second->StartInstanceNum);
 					}
 					else {
 						// Draw batch tesselated
 						DrawInstanced(mi->MeshVertexBuffer, mi->MeshIndexBufferPNAEN,
 							mi->IndicesPNAEN.size(), DynamicInstancingBuffer,
-							sizeof(VobInstanceInfo), it->second->Instances.size(),
-							sizeof(ExVertexStruct), it->second->StartInstanceNum);
+							sizeof(VobInstanceInfo), staticMeshVisual.second->Instances.size(),
+							sizeof(ExVertexStruct), staticMeshVisual.second->StartInstanceNum);
 					}
 				}
 			}
@@ -3649,7 +3641,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 			// Reset visual
 			if (doReset &&
 				!Engine::GAPI->GetRendererState()->RendererSettings.FixViewFrustum) {
-				it->second->StartNewFrame();
+				staticMeshVisual.second->StartNewFrame();
 			}
 		}
 	}
