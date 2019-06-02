@@ -15,6 +15,7 @@
 #include "D3D11PointLight.h"
 #include "D3D11ShaderManager.h"
 #include "D3D11VShader.h"
+#include "D3D11NVPCSS.h"
 #include "GMesh.h"
 #include "GOcean.h"
 #include "GSky.h"
@@ -85,7 +86,6 @@ D3D11GraphicsEngine::D3D11GraphicsEngine() {
 	Resolution = DEFAULT_RESOLUTION;
 
 	DebugPointlight = nullptr;
-
 	SwapChain = nullptr;
 	DXGIFactory = nullptr;
 	DXGIAdapter = nullptr;
@@ -316,6 +316,8 @@ XRESULT D3D11GraphicsEngine::Init() {
 	Context->HSSetSamplers(0, 1, &DefaultSamplerState);
 
 	samplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+	//TODO: NVidia PCSS
+	//samplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
 	samplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
 	Device->CreateSamplerState(&samplerDesc, &ShadowmapSamplerState);
 	Context->PSSetSamplers(2, 1, &ShadowmapSamplerState);
@@ -708,8 +710,7 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
 			Device, s, s, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT,
 			DXGI_FORMAT_R32_FLOAT);
 
-		Engine::GAPI->GetRendererState()->RendererSettings.WorldShadowRangeScale *=
-			old / (float)s;
+		Engine::GAPI->GetRendererState()->RendererSettings.WorldShadowRangeScale *= old / (float)s;
 	}
 
 	// Force the mode
@@ -720,13 +721,8 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
 				Engine::GAPI->GetRendererState()->RendererSettings.GothicUIScale),
 		32);
 
-	// return XR_SUCCESS;
-
 	// Notify the shader manager
 	ShaderManager->OnFrameStart();
-
-	// Clear using the fog color
-	// Clear(float4(0, 0, 0, 0));
 
 	// Enable blending, in case gothic want's to render its save-screen
 	Engine::GAPI->GetRendererState()->BlendState.SetDefault();
@@ -735,24 +731,20 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
 	UpdateRenderStates();
 
 	// Bind GBuffers
-	Context->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
-		DepthStencilBuffer->GetDepthStencilView());
+	Context->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView());
 
 	SetActivePixelShader("PS_Simple");
 	SetActiveVertexShader("VS_Ex");
 
-	PS_DiffuseNormalmappedFxMap =
-		ShaderManager->GetPShader("PS_DiffuseNormalmappedFxMap");
-	PS_DiffuseNormalmappedAlphatestFxMap =
-		ShaderManager->GetPShader("PS_DiffuseNormalmappedAlphatestFxMap");
-	PS_DiffuseNormalmapped = ShaderManager->GetPShader("PS_DiffuseNormalmapped");
-	PS_Diffuse = ShaderManager->GetPShader("PS_Diffuse");
-	PS_DiffuseNormalmappedAlphatest =
-		ShaderManager->GetPShader("PS_DiffuseNormalmappedAlphaTest");
-	PS_DiffuseAlphatest = ShaderManager->GetPShader("PS_DiffuseAlphaTest");
-	PS_Simple = ShaderManager->GetPShader("PS_Simple");
-	GS_Billboard = ShaderManager->GetGShader("GS_Billboard");
-	PS_LinDepth = ShaderManager->GetPShader("PS_LinDepth");
+	PS_DiffuseNormalmappedFxMap				= ShaderManager->GetPShader("PS_DiffuseNormalmappedFxMap");
+	PS_DiffuseNormalmappedAlphatestFxMap	= ShaderManager->GetPShader("PS_DiffuseNormalmappedAlphatestFxMap");
+	PS_DiffuseNormalmapped					= ShaderManager->GetPShader("PS_DiffuseNormalmapped");
+	PS_Diffuse								= ShaderManager->GetPShader("PS_Diffuse");
+	PS_DiffuseNormalmappedAlphatest			= ShaderManager->GetPShader("PS_DiffuseNormalmappedAlphaTest");
+	PS_DiffuseAlphatest						= ShaderManager->GetPShader("PS_DiffuseAlphaTest");
+	PS_Simple								= ShaderManager->GetPShader("PS_Simple");
+	GS_Billboard							= ShaderManager->GetGShader("GS_Billboard");
+	PS_LinDepth								= ShaderManager->GetPShader("PS_LinDepth");
 	return XR_SUCCESS;
 }
 
@@ -1022,10 +1014,10 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferIndexed(D3D11VertexBuffer * vb,
 	unsigned int numIndices,
 	unsigned int indexOffset) {
 #ifdef RECORD_LAST_DRAWCALL
-	g_LastDrawCall.Type = DrawcallInfo::VB_IX;
-	g_LastDrawCall.NumElements = numIndices;
+	g_LastDrawCall.Type               = DrawcallInfo::VB_IX;
+	g_LastDrawCall.NumElements        = numIndices;
 	g_LastDrawCall.BaseVertexLocation = 0;
-	g_LastDrawCall.BaseIndexLocation = indexOffset;
+	g_LastDrawCall.BaseIndexLocation  = indexOffset;
 	if (!g_LastDrawCall.Check()) return XR_SUCCESS;
 #endif
 
@@ -1059,16 +1051,16 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferIndexedUINT(
 	D3D11VertexBuffer * vb, D3D11VertexBuffer * ib, unsigned int numIndices,
 	unsigned int indexOffset) {
 #ifdef RECORD_LAST_DRAWCALL
-	g_LastDrawCall.Type = DrawcallInfo::VB_IX_UINT;
-	g_LastDrawCall.NumElements = numIndices;
+	g_LastDrawCall.Type               = DrawcallInfo::VB_IX_UINT;
+	g_LastDrawCall.NumElements        = numIndices;
 	g_LastDrawCall.BaseVertexLocation = 0;
-	g_LastDrawCall.BaseIndexLocation = indexOffset;
+	g_LastDrawCall.BaseIndexLocation  = indexOffset;
 	if (!g_LastDrawCall.Check()) return XR_SUCCESS;
 #endif
 
 	if (vb) {
-		UINT offset = 0;
-		UINT uStride = sizeof(ExVertexStruct);
+		UINT offset          = 0;
+		UINT uStride         = sizeof(ExVertexStruct);
 		ID3D11Buffer* buffer = ((D3D11VertexBuffer*)vb)->GetVertexBuffer();
 		Context->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
 		Context->IASetIndexBuffer(((D3D11VertexBuffer*)ib)->GetVertexBuffer(),
@@ -1123,11 +1115,10 @@ XRESULT D3D11GraphicsEngine::DrawVertexArray(ExVertexStruct * vertices,
 	unsigned int startVertex,
 	unsigned int stride) {
 	UpdateRenderStates();
-	D3D11VShader* vShader =
-		ActiveVS;  // ShaderManager->GetVShader("VS_TransformedEx");
+	D3D11VShader* vShader = ActiveVS;
+	// ShaderManager->GetVShader("VS_TransformedEx");
 
 	// Bind the FF-Info to the first PS slot
-
 	ActivePS->GetConstantBuffer()[0]->UpdateBuffer(
 		&Engine::GAPI->GetRendererState()->GraphicsState);
 	ActivePS->GetConstantBuffer()[0]->BindToPixelShader(0);
@@ -1152,8 +1143,8 @@ XRESULT D3D11GraphicsEngine::DrawVertexArray(ExVertexStruct * vertices,
 
 	TempVertexBuffer->UpdateBuffer(vertices, stride * numVertices);
 
-	UINT offset = 0;
-	UINT uStride = stride;
+	UINT offset          = 0;
+	UINT uStride         = stride;
 	ID3D11Buffer* buffer = TempVertexBuffer->GetVertexBuffer();
 	Context->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
 
@@ -1265,8 +1256,8 @@ XRESULT D3D11GraphicsEngine::DrawSkeletalMesh(
 	InfiniteRangeConstantBuffer->BindToPixelShader(3);
 
 	D3DXMATRIX& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
-	D3DXMATRIX& view = Engine::GAPI->GetRendererState()->TransformState.TransformView;
-	D3DXMATRIX& proj = Engine::GAPI->GetProjectionMatrix();
+	D3DXMATRIX& view  = Engine::GAPI->GetRendererState()->TransformState.TransformView;
+	D3DXMATRIX& proj  = Engine::GAPI->GetProjectionMatrix();
 
 	SetupVS_ExMeshDrawCall();
 	SetupVS_ExConstantBuffer();
@@ -1276,8 +1267,7 @@ XRESULT D3D11GraphicsEngine::DrawSkeletalMesh(
 	// Get currently bound texture name
 	zCTexture* tex = Engine::GAPI->GetBoundTexture(0);
 
-	bool tesselationEnabled =
-		Engine::GAPI->GetRendererState()->RendererSettings.EnableTesselation;
+	bool tesselationEnabled = Engine::GAPI->GetRendererState()->RendererSettings.EnableTesselation;
 
 	if (tex) {
 		MaterialInfo* info = Engine::GAPI->GetMaterialInfoFrom(tex);
@@ -1365,9 +1355,7 @@ XRESULT D3D11GraphicsEngine::DrawSkeletalMesh(
 		ActivePS = nullptr;
 	}
 
-	bool linearDepth =
-		(Engine::GAPI->GetRendererState()->GraphicsState.FF_GSwitches &
-			GSWITCH_LINEAR_DEPTH) != 0;
+	bool linearDepth = (Engine::GAPI->GetRendererState()->GraphicsState.FF_GSwitches & GSWITCH_LINEAR_DEPTH) != 0;
 	if (linearDepth) {
 		ActivePS = PS_LinDepth;
 		ActivePS->Apply();
@@ -3637,7 +3625,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 #endif
 							continue;
 						}
-							}
+					}
 
 					if (tesselationEnabled && !mi->IndicesPNAEN.empty() &&
 						RenderingStage == DES_MAIN &&
@@ -3670,16 +3658,16 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 							sizeof(VobInstanceInfo), it->second->Instances.size(),
 							sizeof(ExVertexStruct), it->second->StartInstanceNum);
 					}
-						}
-					}
+				}
+			}
 
 			// Reset visual
 			if (doReset &&
 				!Engine::GAPI->GetRendererState()->RendererSettings.FixViewFrustum) {
 				it->second->StartNewFrame();
 			}
-				}
-			}
+		}
+	}
 
 	// Draw mobs
 	if (Engine::GAPI->GetRendererState()->RendererSettings.DrawMobs) {
@@ -3814,7 +3802,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 	SetDefaultStates();
 
 	return XR_SUCCESS;
-		}
+}
 
 /** Draws the static VOBs */
 XRESULT D3D11GraphicsEngine::DrawVOBs(bool noTextures) {
@@ -4049,29 +4037,25 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*> & lights) {
 		? Engine::GAPI->GetPlayerVob()->GetPositionWorld()
 		: D3DXVECTOR3(FLT_MAX, FLT_MAX, FLT_MAX);
 
-	bool partialShadowUpdate = Engine::GAPI->GetRendererState()
-		->RendererSettings.PartialDynamicShadowUpdates;
+	bool partialShadowUpdate = Engine::GAPI->GetRendererState()->RendererSettings.PartialDynamicShadowUpdates;
 
 	// Draw pointlight shadows
-	if (Engine::GAPI->GetRendererState()
-		->RendererSettings.EnablePointlightShadows > 0) {
+	if (Engine::GAPI->GetRendererState()->RendererSettings.EnablePointlightShadows > 0) {
 		std::list<VobLightInfo*> importantUpdates;
-		for (std::vector<VobLightInfo*>::iterator itv = lights.begin();
-			itv != lights.end(); ++itv) {
-			// Create shadowmap in case we should have one but haven't got it yet
-			if (!(*itv)->LightShadowBuffers && (*itv)->UpdateShadows)
-				Engine::GraphicsEngine->CreateShadowedPointLight(
-					&(*itv)->LightShadowBuffers, (*itv));
 
-			if ((*itv)->LightShadowBuffers) {
+		for (auto const& itv : lights) {
+			// Create shadowmap in case we should have one but haven't got it yet
+			if (!itv->LightShadowBuffers && itv->UpdateShadows) {
+				Engine::GraphicsEngine->CreateShadowedPointLight(&itv->LightShadowBuffers, itv);
+			}
+
+			if (itv->LightShadowBuffers) {
 				// Check if this lights even needs an update
-				bool needsUpdate =
-					((D3D11PointLight*)(*itv)->LightShadowBuffers)->NeedsUpdate();
-				bool wantsUpdate =
-					((D3D11PointLight*)(*itv)->LightShadowBuffers)->WantsUpdate();
+				bool needsUpdate = ((D3D11PointLight*)itv->LightShadowBuffers)->NeedsUpdate();
+				bool wantsUpdate = ((D3D11PointLight*)itv->LightShadowBuffers)->WantsUpdate();
 
 				// Add to the updatequeue if it does
-				if (needsUpdate || (*itv)->UpdateShadows) {
+				if (needsUpdate || itv->UpdateShadows) {
 					// Always update the light if the light itself moved
 					if (partialShadowUpdate && !needsUpdate) {
 						// Only add once. This list should never be very big, so it should
@@ -4079,45 +4063,42 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*> & lights) {
 						// light will get updated only once and won't block the queue
 						if (std::find(FrameShadowUpdateLights.begin(),
 							FrameShadowUpdateLights.end(),
-							(*itv)) == FrameShadowUpdateLights.end()) {
+							itv) == FrameShadowUpdateLights.end()) {
 							// Always render the closest light to the playervob, so the player
 							// doesn't flicker when moving
 							float d = D3DXVec3LengthSq(
-								&((*itv)->Vob->GetPositionWorld() - playerPosition));
+								&(itv->Vob->GetPositionWorld() - playerPosition));
 
-							float range = (*itv)->Vob->GetLightRange();
+							float range = itv->Vob->GetLightRange();
 							if (d < range * range &&
 								importantUpdates.size() < MAX_IMPORTANT_LIGHT_UPDATES) {
-								importantUpdates.push_back((*itv));
+								importantUpdates.push_back(itv);
 							}
 							else {
-								FrameShadowUpdateLights.push_back((*itv));
+								FrameShadowUpdateLights.push_back(itv);
 							}
 						}
 					}
 					else {
 						// Always render the closest light to the playervob, so the player
 						// doesn't flicker when moving
-						float d = D3DXVec3LengthSq(
-							&((*itv)->Vob->GetPositionWorld() - playerPosition));
+						float d = D3DXVec3LengthSq(&(itv->Vob->GetPositionWorld() - playerPosition));
 
-						float range = (*itv)->Vob->GetLightRange() * 1.5f;
+						float range = itv->Vob->GetLightRange() * 1.5f;
 
 						// If the engine said this light should be updated, then do so. If
 						// the light said this
 						if (needsUpdate || d < range * range)
-							importantUpdates.push_back((*itv));
+							importantUpdates.push_back(itv);
 					}
 				}
 			}
 		}
 
 		// Render the closest light
-		for (auto it = importantUpdates.begin(); it != importantUpdates.end();
-			++it) {
-			((D3D11PointLight*)(*it)->LightShadowBuffers)
-				->RenderCubemap((*it)->UpdateShadows);
-			(*it)->UpdateShadows = false;
+		for (auto const& it : importantUpdates) {
+			((D3D11PointLight*)it->LightShadowBuffers)->RenderCubemap(it->UpdateShadows);
+			it->UpdateShadows = false;
 		}
 
 		// Update only a fraction of lights, but at least some
@@ -4163,29 +4144,24 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*> & lights) {
 		D3DXVECTOR3 target = dir;
 
 		// Smoothly transition to the next state and wait there
-		if (fabs(D3DXVec3Dot(&smoothDir, &dir)) <
-			0.99995f)  // but cut it off somewhere or the pixels will flicker
-			D3DXVec3Lerp(&dir, &smoothDir, &target,
-				Engine::GAPI->GetFrameTimeSec() * 2.0f);
+		if (fabs(D3DXVec3Dot(&smoothDir, &dir)) < 0.99995f)  // but cut it off somewhere or the pixels will flicker
+			D3DXVec3Lerp(&dir, &smoothDir, &target, Engine::GAPI->GetFrameTimeSec() * 2.0f);
 		else
 			oldDir = dir;
 
 		smoothDir = dir;
 	}
 
-	float smPixelSize =
-		WorldShadowmap1->GetSizeX() *
-		Engine::GAPI->GetRendererState()->RendererSettings.WorldShadowRangeScale;
+	float smPixelSize = WorldShadowmap1->GetSizeX() * Engine::GAPI->GetRendererState()->RendererSettings.WorldShadowRangeScale;
 
 	// Update position
-	if ((D3DXVec3Length(&(oldP - cameraPosition)) <
-		64 &&  // Try to update only if the camera went 500 units away from
-			   // the last position
-		(cameraPosition.x - (int)cameraPosition.x) <
-		0.1f &&  // And is on even space
-		(cameraPosition.y - (int)cameraPosition.y) < 0.1f) ||
-		D3DXVec3Length(&(oldP - cameraPosition)) <
-		600.0f)  // but don't let it go too far
+	// Try to update only if the camera went 500 units away from
+	// the last position
+	if ((D3DXVec3Length(&(oldP - cameraPosition)) < 64 &&
+		// And is on even space
+		(cameraPosition.x - (int)cameraPosition.x) < 0.1f &&
+		// but don't let it go too far
+		(cameraPosition.y - (int)cameraPosition.y) < 0.1f) || D3DXVec3Length(&(oldP - cameraPosition)) < 600.0f)
 	{
 		WorldShadowCP = oldP;
 	}
@@ -4195,12 +4171,10 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*> & lights) {
 	}
 
 	// Get the section we are currently in
-	INT2 cameraSection = WorldConverter::GetSectionOfPos(WorldShadowCP);
-	WorldMeshSectionInfo& section =
-		Engine::GAPI->GetWorldSections()[cameraSection.x][cameraSection.y];
-	D3DXVECTOR3 p = WorldShadowCP;
+	INT2 cameraSection            = WorldConverter::GetSectionOfPos(WorldShadowCP);
+	WorldMeshSectionInfo& section = Engine::GAPI->GetWorldSections()[cameraSection.x][cameraSection.y];
+	D3DXVECTOR3 p                 = WorldShadowCP;
 	// Set the camera height to the highest point in this section
-	// p.y = 0;
 	p += dir * 6000.0f;
 
 	D3DXVECTOR3 lookAt = p;
@@ -4211,13 +4185,10 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*> & lights) {
 	D3DXMatrixTranspose(&cr.ViewReplacement, &cr.ViewReplacement);
 
 	D3DXMatrixOrthoLH(&cr.ProjectionReplacement,
-		WorldShadowmap1->GetSizeX() *
-		Engine::GAPI->GetRendererState()
-		->RendererSettings.WorldShadowRangeScale,
-		WorldShadowmap1->GetSizeX() *
-		Engine::GAPI->GetRendererState()
-		->RendererSettings.WorldShadowRangeScale,
-		1, 20000.0f);
+		WorldShadowmap1->GetSizeX() * Engine::GAPI->GetRendererState()->RendererSettings.WorldShadowRangeScale,
+		WorldShadowmap1->GetSizeX() * Engine::GAPI->GetRendererState()->RendererSettings.WorldShadowRangeScale,
+		1,
+		20000.0f);
 	D3DXMatrixTranspose(&cr.ProjectionReplacement, &cr.ProjectionReplacement);
 
 	cr.PositionReplacement = p;
@@ -4226,8 +4197,8 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*> & lights) {
 	// Replace gothics camera
 	Engine::GAPI->SetCameraReplacementPtr(&cr);
 
-	if (Engine::GAPI->GetLoadedWorldInfo()->BspTree->GetBspTreeMode() ==
-		zBSP_MODE_OUTDOOR)  // Indoor worlds don't need shadowmaps for the world
+	// Indoor worlds don't need shadowmaps for the world
+	if (Engine::GAPI->GetLoadedWorldInfo()->BspTree->GetBspTreeMode() == zBSP_MODE_OUTDOOR)
 	{
 		RenderShadowmaps(WorldShadowCP, nullptr, true);
 	}
@@ -4252,9 +4223,8 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*> & lights) {
 	SetActiveVertexShader("VS_ExPointLight");
 	SetActivePixelShader("PS_DS_PointLight");
 
-	D3D11PShader* psPointLight = ShaderManager->GetPShader("PS_DS_PointLight");
-	D3D11PShader* psPointLightDynShadow =
-		ShaderManager->GetPShader("PS_DS_PointLightDynShadow");
+	D3D11PShader* psPointLight          = ShaderManager->GetPShader("PS_DS_PointLight");
+	D3D11PShader* psPointLightDynShadow = ShaderManager->GetPShader("PS_DS_PointLightDynShadow");
 
 	Engine::GAPI->SetFarPlane(
 		Engine::GAPI->GetRendererState()->RendererSettings.SectionDrawRadius *
@@ -4266,8 +4236,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*> & lights) {
 	Engine::GAPI->GetRendererState()->DepthState.DepthWriteEnabled = false;
 	Engine::GAPI->GetRendererState()->DepthState.SetDirty();
 
-	Engine::GAPI->GetRendererState()->RasterizerState.CullMode =
-		GothicRasterizerStateInfo::CM_CULL_BACK;
+	Engine::GAPI->GetRendererState()->RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_BACK;
 	Engine::GAPI->GetRendererState()->RasterizerState.SetDirty();
 
 	SetupVS_ExMeshDrawCall();
@@ -4278,17 +4247,13 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*> & lights) {
 	CopyDepthStencil();
 
 	// Set the main rendertarget
-	Context->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
-		DepthStencilBuffer->GetDepthStencilView());
+	Context->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView());
 
 	D3DXMatrixTranspose(&view, &view);
 
 	DS_PointLightConstantBuffer plcb;
-	D3DXMatrixInverse(&plcb.PL_InvProj, nullptr,
-		&Engine::GAPI->GetProjectionMatrix());
-	D3DXMatrixInverse(
-		&plcb.PL_InvView, nullptr,
-		&Engine::GAPI->GetRendererState()->TransformState.TransformView);
+	D3DXMatrixInverse(&plcb.PL_InvProj, nullptr, &Engine::GAPI->GetProjectionMatrix());
+	D3DXMatrixInverse(&plcb.PL_InvView, nullptr, &Engine::GAPI->GetRendererState()->TransformState.TransformView);
 	plcb.PL_ViewportSize = float2((float)Resolution.x, (float)Resolution.y);
 
 	GBuffer0_Diffuse->BindToPixelShader(Context, 0);
@@ -4298,24 +4263,23 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*> & lights) {
 	bool lastOutside = true;
 
 	// Draw all lights
-	for (std::vector<VobLightInfo*>::iterator itv = lights.begin();
-		itv != lights.end(); ++itv) {
-		zCVobLight* vob = (*itv)->Vob;
+	for (auto const& itv : lights) {
+		zCVobLight* vob = itv->Vob;
 
 		// Reset state from CollectVisibleVobs
-		(*itv)->VisibleInRenderPass = false;
+		itv->VisibleInRenderPass = false;
 
 		if (!vob->IsEnabled()) continue;
 
 		// Set right shader
 		if (Engine::GAPI->GetRendererState()
 			->RendererSettings.EnablePointlightShadows > 0) {
-			if ((*itv)->LightShadowBuffers && ActivePS != psPointLightDynShadow) {
+			if (itv->LightShadowBuffers && ActivePS != psPointLightDynShadow) {
 				// Need to update shader for shadowed pointlight
 				ActivePS = psPointLightDynShadow;
 				ActivePS->Apply();
 			}
-			else if (!(*itv)->LightShadowBuffers && ActivePS != psPointLight) {
+			else if (!itv->LightShadowBuffers && ActivePS != psPointLight) {
 				// Need to update shader for usual pointlight
 				ActivePS = psPointLight;
 				ActivePS->Apply();
@@ -4328,7 +4292,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*> & lights) {
 		plcb.PL_Color = float4(vob->GetLightColor());
 		plcb.PL_Range = vob->GetLightRange();
 		plcb.Pl_PositionWorld = vob->GetPositionWorld();
-		plcb.PL_Outdoor = (*itv)->IsIndoorVob ? 0.0f : 1.0f;
+		plcb.PL_Outdoor = itv->IsIndoorVob ? 0.0f : 1.0f;
 
 		float dist = D3DXVec3Length(&(*plcb.Pl_PositionWorld.toD3DXVECTOR3() -
 			Engine::GAPI->GetCameraPosition()));
@@ -4398,8 +4362,8 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*> & lights) {
 		if (Engine::GAPI->GetRendererState()
 			->RendererSettings.EnablePointlightShadows > 0) {
 			// Bind shadowmap, if possible
-			if ((*itv)->LightShadowBuffers)
-				((D3D11PointLight*)(*itv)->LightShadowBuffers)->OnRenderLight();
+			if (itv->LightShadowBuffers)
+				((D3D11PointLight*)itv->LightShadowBuffers)->OnRenderLight();
 		}
 
 		// Draw the mesh
@@ -4408,113 +4372,111 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*> & lights) {
 		Engine::GAPI->GetRendererState()->RendererInfo.FrameDrawnLights++;
 	}
 
-	{
-		// *cough cough* somehow this makes the worldmesh disappear in indoor
-		// locations
-		// TODO: Fixme
-		bool oldState =
-			Engine::GAPI->GetRendererState()->RendererSettings.EnableSMAA;
-		Engine::GAPI->GetRendererState()->RendererSettings.EnableSMAA = false;
+	// *cough cough* somehow this makes the worldmesh disappear in indoor
+	// locations
+	// TODO: Fixme
+	bool oldState =
+		Engine::GAPI->GetRendererState()->RendererSettings.EnableSMAA;
+	Engine::GAPI->GetRendererState()->RendererSettings.EnableSMAA = false;
 
-		Engine::GAPI->GetRendererState()->RasterizerState.CullMode =
-			GothicRasterizerStateInfo::CM_CULL_BACK;
-		Engine::GAPI->GetRendererState()->RasterizerState.SetDirty();
+	Engine::GAPI->GetRendererState()->RasterizerState.CullMode =
+		GothicRasterizerStateInfo::CM_CULL_BACK;
+	Engine::GAPI->GetRendererState()->RasterizerState.SetDirty();
 
-		// Modify light when raining
-		float rain = Engine::GAPI->GetRainFXWeight();
-		float wetness = Engine::GAPI->GetSceneWetness();
+	// Modify light when raining
+	float rain = Engine::GAPI->GetRainFXWeight();
+	float wetness = Engine::GAPI->GetSceneWetness();
 
-		// Switch global light shader when raining
-		if (wetness > 0.0f) {
-			SetActivePixelShader("PS_DS_AtmosphericScattering_Rain");
-		}
-		else {
-			SetActivePixelShader("PS_DS_AtmosphericScattering");
-		}
-
-		SetActiveVertexShader("VS_PFX");
-
-		SetupVS_ExMeshDrawCall();
-
-		GSky* sky = Engine::GAPI->GetSky();
-		ActivePS->GetConstantBuffer()[1]->UpdateBuffer(&sky->GetAtmosphereCB());
-		ActivePS->GetConstantBuffer()[1]->BindToPixelShader(1);
-
-		DS_ScreenQuadConstantBuffer scb;
-		scb.SQ_InvProj = plcb.PL_InvProj;
-		scb.SQ_InvView = plcb.PL_InvView;
-		scb.SQ_View =
-			Engine::GAPI->GetRendererState()->TransformState.TransformView;
-
-		D3DXVec3TransformNormal(scb.SQ_LightDirectionVS.toD3DXVECTOR3(),
-			sky->GetAtmosphereCB().AC_LightPos.toD3DXVECTOR3(),
-			&view);
-
-		float3 sunColor =
-			Engine::GAPI->GetRendererState()->RendererSettings.SunLightColor;
-
-		float sunStrength = Toolbox::lerp(
-			Engine::GAPI->GetRendererState()->RendererSettings.SunLightStrength,
-			Engine::GAPI->GetRendererState()->RendererSettings.RainSunLightStrength,
-			std::min(
-				1.0f,
-				rain * 2.0f));  // Scale the darkening-factor faster here, so it
-								// matches more with the increasing fog-density
-
-		scb.SQ_LightColor = float4(sunColor.x, sunColor.y, sunColor.z, sunStrength);
-
-		scb.SQ_ShadowView = cr.ViewReplacement;
-		scb.SQ_ShadowProj = cr.ProjectionReplacement;
-		scb.SQ_ShadowmapSize = (float)WorldShadowmap1->GetSizeX();
-
-		// Get rain matrix
-		scb.SQ_RainView = Effects->GetRainShadowmapCameraRepl().ViewReplacement;
-		scb.SQ_RainProj =
-			Effects->GetRainShadowmapCameraRepl().ProjectionReplacement;
-
-		scb.SQ_ShadowStrength =
-			Engine::GAPI->GetRendererState()->RendererSettings.ShadowStrength;
-		scb.SQ_ShadowAOStrength =
-			Engine::GAPI->GetRendererState()->RendererSettings.ShadowAOStrength;
-		scb.SQ_WorldAOStrength =
-			Engine::GAPI->GetRendererState()->RendererSettings.WorldAOStrength;
-
-		// Modify lightsettings when indoor
-		if (Engine::GAPI->GetLoadedWorldInfo()->BspTree->GetBspTreeMode() ==
-			zBSP_MODE_INDOOR) {
-			// Turn off shadows
-			scb.SQ_ShadowStrength = 0.0f;
-
-			// Only use world AO
-			scb.SQ_WorldAOStrength = 1.0f;
-
-			// Darken the lights
-			scb.SQ_LightColor = float4(1, 1, 1, DEFAULT_INDOOR_VOB_AMBIENT.x);
-		}
-
-		ActivePS->GetConstantBuffer()[0]->UpdateBuffer(&scb);
-		ActivePS->GetConstantBuffer()[0]->BindToPixelShader(0);
-
-		PFXVS_ConstantBuffer vscb;
-		vscb.PFXVS_InvProj = scb.SQ_InvProj;
-		ActiveVS->GetConstantBuffer()[0]->UpdateBuffer(&vscb);
-		ActiveVS->GetConstantBuffer()[0]->BindToVertexShader(0);
-
-		WorldShadowmap1->BindToPixelShader(Context, 3);
-
-		if (Effects->GetRainShadowmap())
-			Effects->GetRainShadowmap()->BindToPixelShader(Context, 4);
-
-		Context->PSSetSamplers(2, 1, &ShadowmapSamplerState);
-
-		Context->PSSetShaderResources(5, 1, &ReflectionCube2);
-
-		DistortionTexture->BindToPixelShader(6);
-
-		PfxRenderer->DrawFullScreenQuad();
-
-		Engine::GAPI->GetRendererState()->RendererSettings.EnableSMAA = oldState;
+	// Switch global light shader when raining
+	if (wetness > 0.0f) {
+		SetActivePixelShader("PS_DS_AtmosphericScattering_Rain");
 	}
+	else {
+		SetActivePixelShader("PS_DS_AtmosphericScattering");
+	}
+
+	SetActiveVertexShader("VS_PFX");
+
+	SetupVS_ExMeshDrawCall();
+
+	GSky* sky = Engine::GAPI->GetSky();
+	ActivePS->GetConstantBuffer()[1]->UpdateBuffer(&sky->GetAtmosphereCB());
+	ActivePS->GetConstantBuffer()[1]->BindToPixelShader(1);
+
+	DS_ScreenQuadConstantBuffer scb;
+	scb.SQ_InvProj = plcb.PL_InvProj;
+	scb.SQ_InvView = plcb.PL_InvView;
+	scb.SQ_View =
+		Engine::GAPI->GetRendererState()->TransformState.TransformView;
+
+	D3DXVec3TransformNormal(scb.SQ_LightDirectionVS.toD3DXVECTOR3(),
+		sky->GetAtmosphereCB().AC_LightPos.toD3DXVECTOR3(),
+		&view);
+
+	float3 sunColor =
+		Engine::GAPI->GetRendererState()->RendererSettings.SunLightColor;
+
+	float sunStrength = Toolbox::lerp(
+		Engine::GAPI->GetRendererState()->RendererSettings.SunLightStrength,
+		Engine::GAPI->GetRendererState()->RendererSettings.RainSunLightStrength,
+		std::min(
+			1.0f,
+			rain * 2.0f));  // Scale the darkening-factor faster here, so it
+							// matches more with the increasing fog-density
+
+	scb.SQ_LightColor = float4(sunColor.x, sunColor.y, sunColor.z, sunStrength);
+
+	scb.SQ_ShadowView = cr.ViewReplacement;
+	scb.SQ_ShadowProj = cr.ProjectionReplacement;
+	scb.SQ_ShadowmapSize = (float)WorldShadowmap1->GetSizeX();
+
+	// Get rain matrix
+	scb.SQ_RainView = Effects->GetRainShadowmapCameraRepl().ViewReplacement;
+	scb.SQ_RainProj =
+		Effects->GetRainShadowmapCameraRepl().ProjectionReplacement;
+
+	scb.SQ_ShadowStrength =
+		Engine::GAPI->GetRendererState()->RendererSettings.ShadowStrength;
+	scb.SQ_ShadowAOStrength =
+		Engine::GAPI->GetRendererState()->RendererSettings.ShadowAOStrength;
+	scb.SQ_WorldAOStrength =
+		Engine::GAPI->GetRendererState()->RendererSettings.WorldAOStrength;
+
+	// Modify lightsettings when indoor
+	if (Engine::GAPI->GetLoadedWorldInfo()->BspTree->GetBspTreeMode() ==
+		zBSP_MODE_INDOOR) {
+		// Turn off shadows
+		scb.SQ_ShadowStrength = 0.0f;
+
+		// Only use world AO
+		scb.SQ_WorldAOStrength = 1.0f;
+
+		// Darken the lights
+		scb.SQ_LightColor = float4(1, 1, 1, DEFAULT_INDOOR_VOB_AMBIENT.x);
+	}
+
+	ActivePS->GetConstantBuffer()[0]->UpdateBuffer(&scb);
+	ActivePS->GetConstantBuffer()[0]->BindToPixelShader(0);
+
+	PFXVS_ConstantBuffer vscb;
+	vscb.PFXVS_InvProj = scb.SQ_InvProj;
+	ActiveVS->GetConstantBuffer()[0]->UpdateBuffer(&vscb);
+	ActiveVS->GetConstantBuffer()[0]->BindToVertexShader(0);
+
+	WorldShadowmap1->BindToPixelShader(Context, 3);
+
+	if (Effects->GetRainShadowmap())
+		Effects->GetRainShadowmap()->BindToPixelShader(Context, 4);
+
+	Context->PSSetSamplers(2, 1, &ShadowmapSamplerState);
+
+	Context->PSSetShaderResources(5, 1, &ReflectionCube2);
+
+	DistortionTexture->BindToPixelShader(6);
+
+	PfxRenderer->DrawFullScreenQuad();
+
+	Engine::GAPI->GetRendererState()->RendererSettings.EnableSMAA = oldState;
 
 	// Reset state
 	ID3D11ShaderResourceView* srv = nullptr;
@@ -5329,8 +5291,7 @@ void D3D11GraphicsEngine::DrawQuadMarks() {
 
 /** Copies the depth stencil buffer to DepthStencilBufferCopy */
 void D3D11GraphicsEngine::CopyDepthStencil() {
-	Context->CopyResource(DepthStencilBufferCopy->GetTexture(),
-		DepthStencilBuffer->GetTexture());
+	Context->CopyResource(DepthStencilBufferCopy->GetTexture(), DepthStencilBuffer->GetTexture());
 }
 
 /** Draws underwater effects */

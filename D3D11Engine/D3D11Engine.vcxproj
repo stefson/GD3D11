@@ -339,6 +339,7 @@ copy "$(OutDir)$(TargetName).pdb" "$(G1_SYSTEM_PATH)\ddraw.pdb"</Command>
     <ClInclude Include="D3D11HDShader.h" />
     <ClInclude Include="D3D11LineRenderer.h" />
     <ClInclude Include="D3D11NVHBAO.h" />
+    <ClInclude Include="D3D11NVPCSS.h" />
     <ClInclude Include="D3D11OcclusionQuerry.h" />
     <ClInclude Include="D3D11PfxRenderer.h" />
     <ClInclude Include="D3D11PFX_Blur.h" />

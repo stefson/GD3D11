@@ -640,6 +640,9 @@
     </ClInclude>
     <ClInclude Include="GMeshSimple.h" />
     <ClInclude Include="BaseShadowedPointLight.h" />
+    <ClInclude Include="D3D11NVPCSS.h">
+      <Filter>Engine\D3D11</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

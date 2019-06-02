@@ -1,6 +1,7 @@
 #pragma once
 
 #include "D3D11GraphicsEngineBase.h"
+#include "D3D11NVPCSS.h"
 
 struct RenderToDepthStencilBuffer;
 
