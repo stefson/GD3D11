@@ -4489,12 +4489,12 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*> & lights) {
 
 /** Renders the shadowmaps for a pointlight */
 void D3D11GraphicsEngine::RenderShadowCube(
-	const D3DXVECTOR3 & position, float range,
-	RenderToDepthStencilBuffer * targetCube, ID3D11DepthStencilView * face,
-	ID3D11RenderTargetView * debugRTV, bool cullFront, bool indoor, bool noNPCs,
-	std::list<VobInfo*> * renderedVobs,
-	std::list<SkeletalVobInfo*> * renderedMobs,
-	std::map<MeshKey, WorldMeshInfo*, cmpMeshKey> * worldMeshCache) {
+	const D3DXVECTOR3& position, float range,
+	RenderToDepthStencilBuffer* targetCube, ID3D11DepthStencilView* face,
+	ID3D11RenderTargetView* debugRTV, bool cullFront, bool indoor, bool noNPCs,
+	std::list<VobInfo*>* renderedVobs,
+	std::list<SkeletalVobInfo*>* renderedMobs,
+	std::map<MeshKey, WorldMeshInfo*, cmpMeshKey>* worldMeshCache) {
 	D3D11_VIEWPORT oldVP;
 	UINT n = 1;
 	Context->RSGetViewports(&n, &oldVP);
@@ -4575,11 +4575,11 @@ void D3D11GraphicsEngine::RenderShadowCube(
 }
 
 /** Renders the shadowmaps for the sun */
-void D3D11GraphicsEngine::RenderShadowmaps(const D3DXVECTOR3 & cameraPosition,
-	RenderToDepthStencilBuffer * target,
+void D3D11GraphicsEngine::RenderShadowmaps(const D3DXVECTOR3& cameraPosition,
+	RenderToDepthStencilBuffer* target,
 	bool cullFront, bool dontCull,
-	ID3D11DepthStencilView * dsvOverwrite,
-	ID3D11RenderTargetView * debugRTV) {
+	ID3D11DepthStencilView* dsvOverwrite,
+	ID3D11RenderTargetView* debugRTV) {
 	if (!target) {
 		target = WorldShadowmap1;
 	}
@@ -4683,7 +4683,7 @@ D3D11ENGINE_RENDER_STAGE D3D11GraphicsEngine::GetRenderingStage() {
 }
 
 /** Draws a single VOB */
-void D3D11GraphicsEngine::DrawVobSingle(VobInfo * vob) {
+void D3D11GraphicsEngine::DrawVobSingle(VobInfo* vob) {
 	Context->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
 		DepthStencilBuffer->GetDepthStencilView());
 
@@ -4753,7 +4753,7 @@ LRESULT D3D11GraphicsEngine::OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam,
 }
 
 /** Draws the ocean */
-XRESULT D3D11GraphicsEngine::DrawOcean(GOcean * ocean) {
+XRESULT D3D11GraphicsEngine::DrawOcean(GOcean* ocean) {
 	SetDefaultStates();
 
 	// Then draw the ocean
@@ -4908,7 +4908,7 @@ XRESULT D3D11GraphicsEngine::DrawOcean(GOcean * ocean) {
 
 /** Constructs the makro list for shader compilation */
 void D3D11GraphicsEngine::ConstructShaderMakroList(
-	std::vector<D3D10_SHADER_MACRO> & list) {
+	std::vector<D3D10_SHADER_MACRO>& list) {
 	GothicRendererSettings& s =
 		Engine::GAPI->GetRendererState()->RendererSettings;
 	D3D10_SHADER_MACRO m;
@@ -4957,7 +4957,7 @@ void D3D11GraphicsEngine::OnUIEvent(EUIEvent uiEvent) {
 }
 
 /** Returns the data of the backbuffer */
-void D3D11GraphicsEngine::GetBackbufferData(byte * *data, int& pixelsize) {
+void D3D11GraphicsEngine::GetBackbufferData(byte** data, int& pixelsize) {
 	constexpr int width = 256;
 	byte* d = new byte[width * width * 4];
 
@@ -5024,7 +5024,7 @@ void D3D11GraphicsEngine::GetBackbufferData(byte * *data, int& pixelsize) {
 }
 
 /** Binds the right shader for the given texture */
-void D3D11GraphicsEngine::BindShaderForTexture(zCTexture * texture,
+void D3D11GraphicsEngine::BindShaderForTexture(zCTexture* texture,
 	bool forceAlphaTest,
 	int zMatAlphaFunc) {
 	D3D11PShader* active = ActivePS;
@@ -5066,7 +5066,7 @@ void D3D11GraphicsEngine::BindShaderForTexture(zCTexture * texture,
 }
 
 /** Draws the given list of decals */
-void D3D11GraphicsEngine::DrawDecalList(const std::vector<zCVob*> & decals,
+void D3D11GraphicsEngine::DrawDecalList(const std::vector<zCVob*>& decals,
 	bool lighting) {
 	Engine::GAPI->GetRendererState()->RasterizerState.CullMode =
 		GothicRasterizerStateInfo::CM_CULL_NONE;
@@ -5231,7 +5231,7 @@ void D3D11GraphicsEngine::DrawQuadMarks() {
 			Engine::GAPI->GetRendererState()->RendererSettings.VisualFXDrawRadius)
 			continue;
 
-		zCMaterial * mat = it->first->GetMaterial();
+		zCMaterial* mat = it->first->GetMaterial();
 		if (mat) mat->BindTexture(0);
 
 		if (alphaFunc != mat->GetAlphaFunc()) {
@@ -5365,8 +5365,8 @@ void D3D11GraphicsEngine::Setup_PNAEN(EPNAENRenderMode mode) {
 
 /** Draws particle effects */
 void D3D11GraphicsEngine::DrawFrameParticles(
-	std::map<zCTexture*, std::vector<ParticleInstanceInfo>> & particles,
-	std::map<zCTexture*, ParticleRenderInfo> & info) {
+	std::map<zCTexture*, std::vector<ParticleInstanceInfo>>& particles,
+	std::map<zCTexture*, ParticleRenderInfo>& info) {
 	SetDefaultStates();
 
 	// Clear GBuffer0 to hold the refraction vectors since it's not needed anymore
@@ -5559,7 +5559,7 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 }
 
 /** Called when a vob was removed from the world */
-XRESULT D3D11GraphicsEngine::OnVobRemovedFromWorld(zCVob * vob) {
+XRESULT D3D11GraphicsEngine::OnVobRemovedFromWorld(zCVob* vob) {
 	if (UIView) UIView->GetEditorPanel()->OnVobRemovedFromWorld(vob);
 
 	// Take out of shadowupdate queue
