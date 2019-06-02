@@ -3674,8 +3674,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 	STOP_TIMING(GothicRendererTiming::TT_Vobs);
 
 	if (RenderingStage == DES_MAIN) {
-		if (Engine::GAPI->GetRendererState()
-			->RendererSettings.DrawParticleEffects) {
+		if (Engine::GAPI->GetRendererState()->RendererSettings.DrawParticleEffects) {
 			std::vector<zCVob*> decals;
 			Engine::GAPI->GetVisibleDecalList(decals);
 			DrawDecalList(decals, true);
@@ -3707,20 +3706,20 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 	Context->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
 		DepthStencilBuffer->GetDepthStencilView());
 
-	for (auto itt = AlphaMeshes.begin(); itt != AlphaMeshes.end(); ++itt) {
-		zCTexture* tx = itt->first.Material->GetAniTexture();
+	for (auto const& alphaMesh : AlphaMeshes) {
+		zCTexture* tx = alphaMesh.first.Material->GetAniTexture();
 
 		if (!tx) continue;
 
 		// Check for alphablending on world mesh
-		bool blendAdd = itt->first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_ADD;
+		bool blendAdd = alphaMesh.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_ADD;
 		bool blendBlend =
-			itt->first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_BLEND;
+			alphaMesh.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_BLEND;
 
 		// Bind texture
 
-		MeshInfo* mi = itt->second.second;
-		MeshVisualInfo* vi = itt->second.first;
+		MeshInfo* mi = alphaMesh.second.second;
+		MeshVisualInfo* vi = alphaMesh.second.first;
 
 		if (tx->CacheIn(0.6f) == zRES_CACHED_IN) {
 			MyDirectDrawSurface7* surface = tx->GetSurface();
@@ -3756,7 +3755,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 				UpdateRenderStates();
 			}
 
-			MaterialInfo* info = itt->first.Info;
+			MaterialInfo* info = alphaMesh.first.Info;
 			if (!info->Constantbuffer) info->UpdateConstantbuffer();
 
 			info->Constantbuffer->BindToPixelShader(2);
@@ -3771,8 +3770,8 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 
 	// Loop again, now that all alpha-meshes have been rendered
 	// so we can reset their visuals, too.
-	for (auto itt = AlphaMeshes.begin(); itt != AlphaMeshes.end(); ++itt) {
-		MeshVisualInfo* vi = itt->second.first;
+	for (auto const& alphaMesh : AlphaMeshes) {
+		MeshVisualInfo* vi = alphaMesh.second.first;
 
 		// Reset visual
 		vi->StartNewFrame();
