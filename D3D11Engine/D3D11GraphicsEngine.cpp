@@ -15,7 +15,6 @@
 #include "D3D11PointLight.h"
 #include "D3D11ShaderManager.h"
 #include "D3D11VShader.h"
-#include "D3D11NVPCSS.h"
 #include "GMesh.h"
 #include "GOcean.h"
 #include "GSky.h"
