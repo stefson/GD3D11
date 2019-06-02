@@ -761,7 +761,7 @@ XRESULT D3D11GraphicsEngine::OnEndFrame() {
 }
 
 /** Called when the game wants to clear the bound rendertarget */
-XRESULT D3D11GraphicsEngine::Clear(const float4 & color) {
+XRESULT D3D11GraphicsEngine::Clear(const float4& color) {
 	// Context->ClearRenderTargetView(BackbufferRTV, (float *)&D3DXVECTOR4(1, 0,
 	// 0, 0));
 	Context->ClearDepthStencilView(DepthStencilBuffer->GetDepthStencilView(),
@@ -779,19 +779,19 @@ XRESULT D3D11GraphicsEngine::Clear(const float4 & color) {
 }
 
 /** Creates a vertexbuffer object (Not registered inside) */
-XRESULT D3D11GraphicsEngine::CreateVertexBuffer(D3D11VertexBuffer * *outBuffer) {
+XRESULT D3D11GraphicsEngine::CreateVertexBuffer(D3D11VertexBuffer** outBuffer) {
 	*outBuffer = new D3D11VertexBuffer;
 	return XR_SUCCESS;
 }
 
 /** Creates a texture object (Not registered inside) */
-XRESULT D3D11GraphicsEngine::CreateTexture(D3D11Texture * *outTexture) {
+XRESULT D3D11GraphicsEngine::CreateTexture(D3D11Texture** outTexture) {
 	*outTexture = new D3D11Texture;
 	return XR_SUCCESS;
 }
 
 /** Creates a constantbuffer object (Not registered inside) */
-XRESULT D3D11GraphicsEngine::CreateConstantBuffer(D3D11ConstantBuffer * *outCB,
+XRESULT D3D11GraphicsEngine::CreateConstantBuffer(D3D11ConstantBuffer** outCB,
 	void* data, int size) {
 	*outCB = new D3D11ConstantBuffer(size, data);
 	return XR_SUCCESS;
@@ -799,7 +799,7 @@ XRESULT D3D11GraphicsEngine::CreateConstantBuffer(D3D11ConstantBuffer * *outCB,
 
 /** Returns a list of available display modes */
 XRESULT
-D3D11GraphicsEngine::GetDisplayModeList(std::vector<DisplayModeInfo> * modeList,
+D3D11GraphicsEngine::GetDisplayModeList(std::vector<DisplayModeInfo>* modeList,
 	bool includeSuperSampling) {
 	HRESULT hr;
 	UINT numModes = 0;
@@ -964,7 +964,7 @@ XRESULT D3D11GraphicsEngine::Present() {
 }
 
 /** Called to set the current viewport */
-XRESULT D3D11GraphicsEngine::SetViewport(const ViewportInfo & viewportInfo) {
+XRESULT D3D11GraphicsEngine::SetViewport(const ViewportInfo& viewportInfo) {
 	// Set the viewport
 	D3D11_VIEWPORT viewport;
 	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
@@ -982,7 +982,7 @@ XRESULT D3D11GraphicsEngine::SetViewport(const ViewportInfo & viewportInfo) {
 }
 
 /** Draws a vertexbuffer, non-indexed (World)*/
-XRESULT D3D11GraphicsEngine::DrawVertexBuffer(D3D11VertexBuffer * vb,
+XRESULT D3D11GraphicsEngine::DrawVertexBuffer(D3D11VertexBuffer* vb,
 	unsigned int numVertices,
 	unsigned int stride) {
 #ifdef RECORD_LAST_DRAWCALL
@@ -1008,8 +1008,8 @@ XRESULT D3D11GraphicsEngine::DrawVertexBuffer(D3D11VertexBuffer * vb,
 }
 
 /** Draws a vertexbuffer, non-indexed (VOBs)*/
-XRESULT D3D11GraphicsEngine::DrawVertexBufferIndexed(D3D11VertexBuffer * vb,
-	D3D11VertexBuffer * ib,
+XRESULT D3D11GraphicsEngine::DrawVertexBufferIndexed(D3D11VertexBuffer* vb,
+	D3D11VertexBuffer* ib,
 	unsigned int numIndices,
 	unsigned int indexOffset) {
 #ifdef RECORD_LAST_DRAWCALL
@@ -1047,7 +1047,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferIndexed(D3D11VertexBuffer * vb,
 }
 
 XRESULT D3D11GraphicsEngine::DrawVertexBufferIndexedUINT(
-	D3D11VertexBuffer * vb, D3D11VertexBuffer * ib, unsigned int numIndices,
+	D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices,
 	unsigned int indexOffset) {
 #ifdef RECORD_LAST_DRAWCALL
 	g_LastDrawCall.Type               = DrawcallInfo::VB_IX_UINT;
@@ -1078,7 +1078,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferIndexedUINT(
 }
 
 /** Binds viewport information to the given constantbuffer slot */
-XRESULT D3D11GraphicsEngine::BindViewportInformation(const std::string & shader,
+XRESULT D3D11GraphicsEngine::BindViewportInformation(const std::string& shader,
 	int slot) {
 	D3D11_VIEWPORT vp;
 	UINT num = 1;
@@ -1109,7 +1109,7 @@ XRESULT D3D11GraphicsEngine::BindViewportInformation(const std::string & shader,
 }
 
 /** Draws a vertexarray, non-indexed (HUD, 2D)*/
-XRESULT D3D11GraphicsEngine::DrawVertexArray(ExVertexStruct * vertices,
+XRESULT D3D11GraphicsEngine::DrawVertexArray(ExVertexStruct* vertices,
 	unsigned int numVertices,
 	unsigned int startVertex,
 	unsigned int stride) {
@@ -1157,9 +1157,9 @@ XRESULT D3D11GraphicsEngine::DrawVertexArray(ExVertexStruct * vertices,
 }
 
 /** Draws a vertexarray, indexed */
-XRESULT D3D11GraphicsEngine::DrawIndexedVertexArray(ExVertexStruct * vertices,
+XRESULT D3D11GraphicsEngine::DrawIndexedVertexArray(ExVertexStruct* vertices,
 	unsigned int numVertices,
-	D3D11VertexBuffer * ib,
+	D3D11VertexBuffer* ib,
 	unsigned int numIndices,
 	unsigned int stride) {
 	UpdateRenderStates();
@@ -1208,7 +1208,7 @@ XRESULT D3D11GraphicsEngine::DrawIndexedVertexArray(ExVertexStruct * vertices,
 }
 
 /** Draws a vertexbuffer, non-indexed, binding the FF-Pipe values */
-XRESULT D3D11GraphicsEngine::DrawVertexBufferFF(D3D11VertexBuffer * vb,
+XRESULT D3D11GraphicsEngine::DrawVertexBufferFF(D3D11VertexBuffer* vb,
 	unsigned int numVertices,
 	unsigned int startVertex,
 	unsigned int stride) {
@@ -1235,9 +1235,9 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferFF(D3D11VertexBuffer * vb,
 
 /** Draws a skeletal mesh */
 XRESULT D3D11GraphicsEngine::DrawSkeletalMesh(
-	D3D11VertexBuffer * vb, D3D11VertexBuffer * ib, unsigned int numIndices,
-	const std::vector<D3DXMATRIX> & transforms, float fatness,
-	SkeletalMeshVisualInfo * msh) {
+	D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices,
+	const std::vector<D3DXMATRIX>& transforms, float fatness,
+	SkeletalMeshVisualInfo* msh) {
 	Context->RSSetState(WorldRasterizerState);
 	Context->OMSetDepthStencilState(DefaultDepthStencilState, 0);
 
@@ -1375,7 +1375,7 @@ XRESULT D3D11GraphicsEngine::DrawSkeletalMesh(
 
 /** Draws a batch of instanced geometry */
 XRESULT D3D11GraphicsEngine::DrawInstanced(
-	D3D11VertexBuffer * vb, D3D11VertexBuffer * ib, unsigned int numIndices,
+	D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices,
 	void* instanceData, unsigned int instanceDataStride,
 	unsigned int numInstances, unsigned int vertexStride) {
 	UpdateRenderStates();
@@ -1453,8 +1453,8 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
 
 /** Draws a batch of instanced geometry */
 XRESULT D3D11GraphicsEngine::DrawInstanced(
-	D3D11VertexBuffer * vb, D3D11VertexBuffer * ib, unsigned int numIndices,
-	D3D11VertexBuffer * instanceData, unsigned int instanceDataStride,
+	D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices,
+	D3D11VertexBuffer* instanceData, unsigned int instanceDataStride,
 	unsigned int numInstances, unsigned int vertexStride,
 	unsigned int startInstanceNum, unsigned int indexOffset) {
 	// Bind shader and pipeline flags
@@ -1488,19 +1488,19 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
 }
 
 /** Sets the active pixel shader object */
-XRESULT D3D11GraphicsEngine::SetActivePixelShader(const std::string & shader) {
+XRESULT D3D11GraphicsEngine::SetActivePixelShader(const std::string& shader) {
 	ActivePS = ShaderManager->GetPShader(shader);
 
 	return XR_SUCCESS;
 }
 
-XRESULT D3D11GraphicsEngine::SetActiveVertexShader(const std::string & shader) {
+XRESULT D3D11GraphicsEngine::SetActiveVertexShader(const std::string& shader) {
 	ActiveVS = ShaderManager->GetVShader(shader);
 
 	return XR_SUCCESS;
 }
 
-XRESULT D3D11GraphicsEngine::SetActiveHDShader(const std::string & shader) {
+XRESULT D3D11GraphicsEngine::SetActiveHDShader(const std::string& shader) {
 	ActiveHDS = ShaderManager->GetHDShader(shader);
 
 	return XR_SUCCESS;
@@ -1827,8 +1827,8 @@ void D3D11GraphicsEngine::SetupPerInstanceConstantBuffer(int slot) {
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(slot);
 }
 
-bool SectionRenderlistSortCmp(std::pair<float, WorldMeshSectionInfo*> & a,
-	std::pair<float, WorldMeshSectionInfo*> & b) {
+bool SectionRenderlistSortCmp(std::pair<float, WorldMeshSectionInfo*>& a,
+	std::pair<float, WorldMeshSectionInfo*>& b) {
 	return a.first < b.first;
 }
 
@@ -1844,38 +1844,33 @@ void D3D11GraphicsEngine::TestDrawWorldMesh() {
 		Engine::GAPI->GetWrappedWorldMesh()->MeshVertexBuffer,
 		Engine::GAPI->GetWrappedWorldMesh()->MeshIndexBuffer, 0, 0);
 
-	for (std::list<WorldMeshSectionInfo*>::iterator itr = renderList.begin();
-		itr != renderList.end(); itr++) {
-		for (std::map<D3D11Texture*, std::vector<MeshInfo*>>::iterator it =
-			(*itr)->WorldMeshesByCustomTexture.begin();
-			it != (*itr)->WorldMeshesByCustomTexture.end(); ++it) {
-			if (it->first) {
-				it->first->BindToPixelShader(0);
+	for (auto const& renderItem : renderList) {
+		for (auto const& mesh : renderItem->WorldMeshesByCustomTexture) {
+			if (mesh.first) {
+				mesh.first->BindToPixelShader(0);
 			}
 
-			for (unsigned int i = 0; i < it->second.size(); i++) {
+			for (unsigned int i = 0; i < mesh.second.size(); i++) {
 				// Draw from wrapped mesh
 				DrawVertexBufferIndexedUINT(nullptr, nullptr,
-					it->second[i]->Indices.size(),
-					it->second[i]->BaseIndexLocation);
+					mesh.second[i]->Indices.size(),
+					mesh.second[i]->BaseIndexLocation);
 			}
 		}
 
-		for (std::map<zCMaterial*, std::vector<MeshInfo*>>::iterator it =
-			(*itr)->WorldMeshesByCustomTextureOriginal.begin();
-			it != (*itr)->WorldMeshesByCustomTextureOriginal.end(); ++it) {
-			if (it->first && it->first->GetTexture()) {
-				if (it->first->GetTexture()->CacheIn(0.6f) == zRES_CACHED_IN)
-					it->first->GetTexture()->Bind(0);
+		for (auto const& mesh : renderItem->WorldMeshesByCustomTextureOriginal) {
+			if (mesh.first && mesh.first->GetTexture()) {
+				if (mesh.first->GetTexture()->CacheIn(0.6f) == zRES_CACHED_IN)
+					mesh.first->GetTexture()->Bind(0);
 				else
 					continue;
 			}
 
-			for (unsigned int i = 0; i < it->second.size(); i++) {
+			for (unsigned int i = 0; i < mesh.second.size(); i++) {
 				// Draw from wrapped mesh
 				DrawVertexBufferIndexedUINT(nullptr, nullptr,
-					it->second[i]->Indices.size(),
-					it->second[i]->BaseIndexLocation);
+					mesh.second[i]->Indices.size(),
+					mesh.second[i]->BaseIndexLocation);
 			}
 		}
 	}
@@ -1883,7 +1878,7 @@ void D3D11GraphicsEngine::TestDrawWorldMesh() {
 
 /** Draws a list of mesh infos */
 XRESULT D3D11GraphicsEngine::DrawMeshInfoListAlphablended(
-	const std::vector<std::pair<MeshKey, MeshInfo*>> & list) {
+	const std::vector<std::pair<MeshKey, MeshInfo*>>& list) {
 	SetDefaultStates();
 
 	// Setup renderstates
@@ -1926,11 +1921,11 @@ XRESULT D3D11GraphicsEngine::DrawMeshInfoListAlphablended(
 	int lastAlphaFunc = 0;
 
 	// Draw the list
-	for (auto it = list.begin(); it != list.end(); ++it) {
+	for (auto const& it : list) {
 		int indicesNumMod = 1;
-		if (it->first.Material->GetAniTexture() != nullptr) {
+		if (it.first.Material->GetAniTexture() != nullptr) {
 			MyDirectDrawSurface7* surface =
-				it->first.Material->GetAniTexture()->GetSurface();
+				it.first.Material->GetAniTexture()->GetSurface();
 			ID3D11ShaderResourceView* srv[3];
 
 			// Get diffuse and normalmap
@@ -1950,15 +1945,15 @@ XRESULT D3D11GraphicsEngine::DrawMeshInfoListAlphablended(
 
 			// Get the right shader for it
 
-			BindShaderForTexture(it->first.Material->GetAniTexture(), false,
-				it->first.Material->GetAlphaFunc());
+			BindShaderForTexture(it.first.Material->GetAniTexture(), false,
+				it.first.Material->GetAlphaFunc());
 
 			// Check for alphablending on world mesh
-			if (lastAlphaFunc != it->first.Material->GetAlphaFunc()) {
-				if (it->first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_BLEND)
+			if (lastAlphaFunc != it.first.Material->GetAlphaFunc()) {
+				if (it.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_BLEND)
 					Engine::GAPI->GetRendererState()->BlendState.SetAlphaBlending();
 
-				if (it->first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_ADD)
+				if (it.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_ADD)
 					Engine::GAPI->GetRendererState()->BlendState.SetAdditiveBlending();
 
 				Engine::GAPI->GetRendererState()->BlendState.SetDirty();
@@ -1967,20 +1962,20 @@ XRESULT D3D11GraphicsEngine::DrawMeshInfoListAlphablended(
 				Engine::GAPI->GetRendererState()->DepthState.SetDirty();
 
 				UpdateRenderStates();
-				lastAlphaFunc = it->first.Material->GetAlphaFunc();
+				lastAlphaFunc = it.first.Material->GetAlphaFunc();
 			}
 
-			MaterialInfo * info = it->first.Info;
+			MaterialInfo* info = it.first.Info;
 			if (!info->Constantbuffer) info->UpdateConstantbuffer();
 
 			info->Constantbuffer->BindToPixelShader(2);
 
 			// Don't let the game unload the texture after some time
-			it->first.Material->GetAniTexture()->CacheIn(0.6f);
+			it.first.Material->GetAniTexture()->CacheIn(0.6f);
 
 			// Draw the section-part
-			DrawVertexBufferIndexedUINT(nullptr, nullptr, it->second->Indices.size(),
-				it->second->BaseIndexLocation);
+			DrawVertexBufferIndexedUINT(nullptr, nullptr, it.second->Indices.size(),
+				it.second->BaseIndexLocation);
 		}
 	}
 
@@ -1993,11 +1988,11 @@ XRESULT D3D11GraphicsEngine::DrawMeshInfoListAlphablended(
 
 	// Draw again, but only to depthbuffer this time to make them work with
 	// fogging
-	for (auto it = list.begin(); it != list.end(); ++it) {
-		if (it->first.Material->GetAniTexture() != nullptr) {
+	for (auto const& it : list) {
+		if (it.first.Material->GetAniTexture() != nullptr) {
 			// Draw the section-part
-			DrawVertexBufferIndexedUINT(nullptr, nullptr, it->second->Indices.size(),
-				it->second->BaseIndexLocation);
+			DrawVertexBufferIndexedUINT(nullptr, nullptr, it.second->Indices.size(),
+				it.second->BaseIndexLocation);
 		}
 	}
 
@@ -2062,13 +2057,10 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh(bool noTextures) {
 
 	int numUncachedTextures = 0;
 	for (int i = 0; i < 2; i++) {
-		for (std::list<WorldMeshSectionInfo*>::iterator it = renderList.begin();
-			it != renderList.end(); ++it) {
-			for (std::map<MeshKey, WorldMeshInfo*>::iterator itm =
-				(*it)->WorldMeshes.begin();
-				itm != (*it)->WorldMeshes.end(); ++itm) {
-				if ((*itm).first.Material) {
-					zCTexture* aniTex = (*itm).first.Material->GetTexture();
+		for (auto const& renderItem : renderList) {
+			for (auto const& worldMesh : renderItem->WorldMeshes) {
+				if (worldMesh.first.Material) {
+					zCTexture* aniTex = worldMesh.first.Material->GetTexture();
 
 					if (!aniTex) continue;
 
@@ -2084,39 +2076,39 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh(bool noTextures) {
 					}
 
 					// Check surface type
-					if ((*itm).first.Info->MaterialType == MaterialInfo::MT_Water) {
-						FrameWaterSurfaces[aniTex].push_back((*itm).second);
+					if (worldMesh.first.Info->MaterialType == MaterialInfo::MT_Water) {
+						FrameWaterSurfaces[aniTex].push_back(worldMesh.second);
 						continue;
 					}
 
 					// Check if the animated texture and the registered textures are the
 					// same
-					if ((*itm).first.Texture != aniTex) {
-						MeshKey key = (*itm).first;
+					if (worldMesh.first.Texture != aniTex) {
+						MeshKey key = worldMesh.first;
 						key.Texture = aniTex;
 
 						// Check for alphablending
-						if ((*itm).first.Material->GetAlphaFunc() >
+						if (worldMesh.first.Material->GetAlphaFunc() >
 							zMAT_ALPHA_FUNC_FUNC_NONE &&
-							(*itm).first.Material->GetAlphaFunc() != zMAT_ALPHA_FUNC_TEST) {
-							FrameTransparencyMeshes.push_back((*itm));
+							worldMesh.first.Material->GetAlphaFunc() != zMAT_ALPHA_FUNC_TEST) {
+							FrameTransparencyMeshes.push_back(worldMesh);
 						}
 						else {
 							// Create a new pair using the animated texture
-							meshList.push_back(std::make_pair(key, (*itm).second));
+							meshList.push_back(std::make_pair(key, worldMesh.second));
 						}
 
 					}
 					else {
 						// Check for alphablending
-						if ((*itm).first.Material->GetAlphaFunc() >
+						if (worldMesh.first.Material->GetAlphaFunc() >
 							zMAT_ALPHA_FUNC_FUNC_NONE &&
-							(*itm).first.Material->GetAlphaFunc() != zMAT_ALPHA_FUNC_TEST) {
-							FrameTransparencyMeshes.push_back((*itm));
+							worldMesh.first.Material->GetAlphaFunc() != zMAT_ALPHA_FUNC_TEST) {
+							FrameTransparencyMeshes.push_back(worldMesh);
 						}
 						else {
 							// Push this texture/mesh combination
-							meshList.push_back((*itm));
+							meshList.push_back(worldMesh);
 						}
 					}
 				}
@@ -2147,22 +2139,20 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh(bool noTextures) {
 			WorldConverter::GetSectionOfPos(Engine::GAPI->GetCameraPosition());
 		Context->PSSetShader(nullptr, nullptr, 0);
 
-		for (std::list<std::pair<MeshKey, WorldMeshInfo*>>::iterator it =
-			meshList.begin();
-			it != meshList.end(); ++it) {
-			if (!it->first.Material->GetAniTexture()) continue;
+		for (auto const& mesh : meshList) {
+			if (!mesh.first.Material->GetAniTexture()) continue;
 
-			if (it->first.Material->GetAniTexture()->HasAlphaChannel())
+			if (mesh.first.Material->GetAniTexture()->HasAlphaChannel())
 				continue;  // Don't pre-render stuff with alpha channel
 
-			if (it->first.Info->MaterialType == MaterialInfo::MT_Water)
+			if (mesh.first.Info->MaterialType == MaterialInfo::MT_Water)
 				continue;  // Don't pre-render water
 
-			if (it->second->TesselationSettings.buffer.VT_TesselationFactor > 0.0f)
+			if (mesh.second->TesselationSettings.buffer.VT_TesselationFactor > 0.0f)
 				continue;  // Don't pre-render tesselated surfaces
 
-			DrawVertexBufferIndexedUINT(nullptr, nullptr, it->second->Indices.size(),
-				it->second->BaseIndexLocation);
+			DrawVertexBufferIndexedUINT(nullptr, nullptr, mesh.second->Indices.size(),
+				mesh.second->BaseIndexLocation);
 		}
 	}
 
@@ -2178,15 +2168,13 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh(bool noTextures) {
 	zCTexture* bound = nullptr;
 	MaterialInfo* boundInfo = nullptr;
 	ID3D11ShaderResourceView* boundNormalmap = nullptr;
-	for (std::list<std::pair<MeshKey, WorldMeshInfo*>>::iterator it =
-		meshList.begin();
-		it != meshList.end(); ++it) {
+	for (auto const& mesh : meshList) {
 		int indicesNumMod = 1;
-		if (it->first.Texture != bound &&
+		if (mesh.first.Texture != bound &&
 			Engine::GAPI->GetRendererState()->RendererSettings.DrawWorldMesh > 1) {
-			MyDirectDrawSurface7* surface = it->first.Texture->GetSurface();
+			MyDirectDrawSurface7* surface = mesh.first.Texture->GetSurface();
 			ID3D11ShaderResourceView* srv[3];
-			MaterialInfo* info = it->first.Info;
+			MaterialInfo* info = mesh.first.Info;
 
 			// Get diffuse and normalmap
 			srv[0] = ((D3D11Texture*)surface->GetEngineTexture())
@@ -2221,17 +2209,17 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh(bool noTextures) {
 
 			// Get the right shader for it
 
-			BindShaderForTexture(it->first.Material->GetAniTexture(), false,
-				it->first.Material->GetAlphaFunc());
+			BindShaderForTexture(mesh.first.Material->GetAniTexture(), false,
+				mesh.first.Material->GetAlphaFunc());
 
 			// Check for alphablending on world mesh
-			if ((it->first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_BLEND ||
-				it->first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_ADD) &&
+			if ((mesh.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_BLEND ||
+				mesh.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_ADD) &&
 				!Engine::GAPI->GetRendererState()->BlendState.BlendEnabled) {
-				if (it->first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_BLEND)
+				if (mesh.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_BLEND)
 					Engine::GAPI->GetRendererState()->BlendState.SetAlphaBlending();
 
-				if (it->first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_ADD)
+				if (mesh.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_ADD)
 					Engine::GAPI->GetRendererState()->BlendState.SetAdditiveBlending();
 
 				Engine::GAPI->GetRendererState()->BlendState.SetDirty();
@@ -2242,7 +2230,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh(bool noTextures) {
 				UpdateRenderStates();
 			}
 			else if (Engine::GAPI->GetRendererState()->BlendState.BlendEnabled &&
-				it->first.Material->GetAlphaFunc() != zMAT_ALPHA_FUNC_BLEND) {
+				mesh.first.Material->GetAlphaFunc() != zMAT_ALPHA_FUNC_BLEND) {
 				Engine::GAPI->GetRendererState()->BlendState.SetDefault();
 				Engine::GAPI->GetRendererState()->BlendState.SetDirty();
 
@@ -2257,21 +2245,19 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh(bool noTextures) {
 			info->Constantbuffer->BindToPixelShader(2);
 
 			// Don't let the game unload the texture after some timep
-			it->first.Material->GetAniTexture()->CacheIn(0.6f);
+			mesh.first.Material->GetAniTexture()->CacheIn(0.6f);
 
 			boundInfo = info;
-			bound = it->first.Material->GetAniTexture();
+			bound = mesh.first.Material->GetAniTexture();
 
 			// Bind normalmap to HDS
-			if (!it->second->IndicesPNAEN.empty()) {
+			if (!mesh.second->IndicesPNAEN.empty()) {
 				Context->DSSetShaderResources(0, 1, &boundNormalmap);
 				Context->HSSetShaderResources(0, 1, &boundNormalmap);
 			}
 		}
 
 		// Check for tesselated mesh
-		// if (tesselationEnabled && !ActiveHDS &&
-		// it->second->TesselationSettings.buffer.VT_TesselationFactor > 0.0f)
 		if (tesselationEnabled && !ActiveHDS &&
 			boundInfo->TextureTesselationSettings.buffer.VT_TesselationFactor >
 			0.0f) {
@@ -2285,8 +2271,8 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh(bool noTextures) {
 		if (boundInfo &&
 			boundInfo->TextureTesselationSettings.buffer.VT_TesselationFactor >
 			0.0f &&
-			!it->second->IndicesPNAEN.empty() &&
-			it->first.Material->GetAlphaFunc() <= zMAT_ALPHA_FUNC_FUNC_NONE &&
+			!mesh.second->IndicesPNAEN.empty() &&
+			mesh.first.Material->GetAlphaFunc() <= zMAT_ALPHA_FUNC_FUNC_NONE &&
 			!bound->HasAlphaChannel())  // Only allow tesselation for materials
 										// without alphablending
 		{
@@ -2312,15 +2298,15 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh(bool noTextures) {
 
 		if (Engine::GAPI->GetRendererState()->RendererSettings.DrawWorldMesh > 2) {
 			if (!ActiveHDS) {
-				DrawVertexBufferIndexed(it->second->MeshVertexBuffer,
-					it->second->MeshIndexBuffer,
-					it->second->Indices.size());
+				DrawVertexBufferIndexed(mesh.second->MeshVertexBuffer,
+					mesh.second->MeshIndexBuffer,
+					mesh.second->Indices.size());
 			}
 			else {
 				// Draw from mesh info
-				DrawVertexBufferIndexed(it->second->MeshVertexBuffer,
-					it->second->MeshIndexBufferPNAEN,
-					it->second->IndicesPNAEN.size());
+				DrawVertexBufferIndexed(mesh.second->MeshVertexBuffer,
+					mesh.second->MeshIndexBufferPNAEN,
+					mesh.second->IndicesPNAEN.size());
 			}
 		}
 	}
