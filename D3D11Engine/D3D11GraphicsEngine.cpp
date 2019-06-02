@@ -3217,21 +3217,20 @@ void D3D11GraphicsEngine::DrawWorldAround(const D3DXVECTOR3& position,
 		UpdateRenderStates();
 
 		// Reset instances
-		const std::unordered_map<zCProgMeshProto*, MeshVisualInfo*>& vis =
+		const std::unordered_map<zCProgMeshProto*, MeshVisualInfo*>& staticMeshVisuals =
 			Engine::GAPI->GetStaticMeshVisuals();
 
 		D3DXVECTOR3 camPos = Engine::GAPI->GetCameraPosition();
 		float shadowRange = Engine::GAPI->GetRendererState()
 			->RendererSettings.WorldShadowRangeScale *
 			WorldShadowmap1->GetSizeX();
-		for (std::list<VobInfo*>::iterator it = RenderedVobs.begin();
-			it != RenderedVobs.end(); ++it) {
+		for (auto const& it : RenderedVobs) {
 			VobInstanceInfo vii;
-			vii.world = (*it)->WorldMatrix;
+			vii.world = it->WorldMatrix;
 
-			if (!(*it)->IsIndoorVob)  // && D3DXVec3Length(&((*it)->LastRenderPosition
+			if (!it->IsIndoorVob)  // && D3DXVec3Length(&((*it)->LastRenderPosition
 									  // - position)) < shadowRange)
-				((MeshVisualInfo*)(*it)->VisualInfo)->Instances.push_back(vii);
+				((MeshVisualInfo*)it->VisualInfo)->Instances.push_back(vii);
 		}
 
 		// Apply instancing shader
@@ -3257,44 +3256,37 @@ void D3D11GraphicsEngine::DrawWorldAround(const D3DXVECTOR3& position,
 			(void**)& data, &size);
 		static std::vector<VobInstanceInfo, AlignmentAllocator<VobInstanceInfo, 16>>
 			s_InstanceData;
-		for (std::unordered_map<zCProgMeshProto*, MeshVisualInfo*>::const_iterator
-			it = vis.begin();
-			it != vis.end(); ++it) {
-			if (it->second->Instances.empty()) continue;
+		for (auto const& staticMeshVisual : staticMeshVisuals) {
+			if (staticMeshVisual.second->Instances.empty()) continue;
 
-			if ((loc + it->second->Instances.size()) * sizeof(VobInstanceInfo) >=
+			if ((loc + staticMeshVisual.second->Instances.size()) * sizeof(VobInstanceInfo) >=
 				desc.ByteWidth)
 				break;  // Should never happen
 
-			it->second->StartInstanceNum = loc;
-			memcpy(data + loc * sizeof(VobInstanceInfo), &it->second->Instances[0],
-				sizeof(VobInstanceInfo) * it->second->Instances.size());
-			loc += it->second->Instances.size();
+			staticMeshVisual.second->StartInstanceNum = loc;
+			memcpy(data + loc * sizeof(VobInstanceInfo), &staticMeshVisual.second->Instances[0],
+				sizeof(VobInstanceInfo) * staticMeshVisual.second->Instances.size());
+			loc += staticMeshVisual.second->Instances.size();
 		}
 		DynamicInstancingBuffer->Unmap();
 
 		// Draw all vobs the player currently sees
-		for (std::unordered_map<zCProgMeshProto*, MeshVisualInfo*>::const_iterator
-			it = vis.begin();
-			it != vis.end(); ++it) {
-			if (it->second->Instances.empty()) continue;
+		for (auto const& staticMeshVisual : staticMeshVisuals) {
+			if (staticMeshVisual.second->Instances.empty()) continue;
 
 			bool doReset = true;
-			for (std::map<MeshKey, std::vector<MeshInfo*>>::iterator itt =
-				it->second->MeshesByTexture.begin();
-				itt != it->second->MeshesByTexture.end(); itt++) {
-				std::vector<MeshInfo*>& mlist =
-					it->second->MeshesByTexture[itt->first];
+			for (auto const& itt : staticMeshVisual.second->MeshesByTexture) {
+				std::vector<MeshInfo*>& mlist = staticMeshVisual.second->MeshesByTexture[itt.first];
 				if (mlist.empty()) continue;
 
 				for (unsigned int i = 0; i < mlist.size(); i++) {
-					zCTexture* tx = itt->first.Texture;
+					zCTexture* tx = itt.first.Texture;
 
 					// Check for alphablend
 					bool blendAdd =
-						itt->first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_ADD;
+						itt.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_ADD;
 					bool blendBlend =
-						itt->first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_BLEND;
+						itt.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_BLEND;
 					if (!doReset || blendAdd ||
 						blendBlend)  // TODO: FIXME: if one part of the mesh uses blending, all do.
 					{
@@ -3324,34 +3316,32 @@ void D3D11GraphicsEngine::DrawWorldAround(const D3DXVECTOR3& position,
 					// Draw batch
 					DrawInstanced(mi->MeshVertexBuffer, mi->MeshIndexBuffer,
 						mi->Indices.size(), DynamicInstancingBuffer,
-						sizeof(VobInstanceInfo), it->second->Instances.size(),
-						sizeof(ExVertexStruct), it->second->StartInstanceNum);
+						sizeof(VobInstanceInfo), staticMeshVisual.second->Instances.size(),
+						sizeof(ExVertexStruct), staticMeshVisual.second->StartInstanceNum);
 
 					Engine::GAPI->GetRendererState()->RendererInfo.FrameDrawnVobs +=
-						it->second->Instances.size();
+						staticMeshVisual.second->Instances.size();
 				}
 			}
 
 			// Reset visual
-			if (doReset) it->second->StartNewFrame();
+			if (doReset) staticMeshVisual.second->StartNewFrame();
 		}
 	}
 
 	if (Engine::GAPI->GetRendererState()->RendererSettings.DrawSkeletalMeshes) {
 		// Draw skeletal meshes
-		for (std::list<SkeletalVobInfo*>::iterator it =
-			Engine::GAPI->GetSkeletalMeshVobs().begin();
-			it != Engine::GAPI->GetSkeletalMeshVobs().end(); ++it) {
-			if (!(*it)->VisualInfo) continue;
+		for (auto const& skeletalMeshVob : Engine::GAPI->GetSkeletalMeshVobs()) {
+			if (!skeletalMeshVob->VisualInfo) continue;
 
-			INT2 s = WorldConverter::GetSectionOfPos((*it)->Vob->GetPositionWorld());
+			INT2 s = WorldConverter::GetSectionOfPos(skeletalMeshVob->Vob->GetPositionWorld());
 
-			float dist = D3DXVec3Length(&((*it)->Vob->GetPositionWorld() - position));
+			float dist = D3DXVec3Length(&(skeletalMeshVob->Vob->GetPositionWorld() - position));
 			if (dist > Engine::GAPI->GetRendererState()
 				->RendererSettings.IndoorVobDrawRadius)
 				continue;  // Skip out of range
 
-			Engine::GAPI->DrawSkeletalMeshVob((*it), FLT_MAX);
+			Engine::GAPI->DrawSkeletalMeshVob(skeletalMeshVob, FLT_MAX);
 		}
 	}
 
