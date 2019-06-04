@@ -370,7 +370,7 @@ public:
 	void SetEnableGothicInput(bool value);
 
 	/** Returns the midpoint of the current world */
-	WorldInfo * GetLoadedWorldInfo() { return LoadedWorldInfo; }
+	WorldInfo* GetLoadedWorldInfo() { return LoadedWorldInfo.get(); }
 
 	/** Returns wether the camera is indoor or not */
 	bool IsCameraIndoor();
@@ -636,7 +636,7 @@ private:
 	GothicRendererState RendererState;
 
 	/** Loaded world mitpoint */
-	WorldInfo * LoadedWorldInfo;
+	std::unique_ptr<WorldInfo> LoadedWorldInfo;
 
 	/** Currently bound textures from gothic */
 	zCTexture * BoundTextures[8];
@@ -700,10 +700,10 @@ private:
 	std::mutex ResourceMutex;
 
 	/** Sky renderer */
-	GSky * SkyRenderer;
+	std::unique_ptr<GSky> SkyRenderer;
 
 	/** Inventory manager */
-	GInventory * Inventory;
+	std::unique_ptr<GInventory> Inventory;
 
 	/** Saved Wnd-Proc pointer from the game */
 	LONG_PTR OriginalGothicWndProc;
@@ -722,7 +722,7 @@ private:
 	HWND OutputWindow;
 
 	/** Ocean */
-	GOcean * Ocean;
+	std::unique_ptr<GOcean> Ocean;
 
 	/** Suppressed textures for the sections */
 	std::map<WorldMeshSectionInfo *, std::vector<std::string>> SuppressedTexturesBySection;

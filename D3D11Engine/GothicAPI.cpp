@@ -132,10 +132,10 @@ GothicAPI::GothicAPI()
 
 GothicAPI::~GothicAPI() {
 	//ResetWorld(); // Just let it leak for now. // FIXME: Do this properly
-	SAFE_DELETE(Ocean);
-	SAFE_DELETE(SkyRenderer);
-	SAFE_DELETE(Inventory);
-	SAFE_DELETE(LoadedWorldInfo);
+	Ocean.reset();
+	SkyRenderer.reset();
+	Inventory.reset();
+	LoadedWorldInfo.reset();
 	SAFE_DELETE(WrappedWorldMesh);
 }
 
@@ -163,7 +163,7 @@ void GothicAPI::OnGameStart() {
 #endif
 #endif
 
-	LoadedWorldInfo = new WorldInfo;
+	LoadedWorldInfo = std::make_unique<WorldInfo>();
 	LoadedWorldInfo->HighestVertex = 2;
 	LoadedWorldInfo->LowestVertex = 3;
 	LoadedWorldInfo->MidPoint = D3DXVECTOR2(4, 5);
@@ -175,10 +175,10 @@ void GothicAPI::OnGameStart() {
 
 	InitializeCriticalSection(&ResourceCriticalSection);
 
-	SkyRenderer = new GSky;
+	SkyRenderer = std::make_unique<GSky>();
 	SkyRenderer->InitSky();
 
-	Inventory = new GInventory;
+	Inventory = std::make_unique<GInventory>();
 }
 
 /** Called to update the world, before rendering */
@@ -470,7 +470,7 @@ void GothicAPI::OnGeometryLoaded(zCPolygon * *polys, unsigned int numPolygons) {
 	std::string worldStr = "system\\GD3D11\\meshes\\WLD_" + LoadedWorldInfo->WorldName + ".obj";
 	// Convert world to our own format
 #ifdef BUILD_GOTHIC_2_6_fix
-	WorldConverter::ConvertWorldMesh(polys, numPolygons, &WorldSections, LoadedWorldInfo, &WrappedWorldMesh);
+	WorldConverter::ConvertWorldMesh(polys, numPolygons, &WorldSections, LoadedWorldInfo.get(), &WrappedWorldMesh);
 #else
 	if (Toolbox::FileExists(worldStr)) {
 		WorldConverter::LoadWorldMeshFromFile(worldStr, &WorldSections, LoadedWorldInfo, &WrappedWorldMesh);
@@ -2177,13 +2177,13 @@ D3DXMATRIX& GothicAPI::GetProjectionMatrix()
 /** Returns the GSky-Object */
 GSky* GothicAPI::GetSky()
 {
-	return SkyRenderer;
+	return SkyRenderer.get();
 }
 
 /** Returns the inventory */
 GInventory* GothicAPI::GetInventory()
 {
-	return Inventory;
+	return Inventory.get();
 }
 
 /** Returns the fog-color */
@@ -4031,7 +4031,7 @@ void GothicAPI::CollectPolygonsInAABBRec(BspInfo * base, const zTBBox3D & bbox, 
 
 /** Returns the current ocean-object */
 GOcean* GothicAPI::GetOcean() {
-	return Ocean;
+	return Ocean.get();
 }
 
 /** Returns our bsp-root-node */
