@@ -4583,16 +4583,13 @@ void D3D11GraphicsEngine::RenderShadowmaps(const D3DXVECTOR3& cameraPosition,
 
 	if (!debugRTV) {
 		Context->OMSetRenderTargets(0, nullptr, dsvOverwrite);
-
 		Engine::GAPI->GetRendererState()->BlendState.ColorWritesEnabled = false;
-		Engine::GAPI->GetRendererState()->BlendState.SetDirty();
 	}
 	else {
 		Context->OMSetRenderTargets(1, &debugRTV, dsvOverwrite);
-
 		Engine::GAPI->GetRendererState()->BlendState.ColorWritesEnabled = true;
-		Engine::GAPI->GetRendererState()->BlendState.SetDirty();
 	}
+	Engine::GAPI->GetRendererState()->BlendState.SetDirty();
 
 	// Dont render shadows from the sun when it isn't on the sky
 	if ((target != WorldShadowmap1.get() ||
