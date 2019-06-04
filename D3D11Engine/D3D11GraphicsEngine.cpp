@@ -135,7 +135,7 @@ D3D11GraphicsEngine::D3D11GraphicsEngine() {
 	CubeSamplerState = nullptr;
 	ClampSamplerState = nullptr;
 
-	Effects = new D3D11Effect;
+	Effects = std::make_unique<D3D11Effect>();
 
 	RenderingStage = DES_MAIN;
 
@@ -143,7 +143,7 @@ D3D11GraphicsEngine::D3D11GraphicsEngine() {
 	SaveScreenshotNextFrame = false;
 
 	LineRenderer = new D3D11LineRenderer();
-	Occlusion = new D3D11OcclusionQuerry();
+	Occlusion = std::make_unique<D3D11OcclusionQuerry>();
 
 	RECT desktopRect;
 	GetClientRect(GetDesktopWindow(), &desktopRect);
@@ -158,8 +158,8 @@ D3D11GraphicsEngine::~D3D11GraphicsEngine() {
 	GothicBlendStateInfo::DeleteCachedObjects();
 	GothicRasterizerStateInfo::DeleteCachedObjects();
 
-	SAFE_DELETE(Effects);
-	SAFE_DELETE(Occlusion);
+	Effects.reset();
+	Occlusion.reset();
 	SAFE_DELETE(InfiniteRangeConstantBuffer);
 	SAFE_DELETE(OutdoorSmallVobsConstantBuffer);
 	SAFE_DELETE(OutdoorVobsConstantBuffer);
@@ -172,18 +172,18 @@ D3D11GraphicsEngine::~D3D11GraphicsEngine() {
 	SAFE_DELETE(DepthStencilBuffer);
 	SAFE_DELETE(DynamicInstancingBuffer);
 	SAFE_DELETE(PfxRenderer);
-	SAFE_DELETE(CloudBuffer);
-	SAFE_DELETE(DistortionTexture);
-	SAFE_DELETE(WhiteTexture);
-	SAFE_DELETE(NoiseTexture);
+	CloudBuffer.reset();
+	DistortionTexture.reset();
+	WhiteTexture.reset();
+	NoiseTexture.reset();
 	SAFE_DELETE(ShaderManager);
 	SAFE_DELETE(TempVertexBuffer);
 	SAFE_DELETE(GBuffer1_Normals_SpecIntens_SpecPower);
 	SAFE_DELETE(GBuffer0_Diffuse);
 	SAFE_DELETE(HDRBackBuffer);
-	SAFE_DELETE(WorldShadowmap1);
+	WorldShadowmap1.reset();
 	SAFE_DELETE(InverseUnitSphereMesh);
-	SAFE_DELETE(UIView);
+	UIView.reset();
 
 	SAFE_RELEASE(ReflectionCube2);
 	SAFE_RELEASE(ReflectionCube);
@@ -383,13 +383,13 @@ XRESULT D3D11GraphicsEngine::Init() {
 	SetActivePixelShader("PS_Simple");
 	SetActiveVertexShader("VS_Ex");
 
-	CreateTexture(&DistortionTexture);
+	DistortionTexture = std::make_unique<D3D11Texture>();
 	DistortionTexture->Init("system\\GD3D11\\textures\\distortion2.dds");
-
-	CreateTexture(&NoiseTexture);
+	
+	NoiseTexture = std::make_unique<D3D11Texture>();
 	NoiseTexture->Init("system\\GD3D11\\textures\\noise.png");
-
-	CreateTexture(&WhiteTexture);
+	
+	WhiteTexture = std::make_unique<D3D11Texture>();
 	WhiteTexture->Init("system\\GD3D11\\textures\\white.png");
 
 	InverseUnitSphereMesh = new GMesh;
@@ -619,9 +619,7 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 
 	PfxRenderer->OnResize(Resolution);
 
-	delete CloudBuffer;
-	CloudBuffer = new RenderToTextureBuffer(Device, bbres.x, bbres.y,
-		DXGI_FORMAT_R8G8B8A8_UNORM);
+	CloudBuffer = std::make_unique<RenderToTextureBuffer>(Device, bbres.x, bbres.y, DXGI_FORMAT_R8G8B8A8_UNORM);
 
 	delete GBuffer1_Normals_SpecIntens_SpecPower;
 	GBuffer1_Normals_SpecIntens_SpecPower = new RenderToTextureBuffer(
@@ -635,9 +633,8 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 	HDRBackBuffer = new RenderToTextureBuffer(Device, Resolution.x, Resolution.y,
 		DXGI_FORMAT_R16G16B16A16_FLOAT);
 
-	delete WorldShadowmap1;
 	int s = Engine::GAPI->GetRendererState()->RendererSettings.ShadowMapSize;
-	WorldShadowmap1 = new RenderToDepthStencilBuffer(
+	WorldShadowmap1 = std::make_unique<RenderToDepthStencilBuffer>(
 		Device, s, s, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT,
 		DXGI_FORMAT_R32_FLOAT);
 
@@ -704,8 +701,7 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
 	if (WorldShadowmap1->GetSizeX() != s) {
 		int old = WorldShadowmap1->GetSizeX();
 		LogInfo() << "Shadowmapresolution changed to: " << s << "x" << s;
-		SAFE_DELETE(WorldShadowmap1);
-		WorldShadowmap1 = new RenderToDepthStencilBuffer(
+		WorldShadowmap1 = std::make_unique<RenderToDepthStencilBuffer>(
 			Device, s, s, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT,
 			DXGI_FORMAT_R32_FLOAT);
 
@@ -2199,7 +2195,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh(bool noTextures) {
 					info->buffer.NormalmapStrength = DEFAULT_NORMALMAP_STRENGTH;
 					info->UpdateConstantbuffer();
 				}
-				srv[1] = ((D3D11Texture*)DistortionTexture)->GetShaderResourceView();
+				srv[1] = DistortionTexture->GetShaderResourceView();
 			}
 
 			boundNormalmap = srv[1];
@@ -3561,8 +3557,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 									info->buffer.NormalmapStrength = DEFAULT_NORMALMAP_STRENGTH;
 									info->UpdateConstantbuffer();
 								}
-								srv[1] = ((D3D11Texture*)DistortionTexture)
-									->GetShaderResourceView();
+								srv[1] = DistortionTexture->GetShaderResourceView();
 							}
 							// Bind both
 							Context->PSSetShaderResources(0, 3, srv);
@@ -4562,7 +4557,7 @@ void D3D11GraphicsEngine::RenderShadowmaps(const D3DXVECTOR3& cameraPosition,
 	ID3D11DepthStencilView* dsvOverwrite,
 	ID3D11RenderTargetView* debugRTV) {
 	if (!target) {
-		target = WorldShadowmap1;
+		target = WorldShadowmap1.get();
 	}
 
 	if (!dsvOverwrite) dsvOverwrite = target->GetDepthStencilView();
@@ -4604,7 +4599,7 @@ void D3D11GraphicsEngine::RenderShadowmaps(const D3DXVECTOR3& cameraPosition,
 	}
 
 	// Dont render shadows from the sun when it isn't on the sky
-	if ((target != WorldShadowmap1 ||
+	if ((target != WorldShadowmap1.get() ||
 		Engine::GAPI->GetSky()->GetAtmoshpereSettings().LightDirection.y >
 		0) &&  // Only stop rendering if the sun is down on main-shadowmap
 			   // TODO: Take this out of here!
@@ -5285,12 +5280,12 @@ void D3D11GraphicsEngine::DrawUnderwaterEffects() {
 /** Creates the main UI-View */
 void D3D11GraphicsEngine::CreateMainUIView() {
 	if (!UIView) {
-		UIView = new D2DView;
+		UIView = std::make_unique<D2DView>();
 
 		ID3D11Texture2D* tex;
 		BackbufferRTV->GetResource((ID3D11Resource * *)& tex);
 		if (XR_SUCCESS != UIView->Init(Resolution, tex)) {
-			SAFE_DELETE(UIView);
+			UIView.reset();
 
 			SAFE_RELEASE(tex);
 

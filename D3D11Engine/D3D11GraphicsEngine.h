@@ -279,7 +279,7 @@ public:
 	void DrawFrameParticles(std::map<zCTexture *, std::vector<ParticleInstanceInfo>> & particles, std::map<zCTexture *, ParticleRenderInfo> & info);
 
 	/** Returns the UI-View */
-	D2DView * GetUIView(){return UIView;}
+	D2DView* GetUIView() { return UIView.get(); }
 
 	/** Creates the main UI-View */
 	void CreateMainUIView();
@@ -304,7 +304,7 @@ protected:
 	ID3D11DepthStencilState* DefaultDepthStencilState;
 
 	/** Effects wrapper */
-	D3D11Effect* Effects;
+	std::unique_ptr<D3D11Effect> Effects;
 
 	/** Swapchain buffers */
 	ID3D11RenderTargetView* BackbufferRTV;
@@ -326,23 +326,23 @@ protected:
 	D3D11PfxRenderer* PfxRenderer;
 
 	/** Sky */
-	RenderToTextureBuffer * CloudBuffer;
-	D3D11Texture * DistortionTexture;
-	D3D11Texture * NoiseTexture;
-	D3D11Texture * WhiteTexture;
+	std::unique_ptr<RenderToTextureBuffer> CloudBuffer;
+	std::unique_ptr<D3D11Texture> DistortionTexture;
+	std::unique_ptr<D3D11Texture> NoiseTexture;
+	std::unique_ptr<D3D11Texture> WhiteTexture;
 
 	/** Lighting */
 	GMesh* InverseUnitSphereMesh;
 
 	/** Shadowing */
-	RenderToDepthStencilBuffer * WorldShadowmap1;
+	std::unique_ptr<RenderToDepthStencilBuffer> WorldShadowmap1;
 	std::list<VobInfo*> RenderedVobs;
 
 	/** The current rendering stage */
 	D3D11ENGINE_RENDER_STAGE RenderingStage;
 
 	/** The editorcontrols */
-	D2DView * UIView;
+	std::unique_ptr<D2DView> UIView;
 
 	/** Map of texture/index */
 	stdext::unordered_map<zCTexture *, int> TexArrayIndexByTexture;
@@ -367,7 +367,7 @@ protected:
 	D3D11VertexBuffer* QuadIndexBuffer;
 
 	/** Occlusion query manager */
-	D3D11OcclusionQuerry* Occlusion;
+	std::unique_ptr<D3D11OcclusionQuerry> Occlusion;
 
 	/** If true, we will save a screenshot after the next frame */
 	bool SaveScreenshotNextFrame;
