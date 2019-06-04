@@ -327,10 +327,10 @@ XRESULT D3D11GraphicsEngineBase::SetViewport(const ViewportInfo& viewportInfo)
 	D3D11_VIEWPORT viewport;
 	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
 
-	viewport.TopLeftX = (float)viewportInfo.TopLeftX;
-	viewport.TopLeftY = (float)viewportInfo.TopLeftY;
-	viewport.Width = (float)viewportInfo.Width;
-	viewport.Height = (float)viewportInfo.Height;
+	viewport.TopLeftX = static_cast<float>(viewportInfo.TopLeftX);
+	viewport.TopLeftY = static_cast<float>(viewportInfo.TopLeftY);
+	viewport.Width    = static_cast<float>(viewportInfo.Width);
+	viewport.Height   = static_cast<float>(viewportInfo.Height);
 	viewport.MinDepth = viewportInfo.MinZ;
 	viewport.MaxDepth = viewportInfo.MaxZ;
 
@@ -575,7 +575,7 @@ XRESULT D3D11GraphicsEngineBase::DrawVertexArray(ExVertexStruct* vertices, unsig
 	Context->RSGetViewports(&num, &vp);
 
 	// Update viewport information
-	float scale = Engine::GAPI->GetRendererState()->RendererSettings.GothicUIScale;
+	const float scale = Engine::GAPI->GetRendererState()->RendererSettings.GothicUIScale;
 	float2 temp2Float2[2];
 	temp2Float2[0].x = vp.TopLeftX / scale;
 	temp2Float2[0].y = vp.TopLeftY / scale;
@@ -686,7 +686,7 @@ XRESULT D3D11GraphicsEngineBase::UpdateRenderStates()
 /** Constructs the makro list for shader compilation */
 void D3D11GraphicsEngineBase::ConstructShaderMakroList(std::vector<D3D10_SHADER_MACRO> & list)
 {
-	GothicRendererSettings& s = Engine::GAPI->GetRendererState()->RendererSettings;
+	const GothicRendererSettings& s = Engine::GAPI->GetRendererState()->RendererSettings;
 	D3D10_SHADER_MACRO m;
 
 	m.Name = "SHD_ENABLE";
@@ -714,9 +714,9 @@ void D3D11GraphicsEngineBase::SetupVS_ExMeshDrawCall()
 
 void D3D11GraphicsEngineBase::SetupVS_ExConstantBuffer()
 {
-	D3DXMATRIX& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
-	D3DXMATRIX& view = Engine::GAPI->GetRendererState()->TransformState.TransformView;
-	D3DXMATRIX& proj = Engine::GAPI->GetProjectionMatrix();
+	const D3DXMATRIX& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
+	const D3DXMATRIX& view  = Engine::GAPI->GetRendererState()->TransformState.TransformView;
+	const D3DXMATRIX& proj  = Engine::GAPI->GetProjectionMatrix();
 
 	VS_ExConstantBuffer_PerFrame cb;
 	cb.View = view;
@@ -772,7 +772,7 @@ XRESULT D3D11GraphicsEngineBase::SetActiveGShader(const std::string & shader)
 /** Puts the current world matrix into a CB and binds it to the given slot */
 void D3D11GraphicsEngineBase::SetupPerInstanceConstantBuffer(int slot)
 {
-	D3DXMATRIX& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
+	const D3DXMATRIX& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
 
 	VS_ExConstantBuffer_PerInstance cb;
 	cb.World = world;
@@ -784,9 +784,9 @@ void D3D11GraphicsEngineBase::SetupPerInstanceConstantBuffer(int slot)
 /** Updates the transformsCB with new values from the GAPI */
 void D3D11GraphicsEngineBase::UpdateTransformsCB()
 {
-	D3DXMATRIX& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
-	D3DXMATRIX& view = Engine::GAPI->GetRendererState()->TransformState.TransformView;
-	D3DXMATRIX& proj = Engine::GAPI->GetProjectionMatrix();
+	const D3DXMATRIX& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
+	const D3DXMATRIX& view  = Engine::GAPI->GetRendererState()->TransformState.TransformView;
+	const D3DXMATRIX& proj  = Engine::GAPI->GetProjectionMatrix();
 
 	VS_ExConstantBuffer_PerFrame cb;
 	cb.View = view;
@@ -818,7 +818,7 @@ XRESULT D3D11GraphicsEngineBase::DrawVertexBufferFF(D3D11VertexBuffer* vb, unsig
 
 	UINT offset = 0;
 	UINT uStride = stride;
-	ID3D11Buffer* buffer = ((D3D11VertexBuffer *)vb)->GetVertexBuffer();
+	ID3D11Buffer* buffer = vb->GetVertexBuffer();
 	Context->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
 
 	//Draw the mesh

@@ -673,7 +673,6 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
 
 	// Check for shadowmap resize
 	int s = Engine::GAPI->GetRendererState()->RendererSettings.ShadowMapSize;
-	float r = 0;
 	switch (s) {
 		case 0:
 			s = 512;
@@ -690,6 +689,9 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
 		case 3:
 			s = 4096;
 			break;
+		case 4:
+			s = 8192;
+			break;
 	}
 
 	if (WorldShadowmap1->GetSizeX() != s) {
@@ -704,10 +706,8 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
 
 	// Force the mode
 	zCView::SetMode(
-		(int)(Resolution.x /
-			Engine::GAPI->GetRendererState()->RendererSettings.GothicUIScale),
-			(int)(Resolution.y /
-				Engine::GAPI->GetRendererState()->RendererSettings.GothicUIScale),
+		static_cast<int>(Resolution.x / Engine::GAPI->GetRendererState()->RendererSettings.GothicUIScale),
+		static_cast<int>(Resolution.y / Engine::GAPI->GetRendererState()->RendererSettings.GothicUIScale),
 		32);
 
 	// Notify the shader manager
