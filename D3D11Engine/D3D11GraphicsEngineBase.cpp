@@ -50,7 +50,7 @@ D3D11GraphicsEngineBase::~D3D11GraphicsEngineBase() {
 	SAFE_DELETE(TempVertexBuffer);
 	SAFE_DELETE(ShaderManager);
 	SAFE_DELETE(Backbuffer);
-	SAFE_DELETE(HDRBackBuffer);
+	HDRBackBuffer.reset();
 	SAFE_DELETE(LineRenderer);
 	SAFE_DELETE(TransformsCB);
 
@@ -182,7 +182,7 @@ XRESULT D3D11GraphicsEngineBase::OnResize(INT2 newSize)
 	SetWindowPos(OutputWindow, nullptr, 0, 0, desktopRect.right, desktopRect.bottom, 0);
 
 	delete Backbuffer; Backbuffer = nullptr;
-	delete DepthStencilBuffer; DepthStencilBuffer = nullptr;
+	DepthStencilBuffer.reset();
 
 	if (!SwapChain)
 	{
@@ -251,8 +251,7 @@ XRESULT D3D11GraphicsEngineBase::OnResize(INT2 newSize)
 	Backbuffer = new RenderToTextureBuffer(backbuffer, backbufferSRV, backbufferRTV, (UINT)Resolution.x, (UINT)Resolution.y);
 
 	// Recreate DepthStencilBuffer
-	delete DepthStencilBuffer;
-	DepthStencilBuffer = new RenderToDepthStencilBuffer(Device, Resolution.x, Resolution.y, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_R32_FLOAT);
+	DepthStencilBuffer = std::make_unique<RenderToDepthStencilBuffer>(Device, Resolution.x, Resolution.y, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_R32_FLOAT);
 
 	// Bind our newly created resources
 	Context->OMSetRenderTargets(1, Backbuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView());
@@ -271,8 +270,7 @@ XRESULT D3D11GraphicsEngineBase::OnResize(INT2 newSize)
 	Context->RSSetViewports(1, &viewport);
 
 	// Create other buffers
-	delete HDRBackBuffer;
-	HDRBackBuffer = new RenderToTextureBuffer(Device, Resolution.x, Resolution.y, DXGI_FORMAT_R16G16B16A16_FLOAT);
+	HDRBackBuffer = std::make_unique<RenderToTextureBuffer>(Device, Resolution.x, Resolution.y, DXGI_FORMAT_R16G16B16A16_FLOAT);
 
 	Engine::AntTweakBar->OnResize(newSize);
 

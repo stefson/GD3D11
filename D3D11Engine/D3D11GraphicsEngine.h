@@ -147,19 +147,19 @@ public:
 	XRESULT DrawOcean(GOcean* ocean);
 
 	/** Gets the depthbuffer */
-	RenderToDepthStencilBuffer * GetDepthBuffer(){return DepthStencilBuffer;}
+	RenderToDepthStencilBuffer * GetDepthBuffer(){return DepthStencilBuffer.get();}
 
 	/** Returns the Backbuffers shader resource view */
 	ID3D11ShaderResourceView * GetBackbufferSRV(){return BackbufferSRV;}
 
 	/** Returns the first GBuffer */
-	RenderToTextureBuffer * GetGBuffer0(){return GBuffer0_Diffuse;}
+	RenderToTextureBuffer * GetGBuffer0(){return GBuffer0_Diffuse.get();}
 
 	/** Returns the second GBuffer */
-	RenderToTextureBuffer * GetGBuffer1(){return GBuffer1_Normals_SpecIntens_SpecPower;}
+	RenderToTextureBuffer * GetGBuffer1(){return GBuffer1_Normals_SpecIntens_SpecPower.get();}
 
 	/** Returns the HDRBackbuffer */
-	RenderToTextureBuffer * GetHDRBackBuffer(){return HDRBackBuffer;}
+	RenderToTextureBuffer * GetHDRBackBuffer(){return HDRBackBuffer.get();}
 
 	/** Unbinds the texture at the given slot */
 	virtual XRESULT UnbindTexture(int slot);
@@ -309,9 +309,9 @@ protected:
 	/** Swapchain buffers */
 	ID3D11RenderTargetView* BackbufferRTV;
 	ID3D11ShaderResourceView * BackbufferSRV; // Diffuse
-	RenderToTextureBuffer * GBuffer0_Diffuse;
-	RenderToTextureBuffer * GBuffer1_Normals_SpecIntens_SpecPower; // Normals / SpecIntensity / SpecPower
-	RenderToTextureBuffer * DepthStencilBufferCopy;
+	std::unique_ptr<RenderToTextureBuffer> GBuffer0_Diffuse;
+	std::unique_ptr<RenderToTextureBuffer> GBuffer1_Normals_SpecIntens_SpecPower; // Normals / SpecIntensity / SpecPower
+	std::unique_ptr<RenderToTextureBuffer>  DepthStencilBufferCopy;
 	RenderToTextureBuffer * DummyShadowCubemapTexture; // PS-Stage needs to have a rendertarget bound to execute SV_Depth-Writes, as it seems.
 
 	/** Temp-Arrays for storing data to be put in constant buffers */
@@ -323,7 +323,7 @@ protected:
 	std::set<zCTexture *> FrameTextures;
 
 	/** Post processing */
-	D3D11PfxRenderer* PfxRenderer;
+	std::unique_ptr<D3D11PfxRenderer> PfxRenderer;
 
 	/** Sky */
 	std::unique_ptr<RenderToTextureBuffer> CloudBuffer;

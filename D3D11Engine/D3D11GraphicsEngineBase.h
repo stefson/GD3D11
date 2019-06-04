@@ -177,8 +177,8 @@ protected:
 	/** Swapchain and resources */
 	IDXGISwapChain* SwapChain;
 	RenderToTextureBuffer * Backbuffer;
-	RenderToDepthStencilBuffer * DepthStencilBuffer;
-	RenderToTextureBuffer * HDRBackBuffer;
+	std::unique_ptr<RenderToDepthStencilBuffer> DepthStencilBuffer;
+	std::unique_ptr<RenderToTextureBuffer> HDRBackBuffer;
 
 	/** States */
 	ID3D11SamplerState* DefaultSamplerState;

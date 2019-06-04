@@ -169,18 +169,18 @@ D3D11GraphicsEngine::~D3D11GraphicsEngine() {
 	SAFE_DELETE(QuadIndexBuffer);
 
 	SAFE_DELETE(LineRenderer);
-	SAFE_DELETE(DepthStencilBuffer);
+	DepthStencilBuffer.reset();
 	SAFE_DELETE(DynamicInstancingBuffer);
-	SAFE_DELETE(PfxRenderer);
+	PfxRenderer.reset();
 	CloudBuffer.reset();
 	DistortionTexture.reset();
 	WhiteTexture.reset();
 	NoiseTexture.reset();
 	SAFE_DELETE(ShaderManager);
 	SAFE_DELETE(TempVertexBuffer);
-	SAFE_DELETE(GBuffer1_Normals_SpecIntens_SpecPower);
-	SAFE_DELETE(GBuffer0_Diffuse);
-	SAFE_DELETE(HDRBackBuffer);
+	GBuffer1_Normals_SpecIntens_SpecPower.reset();
+	GBuffer0_Diffuse.reset();
+	HDRBackBuffer.reset();
 	WorldShadowmap1.reset();
 	SAFE_DELETE(InverseUnitSphereMesh);
 	UIView.reset();
@@ -435,7 +435,7 @@ XRESULT D3D11GraphicsEngine::Init() {
 	ExVertexStruct vx[6];
 	ZeroMemory(vx, sizeof(vx));
 
-	float scale = 1.0f;
+	const float scale = 1.0f;
 	vx[0].Position = float3(-scale * 0.5f, -scale * 0.5f, 0.0f);
 	vx[1].Position = float3(scale * 0.5f, -scale * 0.5f, 0.0f);
 	vx[2].Position = float3(-scale * 0.5f, scale * 0.5f, 0.0f);
@@ -514,7 +514,7 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 	// Release all referenced buffer resources before we can resize the swapchain
 	SAFE_RELEASE(BackbufferRTV);
 	SAFE_RELEASE(BackbufferSRV);
-	SAFE_DELETE(DepthStencilBuffer);
+	DepthStencilBuffer.reset();
 
 	if (UIView) UIView->PrepareResize();
 
@@ -575,7 +575,7 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 	// Successfully resized swapchain, re-get buffers
 	ID3D11Texture2D* backbuffer = nullptr;
 	SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)& backbuffer);
-
+	
 	// Recreate RenderTargetView
 	LE(Device->CreateRenderTargetView(backbuffer, nullptr, &BackbufferRTV));
 	LE(Device->CreateShaderResourceView(backbuffer, nullptr, &BackbufferSRV));
@@ -587,13 +587,11 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 	backbuffer->Release();
 
 	// Recreate DepthStencilBuffer
-	delete DepthStencilBuffer;
-	DepthStencilBuffer = new RenderToDepthStencilBuffer(
+	DepthStencilBuffer = std::make_unique<RenderToDepthStencilBuffer>(
 		Device, Resolution.x, Resolution.y, DXGI_FORMAT_R32_TYPELESS, nullptr,
 		DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_R32_FLOAT);
 
-	delete DepthStencilBufferCopy;
-	DepthStencilBufferCopy = new RenderToTextureBuffer(
+	DepthStencilBufferCopy = std::make_unique<RenderToTextureBuffer>(
 		Device, Resolution.x, Resolution.y, DXGI_FORMAT_R32_TYPELESS, nullptr,
 		DXGI_FORMAT_R32_FLOAT, DXGI_FORMAT_R32_FLOAT);
 
@@ -615,22 +613,19 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 	Context->RSSetViewports(1, &viewport);
 
 	// Create PFX-Renderer
-	if (!PfxRenderer) PfxRenderer = new D3D11PfxRenderer;
+	if (!PfxRenderer) PfxRenderer = std::make_unique<D3D11PfxRenderer>();
 
 	PfxRenderer->OnResize(Resolution);
 
 	CloudBuffer = std::make_unique<RenderToTextureBuffer>(Device, bbres.x, bbres.y, DXGI_FORMAT_R8G8B8A8_UNORM);
 
-	delete GBuffer1_Normals_SpecIntens_SpecPower;
-	GBuffer1_Normals_SpecIntens_SpecPower = new RenderToTextureBuffer(
+	GBuffer1_Normals_SpecIntens_SpecPower = std::make_unique<RenderToTextureBuffer>(
 		Device, Resolution.x, Resolution.y, DXGI_FORMAT_R16G16B16A16_FLOAT);
 
-	delete GBuffer0_Diffuse;
-	GBuffer0_Diffuse = new RenderToTextureBuffer(
+	GBuffer0_Diffuse = std::make_unique<RenderToTextureBuffer>(
 		Device, Resolution.x, Resolution.y, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB);
 
-	delete HDRBackBuffer;
-	HDRBackBuffer = new RenderToTextureBuffer(Device, Resolution.x, Resolution.y,
+	HDRBackBuffer = std::make_unique<RenderToTextureBuffer>(Device, Resolution.x, Resolution.y,
 		DXGI_FORMAT_R16G16B16A16_FLOAT);
 
 	int s = Engine::GAPI->GetRendererState()->RendererSettings.ShadowMapSize;
@@ -5273,7 +5268,7 @@ void D3D11GraphicsEngine::DrawUnderwaterEffects() {
 	DistortionTexture->BindToPixelShader(2);
 	DepthStencilBufferCopy->BindToPixelShader(Context, 3);
 
-	PfxRenderer->BlurTexture(HDRBackBuffer, false, 1.0f, UNDERWATER_COLOR_MOD,
+	PfxRenderer->BlurTexture(HDRBackBuffer.get(), false, 1.0f, UNDERWATER_COLOR_MOD,
 		"PS_PFX_UnderwaterFinal");
 }
 
