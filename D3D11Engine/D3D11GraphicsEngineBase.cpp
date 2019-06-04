@@ -70,7 +70,7 @@ XRESULT D3D11GraphicsEngineBase::Init() {
 	LogInfo() << "Initializing Device...";
 
 	// Create DXGI factory
-	LE(CreateDXGIFactory(__uuidof(IDXGIFactory), (void **)&DXGIFactory));
+	LE(CreateDXGIFactory(__uuidof(IDXGIFactory), (void **)& DXGIFactory));
 	LE(DXGIFactory->EnumAdapters(0, &DXGIAdapter)); // Get first adapter
 
 	// Find out what we are rendering on to write it into the logfile
@@ -92,18 +92,18 @@ XRESULT D3D11GraphicsEngineBase::Init() {
 #else
 	LE(D3D11CreateDevice(DXGIAdapter, D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags | D3D11_CREATE_DEVICE_DEBUG, &featurelevel, 1, D3D11_SDK_VERSION, &Device, nullptr, &Context));
 #endif
-	
+
 	if (hr == DXGI_ERROR_UNSUPPORTED) {
-		LogErrorBox() <<	"Your GPU (" << deviceDescription.c_str() << ") does not support Direct3D 11, so it can't run GD3D11!\n"
+		LogErrorBox() << "Your GPU (" << deviceDescription.c_str() << ") does not support Direct3D 11, so it can't run GD3D11!\n"
 			"It has to be at least Featurelevel 11_0 compatible, which requires at least:"
 			" *	Nvidia GeForce GTX4xx or newer"
 			" *	AMD Radeon 5xxx or newer\n\n"
 			"The game will now close.";
 		exit(0);
 	}
-	
+
 	LE(Device->CreateDeferredContext(0, &DeferredContext)); // Used for multithreaded texture loading
-	
+
 	LogInfo() << "Creating ShaderManager";
 
 	ShaderManager = new D3D11ShaderManager();
@@ -204,7 +204,7 @@ XRESULT D3D11GraphicsEngineBase::OnResize(INT2 newSize)
 
 		// Check for windowed mode
 		bool windowed = Engine::GAPI->HasCommandlineParameter("ZWINDOW") ||
-						Engine::GAPI->GetIntParamFromConfig("zStartupWindowed");
+			Engine::GAPI->GetIntParamFromConfig("zStartupWindowed");
 		scd.Windowed = windowed;
 
 #ifdef BUILD_GOTHIC_1_08k
@@ -217,7 +217,7 @@ XRESULT D3D11GraphicsEngineBase::OnResize(INT2 newSize)
 
 
 		LE(DXGIFactory->CreateSwapChain(Device, &scd, &SwapChain));
-		 
+
 		if (!SwapChain)
 		{
 			LogError() << "Failed to create Swapchain! Program will now exit!";
@@ -240,7 +240,7 @@ XRESULT D3D11GraphicsEngineBase::OnResize(INT2 newSize)
 
 	// Successfully resized swapchain, re-get buffers
 	ID3D11Texture2D * backbuffer = nullptr;
-	SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void **)&backbuffer);
+	SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void **)& backbuffer);
 
 	// Recreate RenderTargetView
 	ID3D11RenderTargetView* backbufferRTV;
@@ -350,8 +350,8 @@ D3D11ShaderManager* D3D11GraphicsEngineBase::GetShaderManager()
 XRESULT D3D11GraphicsEngineBase::Clear(const float4 & color)
 {
 	Context->ClearDepthStencilView(DepthStencilBuffer->GetDepthStencilView(), D3D11_CLEAR_DEPTH, 1.0f, 0);
-	Context->ClearRenderTargetView(HDRBackBuffer->GetRenderTargetView(), (float *)&color);
-	Context->ClearRenderTargetView(Backbuffer->GetRenderTargetView(), (float *)&color);
+	Context->ClearRenderTargetView(HDRBackBuffer->GetRenderTargetView(), (float *)& color);
+	Context->ClearRenderTargetView(Backbuffer->GetRenderTargetView(), (float *)& color);
 
 	return XR_SUCCESS;
 }
@@ -407,7 +407,7 @@ XRESULT D3D11GraphicsEngineBase::GetDisplayModeList(std::vector<DisplayModeInfo>
 	// Get the list
 	hr = output->GetDisplayModeList(format, 0, &numModes, displayModes.get());
 
-	for (unsigned int i = 0; i<numModes; i++)
+	for (unsigned int i = 0; i < numModes; i++)
 	{
 		if (displayModes[i].Format != format)
 			continue;
@@ -431,7 +431,7 @@ XRESULT D3D11GraphicsEngineBase::GetDisplayModeList(std::vector<DisplayModeInfo>
 		// Put supersampling resolutions in, up to just below 8k
 		int i = 2;
 		DisplayModeInfo ssBase = modeList->back();
-		while(ssBase.Width * i < 8192 && ssBase.Height * i < 8192)
+		while (ssBase.Width * i < 8192 && ssBase.Height * i < 8192)
 		{
 			DisplayModeInfo info;
 			info.Height = ssBase.Height * i;
@@ -469,39 +469,39 @@ XRESULT D3D11GraphicsEngineBase::Present()
 	bool vsync = Engine::GAPI->GetRendererState()->RendererSettings.EnableVSync;
 	if (SwapChain->Present(vsync ? 1 : 0, 0) == DXGI_ERROR_DEVICE_REMOVED)
 	{
-		switch(Device->GetDeviceRemovedReason())
+		switch (Device->GetDeviceRemovedReason())
 		{
-		case DXGI_ERROR_DEVICE_HUNG:
-			LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_HUNG)";
-			exit(0);
-			break;
+			case DXGI_ERROR_DEVICE_HUNG:
+				LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_HUNG)";
+				exit(0);
+				break;
 
-		case DXGI_ERROR_DEVICE_REMOVED:
-			LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_REMOVED)";
-			exit(0);
-			break;
+			case DXGI_ERROR_DEVICE_REMOVED:
+				LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_REMOVED)";
+				exit(0);
+				break;
 
-		case DXGI_ERROR_DEVICE_RESET:
-			LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_RESET)";
-			exit(0);
-			break;
+			case DXGI_ERROR_DEVICE_RESET:
+				LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_RESET)";
+				exit(0);
+				break;
 
-		case DXGI_ERROR_DRIVER_INTERNAL_ERROR:
-			LogErrorBox() << "Device Removed! (DXGI_ERROR_DRIVER_INTERNAL_ERROR)";
-			exit(0);
-			break;
+			case DXGI_ERROR_DRIVER_INTERNAL_ERROR:
+				LogErrorBox() << "Device Removed! (DXGI_ERROR_DRIVER_INTERNAL_ERROR)";
+				exit(0);
+				break;
 
-		case DXGI_ERROR_INVALID_CALL:
-			LogErrorBox() << "Device Removed! (DXGI_ERROR_INVALID_CALL)";
-			exit(0);
-			break;
+			case DXGI_ERROR_INVALID_CALL:
+				LogErrorBox() << "Device Removed! (DXGI_ERROR_INVALID_CALL)";
+				exit(0);
+				break;
 
-		case S_OK:
-			LogInfo() << "Device removed, but we're fine!";
-			break;
+			case S_OK:
+				LogInfo() << "Device removed, but we're fine!";
+				break;
 
-		default:
-			LogWarnBox() << "Device Removed! (Unknown reason)";
+			default:
+				LogWarnBox() << "Device Removed! (Unknown reason)";
 		}
 	}
 
@@ -512,7 +512,7 @@ XRESULT D3D11GraphicsEngineBase::Present()
 }
 
 /** Called when we started to render the world */
-XRESULT D3D11GraphicsEngineBase::OnStartWorldRendering() 
+XRESULT D3D11GraphicsEngineBase::OnStartWorldRendering()
 {
 	if (PresentPending)
 		return XR_FAILED;
@@ -565,7 +565,7 @@ XRESULT D3D11GraphicsEngineBase::DrawVertexArray(ExVertexStruct* vertices, unsig
 
 	vShader->Apply();
 	pShader->Apply();
-	
+
 	// Set vertex type
 	Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -634,10 +634,10 @@ XRESULT D3D11GraphicsEngineBase::UpdateRenderStates()
 		FFBlendState = state->State;
 
 		Engine::GAPI->GetRendererState()->BlendState.StateDirty = false;
-		Context->OMSetBlendState(FFBlendState, (float *)&D3DXVECTOR4(0, 0, 0, 0), 0xFFFFFFFF);
+		Context->OMSetBlendState(FFBlendState, (float *)& D3DXVECTOR4(0, 0, 0, 0), 0xFFFFFFFF);
 	}
 
-	
+
 
 	if (Engine::GAPI->GetRendererState()->RasterizerState.StateDirty)
 	{
@@ -657,7 +657,7 @@ XRESULT D3D11GraphicsEngineBase::UpdateRenderStates()
 		Context->RSSetState(FFRasterizerState);
 	}
 
-	
+
 
 	if (Engine::GAPI->GetRendererState()->DepthState.StateDirty)
 	{
@@ -677,7 +677,7 @@ XRESULT D3D11GraphicsEngineBase::UpdateRenderStates()
 		Context->OMSetDepthStencilState(FFDepthStencilState, 0);
 	}
 
-	
+
 
 	return XR_SUCCESS;
 }
@@ -765,7 +765,7 @@ XRESULT D3D11GraphicsEngineBase::SetActiveHDShader(const std::string & shader)
 XRESULT D3D11GraphicsEngineBase::SetActiveGShader(const std::string & shader)
 {
 	ActiveGS = ShaderManager->GetGShader(shader);
-	
+
 	return XR_SUCCESS;
 }
 
@@ -831,7 +831,7 @@ XRESULT D3D11GraphicsEngineBase::DrawVertexBufferFF(D3D11VertexBuffer* vb, unsig
 
 
 /** Binds viewport information to the given constantbuffer slot */
-XRESULT D3D11GraphicsEngineBase::BindViewportInformation(const std::string & shader, int slot) 
+XRESULT D3D11GraphicsEngineBase::BindViewportInformation(const std::string & shader, int slot)
 {
 	D3D11_VIEWPORT vp;
 	UINT num = 1;

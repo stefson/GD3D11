@@ -268,8 +268,7 @@ XRESULT D3D11GraphicsEngine::Init() {
 		exit(0);
 	}
 
-	LE(Device->CreateDeferredContext(
-		0, &DeferredContext));  // Used for multithreaded texture loading
+	LE(Device->CreateDeferredContext(0, &DeferredContext));  // Used for multithreaded texture loading
 
 	LogInfo() << "Creating ShaderManager";
 
