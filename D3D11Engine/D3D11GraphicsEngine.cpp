@@ -385,10 +385,10 @@ XRESULT D3D11GraphicsEngine::Init() {
 
 	DistortionTexture = std::make_unique<D3D11Texture>();
 	DistortionTexture->Init("system\\GD3D11\\textures\\distortion2.dds");
-	
+
 	NoiseTexture = std::make_unique<D3D11Texture>();
 	NoiseTexture->Init("system\\GD3D11\\textures\\noise.png");
-	
+
 	WhiteTexture = std::make_unique<D3D11Texture>();
 	WhiteTexture->Init("system\\GD3D11\\textures\\white.png");
 
@@ -575,7 +575,7 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 	// Successfully resized swapchain, re-get buffers
 	ID3D11Texture2D* backbuffer = nullptr;
 	SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)& backbuffer);
-	
+
 	// Recreate RenderTargetView
 	LE(Device->CreateRenderTargetView(backbuffer, nullptr, &BackbufferRTV));
 	LE(Device->CreateShaderResourceView(backbuffer, nullptr, &BackbufferSRV));
@@ -605,8 +605,8 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
-	viewport.Width = (float)bbres.x;
-	viewport.Height = (float)bbres.y;
+	viewport.Width = static_cast<float>(bbres.x);
+	viewport.Height = static_cast<float>(bbres.y);
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
 
@@ -700,7 +700,7 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
 			Device, s, s, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT,
 			DXGI_FORMAT_R32_FLOAT);
 
-		Engine::GAPI->GetRendererState()->RendererSettings.WorldShadowRangeScale *= old / (float)s;
+		Engine::GAPI->GetRendererState()->RendererSettings.WorldShadowRangeScale *= old / static_cast<float>(s);
 	}
 
 	// Force the mode
@@ -794,7 +794,7 @@ D3D11GraphicsEngine::GetDisplayModeList(std::vector<DisplayModeInfo>* modeList,
 	bool includeSuperSampling) {
 	HRESULT hr;
 	UINT numModes = 0;
-	DXGI_MODE_DESC* displayModes = nullptr;
+	std::unique_ptr<DXGI_MODE_DESC[]> displayModes = nullptr;
 	DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	IDXGIOutput* output;
 
@@ -810,10 +810,10 @@ D3D11GraphicsEngine::GetDisplayModeList(std::vector<DisplayModeInfo>* modeList,
 
 	hr = output->GetDisplayModeList(format, 0, &numModes, nullptr);
 
-	displayModes = new DXGI_MODE_DESC[numModes];
+	displayModes = std::make_unique<DXGI_MODE_DESC[]>(numModes);
 
 	// Get the list
-	hr = output->GetDisplayModeList(format, 0, &numModes, displayModes);
+	hr = output->GetDisplayModeList(format, 0, &numModes, displayModes.get());
 
 	for (unsigned int i = 0; i < numModes; i++) {
 		if (displayModes[i].Format != format) continue;
@@ -851,7 +851,7 @@ D3D11GraphicsEngine::GetDisplayModeList(std::vector<DisplayModeInfo>* modeList,
 		}
 	}
 
-	delete[] displayModes;
+	displayModes.reset();
 
 	output->Release();
 
@@ -865,8 +865,8 @@ XRESULT D3D11GraphicsEngine::Present() {
 	vp.TopLeftY = 0.0f;
 	vp.MinDepth = 0.0f;
 	vp.MaxDepth = 0.0f;
-	vp.Width = (float)GetBackbufferResolution().x;
-	vp.Height = (float)GetBackbufferResolution().y;
+	vp.Width = static_cast<float>(GetBackbufferResolution().x);
+	vp.Height = static_cast<float>(GetBackbufferResolution().y);
 
 	Context->RSSetViewports(1, &vp);
 
@@ -960,10 +960,10 @@ XRESULT D3D11GraphicsEngine::SetViewport(const ViewportInfo& viewportInfo) {
 	D3D11_VIEWPORT viewport;
 	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
 
-	viewport.TopLeftX = (float)viewportInfo.TopLeftX;
-	viewport.TopLeftY = (float)viewportInfo.TopLeftY;
-	viewport.Width = (float)viewportInfo.Width;
-	viewport.Height = (float)viewportInfo.Height;
+	viewport.TopLeftX = static_cast<float>(viewportInfo.TopLeftX);
+	viewport.TopLeftY = static_cast<float>(viewportInfo.TopLeftY);
+	viewport.Width = static_cast<float>(viewportInfo.Width);
+	viewport.Height = static_cast<float>(viewportInfo.Height);
 	viewport.MinDepth = viewportInfo.MinZ;
 	viewport.MaxDepth = viewportInfo.MaxZ;
 
@@ -1606,8 +1606,8 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 	vp.TopLeftY = 0.0f;
 	vp.MinDepth = 0.0f;
 	vp.MaxDepth = 1.0f;
-	vp.Width = (float)GetResolution().x;
-	vp.Height = (float)GetResolution().y;
+	vp.Width = static_cast<float>(GetResolution().x);
+	vp.Height = static_cast<float>(GetResolution().y);
 
 	Context->RSSetViewports(1, &vp);
 
@@ -1737,8 +1737,8 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 	vp.TopLeftY = 0.0f;
 	vp.MinDepth = 0.0f;
 	vp.MaxDepth = 1.0f;
-	vp.Width = (float)GetBackbufferResolution().x;
-	vp.Height = (float)GetBackbufferResolution().y;
+	vp.Width = static_cast<float>(GetBackbufferResolution().x);
+	vp.Height = static_cast<float>(GetBackbufferResolution().y);
 
 	Context->RSSetViewports(1, &vp);
 
@@ -2827,8 +2827,10 @@ void D3D11GraphicsEngine::DrawWorldAround(
 				for (std::map<int, WorldMeshSectionInfo>::iterator ity =
 					(*itx).second.begin();
 					ity != (*itx).second.end(); ity++) {
-					D3DXVECTOR2 a = D3DXVECTOR2((float)((*itx).first - s.x),
-						(float)((*ity).first - s.y));
+					D3DXVECTOR2 a = D3DXVECTOR2(
+						static_cast<float>((*itx).first - s.x),
+						static_cast<float>((*ity).first - s.y)
+					);
 					if (D3DXVec2Length(&a) < 2) {
 						WorldMeshSectionInfo& section = (*ity).second;
 						drawnSections.push_back(&section);
@@ -3146,7 +3148,7 @@ void D3D11GraphicsEngine::DrawWorldAround(const D3DXVECTOR3& position,
 				(*itx).second.begin();
 				ity != (*itx).second.end(); ity++) {
 				D3DXVECTOR2 a = D3DXVECTOR2((float)((*itx).first - s.x),
-					(float)((*ity).first - s.y));
+					static_cast<float>(((*ity).first - s.y)));
 				if (D3DXVec2Length(&a) < sectionRange) {
 					WorldMeshSectionInfo& section = (*ity).second;
 
@@ -4210,7 +4212,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	DS_PointLightConstantBuffer plcb;
 	D3DXMatrixInverse(&plcb.PL_InvProj, nullptr, &Engine::GAPI->GetProjectionMatrix());
 	D3DXMatrixInverse(&plcb.PL_InvView, nullptr, &Engine::GAPI->GetRendererState()->TransformState.TransformView);
-	plcb.PL_ViewportSize = float2((float)Resolution.x, (float)Resolution.y);
+	plcb.PL_ViewportSize = float2(static_cast<float>(Resolution.x), static_cast<float>(Resolution.y));
 
 	GBuffer0_Diffuse->BindToPixelShader(Context, 0);
 	GBuffer1_Normals_SpecIntens_SpecPower->BindToPixelShader(Context, 1);
@@ -4384,7 +4386,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 
 	scb.SQ_ShadowView = cr.ViewReplacement;
 	scb.SQ_ShadowProj = cr.ProjectionReplacement;
-	scb.SQ_ShadowmapSize = (float)WorldShadowmap1->GetSizeX();
+	scb.SQ_ShadowmapSize = static_cast<float>(WorldShadowmap1->GetSizeX());
 
 	// Get rain matrix
 	scb.SQ_RainView = Effects->GetRainShadowmapCameraRepl().ViewReplacement;
@@ -4476,8 +4478,8 @@ void D3D11GraphicsEngine::RenderShadowCube(
 	vp.TopLeftY = 0;
 	vp.MinDepth = 0.0f;
 	vp.MaxDepth = 1.0f;
-	vp.Width = (float)targetCube->GetSizeX();
-	vp.Height = (float)targetCube->GetSizeX();
+	vp.Width = static_cast<float>(targetCube->GetSizeX());
+	vp.Height = static_cast<float>(targetCube->GetSizeX());
 
 	Context->RSSetViewports(1, &vp);
 
@@ -4567,8 +4569,8 @@ void D3D11GraphicsEngine::RenderShadowmaps(const D3DXVECTOR3& cameraPosition,
 	vp.TopLeftY = 0;
 	vp.MinDepth = 0.0f;
 	vp.MaxDepth = 1.0f;
-	vp.Width = (float)target->GetSizeX();
-	vp.Height = (float)target->GetSizeX();
+	vp.Width = static_cast<float>(target->GetSizeX());
+	vp.Height = vp.Width;
 	Context->RSSetViewports(1, &vp);
 
 	// Set the rendering stage
@@ -4828,12 +4830,14 @@ XRESULT D3D11GraphicsEngine::DrawOcean(GOcean* ocean) {
 	Engine::GAPI->GetViewMatrix(&view);
 	D3DXMatrixTranspose(&view, &view);
 
-	for (unsigned int i = 0; i < patches.size(); i++) {
+	for (auto const& patch : patches) {
 		D3DXMATRIX scale, world;
 		D3DXMatrixIdentity(&scale);
-		D3DXMatrixScaling(&scale, (float)OCEAN_PATCH_SIZE, (float)OCEAN_PATCH_SIZE,
-			(float)OCEAN_PATCH_SIZE);
-		D3DXMatrixTranslation(&world, patches[i].x, patches[i].y, patches[i].z);
+		D3DXMatrixScaling(&scale,
+			static_cast<float>(OCEAN_PATCH_SIZE),
+			static_cast<float>(OCEAN_PATCH_SIZE),
+			static_cast<float>(OCEAN_PATCH_SIZE));
+		D3DXMatrixTranslation(&world, patch.x, patch.y, patch.z);
 		world = scale * world;
 		D3DXMatrixTranspose(&world, &world);
 		ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&world);
@@ -4848,7 +4852,7 @@ XRESULT D3D11GraphicsEngine::DrawOcean(GOcean* ocean) {
 
 		OceanPerPatchConstantBuffer opp;
 		opp.OPP_LocalEye = localEye;
-		opp.OPP_PatchPosition = patches[i];
+		opp.OPP_PatchPosition = patch;
 		ActivePS->GetConstantBuffer()[3]->UpdateBuffer(&opp);
 		ActivePS->GetConstantBuffer()[3]->BindToPixelShader(3);
 
@@ -5321,8 +5325,8 @@ void D3D11GraphicsEngine::Setup_PNAEN(EPNAENRenderMode mode) {
 	cb.f4TessFactors = float4(
 		f, f, Engine::GAPI->GetRendererState()->RendererSettings.TesselationRange,
 		Engine::GAPI->GetRendererState()->RendererSettings.TesselationFactor);
-	cb.f4ViewportScale.x = (float)GetResolution().x / 2;
-	cb.f4ViewportScale.y = (float)GetResolution().y / 2;
+	cb.f4ViewportScale.x = static_cast<float>(GetResolution().x / 2);
+	cb.f4ViewportScale.y = static_cast<float>(GetResolution().y / 2);
 	cb.f4x4Projection = Engine::GAPI->GetProjectionMatrix();
 
 	pnaen->GetConstantBuffer()[0]->UpdateBuffer(&cb);

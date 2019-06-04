@@ -384,7 +384,7 @@ XRESULT D3D11GraphicsEngineBase::GetDisplayModeList(std::vector<DisplayModeInfo>
 {
 	HRESULT hr;
 	UINT numModes = 0;
-	DXGI_MODE_DESC* displayModes = nullptr;
+	std::unique_ptr<DXGI_MODE_DESC[]> displayModes = nullptr;
 	DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	IDXGIOutput* output;
 
@@ -402,10 +402,10 @@ XRESULT D3D11GraphicsEngineBase::GetDisplayModeList(std::vector<DisplayModeInfo>
 
 	hr = output->GetDisplayModeList(format, 0, &numModes, nullptr);
 
-	displayModes = new DXGI_MODE_DESC[numModes];
+	displayModes = std::make_unique<DXGI_MODE_DESC[]>(numModes);
 
 	// Get the list
-	hr = output->GetDisplayModeList(format, 0, &numModes, displayModes);
+	hr = output->GetDisplayModeList(format, 0, &numModes, displayModes.get());
 
 	for (unsigned int i = 0; i<numModes; i++)
 	{
@@ -444,7 +444,7 @@ XRESULT D3D11GraphicsEngineBase::GetDisplayModeList(std::vector<DisplayModeInfo>
 	}
 
 
-	delete[] displayModes;
+	displayModes.reset();
 
 	output->Release();
 
@@ -588,7 +588,7 @@ XRESULT D3D11GraphicsEngineBase::DrawVertexArray(ExVertexStruct* vertices, unsig
 
 
 	D3D11_BUFFER_DESC desc;
-	((D3D11VertexBuffer *)TempVertexBuffer)->GetVertexBuffer()->GetDesc(&desc);
+	TempVertexBuffer->GetVertexBuffer()->GetDesc(&desc);
 
 	// Check if we need a bigger vertexbuffer
 	if (desc.ByteWidth < stride * numVertices)
