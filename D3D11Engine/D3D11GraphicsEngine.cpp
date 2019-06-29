@@ -3014,33 +3014,34 @@ void D3D11GraphicsEngine::DrawWorldAround(
 		}
 
 		// At this point eiter renderedMobs or rndVob is filled with something
-		std::list<SkeletalVobInfo*>& rl =
-			renderedMobs != nullptr ? *renderedMobs : rndVob;
-		for (std::list<SkeletalVobInfo*>::iterator it = rl.begin(); it != rl.end();
-			++it) {
-			Engine::GAPI->DrawSkeletalMeshVob((*it), FLT_MAX);
+		std::list<SkeletalVobInfo*>& rl = renderedMobs != nullptr ? *renderedMobs : rndVob;
+		for (auto it : rl) {
+			Engine::GAPI->DrawSkeletalMeshVob(it, FLT_MAX);
 		}
 	}
 	if (Engine::GAPI->GetRendererState()->RendererSettings.DrawSkeletalMeshes) {
 		// Draw animated skeletal meshes if wanted
 		if (renderNPCs) {
-			for (std::list<SkeletalVobInfo*>::iterator it =
-				Engine::GAPI->GetAnimatedSkeletalMeshVobs().begin();
-				it != Engine::GAPI->GetAnimatedSkeletalMeshVobs().end(); ++it) {
-				if (!(*it)->VisualInfo) continue;  // Seems to happen in Gothic 1
-
+			for (auto const& skeletalMeshVob :Engine::GAPI->GetAnimatedSkeletalMeshVobs()) {
+				if (!skeletalMeshVob->VisualInfo) {
+					// Seems to happen in Gothic 1
+					continue;
+				}
 				// Check vob range
 				float dist =
-					D3DXVec3Length(&(position - (*it)->Vob->GetPositionWorld()));
-				if (dist > range) continue;
-
+					D3DXVec3Length(&(position - skeletalMeshVob->Vob->GetPositionWorld()));
+				if (dist > range) {
+					// Not in range
+					continue;
+				}
 				// Check for inside vob. Don't render inside-vobs when the light is
 				// outside and vice-versa.
-				if (!(*it)->Vob->IsIndoorVob() && indoor ||
-					(*it)->Vob->IsIndoorVob() && !indoor)
+				if (!skeletalMeshVob->Vob->IsIndoorVob() && indoor ||
+					skeletalMeshVob->Vob->IsIndoorVob() && !indoor) {
 					continue;
+				}
 
-				Engine::GAPI->DrawSkeletalMeshVob((*it), FLT_MAX);
+				Engine::GAPI->DrawSkeletalMeshVob(skeletalMeshVob, FLT_MAX);
 			}
 		}
 	}
@@ -3571,13 +3572,13 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 						}
 						else {
 #ifndef PUBLIC_RELEASE
-							for (size_t s = 0; s < it->second->Instances.size(); s++) {
+							for (size_t s = 0; s < staticMeshVisual.second->Instances.size(); s++) {
 								D3DXVECTOR3 pos =
-									D3DXVECTOR3(it->second->Instances[s].world._14,
-										it->second->Instances[s].world._24,
-										it->second->Instances[s].world._34);
-								GetLineRenderer()->AddAABBMinMax(pos - it->second->BBox.Min,
-									pos + it->second->BBox.Max,
+									D3DXVECTOR3(staticMeshVisual.second->Instances[s].world._14,
+										staticMeshVisual.second->Instances[s].world._24,
+										staticMeshVisual.second->Instances[s].world._34);
+								GetLineRenderer()->AddAABBMinMax(pos - staticMeshVisual.second->BBox.Min,
+									pos + staticMeshVisual.second->BBox.Max,
 									D3DXVECTOR4(1, 0, 0, 1));
 							}
 #endif
