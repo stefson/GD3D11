@@ -114,7 +114,7 @@ void createTextureAndViews(ID3D11Device* pd3dDevice, UINT width, UINT height, DX
 	tex_desc.Format = format;
 	tex_desc.SampleDesc.Count = 1;
 	tex_desc.SampleDesc.Quality = 0;
-	tex_desc.Usage = D3D11_USAGE_DEFAULT;
+	tex_desc.Usage = D3D11_USAGE_IMMUTABLE;
 	tex_desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
 	tex_desc.CPUAccessFlags = 0;
 	tex_desc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;

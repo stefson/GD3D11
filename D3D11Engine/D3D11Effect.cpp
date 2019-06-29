@@ -395,7 +395,7 @@ HRESULT LoadTextureArray(ID3D11Device* pd3dDevice, ID3D11DeviceContext* context,
 
 			if (!(*ppTex2D))
 			{
-				desc.Usage = D3D11_USAGE_DEFAULT;
+				desc.Usage = D3D11_USAGE_IMMUTABLE;
 				desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 				desc.CPUAccessFlags = 0;
 				desc.ArraySize = iNumTextures;

@@ -5591,7 +5591,7 @@ void D3D11GraphicsEngine::SaveScreenshot() {
 	texDesc.MiscFlags = 0;
 	texDesc.SampleDesc.Count = 1;
 	texDesc.SampleDesc.Quality = 0;
-	texDesc.Usage = D3D11_USAGE_DEFAULT;
+	texDesc.Usage = D3D11_USAGE_IMMUTABLE;
 
 	ID3D11Texture2D* texture;
 	LE(Device->CreateTexture2D(&texDesc, 0, &texture));
