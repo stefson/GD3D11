@@ -3523,9 +3523,6 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 	switch (s.ShadowMapSize)
 	{
 		case 512:
-			s.WorldShadowRangeScale = 16.0f;
-			break;
-
 		case 1024:
 			s.WorldShadowRangeScale = 16.0f;
 			break;
@@ -3535,6 +3532,7 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 			break;
 
 		case 4096:
+		case 8192:
 			s.WorldShadowRangeScale = 4.0f;
 			break;
 	}
