@@ -1212,8 +1212,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferFF(D3D11VertexBuffer* vb,
 /** Draws a skeletal mesh */
 XRESULT D3D11GraphicsEngine::DrawSkeletalMesh(
 	D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices,
-	const std::vector<D3DXMATRIX>& transforms, float fatness,
-	SkeletalMeshVisualInfo* msh) {
+	const std::vector<D3DXMATRIX>& transforms, float fatness) {
 	Context->RSSetState(WorldRasterizerState);
 	Context->OMSetDepthStencilState(DefaultDepthStencilState, 0);
 
@@ -1312,15 +1311,15 @@ XRESULT D3D11GraphicsEngine::DrawSkeletalMesh(
 
 	UINT offset = 0;
 	UINT uStride = sizeof(ExSkelVertexStruct);
-	ID3D11Buffer* buffer = ((D3D11VertexBuffer*)vb)->GetVertexBuffer();
+	ID3D11Buffer* buffer = vb->GetVertexBuffer();
 	Context->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
 
 	if (sizeof(VERTEX_INDEX) == sizeof(unsigned short)) {
-		Context->IASetIndexBuffer(((D3D11VertexBuffer*)ib)->GetVertexBuffer(),
+		Context->IASetIndexBuffer(ib->GetVertexBuffer(),
 			DXGI_FORMAT_R16_UINT, 0);
 	}
 	else {
-		Context->IASetIndexBuffer(((D3D11VertexBuffer*)ib)->GetVertexBuffer(),
+		Context->IASetIndexBuffer(ib->GetVertexBuffer(),
 			DXGI_FORMAT_R32_UINT, 0);
 	}
 

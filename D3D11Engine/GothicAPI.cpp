@@ -447,7 +447,7 @@ void GothicAPI::ResetVobs() {
 	VobMap.clear();
 
 	// Delete skeletal mesh vobs
-	for (auto&& it : SkeletalMeshVobs) {
+	for (auto it : SkeletalMeshVobs) {
 		delete it;
 	}
 	SkeletalMeshVobs.clear();
@@ -989,7 +989,7 @@ void GothicAPI::DrawMeshInfo(zCMaterial * mat, MeshInfo * msh) {
 }
 
 /** Draws a SkeletalMeshInfo */
-void GothicAPI::DrawSkeletalMeshInfo(zCMaterial * mat, SkeletalMeshInfo * msh, SkeletalMeshVisualInfo * vis, std::vector<D3DXMATRIX> & transforms, float fatness) {
+void GothicAPI::DrawSkeletalMeshInfo(zCMaterial * mat, SkeletalMeshInfo * msh, std::vector<D3DXMATRIX> & transforms, float fatness) {
 	// Check for material and bind the texture if it exists
 	if (mat) {
 		if (mat->GetTexture()) {
@@ -1004,10 +1004,10 @@ void GothicAPI::DrawSkeletalMeshInfo(zCMaterial * mat, SkeletalMeshInfo * msh, S
 	}
 
 	if (RendererState.RendererSettings.EnableTesselation && !msh->IndicesPNAEN.empty()) {
-		Engine::GraphicsEngine->DrawSkeletalMesh(msh->MeshVertexBuffer, msh->MeshIndexBufferPNAEN, msh->IndicesPNAEN.size(), transforms, fatness, vis);
+		Engine::GraphicsEngine->DrawSkeletalMesh(msh->MeshVertexBuffer, msh->MeshIndexBufferPNAEN, msh->IndicesPNAEN.size(), transforms, fatness);
 	}
 	else {
-		Engine::GraphicsEngine->DrawSkeletalMesh(msh->MeshVertexBuffer, msh->MeshIndexBuffer, msh->Indices.size(), transforms, fatness, vis);
+		Engine::GraphicsEngine->DrawSkeletalMesh(msh->MeshVertexBuffer, msh->MeshIndexBuffer, msh->Indices.size(), transforms, fatness);
 	}
 }
 
@@ -1143,7 +1143,6 @@ void GothicAPI::OnRemovedVob(zCVob * vob, zCWorld * world) {
 	if (vi && vi->VobSection) {
 		vi->VobSection->Vobs.remove(vi);
 	}
-
 	// Erase it from the skeletal vob-list
 	for (auto it = SkeletalMeshVobs.begin(); it != SkeletalMeshVobs.end(); ++it) {
 		if ((*it)->Vob == vob) {
@@ -1421,7 +1420,7 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 		static void Draw(SkeletalVobInfo* vi, std::vector<D3DXMATRIX>& transforms, float fatness) {
 			for (auto const& itm : dynamic_cast<SkeletalMeshVisualInfo*>(vi->VisualInfo)->SkeletalMeshes) {
 				for (auto& i : itm.second) {
-					Engine::GAPI->DrawSkeletalMeshInfo(itm.first, i, dynamic_cast<SkeletalMeshVisualInfo*>(vi->VisualInfo), transforms, fatness);
+					Engine::GAPI->DrawSkeletalMeshInfo(itm.first, i, transforms, fatness);
 				}
 			}
 		}
