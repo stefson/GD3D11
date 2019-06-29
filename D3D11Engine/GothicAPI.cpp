@@ -132,10 +132,6 @@ GothicAPI::GothicAPI()
 
 GothicAPI::~GothicAPI() {
 	//ResetWorld(); // Just let it leak for now. // FIXME: Do this properly
-	Ocean.reset();
-	SkyRenderer.reset();
-	Inventory.reset();
-	LoadedWorldInfo.reset();
 	SAFE_DELETE(WrappedWorldMesh);
 }
 

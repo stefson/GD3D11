@@ -158,8 +158,6 @@ D3D11GraphicsEngine::~D3D11GraphicsEngine() {
 	GothicBlendStateInfo::DeleteCachedObjects();
 	GothicRasterizerStateInfo::DeleteCachedObjects();
 
-	Effects.reset();
-	Occlusion.reset();
 	SAFE_DELETE(InfiniteRangeConstantBuffer);
 	SAFE_DELETE(OutdoorSmallVobsConstantBuffer);
 	SAFE_DELETE(OutdoorVobsConstantBuffer);
@@ -168,22 +166,9 @@ D3D11GraphicsEngine::~D3D11GraphicsEngine() {
 	SAFE_DELETE(QuadVertexBuffer);
 	SAFE_DELETE(QuadIndexBuffer);
 
-	LineRenderer.reset();
-	DepthStencilBuffer.reset();
 	SAFE_DELETE(DynamicInstancingBuffer);
-	PfxRenderer.reset();
-	CloudBuffer.reset();
-	DistortionTexture.reset();
-	WhiteTexture.reset();
-	NoiseTexture.reset();
-	ShaderManager.reset();
 	SAFE_DELETE(TempVertexBuffer);
-	GBuffer1_Normals_SpecIntens_SpecPower.reset();
-	GBuffer0_Diffuse.reset();
-	HDRBackBuffer.reset();
-	WorldShadowmap1.reset();
 	SAFE_DELETE(InverseUnitSphereMesh);
-	UIView.reset();
 
 	SAFE_RELEASE(ReflectionCube2);
 	SAFE_RELEASE(ReflectionCube);
@@ -478,7 +463,7 @@ XRESULT D3D11GraphicsEngine::SetWindow(HWND hWnd) {
 	LogInfo() << "Creating swapchain";
 	OutputWindow = hWnd;
 
-	INT2 res = Resolution;
+	const INT2 res = Resolution;
 
 #ifdef BUILD_SPACER
 	RECT r;
@@ -971,7 +956,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexBuffer(D3D11VertexBuffer* vb,
 
 	UINT offset = 0;
 	UINT uStride = stride;
-	ID3D11Buffer* buffer = ((D3D11VertexBuffer*)vb)->GetVertexBuffer();
+	ID3D11Buffer* buffer = vb->GetVertexBuffer();
 	Context->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
 
 	// Draw the mesh
@@ -999,15 +984,15 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferIndexed(D3D11VertexBuffer* vb,
 	if (vb) {
 		UINT offset = 0;
 		UINT uStride = sizeof(ExVertexStruct);
-		ID3D11Buffer* buffer = ((D3D11VertexBuffer*)vb)->GetVertexBuffer();
+		ID3D11Buffer* buffer = vb->GetVertexBuffer();
 		Context->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
 
 		if (sizeof(VERTEX_INDEX) == sizeof(unsigned short)) {
-			Context->IASetIndexBuffer(((D3D11VertexBuffer*)ib)->GetVertexBuffer(),
+			Context->IASetIndexBuffer(ib->GetVertexBuffer(),
 				DXGI_FORMAT_R16_UINT, 0);
 		}
 		else {
-			Context->IASetIndexBuffer(((D3D11VertexBuffer*)ib)->GetVertexBuffer(),
+			Context->IASetIndexBuffer(ib->GetVertexBuffer(),
 				DXGI_FORMAT_R32_UINT, 0);
 		}
 	}
@@ -1170,8 +1155,10 @@ XRESULT D3D11GraphicsEngine::DrawIndexedVertexArray(ExVertexStruct* vertices,
 
 	UINT offset = 0;
 	UINT uStride = stride;
-	ID3D11Buffer* buffers[] = {TempVertexBuffer->GetVertexBuffer(),
-							   ((D3D11VertexBuffer*)ib)->GetVertexBuffer()};
+	ID3D11Buffer* buffers[] = {
+		TempVertexBuffer->GetVertexBuffer(),
+		ib->GetVertexBuffer()
+	};
 	Context->IASetVertexBuffers(0, 2, buffers, &uStride, &offset);
 
 	// Draw the mesh
@@ -1197,7 +1184,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferFF(D3D11VertexBuffer* vb,
 
 	UINT offset = 0;
 	UINT uStride = stride;
-	ID3D11Buffer* buffer = ((D3D11VertexBuffer*)vb)->GetVertexBuffer();
+	ID3D11Buffer* buffer = vb->GetVertexBuffer();
 	Context->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
 
 	// Draw the mesh
@@ -1210,7 +1197,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferFF(D3D11VertexBuffer* vb,
 }
 
 /** Draws a skeletal mesh */
-XRESULT D3D11GraphicsEngine::DrawSkeletalMesh(
+ XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh(
 	D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices,
 	const std::vector<D3DXMATRIX>& transforms, float fatness) {
 	Context->RSSetState(WorldRasterizerState);
@@ -1223,15 +1210,15 @@ XRESULT D3D11GraphicsEngine::DrawSkeletalMesh(
 		SetActiveVertexShader("VS_ExSkeletal");
 	}
 	SetActivePixelShader("PS_AtmosphereGround");
-	D3D11PShader* nrmPS = ActivePS;
+	const D3D11PShader* nrmPS = ActivePS;
 	SetActivePixelShader("PS_World");
-	D3D11PShader* defaultPS = ActivePS;
+	const D3D11PShader* defaultPS = ActivePS;
 
 	InfiniteRangeConstantBuffer->BindToPixelShader(3);
 
-	D3DXMATRIX& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
-	D3DXMATRIX& view  = Engine::GAPI->GetRendererState()->TransformState.TransformView;
-	D3DXMATRIX& proj  = Engine::GAPI->GetProjectionMatrix();
+	const D3DXMATRIX& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
+	const D3DXMATRIX& view  = Engine::GAPI->GetRendererState()->TransformState.TransformView;
+	const D3DXMATRIX& proj  = Engine::GAPI->GetProjectionMatrix();
 
 	SetupVS_ExMeshDrawCall();
 	SetupVS_ExConstantBuffer();
@@ -1241,7 +1228,7 @@ XRESULT D3D11GraphicsEngine::DrawSkeletalMesh(
 	// Get currently bound texture name
 	zCTexture* tex = Engine::GAPI->GetBoundTexture(0);
 
-	bool tesselationEnabled = Engine::GAPI->GetRendererState()->RendererSettings.EnableTesselation;
+	const bool tesselationEnabled = Engine::GAPI->GetRendererState()->RendererSettings.EnableTesselation;
 
 	if (tex) {
 		MaterialInfo* info = Engine::GAPI->GetMaterialInfoFrom(tex);

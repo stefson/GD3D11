@@ -48,10 +48,7 @@ D3D11GraphicsEngineBase::~D3D11GraphicsEngineBase() {
 	}
 
 	SAFE_DELETE(TempVertexBuffer);
-	ShaderManager.reset();
 	SAFE_DELETE(Backbuffer);
-	HDRBackBuffer.reset();
-	LineRenderer.reset();
 	SAFE_DELETE(TransformsCB);
 
 	SAFE_RELEASE(DefaultSamplerState);
