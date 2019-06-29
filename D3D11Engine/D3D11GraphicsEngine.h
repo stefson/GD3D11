@@ -44,22 +44,22 @@ public:
 	~D3D11GraphicsEngine();
 
 	/** Called after the fake-DDraw-Device got created */
-	virtual XRESULT Init();
+	virtual XRESULT Init() override;
 
 	/** Called when the game created its window */
-	virtual XRESULT SetWindow(HWND hWnd);
+	virtual XRESULT SetWindow(HWND hWnd) override;
 
 	/** Called on window resize/resolution change */
-	virtual XRESULT OnResize(INT2 newSize);
+	virtual XRESULT OnResize(INT2 newSize) override;
 
 	/** Called when the game wants to render a new frame */
-	virtual XRESULT OnBeginFrame();
+	virtual XRESULT OnBeginFrame() override;
 
 	/** Called when the game ended it's frame */
-	virtual XRESULT OnEndFrame();
+	virtual XRESULT OnEndFrame() override;
 
 	/** Called to set the current viewport */
-	virtual XRESULT SetViewport(const ViewportInfo& viewportInfo);
+	virtual XRESULT SetViewport(const ViewportInfo& viewportInfo) override;
 
 	/** Called when the game wants to clear the bound rendertarget */
 	virtual XRESULT Clear(const float4 & color);
@@ -77,23 +77,23 @@ public:
 	virtual XRESULT GetDisplayModeList(std::vector<DisplayModeInfo>* modeList, bool includeSuperSampling = false);
 
 	/** Presents the current frame to the screen */
-	virtual XRESULT Present();
+	virtual XRESULT Present() override;
 
 	/** Saves a screenshot */
-	virtual void SaveScreenshot();
+	virtual void SaveScreenshot() override;
 
 	/** Draws a vertexbuffer, non-indexed */
-	virtual XRESULT DrawVertexBuffer(D3D11VertexBuffer* vb, unsigned int numVertices, unsigned int stride = sizeof(ExVertexStruct));
+	virtual XRESULT DrawVertexBuffer(D3D11VertexBuffer* vb, unsigned int numVertices, unsigned int stride = sizeof(ExVertexStruct)) override;
 
 	/** Draws a vertexbuffer, non-indexed */
-	virtual XRESULT DrawVertexBufferIndexed(D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices, unsigned int indexOffset = 0);
-	virtual XRESULT DrawVertexBufferIndexedUINT(D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices, unsigned int indexOffset);
+	virtual XRESULT DrawVertexBufferIndexed(D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices, unsigned int indexOffset = 0) override;
+	virtual XRESULT DrawVertexBufferIndexedUINT(D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices, unsigned int indexOffset) override;
 
 	/** Draws a vertexbuffer, non-indexed, binding the FF-Pipe values */
-	virtual XRESULT DrawVertexBufferFF(D3D11VertexBuffer* vb, unsigned int numVertices, unsigned int startVertex, unsigned int stride = sizeof(ExVertexStruct));
+	virtual XRESULT DrawVertexBufferFF(D3D11VertexBuffer* vb, unsigned int numVertices, unsigned int startVertex, unsigned int stride = sizeof(ExVertexStruct)) override;
 
 	/** Binds viewport information to the given constantbuffer slot */
-	virtual XRESULT BindViewportInformation(const std::string & shader, int slot);
+	virtual XRESULT BindViewportInformation(const std::string & shader, int slot) override;
 
 	/** Sets up a draw call for a VS_Ex-Mesh */
 	void SetupVS_ExMeshDrawCall();
@@ -113,13 +113,13 @@ public:
 	void Setup_PNAEN(EPNAENRenderMode mode = PNAEN_Default);
 
 	/** Draws a skeletal mesh */
-	virtual XRESULT DrawSkeletalMesh(D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices, const std::vector<D3DXMATRIX> & transforms, float fatness = 1.0f);
+	virtual XRESULT DrawSkeletalMesh(D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices, const std::vector<D3DXMATRIX> & transforms, float fatness = 1.0f) override;
 
 	/** Draws a vertexarray, non-indexed */
-	virtual XRESULT DrawVertexArray(ExVertexStruct* vertices, unsigned int numVertices, unsigned int startVertex = 0, unsigned int stride = sizeof(ExVertexStruct));
+	virtual XRESULT DrawVertexArray(ExVertexStruct* vertices, unsigned int numVertices, unsigned int startVertex = 0, unsigned int stride = sizeof(ExVertexStruct)) override;
 
 	/** Draws a vertexarray, indexed */
-	virtual XRESULT DrawIndexedVertexArray(ExVertexStruct* vertices, unsigned int numVertices, D3D11VertexBuffer* ib, unsigned int numIndices, unsigned int stride = sizeof(ExVertexStruct));
+	virtual XRESULT DrawIndexedVertexArray(ExVertexStruct* vertices, unsigned int numVertices, D3D11VertexBuffer* ib, unsigned int numIndices, unsigned int stride = sizeof(ExVertexStruct)) override;
 
 	/** Draws a batch of instanced geometry */
 	virtual XRESULT DrawInstanced(D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices, void * instanceData, unsigned int instanceDataStride, unsigned int numInstances, unsigned int vertexStride = sizeof(ExVertexStruct));
@@ -129,7 +129,7 @@ public:
 	virtual XRESULT OnVobRemovedFromWorld(zCVob * vob);
 
 	/** Called when a key got pressed */
-	virtual XRESULT OnKeyDown(unsigned int key);
+	virtual XRESULT OnKeyDown(unsigned int key) override;
 
 	/** Sets the active pixel shader object */
 	virtual XRESULT SetActivePixelShader(const std::string & shader);
@@ -147,19 +147,19 @@ public:
 	XRESULT DrawOcean(GOcean* ocean);
 
 	/** Gets the depthbuffer */
-	RenderToDepthStencilBuffer * GetDepthBuffer(){return DepthStencilBuffer.get();}
+	RenderToDepthStencilBuffer * GetDepthBuffer() { return DepthStencilBuffer.get(); }
 
 	/** Returns the Backbuffers shader resource view */
-	ID3D11ShaderResourceView * GetBackbufferSRV(){return BackbufferSRV;}
+	ID3D11ShaderResourceView * GetBackbufferSRV() { return BackbufferSRV; }
 
 	/** Returns the first GBuffer */
-	RenderToTextureBuffer * GetGBuffer0(){return GBuffer0_Diffuse.get();}
+	RenderToTextureBuffer * GetGBuffer0() { return GBuffer0_Diffuse.get(); }
 
 	/** Returns the second GBuffer */
-	RenderToTextureBuffer * GetGBuffer1(){return GBuffer1_Normals_SpecIntens_SpecPower.get();}
+	RenderToTextureBuffer * GetGBuffer1() { return GBuffer1_Normals_SpecIntens_SpecPower.get(); }
 
 	/** Returns the HDRBackbuffer */
-	RenderToTextureBuffer * GetHDRBackBuffer(){return HDRBackBuffer.get();}
+	RenderToTextureBuffer * GetHDRBackBuffer() { return HDRBackBuffer.get(); }
 
 	/** Unbinds the texture at the given slot */
 	virtual XRESULT UnbindTexture(int slot);
@@ -169,7 +169,7 @@ public:
 
 	/** Returns the current resolution (Maybe supersampled)*/
 	INT2 GetResolution();
-	
+
 	/** Returns the actual resolution of the backbuffer (not supersampled) */
 	INT2 GetBackbufferResolution();
 
@@ -197,13 +197,13 @@ public:
 
 	/** Draws everything around the given position */
 	void DrawWorldAround(const D3DXVECTOR3 & position, int sectionRange, float vobXZRange, bool cullFront = true, bool dontCull = false);
-	void DrawWorldAround(const D3DXVECTOR3 & position, 
-					     float range,
-					     bool cullFront = true, 
-						 bool indoor = false,
-						 bool noNPCs = false,
-					     std::list<VobInfo*>* renderedVobs = nullptr, std::list<SkeletalVobInfo*>* renderedMobs = nullptr, std::map<MeshKey, WorldMeshInfo*, cmpMeshKey>* worldMeshCache = nullptr);
-					     
+	void DrawWorldAround(const D3DXVECTOR3 & position,
+		float range,
+		bool cullFront = true,
+		bool indoor = false,
+		bool noNPCs = false,
+		std::list<VobInfo*>* renderedVobs = nullptr, std::list<SkeletalVobInfo*>* renderedMobs = nullptr, std::map<MeshKey, WorldMeshInfo*, cmpMeshKey>* worldMeshCache = nullptr);
+
 	/** Draws the static vobs instanced */
 	XRESULT DrawVOBsInstanced();
 
@@ -220,15 +220,15 @@ public:
 	void RenderShadowmaps(const D3DXVECTOR3 & cameraPosition, RenderToDepthStencilBuffer * target = nullptr, bool cullFront = true, bool dontCull = false, ID3D11DepthStencilView* dsvOverwrite = nullptr, ID3D11RenderTargetView* debugRTV = nullptr);
 
 	/** Renders the shadowmaps for a pointlight */
-	void RenderShadowCube(const D3DXVECTOR3 & position, 
-		float range, 
-		RenderToDepthStencilBuffer * targetCube, 
+	void RenderShadowCube(const D3DXVECTOR3 & position,
+		float range,
+		RenderToDepthStencilBuffer * targetCube,
 		ID3D11DepthStencilView* face,
-		ID3D11RenderTargetView* debugRTV = nullptr, 
-		bool cullFront = true, 
+		ID3D11RenderTargetView* debugRTV = nullptr,
+		bool cullFront = true,
 		bool indoor = false,
 		bool noNPCs = false,
-		std::list<VobInfo*>* renderedVobs = nullptr, std::list<SkeletalVobInfo*>* renderedMobs = nullptr, std::map<MeshKey, WorldMeshInfo*, cmpMeshKey>* worldMeshCache = nullptr); 
+		std::list<VobInfo*>* renderedVobs = nullptr, std::list<SkeletalVobInfo*>* renderedMobs = nullptr, std::map<MeshKey, WorldMeshInfo*, cmpMeshKey>* worldMeshCache = nullptr);
 
 	/** Updates the occlusion for the bsp-tree */
 	void UpdateOcclusion();
@@ -237,7 +237,7 @@ public:
 	XRESULT UpdateRenderStates();
 
 	/** Returns the textures drawn this frame */
-	const std::set<zCTexture *> GetFrameTextures(){return FrameTextures;}
+	const std::set<zCTexture *> GetFrameTextures() override { return FrameTextures; }
 
 	/** Draws a fullscreenquad, copying the given texture to the viewport */
 	void DrawQuad(INT2 position, INT2 size);
@@ -285,7 +285,7 @@ public:
 	void CreateMainUIView();
 
 	/** Returns a dummy cube-rendertarget used for pointlight shadowmaps */
-	RenderToTextureBuffer * GetDummyCubeRT(){return DummyShadowCubemapTexture;}
+	RenderToTextureBuffer * GetDummyCubeRT() { return DummyShadowCubemapTexture; }
 protected:
 	/** Test draw world */
 	void TestDrawWorldMesh();
