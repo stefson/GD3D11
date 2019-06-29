@@ -190,7 +190,7 @@ protected:
 	INT2 Resolution;
 
 	/** Shader manager */
-	D3D11ShaderManager* ShaderManager;
+	std::unique_ptr<D3D11ShaderManager> ShaderManager;
 
 	/** Dynamic buffer for vertex array rendering */
 	D3D11VertexBuffer* TempVertexBuffer;
@@ -228,7 +228,7 @@ protected:
 	size_t FFDepthStencilStateHash;
 
 	/** Debug line-renderer */
-	D3D11LineRenderer* LineRenderer;
+	std::unique_ptr<D3D11LineRenderer> LineRenderer;
 
 	/** If true, we are still waiting for a present to happen. Don't draw everything twice! */
 	bool PresentPending;

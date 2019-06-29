@@ -48,10 +48,10 @@ D3D11GraphicsEngineBase::~D3D11GraphicsEngineBase() {
 	}
 
 	SAFE_DELETE(TempVertexBuffer);
-	SAFE_DELETE(ShaderManager);
+	ShaderManager.reset();
 	SAFE_DELETE(Backbuffer);
 	HDRBackBuffer.reset();
-	SAFE_DELETE(LineRenderer);
+	LineRenderer.reset();
 	SAFE_DELETE(TransformsCB);
 
 	SAFE_RELEASE(DefaultSamplerState);
@@ -106,7 +106,7 @@ XRESULT D3D11GraphicsEngineBase::Init() {
 
 	LogInfo() << "Creating ShaderManager";
 
-	ShaderManager = new D3D11ShaderManager();
+	ShaderManager = std::make_unique<D3D11ShaderManager>();
 	ShaderManager->Init();
 	ShaderManager->LoadShaders();
 
@@ -148,7 +148,7 @@ XRESULT D3D11GraphicsEngineBase::Init() {
 
 	TransformsCB = new D3D11ConstantBuffer(sizeof(VS_ExConstantBuffer_PerFrame), nullptr);
 
-	LineRenderer = new D3D11LineRenderer();
+	LineRenderer = std::make_unique<D3D11LineRenderer>();
 
 	SetDefaultStates();
 	UpdateRenderStates();
@@ -343,7 +343,7 @@ XRESULT D3D11GraphicsEngineBase::SetViewport(const ViewportInfo& viewportInfo)
 /** Returns the shadermanager */
 D3D11ShaderManager* D3D11GraphicsEngineBase::GetShaderManager()
 {
-	return ShaderManager;
+	return ShaderManager.get();
 }
 
 /** Called when the game wants to clear the bound rendertarget */
@@ -531,7 +531,7 @@ XRESULT D3D11GraphicsEngineBase::OnStartWorldRendering()
 /** Returns the line renderer object */
 BaseLineRenderer* D3D11GraphicsEngineBase::GetLineRenderer()
 {
-	return LineRenderer;
+	return LineRenderer.get();
 }
 
 /** Sets up the default rendering state */

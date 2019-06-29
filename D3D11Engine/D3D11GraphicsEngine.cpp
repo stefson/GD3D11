@@ -142,7 +142,7 @@ D3D11GraphicsEngine::D3D11GraphicsEngine() {
 	PresentPending = false;
 	SaveScreenshotNextFrame = false;
 
-	LineRenderer = new D3D11LineRenderer();
+	LineRenderer = std::make_unique<D3D11LineRenderer>();
 	Occlusion = std::make_unique<D3D11OcclusionQuerry>();
 
 	RECT desktopRect;
@@ -168,7 +168,7 @@ D3D11GraphicsEngine::~D3D11GraphicsEngine() {
 	SAFE_DELETE(QuadVertexBuffer);
 	SAFE_DELETE(QuadIndexBuffer);
 
-	SAFE_DELETE(LineRenderer);
+	LineRenderer.reset();
 	DepthStencilBuffer.reset();
 	SAFE_DELETE(DynamicInstancingBuffer);
 	PfxRenderer.reset();
@@ -176,7 +176,7 @@ D3D11GraphicsEngine::~D3D11GraphicsEngine() {
 	DistortionTexture.reset();
 	WhiteTexture.reset();
 	NoiseTexture.reset();
-	SAFE_DELETE(ShaderManager);
+	ShaderManager.reset();
 	SAFE_DELETE(TempVertexBuffer);
 	GBuffer1_Normals_SpecIntens_SpecPower.reset();
 	GBuffer0_Diffuse.reset();
@@ -272,7 +272,7 @@ XRESULT D3D11GraphicsEngine::Init() {
 
 	LogInfo() << "Creating ShaderManager";
 
-	ShaderManager = new D3D11ShaderManager();
+	ShaderManager = std::make_unique<D3D11ShaderManager>();
 	ShaderManager->Init();
 	ShaderManager->LoadShaders();
 
@@ -674,24 +674,11 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
 	// Check for shadowmap resize
 	int s = Engine::GAPI->GetRendererState()->RendererSettings.ShadowMapSize;
 	switch (s) {
-		case 0:
-			s = 512;
-			break;
-
-		case 1:
-			s = 1024;
-			break;
-
-		case 2:
-			s = 2048;
-			break;
-
-		case 3:
-			s = 4096;
-			break;
-		case 4:
-			s = 8192;
-			break;
+		case 0: s = 512; break;
+		case 1: s = 1024; break;
+		case 2: s = 2048; break;
+		case 3: s = 4096; break; 
+		case 4: s = 8192; break; 
 	}
 
 	if (WorldShadowmap1->GetSizeX() != s) {
@@ -791,10 +778,9 @@ XRESULT D3D11GraphicsEngine::CreateConstantBuffer(D3D11ConstantBuffer** outCB,
 XRESULT
 D3D11GraphicsEngine::GetDisplayModeList(std::vector<DisplayModeInfo>* modeList,
 	bool includeSuperSampling) {
-	HRESULT hr;
 	UINT numModes = 0;
 	std::unique_ptr<DXGI_MODE_DESC[]> displayModes = nullptr;
-	DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	const DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	IDXGIOutput* output;
 
 	// Get desktop rect
@@ -807,7 +793,7 @@ D3D11GraphicsEngine::GetDisplayModeList(std::vector<DisplayModeInfo>* modeList,
 
 	if (!output) return XR_FAILED;
 
-	hr = output->GetDisplayModeList(format, 0, &numModes, nullptr);
+	HRESULT hr = output->GetDisplayModeList(format, 0, &numModes, nullptr);
 
 	displayModes = std::make_unique<DXGI_MODE_DESC[]>(numModes);
 
@@ -3022,7 +3008,7 @@ void D3D11GraphicsEngine::DrawWorldAround(
 	if (Engine::GAPI->GetRendererState()->RendererSettings.DrawSkeletalMeshes) {
 		// Draw animated skeletal meshes if wanted
 		if (renderNPCs) {
-			for (auto const& skeletalMeshVob :Engine::GAPI->GetAnimatedSkeletalMeshVobs()) {
+			for (auto const& skeletalMeshVob : Engine::GAPI->GetAnimatedSkeletalMeshVobs()) {
 				if (!skeletalMeshVob->VisualInfo) {
 					// Seems to happen in Gothic 1
 					continue;
@@ -3617,16 +3603,16 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 							sizeof(VobInstanceInfo), staticMeshVisual.second->Instances.size(),
 							sizeof(ExVertexStruct), staticMeshVisual.second->StartInstanceNum);
 					}
-				}
-			}
+							}
+						}
 
 			// Reset visual
 			if (doReset &&
 				!Engine::GAPI->GetRendererState()->RendererSettings.FixViewFrustum) {
 				staticMeshVisual.second->StartNewFrame();
 			}
-		}
-	}
+					}
+				}
 
 	// Draw mobs
 	if (Engine::GAPI->GetRendererState()->RendererSettings.DrawMobs) {
@@ -3760,7 +3746,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 	SetDefaultStates();
 
 	return XR_SUCCESS;
-}
+			}
 
 /** Draws the static VOBs */
 XRESULT D3D11GraphicsEngine::DrawVOBs(bool noTextures) {
@@ -3944,7 +3930,7 @@ XRESULT D3D11GraphicsEngine::OnKeyDown(unsigned int key) {
 				Engine::GAPI->GetRendererState()->RendererSettings.EnableEditorPanel =
 					true;
 				CreateMainUIView();
-			}
+	}
 			break;
 		case VK_F3:
 			if (SwapChain) {
@@ -3964,10 +3950,10 @@ XRESULT D3D11GraphicsEngine::OnKeyDown(unsigned int key) {
 			break;
 		default:
 			break;
-	}
+}
 
 	return XR_SUCCESS;
-}
+		}
 
 /** Reloads shaders */
 XRESULT D3D11GraphicsEngine::ReloadShaders() {
@@ -3978,7 +3964,7 @@ XRESULT D3D11GraphicsEngine::ReloadShaders() {
 
 /** Returns the line renderer object */
 BaseLineRenderer* D3D11GraphicsEngine::GetLineRenderer() {
-	return LineRenderer;
+	return LineRenderer.get();
 }
 
 /** Applys the lighting to the scene */
