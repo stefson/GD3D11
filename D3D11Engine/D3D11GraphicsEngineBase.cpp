@@ -179,7 +179,6 @@ XRESULT D3D11GraphicsEngineBase::OnResize(INT2 newSize)
 	SetWindowPos(OutputWindow, nullptr, 0, 0, desktopRect.right, desktopRect.bottom, 0);
 
 	delete Backbuffer; Backbuffer = nullptr;
-	DepthStencilBuffer.reset();
 
 	if (!SwapChain)
 	{
@@ -297,7 +296,7 @@ XRESULT D3D11GraphicsEngineBase::OnBeginFrame()
 	}
 
 	// Force the mode upon Gothic
-	zCView::SetMode((int)(Resolution.x / Engine::GAPI->GetRendererState()->RendererSettings.GothicUIScale), (int)(Resolution.y / Engine::GAPI->GetRendererState()->RendererSettings.GothicUIScale), 32);
+	zCView::SetMode(static_cast<int>(Resolution.x / Engine::GAPI->GetRendererState()->RendererSettings.GothicUIScale), static_cast<int>(Resolution.y / Engine::GAPI->GetRendererState()->RendererSettings.GothicUIScale), 32);
 
 	// Notify the shader manager
 	ShaderManager->OnFrameStart();
