@@ -1,6 +1,7 @@
 #pragma once
 
 #include "D3D11GraphicsEngineBase.h"
+#include <wrl.h>
 
 struct RenderToDepthStencilBuffer;
 
@@ -296,12 +297,13 @@ protected:
 	std::list<VobLightInfo*> FrameShadowUpdateLights;
 
 	/** D3D11 Objects */
-	ID3D11SamplerState* ClampSamplerState;
-	ID3D11SamplerState* CubeSamplerState;
-	ID3D11SamplerState* ShadowmapSamplerState;
-	ID3D11RasterizerState* WorldRasterizerState;
-	ID3D11RasterizerState* HUDRasterizerState;
-	ID3D11DepthStencilState* DefaultDepthStencilState;
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> ClampSamplerState;
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> CubeSamplerState;
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> ShadowmapSamplerState;
+	
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> WorldRasterizerState;
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> HUDRasterizerState;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> DefaultDepthStencilState;
 
 	/** Effects wrapper */
 	std::unique_ptr<D3D11Effect> Effects;

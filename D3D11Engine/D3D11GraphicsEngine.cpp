@@ -103,11 +103,7 @@ D3D11GraphicsEngine::D3D11GraphicsEngine() {
 	InfiniteRangeConstantBuffer = nullptr;
 	OutdoorSmallVobsConstantBuffer = nullptr;
 	OutdoorVobsConstantBuffer = nullptr;
-	ShadowmapSamplerState = nullptr;
 	DefaultSamplerState = nullptr;
-	HUDRasterizerState = nullptr;
-	WorldRasterizerState = nullptr;
-	DefaultDepthStencilState = nullptr;
 
 	FFRasterizerState = nullptr;
 	FFBlendState = nullptr;
@@ -132,8 +128,6 @@ D3D11GraphicsEngine::D3D11GraphicsEngine() {
 	GBuffer0_Diffuse = nullptr;
 	WorldShadowmap1 = nullptr;
 	HDRBackBuffer = nullptr;
-	CubeSamplerState = nullptr;
-	ClampSamplerState = nullptr;
 
 	Effects = std::make_unique<D3D11Effect>();
 
@@ -172,17 +166,11 @@ D3D11GraphicsEngine::~D3D11GraphicsEngine() {
 
 	SAFE_RELEASE(ReflectionCube2);
 	SAFE_RELEASE(ReflectionCube);
-	SAFE_RELEASE(CubeSamplerState);
-	SAFE_RELEASE(ClampSamplerState);
-	SAFE_RELEASE(ShadowmapSamplerState);
 	SAFE_RELEASE(FFRasterizerState);
 	SAFE_RELEASE(FFBlendState);
 	SAFE_RELEASE(FFDepthStencilState);
 	SAFE_RELEASE(BackbufferSRV);
 	SAFE_RELEASE(DefaultSamplerState);
-	SAFE_RELEASE(HUDRasterizerState);
-	SAFE_RELEASE(WorldRasterizerState);
-	SAFE_RELEASE(DefaultDepthStencilState);
 
 	SAFE_RELEASE(BackbufferRTV);
 	SAFE_RELEASE(SwapChain);
@@ -303,8 +291,8 @@ XRESULT D3D11GraphicsEngine::Init() {
 	//samplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
 	samplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
 	Device->CreateSamplerState(&samplerDesc, &ShadowmapSamplerState);
-	Context->PSSetSamplers(2, 1, &ShadowmapSamplerState);
-	Context->VSSetSamplers(2, 1, &ShadowmapSamplerState);
+	Context->PSSetSamplers(2, 1, ShadowmapSamplerState.GetAddressOf());
+	Context->VSSetSamplers(2, 1, ShadowmapSamplerState.GetAddressOf());
 
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
@@ -333,7 +321,7 @@ XRESULT D3D11GraphicsEngine::Init() {
 	rasterizerDesc.AntialiasedLineEnable = true;
 
 	LE(Device->CreateRasterizerState(&rasterizerDesc, &WorldRasterizerState));
-	Context->RSSetState(WorldRasterizerState);
+	Context->RSSetState(WorldRasterizerState.Get());
 
 	rasterizerDesc.FrontCounterClockwise = false;
 	LE(Device->CreateRasterizerState(&rasterizerDesc, &HUDRasterizerState));
@@ -1200,8 +1188,8 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferFF(D3D11VertexBuffer* vb,
  XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh(
 	D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices,
 	const std::vector<D3DXMATRIX>& transforms, float fatness) {
-	Context->RSSetState(WorldRasterizerState);
-	Context->OMSetDepthStencilState(DefaultDepthStencilState, 0);
+	Context->RSSetState(WorldRasterizerState.Get());
+	Context->OMSetDepthStencilState(DefaultDepthStencilState.Get(), 0);
 
 	if (GetRenderingStage() == DES_SHADOWMAP_CUBE) {
 		SetActiveVertexShader("VS_ExSkeletalCube");
@@ -4382,7 +4370,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	if (Effects->GetRainShadowmap())
 		Effects->GetRainShadowmap()->BindToPixelShader(Context, 4);
 
-	Context->PSSetSamplers(2, 1, &ShadowmapSamplerState);
+	Context->PSSetSamplers(2, 1, ShadowmapSamplerState.GetAddressOf());
 
 	Context->PSSetShaderResources(5, 1, &ReflectionCube2);
 
@@ -4748,8 +4736,8 @@ XRESULT D3D11GraphicsEngine::DrawOcean(GOcean* ocean) {
 
 	// Scene information is still bound from rendering water surfaces
 
-	Context->PSSetSamplers(1, 1, &ClampSamplerState);
-	Context->PSSetSamplers(2, 1, &CubeSamplerState);
+	Context->PSSetSamplers(1, 1, ClampSamplerState.GetAddressOf());
+	Context->PSSetSamplers(2, 1, CubeSamplerState.GetAddressOf());
 
 	// Update constantbuffer
 	ActivePS->GetConstantBuffer()[2]->UpdateBuffer(&ocb);
@@ -4822,7 +4810,7 @@ XRESULT D3D11GraphicsEngine::DrawOcean(GOcean* ocean) {
 		GothicRasterizerStateInfo::CM_CULL_BACK;
 	Engine::GAPI->GetRendererState()->RasterizerState.SetDirty();
 
-	Context->PSSetSamplers(2, 1, &ShadowmapSamplerState);
+	Context->PSSetSamplers(2, 1, ShadowmapSamplerState.GetAddressOf());
 
 	SetActivePixelShader("PS_World");
 	SetActiveVertexShader("VS_Ex");
