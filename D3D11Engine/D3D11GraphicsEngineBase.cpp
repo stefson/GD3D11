@@ -23,7 +23,6 @@ D3D11GraphicsEngineBase::D3D11GraphicsEngineBase() {
 	Backbuffer = nullptr;
 	DepthStencilBuffer = nullptr;
 	HDRBackBuffer = nullptr;
-	DefaultSamplerState = nullptr;
 	LineRenderer = nullptr;
 	TransformsCB = nullptr;
 	PresentPending = false;
@@ -44,8 +43,6 @@ D3D11GraphicsEngineBase::~D3D11GraphicsEngineBase() {
 	SAFE_DELETE(TempVertexBuffer);
 	SAFE_DELETE(Backbuffer);
 	SAFE_DELETE(TransformsCB);
-
-	SAFE_RELEASE(DefaultSamplerState);
 }
 
 /** Called after the fake-DDraw-Device got created */
@@ -123,10 +120,10 @@ XRESULT D3D11GraphicsEngineBase::Init() {
 	samplerDesc.MaxLOD = 3.402823466e+38F; // FLT_MAX
 
 	LE(GetDevice()->CreateSamplerState(&samplerDesc, &DefaultSamplerState));
-	GetContext()->PSSetSamplers(0, 1, &DefaultSamplerState);
-	GetContext()->VSSetSamplers(0, 1, &DefaultSamplerState);
-	GetContext()->DSSetSamplers(0, 1, &DefaultSamplerState);
-	GetContext()->HSSetSamplers(0, 1, &DefaultSamplerState);
+	GetContext()->PSSetSamplers(0, 1, DefaultSamplerState.GetAddressOf());
+	GetContext()->VSSetSamplers(0, 1, DefaultSamplerState.GetAddressOf());
+	GetContext()->DSSetSamplers(0, 1, DefaultSamplerState.GetAddressOf());
+	GetContext()->HSSetSamplers(0, 1, DefaultSamplerState.GetAddressOf());
 
 	TempVertexBuffer = new D3D11VertexBuffer();
 	TempVertexBuffer->Init(nullptr, DRAWVERTEXARRAY_BUFFER_SIZE, D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE);
@@ -426,12 +423,8 @@ XRESULT D3D11GraphicsEngineBase::GetDisplayModeList(std::vector<DisplayModeInfo>
 			i++;
 		}
 	}
-
-
 	displayModes.reset();
-
 	output->Release();
-
 	return XR_SUCCESS;
 }
 
@@ -531,7 +524,7 @@ void D3D11GraphicsEngineBase::SetDefaultStates()
 	Engine::GAPI->GetRendererState()->DepthState.SetDirty();
 	Engine::GAPI->GetRendererState()->SamplerState.SetDirty();
 
-	GetContext()->PSSetSamplers(0, 1, &DefaultSamplerState);
+	GetContext()->PSSetSamplers(0, 1, DefaultSamplerState.GetAddressOf());
 
 	UpdateRenderStates();
 }
@@ -568,8 +561,6 @@ XRESULT D3D11GraphicsEngineBase::DrawVertexArray(ExVertexStruct* vertices, unsig
 
 	vShader->GetConstantBuffer()[0]->UpdateBuffer(temp2Float2);
 	vShader->GetConstantBuffer()[0]->BindToVertexShader(0);
-
-
 
 	D3D11_BUFFER_DESC desc;
 	TempVertexBuffer->GetVertexBuffer()->GetDesc(&desc);
@@ -618,10 +609,8 @@ XRESULT D3D11GraphicsEngineBase::UpdateRenderStates()
 		FFBlendState = state->State;
 
 		Engine::GAPI->GetRendererState()->BlendState.StateDirty = false;
-		GetContext()->OMSetBlendState(FFBlendState, (float *)& D3DXVECTOR4(0, 0, 0, 0), 0xFFFFFFFF);
+		GetContext()->OMSetBlendState(FFBlendState.Get(), (float *)& D3DXVECTOR4(0, 0, 0, 0), 0xFFFFFFFF);
 	}
-
-
 
 	if (Engine::GAPI->GetRendererState()->RasterizerState.StateDirty)
 	{
@@ -638,10 +627,8 @@ XRESULT D3D11GraphicsEngineBase::UpdateRenderStates()
 		FFRasterizerState = state->State;
 
 		Engine::GAPI->GetRendererState()->RasterizerState.StateDirty = false;
-		GetContext()->RSSetState(FFRasterizerState);
+		GetContext()->RSSetState(FFRasterizerState.Get());
 	}
-
-
 
 	if (Engine::GAPI->GetRendererState()->DepthState.StateDirty)
 	{
@@ -658,11 +645,9 @@ XRESULT D3D11GraphicsEngineBase::UpdateRenderStates()
 		FFDepthStencilState = state->State;
 
 		Engine::GAPI->GetRendererState()->DepthState.StateDirty = false;
-		GetContext()->OMSetDepthStencilState(FFDepthStencilState, 0);
+		GetContext()->OMSetDepthStencilState(FFDepthStencilState.Get(), 0);
 	}
-
-
-
+	
 	return XR_SUCCESS;
 }
 

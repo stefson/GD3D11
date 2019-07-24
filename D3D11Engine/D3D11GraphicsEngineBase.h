@@ -182,7 +182,7 @@ protected:
 	std::unique_ptr<RenderToTextureBuffer> HDRBackBuffer;
 
 	/** States */
-	ID3D11SamplerState* DefaultSamplerState;
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> DefaultSamplerState;
 
 	/** Output-window (Gothics main window)*/
 	HWND OutputWindow;
@@ -221,11 +221,11 @@ protected:
 	D3D11GShader* ActiveGS;
 
 	/** FixedFunction-State render states */
-	ID3D11RasterizerState* FFRasterizerState;
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> FFRasterizerState;
 	size_t FFRasterizerStateHash;
-	ID3D11BlendState* FFBlendState;
+	Microsoft::WRL::ComPtr<ID3D11BlendState> FFBlendState;
 	size_t FFBlendStateHash;
-	ID3D11DepthStencilState* FFDepthStencilState;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> FFDepthStencilState;
 	size_t FFDepthStencilStateHash;
 
 	/** Debug line-renderer */

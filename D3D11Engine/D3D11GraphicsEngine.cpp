@@ -95,11 +95,6 @@ D3D11GraphicsEngine::D3D11GraphicsEngine() {
 	InfiniteRangeConstantBuffer = nullptr;
 	OutdoorSmallVobsConstantBuffer = nullptr;
 	OutdoorVobsConstantBuffer = nullptr;
-	DefaultSamplerState = nullptr;
-
-	FFRasterizerState = nullptr;
-	FFBlendState = nullptr;
-	FFDepthStencilState = nullptr;
 
 	ActiveHDS = nullptr;
 	ShaderManager = nullptr;
@@ -153,11 +148,6 @@ D3D11GraphicsEngine::~D3D11GraphicsEngine() {
 	SAFE_DELETE(DynamicInstancingBuffer);
 	SAFE_DELETE(TempVertexBuffer);
 	SAFE_DELETE(InverseUnitSphereMesh);
-
-	SAFE_RELEASE(FFRasterizerState);
-	SAFE_RELEASE(FFBlendState);
-	SAFE_RELEASE(FFDepthStencilState);
-	SAFE_RELEASE(DefaultSamplerState);
 
 	ID3D11Debug* d3dDebug;
 	Device->QueryInterface(__uuidof(ID3D11Debug),
@@ -257,10 +247,10 @@ XRESULT D3D11GraphicsEngine::Init() {
 	samplerDesc.MaxLOD = 3.402823466e+38F;   // FLT_MAX
 
 	LE(GetDevice()->CreateSamplerState(&samplerDesc, &DefaultSamplerState));
-	GetContext()->PSSetSamplers(0, 1, &DefaultSamplerState);
-	GetContext()->VSSetSamplers(0, 1, &DefaultSamplerState);
-	GetContext()->DSSetSamplers(0, 1, &DefaultSamplerState);
-	GetContext()->HSSetSamplers(0, 1, &DefaultSamplerState);
+	GetContext()->PSSetSamplers(0, 1, DefaultSamplerState.GetAddressOf());
+	GetContext()->VSSetSamplers(0, 1, DefaultSamplerState.GetAddressOf());
+	GetContext()->DSSetSamplers(0, 1, DefaultSamplerState.GetAddressOf());
+	GetContext()->HSSetSamplers(0, 1, DefaultSamplerState.GetAddressOf());
 
 	samplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
 	//TODO: NVidia PCSS
@@ -1470,7 +1460,7 @@ XRESULT D3D11GraphicsEngine::UpdateRenderStates() {
 		FFRasterizerStateHash = Engine::GAPI->GetRendererState()->BlendState.Hash;
 
 		Engine::GAPI->GetRendererState()->BlendState.StateDirty = false;
-		GetContext()->OMSetBlendState(FFBlendState, (float*)& D3DXVECTOR4(0, 0, 0, 0),
+		GetContext()->OMSetBlendState(FFBlendState.Get(), (float*)& D3DXVECTOR4(0, 0, 0, 0),
 			0xFFFFFFFF);
 	}
 
@@ -1494,7 +1484,7 @@ XRESULT D3D11GraphicsEngine::UpdateRenderStates() {
 		FFRasterizerStateHash = Engine::GAPI->GetRendererState()->DepthState.Hash;
 
 		Engine::GAPI->GetRendererState()->RasterizerState.StateDirty = false;
-		GetContext()->RSSetState(FFRasterizerState);
+		GetContext()->RSSetState(FFRasterizerState.Get());
 	}
 
 	if (Engine::GAPI->GetRendererState()->DepthState.StateDirty &&
@@ -1517,7 +1507,7 @@ XRESULT D3D11GraphicsEngine::UpdateRenderStates() {
 		FFDepthStencilStateHash = Engine::GAPI->GetRendererState()->DepthState.Hash;
 
 		Engine::GAPI->GetRendererState()->DepthState.StateDirty = false;
-		GetContext()->OMSetDepthStencilState(FFDepthStencilState, 0);
+		GetContext()->OMSetDepthStencilState(FFDepthStencilState.Get(), 0);
 	}
 
 	return XR_SUCCESS;
@@ -1566,7 +1556,7 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 	zCTextureCacheHack::NumNotCachedTexturesInFrame = 0;
 
 	// Re-Bind the default sampler-state in case it was overwritten
-	GetContext()->PSSetSamplers(0, 1, &DefaultSamplerState);
+	GetContext()->PSSetSamplers(0, 1, DefaultSamplerState.GetAddressOf());
 
 	// Update view distances
 	InfiniteRangeConstantBuffer->UpdateBuffer(&D3DXVECTOR4(FLT_MAX, 0, 0, 0));
@@ -3728,7 +3718,7 @@ void D3D11GraphicsEngine::SetDefaultStates(bool force) {
 	Engine::GAPI->GetRendererState()->DepthState.SetDirty();
 	Engine::GAPI->GetRendererState()->SamplerState.SetDirty();
 
-	GetContext()->PSSetSamplers(0, 1, &DefaultSamplerState);
+	GetContext()->PSSetSamplers(0, 1, DefaultSamplerState.GetAddressOf());
 
 	if (force) {
 		FFRasterizerStateHash = 0;
