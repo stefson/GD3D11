@@ -1,6 +1,7 @@
 #pragma once
 
 #include "basegraphicsengine.h"
+#include <wrl.h>
 
 class D3D11DepthBufferState;
 class D3D11BlendStateInfo;
@@ -125,7 +126,7 @@ public:
 	XRESULT D3D11GraphicsEngineBase::BindViewportInformation(const std::string & shader, int slot);
 
 	/** Returns the Device/Context */
-	ID3D11Device* GetDevice() { return Device; }
+	ID3D11Device* GetDevice() { return Device.Get(); }
 	ID3D11DeviceContext* GetContext() { return Context; }
 	ID3D11DeviceContext* GetDeferredMediaContext() { return DeferredContext; }
 
@@ -160,11 +161,11 @@ protected:
 	void UpdateTransformsCB();
 
 	/** Device-objects */
-	IDXGIFactory* DXGIFactory;
-	IDXGIAdapter* DXGIAdapter;
+	Microsoft::WRL::ComPtr<IDXGIFactory> DXGIFactory;
+	Microsoft::WRL::ComPtr<IDXGIAdapter> DXGIAdapter;
 	std::string DeviceDescription;
 
-	ID3D11Device* Device;
+	Microsoft::WRL::ComPtr<ID3D11Device> Device;
 	ID3D11DeviceContext* Context;
 	ID3D11DeviceContext* DeferredContext;
 

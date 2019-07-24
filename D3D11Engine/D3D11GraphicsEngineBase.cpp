@@ -21,9 +21,6 @@ D3D11GraphicsEngineBase::D3D11GraphicsEngineBase() {
 	TempVertexBuffer = nullptr;
 	DeferredContext = nullptr;
 	Context = nullptr;
-	Device = nullptr;
-	DXGIAdapter = nullptr;
-	DXGIFactory = nullptr;
 	ShaderManager = nullptr;
 	SwapChain = nullptr;
 	Backbuffer = nullptr;
@@ -55,9 +52,6 @@ D3D11GraphicsEngineBase::~D3D11GraphicsEngineBase() {
 	SAFE_RELEASE(SwapChain);
 	//SAFE_RELEASE(DeferredContext);
 	SAFE_RELEASE(Context);
-	SAFE_RELEASE(Device);
-	SAFE_RELEASE(DXGIAdapter);
-	SAFE_RELEASE(DXGIFactory);
 }
 
 /** Called after the fake-DDraw-Device got created */
@@ -67,7 +61,7 @@ XRESULT D3D11GraphicsEngineBase::Init() {
 	LogInfo() << "Initializing Device...";
 
 	// Create DXGI factory
-	LE(CreateDXGIFactory(__uuidof(IDXGIFactory), (void **)& DXGIFactory));
+	LE(CreateDXGIFactory(__uuidof(IDXGIFactory), &DXGIFactory));
 	LE(DXGIFactory->EnumAdapters(0, &DXGIAdapter)); // Get first adapter
 
 	// Find out what we are rendering on to write it into the logfile
@@ -85,9 +79,9 @@ XRESULT D3D11GraphicsEngineBase::Init() {
 
 	// Create D3D11-Device
 #ifndef DEBUG_D3D11
-	LE(D3D11CreateDevice(DXGIAdapter, D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags, &featurelevel, 1, D3D11_SDK_VERSION, &Device, nullptr, &Context));
+	LE(D3D11CreateDevice(DXGIAdapter.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags, &featurelevel, 1, D3D11_SDK_VERSION, &Device, nullptr, &Context));
 #else
-	LE(D3D11CreateDevice(DXGIAdapter, D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags | D3D11_CREATE_DEVICE_DEBUG, &featurelevel, 1, D3D11_SDK_VERSION, &Device, nullptr, &Context));
+	LE(D3D11CreateDevice(DXGIAdapter.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags | D3D11_CREATE_DEVICE_DEBUG, &featurelevel, 1, D3D11_SDK_VERSION, &Device, nullptr, &Context));
 #endif
 
 	if (hr == DXGI_ERROR_UNSUPPORTED) {
@@ -134,7 +128,7 @@ XRESULT D3D11GraphicsEngineBase::Init() {
 	samplerDesc.MinLOD = -3.402823466e+38F; // -FLT_MAX
 	samplerDesc.MaxLOD = 3.402823466e+38F; // FLT_MAX
 
-	LE(Device->CreateSamplerState(&samplerDesc, &DefaultSamplerState));
+	LE(GetDevice()->CreateSamplerState(&samplerDesc, &DefaultSamplerState));
 	Context->PSSetSamplers(0, 1, &DefaultSamplerState);
 	Context->VSSetSamplers(0, 1, &DefaultSamplerState);
 	Context->DSSetSamplers(0, 1, &DefaultSamplerState);
@@ -212,7 +206,7 @@ XRESULT D3D11GraphicsEngineBase::OnResize(INT2 newSize)
 #endif
 
 
-		LE(DXGIFactory->CreateSwapChain(Device, &scd, &SwapChain));
+		LE(DXGIFactory->CreateSwapChain(GetDevice(), &scd, &SwapChain));
 
 		if (!SwapChain)
 		{
@@ -241,13 +235,13 @@ XRESULT D3D11GraphicsEngineBase::OnResize(INT2 newSize)
 	// Recreate RenderTargetView
 	ID3D11RenderTargetView* backbufferRTV;
 	ID3D11ShaderResourceView * backbufferSRV;
-	LE(Device->CreateRenderTargetView(backbuffer, nullptr, &backbufferRTV));
-	LE(Device->CreateShaderResourceView(backbuffer, nullptr, &backbufferSRV));
+	LE(GetDevice()->CreateRenderTargetView(backbuffer, nullptr, &backbufferRTV));
+	LE(GetDevice()->CreateShaderResourceView(backbuffer, nullptr, &backbufferSRV));
 
 	Backbuffer = new RenderToTextureBuffer(backbuffer, backbufferSRV, backbufferRTV, (UINT)Resolution.x, (UINT)Resolution.y);
 
 	// Recreate DepthStencilBuffer
-	DepthStencilBuffer = std::make_unique<RenderToDepthStencilBuffer>(Device, Resolution.x, Resolution.y, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_R32_FLOAT);
+	DepthStencilBuffer = std::make_unique<RenderToDepthStencilBuffer>(GetDevice(), Resolution.x, Resolution.y, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_R32_FLOAT);
 
 	// Bind our newly created resources
 	Context->OMSetRenderTargets(1, Backbuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView());
@@ -266,7 +260,7 @@ XRESULT D3D11GraphicsEngineBase::OnResize(INT2 newSize)
 	Context->RSSetViewports(1, &viewport);
 
 	// Create other buffers
-	HDRBackBuffer = std::make_unique<RenderToTextureBuffer>(Device, Resolution.x, Resolution.y, DXGI_FORMAT_R16G16B16A16_FLOAT);
+	HDRBackBuffer = std::make_unique<RenderToTextureBuffer>(GetDevice(), Resolution.x, Resolution.y, DXGI_FORMAT_R16G16B16A16_FLOAT);
 
 	Engine::AntTweakBar->OnResize(newSize);
 
@@ -465,7 +459,7 @@ XRESULT D3D11GraphicsEngineBase::Present()
 	bool vsync = Engine::GAPI->GetRendererState()->RendererSettings.EnableVSync;
 	if (SwapChain->Present(vsync ? 1 : 0, 0) == DXGI_ERROR_DEVICE_REMOVED)
 	{
-		switch (Device->GetDeviceRemovedReason())
+		switch (GetDevice()->GetDeviceRemovedReason())
 		{
 			case DXGI_ERROR_DEVICE_HUNG:
 				LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_HUNG)";

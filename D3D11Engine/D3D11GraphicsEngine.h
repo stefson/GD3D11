@@ -356,8 +356,8 @@ protected:
 	std::vector<std::pair<MeshKey, MeshInfo *>> FrameTransparencyMeshes;
 
 	/** Reflection */
-	ID3D11ShaderResourceView * ReflectionCube;
-	ID3D11ShaderResourceView * ReflectionCube2;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ReflectionCube;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ReflectionCube2;
 
 	/** Constantbuffers for view-distances */
 	D3D11ConstantBuffer* InfiniteRangeConstantBuffer;

@@ -86,13 +86,9 @@ D3D11GraphicsEngine::D3D11GraphicsEngine() {
 
 	DebugPointlight = nullptr;
 	SwapChain = nullptr;
-	DXGIFactory = nullptr;
-	DXGIAdapter = nullptr;
 	OutputWindow = nullptr;
 	DepthStencilBuffer = nullptr;
-	Device = nullptr;
 	Context = nullptr;
-	ReflectionCube2 = nullptr;
 	DistortionTexture = nullptr;
 	DeferredContext = nullptr;
 	UIView = nullptr;
@@ -120,7 +116,6 @@ D3D11GraphicsEngine::D3D11GraphicsEngine() {
 	CloudBuffer = nullptr;
 
 	InverseUnitSphereMesh = nullptr;
-	ReflectionCube = nullptr;
 
 	GBuffer1_Normals_SpecIntens_SpecPower = nullptr;
 	GBuffer0_Diffuse = nullptr;
@@ -162,8 +157,6 @@ D3D11GraphicsEngine::~D3D11GraphicsEngine() {
 	SAFE_DELETE(TempVertexBuffer);
 	SAFE_DELETE(InverseUnitSphereMesh);
 
-	SAFE_RELEASE(ReflectionCube2);
-	SAFE_RELEASE(ReflectionCube);
 	SAFE_RELEASE(FFRasterizerState);
 	SAFE_RELEASE(FFBlendState);
 	SAFE_RELEASE(FFDepthStencilState);
@@ -183,11 +176,6 @@ D3D11GraphicsEngine::~D3D11GraphicsEngine() {
 		d3dDebug->Release();
 	}
 
-	SAFE_RELEASE(Device);
-
-	SAFE_RELEASE(DXGIAdapter);
-	SAFE_RELEASE(DXGIFactory);
-
 	// MemTrackerFinalReport();
 }
 
@@ -198,7 +186,7 @@ XRESULT D3D11GraphicsEngine::Init() {
 	LogInfo() << "Initializing Device...";
 
 	// Create DXGI factory
-	LE(CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)& DXGIFactory));
+	LE(CreateDXGIFactory(__uuidof(IDXGIFactory), &DXGIFactory));
 	LE(DXGIFactory->EnumAdapters(0, &DXGIAdapter));  // Get first adapter
 
 	// Find out what we are rendering on to write it into the logfile
@@ -217,11 +205,11 @@ XRESULT D3D11GraphicsEngine::Init() {
 
 	// Create D3D11-Device
 #ifndef DEBUG_D3D11
-	LE(D3D11CreateDevice(DXGIAdapter, D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags,
+	LE(D3D11CreateDevice(DXGIAdapter.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags,
 		&featurelevel, 1, D3D11_SDK_VERSION, &Device, nullptr,
 		&Context));
 #else
-	LE(D3D11CreateDevice(DXGIAdapter, D3D_DRIVER_TYPE_UNKNOWN, nullptr,
+	LE(D3D11CreateDevice(DXGIAdapter.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr,
 		flags | D3D11_CREATE_DEVICE_DEBUG, &featurelevel, 1,
 		D3D11_SDK_VERSION, &Device, nullptr, &Context));
 #endif
@@ -237,7 +225,7 @@ XRESULT D3D11GraphicsEngine::Init() {
 		exit(0);
 	}
 
-	LE(Device->CreateDeferredContext(0, &DeferredContext));  // Used for multithreaded texture loading
+	LE(GetDevice()->CreateDeferredContext(0, &DeferredContext));  // Used for multithreaded texture loading
 
 	LogInfo() << "Creating ShaderManager";
 
@@ -276,7 +264,7 @@ XRESULT D3D11GraphicsEngine::Init() {
 	samplerDesc.MinLOD = -3.402823466e+38F;  // -FLT_MAX
 	samplerDesc.MaxLOD = 3.402823466e+38F;   // FLT_MAX
 
-	LE(Device->CreateSamplerState(&samplerDesc, &DefaultSamplerState));
+	LE(GetDevice()->CreateSamplerState(&samplerDesc, &DefaultSamplerState));
 	Context->PSSetSamplers(0, 1, &DefaultSamplerState);
 	Context->VSSetSamplers(0, 1, &DefaultSamplerState);
 	Context->DSSetSamplers(0, 1, &DefaultSamplerState);
@@ -286,7 +274,7 @@ XRESULT D3D11GraphicsEngine::Init() {
 	//TODO: NVidia PCSS
 	//samplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
 	samplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
-	Device->CreateSamplerState(&samplerDesc, &ShadowmapSamplerState);
+	GetDevice()->CreateSamplerState(&samplerDesc, &ShadowmapSamplerState);
 	Context->PSSetSamplers(2, 1, ShadowmapSamplerState.GetAddressOf());
 	Context->VSSetSamplers(2, 1, ShadowmapSamplerState.GetAddressOf());
 
@@ -294,13 +282,13 @@ XRESULT D3D11GraphicsEngine::Init() {
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-	Device->CreateSamplerState(&samplerDesc, &ClampSamplerState);
+	GetDevice()->CreateSamplerState(&samplerDesc, &ClampSamplerState);
 
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	Device->CreateSamplerState(&samplerDesc, &CubeSamplerState);
+	GetDevice()->CreateSamplerState(&samplerDesc, &CubeSamplerState);
 
 	D3D11_RASTERIZER_DESC rasterizerDesc;
 	rasterizerDesc.CullMode = D3D11_CULL_BACK;
@@ -316,11 +304,11 @@ XRESULT D3D11GraphicsEngine::Init() {
 	rasterizerDesc.MultisampleEnable = false;
 	rasterizerDesc.AntialiasedLineEnable = true;
 
-	LE(Device->CreateRasterizerState(&rasterizerDesc, &WorldRasterizerState));
+	LE(GetDevice()->CreateRasterizerState(&rasterizerDesc, &WorldRasterizerState));
 	Context->RSSetState(WorldRasterizerState.Get());
 
 	rasterizerDesc.FrontCounterClockwise = false;
-	LE(Device->CreateRasterizerState(&rasterizerDesc, &HUDRasterizerState));
+	LE(GetDevice()->CreateRasterizerState(&rasterizerDesc, &HUDRasterizerState));
 
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
 	// Depth test parameters
@@ -345,7 +333,7 @@ XRESULT D3D11GraphicsEngine::Init() {
 	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
-	LE(Device->CreateDepthStencilState(&depthStencilDesc,
+	LE(GetDevice()->CreateDepthStencilState(&depthStencilDesc,
 		&DefaultDepthStencilState));
 
 	SetActivePixelShader("PS_Simple");
@@ -376,13 +364,13 @@ XRESULT D3D11GraphicsEngine::Init() {
 
 	// Load reflectioncube
 	if (S_OK != D3DX11CreateShaderResourceViewFromFile(
-		Device, "system\\GD3D11\\Textures\\reflect_cube.dds", nullptr,
+		GetDevice(), "system\\GD3D11\\Textures\\reflect_cube.dds", nullptr,
 		nullptr, &ReflectionCube, nullptr))
 		LogWarn()
 		<< "Failed to load file: system\\GD3D11\\Textures\\reflect_cube.dds";
 
 	if (S_OK != D3DX11CreateShaderResourceViewFromFile(
-		Device, "system\\GD3D11\\Textures\\SkyCubemap2.dds", nullptr,
+		GetDevice(), "system\\GD3D11\\Textures\\SkyCubemap2.dds", nullptr,
 		nullptr, &ReflectionCube2, nullptr))
 		LogWarn()
 		<< "Failed to load file: system\\GD3D11\\Textures\\SkyCubemap2.dds";
@@ -435,7 +423,7 @@ XRESULT D3D11GraphicsEngine::Init() {
 
 	// Create dummy rendertarget for shadowcubes
 	DummyShadowCubemapTexture = new RenderToTextureBuffer(
-		Device, POINTLIGHT_SHADOWMAP_SIZE, POINTLIGHT_SHADOWMAP_SIZE,
+		GetDevice(), POINTLIGHT_SHADOWMAP_SIZE, POINTLIGHT_SHADOWMAP_SIZE,
 		DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, DXGI_FORMAT_UNKNOWN,
 		DXGI_FORMAT_UNKNOWN, 1, 6);
 
@@ -517,7 +505,7 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 #endif
 #endif
 
-		LE(DXGIFactory->CreateSwapChain(Device, &scd, &SwapChain));
+		LE(DXGIFactory->CreateSwapChain(GetDevice(), &scd, &SwapChain));
 
 		if (!SwapChain) {
 			LogError() << "Failed to create Swapchain! Program will now exit!";
@@ -543,8 +531,8 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 	SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &backbuffer);
 
 	// Recreate RenderTargetView
-	LE(Device->CreateRenderTargetView(backbuffer.Get(), nullptr, &BackbufferRTV));
-	LE(Device->CreateShaderResourceView(backbuffer.Get(), nullptr, &BackbufferSRV));
+	LE(GetDevice()->CreateRenderTargetView(backbuffer.Get(), nullptr, &BackbufferRTV));
+	LE(GetDevice()->CreateShaderResourceView(backbuffer.Get(), nullptr, &BackbufferSRV));
 
 	if (UIView) {
 		UIView->Resize(Resolution, backbuffer.Get());
@@ -552,11 +540,11 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 
 	// Recreate DepthStencilBuffer
 	DepthStencilBuffer = std::make_unique<RenderToDepthStencilBuffer>(
-		Device, Resolution.x, Resolution.y, DXGI_FORMAT_R32_TYPELESS, nullptr,
+		GetDevice(), Resolution.x, Resolution.y, DXGI_FORMAT_R32_TYPELESS, nullptr,
 		DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_R32_FLOAT);
 
 	DepthStencilBufferCopy = std::make_unique<RenderToTextureBuffer>(
-		Device, Resolution.x, Resolution.y, DXGI_FORMAT_R32_TYPELESS, nullptr,
+		GetDevice(), Resolution.x, Resolution.y, DXGI_FORMAT_R32_TYPELESS, nullptr,
 		DXGI_FORMAT_R32_FLOAT, DXGI_FORMAT_R32_FLOAT);
 
 	// Bind our newly created resources
@@ -581,20 +569,20 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 
 	PfxRenderer->OnResize(Resolution);
 
-	CloudBuffer = std::make_unique<RenderToTextureBuffer>(Device, bbres.x, bbres.y, DXGI_FORMAT_R8G8B8A8_UNORM);
+	CloudBuffer = std::make_unique<RenderToTextureBuffer>(GetDevice(), bbres.x, bbres.y, DXGI_FORMAT_R8G8B8A8_UNORM);
 
 	GBuffer1_Normals_SpecIntens_SpecPower = std::make_unique<RenderToTextureBuffer>(
-		Device, Resolution.x, Resolution.y, DXGI_FORMAT_R16G16B16A16_FLOAT);
+		GetDevice(), Resolution.x, Resolution.y, DXGI_FORMAT_R16G16B16A16_FLOAT);
 
 	GBuffer0_Diffuse = std::make_unique<RenderToTextureBuffer>(
-		Device, Resolution.x, Resolution.y, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB);
+		GetDevice(), Resolution.x, Resolution.y, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB);
 
-	HDRBackBuffer = std::make_unique<RenderToTextureBuffer>(Device, Resolution.x, Resolution.y,
+	HDRBackBuffer = std::make_unique<RenderToTextureBuffer>(GetDevice(), Resolution.x, Resolution.y,
 		DXGI_FORMAT_R16G16B16A16_FLOAT);
 
 	int s = Engine::GAPI->GetRendererState()->RendererSettings.ShadowMapSize;
 	WorldShadowmap1 = std::make_unique<RenderToDepthStencilBuffer>(
-		Device, s, s, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT,
+		GetDevice(), s, s, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT,
 		DXGI_FORMAT_R32_FLOAT);
 
 	Engine::AntTweakBar->OnResize(newSize);
@@ -650,7 +638,7 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
 		int old = WorldShadowmap1->GetSizeX();
 		LogInfo() << "Shadowmapresolution changed to: " << s << "x" << s;
 		WorldShadowmap1 = std::make_unique<RenderToDepthStencilBuffer>(
-			Device, s, s, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT,
+			GetDevice(), s, s, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT,
 			DXGI_FORMAT_R32_FLOAT);
 
 		Engine::GAPI->GetRendererState()->RendererSettings.WorldShadowRangeScale *= old / static_cast<float>(s);
@@ -861,7 +849,7 @@ XRESULT D3D11GraphicsEngine::Present() {
 
 	Engine::GAPI->EnterResourceCriticalSection();
 	if (SwapChain->Present(vsync ? 1 : 0, 0) == DXGI_ERROR_DEVICE_REMOVED) {
-		switch (Device->GetDeviceRemovedReason()) {
+		switch (GetDevice()->GetDeviceRemovedReason()) {
 			case DXGI_ERROR_DEVICE_HUNG:
 				LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_HUNG)";
 				exit(0);
@@ -1961,7 +1949,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh(bool noTextures) {
 	SetupVS_ExConstantBuffer();
 
 	// Bind reflection-cube to slot 4
-	Context->PSSetShaderResources(4, 1, &ReflectionCube);
+	Context->PSSetShaderResources(4, 1, ReflectionCube.GetAddressOf());
 
 	// Set constant buffer
 	ActivePS->GetConstantBuffer()[0]->UpdateBuffer(
@@ -2606,7 +2594,7 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 	ActivePS->GetConstantBuffer()[2]->BindToPixelShader(2);
 
 	// Bind reflection cube
-	Context->PSSetShaderResources(3, 1, &ReflectionCube);
+	Context->PSSetShaderResources(3, 1, ReflectionCube.GetAddressOf());
 
 	for (int i = 0; i < 1;
 		i++)  // Draw twice, but second time only to depth buffer to fix the fog
@@ -4359,7 +4347,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 
 	Context->PSSetSamplers(2, 1, ShadowmapSamplerState.GetAddressOf());
 
-	Context->PSSetShaderResources(5, 1, &ReflectionCube2);
+	Context->PSSetShaderResources(5, 1, ReflectionCube2.GetAddressOf());
 
 	DistortionTexture->BindToPixelShader(6);
 
@@ -4707,7 +4695,7 @@ XRESULT D3D11GraphicsEngine::DrawOcean(GOcean* ocean) {
 	ID3D11ShaderResourceView* tex_displacement;
 	ID3D11ShaderResourceView* tex_gradient;
 	ID3D11ShaderResourceView* tex_fresnel;
-	ID3D11ShaderResourceView* cube_reflect = ReflectionCube;
+	ID3D11ShaderResourceView* cube_reflect = ReflectionCube.Get();
 	OceanSettingsConstantBuffer ocb;
 	ocean->GetFFTResources(&tex_displacement, &tex_gradient, &tex_fresnel, &ocb);
 	ocb.OS_SunColor = Engine::GAPI->GetSky()->GetSunColor();
@@ -4884,7 +4872,7 @@ void D3D11GraphicsEngine::GetBackbufferData(byte** data, int& pixelsize) {
 
 	// Buffer for scaling down the image
 	RenderToTextureBuffer* rt = new RenderToTextureBuffer(
-		Device, width, width, DXGI_FORMAT_R8G8B8A8_UNORM);
+		GetDevice(), width, width, DXGI_FORMAT_R8G8B8A8_UNORM);
 
 	// Downscale to 256x256
 	PfxRenderer->CopyTextureToRTV(HDRBackBuffer->GetShaderResView(),
@@ -4906,7 +4894,7 @@ void D3D11GraphicsEngine::GetBackbufferData(byte** data, int& pixelsize) {
 	texDesc.Usage = D3D11_USAGE_STAGING;
 
 	ID3D11Texture2D* texture;
-	LE(Device->CreateTexture2D(&texDesc, 0, &texture));
+	LE(GetDevice()->CreateTexture2D(&texDesc, 0, &texture));
 	Context->CopyResource(texture, rt->GetTexture());
 
 	// Get data
@@ -5519,7 +5507,7 @@ void D3D11GraphicsEngine::SaveScreenshot() {
 
 	// Buffer for scaling down the image
 	RenderToTextureBuffer* rt = new RenderToTextureBuffer(
-		Device, Resolution.x, Resolution.y, DXGI_FORMAT_R8G8B8A8_UNORM);
+		GetDevice(), Resolution.x, Resolution.y, DXGI_FORMAT_R8G8B8A8_UNORM);
 
 	// Downscale to 256x256
 	PfxRenderer->CopyTextureToRTV(HDRBackBuffer->GetShaderResView(),
@@ -5539,7 +5527,7 @@ void D3D11GraphicsEngine::SaveScreenshot() {
 	texDesc.Usage = D3D11_USAGE_IMMUTABLE;
 
 	ID3D11Texture2D* texture;
-	LE(Device->CreateTexture2D(&texDesc, 0, &texture));
+	LE(GetDevice()->CreateTexture2D(&texDesc, 0, &texture));
 	Context->CopyResource(texture, rt->GetTexture());
 
 	char date[50];
