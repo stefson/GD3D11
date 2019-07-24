@@ -286,7 +286,7 @@ public:
 	void CreateMainUIView();
 
 	/** Returns a dummy cube-rendertarget used for pointlight shadowmaps */
-	RenderToTextureBuffer * GetDummyCubeRT() { return DummyShadowCubemapTexture; }
+	RenderToTextureBuffer * GetDummyCubeRT() { return DummyShadowCubemapTexture.get(); }
 protected:
 	/** Test draw world */
 	void TestDrawWorldMesh();
@@ -313,8 +313,8 @@ protected:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> BackbufferSRV; // Diffuse
 	std::unique_ptr<RenderToTextureBuffer> GBuffer0_Diffuse;
 	std::unique_ptr<RenderToTextureBuffer> GBuffer1_Normals_SpecIntens_SpecPower; // Normals / SpecIntensity / SpecPower
-	std::unique_ptr<RenderToTextureBuffer>  DepthStencilBufferCopy;
-	RenderToTextureBuffer * DummyShadowCubemapTexture; // PS-Stage needs to have a rendertarget bound to execute SV_Depth-Writes, as it seems.
+	std::unique_ptr<RenderToTextureBuffer> DepthStencilBufferCopy;
+	std::unique_ptr<RenderToTextureBuffer> DummyShadowCubemapTexture; // PS-Stage needs to have a rendertarget bound to execute SV_Depth-Writes, as it seems.
 
 	/** Temp-Arrays for storing data to be put in constant buffers */
 	D3DXMATRIX Temp2D3DXMatrix[2];
@@ -360,9 +360,9 @@ protected:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ReflectionCube2;
 
 	/** Constantbuffers for view-distances */
-	D3D11ConstantBuffer* InfiniteRangeConstantBuffer;
-	D3D11ConstantBuffer* OutdoorSmallVobsConstantBuffer;
-	D3D11ConstantBuffer* OutdoorVobsConstantBuffer;
+	std::unique_ptr<D3D11ConstantBuffer> InfiniteRangeConstantBuffer;
+	std::unique_ptr<D3D11ConstantBuffer> OutdoorSmallVobsConstantBuffer;
+	std::unique_ptr<D3D11ConstantBuffer> OutdoorVobsConstantBuffer;
 
 	/** Quads for decals/particles */
 	D3D11VertexBuffer* QuadVertexBuffer;

@@ -86,33 +86,13 @@ D3D11GraphicsEngine::D3D11GraphicsEngine() {
 
 	DebugPointlight = nullptr;
 	OutputWindow = nullptr;
-	DepthStencilBuffer = nullptr;
-	DistortionTexture = nullptr;
-	UIView = nullptr;
-	DepthStencilBufferCopy = nullptr;
-	DummyShadowCubemapTexture = nullptr;
-
-	InfiniteRangeConstantBuffer = nullptr;
-	OutdoorSmallVobsConstantBuffer = nullptr;
-	OutdoorVobsConstantBuffer = nullptr;
 
 	ActiveHDS = nullptr;
-	ShaderManager = nullptr;
 	DynamicInstancingBuffer = nullptr;
-	TempVertexBuffer = nullptr;
-	NoiseTexture = nullptr;
-	WhiteTexture = nullptr;
 
 	ActivePS = nullptr;
-	PfxRenderer = nullptr;
-	CloudBuffer = nullptr;
 
 	InverseUnitSphereMesh = nullptr;
-
-	GBuffer1_Normals_SpecIntens_SpecPower = nullptr;
-	GBuffer0_Diffuse = nullptr;
-	WorldShadowmap1 = nullptr;
-	HDRBackBuffer = nullptr;
 
 	Effects = std::make_unique<D3D11Effect>();
 
@@ -137,16 +117,11 @@ D3D11GraphicsEngine::~D3D11GraphicsEngine() {
 	GothicBlendStateInfo::DeleteCachedObjects();
 	GothicRasterizerStateInfo::DeleteCachedObjects();
 
-	SAFE_DELETE(InfiniteRangeConstantBuffer);
-	SAFE_DELETE(OutdoorSmallVobsConstantBuffer);
-	SAFE_DELETE(OutdoorVobsConstantBuffer);
-
-	SAFE_DELETE(DummyShadowCubemapTexture);
-	SAFE_DELETE(QuadVertexBuffer);
-	SAFE_DELETE(QuadIndexBuffer);
-
 	SAFE_DELETE(DynamicInstancingBuffer);
 	SAFE_DELETE(InverseUnitSphereMesh);
+
+	SAFE_DELETE(QuadVertexBuffer);
+	SAFE_DELETE(QuadIndexBuffer);
 
 	ID3D11Debug* d3dDebug;
 	Device->QueryInterface(__uuidof(ID3D11Debug),
@@ -403,7 +378,7 @@ XRESULT D3D11GraphicsEngine::Init() {
 	QuadIndexBuffer->UpdateBuffer(indices, sizeof(indices));
 
 	// Create dummy rendertarget for shadowcubes
-	DummyShadowCubemapTexture = new RenderToTextureBuffer(
+	DummyShadowCubemapTexture = std::make_unique<RenderToTextureBuffer>(
 		GetDevice(), POINTLIGHT_SHADOWMAP_SIZE, POINTLIGHT_SHADOWMAP_SIZE,
 		DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, DXGI_FORMAT_UNKNOWN,
 		DXGI_FORMAT_UNKNOWN, 1, 6);
@@ -614,8 +589,8 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
 		case 0: s = 512; break;
 		case 1: s = 1024; break;
 		case 2: s = 2048; break;
-		case 3: s = 4096; break; 
-		case 4: s = 8192; break; 
+		case 3: s = 4096; break;
+		case 4: s = 8192; break;
 	}
 
 	if (WorldShadowmap1->GetSizeX() != s) {
@@ -1145,7 +1120,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferFF(D3D11VertexBuffer* vb,
 }
 
 /** Draws a skeletal mesh */
- XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh(
+XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh(
 	D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices,
 	const std::vector<D3DXMATRIX>& transforms, float fatness) {
 	GetContext()->RSSetState(WorldRasterizerState.Get());
@@ -3534,16 +3509,16 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 							sizeof(VobInstanceInfo), staticMeshVisual.second->Instances.size(),
 							sizeof(ExVertexStruct), staticMeshVisual.second->StartInstanceNum);
 					}
-							}
-						}
+				}
+			}
 
 			// Reset visual
 			if (doReset &&
 				!Engine::GAPI->GetRendererState()->RendererSettings.FixViewFrustum) {
 				staticMeshVisual.second->StartNewFrame();
 			}
-					}
-				}
+		}
+	}
 
 	// Draw mobs
 	if (Engine::GAPI->GetRendererState()->RendererSettings.DrawMobs) {
@@ -3677,7 +3652,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 	SetDefaultStates();
 
 	return XR_SUCCESS;
-			}
+}
 
 /** Draws the static VOBs */
 XRESULT D3D11GraphicsEngine::DrawVOBs(bool noTextures) {
@@ -3861,14 +3836,14 @@ XRESULT D3D11GraphicsEngine::OnKeyDown(unsigned int key) {
 				Engine::GAPI->GetRendererState()->RendererSettings.EnableEditorPanel =
 					true;
 				CreateMainUIView();
-	}
+			}
 			break;
 		default:
 			break;
-}
+	}
 
 	return XR_SUCCESS;
-		}
+}
 
 /** Reloads shaders */
 XRESULT D3D11GraphicsEngine::ReloadShaders() {
