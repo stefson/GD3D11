@@ -320,7 +320,7 @@ protected:
 	D3DXMATRIX Temp2D3DXMatrix[2];
 	D3DXMATRIX TempBonesD3DXmatrix[NUM_MAX_BONES];
 	float2 Temp2Float2[2];
-	D3D11VertexBuffer* DynamicInstancingBuffer;
+	std::unique_ptr<D3D11VertexBuffer> DynamicInstancingBuffer;
 
 	std::set<zCTexture *> FrameTextures;
 

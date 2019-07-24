@@ -83,24 +83,16 @@ DrawcallInfo g_LastDrawCall;
 
 D3D11GraphicsEngine::D3D11GraphicsEngine() {
 	Resolution = DEFAULT_RESOLUTION;
-
 	DebugPointlight = nullptr;
 	OutputWindow = nullptr;
-
 	ActiveHDS = nullptr;
-	DynamicInstancingBuffer = nullptr;
-
 	ActivePS = nullptr;
-
 	InverseUnitSphereMesh = nullptr;
 
 	Effects = std::make_unique<D3D11Effect>();
-
 	RenderingStage = DES_MAIN;
-
 	PresentPending = false;
 	SaveScreenshotNextFrame = false;
-
 	LineRenderer = std::make_unique<D3D11LineRenderer>();
 	Occlusion = std::make_unique<D3D11OcclusionQuerry>();
 
@@ -117,7 +109,6 @@ D3D11GraphicsEngine::~D3D11GraphicsEngine() {
 	GothicBlendStateInfo::DeleteCachedObjects();
 	GothicRasterizerStateInfo::DeleteCachedObjects();
 
-	SAFE_DELETE(DynamicInstancingBuffer);
 	SAFE_DELETE(InverseUnitSphereMesh);
 
 	SAFE_DELETE(QuadVertexBuffer);
@@ -200,7 +191,7 @@ XRESULT D3D11GraphicsEngine::Init() {
 		nullptr, DRAWVERTEXARRAY_BUFFER_SIZE, D3D11VertexBuffer::B_VERTEXBUFFER,
 		D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE);
 
-	DynamicInstancingBuffer = new D3D11VertexBuffer();
+	DynamicInstancingBuffer = std::make_unique<D3D11VertexBuffer>();
 	DynamicInstancingBuffer->Init(
 		nullptr, INSTANCING_BUFFER_SIZE, D3D11VertexBuffer::B_VERTEXBUFFER,
 		D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE);
@@ -1267,9 +1258,7 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
 
 	// Check buffersize
 	D3D11_BUFFER_DESC desc;
-	((D3D11VertexBuffer*)DynamicInstancingBuffer)
-		->GetVertexBuffer()
-		->GetDesc(&desc);
+	DynamicInstancingBuffer->GetVertexBuffer()->GetDesc(&desc);
 
 	if (desc.ByteWidth < instanceDataStride * numInstances) {
 		LogInfo() << "Instancing buffer too small (" << desc.ByteWidth << "), need "
@@ -1277,8 +1266,7 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
 			<< " bytes. Recreating buffer.";
 
 		// Buffer too small, recreate it
-		delete DynamicInstancingBuffer;
-		DynamicInstancingBuffer = new D3D11VertexBuffer();
+		DynamicInstancingBuffer = std::make_unique<D3D11VertexBuffer>();
 
 		// Put in some little extra space (16) so we don't need to recreate this
 		// every frame when approaching a field of stones or something.
@@ -1318,7 +1306,7 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
 	UINT uStride[] = {vertexStride, instanceDataStride};
 	ID3D11Buffer* buffers[] = {
 		((D3D11VertexBuffer*)vb)->GetVertexBuffer(),
-		((D3D11VertexBuffer*)DynamicInstancingBuffer)->GetVertexBuffer()};
+		DynamicInstancingBuffer->GetVertexBuffer()};
 	GetContext()->IASetVertexBuffers(0, 2, buffers, uStride, offset);
 
 	if (sizeof(VERTEX_INDEX) == sizeof(unsigned short)) {
@@ -3130,9 +3118,7 @@ void D3D11GraphicsEngine::DrawWorldAround(const D3DXVECTOR3& position,
 		}
 
 		D3D11_BUFFER_DESC desc;
-		((D3D11VertexBuffer*)DynamicInstancingBuffer)
-			->GetVertexBuffer()
-			->GetDesc(&desc);
+		DynamicInstancingBuffer->GetVertexBuffer()->GetDesc(&desc);
 
 		byte* data;
 		UINT size;
@@ -3200,7 +3186,7 @@ void D3D11GraphicsEngine::DrawWorldAround(const D3DXVECTOR3& position,
 
 					// Draw batch
 					DrawInstanced(mi->MeshVertexBuffer, mi->MeshIndexBuffer,
-						mi->Indices.size(), DynamicInstancingBuffer,
+						mi->Indices.size(), DynamicInstancingBuffer.get(),
 						sizeof(VobInstanceInfo), staticMeshVisual.second->Instances.size(),
 						sizeof(ExVertexStruct), staticMeshVisual.second->StartInstanceNum);
 
@@ -3307,9 +3293,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 	if (Engine::GAPI->GetRendererState()->RendererSettings.DrawVOBs) {
 		// Create instancebuffer for this frame
 		D3D11_BUFFER_DESC desc;
-		((D3D11VertexBuffer*)DynamicInstancingBuffer)
-			->GetVertexBuffer()
-			->GetDesc(&desc);
+		DynamicInstancingBuffer->GetVertexBuffer()->GetDesc(&desc);
 
 		if (desc.ByteWidth < sizeof(VobInstanceInfo) * vobs.size()) {
 			LogInfo() << "Instancing buffer too small (" << desc.ByteWidth
@@ -3317,8 +3301,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 				<< " bytes. Recreating buffer.";
 
 			// Buffer too small, recreate it
-			delete DynamicInstancingBuffer;
-			DynamicInstancingBuffer = new D3D11VertexBuffer();
+			DynamicInstancingBuffer = std::make_unique<D3D11VertexBuffer>();
 			DynamicInstancingBuffer->Init(
 				nullptr, sizeof(VobInstanceInfo) * vobs.size(),
 				D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC,
@@ -3498,14 +3481,14 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 					if (!ActiveHDS) {
 						// Draw batch
 						DrawInstanced(mi->MeshVertexBuffer, mi->MeshIndexBuffer,
-							mi->Indices.size(), DynamicInstancingBuffer,
+							mi->Indices.size(), DynamicInstancingBuffer.get(),
 							sizeof(VobInstanceInfo), staticMeshVisual.second->Instances.size(),
 							sizeof(ExVertexStruct), staticMeshVisual.second->StartInstanceNum);
 					}
 					else {
 						// Draw batch tesselated
 						DrawInstanced(mi->MeshVertexBuffer, mi->MeshIndexBufferPNAEN,
-							mi->IndicesPNAEN.size(), DynamicInstancingBuffer,
+							mi->IndicesPNAEN.size(), DynamicInstancingBuffer.get(),
 							sizeof(VobInstanceInfo), staticMeshVisual.second->Instances.size(),
 							sizeof(ExVertexStruct), staticMeshVisual.second->StartInstanceNum);
 					}
@@ -3629,7 +3612,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 
 		// Draw batch
 		DrawInstanced(mi->MeshVertexBuffer, mi->MeshIndexBuffer, mi->Indices.size(),
-			DynamicInstancingBuffer, sizeof(VobInstanceInfo),
+			DynamicInstancingBuffer.get(), sizeof(VobInstanceInfo),
 			vi->Instances.size(), sizeof(ExVertexStruct),
 			vi->StartInstanceNum);
 	}
