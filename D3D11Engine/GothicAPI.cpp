@@ -132,10 +132,6 @@ GothicAPI::GothicAPI()
 
 GothicAPI::~GothicAPI() {
 	//ResetWorld(); // Just let it leak for now. // FIXME: Do this properly
-	SAFE_DELETE(Ocean);
-	SAFE_DELETE(SkyRenderer);
-	SAFE_DELETE(Inventory);
-	SAFE_DELETE(LoadedWorldInfo);
 	SAFE_DELETE(WrappedWorldMesh);
 }
 
@@ -163,7 +159,7 @@ void GothicAPI::OnGameStart() {
 #endif
 #endif
 
-	LoadedWorldInfo = new WorldInfo;
+	LoadedWorldInfo = std::make_unique<WorldInfo>();
 	LoadedWorldInfo->HighestVertex = 2;
 	LoadedWorldInfo->LowestVertex = 3;
 	LoadedWorldInfo->MidPoint = D3DXVECTOR2(4, 5);
@@ -175,10 +171,10 @@ void GothicAPI::OnGameStart() {
 
 	InitializeCriticalSection(&ResourceCriticalSection);
 
-	SkyRenderer = new GSky;
+	SkyRenderer = std::make_unique<GSky>();
 	SkyRenderer->InitSky();
 
-	Inventory = new GInventory;
+	Inventory = std::make_unique<GInventory>();
 }
 
 /** Called to update the world, before rendering */
@@ -447,7 +443,7 @@ void GothicAPI::ResetVobs() {
 	VobMap.clear();
 
 	// Delete skeletal mesh vobs
-	for (auto&& it : SkeletalMeshVobs) {
+	for (auto it : SkeletalMeshVobs) {
 		delete it;
 	}
 	SkeletalMeshVobs.clear();
@@ -470,7 +466,7 @@ void GothicAPI::OnGeometryLoaded(zCPolygon * *polys, unsigned int numPolygons) {
 	std::string worldStr = "system\\GD3D11\\meshes\\WLD_" + LoadedWorldInfo->WorldName + ".obj";
 	// Convert world to our own format
 #ifdef BUILD_GOTHIC_2_6_fix
-	WorldConverter::ConvertWorldMesh(polys, numPolygons, &WorldSections, LoadedWorldInfo, &WrappedWorldMesh);
+	WorldConverter::ConvertWorldMesh(polys, numPolygons, &WorldSections, LoadedWorldInfo.get(), &WrappedWorldMesh);
 #else
 	if (Toolbox::FileExists(worldStr)) {
 		WorldConverter::LoadWorldMeshFromFile(worldStr, &WorldSections, LoadedWorldInfo, &WrappedWorldMesh);
@@ -989,7 +985,7 @@ void GothicAPI::DrawMeshInfo(zCMaterial * mat, MeshInfo * msh) {
 }
 
 /** Draws a SkeletalMeshInfo */
-void GothicAPI::DrawSkeletalMeshInfo(zCMaterial * mat, SkeletalMeshInfo * msh, SkeletalMeshVisualInfo * vis, std::vector<D3DXMATRIX> & transforms, float fatness) {
+void GothicAPI::DrawSkeletalMeshInfo(zCMaterial * mat, SkeletalMeshInfo * msh, std::vector<D3DXMATRIX> & transforms, float fatness) {
 	// Check for material and bind the texture if it exists
 	if (mat) {
 		if (mat->GetTexture()) {
@@ -1004,10 +1000,10 @@ void GothicAPI::DrawSkeletalMeshInfo(zCMaterial * mat, SkeletalMeshInfo * msh, S
 	}
 
 	if (RendererState.RendererSettings.EnableTesselation && !msh->IndicesPNAEN.empty()) {
-		Engine::GraphicsEngine->DrawSkeletalMesh(msh->MeshVertexBuffer, msh->MeshIndexBufferPNAEN, msh->IndicesPNAEN.size(), transforms, fatness, vis);
+		Engine::GraphicsEngine->DrawSkeletalMesh(msh->MeshVertexBuffer, msh->MeshIndexBufferPNAEN, msh->IndicesPNAEN.size(), transforms, fatness);
 	}
 	else {
-		Engine::GraphicsEngine->DrawSkeletalMesh(msh->MeshVertexBuffer, msh->MeshIndexBuffer, msh->Indices.size(), transforms, fatness, vis);
+		Engine::GraphicsEngine->DrawSkeletalMesh(msh->MeshVertexBuffer, msh->MeshIndexBuffer, msh->Indices.size(), transforms, fatness);
 	}
 }
 
@@ -1143,7 +1139,6 @@ void GothicAPI::OnRemovedVob(zCVob * vob, zCWorld * world) {
 	if (vi && vi->VobSection) {
 		vi->VobSection->Vobs.remove(vi);
 	}
-
 	// Erase it from the skeletal vob-list
 	for (auto it = SkeletalMeshVobs.begin(); it != SkeletalMeshVobs.end(); ++it) {
 		if ((*it)->Vob == vob) {
@@ -1419,9 +1414,9 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 		// TODO: FIXME
 		// Ugly stuff to get the fucking corrupt visual in returning here
 		static void Draw(SkeletalVobInfo* vi, std::vector<D3DXMATRIX>& transforms, float fatness) {
-			for (auto const& itm : ((SkeletalMeshVisualInfo*)vi->VisualInfo)->SkeletalMeshes) {
-				for (unsigned int i = 0; i < itm.second.size(); i++) {
-					Engine::GAPI->DrawSkeletalMeshInfo(itm.first, itm.second[i], ((SkeletalMeshVisualInfo*)vi->VisualInfo), transforms, fatness);
+			for (auto const& itm : dynamic_cast<SkeletalMeshVisualInfo*>(vi->VisualInfo)->SkeletalMeshes) {
+				for (auto& i : itm.second) {
+					Engine::GAPI->DrawSkeletalMeshInfo(itm.first, i, transforms, fatness);
 				}
 			}
 		}
@@ -2177,13 +2172,13 @@ D3DXMATRIX& GothicAPI::GetProjectionMatrix()
 /** Returns the GSky-Object */
 GSky* GothicAPI::GetSky()
 {
-	return SkyRenderer;
+	return SkyRenderer.get();
 }
 
 /** Returns the inventory */
 GInventory* GothicAPI::GetInventory()
 {
-	return Inventory;
+	return Inventory.get();
 }
 
 /** Returns the fog-color */
@@ -2430,22 +2425,23 @@ void GothicAPI::CollectVisibleVobs(std::vector<VobInfo*> & vobs, std::vector<Vob
 	// Recursively go through the tree and draw all nodes
 	CollectVisibleVobsHelper(root, root->OriginalNode->BBox3D, 63, vobs, lights, mobs);
 
-	D3DXVECTOR3 camPos = GetCameraPosition();
-	float vobIndoorDist = Engine::GAPI->GetRendererState()->RendererSettings.IndoorVobDrawRadius;
-	float vobOutdoorDist = Engine::GAPI->GetRendererState()->RendererSettings.OutdoorVobDrawRadius;
-	float vobOutdoorSmallDist = Engine::GAPI->GetRendererState()->RendererSettings.OutdoorSmallVobDrawRadius;
-	float vobSmallSize = Engine::GAPI->GetRendererState()->RendererSettings.SmallVobSize;
+	const D3DXVECTOR3 camPos = GetCameraPosition();
+	const float vobIndoorDist = Engine::GAPI->GetRendererState()->RendererSettings.IndoorVobDrawRadius;
+	const float vobOutdoorDist = Engine::GAPI->GetRendererState()->RendererSettings.OutdoorVobDrawRadius;
+	const float vobOutdoorSmallDist = Engine::GAPI->GetRendererState()->RendererSettings.OutdoorSmallVobDrawRadius;
+	const float vobSmallSize = Engine::GAPI->GetRendererState()->RendererSettings.SmallVobSize;
 
 	std::list<VobInfo*> removeList; // FIXME: This should not be needed!
 
 	// Add visible dynamically added vobs
 	if (Engine::GAPI->GetRendererState()->RendererSettings.DrawVOBs) {
-		for (std::list<VobInfo*>::iterator it = DynamicallyAddedVobs.begin(); it != DynamicallyAddedVobs.end(); ++it) {
+		auto const& dynAllocatedVobs = DynamicallyAddedVobs;
+		for (auto const& it : dynAllocatedVobs) {
 			// Get distance to this vob
-			float dist = D3DXVec3Length(&(camPos - (*it)->Vob->GetPositionWorld()));
+			const float dist = D3DXVec3Length(&(camPos - it->Vob->GetPositionWorld()));
 
 			// Draw, if in range
-			if ((*it)->VisualInfo && ((dist < vobIndoorDist && (*it)->IsIndoorVob) || (dist < vobOutdoorSmallDist && (*it)->VisualInfo->MeshSize < vobSmallSize) || (dist < vobOutdoorDist))) {
+			if (it->VisualInfo && ((dist < vobIndoorDist && it->IsIndoorVob) || (dist < vobOutdoorSmallDist && it->VisualInfo->MeshSize < vobSmallSize) || (dist < vobOutdoorDist))) {
 #ifdef BUILD_GOTHIC_1_08k
 				// FIXME: This is sometimes nullptr, suggesting that the Vob is invalid. Why does this happen?
 				if (!(*it)->VobConstantBuffer) {
@@ -2453,18 +2449,18 @@ void GothicAPI::CollectVisibleVobs(std::vector<VobInfo*> & vobs, std::vector<Vob
 					continue;
 				}
 #endif
-				if (!(*it)->Vob->GetShowVisual()) {
+				if (!it->Vob->GetShowVisual()) {
 					continue;
 				}
 
 				VobInstanceInfo vii;
-				vii.world = (*it)->WorldMatrix;
-				vii.color = (*it)->GroundColor;
+				vii.world = it->WorldMatrix;
+				vii.color = it->GroundColor;
 
-				((MeshVisualInfo*)(*it)->VisualInfo)->Instances.push_back(vii);
+				dynamic_cast<MeshVisualInfo *>(it->VisualInfo)->Instances.push_back(vii);
 
-				vobs.push_back(*it);
-				(*it)->VisibleInRenderPass = true;
+				vobs.push_back(it);
+				it->VisibleInRenderPass = true;
 			}
 		}
 	}
@@ -2480,17 +2476,17 @@ void GothicAPI::CollectVisibleVobs(std::vector<VobInfo*> & vobs, std::vector<Vob
 
 /** Collects visible sections from the current camera perspective */
 void GothicAPI::CollectVisibleSections(std::list<WorldMeshSectionInfo*> & sections) {
-	D3DXVECTOR3 camPos = Engine::GAPI->GetCameraPosition();
-	INT2 camSection = WorldConverter::GetSectionOfPos(camPos);
+	const D3DXVECTOR3 camPos = Engine::GAPI->GetCameraPosition();
+	const INT2 camSection = WorldConverter::GetSectionOfPos(camPos);
 
 	// run through every section and check for range and frustum
-	int sectionViewDist = Engine::GAPI->GetRendererState()->RendererSettings.SectionDrawRadius;
-	for (std::map<int, std::map<int, WorldMeshSectionInfo>>::iterator itx = WorldSections.begin(); itx != WorldSections.end(); ++itx) {
-		for (std::map<int, WorldMeshSectionInfo>::iterator ity = itx->second.begin(); ity != itx->second.end(); ++ity) {
-			WorldMeshSectionInfo& section = ity->second;
+	const int sectionViewDist = Engine::GAPI->GetRendererState()->RendererSettings.SectionDrawRadius;
+	for (auto& itx : WorldSections) {
+		for (auto& ity : itx.second) {
+			WorldMeshSectionInfo& section = ity.second;
 
 			// Simple range-check
-			if (abs(itx->first - camSection.x) < sectionViewDist && abs(ity->first - camSection.y) < sectionViewDist) {
+			if (abs(itx.first - camSection.x) < sectionViewDist && abs(ity.first - camSection.y) < sectionViewDist) {
 				int flags = 15; // Frustum check, no farplane
 				if (zCCamera::GetCamera()->BBox3DInFrustum(section.BoundingBox, flags) == ZTCAM_CLIPTYPE_OUT)
 					continue;
@@ -2503,9 +2499,8 @@ void GothicAPI::CollectVisibleSections(std::list<WorldMeshSectionInfo*> & sectio
 
 /** Moves the given vob from a BSP-Node to the dynamic vob list */
 void GothicAPI::MoveVobFromBspToDynamic(SkeletalVobInfo * vob) {
-	for (size_t i = 0; i < vob->ParentBSPNodes.size(); i++) {
-		BspInfo* node = vob->ParentBSPNodes[i];
-
+	auto& parentBspNodes = vob->ParentBSPNodes;
+	for (auto const& node : parentBspNodes) {
 		// Remove from possible lists
 		for (std::vector<SkeletalVobInfo*>::iterator it = node->Mobs.begin(); it != node->Mobs.end(); ++it) {
 			if ((*it) == vob) {
@@ -2515,7 +2510,7 @@ void GothicAPI::MoveVobFromBspToDynamic(SkeletalVobInfo * vob) {
 		}
 	}
 
-	vob->ParentBSPNodes.clear();
+	parentBspNodes.clear();
 
 	AnimatedSkeletalVobs.push_back(vob);
 }
@@ -2609,8 +2604,6 @@ static void CVVH_AddNotDrawnVobToList(std::vector<VobInfo*> & target, std::vecto
 	{
 		if (!it->VisibleInRenderPass)
 		{
-			VobInstanceInfo vii;
-
 			float vd = D3DXVec3Length(&(Engine::GAPI->GetCameraPosition() - it->LastRenderPosition));
 			if (vd < dist && it->Vob->GetShowVisual())
 			{
@@ -2618,7 +2611,7 @@ static void CVVH_AddNotDrawnVobToList(std::vector<VobInfo*> & target, std::vecto
 				vii.world = it->WorldMatrix;
 				vii.color = it->GroundColor;
 
-				((MeshVisualInfo*)it->VisualInfo)->Instances.push_back(vii);
+				dynamic_cast<MeshVisualInfo*>(it->VisualInfo)->Instances.push_back(vii);
 				target.push_back(it);
 				it->VisibleInRenderPass = true;
 			}
@@ -2660,12 +2653,12 @@ static void CVVH_AddNotDrawnVobToList(std::vector<SkeletalVobInfo*> & target, st
 
 /** Recursive helper function to draw collect the vobs */
 void GothicAPI::CollectVisibleVobsHelper(BspInfo * base, zTBBox3D boxCell, int clipFlags, std::vector<VobInfo*> & vobs, std::vector<VobLightInfo*> & lights, std::vector<SkeletalVobInfo*> & mobs) {
-	float vobIndoorDist = Engine::GAPI->GetRendererState()->RendererSettings.IndoorVobDrawRadius;
-	float vobOutdoorDist = Engine::GAPI->GetRendererState()->RendererSettings.OutdoorVobDrawRadius;
-	float vobOutdoorSmallDist = Engine::GAPI->GetRendererState()->RendererSettings.OutdoorSmallVobDrawRadius;
-	float vobSmallSize = Engine::GAPI->GetRendererState()->RendererSettings.SmallVobSize;
-	float visualFXDrawRadius = Engine::GAPI->GetRendererState()->RendererSettings.VisualFXDrawRadius;
-	D3DXVECTOR3 camPos = Engine::GAPI->GetCameraPosition();
+	const float vobIndoorDist = Engine::GAPI->GetRendererState()->RendererSettings.IndoorVobDrawRadius;
+	const float vobOutdoorDist = Engine::GAPI->GetRendererState()->RendererSettings.OutdoorVobDrawRadius;
+	const float vobOutdoorSmallDist = Engine::GAPI->GetRendererState()->RendererSettings.OutdoorSmallVobDrawRadius;
+	const float vobSmallSize = Engine::GAPI->GetRendererState()->RendererSettings.SmallVobSize;
+	const float visualFXDrawRadius = Engine::GAPI->GetRendererState()->RendererSettings.VisualFXDrawRadius;
+	const D3DXVECTOR3 camPos = Engine::GAPI->GetCameraPosition();
 
 	while (base->OriginalNode) {
 		// Check for occlusion-culling
@@ -2688,7 +2681,7 @@ void GothicAPI::CollectVisibleVobsHelper(BspInfo * base, zTBBox3D boxCell, int c
 					nodeClip = zCCamera::GetCamera()->BBox3DInFrustum(nodeBox, clipFlags);
 				}
 				else {
-					nodeClip = (zTCam_ClipType)base->OcclusionInfo.LastCameraClipType; // If we are using occlusion-clipping, this test has already been done
+					nodeClip = static_cast<zTCam_ClipType>(base->OcclusionInfo.LastCameraClipType); // If we are using occlusion-clipping, this test has already been done
 				}
 
 				if (nodeClip == ZTCAM_CLIPTYPE_OUT) {
@@ -2706,16 +2699,16 @@ void GothicAPI::CollectVisibleVobsHelper(BspInfo * base, zTBBox3D boxCell, int c
 			// Check if this leaf is inside the frustum
 			bool insideFrustum = true;
 
-			zCBspLeaf* leaf = (zCBspLeaf*)base->OriginalNode;
+			zCBspLeaf* leaf = (zCBspLeaf *)(base->OriginalNode);
 			std::vector<VobInfo*>& listA = base->IndoorVobs;
 			std::vector<VobInfo*>& listB = base->SmallVobs;
 			std::vector<VobInfo*>& listC = base->Vobs;
 			std::vector<SkeletalVobInfo*>& listD = base->Mobs;
-			std::vector<VobLightInfo*>& listL = base->Lights;
-			std::vector<VobLightInfo*>& listL_Indoor = base->IndoorLights;
+			const std::vector<VobLightInfo*>& listL = base->Lights;
+			const std::vector<VobLightInfo*>& listL_Indoor = base->IndoorLights;
 
 			// Concat the lists
-			float dist = Toolbox::ComputePointAABBDistance(camPos, base->OriginalNode->BBox3D.Min, base->OriginalNode->BBox3D.Max);
+			const float dist = Toolbox::ComputePointAABBDistance(camPos, base->OriginalNode->BBox3D.Min, base->OriginalNode->BBox3D.Max);
 			// float dist = D3DXVec3Length(&(base->BBox3D.Min - camPos));
 
 			if (insideFrustum) {
@@ -3073,7 +3066,7 @@ void GothicAPI::GetMaterialListByTextureName(const std::string & name, std::list
 /** Returns the time since the last frame */
 float GothicAPI::GetDeltaTime()
 {
-	zCTimer* timer = zCTimer::GetTimer();
+	const zCTimer* timer = zCTimer::GetTimer();
 
 	return timer->frameTimeFloat / 1000.0f;
 }
@@ -3525,9 +3518,6 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 	switch (s.ShadowMapSize)
 	{
 		case 512:
-			s.WorldShadowRangeScale = 16.0f;
-			break;
-
 		case 1024:
 			s.WorldShadowRangeScale = 16.0f;
 			break;
@@ -3537,6 +3527,7 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 			break;
 
 		case 4096:
+		case 8192:
 			s.WorldShadowRangeScale = 4.0f;
 			break;
 	}
@@ -4031,7 +4022,7 @@ void GothicAPI::CollectPolygonsInAABBRec(BspInfo * base, const zTBBox3D & bbox, 
 
 /** Returns the current ocean-object */
 GOcean* GothicAPI::GetOcean() {
-	return Ocean;
+	return Ocean.get();
 }
 
 /** Returns our bsp-root-node */

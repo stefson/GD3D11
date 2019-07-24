@@ -86,18 +86,6 @@ void D3D11PointLight::InitResources()
 	{
 		WorldCacheInvalid = true;
 	}
-	/*DebugTextureCubemap = new RenderToTextureBuffer(engine->GetDevice(), 
-		POINTLIGHT_SHADOWMAP_SIZE,
-		POINTLIGHT_SHADOWMAP_SIZE,
-		DXGI_FORMAT_R8G8B8A8_UNORM,
-		nullptr,
-		DXGI_FORMAT_UNKNOWN,
-		DXGI_FORMAT_UNKNOWN,
-		1,
-		6);*/
-
-	// Init the cubemap
-	//RenderCubemap(true);
 
 	InitDone = true;
 
@@ -138,14 +126,6 @@ void D3D11PointLight::RenderCubemap(bool forceUpdate)
 	//vEyePt += D3DXVECTOR3(0, 1, 0) * 20.0f; // Move lightsource out of the ground or other objects (torches!)
 	// TODO: Move the actual lightsource up too!
 
-	/*if (WantsUpdate())
-	{
-		// Move lights with colorchanges around a bit to make it look more light torches
-		vEyePt.y += (float4(LastUpdateColor).x - 0.5f) * LIGHT_COLORCHANGE_POS_MOD;
-		vEyePt.x += (float4(LastUpdateColor).y - 0.5f) * LIGHT_COLORCHANGE_POS_MOD;
-		vEyePt.z += (float4(LastUpdateColor).y - 0.5f) * LIGHT_COLORCHANGE_POS_MOD;
-	}*/
-
     D3DXVECTOR3 vLookDir;
     D3DXVECTOR3 vUpDir;
 
@@ -180,23 +160,28 @@ void D3D11PointLight::RenderCubemap(bool forceUpdate)
     vUpDir = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 	if (dbg)Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(vEyePt, float4(1.0f, 0, 0, 1)), LineVertex((vLookDir - vEyePt) * 50.0f + vEyePt, float4(1.0f, 1.0f, 0, 1)));
     D3DXMatrixLookAtLH(&CubeMapViewMatrices[0], &vEyePt, &vLookDir, &vUpDir);
-    vLookDir = D3DXVECTOR3(-1.0f, 0.0f, 0.0f) + vEyePt;
+    
+	vLookDir = D3DXVECTOR3(-1.0f, 0.0f, 0.0f) + vEyePt;
     vUpDir = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 	if (dbg)Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(vEyePt, float4(1.0f, 0, 0, 1)), LineVertex((vLookDir - vEyePt) * 50.0f + vEyePt, float4(1.0f, 1.0f, 0, 1)));
     D3DXMatrixLookAtLH(&CubeMapViewMatrices[1], &vEyePt, &vLookDir, &vUpDir);
-    vLookDir = D3DXVECTOR3(0.0f, 0.0f + 1.0f, 0.0f) + vEyePt;
+    
+	vLookDir = D3DXVECTOR3(0.0f, 0.0f + 1.0f, 0.0f) + vEyePt;
     vUpDir = D3DXVECTOR3(0.0f, 0.0f, -1.0f);
 	if (dbg)Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(vEyePt, float4(1.0f, 0, 0, 1)), LineVertex((vLookDir - vEyePt) * 50.0f + vEyePt, float4(1.0f, 1.0f, 0, 1)));
     D3DXMatrixLookAtLH(&CubeMapViewMatrices[2], &vEyePt, &vLookDir, &vUpDir);
-    vLookDir = D3DXVECTOR3(0.0f, 0.0f - 1.0f, 0.0f) + vEyePt;
+    
+	vLookDir = D3DXVECTOR3(0.0f, 0.0f - 1.0f, 0.0f) + vEyePt;
     vUpDir = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
 	if (dbg)Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(vEyePt, float4(1.0f, 0, 0, 1)), LineVertex((vLookDir - vEyePt) * 50.0f + vEyePt, float4(1.0f, 1.0f, 0, 1)));
     D3DXMatrixLookAtLH(&CubeMapViewMatrices[3], &vEyePt, &vLookDir, &vUpDir);
-    vLookDir = D3DXVECTOR3(0.0f, 0.0f, 1.0f) + vEyePt;
+    
+	vLookDir = D3DXVECTOR3(0.0f, 0.0f, 1.0f) + vEyePt;
     vUpDir = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 	if (dbg)Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(vEyePt, float4(1.0f, 0, 0, 1)), LineVertex((vLookDir - vEyePt) * 50.0f + vEyePt, float4(1.0f, 1.0f, 0, 1)));
     D3DXMatrixLookAtLH(&CubeMapViewMatrices[4], &vEyePt, &vLookDir, &vUpDir);
-    vLookDir = D3DXVECTOR3(0.0f, 0.0f, -1.0f) + vEyePt;
+    
+	vLookDir = D3DXVECTOR3(0.0f, 0.0f, -1.0f) + vEyePt;
     vUpDir = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 	if (dbg)Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(vEyePt, float4(1.0f, 0, 0, 1)), LineVertex((vLookDir - vEyePt) * 50.0f + vEyePt, float4(1.0f, 1.0f, 0, 1)));
     D3DXMatrixLookAtLH(&CubeMapViewMatrices[5], &vEyePt, &vLookDir, &vUpDir);
@@ -229,8 +214,6 @@ void D3D11PointLight::RenderCubemap(bool forceUpdate)
 	ViewMatricesCB->UpdateBuffer(&gcb);
 	ViewMatricesCB->BindToGeometryShader(2);
 
-	//for(int i=0;i<6;i++)
-	//	RenderCubemapFace(CubeMapViewMatrices[i], proj, i);
 	RenderFullCubemap();
 
 	if (dbg)
@@ -255,7 +238,7 @@ void D3D11PointLight::RenderFullCubemap()
 
 	// Disable shadows for NPCs
 	// TODO: Only for the player himself, because his shadows look ugly when using a torch
-	bool oldDrawSkel = Engine::GAPI->GetRendererState()->RendererSettings.DrawSkeletalMeshes;
+	//bool oldDrawSkel = Engine::GAPI->GetRendererState()->RendererSettings.DrawSkeletalMeshes;
 	//Engine::GAPI->GetRendererState()->RendererSettings.DrawSkeletalMeshes = false;
 
 	float range = LightInfo->Vob->GetLightRange() * 1.1f;
@@ -293,7 +276,7 @@ void D3D11PointLight::RenderCubemapFace(const D3DXMATRIX& view, const D3DXMATRIX
 
 	// Disable shadows for NPCs
 	// TODO: Only for the player himself, because his shadows look ugly when using a torch
-	bool oldDrawSkel = Engine::GAPI->GetRendererState()->RendererSettings.DrawSkeletalMeshes;
+	//bool oldDrawSkel = Engine::GAPI->GetRendererState()->RendererSettings.DrawSkeletalMeshes;
 	//Engine::GAPI->GetRendererState()->RendererSettings.DrawSkeletalMeshes = false;
 
 	float range = LightInfo->Vob->GetLightRange() * 1.1f;

@@ -39,14 +39,6 @@ MyDirectDrawSurface7::~MyDirectDrawSurface7()
 {
 	Engine::GAPI->RemoveSurface(this);
 
-#ifndef BUILD_GOTHIC_1_08k
-	/*for(int i=0;i<attachedSurfaces.size();i++)
-	{
-		attachedSurfaces[i]->Release();
-	}
-	attachedSurfaces.clear();*/
-#endif
-
 	// Sometimes gothic doesn't unlock a surface or this is a movie-buffer
 	delete[] LockedData;
 
@@ -502,66 +494,8 @@ HRESULT MyDirectDrawSurface7::Unlock(LPRECT lpRect)
 		
 	} else
 	{
-		/*unsigned char* convertedData = new unsigned char[OriginalSurfaceDesc.dwWidth * OriginalSurfaceDesc.dwHeight * 4];
-		ZeroMemory(convertedData, OriginalSurfaceDesc.dwWidth * OriginalSurfaceDesc.dwHeight * 4);
-
-		static int num = 0;
-		num++;
-
-
-		// DDS-Texture
-		if ((OriginalSurfaceDesc.ddpfPixelFormat.dwFlags & DDPF_FOURCC) == DDPF_FOURCC)
-		{
-			switch(OriginalSurfaceDesc.ddpfPixelFormat.dwFourCC)
-			{
-			case FOURCC_DXT1:
-				squish::DecompressImage(convertedData, OriginalSurfaceDesc.dwWidth, OriginalSurfaceDesc.dwHeight, LockedData, squish::kDxt1);
-				break;
-
-			case FOURCC_DXT2:
-			case FOURCC_DXT3:
-				squish::DecompressImage(convertedData, OriginalSurfaceDesc.dwWidth, OriginalSurfaceDesc.dwHeight, LockedData, squish::kDxt3);
-				break;
-
-			case FOURCC_DXT4:
-			case FOURCC_DXT5:
-				squish::DecompressImage(convertedData, OriginalSurfaceDesc.dwWidth, OriginalSurfaceDesc.dwHeight, LockedData, squish::kDxt5);
-				break;
-
-			default:
-				LogErrorBox() << "Invalid DXT-Format!";
-			}
-
-			lodepng::State s;
-			lodepng::encode((std::string("tex_") + std::to_string(num) + ".png").c_str(), convertedData, OriginalSurfaceDesc.dwWidth, OriginalSurfaceDesc.dwHeight);
-
-			delete[] convertedData;
-			
-		}*/
-
-		
-
 		if (bpp == 24)
 		{
-			/*unsigned char* dst = new unsigned char[OriginalSurfaceDesc.dwWidth * OriginalSurfaceDesc.dwHeight * 4];
-
-			// Convert from 24 bits to 32
-			for(unsigned int i=0;i<OriginalSurfaceDesc.dwWidth * OriginalSurfaceDesc.dwHeight;i++)
-			{
-				unsigned char blueComponent  = LockedData[i * 3 + 2];
-				unsigned char greenComponent = LockedData[i * 3 + 1];
-				unsigned char redComponent   = LockedData[i * 3 + 0];
-
-				dst[4*i+0] = redComponent;
-				dst[4*i+1] = greenComponent;
-				dst[4*i+2] = blueComponent;
-				dst[4*i+3] = 255;
-			}
-
-			
-
-			delete[] dst;*/
-
 			// This is a movie frame, draw it to the sceen
 			EngineTexture->UpdateData(LockedData, 0);
 
