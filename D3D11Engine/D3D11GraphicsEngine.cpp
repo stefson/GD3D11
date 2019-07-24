@@ -89,7 +89,6 @@ D3D11GraphicsEngine::D3D11GraphicsEngine() {
 	DXGIFactory = nullptr;
 	DXGIAdapter = nullptr;
 	OutputWindow = nullptr;
-	BackbufferRTV = nullptr;
 	DepthStencilBuffer = nullptr;
 	Device = nullptr;
 	Context = nullptr;
@@ -119,7 +118,6 @@ D3D11GraphicsEngine::D3D11GraphicsEngine() {
 	ActivePS = nullptr;
 	PfxRenderer = nullptr;
 	CloudBuffer = nullptr;
-	BackbufferSRV = nullptr;
 
 	InverseUnitSphereMesh = nullptr;
 	ReflectionCube = nullptr;
@@ -169,10 +167,8 @@ D3D11GraphicsEngine::~D3D11GraphicsEngine() {
 	SAFE_RELEASE(FFRasterizerState);
 	SAFE_RELEASE(FFBlendState);
 	SAFE_RELEASE(FFDepthStencilState);
-	SAFE_RELEASE(BackbufferSRV);
 	SAFE_RELEASE(DefaultSamplerState);
 
-	SAFE_RELEASE(BackbufferRTV);
 	SAFE_RELEASE(SwapChain);
 
 	SAFE_RELEASE(Context);
@@ -484,8 +480,6 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 #endif
 
 	// Release all referenced buffer resources before we can resize the swapchain
-	SAFE_RELEASE(BackbufferRTV);
-	SAFE_RELEASE(BackbufferSRV);
 	DepthStencilBuffer.reset();
 
 	if (UIView) UIView->PrepareResize();
@@ -545,18 +539,16 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 	}
 
 	// Successfully resized swapchain, re-get buffers
-	ID3D11Texture2D* backbuffer = nullptr;
-	SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)& backbuffer);
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> backbuffer;
+	SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &backbuffer);
 
 	// Recreate RenderTargetView
-	LE(Device->CreateRenderTargetView(backbuffer, nullptr, &BackbufferRTV));
-	LE(Device->CreateShaderResourceView(backbuffer, nullptr, &BackbufferSRV));
+	LE(Device->CreateRenderTargetView(backbuffer.Get(), nullptr, &BackbufferRTV));
+	LE(Device->CreateShaderResourceView(backbuffer.Get(), nullptr, &BackbufferSRV));
 
 	if (UIView) {
-		UIView->Resize(Resolution, backbuffer);
+		UIView->Resize(Resolution, backbuffer.Get());
 	}
-
-	backbuffer->Release();
 
 	// Recreate DepthStencilBuffer
 	DepthStencilBuffer = std::make_unique<RenderToDepthStencilBuffer>(
@@ -568,7 +560,7 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 		DXGI_FORMAT_R32_FLOAT, DXGI_FORMAT_R32_FLOAT);
 
 	// Bind our newly created resources
-	Context->OMSetRenderTargets(1, &BackbufferRTV,
+	Context->OMSetRenderTargets(1, BackbufferRTV.GetAddressOf(),
 		DepthStencilBuffer->GetDepthStencilView());
 
 	// Set the viewport
@@ -712,8 +704,6 @@ XRESULT D3D11GraphicsEngine::OnEndFrame() {
 
 /** Called when the game wants to clear the bound rendertarget */
 XRESULT D3D11GraphicsEngine::Clear(const float4& color) {
-	// Context->ClearRenderTargetView(BackbufferRTV, (float *)&D3DXVECTOR4(1, 0,
-	// 0, 0));
 	Context->ClearDepthStencilView(DepthStencilBuffer->GetDepthStencilView(),
 		D3D11_CLEAR_DEPTH, 1.0f, 0);
 
@@ -846,11 +836,11 @@ XRESULT D3D11GraphicsEngine::Present() {
 	ActivePS->GetConstantBuffer()[0]->BindToPixelShader(0);
 
 	PfxRenderer->CopyTextureToRTV(HDRBackBuffer->GetShaderResView(),
-		BackbufferRTV, INT2(0, 0), true);
+		BackbufferRTV.Get(), INT2(0, 0), true);
 
 	// Context->ClearState();
 
-	Context->OMSetRenderTargets(1, &BackbufferRTV, nullptr);
+	Context->OMSetRenderTargets(1, BackbufferRTV.GetAddressOf(), nullptr);
 
 	// Check for movie-frame
 	if (Engine::GAPI->GetPendingMovieFrame()) {
@@ -1681,9 +1671,6 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 
 	if (Engine::GAPI->GetRendererState()->RendererSettings.EnableSMAA)
 		PfxRenderer->RenderSMAA();
-
-	// PfxRenderer->CopyTextureToRTV(GBuffer1_Normals_SpecIntens_SpecPower->GetShaderResView(),
-	// BackbufferRTV, INT2(Resolution.x / 4, Resolution.y / 4));
 
 	// Disable the depth-buffer
 	Engine::GAPI->GetRendererState()->DepthState.DepthBufferEnabled = false;

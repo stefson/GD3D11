@@ -151,7 +151,7 @@ public:
 	RenderToDepthStencilBuffer * GetDepthBuffer() { return DepthStencilBuffer.get(); }
 
 	/** Returns the Backbuffers shader resource view */
-	ID3D11ShaderResourceView * GetBackbufferSRV() { return BackbufferSRV; }
+	ID3D11ShaderResourceView * GetBackbufferSRV() { return BackbufferSRV.Get(); }
 
 	/** Returns the first GBuffer */
 	RenderToTextureBuffer * GetGBuffer0() { return GBuffer0_Diffuse.get(); }
@@ -309,8 +309,8 @@ protected:
 	std::unique_ptr<D3D11Effect> Effects;
 
 	/** Swapchain buffers */
-	ID3D11RenderTargetView* BackbufferRTV;
-	ID3D11ShaderResourceView * BackbufferSRV; // Diffuse
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> BackbufferRTV;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> BackbufferSRV; // Diffuse
 	std::unique_ptr<RenderToTextureBuffer> GBuffer0_Diffuse;
 	std::unique_ptr<RenderToTextureBuffer> GBuffer1_Normals_SpecIntens_SpecPower; // Normals / SpecIntensity / SpecPower
 	std::unique_ptr<RenderToTextureBuffer>  DepthStencilBufferCopy;
