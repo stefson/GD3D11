@@ -19,10 +19,7 @@ const int INSTANCING_BUFFER_SIZE = sizeof(VobInstanceInfo) * 2048;
 
 D3D11GraphicsEngineBase::D3D11GraphicsEngineBase() {
 	TempVertexBuffer = nullptr;
-	DeferredContext = nullptr;
-	Context = nullptr;
 	ShaderManager = nullptr;
-	SwapChain = nullptr;
 	Backbuffer = nullptr;
 	DepthStencilBuffer = nullptr;
 	HDRBackBuffer = nullptr;
@@ -49,9 +46,6 @@ D3D11GraphicsEngineBase::~D3D11GraphicsEngineBase() {
 	SAFE_DELETE(TransformsCB);
 
 	SAFE_RELEASE(DefaultSamplerState);
-	SAFE_RELEASE(SwapChain);
-	//SAFE_RELEASE(DeferredContext);
-	SAFE_RELEASE(Context);
 }
 
 /** Called after the fake-DDraw-Device got created */
@@ -129,10 +123,10 @@ XRESULT D3D11GraphicsEngineBase::Init() {
 	samplerDesc.MaxLOD = 3.402823466e+38F; // FLT_MAX
 
 	LE(GetDevice()->CreateSamplerState(&samplerDesc, &DefaultSamplerState));
-	Context->PSSetSamplers(0, 1, &DefaultSamplerState);
-	Context->VSSetSamplers(0, 1, &DefaultSamplerState);
-	Context->DSSetSamplers(0, 1, &DefaultSamplerState);
-	Context->HSSetSamplers(0, 1, &DefaultSamplerState);
+	GetContext()->PSSetSamplers(0, 1, &DefaultSamplerState);
+	GetContext()->VSSetSamplers(0, 1, &DefaultSamplerState);
+	GetContext()->DSSetSamplers(0, 1, &DefaultSamplerState);
+	GetContext()->HSSetSamplers(0, 1, &DefaultSamplerState);
 
 	TempVertexBuffer = new D3D11VertexBuffer();
 	TempVertexBuffer->Init(nullptr, DRAWVERTEXARRAY_BUFFER_SIZE, D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE);
@@ -221,7 +215,7 @@ XRESULT D3D11GraphicsEngineBase::OnResize(INT2 newSize)
 	{
 		LogInfo() << "Resizing swapchain  (Format: DXGI_FORMAT_R8G8B8A8_UNORM)";
 
-		if (FAILED(SwapChain->ResizeBuffers(1, bbres.x, bbres.y, DXGI_FORMAT_R8G8B8A8_UNORM, 0)))
+		if (FAILED(SwapChain->ResizeBuffers(0, bbres.x, bbres.y, DXGI_FORMAT_R8G8B8A8_UNORM, 0)))
 		{
 			LogError() << "Failed to resize swapchain!";
 			return XR_FAILED;
@@ -244,7 +238,7 @@ XRESULT D3D11GraphicsEngineBase::OnResize(INT2 newSize)
 	DepthStencilBuffer = std::make_unique<RenderToDepthStencilBuffer>(GetDevice(), Resolution.x, Resolution.y, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_R32_FLOAT);
 
 	// Bind our newly created resources
-	Context->OMSetRenderTargets(1, Backbuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView());
+	GetContext()->OMSetRenderTargets(1, Backbuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView());
 
 	// Set the viewport
 	D3D11_VIEWPORT viewport;
@@ -257,14 +251,14 @@ XRESULT D3D11GraphicsEngineBase::OnResize(INT2 newSize)
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
 
-	Context->RSSetViewports(1, &viewport);
+	GetContext()->RSSetViewports(1, &viewport);
 
 	// Create other buffers
 	HDRBackBuffer = std::make_unique<RenderToTextureBuffer>(GetDevice(), Resolution.x, Resolution.y, DXGI_FORMAT_R16G16B16A16_FLOAT);
 
 	Engine::AntTweakBar->OnResize(newSize);
 
-	Context->OMSetRenderTargets(1, Backbuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView());
+	GetContext()->OMSetRenderTargets(1, Backbuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView());
 
 	return XR_SUCCESS;
 }
@@ -275,7 +269,7 @@ XRESULT D3D11GraphicsEngineBase::OnBeginFrame()
 	// Enter the critical section for safety while executing the deferred command list
 	Engine::GAPI->EnterResourceCriticalSection();
 	ID3D11CommandList* dc_cl = nullptr;
-	DeferredContext->FinishCommandList(true, &dc_cl);
+	GetDeferredMediaContext()->FinishCommandList(true, &dc_cl);
 
 	// Copy list of textures we are operating on
 	Engine::GAPI->MoveLoadedTexturesToProcessedList();
@@ -285,7 +279,7 @@ XRESULT D3D11GraphicsEngineBase::OnBeginFrame()
 	if (dc_cl)
 	{
 		//LogInfo() << "Executing command list";
-		Context->ExecuteCommandList(dc_cl, true);
+		GetContext()->ExecuteCommandList(dc_cl, true);
 		dc_cl->Release();
 	}
 
@@ -324,7 +318,7 @@ XRESULT D3D11GraphicsEngineBase::SetViewport(const ViewportInfo& viewportInfo)
 	viewport.MinDepth = viewportInfo.MinZ;
 	viewport.MaxDepth = viewportInfo.MaxZ;
 
-	Context->RSSetViewports(1, &viewport);
+	GetContext()->RSSetViewports(1, &viewport);
 
 	return XR_SUCCESS;
 }
@@ -339,9 +333,9 @@ D3D11ShaderManager* D3D11GraphicsEngineBase::GetShaderManager()
 /** Called when the game wants to clear the bound rendertarget */
 XRESULT D3D11GraphicsEngineBase::Clear(const float4 & color)
 {
-	Context->ClearDepthStencilView(DepthStencilBuffer->GetDepthStencilView(), D3D11_CLEAR_DEPTH, 1.0f, 0);
-	Context->ClearRenderTargetView(HDRBackBuffer->GetRenderTargetView(), (float *)& color);
-	Context->ClearRenderTargetView(Backbuffer->GetRenderTargetView(), (float *)& color);
+	GetContext()->ClearDepthStencilView(DepthStencilBuffer->GetDepthStencilView(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+	GetContext()->ClearRenderTargetView(HDRBackBuffer->GetRenderTargetView(), (float *)& color);
+	GetContext()->ClearRenderTargetView(Backbuffer->GetRenderTargetView(), (float *)& color);
 
 	return XR_SUCCESS;
 }
@@ -537,7 +531,7 @@ void D3D11GraphicsEngineBase::SetDefaultStates()
 	Engine::GAPI->GetRendererState()->DepthState.SetDirty();
 	Engine::GAPI->GetRendererState()->SamplerState.SetDirty();
 
-	Context->PSSetSamplers(0, 1, &DefaultSamplerState);
+	GetContext()->PSSetSamplers(0, 1, &DefaultSamplerState);
 
 	UpdateRenderStates();
 }
@@ -557,12 +551,12 @@ XRESULT D3D11GraphicsEngineBase::DrawVertexArray(ExVertexStruct* vertices, unsig
 	pShader->Apply();
 
 	// Set vertex type
-	Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Bind the viewport information to the shader
 	D3D11_VIEWPORT vp;
 	UINT num = 1;
-	Context->RSGetViewports(&num, &vp);
+	GetContext()->RSGetViewports(&num, &vp);
 
 	// Update viewport information
 	const float scale = Engine::GAPI->GetRendererState()->RendererSettings.GothicUIScale;
@@ -598,10 +592,10 @@ XRESULT D3D11GraphicsEngineBase::DrawVertexArray(ExVertexStruct* vertices, unsig
 	UINT offset = 0;
 	UINT uStride = stride;
 	ID3D11Buffer* buffer = TempVertexBuffer->GetVertexBuffer();
-	Context->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
+	GetContext()->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
 
 	//Draw the mesh
-	Context->Draw(numVertices, startVertex);
+	GetContext()->Draw(numVertices, startVertex);
 
 	return XR_SUCCESS;
 }
@@ -624,7 +618,7 @@ XRESULT D3D11GraphicsEngineBase::UpdateRenderStates()
 		FFBlendState = state->State;
 
 		Engine::GAPI->GetRendererState()->BlendState.StateDirty = false;
-		Context->OMSetBlendState(FFBlendState, (float *)& D3DXVECTOR4(0, 0, 0, 0), 0xFFFFFFFF);
+		GetContext()->OMSetBlendState(FFBlendState, (float *)& D3DXVECTOR4(0, 0, 0, 0), 0xFFFFFFFF);
 	}
 
 
@@ -644,7 +638,7 @@ XRESULT D3D11GraphicsEngineBase::UpdateRenderStates()
 		FFRasterizerState = state->State;
 
 		Engine::GAPI->GetRendererState()->RasterizerState.StateDirty = false;
-		Context->RSSetState(FFRasterizerState);
+		GetContext()->RSSetState(FFRasterizerState);
 	}
 
 
@@ -664,7 +658,7 @@ XRESULT D3D11GraphicsEngineBase::UpdateRenderStates()
 		FFDepthStencilState = state->State;
 
 		Engine::GAPI->GetRendererState()->DepthState.StateDirty = false;
-		Context->OMSetDepthStencilState(FFDepthStencilState, 0);
+		GetContext()->OMSetDepthStencilState(FFDepthStencilState, 0);
 	}
 
 
@@ -699,7 +693,7 @@ void D3D11GraphicsEngineBase::SetupVS_ExMeshDrawCall()
 	if (ActiveVS)ActiveVS->Apply();
 	if (ActivePS)ActivePS->Apply();
 
-	Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 void D3D11GraphicsEngineBase::SetupVS_ExConstantBuffer()
@@ -809,10 +803,10 @@ XRESULT D3D11GraphicsEngineBase::DrawVertexBufferFF(D3D11VertexBuffer* vb, unsig
 	UINT offset = 0;
 	UINT uStride = stride;
 	ID3D11Buffer* buffer = vb->GetVertexBuffer();
-	Context->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
+	GetContext()->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
 
 	//Draw the mesh
-	Context->Draw(numVertices, startVertex);
+	GetContext()->Draw(numVertices, startVertex);
 
 	Engine::GAPI->GetRendererState()->RendererInfo.FrameDrawnTriangles += numVertices;
 
@@ -825,7 +819,7 @@ XRESULT D3D11GraphicsEngineBase::BindViewportInformation(const std::string & sha
 {
 	D3D11_VIEWPORT vp;
 	UINT num = 1;
-	Context->RSGetViewports(&num, &vp);
+	GetContext()->RSGetViewports(&num, &vp);
 
 	// Update viewport information
 	float scale = Engine::GAPI->GetRendererState()->RendererSettings.GothicUIScale;

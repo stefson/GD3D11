@@ -85,12 +85,9 @@ D3D11GraphicsEngine::D3D11GraphicsEngine() {
 	Resolution = DEFAULT_RESOLUTION;
 
 	DebugPointlight = nullptr;
-	SwapChain = nullptr;
 	OutputWindow = nullptr;
 	DepthStencilBuffer = nullptr;
-	Context = nullptr;
 	DistortionTexture = nullptr;
-	DeferredContext = nullptr;
 	UIView = nullptr;
 	DepthStencilBufferCopy = nullptr;
 	DummyShadowCubemapTexture = nullptr;
@@ -161,11 +158,6 @@ D3D11GraphicsEngine::~D3D11GraphicsEngine() {
 	SAFE_RELEASE(FFBlendState);
 	SAFE_RELEASE(FFDepthStencilState);
 	SAFE_RELEASE(DefaultSamplerState);
-
-	SAFE_RELEASE(SwapChain);
-
-	SAFE_RELEASE(Context);
-	// SAFE_RELEASE(DeferredContext);
 
 	ID3D11Debug* d3dDebug;
 	Device->QueryInterface(__uuidof(ID3D11Debug),
@@ -265,18 +257,18 @@ XRESULT D3D11GraphicsEngine::Init() {
 	samplerDesc.MaxLOD = 3.402823466e+38F;   // FLT_MAX
 
 	LE(GetDevice()->CreateSamplerState(&samplerDesc, &DefaultSamplerState));
-	Context->PSSetSamplers(0, 1, &DefaultSamplerState);
-	Context->VSSetSamplers(0, 1, &DefaultSamplerState);
-	Context->DSSetSamplers(0, 1, &DefaultSamplerState);
-	Context->HSSetSamplers(0, 1, &DefaultSamplerState);
+	GetContext()->PSSetSamplers(0, 1, &DefaultSamplerState);
+	GetContext()->VSSetSamplers(0, 1, &DefaultSamplerState);
+	GetContext()->DSSetSamplers(0, 1, &DefaultSamplerState);
+	GetContext()->HSSetSamplers(0, 1, &DefaultSamplerState);
 
 	samplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
 	//TODO: NVidia PCSS
 	//samplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
 	samplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
 	GetDevice()->CreateSamplerState(&samplerDesc, &ShadowmapSamplerState);
-	Context->PSSetSamplers(2, 1, ShadowmapSamplerState.GetAddressOf());
-	Context->VSSetSamplers(2, 1, ShadowmapSamplerState.GetAddressOf());
+	GetContext()->PSSetSamplers(2, 1, ShadowmapSamplerState.GetAddressOf());
+	GetContext()->VSSetSamplers(2, 1, ShadowmapSamplerState.GetAddressOf());
 
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
@@ -305,7 +297,7 @@ XRESULT D3D11GraphicsEngine::Init() {
 	rasterizerDesc.AntialiasedLineEnable = true;
 
 	LE(GetDevice()->CreateRasterizerState(&rasterizerDesc, &WorldRasterizerState));
-	Context->RSSetState(WorldRasterizerState.Get());
+	GetContext()->RSSetState(WorldRasterizerState.Get());
 
 	rasterizerDesc.FrontCounterClockwise = false;
 	LE(GetDevice()->CreateRasterizerState(&rasterizerDesc, &HUDRasterizerState));
@@ -467,7 +459,9 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 		desktopRect.bottom, 0);
 #endif
 
-	// Release all referenced buffer resources before we can resize the swapchain
+	// Release all referenced buffer resources before we can resize the swapchain. Needed!
+	BackbufferRTV.Reset();
+	BackbufferSRV.Reset();
 	DepthStencilBuffer.reset();
 
 	if (UIView) UIView->PrepareResize();
@@ -519,7 +513,7 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 	else {
 		LogInfo() << "Resizing swapchain  (Format: DXGI_FORMAT_R8G8B8A8_UNORM)";
 
-		if (FAILED(SwapChain->ResizeBuffers(1, bbres.x, bbres.y,
+		if (FAILED(SwapChain->ResizeBuffers(0, bbres.x, bbres.y,
 			DXGI_FORMAT_R8G8B8A8_UNORM, 0))) {
 			LogError() << "Failed to resize swapchain!";
 			return XR_FAILED;
@@ -548,7 +542,7 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 		DXGI_FORMAT_R32_FLOAT, DXGI_FORMAT_R32_FLOAT);
 
 	// Bind our newly created resources
-	Context->OMSetRenderTargets(1, BackbufferRTV.GetAddressOf(),
+	GetContext()->OMSetRenderTargets(1, BackbufferRTV.GetAddressOf(),
 		DepthStencilBuffer->GetDepthStencilView());
 
 	// Set the viewport
@@ -562,7 +556,7 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
 
-	Context->RSSetViewports(1, &viewport);
+	GetContext()->RSSetViewports(1, &viewport);
 
 	// Create PFX-Renderer
 	if (!PfxRenderer) PfxRenderer = std::make_unique<D3D11PfxRenderer>();
@@ -604,7 +598,8 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
 	// list
 	Engine::GAPI->EnterResourceCriticalSection();
 	ID3D11CommandList* dc_cl = nullptr;
-	DeferredContext->FinishCommandList(true, &dc_cl);
+
+	GetDeferredMediaContext()->FinishCommandList(true, &dc_cl);
 
 	// Copy list of textures we are operating on
 	Engine::GAPI->MoveLoadedTexturesToProcessedList();
@@ -613,7 +608,7 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
 	Engine::GAPI->LeaveResourceCriticalSection();
 	if (dc_cl) {
 		// LogInfo() << "Executing command list";
-		Context->ExecuteCommandList(dc_cl, true);
+		GetContext()->ExecuteCommandList(dc_cl, true);
 		dc_cl->Release();
 	}
 
@@ -660,7 +655,7 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
 	UpdateRenderStates();
 
 	// Bind GBuffers
-	Context->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView());
+	GetContext()->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView());
 
 	SetActivePixelShader("PS_Simple");
 	SetActiveVertexShader("VS_Ex");
@@ -692,15 +687,15 @@ XRESULT D3D11GraphicsEngine::OnEndFrame() {
 
 /** Called when the game wants to clear the bound rendertarget */
 XRESULT D3D11GraphicsEngine::Clear(const float4& color) {
-	Context->ClearDepthStencilView(DepthStencilBuffer->GetDepthStencilView(),
+	GetContext()->ClearDepthStencilView(DepthStencilBuffer->GetDepthStencilView(),
 		D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-	Context->ClearRenderTargetView(GBuffer0_Diffuse->GetRenderTargetView(),
+	GetContext()->ClearRenderTargetView(GBuffer0_Diffuse->GetRenderTargetView(),
 		(float*)& color);
-	Context->ClearRenderTargetView(
+	GetContext()->ClearRenderTargetView(
 		GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView(),
 		(float*)& D3DXVECTOR4(0, 0, 0, 0));
-	Context->ClearRenderTargetView(HDRBackBuffer->GetRenderTargetView(),
+	GetContext()->ClearRenderTargetView(HDRBackBuffer->GetRenderTargetView(),
 		(float*)& D3DXVECTOR4(0, 0, 0, 0));
 
 	return XR_SUCCESS;
@@ -804,7 +799,7 @@ XRESULT D3D11GraphicsEngine::Present() {
 	vp.Width = static_cast<float>(GetBackbufferResolution().x);
 	vp.Height = static_cast<float>(GetBackbufferResolution().y);
 
-	Context->RSSetViewports(1, &vp);
+	GetContext()->RSSetViewports(1, &vp);
 
 	// Copy HDR scene to backbuffer
 	SetDefaultStates();
@@ -826,9 +821,9 @@ XRESULT D3D11GraphicsEngine::Present() {
 	PfxRenderer->CopyTextureToRTV(HDRBackBuffer->GetShaderResView(),
 		BackbufferRTV.Get(), INT2(0, 0), true);
 
-	// Context->ClearState();
+	// GetContext()->ClearState();
 
-	Context->OMSetRenderTargets(1, BackbufferRTV.GetAddressOf(), nullptr);
+	GetContext()->OMSetRenderTargets(1, BackbufferRTV.GetAddressOf(), nullptr);
 
 	// Check for movie-frame
 	if (Engine::GAPI->GetPendingMovieFrame()) {
@@ -903,7 +898,7 @@ XRESULT D3D11GraphicsEngine::SetViewport(const ViewportInfo& viewportInfo) {
 	viewport.MinDepth = viewportInfo.MinZ;
 	viewport.MaxDepth = viewportInfo.MaxZ;
 
-	Context->RSSetViewports(1, &viewport);
+	GetContext()->RSSetViewports(1, &viewport);
 
 	return XR_SUCCESS;
 }
@@ -923,10 +918,10 @@ XRESULT D3D11GraphicsEngine::DrawVertexBuffer(D3D11VertexBuffer* vb,
 	UINT offset = 0;
 	UINT uStride = stride;
 	ID3D11Buffer* buffer = vb->GetVertexBuffer();
-	Context->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
+	GetContext()->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
 
 	// Draw the mesh
-	Context->Draw(numVertices, 0);
+	GetContext()->Draw(numVertices, 0);
 
 	Engine::GAPI->GetRendererState()->RendererInfo.FrameDrawnTriangles +=
 		numVertices;
@@ -951,21 +946,21 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferIndexed(D3D11VertexBuffer* vb,
 		UINT offset = 0;
 		UINT uStride = sizeof(ExVertexStruct);
 		ID3D11Buffer* buffer = vb->GetVertexBuffer();
-		Context->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
+		GetContext()->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
 
 		if (sizeof(VERTEX_INDEX) == sizeof(unsigned short)) {
-			Context->IASetIndexBuffer(ib->GetVertexBuffer(),
+			GetContext()->IASetIndexBuffer(ib->GetVertexBuffer(),
 				DXGI_FORMAT_R16_UINT, 0);
 		}
 		else {
-			Context->IASetIndexBuffer(ib->GetVertexBuffer(),
+			GetContext()->IASetIndexBuffer(ib->GetVertexBuffer(),
 				DXGI_FORMAT_R32_UINT, 0);
 		}
 	}
 
 	if (numIndices) {
 		// Draw the mesh
-		Context->DrawIndexed(numIndices, indexOffset, 0);
+		GetContext()->DrawIndexed(numIndices, indexOffset, 0);
 
 		Engine::GAPI->GetRendererState()->RendererInfo.FrameDrawnTriangles +=
 			numIndices / 3;
@@ -988,14 +983,14 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferIndexedUINT(
 		UINT offset          = 0;
 		UINT uStride         = sizeof(ExVertexStruct);
 		ID3D11Buffer* buffer = ((D3D11VertexBuffer*)vb)->GetVertexBuffer();
-		Context->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
-		Context->IASetIndexBuffer(((D3D11VertexBuffer*)ib)->GetVertexBuffer(),
+		GetContext()->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
+		GetContext()->IASetIndexBuffer(((D3D11VertexBuffer*)ib)->GetVertexBuffer(),
 			DXGI_FORMAT_R32_UINT, 0);
 	}
 
 	if (numIndices) {
 		// Draw the mesh
-		Context->DrawIndexed(numIndices, indexOffset, 0);
+		GetContext()->DrawIndexed(numIndices, indexOffset, 0);
 
 		Engine::GAPI->GetRendererState()->RendererInfo.FrameDrawnTriangles +=
 			numIndices / 3;
@@ -1009,7 +1004,7 @@ XRESULT D3D11GraphicsEngine::BindViewportInformation(const std::string& shader,
 	int slot) {
 	D3D11_VIEWPORT vp;
 	UINT num = 1;
-	Context->RSGetViewports(&num, &vp);
+	GetContext()->RSGetViewports(&num, &vp);
 
 	// Update viewport information
 	float scale =
@@ -1072,10 +1067,10 @@ XRESULT D3D11GraphicsEngine::DrawVertexArray(ExVertexStruct* vertices,
 	UINT offset          = 0;
 	UINT uStride         = stride;
 	ID3D11Buffer* buffer = TempVertexBuffer->GetVertexBuffer();
-	Context->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
+	GetContext()->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
 
 	// Draw the mesh
-	Context->Draw(numVertices, startVertex);
+	GetContext()->Draw(numVertices, startVertex);
 
 	Engine::GAPI->GetRendererState()->RendererInfo.FrameDrawnTriangles +=
 		numVertices;
@@ -1125,10 +1120,10 @@ XRESULT D3D11GraphicsEngine::DrawIndexedVertexArray(ExVertexStruct* vertices,
 		TempVertexBuffer->GetVertexBuffer(),
 		ib->GetVertexBuffer()
 	};
-	Context->IASetVertexBuffers(0, 2, buffers, &uStride, &offset);
+	GetContext()->IASetVertexBuffers(0, 2, buffers, &uStride, &offset);
 
 	// Draw the mesh
-	Context->DrawIndexed(numIndices, 0, 0);
+	GetContext()->DrawIndexed(numIndices, 0, 0);
 
 	Engine::GAPI->GetRendererState()->RendererInfo.FrameDrawnTriangles +=
 		numVertices;
@@ -1151,10 +1146,10 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferFF(D3D11VertexBuffer* vb,
 	UINT offset = 0;
 	UINT uStride = stride;
 	ID3D11Buffer* buffer = vb->GetVertexBuffer();
-	Context->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
+	GetContext()->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
 
 	// Draw the mesh
-	Context->Draw(numVertices, startVertex);
+	GetContext()->Draw(numVertices, startVertex);
 
 	Engine::GAPI->GetRendererState()->RendererInfo.FrameDrawnTriangles +=
 		numVertices;
@@ -1166,8 +1161,8 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferFF(D3D11VertexBuffer* vb,
  XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh(
 	D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices,
 	const std::vector<D3DXMATRIX>& transforms, float fatness) {
-	Context->RSSetState(WorldRasterizerState.Get());
-	Context->OMSetDepthStencilState(DefaultDepthStencilState.Get(), 0);
+	GetContext()->RSSetState(WorldRasterizerState.Get());
+	GetContext()->OMSetDepthStencilState(DefaultDepthStencilState.Get(), 0);
 
 	if (GetRenderingStage() == DES_SHADOWMAP_CUBE) {
 		SetActiveVertexShader("VS_ExSkeletalCube");
@@ -1189,7 +1184,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferFF(D3D11VertexBuffer* vb,
 	SetupVS_ExMeshDrawCall();
 	SetupVS_ExConstantBuffer();
 
-	Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Get currently bound texture name
 	zCTexture* tex = Engine::GAPI->GetBoundTexture(0);
@@ -1229,9 +1224,9 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferFF(D3D11VertexBuffer* vb,
 
 		if (RenderingStage == DES_MAIN) {
 			if (ActiveHDS) {
-				Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-				Context->DSSetShader(nullptr, nullptr, 0);
-				Context->HSSetShader(nullptr, nullptr, 0);
+				GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+				GetContext()->DSSetShader(nullptr, nullptr, 0);
+				GetContext()->HSSetShader(nullptr, nullptr, 0);
 				ActiveHDS = nullptr;
 			}
 		}
@@ -1265,20 +1260,20 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferFF(D3D11VertexBuffer* vb,
 	UINT offset = 0;
 	UINT uStride = sizeof(ExSkelVertexStruct);
 	ID3D11Buffer* buffer = vb->GetVertexBuffer();
-	Context->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
+	GetContext()->IASetVertexBuffers(0, 1, &buffer, &uStride, &offset);
 
 	if (sizeof(VERTEX_INDEX) == sizeof(unsigned short)) {
-		Context->IASetIndexBuffer(ib->GetVertexBuffer(),
+		GetContext()->IASetIndexBuffer(ib->GetVertexBuffer(),
 			DXGI_FORMAT_R16_UINT, 0);
 	}
 	else {
-		Context->IASetIndexBuffer(ib->GetVertexBuffer(),
+		GetContext()->IASetIndexBuffer(ib->GetVertexBuffer(),
 			DXGI_FORMAT_R32_UINT, 0);
 	}
 
 	if (RenderingStage == DES_SHADOWMAP) {
 		// Unbind PixelShader in this case
-		Context->PSSetShader(nullptr, nullptr, 0);
+		GetContext()->PSSetShader(nullptr, nullptr, 0);
 		ActivePS = nullptr;
 	}
 
@@ -1289,12 +1284,12 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferFF(D3D11VertexBuffer* vb,
 	}
 
 	// Draw the mesh
-	Context->DrawIndexed(numIndices, 0, 0);
+	GetContext()->DrawIndexed(numIndices, 0, 0);
 
 	if (ActiveHDS) {
-		Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		Context->DSSetShader(nullptr, nullptr, 0);
-		Context->HSSetShader(nullptr, nullptr, 0);
+		GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		GetContext()->DSSetShader(nullptr, nullptr, 0);
+		GetContext()->HSSetShader(nullptr, nullptr, 0);
 		ActiveHDS = nullptr;
 	}
 
@@ -1356,25 +1351,25 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
 
 	vShader->Apply();
 
-	Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	UINT offset[] = {0, 0};
 	UINT uStride[] = {vertexStride, instanceDataStride};
 	ID3D11Buffer* buffers[] = {
 		((D3D11VertexBuffer*)vb)->GetVertexBuffer(),
 		((D3D11VertexBuffer*)DynamicInstancingBuffer)->GetVertexBuffer()};
-	Context->IASetVertexBuffers(0, 2, buffers, uStride, offset);
+	GetContext()->IASetVertexBuffers(0, 2, buffers, uStride, offset);
 
 	if (sizeof(VERTEX_INDEX) == sizeof(unsigned short)) {
-		Context->IASetIndexBuffer(((D3D11VertexBuffer*)ib)->GetVertexBuffer(),
+		GetContext()->IASetIndexBuffer(((D3D11VertexBuffer*)ib)->GetVertexBuffer(),
 			DXGI_FORMAT_R16_UINT, 0);
 	}
 	else {
-		Context->IASetIndexBuffer(((D3D11VertexBuffer*)ib)->GetVertexBuffer(),
+		GetContext()->IASetIndexBuffer(((D3D11VertexBuffer*)ib)->GetVertexBuffer(),
 			DXGI_FORMAT_R32_UINT, 0);
 	}
 
 	// Draw the batch
-	Context->DrawIndexedInstanced(numIndices, numInstances, 0, 0, 0);
+	GetContext()->DrawIndexedInstanced(numIndices, numInstances, 0, 0, 0);
 
 	return XR_SUCCESS;
 }
@@ -1391,14 +1386,14 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
 	ID3D11Buffer* buffers[] = {
 		((D3D11VertexBuffer*)vb)->GetVertexBuffer(),
 		((D3D11VertexBuffer*)instanceData)->GetVertexBuffer()};
-	Context->IASetVertexBuffers(0, 2, buffers, uStride, offset);
+	GetContext()->IASetVertexBuffers(0, 2, buffers, uStride, offset);
 
 	if (sizeof(VERTEX_INDEX) == sizeof(unsigned short)) {
-		Context->IASetIndexBuffer(((D3D11VertexBuffer*)ib)->GetVertexBuffer(),
+		GetContext()->IASetIndexBuffer(((D3D11VertexBuffer*)ib)->GetVertexBuffer(),
 			DXGI_FORMAT_R16_UINT, 0);
 	}
 	else {
-		Context->IASetIndexBuffer(((D3D11VertexBuffer*)ib)->GetVertexBuffer(),
+		GetContext()->IASetIndexBuffer(((D3D11VertexBuffer*)ib)->GetVertexBuffer(),
 			DXGI_FORMAT_R32_UINT, 0);
 	}
 
@@ -1407,7 +1402,7 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
 	numIndices = max != 0 ? (numIndices < max ? numIndices : max) : numIndices;
 
 	// Draw the batch
-	Context->DrawIndexedInstanced(numIndices, numInstances, indexOffset, 0,
+	GetContext()->DrawIndexedInstanced(numIndices, numInstances, indexOffset, 0,
 		startInstanceNum);
 
 	Engine::GAPI->GetRendererState()->RendererInfo.FrameDrawnVobs++;
@@ -1448,8 +1443,8 @@ XRESULT D3D11GraphicsEngine::BindActiveVertexShader() {
 /** Unbinds the texture at the given slot */
 XRESULT D3D11GraphicsEngine::UnbindTexture(int slot) {
 	ID3D11ShaderResourceView* srv = nullptr;
-	Context->PSSetShaderResources(slot, 1, &srv);
-	Context->VSSetShaderResources(slot, 1, &srv);
+	GetContext()->PSSetShaderResources(slot, 1, &srv);
+	GetContext()->VSSetShaderResources(slot, 1, &srv);
 
 	return XR_SUCCESS;
 }
@@ -1475,7 +1470,7 @@ XRESULT D3D11GraphicsEngine::UpdateRenderStates() {
 		FFRasterizerStateHash = Engine::GAPI->GetRendererState()->BlendState.Hash;
 
 		Engine::GAPI->GetRendererState()->BlendState.StateDirty = false;
-		Context->OMSetBlendState(FFBlendState, (float*)& D3DXVECTOR4(0, 0, 0, 0),
+		GetContext()->OMSetBlendState(FFBlendState, (float*)& D3DXVECTOR4(0, 0, 0, 0),
 			0xFFFFFFFF);
 	}
 
@@ -1499,7 +1494,7 @@ XRESULT D3D11GraphicsEngine::UpdateRenderStates() {
 		FFRasterizerStateHash = Engine::GAPI->GetRendererState()->DepthState.Hash;
 
 		Engine::GAPI->GetRendererState()->RasterizerState.StateDirty = false;
-		Context->RSSetState(FFRasterizerState);
+		GetContext()->RSSetState(FFRasterizerState);
 	}
 
 	if (Engine::GAPI->GetRendererState()->DepthState.StateDirty &&
@@ -1522,7 +1517,7 @@ XRESULT D3D11GraphicsEngine::UpdateRenderStates() {
 		FFDepthStencilStateHash = Engine::GAPI->GetRendererState()->DepthState.Hash;
 
 		Engine::GAPI->GetRendererState()->DepthState.StateDirty = false;
-		Context->OMSetDepthStencilState(FFDepthStencilState, 0);
+		GetContext()->OMSetDepthStencilState(FFDepthStencilState, 0);
 	}
 
 	return XR_SUCCESS;
@@ -1546,12 +1541,12 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 	vp.Width = static_cast<float>(GetResolution().x);
 	vp.Height = static_cast<float>(GetResolution().y);
 
-	Context->RSSetViewports(1, &vp);
+	GetContext()->RSSetViewports(1, &vp);
 
 	ID3D11RenderTargetView* rtvs[] = {
 		GBuffer0_Diffuse->GetRenderTargetView(),
 		GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView()};
-	Context->OMSetRenderTargets(2, rtvs,
+	GetContext()->OMSetRenderTargets(2, rtvs,
 		DepthStencilBuffer->GetDepthStencilView());
 
 	Engine::GAPI->SetFarPlane(
@@ -1571,7 +1566,7 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 	zCTextureCacheHack::NumNotCachedTexturesInFrame = 0;
 
 	// Re-Bind the default sampler-state in case it was overwritten
-	Context->PSSetSamplers(0, 1, &DefaultSamplerState);
+	GetContext()->PSSetSamplers(0, 1, &DefaultSamplerState);
 
 	// Update view distances
 	InfiniteRangeConstantBuffer->UpdateBuffer(&D3DXVECTOR4(FLT_MAX, 0, 0, 0));
@@ -1630,7 +1625,7 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 
 	SetDefaultStates();
 
-	Context->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
+	GetContext()->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
 		DepthStencilBuffer->GetDepthStencilView());
 
 	// Draw unlit decals 
@@ -1674,16 +1669,16 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 	vp.Width = static_cast<float>(GetBackbufferResolution().x);
 	vp.Height = static_cast<float>(GetBackbufferResolution().y);
 
-	Context->RSSetViewports(1, &vp);
+	GetContext()->RSSetViewports(1, &vp);
 
 	// If we currently are underwater, then draw underwater effects
 	if (Engine::GAPI->IsUnderWater()) DrawUnderwaterEffects();
 
 	// Clear here to get a working depthbuffer but no interferences with world
 	// geometry for gothic UI-Rendering
-	Context->ClearDepthStencilView(DepthStencilBuffer->GetDepthStencilView(),
+	GetContext()->ClearDepthStencilView(DepthStencilBuffer->GetDepthStencilView(),
 		D3D11_CLEAR_DEPTH, 1.0f, 0.0f);
-	Context->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
+	GetContext()->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
 		nullptr);
 
 	SetDefaultStates();
@@ -1707,7 +1702,7 @@ void D3D11GraphicsEngine::SetupVS_ExMeshDrawCall() {
 		ActivePS->Apply();
 	}
 
-	Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 void D3D11GraphicsEngine::SetupVS_ExConstantBuffer() {
@@ -1866,7 +1861,7 @@ XRESULT D3D11GraphicsEngine::DrawMeshInfoListAlphablended(
 				: nullptr;
 
 			// Bind both
-			Context->PSSetShaderResources(0, 3, srv);
+			GetContext()->PSSetShaderResources(0, 3, srv);
 
 			// Get the right shader for it
 
@@ -1949,7 +1944,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh(bool noTextures) {
 	SetupVS_ExConstantBuffer();
 
 	// Bind reflection-cube to slot 4
-	Context->PSSetShaderResources(4, 1, ReflectionCube.GetAddressOf());
+	GetContext()->PSSetShaderResources(4, 1, ReflectionCube.GetAddressOf());
 
 	// Set constant buffer
 	ActivePS->GetConstantBuffer()[0]->UpdateBuffer(
@@ -1976,9 +1971,9 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh(bool noTextures) {
 
 	std::list<std::pair<MeshKey, WorldMeshInfo*>> meshList;
 
-	Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	Context->DSSetShader(nullptr, nullptr, 0);
-	Context->HSSetShader(nullptr, nullptr, 0);
+	GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	GetContext()->DSSetShader(nullptr, nullptr, 0);
+	GetContext()->HSSetShader(nullptr, nullptr, 0);
 
 	int numUncachedTextures = 0;
 	for (int i = 0; i < 2; i++) {
@@ -2062,7 +2057,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh(bool noTextures) {
 	if (Engine::GAPI->GetRendererState()->RendererSettings.DoZPrepass) {
 		INT2 camSection =
 			WorldConverter::GetSectionOfPos(Engine::GAPI->GetCameraPosition());
-		Context->PSSetShader(nullptr, nullptr, 0);
+		GetContext()->PSSetShader(nullptr, nullptr, 0);
 
 		for (auto const& mesh : meshList) {
 			if (!mesh.first.Material->GetAniTexture()) continue;
@@ -2130,7 +2125,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh(bool noTextures) {
 			boundNormalmap = srv[1];
 
 			// Bind both
-			Context->PSSetShaderResources(0, 3, srv);
+			GetContext()->PSSetShaderResources(0, 3, srv);
 
 			// Get the right shader for it
 
@@ -2177,8 +2172,8 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh(bool noTextures) {
 
 			// Bind normalmap to HDS
 			if (!mesh.second->IndicesPNAEN.empty()) {
-				Context->DSSetShaderResources(0, 1, &boundNormalmap);
-				Context->HSSetShaderResources(0, 1, &boundNormalmap);
+				GetContext()->DSSetShaderResources(0, 1, &boundNormalmap);
+				GetContext()->HSSetShaderResources(0, 1, &boundNormalmap);
 			}
 		}
 
@@ -2187,8 +2182,8 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh(bool noTextures) {
 			boundInfo->TextureTesselationSettings.buffer.VT_TesselationFactor >
 			0.0f) {
 			// Set normal/displacement map
-			Context->DSSetShaderResources(0, 1, &boundNormalmap);
-			Context->HSSetShaderResources(0, 1, &boundNormalmap);
+			GetContext()->DSSetShaderResources(0, 1, &boundNormalmap);
+			GetContext()->HSSetShaderResources(0, 1, &boundNormalmap);
 			Setup_PNAEN(PNAEN_Default);
 		}
 
@@ -2208,9 +2203,9 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh(bool noTextures) {
 		else if (ActiveHDS)  // Unbind tesselation-shaders if the mesh doesn't
 							// support it
 		{
-			Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			Context->DSSetShader(nullptr, nullptr, 0);
-			Context->HSSetShader(nullptr, nullptr, 0);
+			GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			GetContext()->DSSetShader(nullptr, nullptr, 0);
+			GetContext()->HSSetShader(nullptr, nullptr, 0);
 			ActiveHDS = nullptr;
 			SetActiveVertexShader("VS_Ex");
 			ActiveVS->Apply();
@@ -2397,7 +2392,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMeshW(bool noTextures) {
 
 			// Querry the second texture slot to see if there is a normalmap bound
 			ID3D11ShaderResourceView* nrmmap;
-			Context->PSGetShaderResources(1, 1, &nrmmap);
+			GetContext()->PSGetShaderResources(1, 1, &nrmmap);
 			if (!nrmmap) {
 				if (ActivePS != defaultPS) {
 					ActivePS = defaultPS;
@@ -2426,7 +2421,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMeshW(bool noTextures) {
 			if (!info->TesselationShaderPair.empty()) {
 				info->Constantbuffer->BindToDomainShader(2);
 
-				Context->IASetPrimitiveTopology(
+				GetContext()->IASetPrimitiveTopology(
 					D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
 
 				D3D11HDShader* hd =
@@ -2458,7 +2453,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMeshW(bool noTextures) {
 				DrawVertexBufferIndexedUINT(
 					Engine::GAPI->GetWrappedWorldMesh()->MeshVertexBuffer,
 					Engine::GAPI->GetWrappedWorldMesh()->MeshIndexBuffer, 0, 0);
-				Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+				GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 				D3D11HDShader::Unbind();
 			}
 
@@ -2470,7 +2465,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMeshW(bool noTextures) {
 			else if (ActivePS != defaultPS && ActivePS != nrmPS) {
 				// Querry the second texture slot to see if there is a normalmap bound
 				ID3D11ShaderResourceView* nrmmap;
-				Context->PSGetShaderResources(1, 1, &nrmmap);
+				GetContext()->PSGetShaderResources(1, 1, &nrmmap);
 				if (!nrmmap) {
 					if (ActivePS != defaultPS) {
 						ActivePS = defaultPS;
@@ -2538,8 +2533,8 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 
 	// Pre-Draw the surfaces to fix overlaying polygons causing a huge performance
 	// drop Unbind pixelshader
-	Context->PSSetShader(nullptr, nullptr, 0);
-	Context->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
+	GetContext()->PSSetShader(nullptr, nullptr, 0);
+	GetContext()->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
 		DepthStencilBuffer->GetDepthStencilView());
 	for (std::unordered_map<zCTexture*,
 		std::vector<WorldMeshInfo* >>::const_iterator it =
@@ -2577,11 +2572,11 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 	DistortionTexture->BindToPixelShader(4);
 
 	// Bind copied backbuffer
-	Context->PSSetShaderResources(
+	GetContext()->PSSetShaderResources(
 		5, 1, PfxRenderer->GetTempBuffer()->GetShaderResViewPtr());
 
 	// Bind depth to the shader
-	DepthStencilBufferCopy->BindToPixelShader(Context, 2);
+	DepthStencilBufferCopy->BindToPixelShader(GetContext(), 2);
 
 	// Fill refraction info CB and bind it
 	RefractionInfoConstantBuffer ricb;
@@ -2594,7 +2589,7 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 	ActivePS->GetConstantBuffer()[2]->BindToPixelShader(2);
 
 	// Bind reflection cube
-	Context->PSSetShaderResources(3, 1, ReflectionCube.GetAddressOf());
+	GetContext()->PSSetShaderResources(3, 1, ReflectionCube.GetAddressOf());
 
 	for (int i = 0; i < 1;
 		i++)  // Draw twice, but second time only to depth buffer to fix the fog
@@ -2623,7 +2618,7 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 	// Draw Ocean
 	if (Engine::GAPI->GetOcean()) Engine::GAPI->GetOcean()->Draw();
 
-	Context->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
+	GetContext()->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
 		DepthStencilBuffer->GetDepthStencilView());
 
 	Engine::GAPI->GetRendererState()->DepthState.DepthBufferCompareFunc =
@@ -2741,7 +2736,7 @@ void D3D11GraphicsEngine::DrawWorldAround(
 						if (!linearDepth)  // Only unbind when not rendering linear depth
 						{
 							// Unbind PS
-							Context->PSSetShader(nullptr, nullptr, 0);
+							GetContext()->PSSetShader(nullptr, nullptr, 0);
 						}
 					}
 				}
@@ -2802,7 +2797,7 @@ void D3D11GraphicsEngine::DrawWorldAround(
 														   // depth
 										{
 											// Unbind PS
-											Context->PSSetShader(nullptr, nullptr, 0);
+											GetContext()->PSSetShader(nullptr, nullptr, 0);
 										}
 									}
 								}
@@ -3119,7 +3114,7 @@ void D3D11GraphicsEngine::DrawWorldAround(const D3DXVECTOR3& position,
 													   // depth
 									{
 										// Unbind PS
-										Context->PSSetShader(nullptr, nullptr, 0);
+										GetContext()->PSSetShader(nullptr, nullptr, 0);
 									}
 								}
 							}
@@ -3169,7 +3164,7 @@ void D3D11GraphicsEngine::DrawWorldAround(const D3DXVECTOR3& position,
 		if (!linearDepth)  // Only unbind when not rendering linear depth
 		{
 			// Unbind PS
-			Context->PSSetShader(nullptr, nullptr, 0);
+			GetContext()->PSSetShader(nullptr, nullptr, 0);
 		}
 
 		D3D11_BUFFER_DESC desc;
@@ -3235,7 +3230,7 @@ void D3D11GraphicsEngine::DrawWorldAround(const D3DXVECTOR3& position,
 						if (!linearDepth)  // Only unbind when not rendering linear depth
 						{
 							// Unbind PS
-							Context->PSSetShader(nullptr, nullptr, 0);
+							GetContext()->PSSetShader(nullptr, nullptr, 0);
 						}
 					}
 
@@ -3492,11 +3487,11 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 								srv[1] = DistortionTexture->GetShaderResourceView();
 							}
 							// Bind both
-							Context->PSSetShaderResources(0, 3, srv);
+							GetContext()->PSSetShaderResources(0, 3, srv);
 
 							// Set normal/displacement map
-							Context->DSSetShaderResources(0, 1, &srv[1]);
-							Context->HSSetShaderResources(0, 1, &srv[1]);
+							GetContext()->DSSetShaderResources(0, 1, &srv[1]);
+							GetContext()->HSSetShaderResources(0, 1, &srv[1]);
 
 							// Force alphatest on vobs for now
 							BindShaderForTexture(tx, true, 0);
@@ -3529,10 +3524,10 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 						staticMeshVisual.second->TesselationInfo.Constantbuffer->BindToHullShader(1);
 					}
 					else if (ActiveHDS) {
-						Context->IASetPrimitiveTopology(
+						GetContext()->IASetPrimitiveTopology(
 							D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-						Context->DSSetShader(nullptr, nullptr, 0);
-						Context->HSSetShader(nullptr, nullptr, 0);
+						GetContext()->DSSetShader(nullptr, nullptr, 0);
+						GetContext()->HSSetShader(nullptr, nullptr, 0);
 						ActiveHDS = nullptr;
 						SetActiveVertexShader("VS_ExInstancedObj");
 						ActiveVS->Apply();
@@ -3571,9 +3566,9 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 		}
 	}
 
-	Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	Context->DSSetShader(nullptr, nullptr, 0);
-	Context->HSSetShader(nullptr, nullptr, 0);
+	GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	GetContext()->DSSetShader(nullptr, nullptr, 0);
+	GetContext()->HSSetShader(nullptr, nullptr, 0);
 	ActiveHDS = nullptr;
 
 	if (Engine::GAPI->GetRendererState()->RendererSettings.WireframeVobs) {
@@ -3612,7 +3607,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 	SetupVS_ExMeshDrawCall();
 	SetupVS_ExConstantBuffer();
 
-	Context->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
+	GetContext()->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
 		DepthStencilBuffer->GetDepthStencilView());
 
 	for (auto const& alphaMesh : AlphaMeshes) {
@@ -3647,7 +3642,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 				: nullptr;
 
 			// Bind both
-			Context->PSSetShaderResources(0, 3, srv);
+			GetContext()->PSSetShaderResources(0, 3, srv);
 
 			if ((blendAdd || blendBlend) &&
 				!Engine::GAPI->GetRendererState()->BlendState.BlendEnabled) {
@@ -3733,7 +3728,7 @@ void D3D11GraphicsEngine::SetDefaultStates(bool force) {
 	Engine::GAPI->GetRendererState()->DepthState.SetDirty();
 	Engine::GAPI->GetRendererState()->SamplerState.SetDirty();
 
-	Context->PSSetSamplers(0, 1, &DefaultSamplerState);
+	GetContext()->PSSetSamplers(0, 1, &DefaultSamplerState);
 
 	if (force) {
 		FFRasterizerStateHash = 0;
@@ -4124,7 +4119,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	CopyDepthStencil();
 
 	// Set the main rendertarget
-	Context->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView());
+	GetContext()->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView());
 
 	D3DXMatrixTranspose(&view, &view);
 
@@ -4133,9 +4128,9 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	D3DXMatrixInverse(&plcb.PL_InvView, nullptr, &Engine::GAPI->GetRendererState()->TransformState.TransformView);
 	plcb.PL_ViewportSize = float2(static_cast<float>(Resolution.x), static_cast<float>(Resolution.y));
 
-	GBuffer0_Diffuse->BindToPixelShader(Context, 0);
-	GBuffer1_Normals_SpecIntens_SpecPower->BindToPixelShader(Context, 1);
-	DepthStencilBufferCopy->BindToPixelShader(Context, 2);
+	GBuffer0_Diffuse->BindToPixelShader(GetContext(), 0);
+	GBuffer1_Normals_SpecIntens_SpecPower->BindToPixelShader(GetContext(), 1);
+	DepthStencilBufferCopy->BindToPixelShader(GetContext(), 2);
 
 	bool lastOutside = true;
 
@@ -4340,14 +4335,14 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	ActiveVS->GetConstantBuffer()[0]->UpdateBuffer(&vscb);
 	ActiveVS->GetConstantBuffer()[0]->BindToVertexShader(0);
 
-	WorldShadowmap1->BindToPixelShader(Context, 3);
+	WorldShadowmap1->BindToPixelShader(GetContext(), 3);
 
 	if (Effects->GetRainShadowmap())
-		Effects->GetRainShadowmap()->BindToPixelShader(Context, 4);
+		Effects->GetRainShadowmap()->BindToPixelShader(GetContext(), 4);
 
-	Context->PSSetSamplers(2, 1, ShadowmapSamplerState.GetAddressOf());
+	GetContext()->PSSetSamplers(2, 1, ShadowmapSamplerState.GetAddressOf());
 
-	Context->PSSetShaderResources(5, 1, ReflectionCube2.GetAddressOf());
+	GetContext()->PSSetShaderResources(5, 1, ReflectionCube2.GetAddressOf());
 
 	DistortionTexture->BindToPixelShader(6);
 
@@ -4357,8 +4352,8 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 
 	// Reset state
 	ID3D11ShaderResourceView* srv = nullptr;
-	Context->PSSetShaderResources(2, 1, &srv);
-	Context->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
+	GetContext()->PSSetShaderResources(2, 1, &srv);
+	GetContext()->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
 		DepthStencilBuffer->GetDepthStencilView());
 
 	Engine::GAPI->GetRendererState()->BlendState.SetDefault();
@@ -4389,7 +4384,7 @@ void D3D11GraphicsEngine::RenderShadowCube(
 	std::map<MeshKey, WorldMeshInfo*, cmpMeshKey>* worldMeshCache) {
 	D3D11_VIEWPORT oldVP;
 	UINT n = 1;
-	Context->RSGetViewports(&n, &oldVP);
+	GetContext()->RSGetViewports(&n, &oldVP);
 
 	// Apply new viewport
 	D3D11_VIEWPORT vp;
@@ -4400,7 +4395,7 @@ void D3D11GraphicsEngine::RenderShadowCube(
 	vp.Width = static_cast<float>(targetCube->GetSizeX());
 	vp.Height = static_cast<float>(targetCube->GetSizeX());
 
-	Context->RSSetViewports(1, &vp);
+	GetContext()->RSSetViewports(1, &vp);
 
 	if (!face) {
 		// Set cubemap shader
@@ -4416,17 +4411,17 @@ void D3D11GraphicsEngine::RenderShadowCube(
 	SetRenderingStage(DES_SHADOWMAP_CUBE);
 
 	ID3D11ShaderResourceView* srv = nullptr;
-	Context->PSSetShaderResources(3, 1, &srv);
+	GetContext()->PSSetShaderResources(3, 1, &srv);
 
 	if (!debugRTV) {
-		Context->OMSetRenderTargets(0, nullptr, face);
+		GetContext()->OMSetRenderTargets(0, nullptr, face);
 
 		Engine::GAPI->GetRendererState()->BlendState.ColorWritesEnabled =
 			true;  // Should be false, but needs to be true for SV_Depth to work
 		Engine::GAPI->GetRendererState()->BlendState.SetDirty();
 	}
 	else {
-		Context->OMSetRenderTargets(1, &debugRTV, face);
+		GetContext()->OMSetRenderTargets(1, &debugRTV, face);
 
 		Engine::GAPI->GetRendererState()->BlendState.ColorWritesEnabled = true;
 		Engine::GAPI->GetRendererState()->BlendState.SetDirty();
@@ -4435,7 +4430,7 @@ void D3D11GraphicsEngine::RenderShadowCube(
 	// Dont render shadows from the sun when it isn't on the sky
 	if (Engine::GAPI->GetRendererState()->RendererSettings.DrawShadowGeometry &&
 		Engine::GAPI->GetRendererState()->RendererSettings.EnableShadows) {
-		Context->ClearDepthStencilView(face, D3D11_CLEAR_DEPTH, 1.0f, 0);
+		GetContext()->ClearDepthStencilView(face, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 		// Draw the world mesh without textures
 		DrawWorldAround(position, range, cullFront, indoor, noNPCs, renderedVobs,
@@ -4443,11 +4438,11 @@ void D3D11GraphicsEngine::RenderShadowCube(
 	}
 	else {
 		if (Engine::GAPI->GetSky()->GetAtmoshpereSettings().LightDirection.y <= 0) {
-			Context->ClearDepthStencilView(face, D3D11_CLEAR_DEPTH, 0.0f,
+			GetContext()->ClearDepthStencilView(face, D3D11_CLEAR_DEPTH, 0.0f,
 				0);  // Always shadow in the night
 		}
 		else {
-			Context->ClearDepthStencilView(
+			GetContext()->ClearDepthStencilView(
 				face, D3D11_CLEAR_DEPTH, 1.0f,
 				0);  // Clear shadowmap when shadows not enabled
 		}
@@ -4455,8 +4450,8 @@ void D3D11GraphicsEngine::RenderShadowCube(
 
 	// Restore state
 	SetRenderingStage(oldStage);
-	Context->RSSetViewports(1, &oldVP);
-	Context->GSSetShader(nullptr, nullptr, 0);
+	GetContext()->RSSetViewports(1, &oldVP);
+	GetContext()->GSSetShader(nullptr, nullptr, 0);
 	SetActiveVertexShader("VS_Ex");
 
 	Engine::GAPI->SetFarPlane(
@@ -4480,7 +4475,7 @@ void D3D11GraphicsEngine::RenderShadowmaps(const D3DXVECTOR3& cameraPosition,
 
 	D3D11_VIEWPORT oldVP;
 	UINT n = 1;
-	Context->RSGetViewports(&n, &oldVP);
+	GetContext()->RSGetViewports(&n, &oldVP);
 
 	// Apply new viewport
 	D3D11_VIEWPORT vp;
@@ -4490,7 +4485,7 @@ void D3D11GraphicsEngine::RenderShadowmaps(const D3DXVECTOR3& cameraPosition,
 	vp.MaxDepth = 1.0f;
 	vp.Width = static_cast<float>(target->GetSizeX());
 	vp.Height = vp.Width;
-	Context->RSSetViewports(1, &vp);
+	GetContext()->RSSetViewports(1, &vp);
 
 	// Set the rendering stage
 	D3D11ENGINE_RENDER_STAGE oldStage = RenderingStage;
@@ -4499,14 +4494,14 @@ void D3D11GraphicsEngine::RenderShadowmaps(const D3DXVECTOR3& cameraPosition,
 	// Clear and Bind the shadowmap
 
 	ID3D11ShaderResourceView* srv = nullptr;
-	Context->PSSetShaderResources(3, 1, &srv);
+	GetContext()->PSSetShaderResources(3, 1, &srv);
 
 	if (!debugRTV) {
-		Context->OMSetRenderTargets(0, nullptr, dsvOverwrite);
+		GetContext()->OMSetRenderTargets(0, nullptr, dsvOverwrite);
 		Engine::GAPI->GetRendererState()->BlendState.ColorWritesEnabled = false;
 	}
 	else {
-		Context->OMSetRenderTargets(1, &debugRTV, dsvOverwrite);
+		GetContext()->OMSetRenderTargets(1, &debugRTV, dsvOverwrite);
 		Engine::GAPI->GetRendererState()->BlendState.ColorWritesEnabled = true;
 	}
 	Engine::GAPI->GetRendererState()->BlendState.SetDirty();
@@ -4518,18 +4513,18 @@ void D3D11GraphicsEngine::RenderShadowmaps(const D3DXVECTOR3& cameraPosition,
 			   // TODO: Take this out of here!
 		Engine::GAPI->GetRendererState()->RendererSettings.DrawShadowGeometry &&
 		Engine::GAPI->GetRendererState()->RendererSettings.EnableShadows) {
-		Context->ClearDepthStencilView(dsvOverwrite, D3D11_CLEAR_DEPTH, 1.0f, 0);
+		GetContext()->ClearDepthStencilView(dsvOverwrite, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 		// Draw the world mesh without textures
 		DrawWorldAround(cameraPosition, 2, 10000.0f, cullFront, dontCull);
 	}
 	else {
 		if (Engine::GAPI->GetSky()->GetAtmoshpereSettings().LightDirection.y <= 0) {
-			Context->ClearDepthStencilView(dsvOverwrite, D3D11_CLEAR_DEPTH, 0.0f,
+			GetContext()->ClearDepthStencilView(dsvOverwrite, D3D11_CLEAR_DEPTH, 0.0f,
 				0);  // Always shadow in the night
 		}
 		else {
-			Context->ClearDepthStencilView(
+			GetContext()->ClearDepthStencilView(
 				dsvOverwrite, D3D11_CLEAR_DEPTH, 1.0f,
 				0);  // Clear shadowmap when shadows not enabled
 		}
@@ -4537,7 +4532,7 @@ void D3D11GraphicsEngine::RenderShadowmaps(const D3DXVECTOR3& cameraPosition,
 
 	// Restore state
 	SetRenderingStage(oldStage);
-	Context->RSSetViewports(1, &oldVP);
+	GetContext()->RSSetViewports(1, &oldVP);
 
 	Engine::GAPI->SetFarPlane(
 		Engine::GAPI->GetRendererState()->RendererSettings.SectionDrawRadius *
@@ -4547,10 +4542,10 @@ void D3D11GraphicsEngine::RenderShadowmaps(const D3DXVECTOR3& cameraPosition,
 /** Draws a fullscreenquad, copying the given texture to the viewport */
 void D3D11GraphicsEngine::DrawQuad(INT2 position, INT2 size) {
 	ID3D11ShaderResourceView* srv;
-	Context->PSGetShaderResources(0, 1, &srv);
+	GetContext()->PSGetShaderResources(0, 1, &srv);
 
 	ID3D11RenderTargetView* rtv;
-	Context->OMGetRenderTargets(1, &rtv, nullptr);
+	GetContext()->OMGetRenderTargets(1, &rtv, nullptr);
 
 	if (srv) {
 		if (rtv) {
@@ -4573,7 +4568,7 @@ D3D11ENGINE_RENDER_STAGE D3D11GraphicsEngine::GetRenderingStage() {
 
 /** Draws a single VOB */
 void D3D11GraphicsEngine::DrawVobSingle(VobInfo* vob) {
-	Context->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
+	GetContext()->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
 		DepthStencilBuffer->GetDepthStencilView());
 
 	D3DXMATRIX view;
@@ -4628,7 +4623,7 @@ void D3D11GraphicsEngine::DrawVobSingle(VobInfo* vob) {
 		}
 	}
 
-	Context->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
+	GetContext()->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
 		nullptr);
 }
 
@@ -4671,7 +4666,7 @@ XRESULT D3D11GraphicsEngine::DrawOcean(GOcean* ocean) {
 	SetupVS_ExMeshDrawCall();
 	SetupVS_ExConstantBuffer();
 
-	Context->IASetPrimitiveTopology(
+	GetContext()->IASetPrimitiveTopology(
 		D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
 
 	D3D11HDShader* hd = ShaderManager->GetHDShader("OceanTess");
@@ -4700,19 +4695,19 @@ XRESULT D3D11GraphicsEngine::DrawOcean(GOcean* ocean) {
 	ocean->GetFFTResources(&tex_displacement, &tex_gradient, &tex_fresnel, &ocb);
 	ocb.OS_SunColor = Engine::GAPI->GetSky()->GetSunColor();
 
-	if (tex_gradient) Context->PSSetShaderResources(0, 1, &tex_gradient);
+	if (tex_gradient) GetContext()->PSSetShaderResources(0, 1, &tex_gradient);
 
 	if (tex_displacement) {
-		Context->DSSetShaderResources(0, 1, &tex_displacement);
+		GetContext()->DSSetShaderResources(0, 1, &tex_displacement);
 	}
 
-	Context->PSSetShaderResources(1, 1, &tex_fresnel);
-	Context->PSSetShaderResources(3, 1, &cube_reflect);
+	GetContext()->PSSetShaderResources(1, 1, &tex_fresnel);
+	GetContext()->PSSetShaderResources(3, 1, &cube_reflect);
 
 	// Scene information is still bound from rendering water surfaces
 
-	Context->PSSetSamplers(1, 1, ClampSamplerState.GetAddressOf());
-	Context->PSSetSamplers(2, 1, CubeSamplerState.GetAddressOf());
+	GetContext()->PSSetSamplers(1, 1, ClampSamplerState.GetAddressOf());
+	GetContext()->PSSetSamplers(2, 1, CubeSamplerState.GetAddressOf());
 
 	// Update constantbuffer
 	ActivePS->GetConstantBuffer()[2]->UpdateBuffer(&ocb);
@@ -4733,11 +4728,11 @@ XRESULT D3D11GraphicsEngine::DrawOcean(GOcean* ocean) {
 	DistortionTexture->BindToPixelShader(4);
 
 	// Bind copied backbuffer
-	Context->PSSetShaderResources(
+	GetContext()->PSSetShaderResources(
 		5, 1, PfxRenderer->GetTempBuffer()->GetShaderResViewPtr());
 
 	// Bind depth to the shader
-	DepthStencilBufferCopy->BindToPixelShader(Context, 2);
+	DepthStencilBufferCopy->BindToPixelShader(GetContext(), 2);
 
 	std::vector<D3DXVECTOR3> patches;
 	ocean->GetPatchLocations(patches);
@@ -4785,14 +4780,14 @@ XRESULT D3D11GraphicsEngine::DrawOcean(GOcean* ocean) {
 		GothicRasterizerStateInfo::CM_CULL_BACK;
 	Engine::GAPI->GetRendererState()->RasterizerState.SetDirty();
 
-	Context->PSSetSamplers(2, 1, ShadowmapSamplerState.GetAddressOf());
+	GetContext()->PSSetSamplers(2, 1, ShadowmapSamplerState.GetAddressOf());
 
 	SetActivePixelShader("PS_World");
 	SetActiveVertexShader("VS_Ex");
 
-	Context->HSSetShader(nullptr, nullptr, 0);
-	Context->DSSetShader(nullptr, nullptr, 0);
-	Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	GetContext()->HSSetShader(nullptr, nullptr, 0);
+	GetContext()->DSSetShader(nullptr, nullptr, 0);
+	GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	return XR_SUCCESS;
 }
@@ -4895,13 +4890,13 @@ void D3D11GraphicsEngine::GetBackbufferData(byte** data, int& pixelsize) {
 
 	ID3D11Texture2D* texture;
 	LE(GetDevice()->CreateTexture2D(&texDesc, 0, &texture));
-	Context->CopyResource(texture, rt->GetTexture());
+	GetContext()->CopyResource(texture, rt->GetTexture());
 
 	// Get data
 	D3D11_MAPPED_SUBRESOURCE res;
-	if (SUCCEEDED(Context->Map(texture, 0, D3D11_MAP_READ, 0, &res))) {
+	if (SUCCEEDED(GetContext()->Map(texture, 0, D3D11_MAP_READ, 0, &res))) {
 		memcpy(d, res.pData, width * width * 4);
-		Context->Unmap(texture, 0);
+		GetContext()->Unmap(texture, 0);
 	}
 	else {
 		LogInfo() << "Thumbnail failed";
@@ -5167,7 +5162,7 @@ void D3D11GraphicsEngine::DrawQuadMarks() {
 
 /** Copies the depth stencil buffer to DepthStencilBufferCopy */
 void D3D11GraphicsEngine::CopyDepthStencil() {
-	Context->CopyResource(DepthStencilBufferCopy->GetTexture(), DepthStencilBuffer->GetTexture());
+	GetContext()->CopyResource(DepthStencilBufferCopy->GetTexture(), DepthStencilBuffer->GetTexture());
 }
 
 /** Draws underwater effects */
@@ -5186,7 +5181,7 @@ void D3D11GraphicsEngine::DrawUnderwaterEffects() {
 	ActivePS->GetConstantBuffer()[0]->BindToPixelShader(3);
 
 	DistortionTexture->BindToPixelShader(2);
-	DepthStencilBufferCopy->BindToPixelShader(Context, 3);
+	DepthStencilBufferCopy->BindToPixelShader(GetContext(), 3);
 
 	PfxRenderer->BlurTexture(HDRBackBuffer.get(), false, 1.0f, UNDERWATER_COLOR_MOD,
 		"PS_PFX_UnderwaterFinal");
@@ -5250,7 +5245,7 @@ void D3D11GraphicsEngine::Setup_PNAEN(EPNAENRenderMode mode) {
 	pnaen->GetConstantBuffer()[0]->BindToDomainShader(0);
 	pnaen->GetConstantBuffer()[0]->BindToHullShader(0);
 
-	Context->IASetPrimitiveTopology(
+	GetContext()->IASetPrimitiveTopology(
 		D3D11_PRIMITIVE_TOPOLOGY_18_CONTROL_POINT_PATCHLIST);
 }
 
@@ -5261,9 +5256,9 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 	SetDefaultStates();
 
 	// Clear GBuffer0 to hold the refraction vectors since it's not needed anymore
-	Context->ClearRenderTargetView(GBuffer0_Diffuse->GetRenderTargetView(),
+	GetContext()->ClearRenderTargetView(GBuffer0_Diffuse->GetRenderTargetView(),
 		(float*)& float4(0.0f, 0.0f, 0.0f, 0.0f));
-	Context->ClearRenderTargetView(
+	GetContext()->ClearRenderTargetView(
 		GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView(),
 		(float*)& float4(0.0f, 0.0f, 0.0f, 0.0f));
 
@@ -5324,7 +5319,7 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 	ID3D11RenderTargetView* rtv[] = {
 		GBuffer0_Diffuse->GetRenderTargetView(),
 		GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView()};
-	Context->OMSetRenderTargets(2, rtv,
+	GetContext()->OMSetRenderTargets(2, rtv,
 		DepthStencilBuffer->GetDepthStencilView());
 
 	int lastBlendMode = -1;
@@ -5344,7 +5339,7 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 	ActiveVS->Apply();
 
 	// Rendering points only
-	Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+	GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 
 	UpdateRenderStates();
 
@@ -5381,7 +5376,7 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 				ID3D11RenderTargetView* rtv[] = {
 					GBuffer0_Diffuse->GetRenderTargetView(),
 					GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView()};
-				Context->OMSetRenderTargets(2, rtv,
+				GetContext()->OMSetRenderTargets(2, rtv,
 					DepthStencilBuffer->GetDepthStencilView());
 			}
 			else {
@@ -5389,7 +5384,7 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 				SetActivePixelShader("PS_Simple");
 				PS_Simple->Apply();
 
-				Context->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
+				GetContext()->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
 					DepthStencilBuffer->GetDepthStencilView());
 			}
 		}
@@ -5420,18 +5415,18 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 			sizeof(ParticleInstanceInfo));
 	}
 
-	Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	Context->GSSetShader(nullptr, 0, 0);
+	GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	GetContext()->GSSetShader(nullptr, 0, 0);
 
 	// Set usual rendertarget again
-	Context->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
+	GetContext()->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
 		DepthStencilBuffer->GetDepthStencilView());
 
 	state.BlendState.SetDefault();
 	state.BlendState.SetDirty();
 
-	GBuffer0_Diffuse->BindToPixelShader(Context, 1);
-	GBuffer1_Normals_SpecIntens_SpecPower->BindToPixelShader(Context, 2);
+	GBuffer0_Diffuse->BindToPixelShader(GetContext(), 1);
+	GBuffer1_Normals_SpecIntens_SpecPower->BindToPixelShader(GetContext(), 2);
 
 	// Copy scene behind the particle systems
 	PfxRenderer->CopyTextureToRTV(
@@ -5528,7 +5523,7 @@ void D3D11GraphicsEngine::SaveScreenshot() {
 
 	ID3D11Texture2D* texture;
 	LE(GetDevice()->CreateTexture2D(&texDesc, 0, &texture));
-	Context->CopyResource(texture, rt->GetTexture());
+	GetContext()->CopyResource(texture, rt->GetTexture());
 
 	char date[50];
 	char time[50];
@@ -5545,7 +5540,7 @@ void D3D11GraphicsEngine::SaveScreenshot() {
 
 	LogInfo() << "Saving screenshot to: " << name;
 
-	LE(D3DX11SaveTextureToFile(Context, texture, D3DX11_IFF_JPG, name.c_str()));
+	LE(D3DX11SaveTextureToFile(GetContext(), texture, D3DX11_IFF_JPG, name.c_str()));
 	texture->Release();
 
 	delete rt;

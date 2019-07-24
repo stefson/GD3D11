@@ -127,9 +127,9 @@ public:
 
 	/** Returns the Device/Context */
 	ID3D11Device* GetDevice() { return Device.Get(); }
-	ID3D11DeviceContext* GetContext() { return Context; }
-	ID3D11DeviceContext* GetDeferredMediaContext() { return DeferredContext; }
-
+	ID3D11DeviceContext* GetContext() { return Context.Get(); }
+	ID3D11DeviceContext* GetDeferredMediaContext() { return DeferredContext.Get(); }
+	
 	/** Returns the current resolution */
 	virtual INT2 GetResolution() { return Resolution; }
 
@@ -166,8 +166,8 @@ protected:
 	std::string DeviceDescription;
 
 	Microsoft::WRL::ComPtr<ID3D11Device> Device;
-	ID3D11DeviceContext* Context;
-	ID3D11DeviceContext* DeferredContext;
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext> Context;
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext> DeferredContext;
 
 	/** Deferred contexts for threadpool */
 	std::map<int, ID3D11DeviceContext*> DeferredContextsByThread;
@@ -176,7 +176,7 @@ protected:
 	std::mutex DeferredContextsByThreadMutex;
 
 	/** Swapchain and resources */
-	IDXGISwapChain* SwapChain;
+	Microsoft::WRL::ComPtr<IDXGISwapChain> SwapChain;
 	RenderToTextureBuffer * Backbuffer;
 	std::unique_ptr<RenderToDepthStencilBuffer> DepthStencilBuffer;
 	std::unique_ptr<RenderToTextureBuffer> HDRBackBuffer;
