@@ -18,13 +18,6 @@ const int INSTANCING_BUFFER_SIZE = sizeof(VobInstanceInfo) * 2048;
 //#define DEBUG_D3D11
 
 D3D11GraphicsEngineBase::D3D11GraphicsEngineBase() {
-	TempVertexBuffer = nullptr;
-	ShaderManager = nullptr;
-	Backbuffer = nullptr;
-	DepthStencilBuffer = nullptr;
-	HDRBackBuffer = nullptr;
-	LineRenderer = nullptr;
-	TransformsCB = nullptr;
 	PresentPending = false;
 
 	// Match the resolution with the current desktop resolution
@@ -39,10 +32,6 @@ D3D11GraphicsEngineBase::~D3D11GraphicsEngineBase() {
 	for (size_t i = 0; i < DeferredContextsAll.size(); i++) {
 		SAFE_RELEASE(DeferredContextsAll[i]);
 	}
-
-	SAFE_DELETE(TempVertexBuffer);
-	SAFE_DELETE(Backbuffer);
-	SAFE_DELETE(TransformsCB);
 }
 
 /** Called after the fake-DDraw-Device got created */
@@ -125,10 +114,10 @@ XRESULT D3D11GraphicsEngineBase::Init() {
 	GetContext()->DSSetSamplers(0, 1, DefaultSamplerState.GetAddressOf());
 	GetContext()->HSSetSamplers(0, 1, DefaultSamplerState.GetAddressOf());
 
-	TempVertexBuffer = new D3D11VertexBuffer();
+	TempVertexBuffer = std::make_unique<D3D11VertexBuffer>();
 	TempVertexBuffer->Init(nullptr, DRAWVERTEXARRAY_BUFFER_SIZE, D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE);
 
-	TransformsCB = new D3D11ConstantBuffer(sizeof(VS_ExConstantBuffer_PerFrame), nullptr);
+	TransformsCB = std::make_unique<D3D11ConstantBuffer>(sizeof(VS_ExConstantBuffer_PerFrame), nullptr);
 
 	LineRenderer = std::make_unique<D3D11LineRenderer>();
 
@@ -163,7 +152,7 @@ XRESULT D3D11GraphicsEngineBase::OnResize(INT2 newSize)
 	GetClientRect(GetDesktopWindow(), &desktopRect);
 	SetWindowPos(OutputWindow, nullptr, 0, 0, desktopRect.right, desktopRect.bottom, 0);
 
-	delete Backbuffer; Backbuffer = nullptr;
+	Backbuffer.reset();
 
 	if (!SwapChain)
 	{
@@ -229,7 +218,7 @@ XRESULT D3D11GraphicsEngineBase::OnResize(INT2 newSize)
 	LE(GetDevice()->CreateRenderTargetView(backbuffer, nullptr, &backbufferRTV));
 	LE(GetDevice()->CreateShaderResourceView(backbuffer, nullptr, &backbufferSRV));
 
-	Backbuffer = new RenderToTextureBuffer(backbuffer, backbufferSRV, backbufferRTV, (UINT)Resolution.x, (UINT)Resolution.y);
+	Backbuffer = std::make_unique<RenderToTextureBuffer>(backbuffer, backbufferSRV, backbufferRTV, (UINT)Resolution.x, (UINT)Resolution.y);
 
 	// Recreate DepthStencilBuffer
 	DepthStencilBuffer = std::make_unique<RenderToDepthStencilBuffer>(GetDevice(), Resolution.x, Resolution.y, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_R32_FLOAT);
@@ -571,8 +560,7 @@ XRESULT D3D11GraphicsEngineBase::DrawVertexArray(ExVertexStruct* vertices, unsig
 		LogInfo() << "TempVertexBuffer too small (" << desc.ByteWidth << "), need " << stride * numVertices << " bytes. Recreating buffer.";
 
 		// Buffer too small, recreate it
-		delete TempVertexBuffer;
-		TempVertexBuffer = new D3D11VertexBuffer();
+		TempVertexBuffer = std::make_unique<D3D11VertexBuffer>();
 
 		TempVertexBuffer->Init(nullptr, stride * numVertices, D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE);
 	}

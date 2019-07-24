@@ -146,7 +146,6 @@ D3D11GraphicsEngine::~D3D11GraphicsEngine() {
 	SAFE_DELETE(QuadIndexBuffer);
 
 	SAFE_DELETE(DynamicInstancingBuffer);
-	SAFE_DELETE(TempVertexBuffer);
 	SAFE_DELETE(InverseUnitSphereMesh);
 
 	ID3D11Debug* d3dDebug;
@@ -221,7 +220,7 @@ XRESULT D3D11GraphicsEngine::Init() {
 		ShaderManager->GetPShader("PS_DiffuseNormalmappedAlphaTest");
 	PS_DiffuseAlphatest = ShaderManager->GetPShader("PS_DiffuseAlphaTest");
 
-	TempVertexBuffer = new D3D11VertexBuffer();
+	TempVertexBuffer = std::make_unique<D3D11VertexBuffer>();
 	TempVertexBuffer->Init(
 		nullptr, DRAWVERTEXARRAY_BUFFER_SIZE, D3D11VertexBuffer::B_VERTEXBUFFER,
 		D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE);
@@ -1037,15 +1036,14 @@ XRESULT D3D11GraphicsEngine::DrawVertexArray(ExVertexStruct* vertices,
 	SetupVS_ExMeshDrawCall();
 
 	D3D11_BUFFER_DESC desc;
-	((D3D11VertexBuffer*)TempVertexBuffer)->GetVertexBuffer()->GetDesc(&desc);
+	TempVertexBuffer->GetVertexBuffer()->GetDesc(&desc);
 
 	if (desc.ByteWidth < stride * numVertices) {
 		LogInfo() << "TempVertexBuffer too small (" << desc.ByteWidth << "), need "
 			<< stride * numVertices << " bytes. Recreating buffer.";
 
 		// Buffer too small, recreate it
-		delete TempVertexBuffer;
-		TempVertexBuffer = new D3D11VertexBuffer();
+		TempVertexBuffer = std::make_unique<D3D11VertexBuffer>();
 
 		TempVertexBuffer->Init(
 			nullptr, stride * numVertices, D3D11VertexBuffer::B_VERTEXBUFFER,
@@ -1087,15 +1085,14 @@ XRESULT D3D11GraphicsEngine::DrawIndexedVertexArray(ExVertexStruct* vertices,
 	SetupVS_ExMeshDrawCall();
 
 	D3D11_BUFFER_DESC desc;
-	((D3D11VertexBuffer*)TempVertexBuffer)->GetVertexBuffer()->GetDesc(&desc);
+	TempVertexBuffer->GetVertexBuffer()->GetDesc(&desc);
 
 	if (desc.ByteWidth < stride * numVertices) {
 		LogInfo() << "TempVertexBuffer too small (" << desc.ByteWidth << "), need "
 			<< stride * numVertices << " bytes. Recreating buffer.";
 
 		// Buffer too small, recreate it
-		delete TempVertexBuffer;
-		TempVertexBuffer = new D3D11VertexBuffer();
+		TempVertexBuffer = std::make_unique<D3D11VertexBuffer>();
 
 		TempVertexBuffer->Init(
 			nullptr, stride * numVertices, D3D11VertexBuffer::B_VERTEXBUFFER,
@@ -5381,7 +5378,7 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 
 		// Push data for the particles to the GPU
 		D3D11_BUFFER_DESC desc;
-		((D3D11VertexBuffer*)TempVertexBuffer)->GetVertexBuffer()->GetDesc(&desc);
+		TempVertexBuffer->GetVertexBuffer()->GetDesc(&desc);
 
 		if (desc.ByteWidth < sizeof(ParticleInstanceInfo) * instances.size()) {
 			LogInfo() << "(PARTICLE) TempVertexBuffer too small (" << desc.ByteWidth
@@ -5389,8 +5386,7 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 				<< " bytes. Recreating buffer.";
 
 			// Buffer too small, recreate it
-			delete TempVertexBuffer;
-			TempVertexBuffer = new D3D11VertexBuffer();
+			TempVertexBuffer = std::make_unique<D3D11VertexBuffer>();
 
 			TempVertexBuffer->Init(
 				nullptr, sizeof(ParticleInstanceInfo) * instances.size(),
@@ -5401,7 +5397,7 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 		TempVertexBuffer->UpdateBuffer(
 			&instances[0], sizeof(ParticleInstanceInfo) * instances.size());
 
-		DrawVertexBuffer(TempVertexBuffer, instances.size(),
+		DrawVertexBuffer(TempVertexBuffer.get(), instances.size(),
 			sizeof(ParticleInstanceInfo));
 	}
 

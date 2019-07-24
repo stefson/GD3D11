@@ -177,7 +177,7 @@ protected:
 
 	/** Swapchain and resources */
 	Microsoft::WRL::ComPtr<IDXGISwapChain> SwapChain;
-	RenderToTextureBuffer * Backbuffer;
+	std::unique_ptr<RenderToTextureBuffer> Backbuffer;
 	std::unique_ptr<RenderToDepthStencilBuffer> DepthStencilBuffer;
 	std::unique_ptr<RenderToTextureBuffer> HDRBackBuffer;
 
@@ -194,10 +194,10 @@ protected:
 	std::unique_ptr<D3D11ShaderManager> ShaderManager;
 
 	/** Dynamic buffer for vertex array rendering */
-	D3D11VertexBuffer* TempVertexBuffer;
+	std::unique_ptr<D3D11VertexBuffer> TempVertexBuffer;
 
 	/** Constantbuffers */
-	D3D11ConstantBuffer* TransformsCB; // Holds View/Proj-Transforms
+	std::unique_ptr<D3D11ConstantBuffer> TransformsCB; // Holds View/Proj-Transforms
 
 	/** Shaders */
 	D3D11PShader * PS_DiffuseNormalmapped;
