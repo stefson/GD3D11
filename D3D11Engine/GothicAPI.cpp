@@ -731,22 +731,8 @@ void GothicAPI::DrawParticlesSimple()
 	
 	if (RendererState.RendererSettings.DrawParticleEffects)
 	{
-		D3DXVECTOR3 camPos = GetCameraPosition();
-
 		std::vector<zCVob*> renderedParticleFXs;
-		for (auto const& it : ParticleEffectVobs)
-		{
-			float dist = D3DXVec3Length(&(it->GetPositionWorld() - camPos));
-			if (dist > RendererState.RendererSettings.OutdoorSmallVobDrawRadius)
-				continue;
-			if (dist > RendererState.RendererSettings.VisualFXDrawRadius)
-				continue;
-
-			if (it->GetVisual())
-			{
-				renderedParticleFXs.push_back(it);
-			}
-		}
+		GetVisibleParticleEffectsList(renderedParticleFXs);
 
 		// now it is save to render
 		for (auto const& it : renderedParticleFXs)
@@ -773,6 +759,8 @@ void GothicAPI::GetVisibleParticleEffectsList(std::vector<zCVob*> & pfxList)
 		for (auto const& it : ParticleEffectVobs)
 		{
 			float dist = D3DXVec3Length(&(it->GetPositionWorld() - camPos));
+			if (dist > RendererState.RendererSettings.OutdoorSmallVobDrawRadius)
+				continue;
 			if (dist > RendererState.RendererSettings.VisualFXDrawRadius)
 				continue;
 
