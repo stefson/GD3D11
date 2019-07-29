@@ -5236,12 +5236,10 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 	std::vector<std::tuple<zCTexture*, ParticleRenderInfo*,
 		std::vector<ParticleInstanceInfo>* >>
 		pvec;
-	for (std::map<zCTexture*, std::vector<ParticleInstanceInfo>>::iterator it =
-		particles.begin();
-		it != particles.end(); ++it) {
-		if (it->second.empty()) continue;
+	for (auto&& textureParticle : particles) {
+		if (textureParticle.second.empty()) continue;
 
-		pvec.push_back(std::make_tuple(it->first, &info[it->first], &it->second));
+		pvec.push_back(std::make_tuple(textureParticle.first, &info[textureParticle.first], &textureParticle.second));
 	}
 
 	struct cmp {
@@ -5288,10 +5286,10 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 
 	UpdateRenderStates();
 
-	for (auto it = pvec.begin(); it != pvec.end(); ++it) {
-		zCTexture* tx = std::get<0>((*it));
-		ParticleRenderInfo& info = *std::get<1>((*it));
-		std::vector<ParticleInstanceInfo>& instances = *std::get<2>((*it));
+	for (auto const& textureParticleRenderInfo : pvec) {
+		zCTexture* tx = std::get<0>(textureParticleRenderInfo);
+		ParticleRenderInfo& info = *std::get<1>(textureParticleRenderInfo);
+		std::vector<ParticleInstanceInfo>& instances = *std::get<2>(textureParticleRenderInfo);
 
 		if (instances.empty()) continue;
 
