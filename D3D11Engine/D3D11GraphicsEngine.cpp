@@ -5200,6 +5200,8 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 	std::map<zCTexture*, ParticleRenderInfo>& info) {
 	SetDefaultStates();
 
+	// TODO: Maybe make particles draw at a lower res and bilinear upsample the result.
+
 	// Clear GBuffer0 to hold the refraction vectors since it's not needed anymore
 	GetContext()->ClearRenderTargetView(GBuffer0_Diffuse->GetRenderTargetView(),
 		(float*)& float4(0.0f, 0.0f, 0.0f, 0.0f));
