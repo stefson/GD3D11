@@ -728,7 +728,7 @@ void GothicAPI::DrawWorldMeshNaive() {
 void GothicAPI::DrawParticlesSimple()
 {
 	ParticleFrameData data;
-
+	
 	if (RendererState.RendererSettings.DrawParticleEffects)
 	{
 		D3DXVECTOR3 camPos = GetCameraPosition();
@@ -736,10 +736,10 @@ void GothicAPI::DrawParticlesSimple()
 		std::vector<zCVob*> renderedParticleFXs;
 		for (auto const& it : ParticleEffectVobs)
 		{
-			INT2 s = WorldConverter::GetSectionOfPos(it->GetPositionWorld());
-
 			float dist = D3DXVec3Length(&(it->GetPositionWorld() - camPos));
 			if (dist > RendererState.RendererSettings.OutdoorSmallVobDrawRadius)
+				continue;
+			if (dist > RendererState.RendererSettings.VisualFXDrawRadius)
 				continue;
 
 			if (it->GetVisual())
@@ -749,18 +749,12 @@ void GothicAPI::DrawParticlesSimple()
 		}
 
 		// now it is save to render
-		for (auto const& it : ParticleEffectVobs)
+		for (auto const& it : renderedParticleFXs)
 		{
-			INT2 s = WorldConverter::GetSectionOfPos(it->GetPositionWorld());
-
-			float dist = D3DXVec3Length(&(it->GetPositionWorld() - camPos));
-			if (dist > RendererState.RendererSettings.VisualFXDrawRadius)
-				continue;
-
-			if (it->GetVisual())
+			const zCVisual* vis = it->GetVisual();
+			if (vis)
 			{
-				int mod = dist > RendererState.RendererSettings.IndoorVobDrawRadius ? 2 : 1;
-				DrawParticleFX(it, (zCParticleFX*)it->GetVisual(), data);
+				DrawParticleFX(it, (zCParticleFX*)vis, data);
 			}
 		}
 
@@ -778,8 +772,6 @@ void GothicAPI::GetVisibleParticleEffectsList(std::vector<zCVob*> & pfxList)
 		// now it is save to render
 		for (auto const& it : ParticleEffectVobs)
 		{
-			INT2 s = WorldConverter::GetSectionOfPos(it->GetPositionWorld());
-
 			float dist = D3DXVec3Length(&(it->GetPositionWorld() - camPos));
 			if (dist > RendererState.RendererSettings.VisualFXDrawRadius)
 				continue;
@@ -1734,7 +1726,6 @@ void GothicAPI::DrawParticleFX(zCVob * source, zCParticleFX * fx, ParticleFrameD
 				ii.scale.x *= 0.5f;
 				ii.scale.y *= 0.5f;
 			}
-
 			float4 color;
 			color.x = p->Color.x / 255.0f;
 			color.y = p->Color.y / 255.0f;
