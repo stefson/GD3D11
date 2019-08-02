@@ -96,6 +96,9 @@ D3D11GraphicsEngine::D3D11GraphicsEngine() {
 	LineRenderer = std::make_unique<D3D11LineRenderer>();
 	Occlusion = std::make_unique<D3D11OcclusionQuerry>();
 
+	m_FrameLimiter = std::make_unique<FpsLimiter>();
+	m_LastFrameLimit = 0;
+
 	RECT desktopRect;
 	GetClientRect(GetDesktopWindow(), &desktopRect);
 
@@ -541,6 +544,15 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 
 /** Called when the game wants to render a new frame */
 XRESULT D3D11GraphicsEngine::OnBeginFrame() {
+	if (Engine::GAPI->GetRendererState()->RendererSettings.FpsLimit != 0)
+	{
+		if (m_LastFrameLimit != Engine::GAPI->GetRendererState()->RendererSettings.FpsLimit)
+		{
+			m_LastFrameLimit = Engine::GAPI->GetRendererState()->RendererSettings.FpsLimit;
+			m_FrameLimiter->SetLimit(m_LastFrameLimit);
+		}
+		m_FrameLimiter->Start();
+	}
 	Engine::GAPI->GetRendererState()->RendererInfo.Timing.StartTotal();
 
 	static bool s_firstFrame = true;
@@ -636,7 +648,7 @@ XRESULT D3D11GraphicsEngine::OnEndFrame() {
 	Engine::GAPI->SetFrameProcessedTexturesReady();
 
 	Engine::GAPI->GetRendererState()->RendererInfo.Timing.StopTotal();
-
+	m_FrameLimiter->Wait();
 	return XR_SUCCESS;
 }
 
@@ -3381,7 +3393,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 						PS_Diffuse->GetConstantBuffer()[2]->UpdateBuffer(&b);
 						PS_Diffuse->GetConstantBuffer()[2]->BindToPixelShader(2);*/
 #endif
-					}
+				}
 					else {
 						// Check for alphablending on world mesh
 						bool blendAdd = itt.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_ADD;
@@ -3455,11 +3467,11 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 								GetLineRenderer()->AddAABBMinMax(pos - staticMeshVisual.second->BBox.Min,
 									pos + staticMeshVisual.second->BBox.Max,
 									D3DXVECTOR4(1, 0, 0, 1));
-							}
+						}
 #endif
 							continue;
-						}
 					}
+			}
 
 					if (tesselationEnabled && !mi->IndicesPNAEN.empty() &&
 						RenderingStage == DES_MAIN &&
@@ -3492,15 +3504,15 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 							sizeof(VobInstanceInfo), staticMeshVisual.second->Instances.size(),
 							sizeof(ExVertexStruct), staticMeshVisual.second->StartInstanceNum);
 					}
-				}
-			}
+		}
+	}
 
 			// Reset visual
 			if (doReset &&
 				!Engine::GAPI->GetRendererState()->RendererSettings.FixViewFrustum) {
 				staticMeshVisual.second->StartNewFrame();
 			}
-		}
+}
 	}
 
 	// Draw mobs

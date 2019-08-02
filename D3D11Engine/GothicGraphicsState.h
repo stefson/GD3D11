@@ -425,7 +425,8 @@ struct GothicRendererSettings {
 	/** Sets the default values for this struct */
 	void SetDefault() {
 		SectionDrawRadius = 4;
-
+		
+		FpsLimit = 0;
 		DrawVOBs = true;
 		DrawWorldMesh = 3;
 		DrawSkeletalMeshes = true;	
@@ -572,6 +573,7 @@ struct GothicRendererSettings {
 	}
 
 	/** Rendering options */
+	int FpsLimit;
 	bool DrawVOBs;
 	bool DrawDynamicVOBs;
 	int DrawWorldMesh;

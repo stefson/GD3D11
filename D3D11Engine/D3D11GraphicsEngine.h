@@ -1,6 +1,7 @@
 #pragma once
 
 #include "D3D11GraphicsEngineBase.h"
+#include "fpslimiter.h"
 #include <wrl.h>
 
 struct RenderToDepthStencilBuffer;
@@ -288,6 +289,8 @@ public:
 	/** Returns a dummy cube-rendertarget used for pointlight shadowmaps */
 	RenderToTextureBuffer * GetDummyCubeRT() { return DummyShadowCubemapTexture.get(); }
 protected:
+	std::unique_ptr<FpsLimiter> m_FrameLimiter;
+	int m_LastFrameLimit;
 	/** Test draw world */
 	void TestDrawWorldMesh();
 
