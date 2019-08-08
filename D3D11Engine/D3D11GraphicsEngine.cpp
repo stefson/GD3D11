@@ -3715,31 +3715,31 @@ XRESULT D3D11GraphicsEngine::DrawSky() {
 		return XR_SUCCESS;
 	}
 	// Create a rotaion only view-matrix
-	D3DXMATRIX invView;
-	Engine::GAPI->GetInverseViewMatrix(&invView);
+	DirectX::XMFLOAT4X4 invView;
+	Engine::GAPI->GetInverseViewMatrixDX(&invView);
 
-	D3DXMATRIX view;
-	Engine::GAPI->GetViewMatrix(&view);
+	DirectX::XMFLOAT4X4 view;
+	Engine::GAPI->GetViewMatrixDX(&view);
 
-	D3DXMATRIX scale;
-	D3DXMatrixScaling(
-		&scale, sky->GetAtmoshpereSettings().OuterRadius,
+	DirectX::XMMATRIX scale = DirectX::XMMatrixScaling(
+		sky->GetAtmoshpereSettings().OuterRadius,
 		sky->GetAtmoshpereSettings().OuterRadius,
 		sky->GetAtmoshpereSettings()
 		.OuterRadius);  // Upscale it a huge amount. Gothics world is big.
 
-	D3DXMATRIX world;
-	D3DXMatrixTranslation(&world, Engine::GAPI->GetCameraPosition().x,
+	DirectX::XMMATRIX world = DirectX::XMMatrixTranslation(
+		Engine::GAPI->GetCameraPosition().x,
 		Engine::GAPI->GetCameraPosition().y +
 		sky->GetAtmoshpereSettings().SphereOffsetY,
 		Engine::GAPI->GetCameraPosition().z);
 
-	world = scale * world;
-	D3DXMatrixTranspose(&world, &world);
+	world = DirectX::XMMatrixTranspose(scale * world);
 
 	// Apply world matrix
-	Engine::GAPI->SetWorldTransform(world);
-	Engine::GAPI->SetViewTransform(view);
+	D3DXMATRIX d3dxWorld;
+	DirectX::XMStoreFloat4x4(&(DirectX::XMFLOAT4X4)d3dxWorld, world);
+	Engine::GAPI->SetWorldTransform(d3dxWorld);
+	Engine::GAPI->SetViewTransform((D3DXMATRIX)view);
 
 	if (sky->GetAtmosphereCB().AC_CameraHeight >
 		sky->GetAtmosphereCB().AC_OuterRadius) {
@@ -3755,7 +3755,7 @@ XRESULT D3D11GraphicsEngine::DrawSky() {
 	ActivePS->GetConstantBuffer()[0]->BindToPixelShader(1);
 
 	VS_ExConstantBuffer_PerInstance cbi;
-	cbi.World = world;
+	DirectX::XMStoreFloat4x4(&(DirectX::XMFLOAT4X4)cbi.World, world);
 	ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&cbi);
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
@@ -3860,10 +3860,11 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	// ********************************
 	CameraReplacement cr;
 	D3DXVECTOR3 cameraPosition = Engine::GAPI->GetCameraPosition();
-	D3DXVECTOR3 playerPosition =
+	auto playerPosition =
 		Engine::GAPI->GetPlayerVob() != nullptr
-		? Engine::GAPI->GetPlayerVob()->GetPositionWorld()
-		: D3DXVECTOR3(FLT_MAX, FLT_MAX, FLT_MAX);
+		? Engine::GAPI->GetPlayerVob()->GetPositionWorldDX()
+		: DirectX::XMFLOAT3(FLT_MAX, FLT_MAX, FLT_MAX);
+	DirectX::XMVECTOR vPlayerPosition = DirectX::XMLoadFloat3(&playerPosition);
 
 	bool partialShadowUpdate = Engine::GAPI->GetRendererState()->RendererSettings.PartialDynamicShadowUpdates;
 
@@ -3894,8 +3895,8 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 							light) == FrameShadowUpdateLights.end()) {
 							// Always render the closest light to the playervob, so the player
 							// doesn't flicker when moving
-							float d = D3DXVec3LengthSq(
-								&(light->Vob->GetPositionWorld() - playerPosition));
+							float d;
+							DirectX::XMStoreFloat(&d, DirectX::XMVector3LengthSq(DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&light->Vob->GetPositionWorldDX()), vPlayerPosition)));
 
 							float range = light->Vob->GetLightRange();
 							if (d < range * range &&
@@ -3910,8 +3911,9 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 					else {
 						// Always render the closest light to the playervob, so the player
 						// doesn't flicker when moving
-						float d = D3DXVec3LengthSq(&(light->Vob->GetPositionWorld() - playerPosition));
-
+						float d;
+						DirectX::XMStoreFloat(&d, DirectX::XMVector3LengthSq(DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&light->Vob->GetPositionWorldDX()), vPlayerPosition)));
+						
 						float range = light->Vob->GetLightRange() * 1.5f;
 
 						// If the engine said this light should be updated, then do so. If

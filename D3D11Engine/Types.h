@@ -94,7 +94,9 @@ struct float3 {
 	D3DXVECTOR3 * toD3DXVECTOR3() const {
 		return (D3DXVECTOR3 *)this;
 	}
-
+	DirectX::XMFLOAT3 * toXMFLOAT3() const {
+		return (DirectX::XMFLOAT3 *)this;
+	}
 	std::string toString() const {
 		return std::string("(") + std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z) + ")";
 	}

@@ -2104,7 +2104,17 @@ D3DXVECTOR3 GothicAPI::GetCameraPosition()
 
 	return oCGame::GetGame()->_zCSession_camVob->GetPositionWorld();
 }
+/** Returns the current cameraposition */
+DirectX::XMFLOAT3 GothicAPI::GetCameraPositionDX()
+{
+	if (!oCGame::GetGame()->_zCSession_camVob)
+		return DirectX::XMFLOAT3(0, 0, 0);
 
+	if (CameraReplacementPtr)
+		return (DirectX::XMFLOAT3)CameraReplacementPtr->PositionReplacement;
+
+	return oCGame::GetGame()->_zCSession_camVob->GetPositionWorldDX();
+}
 /** Returns the current forward vector of the camera */
 D3DXVECTOR3 GothicAPI::GetCameraForward()
 {
@@ -2136,7 +2146,7 @@ void GothicAPI::GetViewMatrixDX(DirectX::XMFLOAT4X4 * view)
 	// TODO: Switch to pure DirectXMath
 	if (CameraReplacementPtr)
 	{
-		*view = D3DXMatToDX(CameraReplacementPtr->ViewReplacement);
+		*view = (DirectX::XMFLOAT4X4)CameraReplacementPtr->ViewReplacement;
 		return;
 	}
 	*view = zCCamera::GetCamera()->GetTransformDX(zCCamera::ETransformType::TT_VIEW);
@@ -2158,7 +2168,7 @@ void GothicAPI::GetInverseViewMatrixDX(DirectX::XMFLOAT4X4 * invView)
 {
 	if (CameraReplacementPtr)
 	{
-		DirectX::XMStoreFloat4x4(invView, DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&D3DXMatToDX(CameraReplacementPtr->ViewReplacement))));
+		DirectX::XMStoreFloat4x4(invView, DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&((DirectX::XMFLOAT4X4)CameraReplacementPtr->ViewReplacement))));
 		return;
 	}
 
