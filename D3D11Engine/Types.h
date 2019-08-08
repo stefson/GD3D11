@@ -5,6 +5,7 @@
 #include <Windows.h>
 
 #include <D3DX10math.h>
+#include <DirectXMath.h>
 
 /** Defines types used for the project */
 
@@ -82,6 +83,12 @@ struct float3 {
 		x = ((float3 *)&v)->x;
 		y = ((float3 *)&v)->y;
 		z = ((float3 *)&v)->z;
+	}
+
+	float3(const DirectX::XMFLOAT3 & v) {
+		x = v.x;
+		y = v.y;
+		z = v.z;
 	}
 
 	D3DXVECTOR3 * toD3DXVECTOR3() const {
@@ -177,6 +184,20 @@ struct float4 {
 		this->w = a;
 	}
 
+	float4(const DirectX::XMFLOAT3 & v) {
+		x = v.x;
+		y = v.y;
+		z = v.z;
+		w = 1.0f;
+	}
+
+	float4(const DirectX::XMFLOAT4 & v) {
+		x = v.x;
+		y = v.y;
+		z = v.z;
+		w = v.w;
+	}
+
 	float4() {}
 
 	D3DXVECTOR4 * toD3DXVECTOR4() const {
@@ -248,3 +269,4 @@ struct float2 {
 
 	float x, y;
 };
+

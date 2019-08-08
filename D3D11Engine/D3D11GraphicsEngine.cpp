@@ -27,7 +27,6 @@
 #include "zCVobLight.h"
 
 #include <D3DX11.h>
-
 #pragma comment(lib, "dxguid.lib")
 
 const int RES_UPSCALE = 1;
@@ -4694,32 +4693,35 @@ XRESULT D3D11GraphicsEngine::DrawOcean(GOcean* ocean) {
 	std::vector<D3DXVECTOR3> patches;
 	ocean->GetPatchLocations(patches);
 
-	D3DXMATRIX view;
-	Engine::GAPI->GetViewMatrix(&view);
-	D3DXMatrixTranspose(&view, &view);
+	DirectX::XMFLOAT4X4 view;
+	Engine::GAPI->GetViewMatrixDX(&view);
+	DirectX::XMMATRIX viewMatrix = DirectX::XMLoadFloat4x4(&view);
+
+	viewMatrix = DirectX::XMMatrixTranspose(viewMatrix);
 
 	for (auto const& patch : patches) {
-		D3DXMATRIX scale, world;
-		D3DXMatrixIdentity(&scale);
-		D3DXMatrixScaling(&scale,
+		DirectX::XMMATRIX scale, world;
+		scale = DirectX::XMMatrixIdentity();
+		scale = DirectX::XMMatrixScaling(
 			static_cast<float>(OCEAN_PATCH_SIZE),
 			static_cast<float>(OCEAN_PATCH_SIZE),
 			static_cast<float>(OCEAN_PATCH_SIZE));
-		D3DXMatrixTranslation(&world, patch.x, patch.y, patch.z);
+
+		world = DirectX::XMMatrixTranslation(patch.x, patch.y, patch.z);
 		world = scale * world;
-		D3DXMatrixTranspose(&world, &world);
+		world = DirectX::XMMatrixTranspose(world);
 		ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&world);
 		ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
-		D3DXMATRIX invWorldView;
-		D3DXVECTOR3 localEye = D3DXVECTOR3(0, 0, 0);
-		D3DXMatrixTranspose(&world, &world);
+		DirectX::XMVECTOR localEye = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0, 0, 0));
+		world = DirectX::XMMatrixTranspose(world);
 
-		D3DXMatrixInverse(&invWorldView, nullptr, &(world * view));
-		D3DXVec3TransformCoord(&localEye, &localEye, &invWorldView);
+		localEye = DirectX::XMVector3TransformCoord(localEye, DirectX::XMMatrixInverse(nullptr, world * viewMatrix));
 
 		OceanPerPatchConstantBuffer opp;
-		opp.OPP_LocalEye = localEye;
+		DirectX::XMFLOAT3 localEye3;
+		DirectX::XMStoreFloat3(&localEye3, localEye);
+		opp.OPP_LocalEye = localEye3;
 		opp.OPP_PatchPosition = patch;
 		ActivePS->GetConstantBuffer()[3]->UpdateBuffer(&opp);
 		ActivePS->GetConstantBuffer()[3]->BindToPixelShader(3);

@@ -66,6 +66,13 @@ struct BspInfo {
 	BspInfo * Back;
 };
 
+
+struct CameraReplacementDX {
+	DirectX::XMFLOAT4X4 ViewReplacement;
+	DirectX::XMFLOAT4X4 ProjectionReplacement;
+	DirectX::XMFLOAT3 PositionReplacement;
+	DirectX::XMFLOAT3 LookAtReplacement;
+};
 struct CameraReplacement {
 	D3DXMATRIX ViewReplacement;
 	D3DXMATRIX ProjectionReplacement;
@@ -319,15 +326,19 @@ public:
 
 	/** Returns the current cameraposition */
 	D3DXVECTOR3 GetCameraPosition();
+	DirectX::XMFLOAT3 GetCameraPositionDX();
 
 	/** Returns the current forward vector of the camera */
 	D3DXVECTOR3 GetCameraForward();
+	DirectX::XMFLOAT3 GetCameraForwardDX();
 
 	/** Returns the view matrix */
 	void GetViewMatrix(D3DXMATRIX * view);
+	void GetViewMatrixDX(DirectX::XMFLOAT4X4 * view);
 
 	/** Returns the view matrix */
 	void GetInverseViewMatrix(D3DXMATRIX * invView);
+	void GetInverseViewMatrixDX(DirectX::XMFLOAT4X4 * invView);
 
 	/** Returns the projection-matrix */
 	D3DXMATRIX & GetProjectionMatrix();
@@ -714,6 +725,7 @@ private:
 
 	/** Replacement values for the camera */
 	CameraReplacement * CameraReplacementPtr;
+	CameraReplacementDX * CameraReplacementPtrDX;
 
 	/** List of available GVegetationBoxes */
 	std::list<GVegetationBox *> VegetationBoxes;

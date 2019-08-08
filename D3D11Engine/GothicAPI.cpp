@@ -2126,6 +2126,23 @@ void GothicAPI::GetViewMatrix(D3DXMATRIX * view)
 }
 
 /** Returns the view matrix */
+void GothicAPI::GetViewMatrixDX(DirectX::XMFLOAT4X4 * view)
+{
+	/*if (CameraReplacementPtrDX)
+	{
+		*view = CameraReplacementPtrDX->ViewReplacement;
+		return;
+	}*/
+	// TODO: Switch to pure DirectXMath
+	if (CameraReplacementPtr)
+	{
+		*view = D3DXMatToDX(CameraReplacementPtr->ViewReplacement);
+		return;
+	}
+	*view = zCCamera::GetCamera()->GetTransformDX(zCCamera::ETransformType::TT_VIEW);
+}
+
+/** Returns the view matrix */
 void GothicAPI::GetInverseViewMatrix(D3DXMATRIX * invView)
 {
 	if (CameraReplacementPtr)
@@ -2136,7 +2153,17 @@ void GothicAPI::GetInverseViewMatrix(D3DXMATRIX * invView)
 
 	*invView = zCCamera::GetCamera()->GetTransform(zCCamera::ETransformType::TT_VIEW_INV);
 }
+/** Returns the view matrix */
+void GothicAPI::GetInverseViewMatrixDX(DirectX::XMFLOAT4X4 * invView)
+{
+	if (CameraReplacementPtr)
+	{
+		DirectX::XMStoreFloat4x4(invView, DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&D3DXMatToDX(CameraReplacementPtr->ViewReplacement))));
+		return;
+	}
 
+	*invView = zCCamera::GetCamera()->GetTransformDX(zCCamera::ETransformType::TT_VIEW_INV);
+}
 /** Returns the projection-matrix */
 D3DXMATRIX& GothicAPI::GetProjectionMatrix()
 {
