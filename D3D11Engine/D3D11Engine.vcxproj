@@ -148,6 +148,7 @@
       <DelayLoadDLLs>
       </DelayLoadDLLs>
       <AdditionalLibraryDirectories>$(WindowsSDK_LibraryPath_x86)</AdditionalLibraryDirectories>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <CustomBuildStep>
       <Command>copy "shaders\*.*" "$(G2_SYSTEM_PATH)\GD3D11\shaders\"
