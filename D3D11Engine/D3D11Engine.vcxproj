@@ -88,7 +88,7 @@
     <IncludePath>$(IncludePath);$(DXSDK_DIR)\include;squish-1.11;include;;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include</IncludePath>
     <LibraryPath>$(DXSDK_DIR)\lib\x86;lib;$(LibraryPath);C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86</LibraryPath>
     <TargetName>ddraw</TargetName>
-    <CodeAnalysisRuleSet>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Team Tools\Static Analysis Tools\Rule Sets\NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_G1|Win32'">
