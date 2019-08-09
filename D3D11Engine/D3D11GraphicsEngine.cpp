@@ -25,9 +25,12 @@
 #include "zCTexture.h"
 #include "zCView.h"
 #include "zCVobLight.h"
+#include <wrl\client.h>
 
 #include <D3DX11.h>
 #pragma comment(lib, "dxguid.lib")
+
+namespace wrl = Microsoft::WRL;
 
 const int RES_UPSCALE = 1;
 const INT2 DEFAULT_RESOLUTION = INT2(1920 * RES_UPSCALE, 1080 * RES_UPSCALE);
@@ -478,7 +481,7 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 	}
 
 	// Successfully resized swapchain, re-get buffers
-	Microsoft::WRL::ComPtr<ID3D11Texture2D> backbuffer;
+	wrl::ComPtr<ID3D11Texture2D> backbuffer;
 	SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &backbuffer);
 
 	// Recreate RenderTargetView
@@ -2298,8 +2301,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMeshW(bool noTextures) {
 			(*itr)->WorldMeshes.begin();
 			it != (*itr)->WorldMeshes.end(); ++it) {
 			if (it->first.Material) {
-				std::pair<MaterialInfo*, std::vector<WorldMeshInfo*>>& p =
-					meshesByMaterial[it->first.Material->GetTexture()];
+				auto p = meshesByMaterial[it->first.Material->GetTexture()];
 				p.second.push_back(it->second);
 
 				if (!p.first) {
@@ -2320,54 +2322,50 @@ XRESULT D3D11GraphicsEngine::DrawWorldMeshW(bool noTextures) {
 		Engine::GAPI->GetWrappedWorldMesh()->MeshVertexBuffer,
 		Engine::GAPI->GetWrappedWorldMesh()->MeshIndexBuffer, 0, 0);
 
-	for (std::unordered_map<
-		zCTexture*,
-		std::pair<MaterialInfo*, std::vector<WorldMeshInfo*>>>::iterator
-		it = meshesByMaterial.begin();
-		it != meshesByMaterial.end(); ++it) {
-		if (it->second.second.empty()) continue;
+	for (auto&& textureInfo : meshesByMaterial) {
+		if (textureInfo.second.second.empty()) continue;
 
-		if (!it->first) {
+		if (!textureInfo.first) {
 			DistortionTexture->BindToPixelShader(0);
 		}
 		else {
 			// FrameTextures.insert(it->first);
 
-			MaterialInfo* info = it->second.first;
+			MaterialInfo* info = textureInfo.second.first;
 			if (!info->Constantbuffer) info->UpdateConstantbuffer();
 
 			// Check surface type
 			if (info->MaterialType == MaterialInfo::MT_Water) {
-				FrameWaterSurfaces[it->first] = it->second.second;
-				it->second.second.resize(0);
+				FrameWaterSurfaces[textureInfo.first] = textureInfo.second.second;
+				textureInfo.second.second.resize(0);
 				continue;
 			}
 
 			info->Constantbuffer->BindToPixelShader(2);
 
 			// Bind texture
-			if (it->first->CacheIn(0.6f) == zRES_CACHED_IN)
-				it->first->Bind(0);
+			if (textureInfo.first->CacheIn(0.6f) == zRES_CACHED_IN)
+				textureInfo.first->Bind(0);
 			else
 				continue;
 
 			// Querry the second texture slot to see if there is a normalmap bound
-			ID3D11ShaderResourceView* nrmmap;
-			GetContext()->PSGetShaderResources(1, 1, &nrmmap);
-			if (!nrmmap) {
-				if (ActivePS != defaultPS) {
-					ActivePS = defaultPS;
-					ActivePS->Apply();
+			{
+				wrl::ComPtr<ID3D11ShaderResourceView> nrmmap;
+				GetContext()->PSGetShaderResources(1, 1, &nrmmap);
+				if (!nrmmap) {
+					if (ActivePS != defaultPS) {
+						ActivePS = defaultPS;
+						ActivePS->Apply();
+					}
+				}
+				else {
+					if (ActivePS != nrmPS) {
+						ActivePS = nrmPS;
+						ActivePS->Apply();
+					}
 				}
 			}
-			else {
-				if (ActivePS != nrmPS) {
-					ActivePS = nrmPS;
-					ActivePS->Apply();
-				}
-				nrmmap->Release();
-			}
-
 			// Check for overwrites
 			// TODO: This is slow, sort this!
 			if (!info->VertexShader.empty()) {
@@ -2444,18 +2442,16 @@ XRESULT D3D11GraphicsEngine::DrawWorldMeshW(bool noTextures) {
 		}
 
 		if (ActiveHDS) {
-			for (std::vector<WorldMeshInfo*>::iterator itr =
-				it->second.second.begin();
-				itr != it->second.second.end(); itr++) {
+			for (auto&& itr = textureInfo.second.second.begin();
+				itr != textureInfo.second.second.end(); itr++) {
 				DrawVertexBufferIndexed((*itr)->MeshVertexBuffer,
 					(*itr)->MeshIndexBuffer,
 					(*itr)->Indices.size());
 			}
 		}
 		else {
-			for (std::vector<WorldMeshInfo*>::iterator itr =
-				it->second.second.begin();
-				itr != it->second.second.end(); itr++) {
+			for (auto&& itr = textureInfo.second.second.begin();
+				itr != textureInfo.second.second.end(); itr++) {
 				// Draw from wrapped mesh
 				DrawVertexBufferIndexedUINT(nullptr, nullptr, (*itr)->Indices.size(),
 					(*itr)->BaseIndexLocation);
@@ -2463,10 +2459,10 @@ XRESULT D3D11GraphicsEngine::DrawWorldMeshW(bool noTextures) {
 		}
 
 		Engine::GAPI->GetRendererState()->RendererInfo.WorldMeshDrawCalls +=
-			it->second.second.size();
+			textureInfo.second.second.size();
 
 		// Clear the list, leaving the memory allocated
-		it->second.second.resize(0);
+		textureInfo.second.second.resize(0);
 	}
 
 	if (Engine::GAPI->GetRendererState()->RendererSettings.WireframeWorld) {
@@ -2497,15 +2493,13 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 	GetContext()->PSSetShader(nullptr, nullptr, 0);
 	GetContext()->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
 		DepthStencilBuffer->GetDepthStencilView());
-	for (std::unordered_map<zCTexture*,
-		std::vector<WorldMeshInfo* >>::const_iterator it =
-		FrameWaterSurfaces.begin();
-		it != FrameWaterSurfaces.end(); ++it) {
+	for (auto const& it : FrameWaterSurfaces) {
 		// Draw surfaces
-		for (unsigned int i = 0; i < it->second.size(); i++) {
-			DrawVertexBufferIndexed(it->second[i]->MeshVertexBuffer,
-				it->second[i]->MeshIndexBuffer,
-				it->second[i]->Indices.size());
+		for (auto const& mesh : it.second) {
+			DrawVertexBufferIndexed(
+				mesh->MeshVertexBuffer,
+				mesh->MeshIndexBuffer,
+				mesh->Indices.size());
 		}
 	}
 
@@ -2552,26 +2546,23 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 	// Bind reflection cube
 	GetContext()->PSSetShaderResources(3, 1, ReflectionCube.GetAddressOf());
 
-	for (int i = 0; i < 1;
-		i++)  // Draw twice, but second time only to depth buffer to fix the fog
+	for (int i = 0; i < 1; i++)
+	// Draw twice, but second time only to depth buffer to fix the fog
 	{
-		for (std::unordered_map<zCTexture*,
-			std::vector<WorldMeshInfo* >>::const_iterator it =
-			FrameWaterSurfaces.begin();
-			it != FrameWaterSurfaces.end(); ++it) {
-			if (it->first) {
+		for (auto const& it : FrameWaterSurfaces) {
+			if (it.first) {
 				// Bind diffuse
-				if (it->first->CacheIn(-1) ==
+				if (it.first->CacheIn(-1) ==
 					zRES_CACHED_IN)  // Force immediate cache in, because water is
 									 // important!
-					it->first->Bind(0);
+					it.first->Bind(0);
 			}
-
 			// Draw surfaces
-			for (unsigned int i = 0; i < it->second.size(); i++) {
-				DrawVertexBufferIndexed(it->second[i]->MeshVertexBuffer,
-					it->second[i]->MeshIndexBuffer,
-					it->second[i]->Indices.size());
+			for (auto const& mesh :it.second) {
+				DrawVertexBufferIndexed(
+					mesh->MeshVertexBuffer,
+					mesh->MeshIndexBuffer,
+					mesh->Indices.size());
 			}
 		}
 	}
@@ -2673,21 +2664,19 @@ void D3D11GraphicsEngine::DrawWorldAround(
 		//		 The current solution won't use the cache at all when there are
 		// no vobs near!
 		if (worldMeshCache && renderedVobs && !renderedVobs->empty()) {
-			for (std::map<MeshKey, WorldMeshInfo*>::iterator it =
-				worldMeshCache->begin();
-				it != worldMeshCache->end(); ++it) {
+			for (auto&& meshInfoByKey = worldMeshCache->begin(); meshInfoByKey != worldMeshCache->end(); ++meshInfoByKey) {
 				// Bind texture
-				if (it->first.Material && it->first.Material->GetTexture()) {
+				if (meshInfoByKey->first.Material && meshInfoByKey->first.Material->GetTexture()) {
 					// Check surface type
-					if (it->first.Info->MaterialType == MaterialInfo::MT_Water) {
+					if (meshInfoByKey->first.Info->MaterialType == MaterialInfo::MT_Water) {
 						continue;
 					}
 
-					if (it->first.Material->GetTexture()->HasAlphaChannel() ||
+					if (meshInfoByKey->first.Material->GetTexture()->HasAlphaChannel() ||
 						colorWritesEnabled) {
-						if (alphaRef > 0.0f && it->first.Material->GetTexture()->CacheIn(
+						if (alphaRef > 0.0f && meshInfoByKey->first.Material->GetTexture()->CacheIn(
 							0.6f) == zRES_CACHED_IN) {
-							it->first.Material->GetTexture()->Bind(0);
+							meshInfoByKey->first.Material->GetTexture()->Bind(0);
 							ActivePS->Apply();
 						}
 						else
@@ -2706,23 +2695,22 @@ void D3D11GraphicsEngine::DrawWorldAround(
 				DrawVertexBufferIndexedUINT(
 					Engine::GAPI->GetWrappedWorldMesh()->MeshVertexBuffer,
 					Engine::GAPI->GetWrappedWorldMesh()->MeshIndexBuffer,
-					it->second->Indices.size(), it->second->BaseIndexLocation);
+					meshInfoByKey->second->Indices.size(), meshInfoByKey->second->BaseIndexLocation);
 			}
 
 		}
 		else {
-			for (std::map<int, std::map<int, WorldMeshSectionInfo>>::iterator itx =
-				Engine::GAPI->GetWorldSections().begin();
-				itx != Engine::GAPI->GetWorldSections().end(); itx++) {
-				for (std::map<int, WorldMeshSectionInfo>::iterator ity =
-					(*itx).second.begin();
-					ity != (*itx).second.end(); ity++) {
-					D3DXVECTOR2 a = D3DXVECTOR2(
-						static_cast<float>((*itx).first - s.x),
-						static_cast<float>((*ity).first - s.y)
+			for (auto&& itx : Engine::GAPI->GetWorldSections()) {
+				for (auto&& ity : itx.second) {
+					auto a = DirectX::XMFLOAT2(
+						static_cast<float>(itx.first - s.x),
+						static_cast<float>(ity.first - s.y)
 					);
-					if (D3DXVec2Length(&a) < 2) {
-						WorldMeshSectionInfo& section = (*ity).second;
+					float vLen;
+					DirectX::XMStoreFloat(&vLen, DirectX::XMVector2Length(DirectX::XMLoadFloat2(&a)));
+
+					if (vLen < 2) {
+						WorldMeshSectionInfo& section = ity.second;
 						drawnSections.push_back(&section);
 
 						if (Engine::GAPI->GetRendererState()
@@ -2732,22 +2720,21 @@ void D3D11GraphicsEngine::DrawWorldAround(
 								Engine::GAPI->DrawMeshInfo(nullptr, section.FullStaticMesh);
 						}
 						else {
-							for (std::map<MeshKey, WorldMeshInfo*>::iterator it =
-								section.WorldMeshes.begin();
-								it != section.WorldMeshes.end(); ++it) {
+							for (auto&& meshInfoByKey = section.WorldMeshes.begin(); 
+								meshInfoByKey != section.WorldMeshes.end(); ++meshInfoByKey) {
 								// Check surface type
-								if (it->first.Info->MaterialType == MaterialInfo::MT_Water) {
+								if (meshInfoByKey->first.Info->MaterialType == MaterialInfo::MT_Water) {
 									continue;
 								}
 
 								// Bind texture
-								if (it->first.Material && it->first.Material->GetTexture()) {
-									if (it->first.Material->GetTexture()->HasAlphaChannel() ||
+								if (meshInfoByKey->first.Material && meshInfoByKey->first.Material->GetTexture()) {
+									if (meshInfoByKey->first.Material->GetTexture()->HasAlphaChannel() ||
 										colorWritesEnabled) {
 										if (alphaRef > 0.0f &&
-											it->first.Material->GetTexture()->CacheIn(0.6f) ==
+											meshInfoByKey->first.Material->GetTexture()->CacheIn(0.6f) ==
 											zRES_CACHED_IN) {
-											it->first.Material->GetTexture()->Bind(0);
+											meshInfoByKey->first.Material->GetTexture()->Bind(0);
 											ActivePS->Apply();
 										}
 										else
@@ -2767,7 +2754,7 @@ void D3D11GraphicsEngine::DrawWorldAround(
 								DrawVertexBufferIndexedUINT(
 									Engine::GAPI->GetWrappedWorldMesh()->MeshVertexBuffer,
 									Engine::GAPI->GetWrappedWorldMesh()->MeshIndexBuffer,
-									it->second->Indices.size(), it->second->BaseIndexLocation);
+									meshInfoByKey->second->Indices.size(), meshInfoByKey->second->BaseIndexLocation);
 							}
 						}
 					}
@@ -2813,31 +2800,29 @@ void D3D11GraphicsEngine::DrawWorldAround(
 
 		// At this point eiter renderedVobs or rndVob is filled with something
 		std::list<VobInfo*>& rl = renderedVobs != nullptr ? *renderedVobs : rndVob;
-		for (std::list<VobInfo*>::iterator it = rl.begin(); it != rl.end(); ++it) {
+		for (auto const& vobInfo : rl) {
 			// Bind per-instance buffer
-			((D3D11ConstantBuffer*)(*it)->VobConstantBuffer)->BindToVertexShader(1);
+			((D3D11ConstantBuffer*)vobInfo->VobConstantBuffer)->BindToVertexShader(1);
 
 			// Draw the vob
-			for (std::map<zCMaterial*, std::vector<MeshInfo*>>::iterator itm =
-				(*it)->VisualInfo->Meshes.begin();
-				itm != (*it)->VisualInfo->Meshes.end(); ++itm) {
-				if ((*itm).first && (*itm).first->GetTexture()) {
-					if ((*itm).first->GetAlphaFunc() != zMAT_ALPHA_FUNC_FUNC_NONE ||
-						(*itm).first->GetAlphaFunc() !=
+			for (auto const& materialMesh : vobInfo->VisualInfo->Meshes) {
+				if (materialMesh.first && materialMesh.first->GetTexture()) {
+					if (materialMesh.first->GetAlphaFunc() != zMAT_ALPHA_FUNC_FUNC_NONE ||
+						materialMesh.first->GetAlphaFunc() !=
 						zMAT_ALPHA_FUNC_FUNC_MAT_DEFAULT) {
-						if ((*itm).first->GetTexture()->CacheIn(0.6f) == zRES_CACHED_IN) {
-							(*itm).first->GetTexture()->Bind(0);
+						if (materialMesh.first->GetTexture()->CacheIn(0.6f) == zRES_CACHED_IN) {
+							materialMesh.first->GetTexture()->Bind(0);
 						}
 					}
 					else {
 						DistortionTexture->BindToPixelShader(0);
 					}
 				}
-				for (unsigned int i = 0; i < (*itm).second.size(); i++) {
+				for (auto const& meshInfo : materialMesh.second) {
 					Engine::GraphicsEngine->DrawVertexBufferIndexed(
-						(*itm).second[i]->MeshVertexBuffer,
-						(*itm).second[i]->MeshIndexBuffer,
-						(*itm).second[i]->Indices.size());
+						meshInfo->MeshVertexBuffer,
+						meshInfo->MeshIndexBuffer,
+						meshInfo->Indices.size());
 				}
 			}
 		}
