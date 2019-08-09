@@ -3739,7 +3739,7 @@ XRESULT D3D11GraphicsEngine::DrawSky() {
 	D3DXMATRIX d3dxWorld;
 	DirectX::XMStoreFloat4x4(&(DirectX::XMFLOAT4X4)d3dxWorld, world);
 	Engine::GAPI->SetWorldTransform(d3dxWorld);
-	Engine::GAPI->SetViewTransform((D3DXMATRIX)view);
+	Engine::GAPI->SetViewTransform(DX4x4ToD3DXMat(view));
 
 	if (sky->GetAtmosphereCB().AC_CameraHeight >
 		sky->GetAtmosphereCB().AC_OuterRadius) {
