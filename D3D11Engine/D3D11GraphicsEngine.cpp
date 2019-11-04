@@ -224,7 +224,7 @@ XRESULT D3D11GraphicsEngine::Init() {
 
 	samplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
 	//TODO: NVidia PCSS
-	//samplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
+	// samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
 	samplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
 	GetDevice()->CreateSamplerState(&samplerDesc, &ShadowmapSamplerState);
 	GetContext()->PSSetSamplers(2, 1, ShadowmapSamplerState.GetAddressOf());
@@ -483,7 +483,7 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 	// Successfully resized swapchain, re-get buffers
 	wrl::ComPtr<ID3D11Texture2D> backbuffer;
 	SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &backbuffer);
-
+	
 	// Recreate RenderTargetView
 	LE(GetDevice()->CreateRenderTargetView(backbuffer.Get(), nullptr, &BackbufferRTV));
 	LE(GetDevice()->CreateShaderResourceView(backbuffer.Get(), nullptr, &BackbufferSRV));
@@ -591,11 +591,12 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
 	// Check for shadowmap resize
 	int s = Engine::GAPI->GetRendererState()->RendererSettings.ShadowMapSize;
 	switch (s) {
-		case 0: s = 512; break;
-		case 1: s = 1024; break;
-		case 2: s = 2048; break;
-		case 3: s = 4096; break;
-		case 4: s = 8192; break;
+		case 0:
+		case 1: s = 512; break;
+		case 2: s = 1024; break;
+		case 3: s = 2048; break;
+		case 4: s = 4096; break;
+		case 5: s = 8192; break;
 	}
 
 	if (WorldShadowmap1->GetSizeX() != s) {
@@ -714,7 +715,6 @@ D3D11GraphicsEngine::GetDisplayModeList(std::vector<DisplayModeInfo>* modeList,
 
 	// Get the list
 	hr = output->GetDisplayModeList(format, 0, &numModes, displayModes.get());
-
 	for (unsigned int i = 0; i < numModes; i++) {
 		if (displayModes[i].Format != format) continue;
 
@@ -722,10 +722,10 @@ D3D11GraphicsEngine::GetDisplayModeList(std::vector<DisplayModeInfo>* modeList,
 		info.Height = displayModes[i].Height;
 		info.Width = displayModes[i].Width;
 		info.Bpp = 32;
-
-		if (info.Width > (unsigned long)desktop.right ||
-			info.Height > (unsigned long)desktop.bottom)
-			continue;  // Skip bigger sizes than the desktop rect, because DXGI
+		// TODO: find out what is causing issues, this has issues with exclusive fullscreen
+		//if (info.Width > (unsigned long)desktop.right ||
+		//	info.Height > (unsigned long)desktop.bottom)
+		//	continue;  // Skip bigger sizes than the desktop rect, because DXGI
 					   // doesn't like them apparently
 					   // TODO: Fix this if possible!
 
@@ -735,7 +735,6 @@ D3D11GraphicsEngine::GetDisplayModeList(std::vector<DisplayModeInfo>* modeList,
 
 		modeList->push_back(info);
 	}
-
 	if (includeSuperSampling) {
 		// Put supersampling resolutions in, up to just below 8k
 		int i = 2;
@@ -750,8 +749,6 @@ D3D11GraphicsEngine::GetDisplayModeList(std::vector<DisplayModeInfo>* modeList,
 			i++;
 		}
 	}
-
-	displayModes.reset();
 
 	output->Release();
 
