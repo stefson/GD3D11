@@ -3151,8 +3151,8 @@ void D3D11GraphicsEngine::DrawWorldAround(const D3DXVECTOR3& position,
 						itt.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_ADD;
 					bool blendBlend =
 						itt.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_BLEND;
-					if (!doReset || blendAdd ||
-						blendBlend)  // TODO: FIXME: if one part of the mesh uses blending, all do.
+					// TODO: FIXME: if one part of the mesh uses blending, all do.
+					if (!doReset || blendAdd || blendBlend)
 					{
 						doReset = false;
 						continue;
