@@ -3491,8 +3491,8 @@ XRESULT GothicAPI::SaveMenuSettings(const std::string & file) {
 	WritePrivateProfileStringA("Display", "Width", std::to_string(res.x).c_str(), ini.c_str());
 	WritePrivateProfileStringA("Display", "Height", std::to_string(res.y).c_str(), ini.c_str());
 	WritePrivateProfileStringA("Display", "VSync", std::to_string(s.EnableVSync ? 1 : 0).c_str(), ini.c_str());
-	WritePrivateProfileStringA("Display", "FOVHoriz", std::to_string(s.FOVHoriz).c_str(), ini.c_str());
-	WritePrivateProfileStringA("Display", "FOVVert", std::to_string(s.FOVVert).c_str(), ini.c_str());
+	WritePrivateProfileStringA("Display", "FOVHoriz", std::to_string((int)s.FOVHoriz).c_str(), ini.c_str());
+	WritePrivateProfileStringA("Display", "FOVVert", std::to_string((int)s.FOVVert).c_str(), ini.c_str());
 	WritePrivateProfileStringA("Display", "Gamma", std::to_string(s.GammaValue).c_str(), ini.c_str());
 	WritePrivateProfileStringA("Display", "Brightness", std::to_string(s.BrightnessValue).c_str(), ini.c_str());
 	
