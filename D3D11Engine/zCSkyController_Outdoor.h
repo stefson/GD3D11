@@ -153,7 +153,7 @@ public:
 #ifndef BUILD_GOTHIC_1_08k
 		return *(DirectX::SimpleMath::Vector3 *)THISPTR_OFFSET(GothicMemoryLocations::zCSkyController_Outdoor::Offset_OverrideColor);
 #else
-		return D3DXVECTOR3(0, 0, 0);
+		return DirectX::SimpleMath::Vector3(0, 0, 0);
 #endif
 	}
 

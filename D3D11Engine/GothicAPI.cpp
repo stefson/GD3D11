@@ -634,7 +634,7 @@ void GothicAPI::DrawWorldMeshNaive() {
 	static float setfovH = RendererState.RendererSettings.FOVHoriz;
 	static float setfovV = RendererState.RendererSettings.FOVVert;
 
-	float fovH, fovV;
+	float fovH = 90.0f, fovV = 90.0f;
 	if (zCCamera::GetCamera())
 		zCCamera::GetCamera()->GetFOV(fovH, fovV);
 

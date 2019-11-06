@@ -7,9 +7,6 @@
 #include "zCTimer.h"
 #include "zCPolyStrip.h"
 
-using namespace DirectX;
-using namespace DirectX::SimpleMath;
-
 enum EZParticleAlignment
 {
 	zPARTICLE_ALIGNMENT_VELOCITY = 1,
@@ -146,7 +143,7 @@ public:
 
 	static float SinEase(float value)
 	{
-		return (float)((sin(value * XM_PI - XM_PI / 2.0) + 1.0) / 2.0);
+		return (float)((sin(value * DirectX::XM_PI - DirectX::XM_PI / 2.0) + 1.0) / 2.0);
 	}
 
 	static float SinSmooth(float value)
