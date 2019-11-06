@@ -31,6 +31,8 @@
 #pragma comment(lib, "dxguid.lib")
 
 namespace wrl = Microsoft::WRL;
+using namespace DirectX;
+using namespace DirectX::SimpleMath;
 
 const int RES_UPSCALE = 1;
 const INT2 DEFAULT_RESOLUTION = INT2(1920 * RES_UPSCALE, 1080 * RES_UPSCALE);
@@ -152,7 +154,7 @@ XRESULT D3D11GraphicsEngine::Init() {
 	LogInfo() << "Rendering on: " << deviceDescription.c_str();
 
 	int flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
-
+	
 	D3D_FEATURE_LEVEL featurelevel = D3D_FEATURE_LEVEL_11_0;
 
 	// Create D3D11-Device
@@ -426,13 +428,15 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 
 	if (UIView) UIView->PrepareResize();
 
+	const DXGI_SWAP_CHAIN_FLAG& scflags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+
 	if (!SwapChain) {
 		LogInfo() << "Creating new swapchain! (Format: DXGI_FORMAT_R8G8B8A8_UNORM)";
 
 		DXGI_SWAP_CHAIN_DESC scd;
 		ZeroMemory(&scd, sizeof(DXGI_SWAP_CHAIN_DESC));
 
-		scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+		scd.Flags = scflags;
 		scd.BufferCount = 1;
 		scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_SHADER_INPUT;
@@ -474,7 +478,7 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 		LogInfo() << "Resizing swapchain  (Format: DXGI_FORMAT_R8G8B8A8_UNORM)";
 
 		if (FAILED(SwapChain->ResizeBuffers(0, bbres.x, bbres.y,
-			DXGI_FORMAT_R8G8B8A8_UNORM, 0))) {
+			DXGI_FORMAT_R8G8B8A8_UNORM, scflags))) {
 			LogError() << "Failed to resize swapchain!";
 			return XR_FAILED;
 		}
@@ -2535,7 +2539,7 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 	ricb.RI_Projection = Engine::GAPI->GetProjectionMatrix();
 	ricb.RI_ViewportSize = float2(Resolution.x, Resolution.y);
 	ricb.RI_Time = Engine::GAPI->GetTimeSeconds();
-	ricb.RI_CameraPosition = Engine::GAPI->GetCameraPosition();
+	ricb.RI_CameraPosition = float3(Engine::GAPI->GetCameraPosition());
 
 	ActivePS->GetConstantBuffer()[2]->UpdateBuffer(&ricb);
 	ActivePS->GetConstantBuffer()[2]->BindToPixelShader(2);
@@ -2699,13 +2703,8 @@ void D3D11GraphicsEngine::DrawWorldAround(
 		else {
 			for (auto&& itx : Engine::GAPI->GetWorldSections()) {
 				for (auto&& ity : itx.second) {
-					auto a = DirectX::XMFLOAT2(
-						static_cast<float>(itx.first - s.x),
-						static_cast<float>(ity.first - s.y)
-					);
-					float vLen;
-					DirectX::XMStoreFloat(&vLen, DirectX::XMVector2Length(DirectX::XMLoadFloat2(&a)));
-
+					const auto&& vLen = Vector2(itx.first - s.x, ity.first - s.y).Length();
+					
 					if (vLen < 2) {
 						WorldMeshSectionInfo& section = ity.second;
 						drawnSections.push_back(&section);
@@ -3697,29 +3696,29 @@ XRESULT D3D11GraphicsEngine::DrawSky() {
 		return XR_SUCCESS;
 	}
 	// Create a rotaion only view-matrix
-	DirectX::XMFLOAT4X4 invView;
+	Matrix invView;
 	Engine::GAPI->GetInverseViewMatrixDX(&invView);
 
-	DirectX::XMFLOAT4X4 view;
+	Matrix view;
 	Engine::GAPI->GetViewMatrixDX(&view);
 
-	DirectX::XMMATRIX scale = DirectX::XMMatrixScaling(
+	Matrix scale = XMMatrixScaling(
 		sky->GetAtmoshpereSettings().OuterRadius,
 		sky->GetAtmoshpereSettings().OuterRadius,
 		sky->GetAtmoshpereSettings()
 		.OuterRadius);  // Upscale it a huge amount. Gothics world is big.
 
-	DirectX::XMMATRIX world = DirectX::XMMatrixTranslation(
+	Matrix world = XMMatrixTranslation(
 		Engine::GAPI->GetCameraPosition().x,
 		Engine::GAPI->GetCameraPosition().y +
 		sky->GetAtmoshpereSettings().SphereOffsetY,
 		Engine::GAPI->GetCameraPosition().z);
 
-	world = DirectX::XMMatrixTranspose(scale * world);
+	world = XMMatrixTranspose(scale * world);
 
 	// Apply world matrix
 	D3DXMATRIX d3dxWorld;
-	DirectX::XMStoreFloat4x4(&(DirectX::XMFLOAT4X4)d3dxWorld, world);
+	XMStoreFloat4x4(&(Matrix)d3dxWorld, world);
 	Engine::GAPI->SetWorldTransform(d3dxWorld);
 	Engine::GAPI->SetViewTransform(DX4x4ToD3DXMat(view));
 
@@ -3737,7 +3736,7 @@ XRESULT D3D11GraphicsEngine::DrawSky() {
 	ActivePS->GetConstantBuffer()[0]->BindToPixelShader(1);
 
 	VS_ExConstantBuffer_PerInstance cbi;
-	DirectX::XMStoreFloat4x4(&(DirectX::XMFLOAT4X4)cbi.World, world);
+	XMStoreFloat4x4(&(Matrix)cbi.World, world);
 	ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&cbi);
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
@@ -3845,8 +3844,8 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	auto playerPosition =
 		Engine::GAPI->GetPlayerVob() != nullptr
 		? Engine::GAPI->GetPlayerVob()->GetPositionWorldDX()
-		: DirectX::XMFLOAT3(FLT_MAX, FLT_MAX, FLT_MAX);
-	DirectX::XMVECTOR vPlayerPosition = DirectX::XMLoadFloat3(&playerPosition);
+		: Vector3(FLT_MAX, FLT_MAX, FLT_MAX);
+	XMVECTOR vPlayerPosition = XMLoadFloat3(&playerPosition);
 
 	bool partialShadowUpdate = Engine::GAPI->GetRendererState()->RendererSettings.PartialDynamicShadowUpdates;
 
@@ -3878,7 +3877,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 							// Always render the closest light to the playervob, so the player
 							// doesn't flicker when moving
 							float d;
-							DirectX::XMStoreFloat(&d, DirectX::XMVector3LengthSq(DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&light->Vob->GetPositionWorldDX()), vPlayerPosition)));
+							XMStoreFloat(&d, XMVector3LengthSq(XMVectorSubtract(light->Vob->GetPositionWorldDX(), vPlayerPosition)));
 
 							float range = light->Vob->GetLightRange();
 							if (d < range * range &&
@@ -3894,7 +3893,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 						// Always render the closest light to the playervob, so the player
 						// doesn't flicker when moving
 						float d;
-						DirectX::XMStoreFloat(&d, DirectX::XMVector3LengthSq(DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&light->Vob->GetPositionWorldDX()), vPlayerPosition)));
+						XMStoreFloat(&d, XMVector3LengthSq(XMVectorSubtract(light->Vob->GetPositionWorldDX(), vPlayerPosition)));
 						
 						float range = light->Vob->GetLightRange() * 1.5f;
 
@@ -4134,11 +4133,12 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 		plcb.PL_Color.y *= lightFactor;
 		plcb.PL_Color.z *= lightFactor;
 
+		auto const&& Pl_PositionWorld = plcb.Pl_PositionWorld.toD3DXVECTOR3();
 		// Need that in view space
 		D3DXVec3TransformCoord(plcb.Pl_PositionView.toD3DXVECTOR3(),
-			plcb.Pl_PositionWorld.toD3DXVECTOR3(), &view);
+			Pl_PositionWorld, &view);
 		D3DXVec3TransformCoord(plcb.PL_LightScreenPos.toD3DXVECTOR3(),
-			plcb.Pl_PositionWorld.toD3DXVECTOR3(),
+			Pl_PositionWorld,
 			&Engine::GAPI->GetProjectionMatrix());
 
 		if (dist < plcb.PL_Range) {
@@ -4677,34 +4677,30 @@ XRESULT D3D11GraphicsEngine::DrawOcean(GOcean* ocean) {
 	std::vector<D3DXVECTOR3> patches;
 	ocean->GetPatchLocations(patches);
 
-	DirectX::XMFLOAT4X4 view;
+	Matrix view;
 	Engine::GAPI->GetViewMatrixDX(&view);
-	DirectX::XMMATRIX viewMatrix = DirectX::XMLoadFloat4x4(&view);
+	XMMATRIX viewMatrix = XMLoadFloat4x4(&view);
 
-	viewMatrix = DirectX::XMMatrixTranspose(viewMatrix);
+	viewMatrix = XMMatrixTranspose(viewMatrix);
 
 	for (auto const& patch : patches) {
-		DirectX::XMMATRIX scale, world;
-		scale = DirectX::XMMatrixIdentity();
-		scale = DirectX::XMMatrixScaling(
-			static_cast<float>(OCEAN_PATCH_SIZE),
-			static_cast<float>(OCEAN_PATCH_SIZE),
-			static_cast<float>(OCEAN_PATCH_SIZE));
+		XMMATRIX scale, world;
+		scale = XMMatrixIdentity();
+		scale = XMMatrixScaling(OCEAN_PATCH_SIZE,OCEAN_PATCH_SIZE,OCEAN_PATCH_SIZE);
 
-		world = DirectX::XMMatrixTranslation(patch.x, patch.y, patch.z);
+		world = XMMatrixTranslation(patch.x, patch.y, patch.z);
 		world = scale * world;
-		world = DirectX::XMMatrixTranspose(world);
+		world = XMMatrixTranspose(world);
 		ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&world);
 		ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
-		DirectX::XMVECTOR localEye = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0, 0, 0));
-		world = DirectX::XMMatrixTranspose(world);
+		XMVECTOR localEye = Vector3(0, 0, 0);
+		world = XMMatrixTranspose(world);
 
-		localEye = DirectX::XMVector3TransformCoord(localEye, DirectX::XMMatrixInverse(nullptr, world * viewMatrix));
+		localEye = XMVector3TransformCoord(localEye, XMMatrixInverse(nullptr, world * viewMatrix));
 
 		OceanPerPatchConstantBuffer opp;
-		DirectX::XMFLOAT3 localEye3;
-		DirectX::XMStoreFloat3(&localEye3, localEye);
+		Vector3 localEye3 = localEye;
 		opp.OPP_LocalEye = localEye3;
 		opp.OPP_PatchPosition = patch;
 		ActivePS->GetConstantBuffer()[3]->UpdateBuffer(&opp);

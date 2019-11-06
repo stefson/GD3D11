@@ -4,7 +4,7 @@
 #pragma warning(disable: 4244) // Loss of data during conversion
 #include <Windows.h>
 #include <d3d11.h>
-#include <DirectXMath.h>
+#include <SimpleMath.h>
 #include <future>
 #include <list>
 #include <map>
