@@ -50,30 +50,30 @@ public:
 	XRESULT DrawHBAO(ID3D11RenderTargetView* rtv);
 
 	/** Accessors */
-	RenderToTextureBuffer * GetTempBuffer(){return TempBuffer;}
-	RenderToTextureBuffer * GetTempBufferDS4_1(){return TempBufferDS4_1;}
-	RenderToTextureBuffer * GetTempBufferDS4_2(){return TempBufferDS4_2;}
+	RenderToTextureBuffer * GetTempBuffer() { return TempBuffer.get(); }
+	RenderToTextureBuffer * GetTempBufferDS4_1() { return TempBufferDS4_1.get(); }
+	RenderToTextureBuffer * GetTempBufferDS4_2() { return TempBufferDS4_2.get(); }
 
 private:
 	/** Temporary buffer in the same size/format as the backbuffer */
-	RenderToTextureBuffer * TempBuffer;
+	std::unique_ptr<RenderToTextureBuffer> TempBuffer;
 
 	/** Temporary buffer with the resolution divided by 4 */
-	RenderToTextureBuffer * TempBufferDS4_1;
-	RenderToTextureBuffer * TempBufferDS4_2;
+	std::unique_ptr<RenderToTextureBuffer> TempBufferDS4_1;
+	std::unique_ptr<RenderToTextureBuffer> TempBufferDS4_2;
 
 	/** Blur effect referenced here because it's often needed by PFX */
-	D3D11PFX_Blur* FX_Blur;
-	D3D11PFX_HeightFog* FX_HeightFog;
-	D3D11PFX_DistanceBlur* FX_DistanceBlur;
-	D3D11PFX_HDR* FX_HDR;
-	D3D11PFX_SMAA* FX_SMAA;
-	D3D11PFX_GodRays* FX_GodRays;
+	std::unique_ptr<D3D11PFX_Blur> FX_Blur;
+	std::unique_ptr<D3D11PFX_HeightFog> FX_HeightFog;
+	std::unique_ptr<D3D11PFX_DistanceBlur> FX_DistanceBlur;
+	std::unique_ptr<D3D11PFX_HDR> FX_HDR;
+	std::unique_ptr<D3D11PFX_SMAA> FX_SMAA;
+	std::unique_ptr<D3D11PFX_GodRays> FX_GodRays;
 
 	/** Fullscreen quad */
-	D3D11FullscreenQuad* ScreenQuad;
+	std::unique_ptr<D3D11FullscreenQuad> ScreenQuad;
 
 	/** Nivida HBAO+ */
-	D3D11NVHBAO* NvHBAO;
+	std::unique_ptr<D3D11NVHBAO> NvHBAO;
 };
 
