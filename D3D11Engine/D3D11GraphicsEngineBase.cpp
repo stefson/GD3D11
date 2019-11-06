@@ -597,7 +597,7 @@ XRESULT D3D11GraphicsEngineBase::UpdateRenderStates()
 		FFBlendState = state->State;
 
 		Engine::GAPI->GetRendererState()->BlendState.StateDirty = false;
-		GetContext()->OMSetBlendState(FFBlendState.Get(), (float *)& D3DXVECTOR4(0, 0, 0, 0), 0xFFFFFFFF);
+		GetContext()->OMSetBlendState(FFBlendState.Get(), (float *)&DirectX::SimpleMath::Vector4(0, 0, 0, 0), 0xFFFFFFFF);
 	}
 
 	if (Engine::GAPI->GetRendererState()->RasterizerState.StateDirty)
@@ -671,9 +671,9 @@ void D3D11GraphicsEngineBase::SetupVS_ExMeshDrawCall()
 
 void D3D11GraphicsEngineBase::SetupVS_ExConstantBuffer()
 {
-	const D3DXMATRIX& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
-	const D3DXMATRIX& view  = Engine::GAPI->GetRendererState()->TransformState.TransformView;
-	const D3DXMATRIX& proj  = Engine::GAPI->GetProjectionMatrix();
+	const DirectX::SimpleMath::Matrix& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
+	const DirectX::SimpleMath::Matrix& view  = Engine::GAPI->GetRendererState()->TransformState.TransformView;
+	const DirectX::SimpleMath::Matrix& proj  = Engine::GAPI->GetProjectionMatrix();
 
 	VS_ExConstantBuffer_PerFrame cb;
 	cb.View = view;
@@ -688,7 +688,7 @@ void D3D11GraphicsEngineBase::SetupVS_ExConstantBuffer()
 
 void D3D11GraphicsEngineBase::SetupVS_ExPerInstanceConstantBuffer()
 {
-	D3DXMATRIX& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
+	DirectX::SimpleMath::Matrix& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
 
 	VS_ExConstantBuffer_PerInstance cb;
 	cb.World = world;
@@ -729,7 +729,7 @@ XRESULT D3D11GraphicsEngineBase::SetActiveGShader(const std::string & shader)
 /** Puts the current world matrix into a CB and binds it to the given slot */
 void D3D11GraphicsEngineBase::SetupPerInstanceConstantBuffer(int slot)
 {
-	const D3DXMATRIX& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
+	const DirectX::SimpleMath::Matrix& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
 
 	VS_ExConstantBuffer_PerInstance cb;
 	cb.World = world;
@@ -741,9 +741,9 @@ void D3D11GraphicsEngineBase::SetupPerInstanceConstantBuffer(int slot)
 /** Updates the transformsCB with new values from the GAPI */
 void D3D11GraphicsEngineBase::UpdateTransformsCB()
 {
-	const D3DXMATRIX& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
-	const D3DXMATRIX& view  = Engine::GAPI->GetRendererState()->TransformState.TransformView;
-	const D3DXMATRIX& proj  = Engine::GAPI->GetProjectionMatrix();
+	const DirectX::SimpleMath::Matrix& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
+	const DirectX::SimpleMath::Matrix& view  = Engine::GAPI->GetRendererState()->TransformState.TransformView;
+	const DirectX::SimpleMath::Matrix& proj  = Engine::GAPI->GetProjectionMatrix();
 
 	VS_ExConstantBuffer_PerFrame cb;
 	cb.View = view;

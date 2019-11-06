@@ -39,9 +39,11 @@
 #include "zCSoundSystem.h"
 #include "zCView.h"
 
+using namespace DirectX;
+using namespace DirectX::SimpleMath;
+
 // Duration how long the scene will stay wet, in MS
 const DWORD SCENE_WETNESS_DURATION_MS = 60 * 2 * 1000;
-
 /** Writes this info to a file */
 void MaterialInfo::WriteToFile(const std::string& name)
 {
@@ -164,7 +166,7 @@ void GothicAPI::OnGameStart() {
 	LoadedWorldInfo = std::make_unique<WorldInfo>();
 	LoadedWorldInfo->HighestVertex = 2;
 	LoadedWorldInfo->LowestVertex = 3;
-	LoadedWorldInfo->MidPoint = D3DXVECTOR2(4, 5);
+	LoadedWorldInfo->MidPoint = DirectX::SimpleMath::Vector2(4, 5);
 
 	// Get start directory
 	char dir[MAX_PATH];
@@ -367,9 +369,9 @@ GothicRendererState* GothicAPI::GetRendererState()
 
 
 /** Spawns a vegetationbox at the camera */
-GVegetationBox* GothicAPI::SpawnVegetationBoxAt(const D3DXVECTOR3 & position,
-	const D3DXVECTOR3 & min,
-	const D3DXVECTOR3 & max,
+GVegetationBox* GothicAPI::SpawnVegetationBoxAt(const DirectX::SimpleMath::Vector3 & position,
+	const DirectX::SimpleMath::Vector3 & min,
+	const DirectX::SimpleMath::Vector3 & max,
 	float density,
 	const std::string & restrictByTexture)
 {
@@ -636,10 +638,11 @@ void GothicAPI::DrawWorldMeshNaive() {
 	if (zCCamera::GetCamera())
 		zCCamera::GetCamera()->GetFOV(fovH, fovV);
 
+	// FIXME: FOV is being reset after a dialog!
 	if (zCCamera::GetCamera() && (zCCamera::GetCamera() != CurrentCamera
 		|| setfovH != RendererState.RendererSettings.FOVHoriz
 		|| setfovV != RendererState.RendererSettings.FOVVert
-		|| (fovH == 90.0f && fovV == 90.0f))) // FIXME: This is being reset after a dialog!
+		|| (fovH == 90.0f && fovV == 90.0f)))
 	{
 		setfovH = RendererState.RendererSettings.FOVHoriz;
 		setfovV = RendererState.RendererSettings.FOVVert;
@@ -663,11 +666,11 @@ void GothicAPI::DrawWorldMeshNaive() {
 	}
 
 	// TODO: Get camera position (Make a function for this)
-	D3DXVECTOR3 camPos = GetCameraPosition();
+	DirectX::SimpleMath::Vector3  camPos = GetCameraPosition();
 
 	INT2 camSection = WorldConverter::GetSectionOfPos(camPos);
 
-	D3DXMATRIX view;
+	DirectX::SimpleMath::Matrix view;
 	GetViewMatrix(&view);
 
 	// Clear instances
@@ -685,7 +688,7 @@ void GothicAPI::DrawWorldMeshNaive() {
 
 			const INT2 s = WorldConverter::GetSectionOfPos(vobInfo->Vob->GetPositionWorld());
 
-			float dist = D3DXVec3Length(&(vobInfo->Vob->GetPositionWorld() - camPos));
+			float dist = (vobInfo->Vob->GetPositionWorld() - camPos).Length();
 			if (dist > RendererState.RendererSettings.SkeletalMeshDrawRadius)
 				continue; // Skip out of range
 
@@ -730,7 +733,7 @@ void GothicAPI::DrawWorldMeshNaive() {
 void GothicAPI::DrawParticlesSimple()
 {
 	ParticleFrameData data;
-	
+
 	if (RendererState.RendererSettings.DrawParticleEffects)
 	{
 		std::vector<zCVob*> renderedParticleFXs;
@@ -755,12 +758,13 @@ void GothicAPI::GetVisibleParticleEffectsList(std::vector<zCVob*> & pfxList)
 {
 	if (RendererState.RendererSettings.DrawParticleEffects)
 	{
-		D3DXVECTOR3 camPos = GetCameraPosition();
+		DirectX::XMVECTOR camPos = GetCameraPosition();
 
 		// now it is save to render
 		for (auto const& it : ParticleEffectVobs)
 		{
-			float dist = D3DXVec3Length(&(it->GetPositionWorld() - camPos));
+			float dist;
+			XMStoreFloat(&dist, DirectX::XMVector3Length((DirectX::XMVECTOR)it->GetPositionWorld() - camPos));
 			if (dist > RendererState.RendererSettings.OutdoorSmallVobDrawRadius)
 				continue;
 			if (dist > RendererState.RendererSettings.VisualFXDrawRadius)
@@ -780,11 +784,12 @@ static bool DecalSortcmpFunc(const std::pair<zCVob*, float> & a, const std::pair
 
 /** Gets a list of visible decals */
 void GothicAPI::GetVisibleDecalList(std::vector<zCVob*> & decals) {
-	D3DXVECTOR3 camPos = GetCameraPosition();
+	DirectX::XMVECTOR camPos = GetCameraPosition();
 	static std::vector<std::pair<zCVob*, float>> decalDistances; // Static to get around reallocations
 
 	for (auto const& it : DecalVobs) {
-		float dist = D3DXVec3Length(&(it->GetPositionWorld() - camPos));
+		float dist;
+		XMStoreFloat(&dist, DirectX::XMVector3Length((DirectX::XMVECTOR)it->GetPositionWorld() - camPos));
 		if (dist > RendererState.RendererSettings.VisualFXDrawRadius)
 			continue;
 
@@ -967,7 +972,7 @@ void GothicAPI::DrawMeshInfo(zCMaterial * mat, MeshInfo * msh) {
 }
 
 /** Draws a SkeletalMeshInfo */
-void GothicAPI::DrawSkeletalMeshInfo(zCMaterial * mat, SkeletalMeshInfo * msh, std::vector<D3DXMATRIX> & transforms, float fatness) {
+void GothicAPI::DrawSkeletalMeshInfo(zCMaterial * mat, SkeletalMeshInfo * msh, const std::vector<DirectX::SimpleMath::Matrix> & transforms, float fatness) {
 	// Check for material and bind the texture if it exists
 	if (mat) {
 		if (mat->GetTexture()) {
@@ -1347,7 +1352,7 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 	D3D11GraphicsEngine* g = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
 	g->SetActiveVertexShader("VS_Ex");
 
-	std::vector<D3DXMATRIX> transforms;
+	std::vector<DirectX::SimpleMath::Matrix> transforms;
 	zCModel* model = (zCModel*)vi->Vob->GetVisual();
 	SkeletalMeshVisualInfo* visual = ((SkeletalMeshVisualInfo*)vi->VisualInfo);
 
@@ -1364,17 +1369,18 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 	if (model->GetDrawHandVisualsOnly())
 		return; // Not supported yet
 
-	D3DXMATRIX world;
+	DirectX::SimpleMath::Matrix world;
 	vi->Vob->GetWorldMatrix(&world);
 
-	D3DXMATRIX scale;
-	D3DXVECTOR3 modelScale = model->GetModelScale();
-	D3DXMatrixScaling(&scale, modelScale.x, modelScale.y, modelScale.z);
+	DirectX::XMMATRIX scale;
+	DirectX::SimpleMath::Vector3 modelScale = model->GetModelScale();
+
+	scale = DirectX::XMMatrixScaling(modelScale.x, modelScale.y, modelScale.z);
 	world = world * scale;
 
 	zCCamera::GetCamera()->SetTransform(zCCamera::TT_WORLD, world);
 
-	D3DXMATRIX view;
+	DirectX::SimpleMath::Matrix view;
 	GetViewMatrix(&view);
 	SetWorldViewTransform(world, view);
 
@@ -1389,13 +1395,13 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 
 	std::string visname = model->GetVisualName();
 	std::string vobname = vi->Vob->GetName();
-	D3DXVECTOR3 vobPos = vi->Vob->GetPositionWorld();
+	DirectX::SimpleMath::Vector3 vobPos = vi->Vob->GetPositionWorld();
 	int numSoftSkins = model->GetMeshSoftSkinList()->NumInArray;
 
 	struct fns {
 		// TODO: FIXME
 		// Ugly stuff to get the fucking corrupt visual in returning here
-		static void Draw(SkeletalVobInfo* vi, std::vector<D3DXMATRIX>& transforms, float fatness) {
+		static void Draw(SkeletalVobInfo* vi, std::vector<DirectX::SimpleMath::Matrix>& transforms, float fatness) {
 			for (auto const& itm : dynamic_cast<SkeletalMeshVisualInfo*>(vi->VisualInfo)->SkeletalMeshes) {
 				for (auto& i : itm.second) {
 					Engine::GAPI->DrawSkeletalMeshInfo(itm.first, i, transforms, fatness);
@@ -1403,7 +1409,7 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 			}
 		}
 
-		static bool CatchDraw(SkeletalVobInfo* vi, std::string* visName, std::string* vobName, D3DXVECTOR3* pos, std::vector<D3DXMATRIX>& transforms, float fatness) {
+		static bool CatchDraw(SkeletalVobInfo* vi, std::string* visName, std::string* vobName, DirectX::SimpleMath::Vector3* pos, std::vector<DirectX::SimpleMath::Matrix>& transforms, float fatness) {
 			bool success = true;
 			__try {
 				Draw(vi, transforms, fatness);
@@ -1416,7 +1422,7 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 			return success;
 		}
 
-		static void Except(SkeletalVobInfo* vi, std::string* visName, std::string* vobName, D3DXVECTOR3* pos) {
+		static void Except(SkeletalVobInfo* vi, std::string* visName, std::string* vobName, DirectX::SimpleMath::Vector3* pos) {
 			// TODO: Make static again
 			/*static*/ bool done = false;
 
@@ -1431,7 +1437,7 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 			}
 			// TODO: see if "Faulty Model" happens again
 
-			Engine::GraphicsEngine->GetLineRenderer()->AddPointLocator(*pos, 50.0f, D3DXVECTOR4(1, 0, 0, 1));
+			Engine::GraphicsEngine->GetLineRenderer()->AddPointLocator(*pos, 50.0f, DirectX::SimpleMath::Vector4(1, 0, 0, 1));
 
 			done = true;
 		}
@@ -1528,12 +1534,11 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 					g->SetActivePixelShader("PS_DiffuseAlphaTest");
 
 					if (g->GetRenderingStage() == DES_MAIN) {// Only draw this as a morphmesh when rendering the main scene
-						D3DXMATRIX fatnessScale;
 						const float fs = (fatness + 1.0f) * 0.02f; // This is what gothic seems to be doing for heads, and it even looks right...
 
 						// Calculate "patched" scale according to fatness
-						D3DXMatrixScaling(&fatnessScale, fs, fs, fs);
-						const D3DXMATRIX w = world * scale;
+						const auto fatnessScale = DirectX::XMMatrixScaling(fs, fs, fs);
+						const DirectX::SimpleMath::Matrix w = world * scale;
 
 						// Set new "fat" worldmatrix
 						SetWorldViewTransform(w * transforms[i], view);
@@ -1600,14 +1605,14 @@ void GothicAPI::OnParticleFXDeleted(zCParticleFX * pfx) {
 /** Draws a zCParticleFX */
 void GothicAPI::DrawParticleFX(zCVob * source, zCParticleFX * fx, ParticleFrameData & data) {
 	// Get our view-matrix
-	D3DXMATRIX view;
+	DirectX::SimpleMath::Matrix view;
 	GetViewMatrix(&view);
 
-	D3DXMATRIX world;
+	DirectX::SimpleMath::Matrix world;
 	source->GetWorldMatrix(&world);
 	SetWorldViewTransform(world, view);
 
-	D3DXMATRIX scale;
+	DirectX::SimpleMath::Matrix scale;
 	float effectBrightness = 1.0f;
 
 	// Update effects time
@@ -1616,8 +1621,8 @@ void GothicAPI::DrawParticleFX(zCVob * source, zCParticleFX * fx, ParticleFrameD
 	// Maybe create more emitters?
 	fx->CheckDependentEmitter();
 
-	D3DXMATRIX sw; source->GetWorldMatrix(&sw);
-	D3DXMatrixTranspose(&sw, &sw);
+	DirectX::SimpleMath::Matrix sw; source->GetWorldMatrix(&sw);
+	sw = sw.Transpose();
 
 	zTParticle* pfx = fx->GetFirstParticle();
 	if (pfx) {
@@ -1692,7 +1697,7 @@ void GothicAPI::DrawParticleFX(zCVob * source, zCParticleFX * fx, ParticleFrameD
 
 			// Generate instance info
 			ParticleInstanceInfo ii;
-			ii.scale = D3DXVECTOR2(p->Size.x, p->Size.y);
+			ii.scale = Vector2(p->Size.x, p->Size.y);
 			ii.drawMode = 0;
 
 			// Construct world matrix
@@ -1702,10 +1707,8 @@ void GothicAPI::DrawParticleFX(zCVob * source, zCParticleFX * fx, ParticleFrameD
 			}
 			else if (alignment == zPARTICLE_ALIGNMENT_VELOCITY || alignment == zPARTICLE_ALIGNMENT_VELOCITY_3D) {
 				// Rotate velocity so it fits with the vob
-				D3DXVECTOR3 velNrm;
-				D3DXVec3Normalize(&velNrm, &p->Vel);
-
-				D3DXVec3TransformNormal(&velNrm, &velNrm, &sw);
+				DirectX::SimpleMath::Vector3 velNrm = DirectX::XMVector3Normalize(p->Vel);
+				velNrm = velNrm.TransformNormal(velNrm, sw);
 
 				ii.velocity = velNrm;
 
@@ -1785,48 +1788,48 @@ void GothicAPI::DrawTriangle()
 }
 
 /** Sets the world matrix */
-void GothicAPI::SetWorldTransform(const D3DXMATRIX & world)
+void GothicAPI::SetWorldTransform(const DirectX::SimpleMath::Matrix & world)
 {
 	RendererState.TransformState.TransformWorld = world;
 }
 /** Sets the world matrix */
-void GothicAPI::SetViewTransform(const D3DXMATRIX & view)
+void GothicAPI::SetViewTransform(const DirectX::SimpleMath::Matrix & view)
 {
 	RendererState.TransformState.TransformView = view;
 }
 
 /** Sets the Projection matrix */
-void GothicAPI::SetProjTransform(const D3DXMATRIX & proj)
+void GothicAPI::SetProjTransform(const DirectX::SimpleMath::Matrix & proj)
 {
 	RendererState.TransformState.TransformProj = proj;
 }
 
 /** Sets the Projection matrix */
-D3DXMATRIX GothicAPI::GetProjTransform()
+DirectX::SimpleMath::Matrix GothicAPI::GetProjTransform()
 {
 	return RendererState.TransformState.TransformProj;
 }
 
 /** Sets the world matrix */
-void GothicAPI::SetWorldTransform(const D3DXMATRIX & world, bool transpose)
+void GothicAPI::SetWorldTransform(const DirectX::SimpleMath::Matrix & world, bool transpose)
 {
 	if (transpose)
-		D3DXMatrixTranspose(&RendererState.TransformState.TransformWorld, &world);
+		RendererState.TransformState.TransformWorld = world.Transpose();
 	else
 		RendererState.TransformState.TransformWorld = world;
 }
 
 /** Sets the world matrix */
-void GothicAPI::SetViewTransform(const D3DXMATRIX & view, bool transpose)
+void GothicAPI::SetViewTransform(const DirectX::SimpleMath::Matrix & view, bool transpose)
 {
 	if (transpose)
-		D3DXMatrixTranspose(&RendererState.TransformState.TransformView, &view);
+		RendererState.TransformState.TransformView = view.Transpose();
 	else
 		RendererState.TransformState.TransformView = view;
 }
 
 /** Sets the world matrix */
-void GothicAPI::SetWorldViewTransform(const D3DXMATRIX & world, const D3DXMATRIX & view)
+void GothicAPI::SetWorldViewTransform(const DirectX::SimpleMath::Matrix & world, const DirectX::SimpleMath::Matrix & view)
 {
 	RendererState.TransformState.TransformWorld = world;
 	RendererState.TransformState.TransformView = view;
@@ -1835,15 +1838,15 @@ void GothicAPI::SetWorldViewTransform(const D3DXMATRIX & world, const D3DXMATRIX
 /** Sets the world matrix */
 void GothicAPI::ResetWorldTransform()
 {
-	D3DXMatrixIdentity(&RendererState.TransformState.TransformWorld);
-	D3DXMatrixTranspose(&RendererState.TransformState.TransformWorld, &RendererState.TransformState.TransformWorld);
+	RendererState.TransformState.TransformWorld = RendererState.TransformState.TransformWorld.Identity;
+	RendererState.TransformState.TransformWorld = RendererState.TransformState.TransformWorld.Transpose();
 }
 
 /** Sets the world matrix */
 void GothicAPI::ResetViewTransform()
 {
-	D3DXMatrixIdentity(&RendererState.TransformState.TransformView);
-	D3DXMatrixTranspose(&RendererState.TransformState.TransformView, &RendererState.TransformState.TransformView);
+	RendererState.TransformState.TransformView = RendererState.TransformState.TransformView.Identity;
+	RendererState.TransformState.TransformView = RendererState.TransformState.TransformView.Transpose();
 }
 
 /** Returns the wrapped world mesh */
@@ -1864,7 +1867,7 @@ static bool TraceWorldMeshBoxCmp(const std::pair<WorldMeshSectionInfo*, float> &
 }
 
 /** Traces vobs with static mesh visual */
-VobInfo* GothicAPI::TraceStaticMeshVobsBB(const D3DXVECTOR3 & origin, const D3DXVECTOR3 & dir, D3DXVECTOR3 & hit, zCMaterial * *hitMaterial)
+VobInfo* GothicAPI::TraceStaticMeshVobsBB(const DirectX::SimpleMath::Vector3 & origin, const DirectX::SimpleMath::Vector3 & dir, DirectX::SimpleMath::Vector3 & hit, zCMaterial * *hitMaterial)
 {
 	float closest = FLT_MAX;
 
@@ -1872,10 +1875,10 @@ VobInfo* GothicAPI::TraceStaticMeshVobsBB(const D3DXVECTOR3 & origin, const D3DX
 
 	for (auto it = VobMap.begin(); it != VobMap.end(); ++it)
 	{
-		D3DXMATRIX world; D3DXMatrixTranspose(&world, it->first->GetWorldMatrixPtr());
+		DirectX::XMMATRIX world = it->first->GetWorldMatrixPtr()->Transpose();
 
-		D3DXVECTOR3 min; D3DXVec3TransformCoord(&min, &it->second->VisualInfo->BBox.Min, &world);
-		D3DXVECTOR3 max; D3DXVec3TransformCoord(&max, &it->second->VisualInfo->BBox.Max, &world);
+		DirectX::SimpleMath::Vector3 min = DirectX::XMVector3TransformCoord(it->second->VisualInfo->BBox.Min, world);
+		DirectX::SimpleMath::Vector3 max = DirectX::XMVector3TransformCoord(it->second->VisualInfo->BBox.Max, world);
 
 		float t = 0;
 		if (Toolbox::IntersectBox(min, max, origin, dir, t))
@@ -1895,10 +1898,10 @@ VobInfo* GothicAPI::TraceStaticMeshVobsBB(const D3DXVECTOR3 & origin, const D3DX
 	VobInfo* closestVob = nullptr;
 	for (auto it = hitBBs.begin(); it != hitBBs.end(); ++it)
 	{
-		D3DXMATRIX invWorld; D3DXMatrixTranspose(&invWorld, (*it)->Vob->GetWorldMatrixPtr());
-		D3DXMatrixInverse(&invWorld, nullptr, &invWorld);
-		D3DXVECTOR3 localOrigin; D3DXVec3TransformCoord(&localOrigin, &origin, &invWorld);
-		D3DXVECTOR3 localDir; D3DXVec3TransformNormal(&localDir, &dir, &invWorld);
+		DirectX::XMMATRIX invWorld = (*it)->Vob->GetWorldMatrixPtr()->Transpose().Invert();
+
+		DirectX::SimpleMath::Vector3 localOrigin = DirectX::XMVector3TransformCoord(origin, invWorld);
+		DirectX::SimpleMath::Vector3 localDir = DirectX::XMVector3TransformCoord(dir, invWorld);
 
 		zCMaterial* hitMat = nullptr;
 		float t = TraceVisualInfo(localOrigin, localDir, (*it)->VisualInfo, &hitMat);
@@ -1914,14 +1917,14 @@ VobInfo* GothicAPI::TraceStaticMeshVobsBB(const D3DXVECTOR3 & origin, const D3DX
 		return nullptr;
 
 	if (hitMaterial)
-		* hitMaterial = closestMaterial;
+		*hitMaterial = closestMaterial;
 
 	hit = origin + dir * closest;
 
 	return closestVob;
 }
 
-SkeletalVobInfo* GothicAPI::TraceSkeletalMeshVobsBB(const D3DXVECTOR3 & origin, const D3DXVECTOR3 & dir, D3DXVECTOR3 & hit)
+SkeletalVobInfo* GothicAPI::TraceSkeletalMeshVobsBB(const DirectX::SimpleMath::Vector3 & origin, const DirectX::SimpleMath::Vector3 & dir, DirectX::SimpleMath::Vector3 & hit)
 {
 	float closest = FLT_MAX;
 	SkeletalVobInfo* vob = nullptr;
@@ -1948,7 +1951,7 @@ SkeletalVobInfo* GothicAPI::TraceSkeletalMeshVobsBB(const D3DXVECTOR3 & origin, 
 	return vob;
 }
 
-float GothicAPI::TraceVisualInfo(const D3DXVECTOR3 & origin, const D3DXVECTOR3 & dir, BaseVisualInfo * visual, zCMaterial * *hitMaterial)
+float GothicAPI::TraceVisualInfo(const DirectX::SimpleMath::Vector3 & origin, const DirectX::SimpleMath::Vector3 & dir, BaseVisualInfo * visual, zCMaterial * *hitMaterial)
 {
 	float u, v, t;
 	float closest = FLT_MAX;
@@ -1961,9 +1964,9 @@ float GothicAPI::TraceVisualInfo(const D3DXVECTOR3 & origin, const D3DXVECTOR3 &
 
 			for (unsigned int i = 0; i < mesh->Indices.size(); i += 3)
 			{
-				if (Toolbox::IntersectTri(*mesh->Vertices[mesh->Indices[i]].Position.toD3DXVECTOR3(),
-					*mesh->Vertices[mesh->Indices[i + 1]].Position.toD3DXVECTOR3(),
-					*mesh->Vertices[mesh->Indices[i + 2]].Position.toD3DXVECTOR3(),
+				if (Toolbox::IntersectTri(*mesh->Vertices[mesh->Indices[i]].Position.toVector3(),
+					*mesh->Vertices[mesh->Indices[i + 1]].Position.toVector3(),
+					*mesh->Vertices[mesh->Indices[i + 2]].Position.toVector3(),
 					origin, dir, u, v, t))
 				{
 					if (t > 0 && t < closest)
@@ -1971,7 +1974,7 @@ float GothicAPI::TraceVisualInfo(const D3DXVECTOR3 & origin, const D3DXVECTOR3 &
 						closest = t;
 
 						if (hitMaterial)
-							* hitMaterial = it.first;
+							*hitMaterial = it.first;
 					}
 				}
 			}
@@ -1982,7 +1985,7 @@ float GothicAPI::TraceVisualInfo(const D3DXVECTOR3 & origin, const D3DXVECTOR3 &
 }
 
 /** Traces the worldmesh and returns the hit-location */
-bool GothicAPI::TraceWorldMesh(const D3DXVECTOR3 & origin, const D3DXVECTOR3 & dir, D3DXVECTOR3 & hit, std::string * hitTextureName, D3DXVECTOR3 * hitTriangle, MeshInfo * *hitMesh, zCMaterial * *hitMaterial)
+bool GothicAPI::TraceWorldMesh(const DirectX::SimpleMath::Vector3 & origin, const DirectX::SimpleMath::Vector3 & dir, DirectX::SimpleMath::Vector3 & hit, std::string * hitTextureName, DirectX::SimpleMath::Vector3 * hitTriangle, MeshInfo * *hitMesh, zCMaterial * *hitMaterial)
 {
 	const int maxSections = 2;
 	float closest = FLT_MAX;
@@ -2018,9 +2021,9 @@ bool GothicAPI::TraceWorldMesh(const D3DXVECTOR3 & origin, const D3DXVECTOR3 & d
 
 			for (unsigned int i = 0; i < it->second->Indices.size(); i += 3)
 			{
-				if (Toolbox::IntersectTri(*it->second->Vertices[it->second->Indices[i]].Position.toD3DXVECTOR3(),
-					*it->second->Vertices[it->second->Indices[i + 1]].Position.toD3DXVECTOR3(),
-					*it->second->Vertices[it->second->Indices[i + 2]].Position.toD3DXVECTOR3(),
+				if (Toolbox::IntersectTri(*it->second->Vertices[it->second->Indices[i]].Position.toVector3(),
+					*it->second->Vertices[it->second->Indices[i + 1]].Position.toVector3(),
+					*it->second->Vertices[it->second->Indices[i + 2]].Position.toVector3(),
 					origin, dir, u, v, t))
 				{
 					if (t > 0 && t < closest)
@@ -2029,9 +2032,9 @@ bool GothicAPI::TraceWorldMesh(const D3DXVECTOR3 & origin, const D3DXVECTOR3 & d
 
 						if (hitTriangle)
 						{
-							hitTriangle[0] = *it->second->Vertices[it->second->Indices[i]].Position.toD3DXVECTOR3();
-							hitTriangle[1] = *it->second->Vertices[it->second->Indices[i + 1]].Position.toD3DXVECTOR3();
-							hitTriangle[2] = *it->second->Vertices[it->second->Indices[i + 2]].Position.toD3DXVECTOR3();
+							hitTriangle[0] = *it->second->Vertices[it->second->Indices[i]].Position.toVector3();
+							hitTriangle[1] = *it->second->Vertices[it->second->Indices[i + 1]].Position.toVector3();
+							hitTriangle[2] = *it->second->Vertices[it->second->Indices[i + 2]].Position.toVector3();
 						}
 
 						if (hitMesh)
@@ -2045,7 +2048,7 @@ bool GothicAPI::TraceWorldMesh(const D3DXVECTOR3 & origin, const D3DXVECTOR3 & d
 						}
 
 						if (hitTextureName && it->first.Material && it->first.Material->GetTexture())
-							* hitTextureName = it->first.Material->GetTexture()->GetNameWithoutExt();
+							*hitTextureName = it->first.Material->GetTexture()->GetNameWithoutExt();
 					}
 				}
 			}
@@ -2065,13 +2068,14 @@ bool GothicAPI::TraceWorldMesh(const D3DXVECTOR3 & origin, const D3DXVECTOR3 & d
 }
 
 /** Unprojects a pixel-position on the screen */
-void GothicAPI::Unproject(const D3DXVECTOR3 & p, D3DXVECTOR3 * worldPos, D3DXVECTOR3 * worldDir)
+void GothicAPI::Unproject(const DirectX::SimpleMath::Vector3  & p, DirectX::SimpleMath::Vector3  * worldPos, DirectX::SimpleMath::Vector3  * worldDir)
 {
-	D3DXVECTOR3 u;
-	D3DXMATRIX proj = GetProjectionMatrix();
-	D3DXMATRIX invView; GetInverseViewMatrix(&invView);
-	D3DXMatrixTranspose(&invView, &invView);
-	D3DXMatrixTranspose(&proj, &proj);
+	DirectX::SimpleMath::Vector3  u;
+	DirectX::SimpleMath::Matrix proj = GetProjectionMatrix();
+	DirectX::SimpleMath::Matrix invView; GetInverseViewMatrix(&invView);
+
+	invView = invView.Transpose();
+	proj = proj.Transpose();
 
 	// Convert to screenspace
 	u.x = (((2 * p.x) / Engine::GraphicsEngine->GetResolution().x) - 1) / proj(0, 0);
@@ -2079,54 +2083,43 @@ void GothicAPI::Unproject(const D3DXVECTOR3 & p, D3DXVECTOR3 * worldPos, D3DXVEC
 	u.z = 1;
 
 	// Transform and output
-	D3DXVec3TransformCoord(worldPos, &u, &invView);
-	D3DXVec3Normalize(&u, &u);
-	D3DXVec3TransformNormal(worldDir, &u, &invView);
+	*worldPos = DirectX::XMVector3TransformCoord(u, invView);
+	u.Normalize();
+	*worldDir = DirectX::XMVector3TransformNormal(u, invView);
 }
 
 /** Unprojects the current cursor */
-D3DXVECTOR3 GothicAPI::UnprojectCursor()
+DirectX::SimpleMath::Vector3 GothicAPI::UnprojectCursor()
 {
-	D3DXVECTOR3 mPos, mDir;
+	DirectX::SimpleMath::Vector3 mPos, mDir;
 	POINT p = GetCursorPosition();
 
-	Engine::GAPI->Unproject(D3DXVECTOR3((float)p.x, (float)p.y, 0), &mPos, &mDir);
+	Engine::GAPI->Unproject(DirectX::SimpleMath::Vector3((float)p.x, (float)p.y, 0), &mPos, &mDir);
 
 	return mDir;
 }
 
 /** Returns the current cameraposition */
-D3DXVECTOR3 GothicAPI::GetCameraPosition()
+DirectX::SimpleMath::Vector3  GothicAPI::GetCameraPosition()
 {
 	if (!oCGame::GetGame()->_zCSession_camVob)
-		return D3DXVECTOR3(0, 0, 0);
+		return DirectX::SimpleMath::Vector3::Zero;
 
 	if (CameraReplacementPtr)
 		return CameraReplacementPtr->PositionReplacement;
 
 	return oCGame::GetGame()->_zCSession_camVob->GetPositionWorld();
 }
-/** Returns the current cameraposition */
-DirectX::XMFLOAT3 GothicAPI::GetCameraPositionDX()
-{
-	if (!oCGame::GetGame()->_zCSession_camVob)
-		return DirectX::XMFLOAT3(0, 0, 0);
 
-	if (CameraReplacementPtr)
-		return (DirectX::XMFLOAT3)CameraReplacementPtr->PositionReplacement;
-
-	return oCGame::GetGame()->_zCSession_camVob->GetPositionWorldDX();
-}
 /** Returns the current forward vector of the camera */
-D3DXVECTOR3 GothicAPI::GetCameraForward()
+DirectX::SimpleMath::Vector3  GothicAPI::GetCameraForward()
 {
-	D3DXVECTOR3 fwd = D3DXVECTOR3(1, 0, 0);
-	D3DXVec3TransformNormal(&fwd, &fwd, oCGame::GetGame()->_zCSession_camVob->GetWorldMatrixPtr());
+	DirectX::SimpleMath::Vector3  fwd = DirectX::SimpleMath::Vector3::TransformNormal(fwd, *oCGame::GetGame()->_zCSession_camVob->GetWorldMatrixPtr());
 	return fwd;
 }
 
 /** Returns the view matrix */
-void GothicAPI::GetViewMatrix(D3DXMATRIX * view)
+void GothicAPI::GetViewMatrix(DirectX::SimpleMath::Matrix * view)
 {
 	if (CameraReplacementPtr)
 	{
@@ -2138,46 +2131,19 @@ void GothicAPI::GetViewMatrix(D3DXMATRIX * view)
 }
 
 /** Returns the view matrix */
-void GothicAPI::GetViewMatrixDX(DirectX::XMFLOAT4X4 * view)
-{
-	/*if (CameraReplacementPtrDX)
-	{
-		*view = CameraReplacementPtrDX->ViewReplacement;
-		return;
-	}*/
-	// TODO: Switch to pure DirectXMath
-	if (CameraReplacementPtr)
-	{
-		*view = (DirectX::XMFLOAT4X4)CameraReplacementPtr->ViewReplacement;
-		return;
-	}
-	*view = zCCamera::GetCamera()->GetTransformDX(zCCamera::ETransformType::TT_VIEW);
-}
-
-/** Returns the view matrix */
-void GothicAPI::GetInverseViewMatrix(D3DXMATRIX * invView)
+void GothicAPI::GetInverseViewMatrix(DirectX::SimpleMath::Matrix * invView)
 {
 	if (CameraReplacementPtr)
 	{
-		D3DXMatrixInverse(invView, nullptr, &CameraReplacementPtr->ViewReplacement);
+		*invView = CameraReplacementPtr->ViewReplacement.Invert();
 		return;
 	}
 
 	*invView = zCCamera::GetCamera()->GetTransform(zCCamera::ETransformType::TT_VIEW_INV);
 }
-/** Returns the view matrix */
-void GothicAPI::GetInverseViewMatrixDX(DirectX::XMFLOAT4X4 * invView)
-{
-	if (CameraReplacementPtr)
-	{
-		DirectX::XMStoreFloat4x4(invView, DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&((DirectX::XMFLOAT4X4)CameraReplacementPtr->ViewReplacement))));
-		return;
-	}
 
-	*invView = zCCamera::GetCamera()->GetTransformDX(zCCamera::ETransformType::TT_VIEW_INV);
-}
 /** Returns the projection-matrix */
-D3DXMATRIX& GothicAPI::GetProjectionMatrix()
+DirectX::SimpleMath::Matrix& GothicAPI::GetProjectionMatrix()
 {
 	if (CameraReplacementPtr)
 	{
@@ -2200,28 +2166,28 @@ GInventory* GothicAPI::GetInventory()
 }
 
 /** Returns the fog-color */
-D3DXVECTOR3 GothicAPI::GetFogColor()
+DirectX::SimpleMath::Vector3 GothicAPI::GetFogColor()
 {
 	zCSkyController_Outdoor* sc = oCGame::GetGame()->_zCSession_world->GetSkyControllerOutdoor();
 
 	// Only give the overridden color out if the flag is set
 	if (!sc || !sc->GetOverrideFlag())
-		return *RendererState.RendererSettings.FogColorMod.toD3DXVECTOR3();
+		return *RendererState.RendererSettings.FogColorMod.toVector3();
 
-	D3DXVECTOR3 color = sc->GetOverrideColor();
+	DirectX::SimpleMath::Vector3 color = sc->GetOverrideColor();
 
 	// Clamp to length of 0.5f. Gothic does it at an intensity of 120 / 255.
-	float len = D3DXVec3Length(&color);
+	float len = color.Length();
 	if (len > 0.5f)
 	{
-		D3DXVec3Normalize(&color, &color);
+		color.Normalize();
 
 		color *= 0.5f;
 		len = 0.5f;
 	}
 
 	// Mix these, so the fog won't get black at transitions
-	D3DXVec3Lerp(&color, RendererState.RendererSettings.FogColorMod.toD3DXVECTOR3(), &color, len * 2.0f);
+	color = DirectX::SimpleMath::Vector3::Lerp(*RendererState.RendererSettings.FogColorMod.toVector3(), color, len * 2.0f);
 
 	return color;
 }
@@ -2244,7 +2210,7 @@ float GothicAPI::GetFogOverride()
 	if (!sc)
 		return 0.0f;
 
-	return sc->GetOverrideFlag() ? std::min(D3DXVec3Length(&sc->GetOverrideColor()), 0.5f) * 2.0f : 0.0f;
+	return sc->GetOverrideFlag() ? std::min(sc->GetOverrideColor().Length(), 0.5f) * 2.0f : 0.0f;
 }
 
 /** Draws the inventory */
@@ -2319,7 +2285,7 @@ LRESULT GothicAPI::OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 						}
 					}
 					break;
-			}
+					}
 			break;
 
 #ifdef BUILD_SPACER
@@ -2328,7 +2294,7 @@ LRESULT GothicAPI::OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 			Engine::GraphicsEngine->SetWindow(hWnd);
 			break;
 #endif
-	}
+			}
 
 	// This is only processed when the bar is activated, so just call this here
 	Engine::AntTweakBar->OnWindowMessage(hWnd, msg, wParam, lParam);
@@ -2344,7 +2310,7 @@ LRESULT GothicAPI::OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 	}
 	else
 		return 0;
-}
+	}
 
 /** Recursive helper function to draw the BSP-Tree */
 void GothicAPI::DebugDrawTreeNode(zCBspBase * base, zTBBox3D boxCell, int clipFlags)
@@ -2392,15 +2358,15 @@ void GothicAPI::DebugDrawTreeNode(zCBspBase * base, zTBBox3D boxCell, int clipFl
 			boxCell.Max.y = node->BBox3D.Min.y;
 
 			zTBBox3D tmpbox = boxCell;
-			if (D3DXVec3Dot(&node->Plane.Normal, &GetCameraPosition()) > node->Plane.Distance)
+			if (node->Plane.Normal.Dot(GetCameraPosition()) > node->Plane.Distance)
 			{
 				if (node->Front)
 				{
-					((float*)& tmpbox.Min)[planeAxis] = node->Plane.Distance;
+					((float*)&tmpbox.Min)[planeAxis] = node->Plane.Distance;
 					DebugDrawTreeNode(node->Front, tmpbox, clipFlags);
 				}
 
-				((float*)& boxCell.Max)[planeAxis] = node->Plane.Distance;
+				((float*)&boxCell.Max)[planeAxis] = node->Plane.Distance;
 				base = node->Back;
 
 			}
@@ -2408,11 +2374,11 @@ void GothicAPI::DebugDrawTreeNode(zCBspBase * base, zTBBox3D boxCell, int clipFl
 			{
 				if (node->Back)
 				{
-					((float*)& tmpbox.Max)[planeAxis] = node->Plane.Distance;
+					((float*)&tmpbox.Max)[planeAxis] = node->Plane.Distance;
 					DebugDrawTreeNode(node->Back, tmpbox, clipFlags);
 				}
 
-				((float*)& boxCell.Min)[planeAxis] = node->Plane.Distance;
+				((float*)&boxCell.Min)[planeAxis] = node->Plane.Distance;
 				base = node->Front;
 			}
 		}
@@ -2443,7 +2409,7 @@ void GothicAPI::CollectVisibleVobs(std::vector<VobInfo*> & vobs, std::vector<Vob
 	// Recursively go through the tree and draw all nodes
 	CollectVisibleVobsHelper(root, root->OriginalNode->BBox3D, 63, vobs, lights, mobs);
 
-	const D3DXVECTOR3 camPos = GetCameraPosition();
+	const DirectX::SimpleMath::Vector3 camPos = GetCameraPosition();
 	const float vobIndoorDist = Engine::GAPI->GetRendererState()->RendererSettings.IndoorVobDrawRadius;
 	const float vobOutdoorDist = Engine::GAPI->GetRendererState()->RendererSettings.OutdoorVobDrawRadius;
 	const float vobOutdoorSmallDist = Engine::GAPI->GetRendererState()->RendererSettings.OutdoorSmallVobDrawRadius;
@@ -2456,7 +2422,7 @@ void GothicAPI::CollectVisibleVobs(std::vector<VobInfo*> & vobs, std::vector<Vob
 		auto const& dynAllocatedVobs = DynamicallyAddedVobs;
 		for (auto const& it : dynAllocatedVobs) {
 			// Get distance to this vob
-			const float dist = D3DXVec3Length(&(camPos - it->Vob->GetPositionWorld()));
+			const float dist = (camPos - it->Vob->GetPositionWorld()).Length();
 
 			// Draw, if in range
 			if (it->VisualInfo && ((dist < vobIndoorDist && it->IsIndoorVob) || (dist < vobOutdoorSmallDist && it->VisualInfo->MeshSize < vobSmallSize) || (dist < vobOutdoorDist))) {
@@ -2465,7 +2431,7 @@ void GothicAPI::CollectVisibleVobs(std::vector<VobInfo*> & vobs, std::vector<Vob
 				if (!(*it)->VobConstantBuffer) {
 					removeList.push_back((*it));
 					continue;
-				}
+		}
 #endif
 				if (!it->Vob->GetShowVisual()) {
 					continue;
@@ -2479,9 +2445,9 @@ void GothicAPI::CollectVisibleVobs(std::vector<VobInfo*> & vobs, std::vector<Vob
 
 				vobs.push_back(it);
 				it->VisibleInRenderPass = true;
-			}
-		}
 	}
+}
+}
 
 #ifdef BUILD_GOTHIC_1_08k
 	// FIXME: See above for info on this
@@ -2494,7 +2460,7 @@ void GothicAPI::CollectVisibleVobs(std::vector<VobInfo*> & vobs, std::vector<Vob
 
 /** Collects visible sections from the current camera perspective */
 void GothicAPI::CollectVisibleSections(std::list<WorldMeshSectionInfo*> & sections) {
-	const D3DXVECTOR3 camPos = Engine::GAPI->GetCameraPosition();
+	const DirectX::SimpleMath::Vector3 camPos = Engine::GAPI->GetCameraPosition();
 	const INT2 camSection = WorldConverter::GetSectionOfPos(camPos);
 
 	// run through every section and check for range and frustum
@@ -2622,7 +2588,7 @@ static void CVVH_AddNotDrawnVobToList(std::vector<VobInfo*> & target, std::vecto
 	{
 		if (!it->VisibleInRenderPass)
 		{
-			float vd = D3DXVec3Length(&(Engine::GAPI->GetCameraPosition() - it->LastRenderPosition));
+			float vd = (Engine::GAPI->GetCameraPosition() - it->LastRenderPosition).Length();
 			if (vd < dist && it->Vob->GetShowVisual())
 			{
 				VobInstanceInfo vii;
@@ -2644,7 +2610,7 @@ static void CVVH_AddNotDrawnVobToList(std::vector<VobLightInfo*> & target, std::
 		if (!it->VisibleInRenderPass)
 		{
 			float d = dist;
-			if (D3DXVec3Length(&(Engine::GAPI->GetCameraPosition() - it->Vob->GetPositionWorld())) - it->Vob->GetLightRange() < d)
+			if ((Engine::GAPI->GetCameraPosition() - it->Vob->GetPositionWorld()).Length() - it->Vob->GetLightRange() < d)
 			{
 				target.push_back(it);
 				it->VisibleInRenderPass = true;
@@ -2659,7 +2625,7 @@ static void CVVH_AddNotDrawnVobToList(std::vector<SkeletalVobInfo*> & target, st
 	{
 		if (!it->VisibleInRenderPass)
 		{
-			float vd = D3DXVec3Length(&(Engine::GAPI->GetCameraPosition() - it->Vob->GetPositionWorld()));
+			const float vd = (Engine::GAPI->GetCameraPosition() - it->Vob->GetPositionWorld()).Length();
 			if (vd < dist && it->Vob->GetShowVisual())
 			{
 				target.push_back(it);
@@ -2676,7 +2642,7 @@ void GothicAPI::CollectVisibleVobsHelper(BspInfo * base, zTBBox3D boxCell, int c
 	const float vobOutdoorSmallDist = Engine::GAPI->GetRendererState()->RendererSettings.OutdoorSmallVobDrawRadius;
 	const float vobSmallSize = Engine::GAPI->GetRendererState()->RendererSettings.SmallVobSize;
 	const float visualFXDrawRadius = Engine::GAPI->GetRendererState()->RendererSettings.VisualFXDrawRadius;
-	const D3DXVECTOR3 camPos = Engine::GAPI->GetCameraPosition();
+	const DirectX::SimpleMath::Vector3 camPos = Engine::GAPI->GetCameraPosition();
 
 	while (base->OriginalNode) {
 		// Check for occlusion-culling
@@ -2754,7 +2720,7 @@ void GothicAPI::CollectVisibleVobsHelper(BspInfo * base, zTBBox3D boxCell, int c
 			if (RendererState.RendererSettings.EnableDynamicLighting && insideFrustum) {
 				// Add dynamic lights
 				float minDynamicUpdateLightRange = Engine::GAPI->GetRendererState()->RendererSettings.MinLightShadowUpdateRange;
-				D3DXVECTOR3 playerPosition = Engine::GAPI->GetPlayerVob() != nullptr ? Engine::GAPI->GetPlayerVob()->GetPositionWorld() : D3DXVECTOR3(FLT_MAX, FLT_MAX, FLT_MAX);
+				auto playerPosition = Engine::GAPI->GetPlayerVob() != nullptr ? Engine::GAPI->GetPlayerVob()->GetPositionWorld() : ::SimpleMath::Vector3(FLT_MAX, FLT_MAX, FLT_MAX);
 
 				// Take cameraposition if we are freelooking
 				if (zCCamera::IsFreeLookActive()) {
@@ -2762,7 +2728,7 @@ void GothicAPI::CollectVisibleVobsHelper(BspInfo * base, zTBBox3D boxCell, int c
 				}
 
 				for (int i = 0; i < leaf->LightVobList.NumInArray; i++) {
-					float lightCameraDist = D3DXVec3Length(&(Engine::GAPI->GetCameraPosition() - leaf->LightVobList.Array[i]->GetPositionWorld()));
+					float lightCameraDist = (Engine::GAPI->GetCameraPosition() - leaf->LightVobList.Array[i]->GetPositionWorld()).Length();
 					if (lightCameraDist + leaf->LightVobList.Array[i]->GetLightRange() < visualFXDrawRadius) {
 						zCVobLight* v = leaf->LightVobList.Array[i];
 						VobLightInfo** vi = &VobLightMap[leaf->LightVobList.Array[i]];
@@ -2781,7 +2747,7 @@ void GothicAPI::CollectVisibleVobsHelper(BspInfo * base, zTBBox3D boxCell, int c
 						if (!(*vi)->VisibleInRenderPass && (*vi)->Vob->IsEnabled() /*&& (*vi)->Vob->GetShowVisual()*/) {
 							(*vi)->VisibleInRenderPass = true;
 
-							float lightPlayerDist = D3DXVec3Length(&(playerPosition - leaf->LightVobList.Array[i]->GetPositionWorld()));
+							const float lightPlayerDist = (playerPosition - leaf->LightVobList.Array[i]->GetPositionWorld()).Length();
 
 							// Update the lights shadows if: Light is dynamic or full shadow-updates are set
 							if (RendererState.RendererSettings.EnablePointlightShadows >= GothicRendererSettings::PLS_FULL
@@ -2808,23 +2774,23 @@ void GothicAPI::CollectVisibleVobsHelper(BspInfo * base, zTBBox3D boxCell, int c
 			boxCell.Max.y = node->BBox3D.Min.y;
 
 			zTBBox3D tmpbox = boxCell;
-			if (D3DXVec3Dot(&node->Plane.Normal, &GetCameraPosition()) > node->Plane.Distance) {
+			if (node->Plane.Normal.Dot(GetCameraPosition()) > node->Plane.Distance) {
 				if (node->Front) {
-					((float*)& tmpbox.Min)[planeAxis] = node->Plane.Distance;
+					((float*)&tmpbox.Min)[planeAxis] = node->Plane.Distance;
 					CollectVisibleVobsHelper(base->Front, tmpbox, clipFlags, vobs, lights, mobs);
 				}
 
-				((float*)& boxCell.Max)[planeAxis] = node->Plane.Distance;
+				((float*)&boxCell.Max)[planeAxis] = node->Plane.Distance;
 				base = base->Back;
 
 			}
 			else {
 				if (node->Back) {
-					((float*)& tmpbox.Max)[planeAxis] = node->Plane.Distance;
+					((float*)&tmpbox.Max)[planeAxis] = node->Plane.Distance;
 					CollectVisibleVobsHelper(base->Back, tmpbox, clipFlags, vobs, lights, mobs);
 				}
 
-				((float*)& boxCell.Min)[planeAxis] = node->Plane.Distance;
+				((float*)&boxCell.Min)[planeAxis] = node->Plane.Distance;
 				base = base->Front;
 			}
 		}
@@ -3191,7 +3157,7 @@ zCTexture* GothicAPI::GetBoundTexture(int idx)
 }
 
 /** Teleports the player to the given location */
-void GothicAPI::SetPlayerPosition(const D3DXVECTOR3 & pos)
+void GothicAPI::SetPlayerPosition(const DirectX::SimpleMath::Vector3 & pos)
 {
 	if (oCGame::GetPlayer())
 		oCGame::GetPlayer()->ResetPos(pos);
@@ -3475,7 +3441,7 @@ XRESULT GothicAPI::SaveMenuSettings(const std::string & file) {
 
 	LogInfo() << "Saving menu settings to " << ini;
 	GothicRendererSettings& s = RendererState.RendererSettings;
-	
+
 	WritePrivateProfileStringA("General", "AtmosphericScattering", std::to_string(s.AtmosphericScattering ? 1 : 0).c_str(), ini.c_str());
 	WritePrivateProfileStringA("General", "EnableFog", std::to_string(s.DrawFog ? 1 : 0).c_str(), ini.c_str());
 	WritePrivateProfileStringA("General", "EnableHDR", std::to_string(s.EnableHDR ? 1 : 0).c_str(), ini.c_str());
@@ -3495,7 +3461,7 @@ XRESULT GothicAPI::SaveMenuSettings(const std::string & file) {
 	WritePrivateProfileStringA("Display", "FOVVert", std::to_string((int)s.FOVVert).c_str(), ini.c_str());
 	WritePrivateProfileStringA("Display", "Gamma", std::to_string(s.GammaValue).c_str(), ini.c_str());
 	WritePrivateProfileStringA("Display", "Brightness", std::to_string(s.BrightnessValue).c_str(), ini.c_str());
-	
+
 	WritePrivateProfileStringA("Shadows", "EnableShadows", std::to_string(s.EnableShadows ? 1 : 0).c_str(), ini.c_str());
 	WritePrivateProfileStringA("Shadows", "EnableSoftShadows", std::to_string(s.EnableSoftShadows ? 1 : 0).c_str(), ini.c_str());
 	WritePrivateProfileStringA("Shadows", "ShadowMapSize", std::to_string(s.ShadowMapSize).c_str(), ini.c_str());
@@ -3520,7 +3486,7 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 	// Returns Gothic directory.
 	int len = GetCurrentDirectory(MAX_PATH, NPath);
 	// Get path to Gothic.Ini
-	auto ini = std::string(NPath, len).append("\\"+file);
+	auto ini = std::string(NPath, len).append("\\" + file);
 
 	if (INVALID_FILE_ATTRIBUTES == GetFileAttributes(ini.c_str()) && GetLastError() == ERROR_FILE_NOT_FOUND)
 	{
@@ -3530,7 +3496,7 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 	LogInfo() << "Loading menu settings from " << ini;
 
 	GothicRendererSettings& s = RendererState.RendererSettings;
-	
+
 	s.DrawFog = GetPrivateProfileIntA("General", "EnableFog", 1, ini.c_str());
 	s.AtmosphericScattering = GetPrivateProfileIntA("General", "AtmosphericScattering", 1, ini.c_str());
 	s.EnableHDR = GetPrivateProfileIntA("General", "EnableHDR", 1, ini.c_str());
@@ -3559,7 +3525,7 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 	s.FOVVert = GetPrivateProfileIntA("Display", "FOVVert", 90, ini.c_str());
 	s.GammaValue = GetPrivateProfileFloatA("Display", "Gamma", 1.0f, ini.c_str());
 	s.BrightnessValue = GetPrivateProfileFloatA("Display", "Brightness", 1.0f, ini.c_str());
-	
+
 	s.EnableSMAA = GetPrivateProfileIntA("SMAA", "Enabled", 0, ini.c_str());
 	s.SharpenFactor = GetPrivateProfileFloatA("SMAA", "SharpenFactor", 1.0f, ini.c_str());
 
@@ -3668,18 +3634,18 @@ void GothicAPI::MoveLoadedTexturesToProcessedList()
 /** Draws a morphmesh */
 void GothicAPI::DrawMorphMesh(zCMorphMesh * msh, float fatness)
 {
-	D3DXVECTOR3 tri0, tri1, tri2;
-	D3DXVECTOR2	uv0, uv1, uv2;
-	D3DXVECTOR3 bbmin, bbmax;
-	bbmin = D3DXVECTOR3(FLT_MAX, FLT_MAX, FLT_MAX);
-	bbmax = D3DXVECTOR3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+	DirectX::SimpleMath::Vector3  tri0, tri1, tri2;
+	Vector2	uv0, uv1, uv2;
+	DirectX::SimpleMath::Vector3  bbmin, bbmax;
+	bbmin = DirectX::SimpleMath::Vector3 (FLT_MAX, FLT_MAX, FLT_MAX);
+	bbmax = DirectX::SimpleMath::Vector3 (-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
 	zCProgMeshProto * morphMesh = msh->GetMorphMesh();
 
 	if (!morphMesh)
 		return;
 
-	D3DXVECTOR3 * posList = (D3DXVECTOR3*)morphMesh->GetPositionList()->Array;
+	DirectX::SimpleMath::Vector3 * posList = (DirectX::SimpleMath::Vector3 *)morphMesh->GetPositionList()->Array;
 
 	msh->AdvanceAnis();
 	msh->CalcVertexPositions();
@@ -3704,7 +3670,7 @@ void GothicAPI::DrawMorphMesh(zCMorphMesh * msh, float fatness)
 				vx.Normal = morphMesh->GetSubmeshes()[i].WedgeList.Array[sub.TriList.Array[t].wedge[v]].normal;
 
 				// Do this on GPU probably?
-				*vx.Position.toD3DXVECTOR3() += (*vx.Normal.toD3DXVECTOR3()) * fatness;
+				*vx.Position.toVector3() += (*vx.Normal.toVector3()) * fatness;
 
 				vertices.push_back(vx);
 			}
@@ -3899,7 +3865,7 @@ void GothicAPI::PutCustomPolygonsIntoBspTreeRec(BspInfo * base) {
 					// Check if one vertex is inside the node // FIXME: This will fail for very large triangles!
 					zCVertex** vx = poly->getVertices();
 
-					if (Toolbox::PositionInsideBox(*vx[v]->Position.toD3DXVECTOR3(),
+					if (Toolbox::PositionInsideBox(*vx[v]->Position.toVector3(),
 						base->OriginalNode->BBox3D.Min,
 						base->OriginalNode->BBox3D.Max))
 					{
@@ -3919,7 +3885,7 @@ void GothicAPI::PutCustomPolygonsIntoBspTreeRec(BspInfo * base) {
 }
 
 /** Returns the sections intersecting the given boundingboxes */
-void GothicAPI::GetIntersectingSections(const D3DXVECTOR3 & min, const D3DXVECTOR3 & max, std::vector<WorldMeshSectionInfo*> & sections)
+void GothicAPI::GetIntersectingSections(const DirectX::SimpleMath::Vector3 & min, const DirectX::SimpleMath::Vector3 & max, std::vector<WorldMeshSectionInfo*> & sections)
 {
 	for (std::map<int, std::map<int, WorldMeshSectionInfo>>::iterator itx = Engine::GAPI->GetWorldSections().begin(); itx != Engine::GAPI->GetWorldSections().end(); itx++)
 	{

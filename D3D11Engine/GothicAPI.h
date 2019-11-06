@@ -67,17 +67,11 @@ struct BspInfo {
 };
 
 
-struct CameraReplacementDX {
-	DirectX::XMFLOAT4X4 ViewReplacement;
-	DirectX::XMFLOAT4X4 ProjectionReplacement;
-	DirectX::XMFLOAT3 PositionReplacement;
-	DirectX::XMFLOAT3 LookAtReplacement;
-};
 struct CameraReplacement {
-	D3DXMATRIX ViewReplacement;
-	D3DXMATRIX ProjectionReplacement;
-	D3DXVECTOR3 PositionReplacement;
-	D3DXVECTOR3 LookAtReplacement;
+	DirectX::SimpleMath::Matrix ViewReplacement;
+	DirectX::SimpleMath::Matrix ProjectionReplacement;
+	DirectX::SimpleMath::Vector3 PositionReplacement;
+	DirectX::SimpleMath::Vector3 LookAtReplacement;
 };
 
 /** Version of this struct */
@@ -255,7 +249,7 @@ public:
 	void DrawMeshInfo(zCMaterial * mat, MeshInfo * msh);
 
 	/** Draws a SkeletalMeshInfo */
-	void DrawSkeletalMeshInfo(zCMaterial * mat, SkeletalMeshInfo * msh, std::vector<D3DXMATRIX> & transforms, float fatness = 1.0f);
+	void DrawSkeletalMeshInfo(zCMaterial * mat, SkeletalMeshInfo * msh, const std::vector<DirectX::SimpleMath::Matrix> & transforms, float fatness = 1.0f);
 
 	/** Draws a zCParticleFX */
 	void DrawParticleFX(zCVob * source, zCParticleFX * fx, ParticleFrameData & data);
@@ -267,25 +261,25 @@ public:
 	void GetVisibleParticleEffectsList(std::vector<zCVob *> & pfxList);
 
 	/** Sets the world matrix */
-	void SetWorldTransform(const D3DXMATRIX & world);
+	void SetWorldTransform(const DirectX::SimpleMath::Matrix & world);
 
 	/** Sets the View matrix */
-	void SetViewTransform(const D3DXMATRIX & view);
+	void SetViewTransform(const DirectX::SimpleMath::Matrix & view);
 
 	/** Sets the Projection matrix */
-	void SetProjTransform(const D3DXMATRIX & proj);
+	void SetProjTransform(const DirectX::SimpleMath::Matrix & proj);
 
 	/** Sets the Projection matrix */
-	D3DXMATRIX GetProjTransform();
+	DirectX::SimpleMath::Matrix GetProjTransform();
 
 	/** Sets the world matrix */
-	void SetWorldTransform(const D3DXMATRIX & world, bool transpose);
+	void SetWorldTransform(const DirectX::SimpleMath::Matrix & world, bool transpose);
 
 	/** Sets the world matrix */
-	void SetViewTransform(const D3DXMATRIX & view, bool transpose);
+	void SetViewTransform(const DirectX::SimpleMath::Matrix & view, bool transpose);
 
 	/** Sets the world matrix */
-	void SetWorldViewTransform(const D3DXMATRIX & world, const D3DXMATRIX & view);
+	void SetWorldViewTransform(const DirectX::SimpleMath::Matrix & world, const DirectX::SimpleMath::Matrix & view);
 
 	/** Sets the world matrix */
 	void ResetWorldTransform();
@@ -325,39 +319,35 @@ public:
 	std::list<SkeletalVobInfo *> & GetAnimatedSkeletalMeshVobs();
 
 	/** Returns the current cameraposition */
-	D3DXVECTOR3 GetCameraPosition();
-	DirectX::XMFLOAT3 GetCameraPositionDX();
+	DirectX::SimpleMath::Vector3 GetCameraPosition();
 
 	/** Returns the current forward vector of the camera */
-	D3DXVECTOR3 GetCameraForward();
-	DirectX::XMFLOAT3 GetCameraForwardDX();
+	DirectX::SimpleMath::Vector3 GetCameraForward();
 
 	/** Returns the view matrix */
-	void GetViewMatrix(D3DXMATRIX * view);
-	void GetViewMatrixDX(DirectX::XMFLOAT4X4 * view);
+	void GetViewMatrix(DirectX::SimpleMath::Matrix * view);
 
 	/** Returns the view matrix */
-	void GetInverseViewMatrix(D3DXMATRIX * invView);
-	void GetInverseViewMatrixDX(DirectX::XMFLOAT4X4 * invView);
+	void GetInverseViewMatrix(DirectX::SimpleMath::Matrix * invView);
 
 	/** Returns the projection-matrix */
-	D3DXMATRIX & GetProjectionMatrix();
+	DirectX::SimpleMath::Matrix & GetProjectionMatrix();
 
 	/** Unprojects a pixel-position on the screen */
-	void Unproject(const D3DXVECTOR3 & p, D3DXVECTOR3 * worldPos, D3DXVECTOR3 * worldDir);
+	void Unproject(const DirectX::SimpleMath::Vector3 & p, DirectX::SimpleMath::Vector3 * worldPos, DirectX::SimpleMath::Vector3 * worldDir);
 
 	/** Unprojects the current cursor, returns it's direction in world-space */
-	D3DXVECTOR3 UnprojectCursor();
+	DirectX::SimpleMath::Vector3 UnprojectCursor();
 
 	/** Traces the worldmesh and returns the hit-location */
-	bool TraceWorldMesh(const D3DXVECTOR3 & origin, const D3DXVECTOR3 & dir, D3DXVECTOR3 & hit, std::string * hitTextureName = nullptr, D3DXVECTOR3 * hitTriangle = nullptr, MeshInfo ** hitMesh = nullptr, zCMaterial ** hitMaterial = nullptr);
+	bool TraceWorldMesh(const DirectX::SimpleMath::Vector3 & origin, const DirectX::SimpleMath::Vector3 & dir, DirectX::SimpleMath::Vector3 & hit, std::string * hitTextureName = nullptr, DirectX::SimpleMath::Vector3 * hitTriangle = nullptr, MeshInfo ** hitMesh = nullptr, zCMaterial ** hitMaterial = nullptr);
 
 	/** Traces vobs with static mesh visual */
-	VobInfo * TraceStaticMeshVobsBB(const D3DXVECTOR3 & origin, const D3DXVECTOR3 & dir, D3DXVECTOR3 & hit, zCMaterial ** hitMaterial = nullptr);
-	SkeletalVobInfo * TraceSkeletalMeshVobsBB(const D3DXVECTOR3 & origin, const D3DXVECTOR3 & dir, D3DXVECTOR3 & hit);
+	VobInfo * TraceStaticMeshVobsBB(const DirectX::SimpleMath::Vector3 & origin, const DirectX::SimpleMath::Vector3 & dir, DirectX::SimpleMath::Vector3 & hit, zCMaterial ** hitMaterial = nullptr);
+	SkeletalVobInfo * TraceSkeletalMeshVobsBB(const DirectX::SimpleMath::Vector3 & origin, const DirectX::SimpleMath::Vector3 & dir, DirectX::SimpleMath::Vector3 & hit);
 
 	/** Traces a visual info. Returns -1 if not hit, distance otherwise */
-	float TraceVisualInfo(const D3DXVECTOR3 & origin, const D3DXVECTOR3 & dir, BaseVisualInfo * visual, zCMaterial ** hitMaterial = nullptr);
+	float TraceVisualInfo(const DirectX::SimpleMath::Vector3 & origin, const DirectX::SimpleMath::Vector3 & dir, BaseVisualInfo * visual, zCMaterial ** hitMaterial = nullptr);
 
 	/** Applies tesselation-settings for all mesh-parts using the given info */
 	void ApplyTesselationSettingsForAllMeshPartsUsing(MaterialInfo * info, int amount = 1);
@@ -366,7 +356,7 @@ public:
 	GSky * GetSky();
 
 	/** Returns the fog-color */
-	D3DXVECTOR3 GetFogColor();
+	DirectX::SimpleMath::Vector3 GetFogColor();
 
 	/** Returns true if the game is overwriting the fog color with a fog-zone */
 	float GetFogOverride();
@@ -506,7 +496,7 @@ public:
 	HWND GetOutputWindow() { return OutputWindow; }
 
 	/** Spawns a vegetationbox at the camera */
-	GVegetationBox * SpawnVegetationBoxAt(const D3DXVECTOR3 & position,  const D3DXVECTOR3 & min = D3DXVECTOR3(-1000, -500, -1000), const D3DXVECTOR3 & max = D3DXVECTOR3(1000, 500, 1000), float density = 1.0f, const std::string & restrictByTexture = "");
+	GVegetationBox * SpawnVegetationBoxAt(const DirectX::SimpleMath::Vector3 & position,  const DirectX::SimpleMath::Vector3 & min = DirectX::SimpleMath::Vector3(-1000, -500, -1000), const DirectX::SimpleMath::Vector3 & max = DirectX::SimpleMath::Vector3(1000, 500, 1000), float density = 1.0f, const std::string & restrictByTexture = "");
 
 	/** Adds a vegetationbox to the world */
 	void AddVegetationBox(GVegetationBox * box);
@@ -518,7 +508,7 @@ public:
 	void RemoveVegetationBox(GVegetationBox * box);
 
 	/** Teleports the player to the given location */
-	void SetPlayerPosition(const D3DXVECTOR3 & pos);
+	void SetPlayerPosition(const DirectX::SimpleMath::Vector3 & pos);
 
 	/** Returns the player-vob */
 	zCVob * GetPlayerVob();
@@ -597,7 +587,7 @@ public:
 	float GetBrightnessValue();
 
 	/** Returns the sections intersecting the given boundingboxes */
-	void GetIntersectingSections(const D3DXVECTOR3 & min, const D3DXVECTOR3 & max, std::vector<WorldMeshSectionInfo *> & sections);
+	void GetIntersectingSections(const DirectX::SimpleMath::Vector3 & min, const DirectX::SimpleMath::Vector3 & max, std::vector<WorldMeshSectionInfo *> & sections);
 
 	/** Generates zCPolygons for the loaded sections */
 	void CreatezCPolygonsForSections();
@@ -725,7 +715,6 @@ private:
 
 	/** Replacement values for the camera */
 	CameraReplacement * CameraReplacementPtr;
-	CameraReplacementDX * CameraReplacementPtrDX;
 
 	/** List of available GVegetationBoxes */
 	std::list<GVegetationBox *> VegetationBoxes;
