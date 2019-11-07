@@ -1,5 +1,8 @@
 #pragma once
 
+#define WINVER 0x0601 // Windows 7
+#define _WIN32_WINNT 0x0601 // Windows 7
+
 #pragma warning(disable: 4731) // Change of ebp from inline assembly
 #pragma warning(disable: 4244) // Loss of data during conversion
 #include <Windows.h>
