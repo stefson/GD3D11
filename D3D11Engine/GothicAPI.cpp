@@ -3424,7 +3424,7 @@ float GetPrivateProfileFloatA(
 ) {
 	const int float_str_max = 30;
 	TCHAR nFloat[float_str_max];
-	if (GetPrivateProfileStringA(lpAppName, lpKeyName, "1.0", nFloat, float_str_max, lpFileName)) {
+	if (GetPrivateProfileStringA(lpAppName, lpKeyName, nullptr, nFloat, float_str_max, lpFileName)) {
 		return std::stof(std::string(nFloat));
 	}
 	return nDefault;
@@ -3436,7 +3436,7 @@ XRESULT GothicAPI::SaveMenuSettings(const std::string & file) {
 	// Returns Gothic directory.
 	int len = GetCurrentDirectory(MAX_PATH, NPath);
 	// Get path to Gothic.Ini
-	auto ini = std::string(NPath, len).append("\\" + file); // TODO: Remove this .ini, and change config file
+	auto ini = std::string(NPath, len).append("\\" + file);
 
 	LogInfo() << "Saving menu settings to " << ini;
 	GothicRendererSettings& s = RendererState.RendererSettings;
