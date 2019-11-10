@@ -95,7 +95,7 @@ XRESULT D3D11PFX_HeightFog::Render(RenderToTextureBuffer * fxbuffer)
 	cb.HF_WeightZNear = std::max(0.0f, WORLD_SECTION_SIZE * ((secScale - 0.5f) * 0.7f) - (ffar - fnear)); // Keep distance from original fog but scale the near-fog up to section draw distance
 	cb.HF_WeightZFar = WORLD_SECTION_SIZE * ((secScale - 0.5f) * 0.8f);
 
-	float atmoMax = 83200.0f; // Fixme: Calculate!	
+	float atmoMax = 83200.0f; // TODO: Calculate!	
 	float atmoMin = 27799.9922f;
 
 	cb.HF_WeightZFar = std::min(cb.HF_WeightZFar, atmoMax);

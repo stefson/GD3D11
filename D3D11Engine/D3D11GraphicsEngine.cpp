@@ -1166,7 +1166,7 @@ XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh(
 			info->UpdateConstantbuffer();
 		// TODO: Slow, save this somewhere!
 
-		// TODO: FIXME: Currently bodies and faces look really glossy.
+		// TODO: TODO: Currently bodies and faces look really glossy.
 		//		  This is only a temporary fix!
 		if (info->buffer.SpecularIntensity != 0.05f) {
 			info->buffer.SpecularIntensity = 0.05f;
@@ -1528,7 +1528,7 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 	FrameWaterSurfaces.clear();
 	FrameTransparencyMeshes.clear();
 
-	// TODO: FIXME: Hack for texture caching!
+	// TODO: TODO: Hack for texture caching!
 	zCTextureCacheHack::NumNotCachedTexturesInFrame = 0;
 
 	// Re-Bind the default sampler-state in case it was overwritten
@@ -1596,7 +1596,7 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 		DepthStencilBuffer->GetDepthStencilView());
 
 	// Draw unlit decals 
-	// TODO: FIXME: Only get them once!
+	// TODO: TODO: Only get them once!
 	if (Engine::GAPI->GetRendererState()->RendererSettings.DrawParticleEffects) {
 		std::vector<zCVob*> decals;
 		Engine::GAPI->GetVisibleDecalList(decals);
@@ -1605,7 +1605,7 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 		DrawDecalList(decals, false);
 	}
 
-	// TODO: FIXME: GodRays need the GBuffer1 from the scene, but Particles need to
+	// TODO: TODO: GodRays need the GBuffer1 from the scene, but Particles need to
 	// clear it!
 	if (Engine::GAPI->GetRendererState()->RendererSettings.EnableGodRays)
 		PfxRenderer->RenderGodRays();
@@ -2208,7 +2208,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh(bool noTextures) {
 	Engine::GAPI->GetRendererState()->DepthState.DepthWriteEnabled = true;
 	Engine::GAPI->GetRendererState()->DepthState.SetDirty();
 
-	// TODO: FIXME: Remove DrawWorldMeshNaive finally and put this into a proper
+	// TODO: TODO: Remove DrawWorldMeshNaive finally and put this into a proper
 	// location!
 	UpdateOcclusion();
 
@@ -3142,7 +3142,7 @@ void D3D11GraphicsEngine::DrawWorldAround(const DirectX::SimpleMath::Vector3& po
 						itt.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_ADD;
 					bool blendBlend =
 						itt.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_BLEND;
-					// TODO: FIXME: if one part of the mesh uses blending, all do.
+					// TODO: TODO: if one part of the mesh uses blending, all do.
 					if (!doReset || blendAdd || blendBlend)
 					{
 						doReset = false;
@@ -3370,7 +3370,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 						// Check for alphablending on world mesh
 						bool blendAdd = itt.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_ADD;
 						bool blendBlend = itt.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_BLEND;
-						// TODO: FIXME: if one part of the mesh uses blending, all do.
+						// TODO: TODO: if one part of the mesh uses blending, all do.
 						if (!doReset || blendAdd || blendBlend) {
 							MeshVisualInfo* info = staticMeshVisual.second;
 							MeshInfo* mesh = mlist[i];
@@ -3633,7 +3633,7 @@ INT2 D3D11GraphicsEngine::GetResolution() { return Resolution; }
 INT2 D3D11GraphicsEngine::GetBackbufferResolution() {
 	return Resolution;
 
-	// TODO: FIXME: Oversampling
+	// TODO: TODO: Oversampling
 	/*
 	// Get desktop rect
 	RECT desktop;
@@ -4935,7 +4935,7 @@ void D3D11GraphicsEngine::DrawDecalList(const std::vector<zCVob*>& decals,
 					/*case zRND_ALPHA_FUNC_MUL:
 							Engine::GAPI->GetRendererState()->BlendState.SetModulateBlending();
 							break;*/
-							// TODO: FIXME: Implement modulate
+							// TODO: TODO: Implement modulate
 
 				default:
 					continue;
@@ -5067,7 +5067,7 @@ void D3D11GraphicsEngine::DrawQuadMarks() {
 					/*case zRND_ALPHA_FUNC_MUL:
 							Engine::GAPI->GetRendererState()->BlendState.SetModulateBlending();
 							break;*/
-							// TODO: FIXME: Implement modulate
+							// TODO: TODO: Implement modulate
 
 				default:
 					continue;

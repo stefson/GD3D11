@@ -161,6 +161,11 @@ public:
 	GothicAPI();
 	~GothicAPI();
 
+	/** Call to OnRemoveVob(all skeletal vobs) and OnAddVob(all skeletal vobs) in case of invisibility */
+	void ReloadVobs();
+	/** Call to OnRemoveVob(player) and OnAddVob(player) in case of invisibility */
+	void ReloadPlayerVob();
+
 	/** Called when the game starts */
 	void OnGameStart();
 

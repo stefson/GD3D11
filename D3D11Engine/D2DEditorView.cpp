@@ -1449,7 +1449,7 @@ void D2DEditorView::TextureSettingsSliderChanged(SV_Slider * sender, void * user
 		}
 		else if (sender == v->SelectedTexDisplacementSlider->GetSlider() && v->Selection.SelectedMesh)
 		{
-			WorldMeshInfo* mesh = (WorldMeshInfo *)v->Selection.SelectedMesh; // FIXME: Make this nicer
+			WorldMeshInfo* mesh = (WorldMeshInfo *)v->Selection.SelectedMesh; // TODO: Make this nicer
 			mesh->TesselationSettings.buffer.VT_DisplacementStrength = sender->GetValue();
 			mesh->TesselationSettings.UpdateConstantbuffer();
 
@@ -1457,7 +1457,7 @@ void D2DEditorView::TextureSettingsSliderChanged(SV_Slider * sender, void * user
 		}
 		else if (sender == v->SelectedMeshTessAmountSlider->GetSlider() && v->Selection.SelectedMesh)
 		{
-			WorldMeshInfo* mesh = (WorldMeshInfo *)v->Selection.SelectedMesh; // FIXME: Make this nicer
+			WorldMeshInfo* mesh = (WorldMeshInfo *)v->Selection.SelectedMesh; // TODO: Make this nicer
 
 			if (!mesh->MeshIndexBufferPNAEN)
 			{
@@ -1472,7 +1472,7 @@ void D2DEditorView::TextureSettingsSliderChanged(SV_Slider * sender, void * user
 		}
 		else if (sender == v->SelectedMeshRoundnessSlider->GetSlider() && v->Selection.SelectedMesh)
 		{
-			WorldMeshInfo* mesh = (WorldMeshInfo *)v->Selection.SelectedMesh; // FIXME: Make this nicer
+			WorldMeshInfo* mesh = (WorldMeshInfo *)v->Selection.SelectedMesh; // TODO: Make this nicer
 			mesh->TesselationSettings.buffer.VT_Roundness = sender->GetValue();
 			mesh->TesselationSettings.UpdateConstantbuffer();
 
