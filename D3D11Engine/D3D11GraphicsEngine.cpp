@@ -314,7 +314,8 @@ XRESULT D3D11GraphicsEngine::Init() {
 		nullptr, sizeof(float4));
 
 	// Init inf-buffer now
-	InfiniteRangeConstantBuffer->UpdateBuffer(&DirectX::SimpleMath::Vector4(FLT_MAX, 0, 0, 0));
+	auto const&& cbData = DirectX::SimpleMath::Vector4(FLT_MAX, 0, 0, 0);
+	InfiniteRangeConstantBuffer->UpdateBuffer(&cbData);
 
 	// Load reflectioncube
 	if (S_OK != D3DX11CreateShaderResourceViewFromFile(
@@ -668,9 +669,9 @@ XRESULT D3D11GraphicsEngine::Clear(const float4& color) {
 		(float*)& color);
 	GetContext()->ClearRenderTargetView(
 		GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView(),
-		(float*)&DirectX::SimpleMath::Vector4(0, 0, 0, 0));
+		(float*)&Vector4::Zero);
 	GetContext()->ClearRenderTargetView(HDRBackBuffer->GetRenderTargetView(),
-		(float*)&DirectX::SimpleMath::Vector4(0, 0, 0, 0));
+		(float*)&Vector4::Zero);
 
 	return XR_SUCCESS;
 }
@@ -1435,7 +1436,7 @@ XRESULT D3D11GraphicsEngine::UpdateRenderStates() {
 		FFRasterizerStateHash = Engine::GAPI->GetRendererState()->BlendState.Hash;
 
 		Engine::GAPI->GetRendererState()->BlendState.StateDirty = false;
-		GetContext()->OMSetBlendState(FFBlendState.Get(), (float*)&DirectX::SimpleMath::Vector4(0, 0, 0, 0),
+		GetContext()->OMSetBlendState(FFBlendState.Get(), (float*)&Vector4::Zero,
 			0xFFFFFFFF);
 	}
 
@@ -1534,7 +1535,8 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 	GetContext()->PSSetSamplers(0, 1, DefaultSamplerState.GetAddressOf());
 
 	// Update view distances
-	InfiniteRangeConstantBuffer->UpdateBuffer(&DirectX::SimpleMath::Vector4(FLT_MAX, 0, 0, 0));
+	auto cbData = DirectX::SimpleMath::Vector4(FLT_MAX, 0, 0, 0);
+	InfiniteRangeConstantBuffer->UpdateBuffer(&cbData);
 	OutdoorSmallVobsConstantBuffer->UpdateBuffer(
 		&DirectX::SimpleMath::Vector4(Engine::GAPI->GetRendererState()
 			->RendererSettings.OutdoorSmallVobDrawRadius,
