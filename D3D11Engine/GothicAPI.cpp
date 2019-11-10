@@ -1182,10 +1182,9 @@ void GothicAPI::OnSetVisual(zCVob * vob) {
 		return;
 
 	// Add the vob to the set
-	std::set<zCVob*>::iterator it = RegisteredVobs.find(vob);
-	if (it != RegisteredVobs.end()) {
-		for (std::list<SkeletalVobInfo*>::iterator it = SkeletalMeshVobs.begin(); it != SkeletalMeshVobs.end(); ++it) {
-			if ((*it)->VisualInfo && (*it)->Vob == vob && (*it)->VisualInfo->Visual == (zCModel*)vob->GetVisual()) {
+	if (RegisteredVobs.find(vob) != RegisteredVobs.end()) {
+		for (const auto& it : SkeletalMeshVobs) {
+			if (it->VisualInfo && it->Vob == vob && it->VisualInfo->Visual == (zCModel*)vob->GetVisual()) {
 				return; // No change, skip this.
 			}
 		}
