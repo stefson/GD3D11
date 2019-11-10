@@ -21,7 +21,7 @@ SV_GMeshInfoView::SV_GMeshInfoView(D2DView * view, D2DSubView * parent) : D2DSub
 
 	IsDraggingView = false;
 
-	ObjectPosition = Vector3(0, 0, 0);
+	ObjectPosition = Vector3::Zero;
 	SetObjectOrientation(0, 0, 10.0f);
 	RT = nullptr;
 	DS = nullptr;
@@ -87,7 +87,7 @@ void SV_GMeshInfoView::SetObjectOrientation(float yaw, float pitch, float distan
 
 	ObjectWorldMatrix = ObjectWorldMatrix.Transpose();
 
-	ObjectViewMatrix = XMMatrixLookAtLH(Vector3(-distance, 0, 0), Vector3::Zero, Vector3(0, 1, 0));
+	ObjectViewMatrix = XMMatrixLookAtLH(Vector3(-distance, 0, 0), Vector3::Zero, Vector3::Up);
 	ObjectViewMatrix = ObjectViewMatrix.Transpose();
 }
 
@@ -128,7 +128,7 @@ void SV_GMeshInfoView::UpdateView() {
 	g->GetContext()->RSSetViewports(1, &vp);
 
 	// Clear
-	g->GetContext()->ClearRenderTargetView(RT->GetRenderTargetView(), (float *)&DirectX::SimpleMath::Vector4(0, 0, 0, 0));
+	g->GetContext()->ClearRenderTargetView(RT->GetRenderTargetView(), (float *)&DirectX::SimpleMath::Vector4::Zero);
 	g->GetContext()->ClearDepthStencilView(DS->GetDepthStencilView(), D3D11_CLEAR_DEPTH, 1.0f, 0); 
 
 	// Bind RTV

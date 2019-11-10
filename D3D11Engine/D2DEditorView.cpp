@@ -41,7 +41,7 @@ D2DEditorView::D2DEditorView(D2DView * view, D2DSubView * parent) : D2DSubView(v
 	Mode = EM_IDLE;
 	DraggedBoxMinLocal = Vector3(-700, -500, -700);
 	DraggedBoxMaxLocal = Vector3(700, 500, 700);
-	DraggedBoxCenter = Vector3(0, 0, 0);
+	DraggedBoxCenter = Vector3::Zero;
 
 	memset(SelectedTriangle, 0, sizeof(SelectedTriangle));
 	memset(MButtons, 0, sizeof(MButtons));
@@ -1021,7 +1021,7 @@ void D2DEditorView::DoEditorMovement()
 	{
 		Vector3 fwd = Vector3(sinf(CYaw), 0, cosf(CYaw));
 
-		Vector3 up = Vector3(0, 1, 0);
+		Vector3 up = Vector3::Up;
 		Vector3 side;
 		side = fwd.Cross(up);
 

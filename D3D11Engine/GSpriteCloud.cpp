@@ -46,7 +46,7 @@ struct CloudBB
 void GSpriteCloud::CreateCloud(const Vector3 & size, int numSprites)
 {
 	CloudBB c;
-	c.MakeRandom(Vector3(0, 0, 0), size / 2.0f, size);
+	c.MakeRandom(Vector3::Zero, size / 2.0f, size);
 
 	// Fill the bb with sprites
 	for(int i=0;i<numSprites;i++)

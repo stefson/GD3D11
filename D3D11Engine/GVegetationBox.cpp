@@ -427,7 +427,7 @@ void GVegetationBox::VisualizeGrass(const DirectX::SimpleMath::Vector4 & color)
 			continue; // Only render every 10th grassmesh
 
 		DirectX::SimpleMath::Vector3 spot = DirectX::SimpleMath::Vector3(VegetationSpots[i]._14, VegetationSpots[i]._24, VegetationSpots[i]._34); 
-		DirectX::SimpleMath::Vector3 scale = DirectX::SimpleMath::Vector3(0, 0, 0);
+		DirectX::SimpleMath::Vector3 scale = DirectX::SimpleMath::Vector3::Zero;
 		DirectX::SimpleMath::Vector4 * m = (DirectX::SimpleMath::Vector4 *)&VegetationSpots[i];
 
 		// Compute scale
@@ -495,8 +495,8 @@ void GVegetationBox::RefitBoundingBox()
 {
 	if (VegetationSpots.empty())
 	{
-		BoxMax = DirectX::SimpleMath::Vector3(0, 0, 0);
-		BoxMin = DirectX::SimpleMath::Vector3(0, 0, 0);
+		BoxMax = DirectX::SimpleMath::Vector3::Zero;
+		BoxMin = DirectX::SimpleMath::Vector3::Zero;
 
 		return;
 	}

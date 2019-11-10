@@ -154,7 +154,7 @@ XRESULT D3D11GraphicsEngine::Init() {
 	LogInfo() << "Rendering on: " << deviceDescription.c_str();
 
 	int flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
-	
+
 	D3D_FEATURE_LEVEL featurelevel = D3D_FEATURE_LEVEL_11_0;
 
 	// Create D3D11-Device
@@ -306,16 +306,16 @@ XRESULT D3D11GraphicsEngine::Init() {
 	InverseUnitSphereMesh->LoadMesh("system\\GD3D11\\meshes\\icoSphere.obj");
 
 	// Create distance-buffers
-	CreateConstantBuffer((D3D11ConstantBuffer * *)& InfiniteRangeConstantBuffer,
+	CreateConstantBuffer((D3D11ConstantBuffer * *)&InfiniteRangeConstantBuffer,
 		nullptr, sizeof(float4));
-	CreateConstantBuffer((D3D11ConstantBuffer * *)& OutdoorSmallVobsConstantBuffer,
+	CreateConstantBuffer((D3D11ConstantBuffer * *)&OutdoorSmallVobsConstantBuffer,
 		nullptr, sizeof(float4));
-	CreateConstantBuffer((D3D11ConstantBuffer * *)& OutdoorVobsConstantBuffer,
+	CreateConstantBuffer((D3D11ConstantBuffer * *)&OutdoorVobsConstantBuffer,
 		nullptr, sizeof(float4));
 
 	// Init inf-buffer now
-	auto const&& cbData = DirectX::SimpleMath::Vector4(FLT_MAX, 0, 0, 0);
-	InfiniteRangeConstantBuffer->UpdateBuffer(&cbData);
+	static const XMVECTORF32 ircbData = {FLT_MAX, 0, 0, 0};
+	InfiniteRangeConstantBuffer->UpdateBuffer(&ircbData);
 
 	// Load reflectioncube
 	if (S_OK != D3DX11CreateShaderResourceViewFromFile(
@@ -488,7 +488,7 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 	// Successfully resized swapchain, re-get buffers
 	wrl::ComPtr<ID3D11Texture2D> backbuffer;
 	SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &backbuffer);
-	
+
 	// Recreate RenderTargetView
 	LE(GetDevice()->CreateRenderTargetView(backbuffer.Get(), nullptr, &BackbufferRTV));
 	LE(GetDevice()->CreateShaderResourceView(backbuffer.Get(), nullptr, &BackbufferSRV));
@@ -666,7 +666,7 @@ XRESULT D3D11GraphicsEngine::Clear(const float4& color) {
 		D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 	GetContext()->ClearRenderTargetView(GBuffer0_Diffuse->GetRenderTargetView(),
-		(float*)& color);
+		(float*)&color);
 	GetContext()->ClearRenderTargetView(
 		GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView(),
 		(float*)&Vector4::Zero);
@@ -1535,8 +1535,8 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 	GetContext()->PSSetSamplers(0, 1, DefaultSamplerState.GetAddressOf());
 
 	// Update view distances
-	auto cbData = DirectX::SimpleMath::Vector4(FLT_MAX, 0, 0, 0);
-	InfiniteRangeConstantBuffer->UpdateBuffer(&cbData);
+	static const XMVECTORF32 ircbData = {FLT_MAX, 0, 0, 0};
+	InfiniteRangeConstantBuffer->UpdateBuffer(&ircbData);
 	OutdoorSmallVobsConstantBuffer->UpdateBuffer(
 		&DirectX::SimpleMath::Vector4(Engine::GAPI->GetRendererState()
 			->RendererSettings.OutdoorSmallVobDrawRadius,
@@ -2546,7 +2546,7 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 	GetContext()->PSSetShaderResources(3, 1, ReflectionCube.GetAddressOf());
 
 	for (int i = 0; i < 1; i++)
-	// Draw twice, but second time only to depth buffer to fix the fog
+		// Draw twice, but second time only to depth buffer to fix the fog
 	{
 		for (auto const& it : FrameWaterSurfaces) {
 			if (it.first) {
@@ -2557,7 +2557,7 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 					it.first->Bind(0);
 			}
 			// Draw surfaces
-			for (auto const& mesh :it.second) {
+			for (auto const& mesh : it.second) {
 				DrawVertexBufferIndexed(
 					mesh->MeshVertexBuffer,
 					mesh->MeshIndexBuffer,
@@ -2700,7 +2700,7 @@ void D3D11GraphicsEngine::DrawWorldAround(
 			for (auto&& itx : Engine::GAPI->GetWorldSections()) {
 				for (auto&& ity : itx.second) {
 					const auto&& vLen = Vector2(itx.first - s.x, ity.first - s.y).Length();
-					
+
 					if (vLen < 2) {
 						WorldMeshSectionInfo& section = ity.second;
 						drawnSections.push_back(&section);
@@ -2712,7 +2712,7 @@ void D3D11GraphicsEngine::DrawWorldAround(
 								Engine::GAPI->DrawMeshInfo(nullptr, section.FullStaticMesh);
 						}
 						else {
-							for (auto&& meshInfoByKey = section.WorldMeshes.begin(); 
+							for (auto&& meshInfoByKey = section.WorldMeshes.begin();
 								meshInfoByKey != section.WorldMeshes.end(); ++meshInfoByKey) {
 								// Check surface type
 								if (meshInfoByKey->first.Info->MaterialType == MaterialInfo::MT_Water) {
@@ -2787,7 +2787,7 @@ void D3D11GraphicsEngine::DrawWorldAround(
 				}
 			}
 
-			if (renderedVobs)* renderedVobs = rndVob;
+			if (renderedVobs)*renderedVobs = rndVob;
 		}
 
 		// At this point eiter renderedVobs or rndVob is filled with something
@@ -3108,7 +3108,7 @@ void D3D11GraphicsEngine::DrawWorldAround(const DirectX::SimpleMath::Vector3& po
 		UINT size;
 		UINT loc = 0;
 		DynamicInstancingBuffer->Map(D3D11VertexBuffer::M_WRITE_DISCARD,
-			(void**)& data, &size);
+			(void**)&data, &size);
 		static std::vector<VobInstanceInfo, AlignmentAllocator<VobInstanceInfo, 16>>
 			s_InstanceData;
 		for (auto const& staticMeshVisual : staticMeshVisuals) {
@@ -3296,7 +3296,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 		UINT size;
 		UINT loc = 0;
 		DynamicInstancingBuffer->Map(D3D11VertexBuffer::M_WRITE_DISCARD,
-			(void**)& data, &size);
+			(void**)&data, &size);
 		static std::vector<VobInstanceInfo, AlignmentAllocator<VobInstanceInfo, 16>>
 			s_InstanceData;
 		for (auto const& staticMeshVisual : staticMeshVisuals) {
@@ -3365,7 +3365,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 						PS_Diffuse->GetConstantBuffer()[2]->UpdateBuffer(&b);
 						PS_Diffuse->GetConstantBuffer()[2]->BindToPixelShader(2);*/
 #endif
-				}
+					}
 					else {
 						// Check for alphablending on world mesh
 						bool blendAdd = itt.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_ADD;
@@ -3433,17 +3433,17 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 #ifndef PUBLIC_RELEASE
 							for (size_t s = 0; s < staticMeshVisual.second->Instances.size(); s++) {
 								DirectX::SimpleMath::Vector3 pos =
-									D3DXVECTOR3(staticMeshVisual.second->Instances[s].world._14,
+									Vector3(staticMeshVisual.second->Instances[s].world._14,
 										staticMeshVisual.second->Instances[s].world._24,
 										staticMeshVisual.second->Instances[s].world._34);
 								GetLineRenderer()->AddAABBMinMax(pos - staticMeshVisual.second->BBox.Min,
 									pos + staticMeshVisual.second->BBox.Max,
-									D3DXVECTOR4(1, 0, 0, 1));
-						}
+									Vector4(1, 0, 0, 1));
+							}
 #endif
 							continue;
+						}
 					}
-			}
 
 					if (tesselationEnabled && !mi->IndicesPNAEN.empty() &&
 						RenderingStage == DES_MAIN &&
@@ -3476,15 +3476,15 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 							sizeof(VobInstanceInfo), staticMeshVisual.second->Instances.size(),
 							sizeof(ExVertexStruct), staticMeshVisual.second->StartInstanceNum);
 					}
-		}
-	}
+				}
+			}
 
 			// Reset visual
 			if (doReset &&
 				!Engine::GAPI->GetRendererState()->RendererSettings.FixViewFrustum) {
 				staticMeshVisual.second->StartNewFrame();
 			}
-}
+		}
 	}
 
 	// Draw mobs
@@ -3886,7 +3886,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 						// doesn't flicker when moving
 						float d;
 						XMStoreFloat(&d, XMVector3LengthSq(XMVectorSubtract(light->Vob->GetPositionWorld(), vPlayerPosition)));
-						
+
 						float range = light->Vob->GetLightRange() * 1.5f;
 
 						// If the engine said this light should be updated, then do so. If
@@ -3934,7 +3934,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	static auto oldDir = dir;
 	static auto smoothDir = dir;
 
-	static auto oldP = DirectX::SimpleMath::Vector3(0, 0, 0);
+	static auto oldP = DirectX::SimpleMath::Vector3::Zero;
 
 	DirectX::SimpleMath::Vector3 WorldShadowCP;
 
@@ -3984,7 +3984,8 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	lookAt -= dir;
 
 	// Create shadowmap view-matrix
-	cr.ViewReplacement = DirectX::XMMatrixLookAtLH(p, lookAt, Vector3(0, 1, 0));
+	static const XMVECTORF32 s_lookatUp = {0.f, 1.f, 0.f, 0.f};
+	cr.ViewReplacement = DirectX::XMMatrixLookAtLH(p, lookAt, s_lookatUp);
 	cr.ViewReplacement = DirectX::XMMatrixTranspose(cr.ViewReplacement);
 
 	cr.ProjectionReplacement = DirectX::XMMatrixOrthographicLH(
@@ -4676,7 +4677,7 @@ XRESULT D3D11GraphicsEngine::DrawOcean(GOcean* ocean) {
 	for (auto const& patch : patches) {
 		XMMATRIX scale, world;
 		scale = XMMatrixIdentity();
-		scale = XMMatrixScaling(OCEAN_PATCH_SIZE,OCEAN_PATCH_SIZE,OCEAN_PATCH_SIZE);
+		scale = XMMatrixScaling(OCEAN_PATCH_SIZE, OCEAN_PATCH_SIZE, OCEAN_PATCH_SIZE);
 
 		world = XMMatrixTranslation(patch.x, patch.y, patch.z);
 		world = scale * world;
@@ -4684,7 +4685,7 @@ XRESULT D3D11GraphicsEngine::DrawOcean(GOcean* ocean) {
 		ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&world);
 		ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
-		XMVECTOR localEye = Vector3(0, 0, 0);
+		XMVECTOR localEye = Vector3::Zero;
 		world = XMMatrixTranspose(world);
 
 		localEye = XMVector3TransformCoord(localEye, XMMatrixInverse(nullptr, world * viewMatrix));
@@ -5120,7 +5121,7 @@ void D3D11GraphicsEngine::CreateMainUIView() {
 		UIView = std::make_unique<D2DView>();
 
 		ID3D11Texture2D* tex;
-		BackbufferRTV->GetResource((ID3D11Resource * *)& tex);
+		BackbufferRTV->GetResource((ID3D11Resource * *)&tex);
 		if (XR_SUCCESS != UIView->Init(Resolution, tex)) {
 			UIView.reset();
 
@@ -5186,10 +5187,10 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 
 	// Clear GBuffer0 to hold the refraction vectors since it's not needed anymore
 	GetContext()->ClearRenderTargetView(GBuffer0_Diffuse->GetRenderTargetView(),
-		(float*)& float4(0.0f, 0.0f, 0.0f, 0.0f));
+		(float*)&float4(0.0f, 0.0f, 0.0f, 0.0f));
 	GetContext()->ClearRenderTargetView(
 		GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView(),
-		(float*)& float4(0.0f, 0.0f, 0.0f, 0.0f));
+		(float*)&float4(0.0f, 0.0f, 0.0f, 0.0f));
 
 	D3D11PShader* distPS = ShaderManager->GetPShader("PS_ParticleDistortion");
 
