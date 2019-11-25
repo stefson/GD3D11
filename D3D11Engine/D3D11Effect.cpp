@@ -16,6 +16,8 @@
 #include "RenderToTextureBuffer.h"
 // TODO: Remove this!
 #include "D3D11GraphicsEngine.h"
+
+using namespace Microsoft::WRL;
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
 
@@ -24,21 +26,14 @@ D3D11Effect::D3D11Effect()
 	RainBufferDrawFrom = nullptr;
 	RainBufferStreamTo = nullptr;
 	RainBufferInitial = nullptr;
-	RainShadowmap = nullptr;
-	RainTextureArray = nullptr;
-	RainTextureArraySRV = nullptr;
 }
 
 
 D3D11Effect::~D3D11Effect()
 {
-	if (RainTextureArray)RainTextureArray->Release();
-	if (RainTextureArraySRV)RainTextureArraySRV->Release();
-
 	delete RainBufferInitial;
 	delete RainBufferDrawFrom;
 	delete RainBufferStreamTo;
-	delete RainShadowmap;
 }
 
 /** Loads a texturearray. Use like the following: Put path and prefix as parameter. The files must then be called name_xxxx.dds */
@@ -149,17 +144,19 @@ XRESULT D3D11Effect::DrawRain()
 
 		firstFrame = true;
 
-		if (!RainTextureArray)
+		if (!RainTextureArray.Get())
 		{
+			HRESULT hr = S_OK;
 			// Load textures...
 			LogInfo() << "Loading rain-drop textures";
-			LoadTextureArray(e->GetDevice(), e->GetContext(), "system\\GD3D11\\Textures\\Raindrops\\cv0_vPositive_", 370, &RainTextureArray, &RainTextureArraySRV);
+			LE(LoadTextureArray(e->GetDevice(), e->GetContext(), "system\\GD3D11\\Textures\\Raindrops\\cv0_vPositive_", 370, &RainTextureArray, &RainTextureArraySRV));
+			
 		}
 
-		if (!RainShadowmap)
+		if (!RainShadowmap.get())
 		{
 			const int s = 2048;
-			RainShadowmap = new RenderToDepthStencilBuffer(e->GetDevice(), s, s, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_R32_FLOAT);
+			RainShadowmap = std::make_unique<RenderToDepthStencilBuffer>(e->GetDevice(), s, s, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_R32_FLOAT);
 		}
 	}
 
@@ -263,7 +260,7 @@ XRESULT D3D11Effect::DrawRain()
 	e->SetupVS_ExConstantBuffer();
 
 	// Bind droplets
-	e->GetContext()->PSSetShaderResources(0, 1, &RainTextureArraySRV);
+	e->GetContext()->PSSetShaderResources(0, 1, RainTextureArraySRV.GetAddressOf());
 
 	// Draw the vertexbuffer
 	e->DrawVertexBuffer(RainBufferDrawFrom, numParticles, sizeof(ParticleInstanceInfo));
@@ -279,7 +276,7 @@ XRESULT D3D11Effect::DrawRain()
 /** Renders the rain-shadowmap */
 XRESULT D3D11Effect::DrawRainShadowmap()
 {
-	if (!RainShadowmap)
+	if (!RainShadowmap.get())
 		return XR_SUCCESS;
 
 	D3D11GraphicsEngine * e = (D3D11GraphicsEngine *)Engine::GraphicsEngine; // TODO: This has to be a cast to D3D11GraphicsEngineBase!
@@ -330,7 +327,7 @@ XRESULT D3D11Effect::DrawRainShadowmap()
 	Engine::GAPI->GetRendererState()->RendererSettings.DrawSkeletalMeshes = false;
 
 	// Draw rain-shadowmap
-	e->RenderShadowmaps(p, RainShadowmap, true, false);
+	e->RenderShadowmaps(p, RainShadowmap.get(), true, false);
 	
 
 	// Restore old settings
@@ -359,11 +356,11 @@ HRESULT LoadTextureArray(ID3D11Device* pd3dDevice, ID3D11DeviceContext* context,
 	D3D11_TEXTURE2D_DESC desc;
 	ZeroMemory(&desc, sizeof(D3D11_TEXTURE2D_DESC));
 
-//	CHAR szTextureName[MAX_PATH];
+	//	CHAR szTextureName[MAX_PATH];
 	CHAR str[MAX_PATH];
-	for(int i=0; i<iNumTextures; i++)
+	for (int i=0; i < iNumTextures; i++)
 	{
-		sprintf(str, "%s%.4d.dds", sTexturePrefix, i); 
+		sprintf(str, "%s%.4d.dds", sTexturePrefix, i);
 
 		ID3D11Resource *pRes = nullptr;
 		D3DX11_IMAGE_LOAD_INFO loadInfo;
@@ -377,7 +374,7 @@ HRESULT LoadTextureArray(ID3D11Device* pd3dDevice, ID3D11DeviceContext* context,
 		loadInfo.BindFlags = 0;
 		loadInfo.CpuAccessFlags = D3D11_CPU_ACCESS_WRITE | D3D11_CPU_ACCESS_READ;
 		loadInfo.MiscFlags = 0;
-		loadInfo.Format = DXGI_FORMAT_R8_UNORM; 
+		loadInfo.Format = DXGI_FORMAT_R8_UNORM;
 		loadInfo.Filter = D3DX11_FILTER_TRIANGLE;
 		loadInfo.MipFilter = D3DX11_FILTER_TRIANGLE;
 
@@ -389,14 +386,14 @@ HRESULT LoadTextureArray(ID3D11Device* pd3dDevice, ID3D11DeviceContext* context,
 			pTemp->GetDesc(&desc);
 
 
-			if (DXGI_FORMAT_R8_UNORM != desc.Format)   
-				return false;
+			if (DXGI_FORMAT_R8_UNORM != desc.Format)
+				return E_FAIL;
 
 
 
 			if (!(*ppTex2D))
 			{
-				desc.Usage = D3D11_USAGE_IMMUTABLE;
+				desc.Usage = D3D11_USAGE_DEFAULT;
 				desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 				desc.CPUAccessFlags = 0;
 				desc.ArraySize = iNumTextures;
@@ -405,17 +402,17 @@ HRESULT LoadTextureArray(ID3D11Device* pd3dDevice, ID3D11DeviceContext* context,
 
 
 			D3D11_MAPPED_SUBRESOURCE mappedTex2D;
-			for(UINT iMip=0; iMip < desc.MipLevels; iMip++)
+			for (UINT iMip=0; iMip < desc.MipLevels; iMip++)
 			{
 				context->Map(pTemp, iMip, D3D11_MAP_READ, 0, &mappedTex2D);
-
-				context->UpdateSubresource(		(*ppTex2D), 
-					D3D11CalcSubresource(iMip, i, desc.MipLevels),
-					nullptr,
-					mappedTex2D.pData,
-					mappedTex2D.RowPitch,
-					0);
-
+				if (mappedTex2D.pData) {
+					context->UpdateSubresource((*ppTex2D),
+						D3D11CalcSubresource(iMip, i, desc.MipLevels),
+						nullptr,
+						mappedTex2D.pData,
+						mappedTex2D.RowPitch,
+						0);
+				}
 				context->Unmap(pTemp, iMip);
 			}
 
@@ -424,7 +421,7 @@ HRESULT LoadTextureArray(ID3D11Device* pd3dDevice, ID3D11DeviceContext* context,
 		}
 		else
 		{
-			return false;
+			return E_FAIL;
 		}
 	}
 
