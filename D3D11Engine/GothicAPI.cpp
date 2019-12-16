@@ -1760,7 +1760,12 @@ void GothicAPI::DrawParticleFX(zCVob * source, zCParticleFX * fx, ParticleFrameD
 	fx->CreateParticlesUpdateDependencies();
 
 	// Do something I dont exactly know what it does :)
+#ifdef BUILD_GOTHIC_1_08k
+	// TODO: Figure out why this crashes sometimes!
+	// fx->GetStaticPFXList()->TouchPfx(fx);
+#else
 	fx->GetStaticPFXList()->TouchPfx(fx);
+#endif
 }
 
 /** Debugging */
