@@ -280,7 +280,7 @@ public:
 	DirectX::SimpleMath::Vector3 GetModelScale()
 	{
 #ifdef BUILD_GOTHIC_1_08k
-		return D3DXVECTOR3(1, 1, 1);
+		return DirectX::SimpleMath::Vector3::One;
 #endif
 
 		return *(DirectX::SimpleMath::Vector3 *)THISPTR_OFFSET(GothicMemoryLocations::zCModel::Offset_ModelScale);

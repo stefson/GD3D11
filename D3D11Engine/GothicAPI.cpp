@@ -482,11 +482,11 @@ void GothicAPI::OnGeometryLoaded(zCPolygon * *polys, unsigned int numPolygons) {
 	WorldConverter::ConvertWorldMesh(polys, numPolygons, &WorldSections, LoadedWorldInfo.get(), &WrappedWorldMesh);
 #else
 	if (Toolbox::FileExists(worldStr)) {
-		WorldConverter::LoadWorldMeshFromFile(worldStr, &WorldSections, LoadedWorldInfo, &WrappedWorldMesh);
+		WorldConverter::LoadWorldMeshFromFile(worldStr, &WorldSections, LoadedWorldInfo.get(), &WrappedWorldMesh);
 		LoadedWorldInfo->CustomWorldLoaded = true;
 	}
 	else {
-		WorldConverter::ConvertWorldMesh(polys, numPolygons, &WorldSections, LoadedWorldInfo, &WrappedWorldMesh);
+		WorldConverter::ConvertWorldMesh(polys, numPolygons, &WorldSections, LoadedWorldInfo.get(), &WrappedWorldMesh);
 	}
 #endif
 	LogInfo() << "Done extracting world!";
@@ -2446,8 +2446,8 @@ void GothicAPI::CollectVisibleVobs(std::vector<VobInfo*> & vobs, std::vector<Vob
 			if (it->VisualInfo && ((dist < vobIndoorDist && it->IsIndoorVob) || (dist < vobOutdoorSmallDist && it->VisualInfo->MeshSize < vobSmallSize) || (dist < vobOutdoorDist))) {
 #ifdef BUILD_GOTHIC_1_08k
 				// TODO: This is sometimes nullptr, suggesting that the Vob is invalid. Why does this happen?
-				if (!(*it)->VobConstantBuffer) {
-					removeList.push_back((*it));
+				if (!it->VobConstantBuffer) {
+					removeList.push_back(it);
 					continue;
 				}
 #endif
