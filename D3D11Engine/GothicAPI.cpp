@@ -10,6 +10,7 @@
 #include "zCTexture.h"
 #include "zCVisual.h"
 #include "zCVob.h"
+#include "zCClassDef.h"
 #include "zCProgMeshProto.h"
 #include "zCCamera.h"
 #include "oCGame.h"
@@ -763,6 +764,111 @@ void GothicAPI::DrawParticlesSimple()
 	}
 }
 
+// Converts poly strip visuals to render ready geometry
+void GothicAPI::CalcPolyStripMeshes() {
+
+	PolyStripInfos.clear();
+
+	for (auto it = PolyStripVisuals.begin(); it != PolyStripVisuals.end(); it++) {
+		zCPolyStrip* pStrip = *it;
+
+		if (!pStrip) return;
+
+		//Pointer passed is a placeholder, it'll not be used inside the function.
+		//We need gothic engine to only execute relevant calculations inside native Render()
+		//without actually rendering polygons. Inside Render() polygons are rendered
+		//with zCRnd_D3D::DrawPoly(). Hook created inside zCRndD3D.h prevents native rendering.
+		pStrip->Render(pStrip);
+		//////////////////////////////
+
+		zCPolyStripInstance pStripInst = pStrip->GetInstanceData();
+		zCMaterial* mat = pStripInst.material;
+		zCTexture* tx = mat->GetAniTexture();
+
+		//These values go back to 0 after reaching maxSegAmount
+		int firstSeg = pStripInst.firstSeg;
+		int lastSeg = pStripInst.lastSeg;
+		int maxSegAmount = pStripInst.numVert / 2;
+
+		float* alphaList = pStripInst.alphaList;
+		zCVertex* vertList = pStripInst.vertList;
+		zCPolygon* poly = &(pStripInst.polyList[0]);
+
+		std::vector<ExVertexStruct> vertices;
+		std::vector<VERTEX_INDEX> indices;
+
+		//order of vertex indeces that make up a single poly
+		int vertOrder[4] = { 0, 1, 3, 2 };
+
+		//Loop though segment while allowing segment index to overflow maxSegAmount
+		for (int i = firstSeg; ; i++) {
+			int segIndex = i % maxSegAmount;
+
+			if (segIndex == lastSeg) {
+				//Triangles for the last segment are created during previous iteration, so break here.
+				break;
+			}
+
+			std::vector<ExVertexStruct> polyFan;
+
+#ifdef BUILD_GOTHIC_1_08k
+			//For G1 vertices are taken from polygons in polyList
+			poly = &pStripInst.polyList[segIndex];
+			zCVertex** polyVertices = poly->getVertices();
+
+			for (int n = 0; n < 4; n++) {
+				ExVertexStruct vert;
+
+				vert.Position = polyVertices[n]->Position;
+				vert.TexCoord = poly->getFeatures()[n]->texCoord;
+				vert.Normal = poly->getFeatures()[n]->normal;
+				vert.Color = poly->getFeatures()[n]->lightStatic;
+
+				polyFan.push_back(vert);
+			}
+
+
+#endif
+#ifdef BUILD_GOTHIC_2_6_fix
+			//For G2 polyList only contains a single polygon (supposed to be kind of a reference it seems) 
+			//and vertices should be taken from vertList, while preserving a correct order making up a
+			//properly winded polygon
+			for (int n = 0; n < 4; n++) {
+				//In similar fashion to segment index - vertex index should overflow numVert.
+				int vInd = (segIndex * 2 + vertOrder[n]) % pStripInst.numVert;
+				//Segment index of the current vertex (it's not always equals `i` since we loop through next segment's vertices as well).
+				int vSegInd = ((segIndex * 2 + vertOrder[n]) / 2) % maxSegAmount;
+
+				ExVertexStruct vert;
+
+				vert.Position = vertList[vInd].Position;
+				//Vertex features are hooked up from reference polygon's vertices
+				vert.TexCoord = poly->getFeatures()[n]->texCoord;
+				vert.Normal = poly->getFeatures()[n]->normal;
+				vert.Color = poly->getFeatures()[n]->lightStatic;
+
+				//Applying current segment alpha values//				
+				uint8_t color[4];
+				memcpy(&color, &vert.Color, 4);
+				float alpha = alphaList[vSegInd];
+				if (alpha < 0) alpha = 0;
+				color[3] = alpha;
+				memcpy(&vert.Color, &color, 4);
+				/////////////////////////////////////////
+				polyFan.push_back(vert);
+			}
+#endif
+
+			if (!polyFan.empty()) {
+				//Convert list of quads to list of triangles
+				WorldConverter::TriangleFanToList(&polyFan[0], polyFan.size(), &PolyStripInfos[tx].vertices);
+				PolyStripInfos[tx].material = mat;
+			}
+		}
+
+	}
+};
+
 /** Returns a list of visible particle-effects */
 void GothicAPI::GetVisibleParticleEffectsList(std::vector<zCVob*> & pfxList)
 {
@@ -899,11 +1005,23 @@ void GothicAPI::OnVobMoved(zCVob * vob)
 void GothicAPI::OnVisualDeleted(zCVisual * visual) {
 	std::vector<std::string> extv;
 
+	zCClassDef* classDef = ((zCObject*)(visual))->_GetClassDef();
+	const char* className = classDef->className.ToChar();
+
 	// Get the visuals possible file extensions
 	int e = 0;
 	while (strlen(visual->GetFileExtension(e)) > 0) {
 		extv.push_back(visual->GetFileExtension(e));
 		e++;
+	}
+
+	// This is a poly strip vob
+	if (strcmp(className, "zCPolyStrip") == 0) {
+		for (auto it = PolyStripVisuals.begin(); it != PolyStripVisuals.end(); it++) {
+			if (*it == (zCPolyStrip*)visual) {
+				PolyStripVisuals.erase(*it);
+			}
+		}
 	}
 
 	// Check every extension
@@ -1022,6 +1140,15 @@ void GothicAPI::LeaveResourceCriticalSection()
 void GothicAPI::OnRemovedVob(zCVob * vob, zCWorld * world) {
 	//LogInfo() << "Removing vob: " << vob;
 	Engine::GraphicsEngine->OnVobRemovedFromWorld(vob);
+
+	zCVisual* visual = vob->GetVisual();
+	if (visual) {
+		zCClassDef* classDef = ((zCObject*)(visual))->_GetClassDef();
+		const char* className = classDef->className.ToChar();
+		if (strcmp(className, "zCPolyStrip") == 0) {
+			PolyStripVisuals.erase((zCPolyStrip*)visual); //remove it if it exists in polystrips array
+		}
+	}
 
 	std::set<zCVob*>::iterator it = RegisteredVobs.find(vob);
 	if (it == RegisteredVobs.end()) {
@@ -1206,6 +1333,18 @@ void GothicAPI::OnAddVob(zCVob * vob, zCWorld * world) {
 		return;
 #endif
 
+	zCClassDef* classDef = ((zCObject*)(vob->GetVisual()))->_GetClassDef();
+	const char* className = classDef->className.ToChar();
+
+	std::vector<std::string> extv;
+
+	int e = 0;
+	while (strlen(vob->GetVisual()->GetFileExtension(e)) > 0)
+	{
+		extv.push_back(vob->GetVisual()->GetFileExtension(e));
+		e++;
+	}
+
 	// Add the vob to the set
 	if (RegisteredVobs.find(vob) != RegisteredVobs.end()) {
 		// Already got that
@@ -1216,12 +1355,8 @@ void GothicAPI::OnAddVob(zCVob * vob, zCWorld * world) {
 	if (!world)
 		world = oCGame::GetGame()->_zCSession_world;
 
-	std::vector<std::string> extv;
-
-	int e = 0;
-	while (strlen(vob->GetVisual()->GetFileExtension(e)) > 0) {
-		extv.push_back(vob->GetVisual()->GetFileExtension(e));
-		e++;
+	if (strcmp(className, "zCPolyStrip") == 0) {
+		PolyStripVisuals.insert((zCPolyStrip*)(vob->GetVisual()));
 	}
 
 	for (unsigned int i = 0; i < extv.size(); i++) {
@@ -1705,6 +1840,10 @@ void GothicAPI::DrawParticleFX(zCVob * source, zCParticleFX * fx, ParticleFrameD
 				break;
 			}
 
+			if (p->PolyStrip) {
+				PolyStripVisuals.insert(p->PolyStrip);
+			};
+
 			// Generate instance info
 			ParticleInstanceInfo ii;
 			ii.scale = Vector2(p->Size.x, p->Size.y);
@@ -1769,7 +1908,7 @@ void GothicAPI::DrawParticleFX(zCVob * source, zCParticleFX * fx, ParticleFrameD
 }
 
 /** Debugging */
-void GothicAPI::DrawTriangle()
+void GothicAPI::DrawTriangle(float3 pos = { 0.0f,0.0f,0.0f })
 {
 	D3D11VertexBuffer* vxb;
 	Engine::GraphicsEngine->CreateVertexBuffer(&vxb);
@@ -1794,6 +1933,13 @@ void GothicAPI::DrawTriangle()
 	vx[3].Color = float4(1, 0, 0, 1).ToDWORD();
 	vx[5].Color = float4(0, 1, 0, 1).ToDWORD();
 	vx[4].Color = float4(0, 0, 1, 1).ToDWORD();
+
+	for (int i = 0; i < 6; i++)
+	{
+		vx[i].Position.x += pos.x;
+		vx[i].Position.y += pos.y;
+		vx[i].Position.z += pos.z;
+	}
 
 	vxb->UpdateBuffer(vx);
 
