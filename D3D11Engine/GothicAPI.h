@@ -3,6 +3,7 @@
 #include "GothicGraphicsState.h"
 #include "WorldConverter.h"
 #include "zCTree.h"
+#include "zCPolyStrip.h"
 #include "zTypes.h"
 
 #define START_TIMING Engine::GAPI->GetRendererState()->RendererInfo.Timing.Start
@@ -138,6 +139,18 @@ struct ParticleFrameData {
 	unsigned int BufferPosition;
 	unsigned int BufferSize;
 	unsigned int NeededSize;
+};
+
+struct PolyStripInfo
+{
+	MeshInfo* meshInfo;
+	zCMaterial* material;
+	zCVob* vob;
+};
+
+struct PolyStripSegmentInfo
+{
+	std::chrono::time_point<std::chrono::steady_clock> createdAt;
 };
 
 /** Class used to communicate between Gothic and the Engine */
@@ -293,7 +306,7 @@ public:
 	void ResetViewTransform();
 
 	/** Debugging */
-	void DrawTriangle();
+	void DrawTriangle(float3 pos);
 
 	/** Removes the given quadmark */
 	void RemoveQuadMark(zCQuadMark * mark);
@@ -404,6 +417,9 @@ public:
 
 	/** Draws particles, in a simple way */
 	void DrawParticlesSimple();
+
+	/** Prepares poly strips for feeding into renderer (weapon and effect trails) */
+	void CalcPolyStripMeshes();
 
 	/** Moves the given vob from a BSP-Node to the dynamic vob list */
 	void MoveVobFromBspToDynamic(VobInfo * vob);
@@ -520,6 +536,9 @@ public:
 
 	/** Returns the map of static mesh visuals */
 	const std::unordered_map<zCProgMeshProto *, MeshVisualInfo *> & GetStaticMeshVisuals() { return StaticMeshVisuals; }
+
+	/** Returns the collection of PolyStrip meshes infos */
+	const std::list<PolyStripInfo>& GetPolyStripInfos() { return PolyStripInfos; };
 
 	/** Removes the given texture from the given section and stores the supression, so we can load it next time */
 	void SupressTexture(WorldMeshSectionInfo * section, const std::string & texture);
@@ -663,6 +682,12 @@ private:
 	std::list<zCVob *> DecalVobs;
 	std::unordered_map<zCVob *, std::string> tempParticleNames;
 
+	/** Poly strip segment infos (mostly their alpha values)**/
+	std::unordered_map<zCPolyStrip*, std::unordered_map<int, PolyStripSegmentInfo>> PolyStripSegmentInfos;
+
+	/** Poly strip Vobs */
+	std::list<zCVob*> PolyStripVobs;
+
 	/** Set of Materials */
 	std::set<zCMaterial *> LoadedMaterials;
 
@@ -671,6 +696,9 @@ private:
 
 	/** Map for static mesh visuals */
 	std::unordered_map<zCProgMeshProto *, MeshVisualInfo *> StaticMeshVisuals;
+
+	/** Collection of poly strip infos (includes mesh and material data) */
+	std::list<PolyStripInfo> PolyStripInfos;
 
 	/** Map for skeletal mesh visuals */
 	std::unordered_map<std::string, SkeletalMeshVisualInfo *> SkeletalMeshVisuals;

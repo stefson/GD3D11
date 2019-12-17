@@ -1613,6 +1613,11 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 	// DrawParticleEffects();
 	Engine::GAPI->DrawParticlesSimple();
 
+	// Calc weapon/effect trail mesh data
+	Engine::GAPI->CalcPolyStripMeshes();
+	// Draw those
+	DrawPolyStrips();
+
 	// Draw debug lines
 	LineRenderer->Flush();
 
@@ -1769,8 +1774,10 @@ XRESULT D3D11GraphicsEngine::DrawMeshInfoListAlphablended(
 	SetDefaultStates();
 
 	// Setup renderstates
-	Engine::GAPI->GetRendererState()->RasterizerState.CullMode =
-		GothicRasterizerStateInfo::CM_CULL_BACK;
+	// changed CM_CULL_BACK to CM_CULL_NONE since i've noticed some flat models being rendered incorrectly (waterfall splashes for ex)
+	// Hopefully this will not screw up something else
+	Engine::GAPI->GetRendererState()->RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
+
 	Engine::GAPI->GetRendererState()->RasterizerState.SetDirty();
 
 	DirectX::SimpleMath::Matrix view;
@@ -3624,6 +3631,103 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 /** Draws the static VOBs */
 XRESULT D3D11GraphicsEngine::DrawVOBs(bool noTextures) {
 	return DrawVOBsInstanced();
+}
+
+XRESULT D3D11GraphicsEngine::DrawPolyStrips(bool noTextures) {
+	std::list<PolyStripInfo> polyStripInfos = Engine::GAPI->GetPolyStripInfos();
+
+	SetDefaultStates();
+
+	// Setup renderstates
+	Engine::GAPI->GetRendererState()->RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
+	Engine::GAPI->GetRendererState()->RasterizerState.SetDirty();
+
+
+	Matrix view;
+	Engine::GAPI->GetViewMatrix(&view);
+	Engine::GAPI->SetViewTransform(view);
+	
+	SetActivePixelShader("PS_Diffuse");//seems like "PS_Simple" is used anyway thanks to BindShaderForTexture function used below
+	SetActiveVertexShader("VS_Ex");
+
+	//No idea what these do
+	SetupVS_ExMeshDrawCall();
+	SetupVS_ExConstantBuffer();
+
+	// Set constant buffer
+	ActivePS->GetConstantBuffer()[0]->UpdateBuffer(&Engine::GAPI->GetRendererState()->GraphicsState);
+	ActivePS->GetConstantBuffer()[0]->BindToPixelShader(0);
+
+	// Use default material info for now
+	MaterialInfo defInfo;
+	ActivePS->GetConstantBuffer()[2]->UpdateBuffer(&defInfo);
+	ActivePS->GetConstantBuffer()[2]->BindToPixelShader(2);
+
+
+
+	for (std::list<PolyStripInfo>::iterator it = polyStripInfos.begin(); it != polyStripInfos.end(); it++) {
+		zCMaterial* mat = it->material;
+		MeshInfo* mi = it->meshInfo;
+		zCVob* vob = it->vob;
+
+		//Setting world transform matrix/////////////
+		Matrix id = Matrix::Identity;
+		
+		//vob->GetWorldMatrix(&id);
+		ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&id);
+		ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
+
+		zCTexture* tx = mat->GetAniTexture();
+
+		// Check for alphablending on world mesh
+		bool blendAdd = mat->GetAlphaFunc() == zMAT_ALPHA_FUNC_ADD;
+		bool blendBlend = mat->GetAlphaFunc() == zMAT_ALPHA_FUNC_BLEND;
+
+
+		if (tx->CacheIn(0.6f) == zRES_CACHED_IN)
+		{
+			MyDirectDrawSurface7* surface = tx->GetSurface();
+			ID3D11ShaderResourceView* srv[3];
+
+			BindShaderForTexture(mat->GetAniTexture(), false, mat->GetAlphaFunc());
+
+			// Get diffuse and normalmap
+			srv[0] = ((D3D11Texture*)surface->GetEngineTexture())->GetShaderResourceView();
+			srv[1] = surface->GetNormalmap() ? ((D3D11Texture*)surface->GetNormalmap())->GetShaderResourceView() : NULL;
+			srv[2] = surface->GetFxMap() ? ((D3D11Texture*)surface->GetFxMap())->GetShaderResourceView() : NULL;
+
+			// Bind both
+			Context->PSSetShaderResources(0, 3, srv);
+
+			if ((blendAdd || blendBlend) && !Engine::GAPI->GetRendererState()->BlendState.BlendEnabled)
+			{
+				if (blendAdd)
+					Engine::GAPI->GetRendererState()->BlendState.SetAdditiveBlending();
+				else if (blendBlend)
+					Engine::GAPI->GetRendererState()->BlendState.SetAlphaBlending();
+
+				Engine::GAPI->GetRendererState()->BlendState.SetDirty();
+
+				Engine::GAPI->GetRendererState()->DepthState.DepthWriteEnabled = false;
+				Engine::GAPI->GetRendererState()->DepthState.SetDirty();
+
+				UpdateRenderStates();
+			}
+
+			MaterialInfo* info = Engine::GAPI->GetMaterialInfoFrom(tx);
+			if (!info->Constantbuffer)
+				info->UpdateConstantbuffer();
+
+			info->Constantbuffer->BindToPixelShader(2);
+		}
+
+		// Draw batch // Should i use some other drawing method maybe, since I don't really have a "batch"?
+		DrawInstanced(mi->MeshVertexBuffer, mi->MeshIndexBuffer, mi->Indices.size(), DynamicInstancingBuffer.get(), sizeof(VobInstanceInfo), 1, sizeof(ExVertexStruct), 0);
+	}
+
+	SetDefaultStates();
+
+	return XR_SUCCESS;
 }
 
 /** Returns the current size of the backbuffer */
