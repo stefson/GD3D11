@@ -143,7 +143,7 @@ struct ParticleFrameData {
 
 struct PolyStripInfo
 {
-	MeshInfo* meshInfo;
+	std::vector<ExVertexStruct> vertices;
 	zCMaterial* material;
 	zCVob* vob;
 };
@@ -538,7 +538,7 @@ public:
 	const std::unordered_map<zCProgMeshProto *, MeshVisualInfo *> & GetStaticMeshVisuals() { return StaticMeshVisuals; }
 
 	/** Returns the collection of PolyStrip meshes infos */
-	const std::list<PolyStripInfo>& GetPolyStripInfos() { return PolyStripInfos; };
+	const std::map<zCTexture*, PolyStripInfo>& GetPolyStripInfos() { return PolyStripInfos; };
 
 	/** Removes the given texture from the given section and stores the supression, so we can load it next time */
 	void SupressTexture(WorldMeshSectionInfo * section, const std::string & texture);
@@ -682,11 +682,8 @@ private:
 	std::list<zCVob *> DecalVobs;
 	std::unordered_map<zCVob *, std::string> tempParticleNames;
 
-	/** Poly strip segment infos (mostly their alpha values)**/
-	std::unordered_map<zCPolyStrip*, std::unordered_map<int, PolyStripSegmentInfo>> PolyStripSegmentInfos;
-
-	/** Poly strip Vobs */
-	std::list<zCVob*> PolyStripVobs;
+	/** Poly strip Visuals */
+	std::set<zCPolyStrip*> PolyStripVisuals;
 
 	/** Set of Materials */
 	std::set<zCMaterial *> LoadedMaterials;
@@ -698,7 +695,7 @@ private:
 	std::unordered_map<zCProgMeshProto *, MeshVisualInfo *> StaticMeshVisuals;
 
 	/** Collection of poly strip infos (includes mesh and material data) */
-	std::list<PolyStripInfo> PolyStripInfos;
+	std::map<zCTexture*, PolyStripInfo> PolyStripInfos;
 
 	/** Map for skeletal mesh visuals */
 	std::unordered_map<std::string, SkeletalMeshVisualInfo *> SkeletalMeshVisuals;

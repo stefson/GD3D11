@@ -1613,10 +1613,12 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 	// DrawParticleEffects();
 	Engine::GAPI->DrawParticlesSimple();
 
+#if defined BUILD_GOTHIC_2_6_fix || defined BUILD_GOTHIC_1_08k
 	// Calc weapon/effect trail mesh data
 	Engine::GAPI->CalcPolyStripMeshes();
 	// Draw those
 	DrawPolyStrips();
+#endif
 
 	// Draw debug lines
 	LineRenderer->Flush();
@@ -1774,10 +1776,8 @@ XRESULT D3D11GraphicsEngine::DrawMeshInfoListAlphablended(
 	SetDefaultStates();
 
 	// Setup renderstates
-	// changed CM_CULL_BACK to CM_CULL_NONE since i've noticed some flat models being rendered incorrectly (waterfall splashes for ex)
-	// Hopefully this will not screw up something else
-	Engine::GAPI->GetRendererState()->RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
 
+	Engine::GAPI->GetRendererState()->RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
 	Engine::GAPI->GetRendererState()->RasterizerState.SetDirty();
 
 	DirectX::SimpleMath::Matrix view;
@@ -3634,7 +3634,8 @@ XRESULT D3D11GraphicsEngine::DrawVOBs(bool noTextures) {
 }
 
 XRESULT D3D11GraphicsEngine::DrawPolyStrips(bool noTextures) {
-	std::list<PolyStripInfo> polyStripInfos = Engine::GAPI->GetPolyStripInfos();
+	//DrawMeshInfoListAlphablended was mostly used as an example to write everything below
+	std::map<zCTexture*, PolyStripInfo> polyStripInfos = Engine::GAPI->GetPolyStripInfos();
 
 	SetDefaultStates();
 
@@ -3658,17 +3659,23 @@ XRESULT D3D11GraphicsEngine::DrawPolyStrips(bool noTextures) {
 	ActivePS->GetConstantBuffer()[0]->UpdateBuffer(&Engine::GAPI->GetRendererState()->GraphicsState);
 	ActivePS->GetConstantBuffer()[0]->BindToPixelShader(0);
 
+	// Not sure what this does, adds some kind of sky tint?
+	GSky* sky = Engine::GAPI->GetSky();
+	ActivePS->GetConstantBuffer()[1]->UpdateBuffer(&sky->GetAtmosphereCB());
+	ActivePS->GetConstantBuffer()[1]->BindToPixelShader(1);
+
 	// Use default material info for now
 	MaterialInfo defInfo;
 	ActivePS->GetConstantBuffer()[2]->UpdateBuffer(&defInfo);
 	ActivePS->GetConstantBuffer()[2]->BindToPixelShader(2);
 
+	for (auto it = polyStripInfos.begin(); it != polyStripInfos.end(); it++) {
 
+		zCMaterial* mat = it->second.material;
+		zCTexture* tx = mat->GetAniTexture();
+		std::vector<ExVertexStruct> vertices = it->second.vertices;
 
-	for (std::list<PolyStripInfo>::iterator it = polyStripInfos.begin(); it != polyStripInfos.end(); it++) {
-		zCMaterial* mat = it->material;
-		MeshInfo* mi = it->meshInfo;
-		zCVob* vob = it->vob;
+		if (!vertices.size()) continue;
 
 		//Setting world transform matrix/////////////
 		Matrix id = Matrix::Identity;
@@ -3676,8 +3683,6 @@ XRESULT D3D11GraphicsEngine::DrawPolyStrips(bool noTextures) {
 		//vob->GetWorldMatrix(&id);
 		ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&id);
 		ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
-
-		zCTexture* tx = mat->GetAniTexture();
 
 		// Check for alphablending on world mesh
 		bool blendAdd = mat->GetAlphaFunc() == zMAT_ALPHA_FUNC_ADD;
@@ -3719,10 +3724,27 @@ XRESULT D3D11GraphicsEngine::DrawPolyStrips(bool noTextures) {
 				info->UpdateConstantbuffer();
 
 			info->Constantbuffer->BindToPixelShader(2);
+
+		} else {
+			//Don't draw if texture is not yet cached (I have no idea how can I preload it in advance)
+			continue;
 		}
 
-		// Draw batch // Should i use some other drawing method maybe, since I don't really have a "batch"?
-		DrawInstanced(mi->MeshVertexBuffer, mi->MeshIndexBuffer, mi->Indices.size(), DynamicInstancingBuffer.get(), sizeof(VobInstanceInfo), 1, sizeof(ExVertexStruct), 0);
+		//Populate TempVertexBuffer and draw it
+		D3D11_BUFFER_DESC desc;
+		TempVertexBuffer->GetVertexBuffer()->GetDesc(&desc);
+		if (desc.ByteWidth < sizeof(ExVertexStruct) * vertices.size())
+		{
+			LogInfo() << "(PolyStrip) TempVertexBuffer too small (" << desc.ByteWidth << "), need " << sizeof(ExVertexStruct) * vertices.size() << " bytes. Recreating buffer.";
+
+			// Buffer too small, recreate it
+			TempVertexBuffer.reset(new D3D11VertexBuffer());
+			// Reinit with a bit of a margin, so it will not be reinit each time new vertex is added
+			TempVertexBuffer->Init(NULL, sizeof(ExVertexStruct) * vertices.size() * 1.1, D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE);
+		}
+
+		TempVertexBuffer->UpdateBuffer(&vertices[0], sizeof(ExVertexStruct) * vertices.size());
+		DrawVertexBuffer(TempVertexBuffer.get(), vertices.size(), sizeof(ExVertexStruct));
 	}
 
 	SetDefaultStates();
