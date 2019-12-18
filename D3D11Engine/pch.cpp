@@ -99,3 +99,11 @@ int ComputeFVFSize(DWORD fvf) {
 
 	return size;
 }
+
+std::wstring ToWStr(const char* cStr) {
+	size_t cSize = strlen(cStr) + 1;
+	std::wstring wc(cSize, L'#');
+	mbstowcs(&wc[0], cStr, cSize);
+
+	return wc;
+}

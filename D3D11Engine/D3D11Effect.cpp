@@ -10,9 +10,7 @@
 #include "D3D11PShader.h"
 #include "D3D11ConstantBuffer.h"
 #include "GSky.h"
-#include <D3DX9.h>
-#include <D3DX11.h>
-#include <D3DX11tex.h>
+#include <DDSTextureLoader.h>
 #include "RenderToTextureBuffer.h"
 // TODO: Remove this!
 #include "D3D11GraphicsEngine.h"
@@ -361,24 +359,9 @@ HRESULT LoadTextureArray(ID3D11Device* pd3dDevice, ID3D11DeviceContext* context,
 	for (int i=0; i < iNumTextures; i++)
 	{
 		sprintf(str, "%s%.4d.dds", sTexturePrefix, i);
-
+		
 		ID3D11Resource *pRes = nullptr;
-		D3DX11_IMAGE_LOAD_INFO loadInfo;
-		ZeroMemory(&loadInfo, sizeof(D3DX11_IMAGE_LOAD_INFO));
-		loadInfo.Width = D3DX_FROM_FILE;
-		loadInfo.Height  = D3DX_FROM_FILE;
-		loadInfo.Depth  = D3DX_FROM_FILE;
-		loadInfo.FirstMipLevel = 0;
-		loadInfo.MipLevels = 10;
-		loadInfo.Usage = D3D11_USAGE_STAGING;
-		loadInfo.BindFlags = 0;
-		loadInfo.CpuAccessFlags = D3D11_CPU_ACCESS_WRITE | D3D11_CPU_ACCESS_READ;
-		loadInfo.MiscFlags = 0;
-		loadInfo.Format = DXGI_FORMAT_R8_UNORM;
-		loadInfo.Filter = D3DX11_FILTER_TRIANGLE;
-		loadInfo.MipFilter = D3DX11_FILTER_TRIANGLE;
-
-		LE(D3DX11CreateTextureFromFile(pd3dDevice, str, &loadInfo, nullptr, &pRes, &hr));
+		LE(CreateDDSTextureFromFileEx(pd3dDevice, ToWStr(str).c_str(), 0, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE, 0, false, &pRes, nullptr));
 		if (pRes)
 		{
 			ID3D11Texture2D * pTemp;
@@ -388,7 +371,6 @@ HRESULT LoadTextureArray(ID3D11Device* pd3dDevice, ID3D11DeviceContext* context,
 
 			if (DXGI_FORMAT_R8_UNORM != desc.Format)
 				return E_FAIL;
-
 
 
 			if (!(*ppTex2D))

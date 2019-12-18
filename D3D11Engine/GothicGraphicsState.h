@@ -520,7 +520,7 @@ struct GothicRendererSettings {
 
 		RainRadiusRange = 5000.0f;
 		RainHeightRange = 1000.0f;
-		RainNumParticles = 150000;
+		RainNumParticles = 50000;
 		RainMoveParticles = true;
 		RainGlobalVelocity = DirectX::SimpleMath::Vector3(250, -1000, 0);
 		RainUseInitialSet = false;

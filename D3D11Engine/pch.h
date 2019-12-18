@@ -49,3 +49,4 @@ void DebugWrite_i(LPCSTR lpDebugMessage, void * thisptr);
 /** Computes the size in bytes of the given FVF */
 int ComputeFVFSize(DWORD fvf);
 
+std::wstring ToWStr(const char* cStr);
