@@ -412,8 +412,11 @@ void GothicAPI::ReloadVobs() {
 	OnWorldLoaded();
 }
 void GothicAPI::ReloadPlayerVob() {
-	auto const&& player = (zCVob *)oCGame::GetPlayer();
-	auto const&& playerHomeworld = player->GetHomeWorld();
+	auto player = (zCVob *)oCGame::GetPlayer();
+	if (!player) return;
+	auto playerHomeworld = player->GetHomeWorld();
+	if (!playerHomeworld) return;
+	
 	OnRemovedVob(player, playerHomeworld);
 	OnAddVob(player, playerHomeworld);
 }
@@ -2449,9 +2452,11 @@ LRESULT GothicAPI::OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 				case VK_NUMPAD5:
 					if (GetAsyncKeyState(VK_CONTROL)) {
 						ReloadVobs();
+						PrintMessageTimed(INT2(5, 350), "Skeletal-Mesh vobs reloaded.");
 					}
 					else {
 						ReloadPlayerVob();
+						PrintMessageTimed(INT2(5, 350), "Player Vob reloaded.");
 					}
 					break;
 					}
