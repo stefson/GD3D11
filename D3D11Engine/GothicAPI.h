@@ -148,11 +148,6 @@ struct PolyStripInfo
 	zCVob* vob;
 };
 
-struct PolyStripSegmentInfo
-{
-	std::chrono::time_point<std::chrono::steady_clock> createdAt;
-};
-
 /** Class used to communicate between Gothic and the Engine */
 class zCPolygon;
 class zCTexture;
