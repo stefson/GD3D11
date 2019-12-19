@@ -1,7 +1,6 @@
 #include "pch.h"
 
 #include <D3D11.h>
-#include <D3DX11.h>
 #include "ddraw.h"
 #include "d3d.h"
 #include "D3D7/MyDirectDraw.h"
@@ -13,7 +12,6 @@
 #include <signal.h>
 #include "VersionCheck.h"
 
-#pragma comment(lib, "d3dx11.lib")
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "winmm.lib")

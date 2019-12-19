@@ -26,8 +26,10 @@
 #include "zCView.h"
 #include "zCVobLight.h"
 #include <wrl\client.h>
+#include <DDSTextureLoader.h>
+#include <ScreenGrab.h>
+#include <wincodec.h>
 
-#include <D3DX11.h>
 #pragma comment(lib, "dxguid.lib")
 
 namespace wrl = Microsoft::WRL;
@@ -318,17 +320,11 @@ XRESULT D3D11GraphicsEngine::Init() {
 	InfiniteRangeConstantBuffer->UpdateBuffer(&ircbData);
 
 	// Load reflectioncube
-	if (S_OK != D3DX11CreateShaderResourceViewFromFile(
-		GetDevice(), "system\\GD3D11\\Textures\\reflect_cube.dds", nullptr,
-		nullptr, &ReflectionCube, nullptr))
-		LogWarn()
-		<< "Failed to load file: system\\GD3D11\\Textures\\reflect_cube.dds";
+	if (S_OK != CreateDDSTextureFromFile(GetDevice(), L"system\\GD3D11\\Textures\\reflect_cube.dds", nullptr, &ReflectionCube))
+		LogWarn() << "Failed to load file: system\\GD3D11\\Textures\\reflect_cube.dds";
 
-	if (S_OK != D3DX11CreateShaderResourceViewFromFile(
-		GetDevice(), "system\\GD3D11\\Textures\\SkyCubemap2.dds", nullptr,
-		nullptr, &ReflectionCube2, nullptr))
-		LogWarn()
-		<< "Failed to load file: system\\GD3D11\\Textures\\SkyCubemap2.dds";
+	if (S_OK != CreateDDSTextureFromFile(GetDevice(), L"system\\GD3D11\\Textures\\SkyCubemap2.dds", nullptr, &ReflectionCube2))
+		LogWarn() << "Failed to load file: system\\GD3D11\\Textures\\SkyCubemap2.dds";
 
 	// Init quad buffers
 	Engine::GraphicsEngine->CreateVertexBuffer(&QuadVertexBuffer);
@@ -5551,6 +5547,11 @@ void D3D11GraphicsEngine::UpdateOcclusion() {
 
 /** Saves a screenshot */
 void D3D11GraphicsEngine::SaveScreenshot() {
+	if (!SaveScreenshotNextFrame) {
+		SaveScreenshotNextFrame = true;
+		return;
+	}
+	SaveScreenshotNextFrame = false;
 	HRESULT hr;
 
 	// Buffer for scaling down the image
@@ -5572,7 +5573,7 @@ void D3D11GraphicsEngine::SaveScreenshot() {
 	texDesc.MiscFlags = 0;
 	texDesc.SampleDesc.Count = 1;
 	texDesc.SampleDesc.Quality = 0;
-	texDesc.Usage = D3D11_USAGE_IMMUTABLE;
+	texDesc.Usage = D3D11_USAGE_DEFAULT;
 
 	ID3D11Texture2D* texture;
 	LE(GetDevice()->CreateTexture2D(&texDesc, 0, &texture));
@@ -5593,7 +5594,8 @@ void D3D11GraphicsEngine::SaveScreenshot() {
 
 	LogInfo() << "Saving screenshot to: " << name;
 
-	LE(D3DX11SaveTextureToFile(GetContext(), texture, D3DX11_IFF_JPG, name.c_str()));
+	
+	LE(SaveWICTextureToFile(GetContext(), texture, GUID_ContainerFormatJpeg, ToWStr(name.c_str()).c_str()));
 	texture->Release();
 
 	delete rt;
