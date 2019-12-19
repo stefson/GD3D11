@@ -4,12 +4,13 @@
 #include "Engine.h"
 #include "RenderToTextureBuffer.h"
 #include "D3D11GraphicsEngine.h"
-#include <D3DX11.h>
 #include "D3D11PfxRenderer.h"
 #include "D3D11ShaderManager.h"
 #include "D3D11VShader.h"
 #include "GothicAPI.h"
 #include "D3D11PShader.h"
+#include <d3dcompiler.h>
+#include <DDSTextureLoader.h>
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
@@ -48,36 +49,18 @@ HRESULT D3DX11CreateEffectFromFile_RES(
   HRESULT *pHResult
 )
 {
-
-	ID3D10Blob* ShaderBuffer;
 	ID3D10Blob* ErrorsBuffer;
-	HRESULT hr=D3DX11CompileFromFile(pFileName, pDefines, nullptr, nullptr, pProfile, HLSLFlags, FXFlags, nullptr, &ShaderBuffer,&ErrorsBuffer,pHResult);
-
+	HRESULT hr = D3DX11CompileEffectFromFile(ToWStr(pFileName).c_str(), pDefines, D3D_COMPILE_STANDARD_FILE_INCLUDE, HLSLFlags, FXFlags, pDevice, ppEffect, &ErrorsBuffer);
 
 	char* Errors;
 	if (ErrorsBuffer)
 	{
 		Errors=(char *)ErrorsBuffer->GetBufferPointer();
-
-		CHAR Msg[5024];
-
-		strcpy_s((char *)&Msg,ErrorsBuffer->GetBufferSize(),Errors);
-
-		if (ShaderBuffer)
-		{
-			LogError() << ErrorsBuffer->GetBufferPointer();
-			return E_FAIL;
-		} else
-		{
-			//MessageBoxA(nullptr,(char *)ErrorsBuffer->GetBufferPointer(),"There are warnings in that fx file!",MB_OK | MB_ICONWARNING | MB_TOPMOST);
-		}
+		LogError() << Errors;
+		
 		ErrorsBuffer->Release();
+		return hr;
 	}
-
-	D3DX11CreateEffectFromMemory(ShaderBuffer->GetBufferPointer(), ShaderBuffer->GetBufferSize(), HLSLFlags, pDevice, ppEffect);
-
-
-	ShaderBuffer->Release();
 	return S_OK;
 }
 
@@ -106,14 +89,11 @@ bool D3D11PFX_SMAA::Init()
 	SMAAShader->AddCustomVariable("searchTex", CVT_SHADER_RES_VIEW, &SearchTexIdx);*/
 
 	// Load the textures
-	D3DX11_IMAGE_LOAD_INFO img;
-	img.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-	img.MipLevels = 1;
-	hr = D3DX11CreateShaderResourceViewFromFile(engine->GetDevice(), "system\\GD3D11\\Textures\\SMAA_AreaTexDX10.dds", &img, nullptr, &AreaTextureSRV, nullptr);
+	hr = CreateDDSTextureFromFile(engine->GetDevice(), L"system\\GD3D11\\Textures\\SMAA_AreaTexDX10.dds", nullptr, &AreaTextureSRV);
 	LE(hr);
 
-	img.Format = DXGI_FORMAT_R8_UNORM;
-	hr = D3DX11CreateShaderResourceViewFromFile(engine->GetDevice(), "system\\GD3D11\\Textures\\SMAA_SearchTex.dds", &img, nullptr, &SearchTextureSRV, nullptr);
+	//img.Format = DXGI_FORMAT_R8_UNORM;
+	hr = CreateDDSTextureFromFile(engine->GetDevice(), L"system\\GD3D11\\Textures\\SMAA_SearchTex.dds", nullptr, &SearchTextureSRV);
 	LE(hr);
 
 	SMAAShader->GetVariableByName("areaTex")->AsShaderResource()->SetResource(AreaTextureSRV);
@@ -312,14 +292,11 @@ void D3D11PFX_SMAA::OnResize(const INT2 & size)
 	if (SearchTextureSRV)SearchTextureSRV->Release();
 
 	// Load the textures
-	D3DX11_IMAGE_LOAD_INFO img;
-	img.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-	img.MipLevels = 1;
-	D3DX11CreateShaderResourceViewFromFile(engine->GetDevice(), "system\\GD3D11\\Textures\\SMAA_AreaTexDX10.dds", &img, nullptr, &AreaTextureSRV, &hr);
+	hr = CreateDDSTextureFromFile(engine->GetDevice(), L"system\\GD3D11\\Textures\\SMAA_AreaTexDX10.dds", nullptr, &AreaTextureSRV);
 	LE(hr);
 
-	img.Format = DXGI_FORMAT_R8_UNORM;
-	D3DX11CreateShaderResourceViewFromFile(engine->GetDevice(), "system\\GD3D11\\Textures\\SMAA_SearchTex.dds", &img, nullptr, &SearchTextureSRV, &hr);
+	//img.Format = DXGI_FORMAT_R8_UNORM;
+	hr = CreateDDSTextureFromFile(engine->GetDevice(), L"system\\GD3D11\\Textures\\SMAA_SearchTex.dds", nullptr, &SearchTextureSRV);
 	LE(hr);
 
 	SMAAShader->GetVariableByName("areaTex")->AsShaderResource()->SetResource(AreaTextureSRV);

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "D3D11GShader.h"
 #include "D3D11GraphicsEngineBase.h"
-#include <D3DX11.h>
+#include <d3dcompiler.h>
 #include "Engine.h"
 #include "GothicAPI.h"
 #include "D3D11ConstantBuffer.h"
@@ -57,8 +57,7 @@ HRESULT D3D11GShader::CompileShaderFromFile(const CHAR* szFileName, LPCSTR szEnt
 	m.insert(m.begin(), makros.begin(), makros.end());
 
 	ID3DBlob* pErrorBlob;
-	hr = D3DX11CompileFromFileA(szFileName, &m[0], nullptr, szEntryPoint, szShaderModel,
-		dwShaderFlags, 0, nullptr, ppBlobOut, &pErrorBlob, nullptr);
+	hr = D3DCompileFromFile(ToWStr(szFileName).c_str(), &m[0], D3D_COMPILE_STANDARD_FILE_INCLUDE, szEntryPoint, szShaderModel, dwShaderFlags, 0, ppBlobOut, &pErrorBlob);
 	if (FAILED(hr))
 	{
 		LogInfo() << "Shader compilation failed!";
