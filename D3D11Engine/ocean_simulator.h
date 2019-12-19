@@ -15,7 +15,6 @@
 #ifndef _OCEAN_WAVE_H
 #define _OCEAN_WAVE_H
 
-#include <D3DX11.h>
 #include <d3d11.h>
 #include <SimpleMath.h>
 

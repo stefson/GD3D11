@@ -249,12 +249,18 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID) {
 		ddraw.ReleaseDDThreadLock			= GetProcAddress(ddraw.dll, "ReleaseDDThreadLock");
 
 		*(void **)&DirectDrawCreateEx_t = (void *)GetProcAddress(ddraw.dll, "DirectDrawCreateEx");
+
+		if (CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED) == S_OK)
+		{
+			LogInfo() << "Initialized COM.\n";
+		}
 	} else if (reason == DLL_PROCESS_DETACH) {
 		FreeLibrary(hDDRAW);
 
 		Engine::OnShutDown();
 
 		LogInfo() << "DDRAW Proxy DLL signing off.\n";
+		CoUninitialize();
 	}
 	return TRUE;
 }

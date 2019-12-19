@@ -3,7 +3,8 @@
 #include "Engine.h"
 #include "D3D11GraphicsEngineBase.h"
 #include "GothicAPI.h"
-#include <D3DX11.h>
+#include <DDSTextureLoader.h>
+#include <WICTextureLoader.h>
 #include "RenderToTextureBuffer.h"
 
 using namespace DirectX;
@@ -78,7 +79,12 @@ XRESULT D3D11Texture::Init(const std::string & file)
 
 	//Engine::GAPI->EnterResourceCriticalSection();
 
-	LE(D3DX11CreateShaderResourceViewFromFileA(engine->GetDevice(), file.c_str(), nullptr, nullptr, &ShaderResourceView, nullptr));
+	if (file.find(".dds") != std::string::npos) {
+		LE(CreateDDSTextureFromFile(engine->GetDevice(), ToWStr(file.c_str()).c_str(), nullptr, &ShaderResourceView));
+
+	} else {
+		LE(CreateWICTextureFromFile(engine->GetDevice(), ToWStr(file.c_str()).c_str(), nullptr, &ShaderResourceView));
+	}
 
 	if (!ShaderResourceView)
 		return XR_FAILED;
