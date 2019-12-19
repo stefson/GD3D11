@@ -1141,6 +1141,19 @@ void GothicAPI::LeaveResourceCriticalSection()
 
 /** Called when a VOB got removed from the world */
 void GothicAPI::OnRemovedVob(zCVob * vob, zCWorld * world) {
+	if (!vob)
+	{
+		// Should never happen!
+		LogError() << "OnRemovedVob called with vob = nullptr!";
+		return;
+	}
+	if (!world)
+	{
+		// Same!
+		LogError() << "OnRemovedVob called with world = nullptr!";
+		return;
+	}
+
 	//LogInfo() << "Removing vob: " << vob;
 	Engine::GraphicsEngine->OnVobRemovedFromWorld(vob);
 
@@ -1303,7 +1316,7 @@ void GothicAPI::OnRemovedVob(zCVob * vob, zCWorld * world) {
 	}
 
 	// delete light info, if valid
-	delete li;
+	if (li) delete li;
 }
 
 /** Called on a SetVisual-Call of a vob */
