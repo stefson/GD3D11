@@ -30,8 +30,6 @@
 #include <ScreenGrab.h>
 #include <wincodec.h>
 
-#pragma comment(lib, "dxguid.lib")
-
 namespace wrl = Microsoft::WRL;
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
