@@ -15,11 +15,12 @@ If you have problems with building GD3D11 after following these instructions or 
 
 Building the mod is currently only possible with windows, but should be easy to do for anyone. To build the Mod, you need to do the following:
 
-* Download & install **Git** (or any Git client) and clone this GitHub repository to get the GD3D11 code.
-* Download & install **Microsoft Visual Studio 2015** (Community Edition is fine, make sure to enable C++ Tools during installation!) from Microsoft.
-* Download & install **DirectX SDK** (June 2010) from Microsoft.
-* Set environment variables "G2_SYSTEM_PATH" and/or "G1_SYSTEM_PATH", which should point to the "system"-folders of the games.
-* Download & install the latest release version of the mod into your game from the latest [WOG](http://forum.worldofplayers.de/forum/forums/104-Editing) D3D11 thread.
+- Download & install **Git** (or any Git client) and clone this GitHub repository to get the GD3D11 code.
+- Download & install **Microsoft Visual Studio 2019** (Community Edition is fine, make sure to enable C++ Tools during installation!) from Microsoft.
+	- might work on 2015 or 2017 but untested.
+- ~~Download ... DirectX SDK ...~~ **NEW**: Not dependent on DirectX SDK anymore.
+- Set environment variables "G2_SYSTEM_PATH" and/or "G1_SYSTEM_PATH", which should point to the "system"-folders of the games.
+- Download & install the latest release version of the mod into your game from the latest [WOG](http://forum.worldofplayers.de/forum/forums/104-Editing) D3D11 thread.
 
 To build GD3D11, open its solution file (.sln) with Visual Studio. It will the load all required projects. There are multiple build targets, one for release and one for developing / testing, for both games each:
 
