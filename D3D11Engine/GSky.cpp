@@ -15,11 +15,6 @@ using namespace DirectX;
 using namespace DirectX::SimpleMath;
 
 GSky::GSky() {
-	SkyPlaneVertexBuffer = nullptr;
-	SkyDome = nullptr;
-	SkyPlane = nullptr;
-	CloudTexture = nullptr;
-	NightTexture = nullptr;
 
 	Atmosphere.Kr = 0.0075f;
 	Atmosphere.Km = 0.0010f;
@@ -41,12 +36,6 @@ GSky::GSky() {
 }
 
 GSky::~GSky() {
-	SAFE_DELETE(SkyPlaneVertexBuffer);
-	SAFE_DELETE(SkyDome);
-	SAFE_DELETE(SkyPlane);
-	SAFE_DELETE(CloudTexture);
-	SAFE_DELETE(NightTexture);
-
 	for (unsigned int i = 0; i < SkyTextures.size(); i++) {
 		SAFE_DELETE(SkyTextures[i]);
 	}
@@ -109,7 +98,7 @@ XRESULT GSky::InitSky()
 /** Returns the skyplane */
 MeshInfo * GSky::GetSkyPlane()
 {
-	return SkyPlane;
+	return SkyPlane.get();
 }
 
 /** Adds a sky texture. Sky textures must be in order to make the daytime work */
@@ -127,7 +116,7 @@ XRESULT GSky::AddSkyTexture(const std::string & file)
 /** Loads the sky resources */
 XRESULT GSky::LoadSkyResources()
 {
-	SkyDome = new GMesh;
+	SkyDome = std::make_unique<GMesh>();
 	SkyDome->LoadMesh("system\\GD3D11\\meshes\\unitSphere.obj");
 	//SkyDome->LoadMesh("system\\GD3D11\\meshes\\skySphere.obj");
 
@@ -139,8 +128,9 @@ XRESULT GSky::LoadSkyResources()
 	AddSkyTexture("system\\GD3D11\\textures\\sky\\cgcookie_sky04.dds");
 	AddSkyTexture("system\\GD3D11\\textures\\sky\\cgcookie_sky05.dds");*/
 
-	
-	XLE(Engine::GraphicsEngine->CreateTexture(&CloudTexture));
+	D3D11Texture* cloudTex;
+	XLE(Engine::GraphicsEngine->CreateTexture(&cloudTex));
+	CloudTexture.reset(cloudTex);
 
 #ifdef BUILD_GOTHIC_1_08k
 	XLE(CloudTexture->Init("system\\GD3D11\\Textures\\SkyDay_G1.dds"));
@@ -148,11 +138,14 @@ XRESULT GSky::LoadSkyResources()
 	XLE(CloudTexture->Init("system\\GD3D11\\Textures\\SkyDay.dds"));
 #endif
 
-	XLE(Engine::GraphicsEngine->CreateTexture(&NightTexture));
+	D3D11Texture* nightTex;
+	XLE(Engine::GraphicsEngine->CreateTexture(&nightTex));
+	NightTexture.reset(nightTex);
+
 	XLE(NightTexture->Init("system\\GD3D11\\Textures\\starsh.jpg"));
 
 	VERTEX_INDEX indices[] = {0, 1,2,3,4,5};
-	SkyPlane = new MeshInfo;
+	SkyPlane = std::make_unique<MeshInfo>();
 	SkyPlane->Create(SkyPlaneVertices, 6, indices, 6);
 
 	return XR_SUCCESS;
@@ -161,10 +154,9 @@ XRESULT GSky::LoadSkyResources()
 /** Sets the current sky texture */
 void GSky::SetSkyTexture(ESkyTexture texture)
 {
-	// Delete old texture
-	delete CloudTexture; CloudTexture = nullptr;
-
-	XLE(Engine::GraphicsEngine->CreateTexture(&CloudTexture));
+	D3D11Texture* cloudTex;
+	XLE(Engine::GraphicsEngine->CreateTexture(&cloudTex));
+	CloudTexture.reset(cloudTex);
 
 	// Load the specific new texture
 	switch(texture)
@@ -273,7 +265,7 @@ XRESULT GSky::RenderSky() {
 
 /** Returns the loaded sky-Dome */
 GMesh* GSky::GetSkyDome() {
-	return SkyDome;
+	return SkyDome.get();
 }
 
 /** Returns the current sky-light color */
@@ -295,13 +287,13 @@ float4 GSky::GetSkylightColor() {
 /** Returns the cloud texture */
 D3D11Texture * GSky::GetCloudTexture()
 {
-	return CloudTexture;
+	return CloudTexture.get();
 }
 
 /** Returns the cloud texture */
 D3D11Texture * GSky::GetNightTexture()
 {
-	return NightTexture;
+	return NightTexture.get();
 }
 
 // The scale equation calculated by Vernier's Graphical Analysis

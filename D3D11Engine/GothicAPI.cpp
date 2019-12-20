@@ -1141,19 +1141,6 @@ void GothicAPI::LeaveResourceCriticalSection()
 
 /** Called when a VOB got removed from the world */
 void GothicAPI::OnRemovedVob(zCVob * vob, zCWorld * world) {
-	if (!vob)
-	{
-		// Should never happen!
-		LogError() << "OnRemovedVob called with vob = nullptr!";
-		return;
-	}
-	if (!world)
-	{
-		// Same!
-		LogError() << "OnRemovedVob called with world = nullptr!";
-		return;
-	}
-
 	//LogInfo() << "Removing vob: " << vob;
 	Engine::GraphicsEngine->OnVobRemovedFromWorld(vob);
 
@@ -1185,16 +1172,19 @@ void GothicAPI::OnRemovedVob(zCVob * vob, zCWorld * world) {
 		}
 	}
 
-	// Check if this was in some inventory
-	if (Inventory->OnRemovedVob(vob, world))
-		return; // Don't search in the other lists since it wont be in it anyways
+	// TODO: This is sometimes NULL
+	if (world)
+	{
+		// Check if this was in some inventory
+		if (Inventory->OnRemovedVob(vob, world))
+			return; // Don't search in the other lists since it wont be in it anyways
 
-	if (world != LoadedWorldInfo->MainWorld)
-		return; // *should* be already deleted from the inventory here. But watch out for dem leaks, dragons be here!
+		if (world != LoadedWorldInfo->MainWorld)
+			return; // *should* be already deleted from the inventory here. But watch out for dem leaks, dragons be here!
+	}
 
 	VobInfo * vi = VobMap[vob];
 	SkeletalVobInfo * svi = SkeletalVobMap[vob];
-
 
 	// Tell all dynamic lights that we removed a vob they could have cached
 	for (auto it = VobLightMap.begin(); it != VobLightMap.end(); ++it) {

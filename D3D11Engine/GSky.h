@@ -82,10 +82,10 @@ protected:
 	XRESULT AddSkyTexture(const std::string & file);
 
 	/** Sky mesh */
-	GMesh * SkyDome;
+	std::unique_ptr<GMesh> SkyDome;
 
 	/** Skyplane */
-	MeshInfo * SkyPlane;
+	std::unique_ptr<MeshInfo> SkyPlane;
 
 	/** Sky textures by time:
 		1=0	0.25	0.5	  0.75	  1=0
@@ -93,10 +93,10 @@ protected:
 	*/
 	std::vector<D3D11Texture *> SkyTextures;
 
-	D3D11Texture * CloudTexture;
-	D3D11Texture * NightTexture;
+	std::unique_ptr<D3D11Texture> CloudTexture;
+	std::unique_ptr<D3D11Texture> NightTexture;
 
-	D3D11VertexBuffer* SkyPlaneVertexBuffer;
+	std::unique_ptr<D3D11VertexBuffer> SkyPlaneVertexBuffer;
 	ExVertexStruct SkyPlaneVertices[6];
 
 	/** Atmospheric variables */

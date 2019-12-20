@@ -231,8 +231,9 @@ XRESULT D3D11Texture::CreateThumbnail()
 	LE(engine->GetDevice()->CreateRenderTargetView(Thumbnail, nullptr, &tempRTV));
 	if (!tempRTV)
 		return XR_FAILED;
-
-	engine->GetContext()->ClearRenderTargetView(tempRTV, (float *)&Vector4(1, 0, 0, 1));
+	
+	static auto vecOneZZOne = Vector4(1, 0, 0, 1);
+	engine->GetContext()->ClearRenderTargetView(tempRTV, (float *)&vecOneZZOne);
 
 	// Copy main texture to it
 	engine->GetContext()->PSSetShaderResources(0, 1, &ShaderResourceView);
