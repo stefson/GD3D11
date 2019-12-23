@@ -56,7 +56,12 @@ HRESULT D3DX11CreateEffectFromFile_RES(
 	if (ErrorsBuffer)
 	{
 		Errors=(char *)ErrorsBuffer->GetBufferPointer();
-		LogError() << Errors;
+		if (SUCCEEDED(hr)) {
+			LogWarn() << Errors;
+		}
+		else {
+			LogError() << Errors;
+		}
 		
 		ErrorsBuffer->Release();
 		return hr;
