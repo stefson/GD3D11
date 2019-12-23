@@ -79,12 +79,7 @@ XRESULT D3D11Texture::Init(const std::string & file)
 
 	//Engine::GAPI->EnterResourceCriticalSection();
 
-	if (file.find(".dds") != std::string::npos) {
-		LE(CreateDDSTextureFromFile(engine->GetDevice(), ToWStr(file.c_str()).c_str(), nullptr, &ShaderResourceView));
-
-	} else {
-		LE(CreateWICTextureFromFile(engine->GetDevice(), ToWStr(file.c_str()).c_str(), nullptr, &ShaderResourceView));
-	}
+	LE(CreateDDSTextureFromFile(engine->GetDevice(), ToWStr(file.c_str()).c_str(), nullptr, &ShaderResourceView));
 
 	if (!ShaderResourceView)
 		return XR_FAILED;

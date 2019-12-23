@@ -72,7 +72,7 @@ XRESULT GVegetationBox::InitVegetationBox( MeshInfo * mesh,
 	}
 
 	Engine::GraphicsEngine->CreateTexture(&VegetationTexture);
-	VegetationTexture->Init("system\\GD3D11\\Meshes\\grass02.png");
+	VegetationTexture->Init("system\\GD3D11\\Meshes\\grass02.dds");
 
 	MeshPart = mesh;
 	MeshTexture = meshTexture;
@@ -136,7 +136,7 @@ XRESULT GVegetationBox::InitVegetationBox(const DirectX::SimpleMath::Vector3 & m
 	}
 
 	Engine::GraphicsEngine->CreateTexture(&VegetationTexture);
-	VegetationTexture->Init("system\\GD3D11\\Meshes\\grass02.png");
+	VegetationTexture->Init("system\\GD3D11\\Meshes\\grass02.dds");
 
 	if (restrictByTexture != "")
 	{
@@ -687,7 +687,7 @@ void GVegetationBox::LoadFromFILE(FILE* f, int version)
 	}
 
 	Engine::GraphicsEngine->CreateTexture(&VegetationTexture);
-	VegetationTexture->Init("system\\GD3D11\\Meshes\\grass02.png");
+	VegetationTexture->Init("system\\GD3D11\\Meshes\\grass02.dds");
 
 	Modified = true;
 }

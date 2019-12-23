@@ -297,10 +297,10 @@ XRESULT D3D11GraphicsEngine::Init() {
 	DistortionTexture->Init("system\\GD3D11\\textures\\distortion2.dds");
 
 	NoiseTexture = std::make_unique<D3D11Texture>();
-	NoiseTexture->Init("system\\GD3D11\\textures\\noise.png");
+	NoiseTexture->Init("system\\GD3D11\\textures\\noise.dds");
 
 	WhiteTexture = std::make_unique<D3D11Texture>();
-	WhiteTexture->Init("system\\GD3D11\\textures\\white.png");
+	WhiteTexture->Init("system\\GD3D11\\textures\\white.dds");
 
 	InverseUnitSphereMesh = new GMesh;
 	InverseUnitSphereMesh->LoadMesh("system\\GD3D11\\meshes\\icoSphere.obj");
@@ -5597,7 +5597,7 @@ void D3D11GraphicsEngine::SaveScreenshot() {
 
 	LogInfo() << "Saving screenshot to: " << name;
 
-	
+	// TODO: Remove Screenshot capability? Removes the need for WIC
 	LE(SaveWICTextureToFile(GetContext(), texture, GUID_ContainerFormatJpeg, ToWStr(name.c_str()).c_str()));
 	texture->Release();
 
