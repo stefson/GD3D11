@@ -1427,8 +1427,9 @@ void GothicAPI::OnAddVob(zCVob * vob, zCWorld * world) {
 			if (str.empty()) // Happens when the model has no skeletal-mesh
 				str = mds;
 
+			// TODO: HAMMEL_BODY seems to have fucked up bones, but only this model! Replace with usual sheep before I fix this
 			if (str == "HAMMEL_BODY") {
-				str == "SHEEP_BODY"; // TODO: HAMMEL_BODY seems to have fucked up bones, but only this model! Replace with usual sheep before I fix this
+				str = "SHEEP_BODY";
 				if (!SkeletalMeshVisuals[str]) {
 					RegisteredVobs.erase(vob);
 					SkeletalMeshVisuals.erase(str);
