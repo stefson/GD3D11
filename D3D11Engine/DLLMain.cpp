@@ -1,6 +1,4 @@
 #include "pch.h"
-
-#include <D3D11.h>
 #include "ddraw.h"
 #include "d3d.h"
 #include "D3D7/MyDirectDraw.h"
@@ -222,6 +220,7 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID) {
 		strcat_s(infoBuf, MAX_PATH, "\\ddraw.dll");
 
 		ddraw.dll = LoadLibraryA(infoBuf);     
+		if (!ddraw.dll) return FALSE;
 
 		ddraw.AcquireDDThreadLock			= GetProcAddress(ddraw.dll, "AcquireDDThreadLock");
 		ddraw.CheckFullscreen				= GetProcAddress(ddraw.dll, "CheckFullscreen");
@@ -247,18 +246,12 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID) {
 		ddraw.ReleaseDDThreadLock			= GetProcAddress(ddraw.dll, "ReleaseDDThreadLock");
 
 		*(void **)&DirectDrawCreateEx_t = (void *)GetProcAddress(ddraw.dll, "DirectDrawCreateEx");
-
-		if (CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED) == S_OK)
-		{
-			LogInfo() << "Initialized COM.\n";
-		}
 	} else if (reason == DLL_PROCESS_DETACH) {
 		FreeLibrary(hDDRAW);
 
 		Engine::OnShutDown();
 
 		LogInfo() << "DDRAW Proxy DLL signing off.\n";
-		CoUninitialize();
 	}
 	return TRUE;
 }

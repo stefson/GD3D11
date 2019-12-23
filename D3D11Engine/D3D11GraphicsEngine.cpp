@@ -1590,7 +1590,7 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 		DepthStencilBuffer->GetDepthStencilView());
 
 	// Draw unlit decals 
-	// TODO: TODO: Only get them once!
+	// TODO: Only get them once!
 	if (Engine::GAPI->GetRendererState()->RendererSettings.DrawParticleEffects) {
 		std::vector<zCVob*> decals;
 		Engine::GAPI->GetVisibleDecalList(decals);
@@ -1607,7 +1607,8 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 	// DrawParticleEffects();
 	Engine::GAPI->DrawParticlesSimple();
 
-#if defined BUILD_GOTHIC_2_6_fix || defined BUILD_GOTHIC_1_08k
+	// TODO: Figure out why vob->GetVisual() throws errors sometimes!
+#if false && (defined BUILD_GOTHIC_2_6_fix || defined BUILD_GOTHIC_1_08k)
 	// Calc weapon/effect trail mesh data
 	Engine::GAPI->CalcPolyStripMeshes();
 	// Draw those
@@ -4921,9 +4922,9 @@ void D3D11GraphicsEngine::GetBackbufferData(byte** data, int& pixelsize) {
 	HRESULT hr;
 
 	// Buffer for scaling down the image
-	RenderToTextureBuffer* rt = new RenderToTextureBuffer(
+	auto rt = std::make_unique<RenderToTextureBuffer>(
 		GetDevice(), width, width, DXGI_FORMAT_R8G8B8A8_UNORM);
-
+	
 	// Downscale to 256x256
 	PfxRenderer->CopyTextureToRTV(HDRBackBuffer->GetShaderResView(),
 		rt->GetRenderTargetView(), INT2(width, width),
@@ -4943,15 +4944,20 @@ void D3D11GraphicsEngine::GetBackbufferData(byte** data, int& pixelsize) {
 	texDesc.SampleDesc.Quality = 0;
 	texDesc.Usage = D3D11_USAGE_STAGING;
 
-	ID3D11Texture2D* texture;
+	wrl::ComPtr<ID3D11Texture2D> texture;
 	LE(GetDevice()->CreateTexture2D(&texDesc, 0, &texture));
-	GetContext()->CopyResource(texture, rt->GetTexture());
+	if (!texture.Get())
+	{
+		LogInfo() << "Thumbnail failed. Texture could not be created";
+		return;
+	}
+	GetContext()->CopyResource(texture.Get(), rt->GetTexture());
 
 	// Get data
 	D3D11_MAPPED_SUBRESOURCE res;
-	if (SUCCEEDED(GetContext()->Map(texture, 0, D3D11_MAP_READ, 0, &res))) {
+	if (SUCCEEDED(GetContext()->Map(texture.Get(), 0, D3D11_MAP_READ, 0, &res))) {
 		memcpy(d, res.pData, width * width * 4);
-		GetContext()->Unmap(texture, 0);
+		GetContext()->Unmap(texture.Get(), 0);
 	}
 	else {
 		LogInfo() << "Thumbnail failed";
@@ -4959,9 +4965,6 @@ void D3D11GraphicsEngine::GetBackbufferData(byte** data, int& pixelsize) {
 
 	pixelsize = 4;
 	*data = d;
-
-	texture->Release();
-	delete rt;
 }
 
 /** Binds the right shader for the given texture */
@@ -5245,17 +5248,12 @@ void D3D11GraphicsEngine::CreateMainUIView() {
 	if (!UIView) {
 		UIView = std::make_unique<D2DView>();
 
-		ID3D11Texture2D* tex;
-		BackbufferRTV->GetResource((ID3D11Resource * *)&tex);
-		if (XR_SUCCESS != UIView->Init(Resolution, tex)) {
+		wrl::ComPtr<ID3D11Texture2D> tex;
+		BackbufferRTV->GetResource((ID3D11Resource * *)tex.ReleaseAndGetAddressOf());
+		if (XR_SUCCESS != UIView->Init(Resolution, tex.Get())) {
 			UIView.reset();
-
-			SAFE_RELEASE(tex);
-
 			return;
 		}
-
-		SAFE_RELEASE(tex);
 	}
 }
 
@@ -5558,7 +5556,7 @@ void D3D11GraphicsEngine::SaveScreenshot() {
 	HRESULT hr;
 
 	// Buffer for scaling down the image
-	RenderToTextureBuffer* rt = new RenderToTextureBuffer(
+	auto rt = std::make_unique<RenderToTextureBuffer>(
 		GetDevice(), Resolution.x, Resolution.y, DXGI_FORMAT_R8G8B8A8_UNORM);
 
 	// Downscale to 256x256
@@ -5578,9 +5576,13 @@ void D3D11GraphicsEngine::SaveScreenshot() {
 	texDesc.SampleDesc.Quality = 0;
 	texDesc.Usage = D3D11_USAGE_DEFAULT;
 
-	ID3D11Texture2D* texture;
+	wrl::ComPtr<ID3D11Texture2D> texture;
 	LE(GetDevice()->CreateTexture2D(&texDesc, 0, &texture));
-	GetContext()->CopyResource(texture, rt->GetTexture());
+	if (!texture) {
+		LogError() << "Could not create texture for screenshot!";
+		return;
+	}
+	GetContext()->CopyResource(texture.Get(), rt->GetTexture());
 
 	char date[50];
 	char time[50];
@@ -5593,15 +5595,12 @@ void D3D11GraphicsEngine::SaveScreenshot() {
 	CreateDirectory("system\\Screenshots", nullptr);
 
 	std::string name = "system\\screenshots\\G2D3D11_" + std::string(date) +
-		"__" + std::string(time) + ".jpg";
+		"__" + std::string(time) + ".dds";
 
 	LogInfo() << "Saving screenshot to: " << name;
 
-	// TODO: Remove Screenshot capability? Removes the need for WIC
-	LE(SaveWICTextureToFile(GetContext(), texture, GUID_ContainerFormatJpeg, ToWStr(name.c_str()).c_str()));
-	texture->Release();
-
-	delete rt;
+	// TODO: Remove Screenshot capability, or find COM independent library to convert Texture2D to jpeg
+	LE(SaveDDSTextureToFile(GetContext(), texture.Get(), ToWStr(name.c_str()).c_str()));
 
 	// Inform the user that a screenshot has been taken
 	Engine::GAPI->PrintMessageTimed(INT2(30, 30), "Screenshot taken: " + name);
