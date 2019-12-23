@@ -1,4 +1,6 @@
 #pragma once
+#include <wrl/client.h>
+
 class D3D11Texture
 {
 public:
@@ -42,7 +44,7 @@ public:
 	XRESULT BindToDomainShader(int slot);
 
 	/** Returns the texture-object */
-	ID3D11Texture2D * GetTextureObject(){return Texture;}
+	ID3D11Texture2D * GetTextureObject(){return Texture.Get();}
 
 	/** Returns the shader resource view */
 	ID3D11ShaderResourceView * GetShaderResourceView(){return ShaderResourceView;}
@@ -64,7 +66,7 @@ private:
 	UINT16 ID;
 
 	/** D3D11 objects */
-	ID3D11Texture2D * Texture;
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> Texture;
 	ID3D11ShaderResourceView * ShaderResourceView;
 	DXGI_FORMAT TextureFormat;
 	INT2 TextureSize;

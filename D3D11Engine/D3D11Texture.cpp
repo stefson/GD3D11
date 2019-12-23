@@ -4,7 +4,6 @@
 #include "D3D11GraphicsEngineBase.h"
 #include "GothicAPI.h"
 #include <DDSTextureLoader.h>
-#include <WICTextureLoader.h>
 #include "RenderToTextureBuffer.h"
 
 using namespace DirectX;
@@ -50,7 +49,7 @@ XRESULT D3D11Texture::Init(INT2 size, ETextureFormat format, UINT mipMapCount, v
 		mipMapCount,
 		D3D11_BIND_SHADER_RESOURCE, D3D11_USAGE_DEFAULT, 0, 1, 0, 0);
 
-	LE(engine->GetDevice()->CreateTexture2D(&textureDesc, nullptr, &Texture));
+	LE(engine->GetDevice()->CreateTexture2D(&textureDesc, nullptr, Texture.ReleaseAndGetAddressOf()));
 
 #ifndef PUBLIC_RELEASE
 	Texture->SetPrivateData(WKPDID_D3DDebugObjectName, fileName.size(), fileName.c_str());
@@ -62,7 +61,7 @@ XRESULT D3D11Texture::Init(INT2 size, ETextureFormat format, UINT mipMapCount, v
 	descRV.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	descRV.Texture2D.MipLevels = mipMapCount;
 	descRV.Texture2D.MostDetailedMip = 0;
-	LE(engine->GetDevice()->CreateShaderResourceView(Texture, &descRV, &ShaderResourceView));
+	LE(engine->GetDevice()->CreateShaderResourceView(Texture.Get(), &descRV, &ShaderResourceView));
 
 	//Engine::GAPI->LeaveResourceCriticalSection();
 
@@ -79,14 +78,12 @@ XRESULT D3D11Texture::Init(const std::string & file)
 
 	//Engine::GAPI->EnterResourceCriticalSection();
 
-	LE(CreateDDSTextureFromFile(engine->GetDevice(), ToWStr(file.c_str()).c_str(), nullptr, &ShaderResourceView));
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> res;
+	LE(CreateDDSTextureFromFile(engine->GetDevice(), ToWStr(file.c_str()).c_str(), (ID3D11Resource**)res.ReleaseAndGetAddressOf(), &ShaderResourceView));
 
-	if (!ShaderResourceView)
+	if (!ShaderResourceView || !res.Get())
 		return XR_FAILED;
 	
-	ID3D11Texture2D * res;
-	ShaderResourceView->GetResource((ID3D11Resource **)&res);
-
 	D3D11_TEXTURE2D_DESC desc;
 	res->GetDesc(&desc);
 
@@ -108,7 +105,7 @@ XRESULT D3D11Texture::UpdateData(void * data, int mip)
 
 	// Enter the critical section for safety while executing the deferred command list
 	Engine::GAPI->EnterResourceCriticalSection();
-	engine->GetContext()->UpdateSubresource(Texture, mip, nullptr, data, GetRowPitchBytes(mip), GetSizeInBytes(mip));
+	engine->GetContext()->UpdateSubresource(Texture.Get(), mip, nullptr, data, GetRowPitchBytes(mip), GetSizeInBytes(mip));
 	Engine::GAPI->LeaveResourceCriticalSection();
 
 	return XR_SUCCESS;
@@ -123,7 +120,7 @@ XRESULT D3D11Texture::UpdateDataDeferred(void * data, int mip, bool noLock)
 	if (!noLock)
 		Engine::GAPI->EnterResourceCriticalSection();
 
-	engine->GetDeferredMediaContext()->UpdateSubresource(Texture, mip, nullptr, data, GetRowPitchBytes(mip), GetSizeInBytes(mip));
+	engine->GetDeferredMediaContext()->UpdateSubresource(Texture.Get(), mip, nullptr, data, GetRowPitchBytes(mip), GetSizeInBytes(mip));
 
 	if (!noLock)
 		Engine::GAPI->LeaveResourceCriticalSection();
@@ -269,13 +266,13 @@ XRESULT D3D11Texture::GenerateMipMaps()
 
 	RenderToTextureBuffer * b = new RenderToTextureBuffer(engine->GetDevice(), TextureSize.x, TextureSize.y, DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, DXGI_FORMAT_UNKNOWN, DXGI_FORMAT_UNKNOWN, MipMapCount);
 
-	engine->GetDeferredMediaContext()->CopySubresourceRegion(b->GetTexture(), 0, 0, 0, 0, Texture, 0, nullptr);
+	engine->GetDeferredMediaContext()->CopySubresourceRegion(b->GetTexture(), 0, 0, 0, 0, Texture.Get(), 0, nullptr);
 
 	// Generate mips
 	engine->GetDeferredMediaContext()->GenerateMips(b->GetShaderResView());
 
 	// Copy the full chain back
-	engine->GetDeferredMediaContext()->CopyResource(Texture, b->GetTexture());
+	engine->GetDeferredMediaContext()->CopyResource(Texture.Get(), b->GetTexture());
 	delete b;
 
 	Engine::GAPI->LeaveResourceCriticalSection();
