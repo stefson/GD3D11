@@ -3830,8 +3830,8 @@ XRESULT D3D11GraphicsEngine::DrawSky() {
 	world = XMMatrixTranspose(scale * world);
 
 	// Apply world matrix
-	DirectX::SimpleMath::Matrix d3dxWorld;
-	XMStoreFloat4x4(&(Matrix)d3dxWorld, world);
+	Matrix d3dxWorld;
+	XMStoreFloat4x4(&d3dxWorld, world);
 	Engine::GAPI->SetWorldTransform(d3dxWorld);
 	Engine::GAPI->SetViewTransform(view);
 
@@ -3849,7 +3849,7 @@ XRESULT D3D11GraphicsEngine::DrawSky() {
 	ActivePS->GetConstantBuffer()[0]->BindToPixelShader(1);
 
 	VS_ExConstantBuffer_PerInstance cbi;
-	XMStoreFloat4x4(&(Matrix)cbi.World, world);
+	XMStoreFloat4x4(&cbi.World, world);
 	ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&cbi);
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
