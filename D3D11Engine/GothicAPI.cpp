@@ -650,6 +650,15 @@ void GothicAPI::DrawWorldMeshNaive() {
 	static float setfovH = RendererState.RendererSettings.FOVHoriz;
 	static float setfovV = RendererState.RendererSettings.FOVVert;
 
+#ifdef BUILD_GOTHIC_1_08k 
+	setfovH = RendererState.RendererSettings.FOVHoriz;
+	setfovV = RendererState.RendererSettings.FOVVert;
+
+	// Fix camera FOV-Bug
+	zCCamera::GetCamera()->SetFOV(RendererState.RendererSettings.FOVHoriz, (Engine::GraphicsEngine->GetResolution().y / (float)Engine::GraphicsEngine->GetResolution().x) * RendererState.RendererSettings.FOVVert);
+
+	CurrentCamera = zCCamera::GetCamera();
+#else
 	float fovH = 90.0f, fovV = 90.0f;
 	if (zCCamera::GetCamera())
 		zCCamera::GetCamera()->GetFOV(fovH, fovV);
@@ -668,6 +677,7 @@ void GothicAPI::DrawWorldMeshNaive() {
 
 		CurrentCamera = zCCamera::GetCamera();
 	}
+#endif
 
 	FrameParticleInfo.clear();
 	FrameParticles.clear();
@@ -1911,8 +1921,8 @@ void GothicAPI::DrawParticleFX(zCVob * source, zCParticleFX * fx, ParticleFrameD
 	fx->CreateParticlesUpdateDependencies();
 
 	// Do something I dont exactly know what it does :)
+	// TODO: Figure out why this crashes sometimes! (G1)
 #ifdef BUILD_GOTHIC_1_08k
-	// TODO: Figure out why this crashes sometimes!
 	// fx->GetStaticPFXList()->TouchPfx(fx);
 #else
 	fx->GetStaticPFXList()->TouchPfx(fx);

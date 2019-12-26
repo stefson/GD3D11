@@ -50,19 +50,12 @@ public:
 
 	void SetFOV(float azi, float elev)
 	{
-#ifndef BUILD_GOTHIC_1_08k // TODO: Implement this for G1
 		XCALL(GothicMemoryLocations::zCCamera::SetFOV);
-#endif
 	}
 
 	void GetFOV(float & fovH, float & fovV)
 	{
-#ifdef BUILD_GOTHIC_2_6_fix
 		XCALL(GothicMemoryLocations::zCCamera::GetFOV_f2);
-#else
-		fovH = 90.0f;
-		fovV = 90.0f;
-#endif
 	}
 
 	void UpdateViewport()

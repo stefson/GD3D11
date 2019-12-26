@@ -147,7 +147,8 @@ struct GothicMemoryLocations
 		static const unsigned int UpdateViewport = 0x00536850;
 		static const unsigned int Activate = 0x005364C0;
 		static const unsigned int BBox3DInFrustum = 0x00536EF0;
-		
+		static const unsigned int SetFOV = 0x00536720;
+		static const unsigned int GetFOV_f2 = 0x005366B0;
 	};
 
 	struct zCVob
