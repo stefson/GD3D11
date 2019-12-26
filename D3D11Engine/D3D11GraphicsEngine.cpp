@@ -5238,7 +5238,7 @@ void D3D11GraphicsEngine::DrawUnderwaterEffects() {
 	DistortionTexture->BindToPixelShader(2);
 	DepthStencilBufferCopy->BindToPixelShader(GetContext(), 3);
 
-	PfxRenderer->BlurTexture(HDRBackBuffer.get(), false, 1.0f, UNDERWATER_COLOR_MOD,
+	PfxRenderer->BlurTexture(HDRBackBuffer.get(), false, 0.10f, UNDERWATER_COLOR_MOD,
 		"PS_PFX_UnderwaterFinal");
 }
 
