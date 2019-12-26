@@ -74,5 +74,9 @@ public:
 	{
 		XCALL(GothicMemoryLocations::oCNPC::IsAPlayer);
 	}
+	zSTRING GetName(int i = 0)
+	{
+		XCALL(GothicMemoryLocations::oCNPC::GetName);
+	}
 };
 
