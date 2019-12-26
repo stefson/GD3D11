@@ -122,24 +122,34 @@ public:
 		BaseGraphicsEngine* engine = Engine::GraphicsEngine;
 		// TODO: Make Option checkable
 		// LogInfo() << "Reading Gothic-Config: " << var;
-
 		if (!engine)
 		{
-			LogWarn() << "ENGINE wasn't initialized yet! WTF!";
+			LogWarn() << "ENGINE wasn't initialized yet! WTF! - Reading Gothic-Config: " << var;
+		}
+
+		static bool once = false;
+		if (!once) {
+			once = true;
+			LogInfo() << "Forcing zVidResFullscreenX";
+			LogInfo() << "Forcing zVidResFullscreenY";
+			LogInfo() << "Forcing zVidResFullscreenBPP = 32";
+			LogInfo() << "Forcing zTexMaxSize = 16384";
+			LogInfo() << "Forcing zTexCacheOutTimeMSec = 9120000";
+			LogInfo() << "Forcing zTexCacheSizeMaxBytes = 1000000000";
+			LogInfo() << "Forcing zSndCacheOutTimeMSec = 10000";
+			LogInfo() << "Forcing zSndCacheSizeMaxBytes = 40000000";
 		}
 
 		if (_stricmp(var, "zVidResFullscreenX") == 0)
 		{
 			if (engine)
 			{
-				LogInfo() << "Forcing zVidResFullscreenX: " << engine->GetResolution().x;
 				return engine->GetResolution().x;
 			}
 		} else if (_stricmp(var, "zVidResFullscreenY") == 0)
 		{
 			if (engine)
 			{
-				LogInfo() << "Forcing zVidResFullscreenY: " << engine->GetResolution().y;
 				return engine->GetResolution().y;
 			}
 		} else if (_stricmp(var, "zVidResFullscreenBPP") == 0)
