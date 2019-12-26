@@ -508,6 +508,7 @@ void GothicAPI::OnGeometryLoaded(zCPolygon * *polys, unsigned int numPolygons) {
 /** Called when the game is about to load a new level */
 void GothicAPI::OnLoadWorld(const std::string & levelName, int loadMode)
 {
+	_canClearVobsByVisual = true;
 	if ((loadMode == 0 || loadMode == 2) && !levelName.empty())
 	{
 		std::string name = levelName;
@@ -606,6 +607,8 @@ void GothicAPI::OnWorldLoaded()
 #ifdef BUILD_SPACER
 	Engine::GraphicsEngine->OnUIEvent(BaseGraphicsEngine::UI_OpenEditor);
 #endif
+
+	_canClearVobsByVisual = false;
 }
 
 /** Goes through the given zCTree and registers all found vobs */
@@ -1076,10 +1079,15 @@ void GothicAPI::OnVisualDeleted(zCVisual * visual) {
 
 	// Add to map
 	std::list<BaseVobInfo*> list = VobsByVisual[visual];
-	for (auto it = list.begin(); it != list.end(); ++it) {
-		OnRemovedVob((*it)->Vob, LoadedWorldInfo->MainWorld);
+	if (_canClearVobsByVisual) {
+		for (auto const& it : list) {
+			OnRemovedVob(it->Vob, LoadedWorldInfo->MainWorld);
+		}
 	}
-	VobsByVisual[visual].clear();
+	if (list.size() > 0) {
+		LogInfo() << std::string(className) << " had " + std::to_string(list.size()) << " vobs";
+		VobsByVisual[visual].clear();
+	}
 }
 /** Draws a MeshInfo */
 void GothicAPI::DrawMeshInfo(zCMaterial * mat, MeshInfo * msh) {
@@ -1151,15 +1159,6 @@ void GothicAPI::OnRemovedVob(zCVob * vob, zCWorld * world) {
 	}
 
 	RegisteredVobs.erase(it);
-
-	// TODO: Remove after figuring out why the player becomes invisible sometimes!
-	// Called in: 
-	// - GothicAPI::OnSetVisual
-	// - GothicAPI::OnVisualDeleted
-	if (vob && vob == GetPlayerVob()) {
-		LogError() << "Player was removed!";
-		MyStackWalker::GetSingleton().ShowCallstack();
-	}
 
 	zCVisual* visual = vob->GetVisual();
 	if (visual) {
@@ -1330,7 +1329,6 @@ void GothicAPI::OnSetVisual(zCVob * vob) {
 				return; // No change, skip this.
 			}
 		}
-
 		// This one is already there. Re-Add it!
 		OnRemovedVob(vob, vob->GetHomeWorld());
 	}
@@ -1340,13 +1338,24 @@ void GothicAPI::OnSetVisual(zCVob * vob) {
 
 /** Called when a VOB got added to the BSP-Tree */
 void GothicAPI::OnAddVob(zCVob * vob, zCWorld * world) {
-	if (!vob->GetVisual())
-		return; // Don't need it if we can't render it
+	if (!vob->GetVisual()) {
+		if (vob == GetPlayerVob()) {
+			LogError() << "Player vob without Visual!";
+		}
 
+		return; // Don't need it if we can't render it
+	}
 #ifdef BUILD_SPACER
 	if (strncmp(vob->GetVisual()->GetObjectName(), "INVISIBLE_", strlen("INVISIBLE_")) == 0)
 		return;
 #endif
+
+	// Add the vob to the set
+	if (RegisteredVobs.find(vob) != RegisteredVobs.end()) {
+		// Already got that
+		return;
+	}
+	RegisteredVobs.insert(vob);
 
 	zCClassDef* classDef = ((zCObject*)(vob->GetVisual()))->_GetClassDef();
 	const char* className = classDef->className.ToChar();
@@ -1359,13 +1368,6 @@ void GothicAPI::OnAddVob(zCVob * vob, zCWorld * world) {
 		extv.push_back(vob->GetVisual()->GetFileExtension(e));
 		e++;
 	}
-
-	// Add the vob to the set
-	if (RegisteredVobs.find(vob) != RegisteredVobs.end()) {
-		// Already got that
-		return;
-	}
-	RegisteredVobs.insert(vob);
 
 	if (!world)
 		world = oCGame::GetGame()->_zCSession_world;

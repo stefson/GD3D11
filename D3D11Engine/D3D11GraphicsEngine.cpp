@@ -1278,10 +1278,10 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
 		// Buffer too small, recreate it
 		DynamicInstancingBuffer = std::make_unique<D3D11VertexBuffer>();
 
-		// Put in some little extra space (16) so we don't need to recreate this
+		// Put in some little extra space (32) so we don't need to recreate this
 		// every frame when approaching a field of stones or something.
 		DynamicInstancingBuffer->Init(
-			nullptr, instanceDataStride * (numInstances + 16),
+			nullptr, instanceDataStride * (numInstances + 32),
 			D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC,
 			D3D11VertexBuffer::CA_WRITE);
 	}

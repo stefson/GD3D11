@@ -779,4 +779,7 @@ private:
 	std::vector<std::future<void>> FutureList;
 
 	bool _canRain;
+
+	/** Used to only allow deterministic VOB cleanup (e.g. on loading a world.)*/
+	bool _canClearVobsByVisual;
 };
