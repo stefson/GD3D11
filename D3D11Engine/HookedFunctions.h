@@ -65,6 +65,7 @@ typedef int (__thiscall* zCThreadSuspendThread)(void *);
 typedef void (__thiscall* zCResourceManagerCacheOut)(void *,class zCResource*);
 typedef void (__thiscall* zCQuadMarkCreateQuadMark)(void *, zCPolygon*, const DirectX::SimpleMath::Vector3 &, const DirectX::SimpleMath::Vector2 &, struct zTEffectParams*);
 typedef void (__thiscall* oCWorldEnableVob)(void *, zCVob *,zCVob *);
+typedef void (__thiscall* oCWorldRemoveVob)(void *, zCVob *);
 typedef void (__thiscall* oCWorldDisableVob)(void *, zCVob *);
 typedef void (__fastcall* oCWorldRemoveFromLists)(void *, zCVob *);
 typedef int (__thiscall* zCBinkPlayerOpenVideo)(void *, class zSTRING);
@@ -128,6 +129,7 @@ struct HookedFunctionInfo
 	GenericThiscall original_oCNPCInitModel;
 	oCWorldDisableVob original_oCWorldDisableVob;
 	oCWorldEnableVob original_oCWorldEnableVob;
+	oCWorldRemoveVob original_oCWorldRemoveVob;
 	oCWorldRemoveFromLists original_oCWorldRemoveFromLists;
 	zCBinkPlayerOpenVideo original_zCBinkPlayerOpenVideo;
 	zCVobEndMovement original_zCVobEndMovement;

@@ -32,16 +32,18 @@ public:
 		
 		HookedFunctions::OriginalFunctions.original_oCWorldRemoveFromLists = (oCWorldRemoveFromLists)DetourFunction((BYTE *)GothicMemoryLocations::oCWorld::RemoveFromLists, (BYTE *)zCWorld::hooked_oCWorldRemoveFromLists);
 		HookedFunctions::OriginalFunctions.original_oCWorldEnableVob = (oCWorldEnableVob)DetourFunction((BYTE *)GothicMemoryLocations::oCWorld::EnableVob, (BYTE *)zCWorld::hooked_oCWorldEnableVob);
-		HookedFunctions::OriginalFunctions.original_oCWorldDisableVob = (oCWorldDisableVob)DetourFunction((BYTE *)GothicMemoryLocations::oCWorld::DisableVob, (BYTE *)zCWorld::hooked_oCWorldDisableVob);
+		HookedFunctions::OriginalFunctions.original_oCWorldDisableVob = (oCWorldDisableVob)DetourFunction((BYTE*)GothicMemoryLocations::oCWorld::DisableVob, (BYTE*)zCWorld::hooked_oCWorldDisableVob);
+		HookedFunctions::OriginalFunctions.original_oCWorldRemoveVob = (oCWorldRemoveVob)DetourFunction((BYTE *)GothicMemoryLocations::oCWorld::RemoveVob, (BYTE *)zCWorld::hooked_oCWorldRemoveVob);
 	}
 
 	static void __fastcall hooked_oCWorldEnableVob(void * thisptr, void * unknwn, zCVob * vob, zCVob * parent) {
 		hook_infunc
 		
+		HookedFunctions::OriginalFunctions.original_oCWorldEnableVob(thisptr, vob, parent);
+
 		// Re-Add it
 		Engine::GAPI->OnAddVob(vob, (zCWorld *)thisptr);
 
-		HookedFunctions::OriginalFunctions.original_oCWorldEnableVob(thisptr, vob, parent);
 		hook_outfunc
 	}
 
@@ -52,6 +54,12 @@ public:
 		Engine::GAPI->OnRemovedVob(vob, (zCWorld *)thisptr);
 
 		HookedFunctions::OriginalFunctions.original_oCWorldDisableVob(thisptr, vob);
+		hook_outfunc
+	}
+
+	static void __fastcall hooked_oCWorldRemoveVob(void* thisptr, void* unknwn, zCVob* vob) {
+		hook_infunc
+		HookedFunctions::OriginalFunctions.original_oCWorldRemoveVob(thisptr, vob);
 		hook_outfunc
 	}
 

@@ -353,6 +353,7 @@ struct GothicMemoryLocations
 		static const unsigned int EnableVob = 0x006D7130;
 		static const unsigned int DisableVob = 0x006D7250;
 		static const unsigned int RemoveFromLists = 0x006D7750;
+		static const unsigned int RemoveVob = 0x006D6EF0;
 	};
 
 	struct zCBspNode
