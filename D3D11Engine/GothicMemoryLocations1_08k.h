@@ -310,6 +310,7 @@ struct GothicMemoryLocations
 	struct oCSpawnManager
 	{
 		static const unsigned int SpawnNpc = 0x006D0710;
+		static const unsigned int CheckInsertNpc = 0x006CFDE0;
 
 	};
 

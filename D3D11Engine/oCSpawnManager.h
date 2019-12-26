@@ -15,7 +15,8 @@ public:
 	/** Hooks the functions of this Class */
 	static void Hook()
 	{
-		HookedFunctions::OriginalFunctions.original_oCSpawnManagerSpawnNpc = (oCSpawnManagerSpawnNpc)DetourFunction((BYTE *)GothicMemoryLocations::oCSpawnManager::SpawnNpc, (BYTE *)oCSpawnManager::hooked_oCSpawnManagerSpawnNpc);
+		HookedFunctions::OriginalFunctions.original_oCSpawnManagerSpawnNpc = (oCSpawnManagerSpawnNpc)DetourFunction((BYTE*)GothicMemoryLocations::oCSpawnManager::SpawnNpc, (BYTE*)oCSpawnManager::hooked_oCSpawnManagerSpawnNpc);
+		//HookedFunctions::OriginalFunctions.original_oCSpawnManagerCheckInsertNpc = (oCSpawnManagerCheckInsertNpc)DetourFunction((BYTE *)GothicMemoryLocations::oCSpawnManager::CheckInsertNpc, (BYTE *)oCSpawnManager::hooked_oCSpawnManagerCheckInsertNpc);
 	}
 
 	/** Reads config stuff */
@@ -29,6 +30,14 @@ public:
 			Engine::GAPI->OnRemovedVob((zCVob *)npc, ((zCVob *)npc)->GetHomeWorld());	
 			Engine::GAPI->OnAddVob((zCVob *)npc, ((zCVob *)npc)->GetHomeWorld());
 		}
+		hook_outfunc
+	}
+
+	/** Reads config stuff */
+	static void __fastcall hooked_oCSpawnManagerCheckInsertNpc(void* thisptr, void* unknwn)
+	{
+		hook_infunc
+		HookedFunctions::OriginalFunctions.original_oCSpawnManagerCheckInsertNpc(thisptr);
 		hook_outfunc
 	}
 };
