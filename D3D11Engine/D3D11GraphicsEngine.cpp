@@ -1607,8 +1607,7 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 	// DrawParticleEffects();
 	Engine::GAPI->DrawParticlesSimple();
 
-	// TODO: Figure out why vob->GetVisual() throws errors sometimes!
-#if false && (defined BUILD_GOTHIC_2_6_fix || defined BUILD_GOTHIC_1_08k)
+#if (defined BUILD_GOTHIC_2_6_fix || defined BUILD_GOTHIC_1_08k)
 	// Calc weapon/effect trail mesh data
 	Engine::GAPI->CalcPolyStripMeshes();
 	// Draw those
@@ -5600,7 +5599,7 @@ void D3D11GraphicsEngine::SaveScreenshot() {
 	LogInfo() << "Saving screenshot to: " << name;
 
 	// TODO: Remove Screenshot capability, or find COM independent library to convert Texture2D to jpeg
-	LE(SaveDDSTextureToFile(GetContext(), texture.Get(), ToWStr(name.c_str()).c_str()));
+	LE(SaveDDSTextureToFile(GetContext(), texture.Get(), Toolbox::ToWideChar(name).c_str()));
 
 	// Inform the user that a screenshot has been taken
 	Engine::GAPI->PrintMessageTimed(INT2(30, 30), "Screenshot taken: " + name);

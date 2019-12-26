@@ -50,7 +50,7 @@ HRESULT D3DX11CreateEffectFromFile_RES(
 )
 {
 	ID3D10Blob* ErrorsBuffer;
-	HRESULT hr = D3DX11CompileEffectFromFile(ToWStr(pFileName).c_str(), pDefines, D3D_COMPILE_STANDARD_FILE_INCLUDE, HLSLFlags, FXFlags, pDevice, ppEffect, &ErrorsBuffer);
+	HRESULT hr = D3DX11CompileEffectFromFile(Toolbox::ToWideChar(pFileName).c_str(), pDefines, D3D_COMPILE_STANDARD_FILE_INCLUDE, HLSLFlags, FXFlags, pDevice, ppEffect, &ErrorsBuffer);
 
 	char* Errors;
 	if (ErrorsBuffer)

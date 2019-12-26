@@ -63,7 +63,7 @@ HRESULT D3D11HDShader::CompileShaderFromFile(const CHAR* szFileName, LPCSTR szEn
 #endif
 
 	ID3DBlob* pErrorBlob;
-	hr = D3DCompileFromFile(ToWStr(szFileName).c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, szEntryPoint, szShaderModel, dwShaderFlags, 0, ppBlobOut, &pErrorBlob);
+	hr = D3DCompileFromFile(Toolbox::ToWideChar(szFileName).c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, szEntryPoint, szShaderModel, dwShaderFlags, 0, ppBlobOut, &pErrorBlob);
 	if (FAILED(hr))
 	{
 		LogInfo() << "Shader compilation failed!";

@@ -57,7 +57,7 @@ HRESULT D3D11PShader::CompileShaderFromFile(const CHAR* szFileName, LPCSTR szEnt
 	m.insert(m.begin(), makros.begin(), makros.end());
 
 	ID3DBlob* pErrorBlob;
-	hr = D3DCompileFromFile(ToWStr(szFileName).c_str(), &m[0], D3D_COMPILE_STANDARD_FILE_INCLUDE, szEntryPoint, szShaderModel, dwShaderFlags, 0, ppBlobOut, &pErrorBlob);
+	hr = D3DCompileFromFile(Toolbox::ToWideChar(szFileName).c_str(), &m[0], D3D_COMPILE_STANDARD_FILE_INCLUDE, szEntryPoint, szShaderModel, dwShaderFlags, 0, ppBlobOut, &pErrorBlob);
 
 	if (FAILED(hr))
 	{

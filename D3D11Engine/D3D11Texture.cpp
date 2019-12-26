@@ -79,7 +79,7 @@ XRESULT D3D11Texture::Init(const std::string & file)
 	//Engine::GAPI->EnterResourceCriticalSection();
 
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> res;
-	LE(CreateDDSTextureFromFile(engine->GetDevice(), ToWStr(file.c_str()).c_str(), (ID3D11Resource**)res.ReleaseAndGetAddressOf(), &ShaderResourceView));
+	LE(CreateDDSTextureFromFile(engine->GetDevice(), Toolbox::ToWideChar(file.c_str()).c_str(), (ID3D11Resource**)res.ReleaseAndGetAddressOf(), &ShaderResourceView));
 
 	if (!ShaderResourceView || !res.Get())
 		return XR_FAILED;

@@ -1144,8 +1144,23 @@ void GothicAPI::OnRemovedVob(zCVob * vob, zCWorld * world) {
 	//LogInfo() << "Removing vob: " << vob;
 	Engine::GraphicsEngine->OnVobRemovedFromWorld(vob);
 
-	// TODO: Figure out why vob->GetVisual() throws errors sometimes!
-#if false
+	std::set<zCVob*>::iterator it = RegisteredVobs.find(vob);
+	if (it == RegisteredVobs.end()) {
+		// Not registered
+		return;
+	}
+
+	RegisteredVobs.erase(it);
+
+	// TODO: Remove after figuring out why the player becomes invisible sometimes!
+	// Called in: 
+	// - GothicAPI::OnSetVisual
+	// - GothicAPI::OnVisualDeleted
+	if (vob && vob == GetPlayerVob()) {
+		LogError() << "Player was removed!";
+		MyStackWalker::GetSingleton().ShowCallstack();
+	}
+
 	zCVisual* visual = vob->GetVisual();
 	if (visual) {
 		zCClassDef* classDef = ((zCObject*)(visual))->_GetClassDef();
@@ -1154,15 +1169,6 @@ void GothicAPI::OnRemovedVob(zCVob * vob, zCWorld * world) {
 			PolyStripVisuals.erase((zCPolyStrip*)visual); //remove it if it exists in polystrips array
 		}
 	}
-#endif
-
-	std::set<zCVob*>::iterator it = RegisteredVobs.find(vob);
-	if (it == RegisteredVobs.end()) {
-		// Not registered
-		return;
-	}
-
-	RegisteredVobs.erase(it);
 
 	// Erase the vob from visual-vob map
 	std::list<BaseVobInfo*>& list = VobsByVisual[vob->GetVisual()];

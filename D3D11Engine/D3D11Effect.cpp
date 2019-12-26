@@ -361,7 +361,7 @@ HRESULT LoadTextureArray(ID3D11Device* pd3dDevice, ID3D11DeviceContext* context,
 		sprintf(str, "%s%.4d.dds", sTexturePrefix, i);
 		
 		ID3D11Resource *pRes = nullptr;
-		LE(CreateDDSTextureFromFileEx(pd3dDevice, ToWStr(str).c_str(), 0, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE, 0, false, &pRes, nullptr));
+		LE(CreateDDSTextureFromFileEx(pd3dDevice, Toolbox::ToWideChar(str).c_str(), 0, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE, 0, false, &pRes, nullptr));
 		if (pRes)
 		{
 			ID3D11Texture2D * pTemp;
