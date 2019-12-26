@@ -1338,13 +1338,7 @@ void GothicAPI::OnSetVisual(zCVob * vob) {
 
 /** Called when a VOB got added to the BSP-Tree */
 void GothicAPI::OnAddVob(zCVob * vob, zCWorld * world) {
-	if (!vob->GetVisual()) {
-		if (vob == GetPlayerVob()) {
-			LogError() << "Player vob without Visual!";
-		}
-
-		return; // Don't need it if we can't render it
-	}
+	if (!vob->GetVisual()) return; // Don't need it if we can't render it
 #ifdef BUILD_SPACER
 	if (strncmp(vob->GetVisual()->GetObjectName(), "INVISIBLE_", strlen("INVISIBLE_")) == 0)
 		return;
