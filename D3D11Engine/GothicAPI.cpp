@@ -1572,7 +1572,7 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 		// TODO: FIXME
 		// Ugly stuff to get the fucking corrupt visual in returning here
 		static void Draw(SkeletalVobInfo* vi, std::vector<Matrix>& transforms, float fatness) {
-			for (auto const& itm : dynamic_cast<SkeletalMeshVisualInfo*>(vi->VisualInfo)->SkeletalMeshes) {
+			for (auto const& itm : reinterpret_cast<SkeletalMeshVisualInfo*>(vi->VisualInfo)->SkeletalMeshes) {
 				for (auto& i : itm.second) {
 					Engine::GAPI->DrawSkeletalMeshInfo(itm.first, i, transforms, fatness);
 				}
@@ -2637,7 +2637,7 @@ void GothicAPI::CollectVisibleVobs(std::vector<VobInfo*> & vobs, std::vector<Vob
 				vii.world = it->WorldMatrix;
 				vii.color = it->GroundColor;
 
-				dynamic_cast<MeshVisualInfo *>(it->VisualInfo)->Instances.push_back(vii);
+				reinterpret_cast<MeshVisualInfo *>(it->VisualInfo)->Instances.push_back(vii);
 
 				vobs.push_back(it);
 				it->VisibleInRenderPass = true;
@@ -2791,7 +2791,7 @@ static void CVVH_AddNotDrawnVobToList(std::vector<VobInfo*> & target, std::vecto
 				vii.world = it->WorldMatrix;
 				vii.color = it->GroundColor;
 
-				dynamic_cast<MeshVisualInfo*>(it->VisualInfo)->Instances.push_back(vii);
+				reinterpret_cast<MeshVisualInfo*>(it->VisualInfo)->Instances.push_back(vii);
 				target.push_back(it);
 				it->VisibleInRenderPass = true;
 			}
