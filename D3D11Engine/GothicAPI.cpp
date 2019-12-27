@@ -800,7 +800,10 @@ void GothicAPI::CalcPolyStripMeshes() {
 		zCPolyStripInstance pStripInst = pStrip->GetInstanceData();
 		zCMaterial* mat = pStripInst.material;
 		zCTexture* tx = mat->GetAniTexture();
-
+		if (!tx) {
+			// TODO: PolyStrips Why is this sometimes null?
+			continue;
+		}
 		//These values go back to 0 after reaching maxSegAmount
 		int firstSeg = pStripInst.firstSeg;
 		int lastSeg = pStripInst.lastSeg;
