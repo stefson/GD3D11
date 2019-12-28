@@ -38,6 +38,13 @@ After that, the game will be automatically started and should now run with the G
 When using a Develop target, you might get several exceptions during the start of the game. This is normal and you can savely continue to run the game for all of them (press continue, won't work for "real" exceptions of course).
 When using a Release target, those same exceptions will very likely stop the execution of the game, which is why you should use Develop targets from Visual Studio and test your release builds by starting Gothic 2 directly from the game folder yourself.
 
+### Producing the Redistributables
+- Compile the version that you want (`Release` or `Release_G1`)
+- Run `CreateRedistG1` or `CreateRedistG2` depending on which version you compiled.
+	- There should now be a `redist_g1` or `redist_g2` directory inside the solution directory.
+- To distribute the Renderer, zip the contents of `redist_gX` and let your consumers unzip the contents into their `Gothic\System\` directory.
+
+
 ### Older versions
 
 If you check out the appropriate commits, you can build older versions/commits of GD3D11. All commits on branch "master" since #3183e4d (7 Jun 2016, after 17.2) can be built with Visual Studio 2015.
