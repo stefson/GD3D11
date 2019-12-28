@@ -289,9 +289,18 @@ public:
 	float GetModelFatness()
 	{
 #ifdef BUILD_GOTHIC_1_08k
-		return 1.0f;
+		return 0.0f;
 #endif
-		return *(float *)THISPTR_OFFSET(GothicMemoryLocations::zCModel::Offset_ModelFatness);
+		float fatness = *(float*)THISPTR_OFFSET(GothicMemoryLocations::zCModel::Offset_ModelFatness);
+		// fix fatness value
+		if (fatness >= 2.0f)
+			fatness = 0.50f;
+		else if (fatness == 1.0f)
+			fatness = 0.0f;
+		else if (fatness <= -1.0f)
+			fatness = -0.25f;
+
+		return fatness;
 	}
 
 	int GetDrawHandVisualsOnly()
