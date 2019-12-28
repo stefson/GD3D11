@@ -188,6 +188,10 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID) {
 			Log::Clear();
 			LogInfo() << "Starting DDRAW Proxy DLL.";
 
+			if (CoInitializeEx(NULL, COINIT::COINIT_APARTMENTTHREADED) == S_OK) {
+				LogInfo() << "COM initialized";
+			}
+
 			if (Toolbox::FileExists("gmp.dll")) {
 				GMPModeActive = true;
 				LogInfo() << "GMP Mode Enabled";
@@ -247,6 +251,7 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID) {
 
 		*(void **)&DirectDrawCreateEx_t = (void *)GetProcAddress(ddraw.dll, "DirectDrawCreateEx");
 	} else if (reason == DLL_PROCESS_DETACH) {
+		CoUninitialize();
 		FreeLibrary(hDDRAW);
 
 		Engine::OnShutDown();

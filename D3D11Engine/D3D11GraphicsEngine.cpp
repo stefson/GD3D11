@@ -3920,12 +3920,13 @@ XRESULT D3D11GraphicsEngine::OnKeyDown(unsigned int key) {
 			Engine::GAPI->PrintMessageTimed(INT2(30, 30), "Reloading shaders...");
 			ReloadShaders();
 			break;
-
-		case VK_NUMPAD7:
-			SaveScreenshotNextFrame = true;
-			break;
 #endif
 
+		case VK_NUMPAD7:
+			if (Engine::GAPI->GetRendererState()->RendererSettings.AllowNumpadKeys) {
+				SaveScreenshotNextFrame = true;
+			}
+			break;
 		case VK_F1:
 			if (!UIView && !Engine::GAPI->GetRendererState()
 				->RendererSettings.EnableEditorPanel) {
@@ -5598,19 +5599,30 @@ void D3D11GraphicsEngine::SaveScreenshot() {
 	char time[50];
 
 	// Format the filename
-	GetDateFormat(LOCALE_SYSTEM_DEFAULT, 0, nullptr, "dd_MM_yyyy", date, 50);
-	GetTimeFormat(LOCALE_SYSTEM_DEFAULT, 0, nullptr, "hh_mm_ss", time, 50);
+	GetDateFormat(LOCALE_SYSTEM_DEFAULT, 0, nullptr, "yyyy-MM-dd", date, 50);
+	GetTimeFormat(LOCALE_SYSTEM_DEFAULT, 0, nullptr, "hh-mm-ss", time, 50);
 
 	// Create new folder if needed
 	CreateDirectory("system\\Screenshots", nullptr);
 
-	std::string name = "system\\screenshots\\G2D3D11_" + std::string(date) +
-		"__" + std::string(time) + ".dds";
+	std::string name = "system\\screenshots\\GD3D11_" + std::string(date) +
+		"__" + std::string(time) + ".jpg";
 
 	LogInfo() << "Saving screenshot to: " << name;
 
-	// TODO: Remove Screenshot capability, or find COM independent library to convert Texture2D to jpeg
-	LE(SaveDDSTextureToFile(GetContext(), texture.Get(), Toolbox::ToWideChar(name).c_str()));
+	// Save the Texture as jpeg using Windows Imaging Component (WIC) with 95% quality.
+
+	LE(SaveWICTextureToFile(GetContext(), texture.Get(), GUID_ContainerFormatJpeg, Toolbox::ToWideChar(name).c_str(), nullptr, [](IPropertyBag2* props)
+		{
+			PROPBAG2 options[1] = { 0 };
+			options[0].pstrName = const_cast<wchar_t*>(L"ImageQuality");
+
+			VARIANT varValues[1];
+			varValues[0].vt = VT_R4;
+			varValues[0].fltVal = 0.95f;
+
+			(void)props->Write(1, options, varValues);
+		}, false));
 
 	// Inform the user that a screenshot has been taken
 	Engine::GAPI->PrintMessageTimed(INT2(30, 30), "Screenshot taken: " + name);
