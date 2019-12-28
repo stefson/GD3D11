@@ -2471,16 +2471,6 @@ LRESULT GothicAPI::OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 						}
 					}
 					break;
-				case VK_NUMPAD5:
-					if (GetAsyncKeyState(VK_CONTROL)) {
-						ReloadVobs();
-						PrintMessageTimed(INT2(5, 350), "Skeletal-Mesh vobs reloaded.");
-					}
-					else {
-						ReloadPlayerVob();
-						PrintMessageTimed(INT2(5, 350), "Player Vob reloaded.");
-					}
-					break;
 					}
 			break;
 
