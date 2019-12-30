@@ -312,7 +312,7 @@ struct GothicMemoryLocations
 	{
 		static const unsigned int SpawnNpc = 0x006D0710;
 		static const unsigned int CheckInsertNpc = 0x006CFDE0;
-
+		static const unsigned int CheckRemoveNpc = 0x006D0A80;
 	};
 
 	struct zCDecal

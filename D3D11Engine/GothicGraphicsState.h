@@ -546,6 +546,7 @@ struct GothicRendererSettings {
 		AllowNormalmaps = true;
 
 		AllowNumpadKeys = false;
+		EnableDebugLog = true;
 	}
 
 	void SetupOldWorldSpecificValues() {
@@ -675,6 +676,7 @@ struct GothicRendererSettings {
 	bool AllowNormalmaps;
 
 	bool AllowNumpadKeys;
+	bool EnableDebugLog;
 };
 
 struct GothicRendererTiming {

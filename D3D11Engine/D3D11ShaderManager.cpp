@@ -457,7 +457,8 @@ XRESULT D3D11ShaderManager::LoadShaders()
 				// See if this is a reload
 				if (VShaders.count(Shaders[i].name) > 0)
 				{
-					LogInfo() << "Reloading shader: " << Shaders[i].name;
+					if (Engine::GAPI->GetRendererState()->RendererSettings.EnableDebugLog)
+						LogInfo() << "Reloading shader: " << Shaders[i].name;
 
 					D3D11VShader* vs = new D3D11VShader();
 					if (XR_SUCCESS != vs->LoadShader(("system\\GD3D11\\shaders\\" + Shaders[i].fileName).c_str(), Shaders[i].layout, Shaders[i].shaderMakros))
@@ -478,7 +479,8 @@ XRESULT D3D11ShaderManager::LoadShaders()
 					}
 				} else
 				{
-					LogInfo() << "Reloading shader: " << Shaders[i].name;
+					if (Engine::GAPI->GetRendererState()->RendererSettings.EnableDebugLog)
+						LogInfo() << "Reloading shader: " << Shaders[i].name;
 
 					VShaders[Shaders[i].name] = new D3D11VShader();
 					XLE(VShaders[Shaders[i].name]->LoadShader(("system\\GD3D11\\shaders\\" + Shaders[i].fileName).c_str(), Shaders[i].layout, Shaders[i].shaderMakros));

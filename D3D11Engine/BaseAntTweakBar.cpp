@@ -89,6 +89,7 @@ XRESULT BaseAntTweakBar::Init() {
 	TwAddButton(Bar_General, "Load ZEN-Resources", (TwButtonCallback)LoadZENResourcesCallback, this, nullptr); 
 	TwAddButton(Bar_General, "Open Settings Dialog", (TwButtonCallback)OpenSettingsCallback, this, nullptr); 
 
+	TwAddVarRW(Bar_General, "Enable DebugLog", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.EnableDebugLog, nullptr);
 	TwAddVarRW(Bar_General, "DisableRendering", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.DisableRendering, nullptr);
 	TwAddVarRW(Bar_General, "Draw VOBs", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.DrawVOBs, nullptr);
 	TwAddVarRW(Bar_General, "Draw Dynamic Vobs", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.DrawDynamicVOBs, nullptr);

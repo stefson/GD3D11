@@ -59,7 +59,9 @@ public:
 
 	static void __fastcall hooked_oCWorldRemoveVob(void* thisptr, void* unknwn, zCVob* vob) {
 		hook_infunc
+		//Engine::GAPI->SetCanClearVobsByVisual(); // TODO: #8
 		HookedFunctions::OriginalFunctions.original_oCWorldRemoveVob(thisptr, vob);
+		//Engine::GAPI->SetCanClearVobsByVisual(false); // TODO: #8
 		hook_outfunc
 	}
 

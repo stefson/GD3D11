@@ -17,6 +17,9 @@ public:
 	{
 		HookedFunctions::OriginalFunctions.original_oCSpawnManagerSpawnNpc = (oCSpawnManagerSpawnNpc)DetourFunction((BYTE*)GothicMemoryLocations::oCSpawnManager::SpawnNpc, (BYTE*)oCSpawnManager::hooked_oCSpawnManagerSpawnNpc);
 		//HookedFunctions::OriginalFunctions.original_oCSpawnManagerCheckInsertNpc = (oCSpawnManagerCheckInsertNpc)DetourFunction((BYTE *)GothicMemoryLocations::oCSpawnManager::CheckInsertNpc, (BYTE *)oCSpawnManager::hooked_oCSpawnManagerCheckInsertNpc);
+		
+		// TODO: #8
+		//HookedFunctions::OriginalFunctions.original_oCSpawnManagerCheckRemoveNpc = (oCSpawnManagerCheckRemoveNpc)DetourFunction((BYTE*)GothicMemoryLocations::oCSpawnManager::CheckRemoveNpc, (BYTE*)oCSpawnManager::hooked_oCSpawnManagerCheckRemoveNpc);
 	}
 
 	/** Reads config stuff */
@@ -31,6 +34,18 @@ public:
 			Engine::GAPI->OnAddVob((zCVob *)npc, ((zCVob *)npc)->GetHomeWorld());
 		}
 		hook_outfunc
+	}
+
+	static int __fastcall hooked_oCSpawnManagerCheckRemoveNpc(void* thisptr, void* unknwn, oCNPC* npc)
+	{
+		hook_infunc
+		Engine::GAPI->SetCanClearVobsByVisual();
+		auto res = HookedFunctions::OriginalFunctions.original_oCSpawnManagerCheckRemoveNpc(thisptr, npc);
+		Engine::GAPI->SetCanClearVobsByVisual(false);
+		return res;
+		hook_outfunc
+		
+		return 0;
 	}
 
 	/** Reads config stuff */

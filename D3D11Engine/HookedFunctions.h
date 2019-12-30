@@ -53,7 +53,8 @@ typedef int (__thiscall* CGameManagerExitGame)(void *);
 typedef const zSTRING* (__thiscall* zCVisualGetFileExtension)(void *, int);
 typedef long (__stdcall* zCExceptionHandlerUnhandledExceptionFilter)(void *);
 typedef void (__thiscall* zCWorldDisposeVobs)(void *, zCTree<zCVob> *);
-typedef void (__thiscall* oCSpawnManagerSpawnNpc)(void *, oCNPC *, const DirectX::SimpleMath::Vector3 &, float);
+typedef void (__thiscall* oCSpawnManagerSpawnNpc)(void*, oCNPC*, const DirectX::SimpleMath::Vector3&, float);
+typedef int (__thiscall* oCSpawnManagerCheckRemoveNpc)(void *, oCNPC *);
 typedef void (__thiscall* oCSpawnManagerInsertNpc)(void*, oCNPC*, const DirectX::SimpleMath::Vector3&);
 typedef void (__thiscall* oCSpawnManagerCheckInsertNpc)(void *);
 typedef void (__thiscall* zCVobSetVisual)(void *, zCVisual*);
@@ -113,6 +114,7 @@ struct HookedFunctionInfo
 	GenericThiscall original_zCWorldDisposeWorld;
 	zCWorldDisposeVobs original_zCWorldDisposeVobs;
 	oCSpawnManagerSpawnNpc original_oCSpawnManagerSpawnNpc;
+	oCSpawnManagerCheckRemoveNpc original_oCSpawnManagerCheckRemoveNpc;
 	oCSpawnManagerCheckInsertNpc original_oCSpawnManagerCheckInsertNpc;
 	zCVobSetVisual original_zCVobSetVisual;
 	GenericDestructor original_zCVobDestructor;

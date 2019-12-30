@@ -1015,7 +1015,8 @@ XRESULT D3D11GraphicsEngine::DrawVertexArray(ExVertexStruct* vertices,
 	TempVertexBuffer->GetVertexBuffer()->GetDesc(&desc);
 
 	if (desc.ByteWidth < stride * numVertices) {
-		LogInfo() << "TempVertexBuffer too small (" << desc.ByteWidth << "), need "
+		if (Engine::GAPI->GetRendererState()->RendererSettings.EnableDebugLog)
+			LogInfo() << "TempVertexBuffer too small (" << desc.ByteWidth << "), need "
 			<< stride * numVertices << " bytes. Recreating buffer.";
 
 		// Buffer too small, recreate it
@@ -1064,7 +1065,8 @@ XRESULT D3D11GraphicsEngine::DrawIndexedVertexArray(ExVertexStruct* vertices,
 	TempVertexBuffer->GetVertexBuffer()->GetDesc(&desc);
 
 	if (desc.ByteWidth < stride * numVertices) {
-		LogInfo() << "TempVertexBuffer too small (" << desc.ByteWidth << "), need "
+		if (Engine::GAPI->GetRendererState()->RendererSettings.EnableDebugLog)
+			LogInfo() << "TempVertexBuffer too small (" << desc.ByteWidth << "), need "
 			<< stride * numVertices << " bytes. Recreating buffer.";
 
 		// Buffer too small, recreate it
@@ -1271,7 +1273,8 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
 	DynamicInstancingBuffer->GetVertexBuffer()->GetDesc(&desc);
 
 	if (desc.ByteWidth < instanceDataStride * numInstances) {
-		LogInfo() << "Instancing buffer too small (" << desc.ByteWidth << "), need "
+		if (Engine::GAPI->GetRendererState()->RendererSettings.EnableDebugLog)
+			LogInfo() << "Instancing buffer too small (" << desc.ByteWidth << "), need "
 			<< instanceDataStride * numInstances
 			<< " bytes. Recreating buffer.";
 
@@ -3281,7 +3284,8 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 		DynamicInstancingBuffer->GetVertexBuffer()->GetDesc(&desc);
 
 		if (desc.ByteWidth < sizeof(VobInstanceInfo) * vobs.size()) {
-			LogInfo() << "Instancing buffer too small (" << desc.ByteWidth
+			if (Engine::GAPI->GetRendererState()->RendererSettings.EnableDebugLog)
+				LogInfo() << "Instancing buffer too small (" << desc.ByteWidth
 				<< "), need " << sizeof(VobInstanceInfo) * vobs.size()
 				<< " bytes. Recreating buffer.";
 
@@ -3735,6 +3739,7 @@ XRESULT D3D11GraphicsEngine::DrawPolyStrips(bool noTextures) {
 		TempVertexBuffer->GetVertexBuffer()->GetDesc(&desc);
 		if (desc.ByteWidth < sizeof(ExVertexStruct) * vertices.size())
 		{
+			if (Engine::GAPI->GetRendererState()->RendererSettings.EnableDebugLog)
 			LogInfo() << "(PolyStrip) TempVertexBuffer too small (" << desc.ByteWidth << "), need " << sizeof(ExVertexStruct) * vertices.size() << " bytes. Recreating buffer.";
 
 			// Buffer too small, recreate it
@@ -5451,7 +5456,8 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 		TempVertexBuffer->GetVertexBuffer()->GetDesc(&desc);
 
 		if (desc.ByteWidth < sizeof(ParticleInstanceInfo) * instances.size()) {
-			LogInfo() << "(PARTICLE) TempVertexBuffer too small (" << desc.ByteWidth
+			if (Engine::GAPI->GetRendererState()->RendererSettings.EnableDebugLog)
+				LogInfo() << "(PARTICLE) TempVertexBuffer too small (" << desc.ByteWidth
 				<< "), need " << sizeof(ParticleInstanceInfo) * instances.size()
 				<< " bytes. Recreating buffer.";
 

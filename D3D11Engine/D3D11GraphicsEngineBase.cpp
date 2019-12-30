@@ -557,7 +557,8 @@ XRESULT D3D11GraphicsEngineBase::DrawVertexArray(ExVertexStruct* vertices, unsig
 	// Check if we need a bigger vertexbuffer
 	if (desc.ByteWidth < stride * numVertices)
 	{
-		LogInfo() << "TempVertexBuffer too small (" << desc.ByteWidth << "), need " << stride * numVertices << " bytes. Recreating buffer.";
+		if (Engine::GAPI->GetRendererState()->RendererSettings.EnableDebugLog)
+			LogInfo() << "TempVertexBuffer too small (" << desc.ByteWidth << "), need " << stride * numVertices << " bytes. Recreating buffer.";
 
 		// Buffer too small, recreate it
 		TempVertexBuffer = std::make_unique<D3D11VertexBuffer>();

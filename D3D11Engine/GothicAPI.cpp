@@ -1102,7 +1102,8 @@ void GothicAPI::OnVisualDeleted(zCVisual * visual) {
 		}
 	}
 	else {
-		oCNPC* npcVob;
+		// TODO: #8 - Figure out why exactly we don't get notified that a VOB is re-added after being removed.
+		/*oCNPC* npcVob;
 		for (auto const& it : list) {
 			if (npcVob = VobAsNpc(it->Vob)) {
 				LogInfo() << "Not removing NPC Vob: " << npcVob->GetName().ToChar();
@@ -1110,10 +1111,11 @@ void GothicAPI::OnVisualDeleted(zCVisual * visual) {
 			else {
 				OnRemovedVob(it->Vob, LoadedWorldInfo->MainWorld);
 			}
-		}
+		}*/
 	}
 	if (list.size() > 0) {
-		LogInfo() << std::string(className) << " had " + std::to_string(list.size()) << " vobs";
+		if (RendererState.RendererSettings.EnableDebugLog)
+			LogInfo() << std::string(className) << " had " + std::to_string(list.size()) << " vobs";
 		VobsByVisual[visual].clear();
 	}
 }
@@ -3645,7 +3647,8 @@ XRESULT GothicAPI::SaveMenuSettings(const std::string & file) {
 
 	WritePrivateProfileStringA("General", "AtmosphericScattering", std::to_string(s.AtmosphericScattering ? 1 : 0).c_str(), ini.c_str());
 	WritePrivateProfileStringA("General", "EnableFog", std::to_string(s.DrawFog ? 1 : 0).c_str(), ini.c_str());
-	WritePrivateProfileStringA("General", "EnableHDR", std::to_string(s.EnableHDR ? 1 : 0).c_str(), ini.c_str());
+	//WritePrivateProfileStringA("General", "EnableHDR", std::to_string(s.EnableHDR ? 1 : 0).c_str(), ini.c_str());
+	WritePrivateProfileStringA("General", "EnableDebugLog", std::to_string(s.EnableDebugLog ? 1 : 0).c_str(), ini.c_str());
 	WritePrivateProfileStringA("General", "EnableAutoupdates", std::to_string(s.EnableAutoupdates ? 1 : 0).c_str(), ini.c_str());
 	WritePrivateProfileStringA("General", "EnableGodRays", std::to_string(s.EnableGodRays ? 1 : 0).c_str(), ini.c_str());
 	WritePrivateProfileStringA("General", "AllowNormalmaps", std::to_string(s.AllowNormalmaps ? 1 : 0).c_str(), ini.c_str());
@@ -3700,7 +3703,8 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 
 	s.DrawFog = GetPrivateProfileIntA("General", "EnableFog", 1, ini.c_str());
 	s.AtmosphericScattering = GetPrivateProfileIntA("General", "AtmosphericScattering", 1, ini.c_str());
-	s.EnableHDR = GetPrivateProfileIntA("General", "EnableHDR", 1, ini.c_str());
+	//s.EnableHDR = GetPrivateProfileIntA("General", "EnableHDR", 1, ini.c_str());
+	s.EnableDebugLog = GetPrivateProfileIntA("General", "EnableDebugLog", 1, ini.c_str());
 	s.EnableAutoupdates = GetPrivateProfileIntA("General", "EnableAutoupdates", 1, ini.c_str());
 	s.EnableGodRays = GetPrivateProfileIntA("General", "EnableGodRays", 1, ini.c_str());
 	s.AllowNormalmaps = GetPrivateProfileIntA("General", "AllowNormalmaps", 0, ini.c_str());

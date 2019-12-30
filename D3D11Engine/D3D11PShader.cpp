@@ -94,7 +94,8 @@ XRESULT D3D11PShader::LoadShader(const char* pixelShader, std::vector<D3D10_SHAD
 
 	ID3DBlob* psBlob;
 
-	LogInfo() << "Compilling pixel shader: " << pixelShader;
+	if (Engine::GAPI->GetRendererState()->RendererSettings.EnableDebugLog)
+		LogInfo() << "Compilling pixel shader: " << pixelShader;
 	File = pixelShader;
 
 	// Compile shaders

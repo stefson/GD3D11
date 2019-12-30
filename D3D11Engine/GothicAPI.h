@@ -634,6 +634,9 @@ public:
 		}
 		return nullptr;
 	}
+	void SetCanClearVobsByVisual(bool enabled = true) {
+		_canClearVobsByVisual = enabled;
+	}
 private:
 	/** Collects polygons in the given AABB */
 	void CollectPolygonsInAABBRec(BspInfo * base, const zTBBox3D & bbox, std::vector<zCPolygon *> & list);
@@ -790,4 +793,5 @@ private:
 
 	/** Used to only allow deterministic VOB cleanup (e.g. on loading a world.)*/
 	bool _canClearVobsByVisual;
+	bool m_DebugMode;
 };
