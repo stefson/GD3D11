@@ -3673,11 +3673,6 @@ XRESULT D3D11GraphicsEngine::DrawPolyStrips(bool noTextures) {
 		zCMaterial* mat = it->second.material;
 		zCTexture* tx = mat->GetAniTexture();
 
-		if (!tx) {
-			// Whoops, why does this have no texture?
-			continue;
-		}
-
 		std::vector<ExVertexStruct> vertices = it->second.vertices;
 
 		if (!vertices.size()) continue;

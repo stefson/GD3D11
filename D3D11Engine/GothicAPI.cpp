@@ -801,6 +801,10 @@ void GothicAPI::CalcPolyStripMeshes() {
 		zCMaterial* mat = pStripInst.material;
 		zCTexture* tx = mat->GetAniTexture();
 		if (!tx) {
+			tx = mat->GetTextureSingle();
+		}
+		if (!tx) {
+			// Whoops, why does this have no texture?
 			// TODO: PolyStrips Why is this sometimes null?
 			continue;
 		}
