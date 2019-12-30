@@ -515,4 +515,18 @@ struct GothicMemoryLocations
 		static const unsigned int DisposeVobs = 0x00623960;
 		static const unsigned int Offset_BspTree = 0x1AC;
 	};
+
+	class VobTypes // vftables
+	{
+	public:
+		static const unsigned int
+			Npc = 0x83D724,
+			Mob = 0x83D4D4,
+			Item = 0x83C804,
+			Mover = 0x83A47C,
+			MobFire = 0x83D19C,
+			VobLight = 0x839A74;
+	protected:
+		VobTypes() {}
+	};
 };

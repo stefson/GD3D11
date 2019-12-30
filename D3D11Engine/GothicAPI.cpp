@@ -1101,6 +1101,17 @@ void GothicAPI::OnVisualDeleted(zCVisual * visual) {
 			OnRemovedVob(it->Vob, LoadedWorldInfo->MainWorld);
 		}
 	}
+	else {
+		oCNPC* npcVob;
+		for (auto const& it : list) {
+			if (npcVob = VobAsNpc(it->Vob)) {
+				LogInfo() << "Not removing NPC Vob: " << npcVob->GetName().ToChar();
+			}
+			else {
+				OnRemovedVob(it->Vob, LoadedWorldInfo->MainWorld);
+			}
+		}
+	}
 	if (list.size() > 0) {
 		LogInfo() << std::string(className) << " had " + std::to_string(list.size()) << " vobs";
 		VobsByVisual[visual].clear();

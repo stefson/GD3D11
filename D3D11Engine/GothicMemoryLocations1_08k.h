@@ -454,4 +454,18 @@ struct GothicMemoryLocations
 		static const unsigned int Offset_NumActiveAnis = 0x34;
 		static const unsigned int GetVisualName = 0x00563EF0;
 	};
+
+	class VobTypes // vftables
+	{
+	public:
+		static const unsigned int
+			Npc = 0x7DDF34,
+			Mob = 0x7DDCFC,
+			Item = 0x7DD0CC,
+			Mover = 0x7DBFAC,
+			MobFire = 0x7DD9E4,
+			VobLight = 0x7DB534;
+	protected:
+		VobTypes() {}
+	};
 };

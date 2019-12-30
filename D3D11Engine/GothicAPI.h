@@ -626,6 +626,14 @@ public:
 	/** Prints information about the mod to the screen for a couple of seconds */
 	void PrintModInfo();
 
+	/** returns the NPC pointer from the Vob, or nullptr if not an NPC */
+	oCNPC* VobAsNpc(zCVob* vob) {
+		int vtbl = ((int*)vob)[0];
+		if (vtbl == GothicMemoryLocations::VobTypes::Npc) {
+			return reinterpret_cast<oCNPC*>(vob);
+		}
+		return nullptr;
+	}
 private:
 	/** Collects polygons in the given AABB */
 	void CollectPolygonsInAABBRec(BspInfo * base, const zTBBox3D & bbox, std::vector<zCPolygon *> & list);
