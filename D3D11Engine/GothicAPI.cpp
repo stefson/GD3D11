@@ -1105,7 +1105,7 @@ void GothicAPI::OnVisualDeleted(zCVisual * visual) {
 		// TODO: #8 - Figure out why exactly we don't get notified that a VOB is re-added after being removed.
 		/*oCNPC* npcVob;
 		for (auto const& it : list) {
-			if (npcVob = VobAsNpc(it->Vob)) {
+			if (npcVob = it->Vob->AsNpc()) {
 				LogInfo() << "Not removing NPC Vob: " << npcVob->GetName().ToChar();
 			}
 			else {

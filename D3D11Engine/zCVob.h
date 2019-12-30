@@ -238,6 +238,14 @@ public:
 		return (EVisualCamAlignType)flags;
 	}
 
+	/** returns the NPC pointer from the Vob, or nullptr if not an NPC */
+	oCNPC* AsNpc() {
+		int vtbl = ((int*)this)[0];
+		if (vtbl == GothicMemoryLocations::VobTypes::Npc) {
+			return reinterpret_cast<oCNPC*>(this);
+		}
+		return nullptr;
+	}
 protected:
 	zSTRING& __GetObjectName()
 	{
