@@ -3645,40 +3645,44 @@ XRESULT GothicAPI::SaveMenuSettings(const std::string & file) {
 	LogInfo() << "Saving menu settings to " << ini;
 	GothicRendererSettings& s = RendererState.RendererSettings;
 
-	WritePrivateProfileStringA("General", "AtmosphericScattering", std::to_string(s.AtmosphericScattering ? 1 : 0).c_str(), ini.c_str());
-	WritePrivateProfileStringA("General", "EnableFog", std::to_string(s.DrawFog ? 1 : 0).c_str(), ini.c_str());
-	//WritePrivateProfileStringA("General", "EnableHDR", std::to_string(s.EnableHDR ? 1 : 0).c_str(), ini.c_str());
-	WritePrivateProfileStringA("General", "EnableDebugLog", std::to_string(s.EnableDebugLog ? 1 : 0).c_str(), ini.c_str());
-	WritePrivateProfileStringA("General", "EnableAutoupdates", std::to_string(s.EnableAutoupdates ? 1 : 0).c_str(), ini.c_str());
-	WritePrivateProfileStringA("General", "EnableGodRays", std::to_string(s.EnableGodRays ? 1 : 0).c_str(), ini.c_str());
-	WritePrivateProfileStringA("General", "AllowNormalmaps", std::to_string(s.AllowNormalmaps ? 1 : 0).c_str(), ini.c_str());
-	WritePrivateProfileStringA("General", "AllowNumpadKeys", std::to_string(s.AllowNumpadKeys ? 1 : 0).c_str(), ini.c_str());
+	WritePrivateProfileStringA("General", "AtmosphericScattering", std::to_string(s.AtmosphericScattering ? TRUE : FALSE).c_str(), ini.c_str());
+	WritePrivateProfileStringA("General", "EnableFog", std::to_string(s.DrawFog ? TRUE : FALSE).c_str(), ini.c_str());
+	//WritePrivateProfileStringA("General", "EnableHDR", std::to_string(s.EnableHDR ? 1 : 0).c_str(), ini.c_str()); // HDR is broken!
+	WritePrivateProfileStringA("General", "EnableDebugLog", std::to_string(s.EnableDebugLog ? TRUE : FALSE).c_str(), ini.c_str());
+	WritePrivateProfileStringA("General", "EnableAutoupdates", std::to_string(s.EnableAutoupdates ? TRUE : FALSE).c_str(), ini.c_str());
+	WritePrivateProfileStringA("General", "EnableGodRays", std::to_string(s.EnableGodRays ? TRUE : FALSE).c_str(), ini.c_str());
+	WritePrivateProfileStringA("General", "AllowNormalmaps", std::to_string(s.AllowNormalmaps ? TRUE : FALSE).c_str(), ini.c_str());
+	WritePrivateProfileStringA("General", "AllowNumpadKeys", std::to_string(s.AllowNumpadKeys ? TRUE : FALSE).c_str(), ini.c_str());
 	WritePrivateProfileStringA("General", "VisualFXDrawRadius", std::to_string(s.VisualFXDrawRadius).c_str(), ini.c_str());
 	WritePrivateProfileStringA("General", "OutdoorVobDrawRadius", std::to_string(s.OutdoorVobDrawRadius).c_str(), ini.c_str());
 	WritePrivateProfileStringA("General", "OutdoorSmallVobDrawRadius", std::to_string(s.OutdoorSmallVobDrawRadius).c_str(), ini.c_str());
 	WritePrivateProfileStringA("General", "SectionDrawRadius", std::to_string(s.SectionDrawRadius).c_str(), ini.c_str());
+	WritePrivateProfileStringA("General", "EnableOcclusionCulling", std::to_string(s.EnableOcclusionCulling).c_str(), ini.c_str());
+	WritePrivateProfileStringA("General", "FpsLimit", std::to_string(s.FpsLimit).c_str(), ini.c_str());
+
 	auto res = Engine::GraphicsEngine->GetResolution();
 	WritePrivateProfileStringA("Display", "Width", std::to_string(res.x).c_str(), ini.c_str());
 	WritePrivateProfileStringA("Display", "Height", std::to_string(res.y).c_str(), ini.c_str());
-	WritePrivateProfileStringA("Display", "VSync", std::to_string(s.EnableVSync ? 1 : 0).c_str(), ini.c_str());
+	WritePrivateProfileStringA("Display", "VSync", std::to_string(s.EnableVSync ? TRUE : FALSE).c_str(), ini.c_str());
 	WritePrivateProfileStringA("Display", "FOVHoriz", std::to_string((int)s.FOVHoriz).c_str(), ini.c_str());
 	WritePrivateProfileStringA("Display", "FOVVert", std::to_string((int)s.FOVVert).c_str(), ini.c_str());
 	WritePrivateProfileStringA("Display", "Gamma", std::to_string(s.GammaValue).c_str(), ini.c_str());
 	WritePrivateProfileStringA("Display", "Brightness", std::to_string(s.BrightnessValue).c_str(), ini.c_str());
 
-	WritePrivateProfileStringA("Shadows", "EnableShadows", std::to_string(s.EnableShadows ? 1 : 0).c_str(), ini.c_str());
-	WritePrivateProfileStringA("Shadows", "EnableSoftShadows", std::to_string(s.EnableSoftShadows ? 1 : 0).c_str(), ini.c_str());
+	WritePrivateProfileStringA("Shadows", "EnableShadows", std::to_string(s.EnableShadows ? TRUE : FALSE).c_str(), ini.c_str());
+	WritePrivateProfileStringA("Shadows", "EnableSoftShadows", std::to_string(s.EnableSoftShadows ? TRUE : FALSE).c_str(), ini.c_str());
 	WritePrivateProfileStringA("Shadows", "ShadowMapSize", std::to_string(s.ShadowMapSize).c_str(), ini.c_str());
 	WritePrivateProfileStringA("Shadows", "WorldShadowRangeScale", std::to_string(s.WorldShadowRangeScale).c_str(), ini.c_str());
 	WritePrivateProfileStringA("Shadows", "PointlightShadows", std::to_string(s.EnablePointlightShadows).c_str(), ini.c_str());
+	WritePrivateProfileStringA("Shadows", "EnableDynamicLighting", std::to_string(s.EnableDynamicLighting ? TRUE : FALSE).c_str(), ini.c_str());
 
-	WritePrivateProfileStringA("SMAA", "Enabled", std::to_string(s.EnableSMAA ? 1 : 0).c_str(), ini.c_str());
+	WritePrivateProfileStringA("SMAA", "Enabled", std::to_string(s.EnableSMAA ? TRUE : FALSE).c_str(), ini.c_str());
 	WritePrivateProfileStringA("SMAA", "SharpenFactor", std::to_string(s.SharpenFactor).c_str(), ini.c_str());
 
-	WritePrivateProfileStringA("HBAO", "Enabled", std::to_string(s.HbaoSettings.Enabled ? 1 : 0).c_str(), ini.c_str());
+	WritePrivateProfileStringA("HBAO", "Enabled", std::to_string(s.HbaoSettings.Enabled ? TRUE : FALSE).c_str(), ini.c_str());
 
-	WritePrivateProfileStringA("Tesselation", "EnableTesselation", std::to_string(s.EnableTesselation ? 1 : 0).c_str(), ini.c_str());
-	WritePrivateProfileStringA("Tesselation", "AllowWorldMeshTesselation", std::to_string(s.AllowWorldMeshTesselation ? 1 : 0).c_str(), ini.c_str());
+	WritePrivateProfileStringA("Tesselation", "EnableTesselation", std::to_string(s.EnableTesselation ? TRUE : FALSE).c_str(), ini.c_str());
+	WritePrivateProfileStringA("Tesselation", "AllowWorldMeshTesselation", std::to_string(s.AllowWorldMeshTesselation ? TRUE : FALSE).c_str(), ini.c_str());
 
 	return XR_SUCCESS;
 }
@@ -3701,43 +3705,46 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 
 	GothicRendererSettings& s = RendererState.RendererSettings;
 
-	s.DrawFog = GetPrivateProfileIntA("General", "EnableFog", 1, ini.c_str());
-	s.AtmosphericScattering = GetPrivateProfileIntA("General", "AtmosphericScattering", 1, ini.c_str());
+	s.DrawFog = GetPrivateProfileIntA("General", "EnableFog", TRUE, ini.c_str());
+	s.AtmosphericScattering = GetPrivateProfileIntA("General", "AtmosphericScattering", TRUE, ini.c_str());
 	//s.EnableHDR = GetPrivateProfileIntA("General", "EnableHDR", 1, ini.c_str());
-	s.EnableDebugLog = GetPrivateProfileIntA("General", "EnableDebugLog", 1, ini.c_str());
-	s.EnableAutoupdates = GetPrivateProfileIntA("General", "EnableAutoupdates", 1, ini.c_str());
-	s.EnableGodRays = GetPrivateProfileIntA("General", "EnableGodRays", 1, ini.c_str());
-	s.AllowNormalmaps = GetPrivateProfileIntA("General", "AllowNormalmaps", 0, ini.c_str());
-	s.AllowNumpadKeys = GetPrivateProfileIntA("General", "AllowNumpadKeys", 0, ini.c_str());
+	s.EnableDebugLog = GetPrivateProfileIntA("General", "EnableDebugLog", TRUE, ini.c_str());
+	s.EnableAutoupdates = GetPrivateProfileIntA("General", "EnableAutoupdates", TRUE, ini.c_str());
+	s.EnableGodRays = GetPrivateProfileIntA("General", "EnableGodRays", TRUE, ini.c_str());
+	s.AllowNormalmaps = GetPrivateProfileIntA("General", "AllowNormalmaps", FALSE, ini.c_str());
+	s.AllowNumpadKeys = GetPrivateProfileIntA("General", "AllowNumpadKeys", FALSE, ini.c_str());
 	s.VisualFXDrawRadius = GetPrivateProfileFloatA("General", "VisualFXDrawRadius", 8000.0f, ini.c_str());
 	s.OutdoorVobDrawRadius = GetPrivateProfileFloatA("General", "OutdoorVobDrawRadius", 30000.0f, ini.c_str());
 	s.OutdoorSmallVobDrawRadius =  GetPrivateProfileFloatA("General", "OutdoorSmallVobDrawRadius", 10000.0f, ini.c_str());
 	s.SectionDrawRadius = GetPrivateProfileFloatA("General", "SectionDrawRadius", 4, ini.c_str());
+	s.EnableOcclusionCulling = GetPrivateProfileIntA("General", "EnableOcclusionCulling", FALSE, ini.c_str());
+	s.FpsLimit = GetPrivateProfileIntA("General", "FpsLimit", 0, ini.c_str());
 
-	s.EnableShadows = GetPrivateProfileIntA("Shadows", "EnableShadows", 1, ini.c_str());
-	s.EnableSoftShadows = GetPrivateProfileIntA("Shadows", "EnableSoftShadows", 1, ini.c_str());
+	s.EnableShadows = GetPrivateProfileIntA("Shadows", "EnableShadows", TRUE, ini.c_str());
+	s.EnableSoftShadows = GetPrivateProfileIntA("Shadows", "EnableSoftShadows", TRUE, ini.c_str());
 	s.ShadowMapSize = GetPrivateProfileIntA("Shadows", "ShadowMapSize", 2048, ini.c_str());
-	s.EnablePointlightShadows = GothicRendererSettings::EPointLightShadowMode(GetPrivateProfileIntA("Shadows", "PointlightShadows", 1, ini.c_str()));
+	s.EnablePointlightShadows = GothicRendererSettings::EPointLightShadowMode(GetPrivateProfileIntA("Shadows", "PointlightShadows", GothicRendererSettings::EPointLightShadowMode::PLS_STATIC_ONLY, ini.c_str()));
 	s.WorldShadowRangeScale = GetPrivateProfileFloatA("Shadows", "WorldShadowRangeScale", 1.0f, ini.c_str());
+	s.EnableDynamicLighting = GetPrivateProfileIntA("Shadows", "EnableDynamicLighting", TRUE, ini.c_str());
 
 	INT2 res = {};
 	RECT desktopRect;
 	GetClientRect(GetDesktopWindow(), &desktopRect);
 	res.x = GetPrivateProfileIntA("Display", "Width", desktopRect.right, ini.c_str());
 	res.y = GetPrivateProfileIntA("Display", "Height", desktopRect.bottom, ini.c_str());
-	s.EnableVSync = GetPrivateProfileIntA("Display", "VSync", 0, ini.c_str());
+	s.EnableVSync = GetPrivateProfileIntA("Display", "VSync", FALSE, ini.c_str());
 	s.FOVHoriz = GetPrivateProfileIntA("Display", "FOVHoriz", 90, ini.c_str());
 	s.FOVVert = GetPrivateProfileIntA("Display", "FOVVert", 90, ini.c_str());
 	s.GammaValue = GetPrivateProfileFloatA("Display", "Gamma", 1.0f, ini.c_str());
 	s.BrightnessValue = GetPrivateProfileFloatA("Display", "Brightness", 1.0f, ini.c_str());
 
-	s.EnableSMAA = GetPrivateProfileIntA("SMAA", "Enabled", 0, ini.c_str());
-	s.SharpenFactor = GetPrivateProfileFloatA("SMAA", "SharpenFactor", 1.0f, ini.c_str());
+	s.EnableSMAA = GetPrivateProfileIntA("SMAA", "Enabled", FALSE, ini.c_str());
+	s.SharpenFactor = GetPrivateProfileFloatA("SMAA", "SharpenFactor", 0.30f, ini.c_str());
 
-	s.AllowWorldMeshTesselation = GetPrivateProfileIntA("Tesselation", "AllowWorldMeshTesselation", 0, ini.c_str());
-	s.EnableTesselation = GetPrivateProfileIntA("Tesselation", "EnableTesselation", 0, ini.c_str());
+	s.AllowWorldMeshTesselation = GetPrivateProfileIntA("Tesselation", "AllowWorldMeshTesselation", FALSE, ini.c_str());
+	s.EnableTesselation = GetPrivateProfileIntA("Tesselation", "EnableTesselation", FALSE, ini.c_str());
 
-	s.HbaoSettings.Enabled = GetPrivateProfileIntA("HBAO", "Enabled", 1, ini.c_str());
+	s.HbaoSettings.Enabled = GetPrivateProfileIntA("HBAO", "Enabled", TRUE, ini.c_str());
 
 	// Fix the shadow range
 	switch (s.ShadowMapSize)
