@@ -3644,6 +3644,7 @@ XRESULT GothicAPI::SaveMenuSettings(const std::string & file) {
 
 	LogInfo() << "Saving menu settings to " << ini;
 	GothicRendererSettings& s = RendererState.RendererSettings;
+	AtmosphereSettings& aS = Engine::GAPI->GetSky()->GetAtmoshpereSettings();
 
 	WritePrivateProfileStringA("General", "AtmosphericScattering", std::to_string(s.AtmosphericScattering ? TRUE : FALSE).c_str(), ini.c_str());
 	WritePrivateProfileStringA("General", "EnableFog", std::to_string(s.DrawFog ? TRUE : FALSE).c_str(), ini.c_str());
@@ -3659,6 +3660,11 @@ XRESULT GothicAPI::SaveMenuSettings(const std::string & file) {
 	WritePrivateProfileStringA("General", "SectionDrawRadius", std::to_string(s.SectionDrawRadius).c_str(), ini.c_str());
 	WritePrivateProfileStringA("General", "EnableOcclusionCulling", std::to_string(s.EnableOcclusionCulling).c_str(), ini.c_str());
 	WritePrivateProfileStringA("General", "FpsLimit", std::to_string(s.FpsLimit).c_str(), ini.c_str());
+	WritePrivateProfileStringA("General", "ReplaceSunDirection", std::to_string(s.ReplaceSunDirection ? TRUE : FALSE).c_str(), ini.c_str());
+
+	WritePrivateProfileStringA("Atmoshpere", "LightDirectionX", std::to_string(aS.LightDirection.x).c_str(), ini.c_str());
+	WritePrivateProfileStringA("Atmoshpere", "LightDirectionY", std::to_string(aS.LightDirection.y).c_str(), ini.c_str());
+	WritePrivateProfileStringA("Atmoshpere", "LightDirectionZ", std::to_string(aS.LightDirection.z).c_str(), ini.c_str());
 
 	auto res = Engine::GraphicsEngine->GetResolution();
 	WritePrivateProfileStringA("Display", "Width", std::to_string(res.x).c_str(), ini.c_str());
@@ -3704,6 +3710,7 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 	LogInfo() << "Loading menu settings from " << ini;
 
 	GothicRendererSettings& s = RendererState.RendererSettings;
+	AtmosphereSettings& aS = Engine::GAPI->GetSky()->GetAtmoshpereSettings();
 
 	s.DrawFog = GetPrivateProfileIntA("General", "EnableFog", TRUE, ini.c_str());
 	s.AtmosphericScattering = GetPrivateProfileIntA("General", "AtmosphericScattering", TRUE, ini.c_str());
@@ -3719,6 +3726,12 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 	s.SectionDrawRadius = GetPrivateProfileFloatA("General", "SectionDrawRadius", 4, ini.c_str());
 	s.EnableOcclusionCulling = GetPrivateProfileIntA("General", "EnableOcclusionCulling", FALSE, ini.c_str());
 	s.FpsLimit = GetPrivateProfileIntA("General", "FpsLimit", 0, ini.c_str());
+	s.ReplaceSunDirection = GetPrivateProfileIntA("General", "ReplaceSunDirection", FALSE, ini.c_str());
+
+	static Vector3 defaultLightDirection = Vector3::One;
+	aS.LightDirection.x = GetPrivateProfileFloatA("Atmoshpere", "LightDirectionX", defaultLightDirection.x, ini.c_str());
+	aS.LightDirection.y = GetPrivateProfileFloatA("Atmoshpere", "LightDirectionY", defaultLightDirection.y, ini.c_str());
+	aS.LightDirection.z = GetPrivateProfileFloatA("Atmoshpere", "LightDirectionZ", defaultLightDirection.z, ini.c_str());
 
 	s.EnableShadows = GetPrivateProfileIntA("Shadows", "EnableShadows", TRUE, ini.c_str());
 	s.EnableSoftShadows = GetPrivateProfileIntA("Shadows", "EnableSoftShadows", TRUE, ini.c_str());
