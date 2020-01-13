@@ -36,6 +36,7 @@ public:
 	static int __fastcall hooked_LoadResourceData(void * thisptr)
 	{
 		Engine::GAPI->SetBoundTexture(7, (zCTexture *)thisptr); // Slot 7 is reserved for this
+		// TODO: Figure out why some DTX1a Textures crash this
 		int ret = HookedFunctions::OriginalFunctions.ofiginal_zCTextureLoadResourceData(thisptr);
 
 		Engine::GAPI->SetBoundTexture(7, nullptr); // Slot 7 is reserved for this
