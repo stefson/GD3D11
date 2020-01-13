@@ -3710,7 +3710,6 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 	LogInfo() << "Loading menu settings from " << ini;
 
 	GothicRendererSettings& s = RendererState.RendererSettings;
-	AtmosphereSettings& aS = Engine::GAPI->GetSky()->GetAtmoshpereSettings();
 
 	s.DrawFog = GetPrivateProfileIntA("General", "EnableFog", TRUE, ini.c_str());
 	s.AtmosphericScattering = GetPrivateProfileIntA("General", "AtmosphericScattering", TRUE, ini.c_str());
@@ -3729,9 +3728,16 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 	s.ReplaceSunDirection = GetPrivateProfileIntA("General", "ReplaceSunDirection", FALSE, ini.c_str());
 
 	static Vector3 defaultLightDirection = Vector3::One;
-	aS.LightDirection.x = GetPrivateProfileFloatA("Atmoshpere", "LightDirectionX", defaultLightDirection.x, ini.c_str());
-	aS.LightDirection.y = GetPrivateProfileFloatA("Atmoshpere", "LightDirectionY", defaultLightDirection.y, ini.c_str());
-	aS.LightDirection.z = GetPrivateProfileFloatA("Atmoshpere", "LightDirectionZ", defaultLightDirection.z, ini.c_str());
+
+	if (Engine::GAPI->GetSky()) {
+		AtmosphereSettings& aS = Engine::GAPI->GetSky()->GetAtmoshpereSettings();
+
+		aS.LightDirection = Vector3(
+			GetPrivateProfileFloatA("Atmoshpere", "LightDirectionX", defaultLightDirection.x, ini.c_str()),
+			GetPrivateProfileFloatA("Atmoshpere", "LightDirectionY", defaultLightDirection.y, ini.c_str()),
+			GetPrivateProfileFloatA("Atmoshpere", "LightDirectionZ", defaultLightDirection.z, ini.c_str())
+		);
+	}
 
 	s.EnableShadows = GetPrivateProfileIntA("Shadows", "EnableShadows", TRUE, ini.c_str());
 	s.EnableSoftShadows = GetPrivateProfileIntA("Shadows", "EnableSoftShadows", TRUE, ini.c_str());
