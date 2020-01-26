@@ -1,43 +1,45 @@
-/*===========================================================================*\
+/* ========================================================================= *
  *                                                                           *
  *                               OpenMesh                                    *
- *      Copyright (C) 2001-2015 by Computer Graphics Group, RWTH Aachen      *
- *                           www.openmesh.org                                *
+ *           Copyright (c) 2001-2015, RWTH-Aachen University                 *
+ *           Department of Computer Graphics and Multimedia                  *
+ *                          All rights reserved.                             *
+ *                            www.openmesh.org                               *
  *                                                                           *
- *---------------------------------------------------------------------------* 
- *  This file is part of OpenMesh.                                           *
+ *---------------------------------------------------------------------------*
+ * This file is part of OpenMesh.                                            *
+ *---------------------------------------------------------------------------*
  *                                                                           *
- *  OpenMesh is free software: you can redistribute it and/or modify         * 
- *  it under the terms of the GNU Lesser General Public License as           *
- *  published by the Free Software Foundation, either version 3 of           *
- *  the License, or (at your option) any later version with the              *
- *  following exceptions:                                                    *
+ * Redistribution and use in source and binary forms, with or without        *
+ * modification, are permitted provided that the following conditions        *
+ * are met:                                                                  *
  *                                                                           *
- *  If other files instantiate templates or use macros                       *
- *  or inline functions from this file, or you compile this file and         *
- *  link it with other files to produce an executable, this file does        *
- *  not by itself cause the resulting executable to be covered by the        *
- *  GNU Lesser General Public License. This exception does not however       *
- *  invalidate any other reasons why the executable file might be            *
- *  covered by the GNU Lesser General Public License.                        *
+ * 1. Redistributions of source code must retain the above copyright notice, *
+ *    this list of conditions and the following disclaimer.                  *
  *                                                                           *
- *  OpenMesh is distributed in the hope that it will be useful,              *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of           *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            *
- *  GNU Lesser General Public License for more details.                      *
+ * 2. Redistributions in binary form must reproduce the above copyright      *
+ *    notice, this list of conditions and the following disclaimer in the    *
+ *    documentation and/or other materials provided with the distribution.   *
  *                                                                           *
- *  You should have received a copy of the GNU LesserGeneral Public          *
- *  License along with OpenMesh.  If not,                                    *
- *  see <http://www.gnu.org/licenses/>.                                      *
+ * 3. Neither the name of the copyright holder nor the names of its          *
+ *    contributors may be used to endorse or promote products derived from   *
+ *    this software without specific prior written permission.               *
  *                                                                           *
-\*===========================================================================*/ 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS       *
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED *
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A           *
+ * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER *
+ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,  *
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,       *
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR        *
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF    *
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING      *
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS        *
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.              *
+ *                                                                           *
+ * ========================================================================= */
 
-/*===========================================================================*\
- *                                                                           *             
- *   $Revision: 1188 $                                                         *
- *   $Date: 2015-01-05 16:34:10 +0100 (Mo, 05 Jan 2015) $                   *
- *                                                                           *
-\*===========================================================================*/
+
 
 /** \file DecimaterT.hh
  */
@@ -59,8 +61,6 @@
 #include <OpenMesh/Core/Utils/Property.hh>
 #include <OpenMesh/Tools/Utils/HeapT.hh>
 #include <OpenMesh/Tools/Decimater/BaseDecimaterT.hh>
-
-
 
 //== NAMESPACE ================================================================
 
@@ -96,21 +96,43 @@ public: //------------------------------------------------------ public methods
 
 public:
 
-  /** Decimate (perform _n_collapses collapses). Return number of
-      performed collapses. If _n_collapses is not given reduce as
-      much as possible */
+  /**
+   * @brief Perform a number of collapses on the mesh.
+   * @param _n_collapses Desired number of collapses. If zero (default), attempt
+   *                     to do as many collapses as possible.
+   * @return Number of collapses that were actually performed.
+   * @note This operation only marks the removed mesh elements for deletion. In
+   *       order to actually remove the decimated elements from the mesh, a
+   *       subsequent call to ArrayKernel::garbage_collection() is required.
+   */
   size_t decimate( size_t _n_collapses = 0 );
 
-  /// Decimate to target complexity, returns number of collapses
+  /**
+   * @brief Decimate the mesh to a desired target vertex complexity.
+   * @param _n_vertices Target complexity, i.e. desired number of remaining
+   *                    vertices after decimation.
+   * @return Number of collapses that were actually performed.
+   * @note This operation only marks the removed mesh elements for deletion. In
+   *       order to actually remove the decimated elements from the mesh, a
+   *       subsequent call to ArrayKernel::garbage_collection() is required.
+   */
   size_t decimate_to( size_t  _n_vertices )
   {
     return ( (_n_vertices < this->mesh().n_vertices()) ?
 	     decimate( this->mesh().n_vertices() - _n_vertices ) : 0 );
   }
 
-  /** Decimate to target complexity (vertices and faces).
-   *  Stops when the number of vertices or the number of faces is reached.
-   *  Returns number of performed collapses.
+  /**
+   * @brief Attempts to decimate the mesh until a desired vertex or face
+   *        complexity is achieved.
+   * @param _n_vertices Target vertex complexity.
+   * @param _n_faces Target face complexity.
+   * @return Number of collapses that were actually performed.
+   * @note Decimation stops as soon as either one of the two complexity bounds
+   *       is satisfied.
+   * @note This operation only marks the removed mesh elements for deletion. In
+   *       order to actually remove the decimated elements from the mesh, a
+   *       subsequent call to ArrayKernel::garbage_collection() is required.
    */
   size_t decimate_to_faces( size_t  _n_vertices=0, size_t _n_faces=0 );
 
@@ -168,7 +190,11 @@ private: //------------------------------------------------------- private data
   Mesh&      mesh_;
 
   // heap
-  std::auto_ptr<DeciHeap> heap_;
+  #if (defined(_MSC_VER) && (_MSC_VER >= 1800)) || __cplusplus > 199711L || defined( __GXX_EXPERIMENTAL_CXX0X__ )
+    std::unique_ptr<DeciHeap> heap_;
+  #else
+    std::auto_ptr<DeciHeap> heap_;
+  #endif
 
   // vertex properties
   VPropHandleT<HalfedgeHandle>  collapse_target_;
@@ -183,7 +209,7 @@ private: //------------------------------------------------------- private data
 //=============================================================================
 #if defined(OM_INCLUDE_TEMPLATES) && !defined(OPENMESH_DECIMATER_DECIMATERT_CC)
 #define OPENMESH_DECIMATER_TEMPLATES
-#include "DecimaterT.cc"
+#include "DecimaterT_impl.hh"
 #endif
 //=============================================================================
 #endif // OPENMESH_DECIMATER_DECIMATERT_HH defined

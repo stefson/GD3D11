@@ -1,12 +1,12 @@
 #include "GMesh.h"
 
-#include "assimp--3.0.1270-sdk\include\assimp\Importer.hpp"
-#include "assimp--3.0.1270-sdk\include\assimp\postprocess.h"
-#include "assimp--3.0.1270-sdk\include\assimp\scene.h"
+#include "assimp\Importer.hpp"
+#include "assimp\postprocess.h"
+#include "assimp\scene.h"
 #include "Engine.h"
 #include "GothicAPI.h"
 
-#pragma comment(lib, "assimp.lib")
+#pragma comment(lib, "assimp-vc142-mt.lib")
 
 using namespace Assimp;
 
@@ -138,11 +138,11 @@ XRESULT GMesh::LoadMesh(const std::string & file, float scale) {
 /** Fills this mesh with a grid */
 XRESULT GMesh::CreateGrid(int tesselation, const DirectX::SimpleMath::Vector2 & min, const DirectX::SimpleMath::Vector2 & max, float height) {
 	DirectX::SimpleMath::Vector2 tri1[] = {  DirectX::SimpleMath::Vector3(min.x, height, min.y),
-							DirectX::SimpleMath::Vector3(max.x, height, min.y), 
+							DirectX::SimpleMath::Vector3(max.x, height, min.y),
 							DirectX::SimpleMath::Vector3(min.x, height, max.y) };
 
 	DirectX::SimpleMath::Vector2 tri2[] = {  DirectX::SimpleMath::Vector3(max.x, height, min.y),
-							DirectX::SimpleMath::Vector3(max.x, height, max.y), 
+							DirectX::SimpleMath::Vector3(max.x, height, max.y),
 							DirectX::SimpleMath::Vector3(min.x, height, max.y) };
 
 	//WorldConverter::TesselateTriangle(

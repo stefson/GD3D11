@@ -3,12 +3,8 @@
 //
 // Direct3D 11 Effects Stream Out Decl Parser
 //
-// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
-// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
-// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
-// PARTICULAR PURPOSE.
-//
 // Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/p/?LinkId=271568
 //--------------------------------------------------------------------------------------
@@ -36,42 +32,42 @@ class CSOParser
     char                                        m_pError[ MAX_ERROR_SIZE + 1 ];                 // Error buffer
 
 public:
-    CSOParser()
+    CSOParser() noexcept :
+        m_newEntry{},
+        m_SemanticString{},
+        m_pError{}
     {
-        ZeroMemory(&m_newEntry, sizeof(m_newEntry));
-        ZeroMemory(m_SemanticString, sizeof(m_SemanticString));
-        m_pError[0] = 0;
     }
 
     ~CSOParser()
     {
-        for(size_t Stream = 0; Stream < D3D11_SO_STREAM_COUNT; ++Stream)
+        for( size_t Stream = 0; Stream < D3D11_SO_STREAM_COUNT; ++Stream )
         {
-            SAFE_DELETE_ARRAY(m_SemanticString[Stream]);
+            SAFE_DELETE_ARRAY( m_SemanticString[Stream] );
         }
     }
 
     // Parse a single string, assuming stream 0
-    HRESULT Parse(_In_z_ LPCSTR pString)
+    HRESULT Parse( _In_z_ LPCSTR pString )
     {
         m_vDecls.Clear();
-        return Parse(0, pString);
+        return Parse( 0, pString );
     }
 
     // Parse all 4 streams
-    HRESULT Parse(_In_z_ LPSTR pStreams[D3D11_SO_STREAM_COUNT])
+    HRESULT Parse( _In_z_ LPSTR pStreams[D3D11_SO_STREAM_COUNT] )
     {
         HRESULT hr = S_OK;
         m_vDecls.Clear();
-        for(uint32_t iDecl=0; iDecl < D3D11_SO_STREAM_COUNT; ++iDecl)
+        for( uint32_t iDecl=0; iDecl < D3D11_SO_STREAM_COUNT; ++iDecl )
         {
-            hr = Parse(iDecl, pStreams[iDecl]);
-            if (FAILED(hr))
+            hr = Parse( iDecl, pStreams[iDecl] );
+            if( FAILED(hr) )
             {
                 char str[16];
-                sprintf_s(str, 16, " in stream %u.", iDecl);
+                sprintf_s( str, 16, " in stream %u.", iDecl );
                 str[15] = 0;
-                strcat_s(m_pError, MAX_ERROR_SIZE, str);
+                strcat_s( m_pError, MAX_ERROR_SIZE, str );
                 return hr;
             }
         }
@@ -95,12 +91,12 @@ public:
     }
 
     // Return resulting buffer strides
-    void GetStrides(uint32_t strides[4])
+    void GetStrides( uint32_t strides[4] )
     {
         size_t  len = GetDeclCount();
         strides[0] = strides[1] = strides[2] = strides[3] = 0;
 
-        for(size_t  i=0; i < len; i++)
+        for( size_t  i=0; i < len; i++ )
         {
             strides[m_vDecls[i].OutputSlot] += m_vDecls[i].ComponentCount * sizeof(float);
         }
@@ -109,57 +105,57 @@ public:
 protected:
 
     // Parse a single string "[<slot> :] <semantic>[<index>][.<mask>]; [[<slot> :] <semantic>[<index>][.<mask>][;]]"
-    HRESULT Parse(_In_ uint32_t Stream, _In_z_ LPCSTR pString)
+    HRESULT Parse( _In_ uint32_t Stream, _In_z_ LPCSTR pString )
     {
         HRESULT hr = S_OK;
 
         m_pError[0] = 0;
 
-        if (pString == nullptr)
+        if( pString == nullptr )
             return S_OK;
 
-        uint32_t len = (uint32_t)strlen(pString);
-        if (len == 0)
+        uint32_t len = (uint32_t)strlen( pString );
+        if( len == 0 )
             return S_OK;
 
-        SAFE_DELETE_ARRAY(m_SemanticString[Stream]);
-        VN(m_SemanticString[Stream] = new char[len + 1]);
-        strcpy_s(m_SemanticString[Stream], len + 1, pString);
+        SAFE_DELETE_ARRAY( m_SemanticString[Stream] );
+        VN( m_SemanticString[Stream] = new char[len + 1] );
+        strcpy_s( m_SemanticString[Stream], len + 1, pString );
 
         LPSTR pSemantic = m_SemanticString[Stream];
 
-        while(true)
+        while( true )
         {
             // Each decl entry is delimited by a semi-colon
-            LPSTR pSemi = strchr(pSemantic, ';');
+            LPSTR pSemi = strchr( pSemantic, ';' );
 
             // strip leading and trailing spaces
             LPSTR pEnd;
-            if (pSemi != nullptr)
+            if( pSemi != nullptr )
             {
                 *pSemi = '\0';
                 pEnd = pSemi - 1;
             }
             else
             {
-                pEnd = pSemantic + strlen(pSemantic);
+                pEnd = pSemantic + strlen( pSemantic );
             }
-            while(isspace((unsigned char)*pSemantic))
+            while( isspace( (unsigned char)*pSemantic ) )
                 pSemantic++;
-            while(pEnd > pSemantic && isspace((unsigned char)*pEnd))
+            while( pEnd > pSemantic && isspace( (unsigned char)*pEnd ) )
             {
                 *pEnd = '\0';
                 pEnd--;
             }
 
-            if (*pSemantic != '\0')
+            if( *pSemantic != '\0' )
             {
-                VH(AddSemantic(pSemantic));
+                VH( AddSemantic( pSemantic ) );
                 m_newEntry.Stream = Stream;
 
-                VH(m_vDecls.Add(m_newEntry));
+                VH( m_vDecls.Add( m_newEntry ) );
             }
-            if (pSemi == nullptr)
+            if( pSemi == nullptr )
                 break;
             pSemantic = pSemi + 1;
         }
@@ -169,19 +165,19 @@ lExit:
     }
 
     // Parse a single decl  "[<slot> :] <semantic>[<index>][.<mask>]"
-    HRESULT AddSemantic(_Inout_z_ LPSTR pSemantic)
+    HRESULT AddSemantic( _Inout_z_ LPSTR pSemantic )
     {
         HRESULT hr = S_OK;
 
-        assert(pSemantic);
+        assert( pSemantic );
 
-        ZeroMemory(&m_newEntry, sizeof(m_newEntry));
-        VH(ConsumeOutputSlot(&pSemantic));
-        VH(ConsumeRegisterMask(pSemantic));
-        VH(ConsumeSemanticIndex(pSemantic));
+        ZeroMemory( &m_newEntry, sizeof(m_newEntry) );
+        VH( ConsumeOutputSlot( &pSemantic ) );
+        VH( ConsumeRegisterMask( pSemantic ) );
+        VH( ConsumeSemanticIndex( pSemantic ) );
 
         // pSenantic now contains only the SemanticName (all other fields were consumed)
-        if (strcmp("$SKIP", pSemantic) != 0)
+        if( strcmp( "$SKIP", pSemantic ) != 0 )
         {
             m_newEntry.SemanticName = pSemantic;
         }
@@ -191,7 +187,7 @@ lExit:
     }
 
     // Parse optional mask "[.<mask>]"
-    HRESULT ConsumeRegisterMask(_Inout_z_ LPSTR pSemantic)
+    HRESULT ConsumeRegisterMask( _Inout_z_ LPSTR pSemantic )
     {
         HRESULT hr = S_OK;
         const char *pFullMask1 = "xyzw";
@@ -200,11 +196,11 @@ lExit:
         size_t startComponent = 0;
         LPCSTR p;
 
-        assert(pSemantic);
+        assert( pSemantic );
 
-        pSemantic = strchr(pSemantic, '.'); 
+        pSemantic = strchr( pSemantic, '.' ); 
 
-        if (pSemantic == nullptr)
+        if( pSemantic == nullptr )
         {
             m_newEntry.ComponentCount = 4;
             return S_OK;
@@ -213,26 +209,26 @@ lExit:
         *pSemantic = '\0';
         pSemantic++;
 
-        stringLength = strlen(pSemantic);
-        p = strstr(pFullMask1, pSemantic);
-        if (p)
+        stringLength = strlen( pSemantic );
+        p = strstr(pFullMask1, pSemantic );
+        if( p )
         {
-            startComponent = (uint32_t)(p - pFullMask1);
+            startComponent = (uint32_t)( p - pFullMask1 );
         }
         else
         {
-            p = strstr(pFullMask2, pSemantic);
-            if (p)
-                startComponent = (uint32_t)(p - pFullMask2);
+            p = strstr( pFullMask2, pSemantic );
+            if( p )
+                startComponent = (uint32_t)( p - pFullMask2 );
             else
             {
-                sprintf_s(m_pError, MAX_ERROR_SIZE, "ID3D11Effect::ParseSODecl - invalid mask declaration '%s'", pSemantic);
-                VH(E_FAIL);
+                sprintf_s( m_pError, MAX_ERROR_SIZE, "ID3D11Effect::ParseSODecl - invalid mask declaration '%s'", pSemantic );
+                VH( E_FAIL );
             }
 
         }
 
-        if (stringLength == 0)
+        if( stringLength == 0 )
             stringLength = 4;
 
         m_newEntry.StartComponent = (uint8_t)startComponent;
@@ -243,40 +239,40 @@ lExit:
     }
 
     // Parse optional output slot "[<slot> :]"
-    HRESULT ConsumeOutputSlot(_Inout_z_ LPSTR* ppSemantic)
+    HRESULT ConsumeOutputSlot( _Inout_z_ LPSTR* ppSemantic )
     {
-        assert(ppSemantic && *ppSemantic);
-        _Analysis_assume_(ppSemantic && *ppSemantic);
+        assert( ppSemantic && *ppSemantic );
+        _Analysis_assume_( ppSemantic && *ppSemantic );
 
         HRESULT hr = S_OK;
-        LPSTR pColon = strchr(*ppSemantic, ':'); 
+        LPSTR pColon = strchr( *ppSemantic, ':' ); 
 
-        if (pColon == nullptr)
+        if( pColon == nullptr )
             return S_OK;
 
-        if (pColon == *ppSemantic)
+        if( pColon == *ppSemantic )
         {
-            strcpy_s(m_pError, MAX_ERROR_SIZE,
-                           "ID3D11Effect::ParseSODecl - Invalid output slot");
-            VH(E_FAIL);
+            strcpy_s( m_pError, MAX_ERROR_SIZE,
+                           "ID3D11Effect::ParseSODecl - Invalid output slot" );
+            VH( E_FAIL );
         }
 
         *pColon = '\0';
-        int outputSlot = atoi(*ppSemantic);
-        if (outputSlot < 0 || outputSlot > 255)
+        int outputSlot = atoi( *ppSemantic );
+        if( outputSlot < 0 || outputSlot > 255 )
         {
-            strcpy_s(m_pError, MAX_ERROR_SIZE,
-                           "ID3D11Effect::ParseSODecl - Invalid output slot");
-            VH(E_FAIL);
+            strcpy_s( m_pError, MAX_ERROR_SIZE,
+                           "ID3D11Effect::ParseSODecl - Invalid output slot" );
+            VH( E_FAIL );
         }
         m_newEntry.OutputSlot = (uint8_t)outputSlot;
 
-        while(*ppSemantic < pColon)
+        while( *ppSemantic < pColon )
         {
-            if (!isdigit((unsigned char)**ppSemantic))
+            if( !isdigit( (unsigned char)**ppSemantic ) )
             {
-                sprintf_s(m_pError, MAX_ERROR_SIZE, "ID3D11Effect::ParseSODecl - Non-digit '%c' in output slot", **ppSemantic);
-                VH(E_FAIL);
+                sprintf_s( m_pError, MAX_ERROR_SIZE, "ID3D11Effect::ParseSODecl - Non-digit '%c' in output slot", **ppSemantic );
+                VH( E_FAIL );
             }
             (*ppSemantic)++;
         }
@@ -284,7 +280,7 @@ lExit:
         // skip the colon (which is now '\0')
         (*ppSemantic)++;
 
-        while(isspace((unsigned char)**ppSemantic))
+        while( isspace( (unsigned char)**ppSemantic ) )
             (*ppSemantic)++;
 
 lExit:
@@ -292,19 +288,19 @@ lExit:
     }
 
     // Parse optional index "[<index>]"
-    HRESULT ConsumeSemanticIndex(_Inout_z_ LPSTR pSemantic)
+    HRESULT ConsumeSemanticIndex( _Inout_z_ LPSTR pSemantic )
     {
-        assert(pSemantic);
+        assert( pSemantic );
 
-        uint32_t uLen = (uint32_t)strlen(pSemantic);
+        uint32_t uLen = (uint32_t)strlen( pSemantic );
 
         // Grab semantic index
-        while(uLen > 0 && isdigit((unsigned char)pSemantic[uLen - 1]))
+        while( uLen > 0 && isdigit( (unsigned char)pSemantic[uLen - 1] ) )
             uLen--;
 
-        if (isdigit((unsigned char)pSemantic[uLen]))
+        if( isdigit( (unsigned char)pSemantic[uLen] ) )
         {
-            m_newEntry.SemanticIndex = atoi(pSemantic + uLen);
+            m_newEntry.SemanticIndex = atoi( pSemantic + uLen );
             pSemantic[uLen] = '\0';
         } 
         else

@@ -10,7 +10,7 @@
 
 namespace Engine {
 
-	const char* DLL_FILES[] = { "d3dcompiler_46.dll", "FW1FontWrapper.dll", "Assimp32.dll", "AntTweakBar.dll" };
+	const char* DLL_FILES[] = { "d3dcompiler_47.dll", "FW1FontWrapper.dll", "assimp-vc142-mt.dll", "AntTweakBar.dll" };
 	const int NUM_DLL_FILES = 4;
 
 	/** Creates main graphics engine */

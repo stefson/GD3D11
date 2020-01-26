@@ -419,9 +419,6 @@ HRESULT MyDirectDrawSurface7::Lock(LPRECT lpDestRect, LPDDSURFACEDESC2 lpDDSurfa
 	return S_OK;
 }
 
-#include "../squish-1.11/squish.h"
-#include "../lodepng.h"
-
 HRESULT MyDirectDrawSurface7::Unlock(LPRECT lpRect)
 {
 	DebugWriteTex("IDirectDrawSurface7(%p)::Unlock()");

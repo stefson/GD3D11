@@ -1,43 +1,43 @@
-/*===========================================================================*\
-*                                                                           *
-*                               OpenMesh                                    *
-*      Copyright (C) 2001-2015 by Computer Graphics Group, RWTH Aachen      *
-*                           www.openmesh.org                                *
-*                                                                           *
-*---------------------------------------------------------------------------* 
-*  This file is part of OpenMesh.                                           *
-*                                                                           *
-*  OpenMesh is free software: you can redistribute it and/or modify         * 
-*  it under the terms of the GNU Lesser General Public License as           *
-*  published by the Free Software Foundation, either version 3 of           *
-*  the License, or (at your option) any later version with the              *
-*  following exceptions:                                                    *
-*                                                                           *
-*  If other files instantiate templates or use macros                       *
-*  or inline functions from this file, or you compile this file and         *
-*  link it with other files to produce an executable, this file does        *
-*  not by itself cause the resulting executable to be covered by the        *
-*  GNU Lesser General Public License. This exception does not however       *
-*  invalidate any other reasons why the executable file might be            *
-*  covered by the GNU Lesser General Public License.                        *
-*                                                                           *
-*  OpenMesh is distributed in the hope that it will be useful,              *
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of           *
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            *
-*  GNU Lesser General Public License for more details.                      *
-*                                                                           *
-*  You should have received a copy of the GNU LesserGeneral Public          *
-*  License along with OpenMesh.  If not,                                    *
-*  see <http://www.gnu.org/licenses/>.                                      *
-*                                                                           *
-\*==========================================================================*/ 
-
-/*==========================================================================*\
-*                                                                           *             
-*   $Revision: 410 $                                                        *
-*   $Date: 2010-06-17 12:45:58 +0200 (Do, 17. Jun 2010) $                   *
-*                                                                           *
-\*==========================================================================*/
+/* ========================================================================= *
+ *                                                                           *
+ *                               OpenMesh                                    *
+ *           Copyright (c) 2001-2015, RWTH-Aachen University                 *
+ *           Department of Computer Graphics and Multimedia                  *
+ *                          All rights reserved.                             *
+ *                            www.openmesh.org                               *
+ *                                                                           *
+ *---------------------------------------------------------------------------*
+ * This file is part of OpenMesh.                                            *
+ *---------------------------------------------------------------------------*
+ *                                                                           *
+ * Redistribution and use in source and binary forms, with or without        *
+ * modification, are permitted provided that the following conditions        *
+ * are met:                                                                  *
+ *                                                                           *
+ * 1. Redistributions of source code must retain the above copyright notice, *
+ *    this list of conditions and the following disclaimer.                  *
+ *                                                                           *
+ * 2. Redistributions in binary form must reproduce the above copyright      *
+ *    notice, this list of conditions and the following disclaimer in the    *
+ *    documentation and/or other materials provided with the distribution.   *
+ *                                                                           *
+ * 3. Neither the name of the copyright holder nor the names of its          *
+ *    contributors may be used to endorse or promote products derived from   *
+ *    this software without specific prior written permission.               *
+ *                                                                           *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS       *
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED *
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A           *
+ * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER *
+ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,  *
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,       *
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR        *
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF    *
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING      *
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS        *
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.              *
+ *                                                                           *
+ * ========================================================================= */
 
 /** \file ModifiedButterFlyT.hh
 
@@ -88,7 +88,7 @@ namespace Uniform    { // BEGIN_NS_UNIFORM
  *
  * Clement Courbet - clement.courbet@ecp.fr
  */
-template <typename MeshType, typename RealType = float>
+template <typename MeshType, typename RealType = double>
 class ModifiedButterflyT : public SubdividerT<MeshType, RealType>
 {
 public:
@@ -143,14 +143,14 @@ public:
     {
         weights[K].resize(K+1);
         // s(j) = ( 1/4 + cos(2*pi*j/K) + 1/2 * cos(4*pi*j/K) )/K
-        real_t   invK  = 1.0/real_t(K);
+        double invK  = 1.0/static_cast<double>(K);
         real_t sum = 0;
         for(unsigned int j=0; j<K; ++j)
         {
-            weights[K][j] = (0.25 + cos(2.0*M_PI*j*invK) + 0.5*cos(4.0*M_PI*j*invK))*invK;
+            weights[K][j] = static_cast<real_t>((0.25 + cos(2.0*M_PI*static_cast<double>(j)*invK) + 0.5*cos(4.0*M_PI*static_cast<double>(j)*invK))*invK);
             sum += weights[K][j];
         }
-        weights[K][K] = (real_t)1.0 - sum;
+        weights[K][K] = static_cast<real_t>(1.0) - sum;
     }
   }
 
@@ -383,7 +383,7 @@ private: // geometry helper
     {
         pos = _m.point(a_0);
         pos += _m.point(a_1);
-        pos *= 9.0/16;
+        pos *= static_cast<typename mesh_t::Point::value_type>(9.0/16.0);
         typename mesh_t::Point tpos;
         if(_m.is_boundary(heh))
         {
@@ -396,7 +396,7 @@ private: // geometry helper
             tpos = _m.point(_m.to_vertex_handle(_m.next_halfedge_handle(opp_heh)));
             tpos += _m.point(_m.to_vertex_handle(_m.opposite_halfedge_handle(_m.prev_halfedge_handle(opp_heh))));
         }
-        tpos *= -1.0/16;
+        tpos *= static_cast<typename mesh_t::Point::value_type>(-1.0/16.0);
         pos += tpos;
     }
     else
@@ -499,7 +499,7 @@ private: // geometry helper
         }
         else //at least one endpoint is [irregular and not in boundary]
         {
-            double normFactor = 0.0;
+            typename mesh_t::Point::value_type normFactor = static_cast<typename mesh_t::Point::value_type>(0.0);
 
             if(valence_a_0!=6 && !_m.is_boundary(a_0))
             {

@@ -85,7 +85,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(IncludePath);squish-1.11;include;</IncludePath>
+    <IncludePath>$(IncludePath);squish-1.11;include</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);lib</LibraryPath>
     <TargetName>ddraw</TargetName>
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
@@ -136,6 +136,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -283,40 +284,6 @@ copy "$(OutDir)$(TargetName).pdb" "$(G1_SYSTEM_PATH)\ddraw.pdb"</Command>
   <ItemGroup>
     <ClInclude Include="AlignedAllocator.h" />
     <ClInclude Include="AntTweakBar.h" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\ai_assert.h" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\anim.h" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\camera.h" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\cexport.h" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\cfileio.h" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\cimport.h" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\color4.h" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\Compiler\poppack1.h" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\Compiler\pushpack1.h" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\config.h" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\DefaultLogger.hpp" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\defs.h" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\Exporter.hpp" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\Importer.hpp" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\importerdesc.h" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\IOStream.hpp" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\IOSystem.hpp" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\light.h" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\Logger.hpp" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\LogStream.hpp" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\material.h" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\matrix3x3.h" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\matrix4x4.h" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\mesh.h" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\NullLogger.hpp" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\postprocess.h" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\ProgressHandler.hpp" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\quaternion.h" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\scene.h" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\texture.h" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\types.h" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\vector2.h" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\vector3.h" />
-    <ClInclude Include="assimp--3.0.1270-sdk\include\assimp\version.h" />
     <ClInclude Include="BaseAntTweakBar.h" />
     <ClInclude Include="BasePipelineStates.h" />
     <ClInclude Include="BaseLineRenderer.h" />
@@ -393,7 +360,79 @@ copy "$(OutDir)$(TargetName).pdb" "$(G1_SYSTEM_PATH)\ddraw.pdb"</Command>
     <ClInclude Include="HookExceptionFilter.h" />
     <ClInclude Include="HookedFunctions.h" />
     <ClInclude Include="IkarusBindings.h" />
-    <ClInclude Include="lodepng.h" />
+    <ClInclude Include="include\assimp\aabb.h" />
+    <ClInclude Include="include\assimp\ai_assert.h" />
+    <ClInclude Include="include\assimp\anim.h" />
+    <ClInclude Include="include\assimp\BaseImporter.h" />
+    <ClInclude Include="include\assimp\Bitmap.h" />
+    <ClInclude Include="include\assimp\BlobIOSystem.h" />
+    <ClInclude Include="include\assimp\ByteSwapper.h" />
+    <ClInclude Include="include\assimp\camera.h" />
+    <ClInclude Include="include\assimp\cexport.h" />
+    <ClInclude Include="include\assimp\cfileio.h" />
+    <ClInclude Include="include\assimp\cimport.h" />
+    <ClInclude Include="include\assimp\color4.h" />
+    <ClInclude Include="include\assimp\config.h" />
+    <ClInclude Include="include\assimp\CreateAnimMesh.h" />
+    <ClInclude Include="include\assimp\DefaultIOStream.h" />
+    <ClInclude Include="include\assimp\DefaultIOSystem.h" />
+    <ClInclude Include="include\assimp\DefaultLogger.hpp" />
+    <ClInclude Include="include\assimp\Defines.h" />
+    <ClInclude Include="include\assimp\defs.h" />
+    <ClInclude Include="include\assimp\Exceptional.h" />
+    <ClInclude Include="include\assimp\Exporter.hpp" />
+    <ClInclude Include="include\assimp\fast_atof.h" />
+    <ClInclude Include="include\assimp\GenericProperty.h" />
+    <ClInclude Include="include\assimp\Hash.h" />
+    <ClInclude Include="include\assimp\Importer.hpp" />
+    <ClInclude Include="include\assimp\importerdesc.h" />
+    <ClInclude Include="include\assimp\IOStream.hpp" />
+    <ClInclude Include="include\assimp\IOStreamBuffer.h" />
+    <ClInclude Include="include\assimp\IOSystem.hpp" />
+    <ClInclude Include="include\assimp\irrXMLWrapper.h" />
+    <ClInclude Include="include\assimp\light.h" />
+    <ClInclude Include="include\assimp\LineSplitter.h" />
+    <ClInclude Include="include\assimp\LogAux.h" />
+    <ClInclude Include="include\assimp\Logger.hpp" />
+    <ClInclude Include="include\assimp\LogStream.hpp" />
+    <ClInclude Include="include\assimp\Macros.h" />
+    <ClInclude Include="include\assimp\material.h" />
+    <ClInclude Include="include\assimp\MathFunctions.h" />
+    <ClInclude Include="include\assimp\matrix3x3.h" />
+    <ClInclude Include="include\assimp\matrix4x4.h" />
+    <ClInclude Include="include\assimp\MemoryIOWrapper.h" />
+    <ClInclude Include="include\assimp\mesh.h" />
+    <ClInclude Include="include\assimp\metadata.h" />
+    <ClInclude Include="include\assimp\NullLogger.hpp" />
+    <ClInclude Include="include\assimp\ParsingUtils.h" />
+    <ClInclude Include="include\assimp\pbrmaterial.h" />
+    <ClInclude Include="include\assimp\postprocess.h" />
+    <ClInclude Include="include\assimp\Profiler.h" />
+    <ClInclude Include="include\assimp\ProgressHandler.hpp" />
+    <ClInclude Include="include\assimp\qnan.h" />
+    <ClInclude Include="include\assimp\quaternion.h" />
+    <ClInclude Include="include\assimp\RemoveComments.h" />
+    <ClInclude Include="include\assimp\scene.h" />
+    <ClInclude Include="include\assimp\SceneCombiner.h" />
+    <ClInclude Include="include\assimp\SGSpatialSort.h" />
+    <ClInclude Include="include\assimp\SkeletonMeshBuilder.h" />
+    <ClInclude Include="include\assimp\SmoothingGroups.h" />
+    <ClInclude Include="include\assimp\SpatialSort.h" />
+    <ClInclude Include="include\assimp\StandardShapes.h" />
+    <ClInclude Include="include\assimp\StreamReader.h" />
+    <ClInclude Include="include\assimp\StreamWriter.h" />
+    <ClInclude Include="include\assimp\StringComparison.h" />
+    <ClInclude Include="include\assimp\StringUtils.h" />
+    <ClInclude Include="include\assimp\Subdivision.h" />
+    <ClInclude Include="include\assimp\texture.h" />
+    <ClInclude Include="include\assimp\TinyFormatter.h" />
+    <ClInclude Include="include\assimp\types.h" />
+    <ClInclude Include="include\assimp\vector2.h" />
+    <ClInclude Include="include\assimp\vector3.h" />
+    <ClInclude Include="include\assimp\version.h" />
+    <ClInclude Include="include\assimp\Vertex.h" />
+    <ClInclude Include="include\assimp\XMLTools.h" />
+    <ClInclude Include="include\assimp\ZipArchiveIOSystem.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="MemoryTracker.h" />
     <ClInclude Include="MeshModifier.h" />
@@ -404,20 +443,6 @@ copy "$(OutDir)$(TargetName).pdb" "$(G1_SYSTEM_PATH)\ddraw.pdb"</Command>
     <ClInclude Include="pch.h" />
     <ClInclude Include="BaseShadowedPointLight.h" />
     <ClInclude Include="SV_GMeshInfoView.h" />
-    <ClInclude Include="squish-1.11\alpha.h" />
-    <ClInclude Include="squish-1.11\clusterfit.h" />
-    <ClInclude Include="squish-1.11\colourblock.h" />
-    <ClInclude Include="squish-1.11\colourfit.h" />
-    <ClInclude Include="squish-1.11\colourset.h" />
-    <ClInclude Include="squish-1.11\config.h" />
-    <ClInclude Include="squish-1.11\maths.h" />
-    <ClInclude Include="squish-1.11\rangefit.h" />
-    <ClInclude Include="squish-1.11\simd.h" />
-    <ClInclude Include="squish-1.11\simd_float.h" />
-    <ClInclude Include="squish-1.11\simd_sse.h" />
-    <ClInclude Include="squish-1.11\simd_ve.h" />
-    <ClInclude Include="squish-1.11\singlecolourfit.h" />
-    <ClInclude Include="squish-1.11\squish.h" />
     <ClInclude Include="StackWalker.h" />
     <ClInclude Include="SV_Border.h" />
     <ClInclude Include="SV_Button.h" />
@@ -570,13 +595,6 @@ copy "$(OutDir)$(TargetName).pdb" "$(G1_SYSTEM_PATH)\ddraw.pdb"</Command>
     <ClCompile Include="GVegetationBox.cpp" />
     <ClCompile Include="HookedFunctions.cpp" />
     <ClCompile Include="IkarusBindings.cpp" />
-    <ClCompile Include="lodepng.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt_Spacer|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt_G1|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_G1|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="MeshModifier.cpp" />
     <ClCompile Include="ocean_simulator.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
@@ -600,69 +618,6 @@ copy "$(OutDir)$(TargetName).pdb" "$(G1_SYSTEM_PATH)\ddraw.pdb"</Command>
     </ClCompile>
     <ClCompile Include="BaseShadowedPointLight.cpp" />
     <ClCompile Include="SV_GMeshInfoView.cpp" />
-    <ClCompile Include="squish-1.11\alpha.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt_Spacer|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt_G1|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_G1|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="squish-1.11\clusterfit.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt_Spacer|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt_G1|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_G1|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="squish-1.11\colourblock.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt_Spacer|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt_G1|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_G1|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="squish-1.11\colourfit.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt_Spacer|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt_G1|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_G1|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="squish-1.11\colourset.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt_Spacer|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt_G1|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_G1|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="squish-1.11\maths.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt_Spacer|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt_G1|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_G1|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="squish-1.11\rangefit.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt_Spacer|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt_G1|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_G1|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="squish-1.11\singlecolourfit.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt_Spacer|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt_G1|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_G1|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="squish-1.11\squish.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt_Spacer|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt_G1|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_G1|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="StackWalker.cpp" />
     <ClCompile Include="SV_Border.cpp" />
     <ClCompile Include="SV_Button.cpp" />
@@ -697,14 +652,16 @@ copy "$(OutDir)$(TargetName).pdb" "$(G1_SYSTEM_PATH)\ddraw.pdb"</Command>
     <ClCompile Include="ZipArchive.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="assimp--3.0.1270-sdk\include\assimp\color4.inl" />
-    <None Include="assimp--3.0.1270-sdk\include\assimp\material.inl" />
-    <None Include="assimp--3.0.1270-sdk\include\assimp\matrix3x3.inl" />
-    <None Include="assimp--3.0.1270-sdk\include\assimp\matrix4x4.inl" />
-    <None Include="assimp--3.0.1270-sdk\include\assimp\quaternion.inl" />
-    <None Include="assimp--3.0.1270-sdk\include\assimp\vector2.inl" />
-    <None Include="assimp--3.0.1270-sdk\include\assimp\vector3.inl" />
     <None Include="ddraw.def" />
+    <None Include="include\assimp\.editorconfig" />
+    <None Include="include\assimp\color4.inl" />
+    <None Include="include\assimp\material.inl" />
+    <None Include="include\assimp\matrix3x3.inl" />
+    <None Include="include\assimp\matrix4x4.inl" />
+    <None Include="include\assimp\quaternion.inl" />
+    <None Include="include\assimp\SmoothingGroups.inl" />
+    <None Include="include\assimp\vector2.inl" />
+    <None Include="include\assimp\vector3.inl" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

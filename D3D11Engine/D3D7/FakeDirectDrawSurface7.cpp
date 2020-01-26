@@ -214,7 +214,6 @@ HRESULT FakeDirectDrawSurface7::Lock(LPRECT lpDestRect, LPDDSURFACEDESC2 lpDDSur
 	return S_OK;
 }
 
-#include "../lodepng.h"
 HRESULT FakeDirectDrawSurface7::Unlock(LPRECT lpRect)
 {
 	DebugWrite("FakeDirectDrawSurface7::Unlock");

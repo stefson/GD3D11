@@ -1,43 +1,45 @@
-/*===========================================================================*\
+/* ========================================================================= *
  *                                                                           *
  *                               OpenMesh                                    *
- *      Copyright (C) 2001-2015 by Computer Graphics Group, RWTH Aachen      *
- *                           www.openmesh.org                                *
+ *           Copyright (c) 2001-2015, RWTH-Aachen University                 *
+ *           Department of Computer Graphics and Multimedia                  *
+ *                          All rights reserved.                             *
+ *                            www.openmesh.org                               *
  *                                                                           *
- *---------------------------------------------------------------------------* 
- *  This file is part of OpenMesh.                                           *
+ *---------------------------------------------------------------------------*
+ * This file is part of OpenMesh.                                            *
+ *---------------------------------------------------------------------------*
  *                                                                           *
- *  OpenMesh is free software: you can redistribute it and/or modify         * 
- *  it under the terms of the GNU Lesser General Public License as           *
- *  published by the Free Software Foundation, either version 3 of           *
- *  the License, or (at your option) any later version with the              *
- *  following exceptions:                                                    *
+ * Redistribution and use in source and binary forms, with or without        *
+ * modification, are permitted provided that the following conditions        *
+ * are met:                                                                  *
  *                                                                           *
- *  If other files instantiate templates or use macros                       *
- *  or inline functions from this file, or you compile this file and         *
- *  link it with other files to produce an executable, this file does        *
- *  not by itself cause the resulting executable to be covered by the        *
- *  GNU Lesser General Public License. This exception does not however       *
- *  invalidate any other reasons why the executable file might be            *
- *  covered by the GNU Lesser General Public License.                        *
+ * 1. Redistributions of source code must retain the above copyright notice, *
+ *    this list of conditions and the following disclaimer.                  *
  *                                                                           *
- *  OpenMesh is distributed in the hope that it will be useful,              *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of           *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            *
- *  GNU Lesser General Public License for more details.                      *
+ * 2. Redistributions in binary form must reproduce the above copyright      *
+ *    notice, this list of conditions and the following disclaimer in the    *
+ *    documentation and/or other materials provided with the distribution.   *
  *                                                                           *
- *  You should have received a copy of the GNU LesserGeneral Public          *
- *  License along with OpenMesh.  If not,                                    *
- *  see <http://www.gnu.org/licenses/>.                                      *
+ * 3. Neither the name of the copyright holder nor the names of its          *
+ *    contributors may be used to endorse or promote products derived from   *
+ *    this software without specific prior written permission.               *
  *                                                                           *
-\*===========================================================================*/ 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS       *
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED *
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A           *
+ * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER *
+ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,  *
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,       *
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR        *
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF    *
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING      *
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS        *
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.              *
+ *                                                                           *
+ * ========================================================================= */
 
-/*===========================================================================*\
- *                                                                           *             
- *   $Revision: 1188 $                                                         *
- *   $Date: 2015-01-05 16:34:10 +0100 (Mo, 05 Jan 2015) $                   *
- *                                                                           *
-\*===========================================================================*/
+
 
 
 //=============================================================================
@@ -56,6 +58,7 @@
 
 #include <OpenMesh/Core/System/config.h>
 #include <OpenMesh/Core/Mesh/PolyMeshT.hh>
+#include <OpenMesh/Core/Mesh/Tags.hh>
 #include <vector>
 
 
@@ -96,11 +99,12 @@ public:
   typedef PolyMeshT<Kernel>                     PolyMesh;
 
   //@{
-  /// Determine whether this is a PolyMeshT or TriMeshT ( This function does not check the per face vertex count! It only checks if the datatype is PolyMeshT or TriMeshT )
+  /// Determine whether this is a PolyMeshT or TriMeshT (This function does not check the per face vertex count! It only checks if the datatype is PolyMeshT or TriMeshT)
+  static constexpr bool is_polymesh() { return false; }
+  static constexpr bool is_trimesh()  { return true;  }
+  using ConnectivityTag = TriConnectivityTag;
   enum { IsPolyMesh = 0 };
   enum { IsTriMesh  = 1 };
-  static bool is_polymesh() { return false; }
-  static bool is_trimesh()  { return  true; }
   //@}
 
   //--- items ---
@@ -162,6 +166,10 @@ public:
 
   /// Default constructor
   TriMeshT() : PolyMesh() {}
+  explicit TriMeshT(PolyMesh rhs) : PolyMesh((rhs.triangulate(), rhs))
+  {
+  }
+
   /// Destructor
   virtual ~TriMeshT() {}
 
@@ -326,6 +334,64 @@ public:
   inline VertexHandle split_copy(FaceHandle _fh, const Point& _p)
   { const VertexHandle vh = this->add_vertex(_p);  PolyMesh::split_copy(_fh, vh); return vh; }
 
+
+  /** \brief Face split (= 1-to-4) split, splits edges at midpoints and adds 4 new faces in the interior).
+   *
+   * @param _fh Face handle that should be splitted
+   */
+  inline void split(FaceHandle _fh)
+  {
+    // Collect halfedges of face
+    HalfedgeHandle he0 = this->halfedge_handle(_fh);
+    HalfedgeHandle he1 = this->next_halfedge_handle(he0);
+    HalfedgeHandle he2 = this->next_halfedge_handle(he1);
+
+    EdgeHandle eh0 = this->edge_handle(he0);
+    EdgeHandle eh1 = this->edge_handle(he1);
+    EdgeHandle eh2 = this->edge_handle(he2);
+
+    // Collect points of face
+    VertexHandle p0 = this->to_vertex_handle(he0);
+    VertexHandle p1 = this->to_vertex_handle(he1);
+    VertexHandle p2 = this->to_vertex_handle(he2);
+
+    // Calculate midpoint coordinates
+    const Point new0 = (this->point(p0) + this->point(p2)) * static_cast<typename vector_traits<Point>::value_type >(0.5);
+    const Point new1 = (this->point(p0) + this->point(p1)) * static_cast<typename vector_traits<Point>::value_type >(0.5);
+    const Point new2 = (this->point(p1) + this->point(p2)) * static_cast<typename vector_traits<Point>::value_type >(0.5);
+
+    // Add vertices at midpoint coordinates
+    VertexHandle v0 = this->add_vertex(new0);
+    VertexHandle v1 = this->add_vertex(new1);
+    VertexHandle v2 = this->add_vertex(new2);
+
+    const bool split0 = !this->is_boundary(eh0);
+    const bool split1 = !this->is_boundary(eh1);
+    const bool split2 = !this->is_boundary(eh2);
+
+    // delete original face
+    this->delete_face(_fh);
+
+    // split boundary edges of deleted face ( if not boundary )
+    if ( split0 ) {
+      this->split(eh0,v0);
+    }
+
+    if ( split1 ) {
+      this->split(eh1,v1);
+    }
+
+    if ( split2 ) {
+      this->split(eh2,v2);
+    }
+
+    // Retriangulate
+    this->add_face(v0 , p0, v1);
+    this->add_face(p2, v0 , v2);
+    this->add_face(v2,v1,p1);
+    this->add_face(v2 , v0, v1);
+  }
+
   /** \brief Face split (= 1-to-3 split, calls corresponding PolyMeshT function).
    *
    * The properties of the new faces will be undefined!
@@ -362,7 +428,7 @@ public:
 //=============================================================================
 #if defined(OM_INCLUDE_TEMPLATES) && !defined(OPENMESH_TRIMESH_C)
 #define OPENMESH_TRIMESH_TEMPLATES
-#include "TriMeshT.cc"
+#include "TriMeshT_impl.hh"
 #endif
 //=============================================================================
 #endif // OPENMESH_TRIMESH_HH defined

@@ -1,43 +1,45 @@
-/*===========================================================================*\
+/* ========================================================================= *
  *                                                                           *
  *                               OpenMesh                                    *
- *      Copyright (C) 2001-2015 by Computer Graphics Group, RWTH Aachen      *
- *                           www.openmesh.org                                *
+ *           Copyright (c) 2001-2015, RWTH-Aachen University                 *
+ *           Department of Computer Graphics and Multimedia                  *
+ *                          All rights reserved.                             *
+ *                            www.openmesh.org                               *
  *                                                                           *
  *---------------------------------------------------------------------------*
- *  This file is part of OpenMesh.                                           *
+ * This file is part of OpenMesh.                                            *
+ *---------------------------------------------------------------------------*
  *                                                                           *
- *  OpenMesh is free software: you can redistribute it and/or modify         *
- *  it under the terms of the GNU Lesser General Public License as           *
- *  published by the Free Software Foundation, either version 3 of           *
- *  the License, or (at your option) any later version with the              *
- *  following exceptions:                                                    *
+ * Redistribution and use in source and binary forms, with or without        *
+ * modification, are permitted provided that the following conditions        *
+ * are met:                                                                  *
  *                                                                           *
- *  If other files instantiate templates or use macros                       *
- *  or inline functions from this file, or you compile this file and         *
- *  link it with other files to produce an executable, this file does        *
- *  not by itself cause the resulting executable to be covered by the        *
- *  GNU Lesser General Public License. This exception does not however       *
- *  invalidate any other reasons why the executable file might be            *
- *  covered by the GNU Lesser General Public License.                        *
+ * 1. Redistributions of source code must retain the above copyright notice, *
+ *    this list of conditions and the following disclaimer.                  *
  *                                                                           *
- *  OpenMesh is distributed in the hope that it will be useful,              *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of           *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            *
- *  GNU Lesser General Public License for more details.                      *
+ * 2. Redistributions in binary form must reproduce the above copyright      *
+ *    notice, this list of conditions and the following disclaimer in the    *
+ *    documentation and/or other materials provided with the distribution.   *
  *                                                                           *
- *  You should have received a copy of the GNU LesserGeneral Public          *
- *  License along with OpenMesh.  If not,                                    *
- *  see <http://www.gnu.org/licenses/>.                                      *
+ * 3. Neither the name of the copyright holder nor the names of its          *
+ *    contributors may be used to endorse or promote products derived from   *
+ *    this software without specific prior written permission.               *
  *                                                                           *
-\*===========================================================================*/
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS       *
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED *
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A           *
+ * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER *
+ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,  *
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,       *
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR        *
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF    *
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING      *
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS        *
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.              *
+ *                                                                           *
+ * ========================================================================= */
 
-/*===========================================================================*\
- *                                                                           *
- *   $Revision: 1188 $                                                         *
- *   $Date: 2015-01-05 16:34:10 +0100 (Mo, 05 Jan 2015) $                   *
- *                                                                           *
-\*===========================================================================*/
+
 
 
 #ifndef OPENMESH_IO_OMFORMAT_HH
@@ -172,7 +174,8 @@ namespace OMFormat {
       Entity_Mesh      = 0x01,
       Entity_Face      = 0x02,
       Entity_Edge      = 0x04,
-      Entity_Halfedge  = 0x06
+      Entity_Halfedge  = 0x06,
+      Entity_Sentinel  = 0x07
     };
 
     enum Dim {
@@ -307,16 +310,16 @@ namespace OMFormat {
   /// Return the size of chunk data in bytes
   inline size_t chunk_data_size( Header& _hdr,  Chunk::Header& _chunk_hdr )
   {
-    size_t C     = 0;
-
+    size_t C;
     switch( _chunk_hdr.entity_ )
     {
       case Chunk::Entity_Vertex:   C  = _hdr.n_vertices_; break;
       case Chunk::Entity_Face:     C  = _hdr.n_faces_;    break;
-      case Chunk::Entity_Halfedge: C  = _hdr.n_edges_;    // no break!
-      case Chunk::Entity_Edge:     C += _hdr.n_edges_;    break;
+      case Chunk::Entity_Halfedge: C  = _hdr.n_edges_*2;  break;
+      case Chunk::Entity_Edge:     C  = _hdr.n_edges_;    break;
       case Chunk::Entity_Mesh:     C  = 1;                break;
       default:
+        C = 0;
         std::cerr << "Invalid value in _chunk_hdr.entity_\n";
         assert( false );
         break;
@@ -392,7 +395,9 @@ namespace OMFormat {
   template <typename T> Chunk::Integer_Size integer_size(const T& d)
 #endif
   {
+#ifndef NDEBUG
     assert( is_integer(d) );
+#endif
 
     switch( sizeof(T) )
     {
@@ -416,7 +421,9 @@ namespace OMFormat {
   template <typename T> Chunk::Float_Size float_size(const T& d)
 #endif
   {
+#ifndef NDEBUG
     assert( is_float(d) );
+#endif
 
     switch( sizeof(T) )
     {
@@ -456,6 +463,8 @@ namespace OMFormat {
 
 
   // ---------------------------------------- convenience functions
+
+  std::string as_string(uint8 version);
 
   const char *as_string(Chunk::Type t);
   const char *as_string(Chunk::Entity e);
@@ -732,7 +741,7 @@ namespace OMFormat {
 //=============================================================================
 #if defined(OM_INCLUDE_TEMPLATES) && !defined(OPENMESH_IO_OMFORMAT_CC)
 #  define OPENMESH_IO_OMFORMAT_TEMPLATES
-#  include "OMFormatT.cc"
+#  include "OMFormatT_impl.hh"
 #endif
 //=============================================================================
 #endif

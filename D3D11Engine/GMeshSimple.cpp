@@ -1,14 +1,14 @@
 #include "pch.h"
 #include "GMeshSimple.h"
-#include "assimp--3.0.1270-sdk\include\assimp\Importer.hpp"
-#include "assimp--3.0.1270-sdk\include\assimp\scene.h"
-#include "assimp--3.0.1270-sdk\include\assimp\postprocess.h"
-#include "assimp--3.0.1270-sdk\include\assimp\material.h"
+#include "assimp\Importer.hpp"
+#include "assimp\scene.h"
+#include "assimp\postprocess.h"
+#include "assimp\material.h"
 #include "Engine.h"
 #include "BaseGraphicsEngine.h"
 #include "GothicAPI.h"
 
-#pragma comment(lib, "assimp.lib")
+#pragma comment(lib, "assimp-vc142-mt.lib")
 
 using namespace Assimp;
 
