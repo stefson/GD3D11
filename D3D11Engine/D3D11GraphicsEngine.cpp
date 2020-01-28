@@ -554,6 +554,9 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
 		}
 		m_FrameLimiter->Start();
 	}
+	else {
+		m_FrameLimiter->Reset();
+	}
 	Engine::GAPI->GetRendererState()->RendererInfo.Timing.StartTotal();
 
 	static bool s_firstFrame = true;
