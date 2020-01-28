@@ -15,6 +15,5 @@ Xcopy "blobs\Meshes" "%TARGET_DIR%\GD3D11\Meshes\" /y /s
 Xcopy "blobs\Textures" "%TARGET_DIR%\GD3D11\Textures\" /y /s
 
 
-COPY /y "D3D11Engine\AntTweakBar.dll" "%TARGET_DIR%\AntTweakBar.dll"
 Xcopy "blobs\libs\*" "%TARGET_DIR%\" /y /s
 
