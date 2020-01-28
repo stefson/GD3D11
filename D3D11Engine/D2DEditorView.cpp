@@ -738,7 +738,7 @@ void D2DEditorView::OnMouseButtonDown(int button)
 	}
 
 	// Register buttonpress
-	ButtonPressedLastTime[button] = timeGetTime();
+	ButtonPressedLastTime[button] = Toolbox::timeSinceStartMs();
 	MButtons[button] = true;
 }
 

@@ -758,12 +758,12 @@ HRESULT WorldConverter::ConvertWorldMesh(zCPolygon** polys, unsigned int numPoly
 	Engine::GraphicsEngine->CreateVertexBuffer(&wmi->MeshIndexBuffer);
 	
 	LogInfo() << "Smoothing worldmesh normals...";
-	DWORD sStart = timeGetTime();
+	DWORD sStart = Toolbox::timeSinceStartMs();
 
 	// Generate smooth normals
 	MeshModifier::ComputeSmoothNormals(wrappedVertices);
 
-	LogInfo() << "Process took " << timeGetTime() - sStart << "ms";
+	LogInfo() << "Process took " << Toolbox::timeSinceStartMs() - sStart << "ms";
 
 	// Init and fill them
 	wmi->MeshVertexBuffer->Init(&wrappedVertices[0], wrappedVertices.size() * sizeof(ExVertexStruct), D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_IMMUTABLE);

@@ -148,4 +148,6 @@ namespace Toolbox {
 	/** Loads a std::string from a FILE* */
 	std::string LoadStringFromFILE(FILE * f);
 
+	/** Returns the elapsed milliseconds since first execution of this method */
+	DWORD timeSinceStartMs();
 }

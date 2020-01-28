@@ -355,6 +355,14 @@ namespace Toolbox
 		return str;
 	}
 
+	DWORD timeSinceStartMs()
+	{
+		static std::chrono::steady_clock::time_point s_startPoint = std::chrono::steady_clock::now();
+
+		// We dont expect anyone to play for 49 Days straight!
+		return DWORD(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - s_startPoint).count());
+	}
+
 	/** sse2 memcpy implementation by William Chan and Google */
 	void X_aligned_memcpy_sse2(void * dest, const void * src, const unsigned long size_t)
 	{

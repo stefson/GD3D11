@@ -14,12 +14,6 @@ __declspec(selectany) const char* VERSION_STRING = "Version X" VERSION_NUMBER " 
 
 namespace Engine
 {
-	struct DLLInfo
-	{
-		HANDLE AntTweakBar;
-		HANDLE Assimp32;
-	};
-
 	/** If true, we will just pass everything to the usual ddraw.dll */
 	__declspec(selectany) bool PassThrough;
 
@@ -43,9 +37,6 @@ namespace Engine
 
 	/** Creates the Global GAPI-Object */
 	void CreateGothicAPI();
-
-	/** Loads the needed dll files from subdir */
-	void LoadDLLFiles();
 
 	/** Called when the game is about to close */
 	void OnShutDown();

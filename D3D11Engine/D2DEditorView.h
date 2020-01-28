@@ -1,4 +1,5 @@
 #pragma once
+#include <chrono>
 #include "D2DSubView.h"
 #include "SV_Button.h"
 #include "SV_TabControl.h"

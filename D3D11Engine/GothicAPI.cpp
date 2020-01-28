@@ -4286,15 +4286,15 @@ float GothicAPI::GetRainFXWeight() {
 /** Returns the wetness of the scene. Lasts longer than RainFXWeight */
 float GothicAPI::GetSceneWetness() {
 	float rain = GetRainFXWeight();
-	static DWORD s_rainStopTime = timeGetTime();
+	static DWORD s_rainStopTime = Toolbox::timeSinceStartMs();
 
 	if (rain >= SceneWetness) {
 		SceneWetness = rain; // Rain is starting or still going
-		s_rainStopTime = timeGetTime(); // Just querry this until we fall into the else-branch some time
+		s_rainStopTime = Toolbox::timeSinceStartMs(); // Just querry this until we fall into the else-branch some time
 	}
 	else {
 		// Rain has just stopped, get time of how long the rain isn't going anymore
-		DWORD rainStoppedFor = (float)(timeGetTime() - s_rainStopTime);
+		DWORD rainStoppedFor = (float)(Toolbox::timeSinceStartMs() - s_rainStopTime);
 
 		// Get ratio between duration and that time. This value is near 1 when we almost reached the duration
 		float ratio = rainStoppedFor / (float)SCENE_WETNESS_DURATION_MS;

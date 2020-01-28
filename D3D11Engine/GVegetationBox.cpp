@@ -396,7 +396,7 @@ void GVegetationBox::RenderVegetation(const DirectX::SimpleMath::Vector3 & eye)
 	}*/
 
 	// Seed randomizer again
-	//srand(timeGetTime());
+	//srand(Toolbox::timeSinceStartMs());
 
 	if (DrawBoundingBox)
 		Engine::GraphicsEngine->GetLineRenderer()->AddAABBMinMax(BoxMin, BoxMax);
@@ -700,7 +700,7 @@ void GVegetationBox::ResetVegetationWithDensity(float density)
 	InitSpotsRandom(TrisInside, Shape, density);
 	Modified = false;
 
-	srand(timeGetTime());
+	srand(Toolbox::timeSinceStartMs());
 }
 
 /** Returns whether this has been modified or not */

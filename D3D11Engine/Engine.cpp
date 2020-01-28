@@ -10,9 +10,6 @@
 
 namespace Engine {
 
-	const char* DLL_FILES[] = { "d3dcompiler_47.dll", "FW1FontWrapper.dll", "assimp-vc142-mt.dll", "AntTweakBar.dll" };
-	const int NUM_DLL_FILES = 4;
-
 	/** Creates main graphics engine */
 	void CreateGraphicsEngine() {
 		LogInfo() << "Creating Main graphics engine";
@@ -48,10 +45,6 @@ namespace Engine {
 			LogErrorBox() << "Failed to create GothicAPI!";
 			exit(0);
 		}
-	}
-
-	/** Loads the needed dll files from subdir */
-	void LoadDLLFiles() {
 	}
 
 	/** Called when the game is about to close */

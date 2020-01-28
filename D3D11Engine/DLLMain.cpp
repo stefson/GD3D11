@@ -12,8 +12,7 @@
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
-#pragma comment(lib, "winmm.lib")
-#pragma comment(lib, "Imagehlp.lib")
+#pragma comment(lib, "Imagehlp.lib") // Used in VersionCheck.cpp to get Gothic.exe Checksum.
 
 //#pragma pack(1)
 
@@ -211,7 +210,6 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID) {
 			Engine::CreateGothicAPI();
 
 			GothicAPI::DisableErrorMessageBroadcast();
-			Engine::LoadDLLFiles();
 
 			EnableCrashingOnCrashes();
 			//SetUnhandledExceptionFilter(MyUnhandledExceptionFilter);
