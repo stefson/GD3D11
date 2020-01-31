@@ -3686,6 +3686,10 @@ XRESULT GothicAPI::SaveMenuSettings(const std::string & file) {
 	WritePrivateProfileStringA("SMAA", "SharpenFactor", std::to_string(s.SharpenFactor).c_str(), ini.c_str());
 
 	WritePrivateProfileStringA("HBAO", "Enabled", std::to_string(s.HbaoSettings.Enabled ? TRUE : FALSE).c_str(), ini.c_str());
+	WritePrivateProfileStringA("HBAO", "Bias", std::to_string(s.HbaoSettings.Bias).c_str(), ini.c_str());
+	WritePrivateProfileStringA("HBAO", "Radius", std::to_string(s.HbaoSettings.Radius).c_str(), ini.c_str());
+	WritePrivateProfileStringA("HBAO", "PowerExponent", std::to_string(s.HbaoSettings.PowerExponent).c_str(), ini.c_str());
+	WritePrivateProfileStringA("HBAO", "BlurSharpness", std::to_string(s.HbaoSettings.BlurSharpness).c_str(), ini.c_str());
 
 	WritePrivateProfileStringA("Tesselation", "EnableTesselation", std::to_string(s.EnableTesselation ? TRUE : FALSE).c_str(), ini.c_str());
 	WritePrivateProfileStringA("Tesselation", "AllowWorldMeshTesselation", std::to_string(s.AllowWorldMeshTesselation ? TRUE : FALSE).c_str(), ini.c_str());
@@ -3763,7 +3767,12 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 	s.AllowWorldMeshTesselation = GetPrivateProfileIntA("Tesselation", "AllowWorldMeshTesselation", FALSE, ini.c_str());
 	s.EnableTesselation = GetPrivateProfileIntA("Tesselation", "EnableTesselation", FALSE, ini.c_str());
 
-	s.HbaoSettings.Enabled = GetPrivateProfileIntA("HBAO", "Enabled", TRUE, ini.c_str());
+	HBAOSettings defaultHBAOSettings;
+	s.HbaoSettings.Enabled = GetPrivateProfileIntA("HBAO", "Enabled", defaultHBAOSettings.Enabled, ini.c_str());
+	s.HbaoSettings.Bias = GetPrivateProfileFloatA("HBAO", "Bias", defaultHBAOSettings.Bias, ini.c_str());
+	s.HbaoSettings.Radius = GetPrivateProfileFloatA("HBAO", "Radius", defaultHBAOSettings.Radius, ini.c_str());
+	s.HbaoSettings.PowerExponent = GetPrivateProfileFloatA("HBAO", "PowerExponent", defaultHBAOSettings.PowerExponent, ini.c_str());
+	s.HbaoSettings.BlurSharpness = GetPrivateProfileFloatA("HBAO", "BlurSharpness", defaultHBAOSettings.BlurSharpness, ini.c_str());
 
 	// Fix the shadow range
 	switch (s.ShadowMapSize)

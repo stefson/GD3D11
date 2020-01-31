@@ -6,7 +6,7 @@
 #include "RenderToTextureBuffer.h"
 #include "GothicAPI.h"
 
-#pragma comment(lib, "GFSDK_SSAO.win32.lib")
+#pragma comment(lib, "GFSDK_SSAO_D3D11.win32.lib")
 
 D3D11NVHBAO::D3D11NVHBAO()
 {
@@ -40,36 +40,33 @@ XRESULT D3D11NVHBAO::Init()
 }
 
 /** Renders the HBAO-Effect onto the given RTV */
-XRESULT D3D11NVHBAO::Render(ID3D11RenderTargetView* rtv)
+XRESULT D3D11NVHBAO::Render(ID3D11RenderTargetView* pOutputColorRTV)
 {
 	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
-
-	D3D11_VIEWPORT vp;
-	UINT num = 1;
-	engine->GetContext()->RSGetViewports(&num, &vp);
 
 	HBAOSettings& settings = Engine::GAPI->GetRendererState()->RendererSettings.HbaoSettings;
 
 	GFSDK_SSAO_InputData_D3D11 Input;
 	Input.DepthData.DepthTextureType = GFSDK_SSAO_HARDWARE_DEPTHS;
 	Input.DepthData.pFullResDepthTextureSRV = engine->GetDepthBuffer()->GetShaderResView();
-	Input.DepthData.pViewport = &vp;
-	// TODO: Check this, conversion might throw!
-	Input.DepthData.pProjectionMatrix =  (float*)&Engine::GAPI->GetProjectionMatrix();
-	Input.DepthData.ProjectionMatrixLayout = GFSDK_SSAO_COLUMN_MAJOR_ORDER;
+	Input.DepthData.ProjectionMatrix.Data = GFSDK_SSAO_Float4x4((float*)&Engine::GAPI->GetProjectionMatrix());
+	Input.DepthData.ProjectionMatrix.Layout = GFSDK_SSAO_COLUMN_MAJOR_ORDER;
 	Input.DepthData.MetersToViewSpaceUnits = settings.MetersToViewSpaceUnits;
 
-	GFSDK_SSAO_Parameters_D3D11 Params;
+	GFSDK_SSAO_Parameters Params;
 	Params.Radius = settings.Radius;
 	Params.Bias = settings.Bias;
 	Params.PowerExponent = settings.PowerExponent;
 	Params.Blur.Enable = true;
-	Params.Blur.Radius = GFSDK_SSAO_BLUR_RADIUS_8;
+	Params.Blur.Radius = GFSDK_SSAO_BLUR_RADIUS_4;
 	Params.Blur.Sharpness = settings.BlurSharpness;
-	Params.Output.BlendMode = (GFSDK_SSAO_BlendMode)settings.BlendMode;
+	
+	GFSDK_SSAO_Output_D3D11 Output;
+	Output.Blend.Mode = (GFSDK_SSAO_BlendMode)settings.BlendMode;
+	Output.pRenderTargetView = pOutputColorRTV;
 
 	GFSDK_SSAO_Status status;
-	status = AOContext->RenderAO(engine->GetContext(), &Input, &Params, rtv);
+	status = AOContext->RenderAO(engine->GetContext(), Input, Params, Output);
 	if (status != GFSDK_SSAO_OK)
 	{
 		LogError() << "Failed to render Nvidia HBAO+!";

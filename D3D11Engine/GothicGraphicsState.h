@@ -396,7 +396,7 @@ struct HBAOSettings {
 	HBAOSettings() {
 		MetersToViewSpaceUnits = 100.0f;
 		Radius = 1.00f;
-		Bias = 0.1f;
+		Bias = 0.65f;
 		PowerExponent = 3.0f;
 		BlurSharpness = 4.0f;
 		BlendMode = 1;
