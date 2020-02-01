@@ -52,3 +52,7 @@ If you check out the appropriate commits, you can build older versions/commits o
 Since the older commits/version on "master" branch can not be compiled with Visual Studio 2015 without fixing some things, there is a seperate branch "master_vs2015" which contains all commits between 13.0 and the above commit, but a little bit modified, so they actually work with Visual Studio 2015 the same way the newer commits/versions do.
 
 So its very easy to build any version back to 13.0, just make sure to switch to the branch "master_vs2015" for the older commits. Most commits on both "master" as well as "master_vs2015", that represent a released version, are tagged with that version number. This should make it easy to for you to navigate through commits in git.
+
+### Other
+
+- Using HBAO+ files from https://github.com/windystrife/UnrealEngine_NVIDIAGameWorks
