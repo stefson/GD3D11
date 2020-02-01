@@ -29,7 +29,7 @@
 #define stdext std
 #endif
 
-#define VERSION_NUMBER "17.7-dev8"
+#define VERSION_NUMBER "17.7-dev9"
 __declspec(selectany) const char* VERSION_NUMBER_STR = VERSION_NUMBER;
 
 extern bool GMPModeActive;
