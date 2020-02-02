@@ -268,8 +268,8 @@ XRESULT D3D11ShaderManager::Init()
 	Shaders.push_back(ShaderInfo("GS_ParticleStreamOut", "VS_AdvanceRain.hlsl", "g", 11));
 	Shaders.back().cBufferSizes.push_back(sizeof(ParticleGSInfoConstantBuffer));
 
-	D3D10_SHADER_MACRO m;
-	std::vector<D3D10_SHADER_MACRO> makros;
+	D3D_SHADER_MACRO m;
+	std::vector<D3D_SHADER_MACRO> makros;
 
 	m.Name = "NORMALMAPPING";
 	m.Definition = "0";

@@ -11,9 +11,9 @@ public:
 	std::string type;				//Shader's type: 'v' vertexShader, 'p' pixelShader
 	int layout;						//Shader's input layout
 	std::vector<int> cBufferSizes;	//Vector with size for each constant buffer to be created for this shader
-	std::vector<D3D10_SHADER_MACRO> shaderMakros;
+	std::vector<D3D_SHADER_MACRO> shaderMakros;
 	//Constructor
-	ShaderInfo(std::string n, std::string fn, std::string t, int l, std::vector<D3D10_SHADER_MACRO> & makros = std::vector<D3D10_SHADER_MACRO>())
+	ShaderInfo(std::string n, std::string fn, std::string t, int l, std::vector<D3D_SHADER_MACRO> & makros = std::vector<D3D_SHADER_MACRO>())
 	{
 		name = n;
 		fileName = fn;
@@ -25,7 +25,7 @@ public:
 	}
 
 	//Constructor
-	ShaderInfo(std::string n, std::string fn, std::string t, std::vector<D3D10_SHADER_MACRO> & makros = std::vector<D3D10_SHADER_MACRO>())
+	ShaderInfo(std::string n, std::string fn, std::string t, std::vector<D3D_SHADER_MACRO> & makros = std::vector<D3D_SHADER_MACRO>())
 	{
 		name = n;
 		fileName = fn;

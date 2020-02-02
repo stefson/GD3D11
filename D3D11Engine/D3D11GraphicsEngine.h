@@ -257,7 +257,7 @@ public:
 	virtual LRESULT OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 	/** Constructs the makro list for shader compilation */
-	static void ConstructShaderMakroList(std::vector<D3D10_SHADER_MACRO> & list);
+	static void ConstructShaderMakroList(std::vector<D3D_SHADER_MACRO> & list);
 
 	/** Reloads shaders */
 	virtual XRESULT ReloadShaders();

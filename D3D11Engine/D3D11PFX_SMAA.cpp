@@ -39,7 +39,7 @@ D3D11PFX_SMAA::~D3D11PFX_SMAA()
 
 HRESULT D3DX11CreateEffectFromFile_RES(
   LPCTSTR pFileName,
-  CONST D3D10_SHADER_MACRO *pDefines,
+  CONST D3D_SHADER_MACRO *pDefines,
   LPCSTR pProfile,
   UINT HLSLFlags,
   UINT FXFlags,
@@ -49,7 +49,7 @@ HRESULT D3DX11CreateEffectFromFile_RES(
   HRESULT *pHResult
 )
 {
-	ID3D10Blob* ErrorsBuffer;
+	ID3DBlob* ErrorsBuffer;
 	HRESULT hr = D3DX11CompileEffectFromFile(Toolbox::ToWideChar(pFileName).c_str(), pDefines, D3D_COMPILE_STANDARD_FILE_INCLUDE, HLSLFlags, FXFlags, pDevice, ppEffect, &ErrorsBuffer);
 
 	char* Errors;
@@ -76,7 +76,7 @@ bool D3D11PFX_SMAA::Init()
 
 	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 
-	LE(D3DX11CreateEffectFromFile_RES("System\\GD3D11\\Shaders\\SMAA.fx", nullptr, "fx_5_0", D3D10_SHADER_ENABLE_STRICTNESS | D3D10_SHADER_OPTIMIZATION_LEVEL3, 0, engine->GetDevice(), nullptr,&SMAAShader, nullptr));
+	LE(D3DX11CreateEffectFromFile_RES("System\\GD3D11\\Shaders\\SMAA.fx", nullptr, "fx_5_0", D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_OPTIMIZATION_LEVEL3, 0, engine->GetDevice(), nullptr,&SMAAShader, nullptr));
 	
 	if (AreaTextureSRV)AreaTextureSRV->Release();
 	if (SearchTextureSRV)SearchTextureSRV->Release();
@@ -250,11 +250,11 @@ void D3D11PFX_SMAA::OnResize(const INT2 & size)
 	BlendTex = new RenderToTextureBuffer(engine->GetDevice(), size.x, size.y, DXGI_FORMAT_R8G8B8A8_UNORM, &hr);
 	LE(hr);
 
-	std::vector<D3D10_SHADER_MACRO> Makros;
+	std::vector<D3D_SHADER_MACRO> Makros;
 	
 	char ResStr[256];
 	sprintf(ResStr, "float2(1.0f/%d, 1.0f/%d)", (int)(size.x), (int)(size.y));
-	D3D10_SHADER_MACRO PixelSize = {"SMAA_PIXEL_SIZE", ResStr};
+	D3D_SHADER_MACRO PixelSize = {"SMAA_PIXEL_SIZE", ResStr};
 	Makros.push_back(PixelSize);
 
 	const int QUALITY = 2;
@@ -262,36 +262,36 @@ void D3D11PFX_SMAA::OnResize(const INT2 & size)
 	{
 	case 0:
 		{
-			D3D10_SHADER_MACRO Quality = {"SMAA_PRESET_LOW","1"};
+			D3D_SHADER_MACRO Quality = {"SMAA_PRESET_LOW","1"};
 			Makros.push_back(Quality);
 		}
 		break;
 
 	case 1:
 		{
-			D3D10_SHADER_MACRO Quality = {"SMAA_PRESET_MEDIUM","1"};
+			D3D_SHADER_MACRO Quality = {"SMAA_PRESET_MEDIUM","1"};
 			Makros.push_back(Quality);
 		}
 		break;
 
 	case 2:
 		{
-			D3D10_SHADER_MACRO Quality = {"SMAA_PRESET_HIGH","1"};
+			D3D_SHADER_MACRO Quality = {"SMAA_PRESET_HIGH","1"};
 			Makros.push_back(Quality);
 		}
 		break;
 
 	case 3:
 		{
-			D3D10_SHADER_MACRO Quality = {"SMAA_PRESET_ULTRA","1"};
+			D3D_SHADER_MACRO Quality = {"SMAA_PRESET_ULTRA","1"};
 			Makros.push_back(Quality);
 		}
 		break;
 	}
-	D3D10_SHADER_MACRO Null = {nullptr, nullptr};
+	D3D_SHADER_MACRO Null = {nullptr, nullptr};
 	Makros.push_back(Null);
 
-	LE(D3DX11CreateEffectFromFile_RES("system\\GD3D11\\shaders\\SMAA.fx", &Makros[0], "fx_5_0", D3D10_SHADER_OPTIMIZATION_LEVEL3, 0, engine->GetDevice(), nullptr,&SMAAShader, nullptr));
+	LE(D3DX11CreateEffectFromFile_RES("system\\GD3D11\\shaders\\SMAA.fx", &Makros[0], "fx_5_0", D3DCOMPILE_OPTIMIZATION_LEVEL3, 0, engine->GetDevice(), nullptr,&SMAAShader, nullptr));
 	
 	if (AreaTextureSRV)AreaTextureSRV->Release();
 	if (SearchTextureSRV)SearchTextureSRV->Release();

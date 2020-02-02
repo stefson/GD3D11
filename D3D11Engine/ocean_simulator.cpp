@@ -627,7 +627,7 @@ HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szS
     char pFilePathName[MAX_PATH];        
     WideCharToMultiByte(CP_ACP, 0, str, -1, pFilePathName, MAX_PATH, nullptr, nullptr);
     ID3DBlob* pErrorBlob;
-    hr = D3DCompile(pFileData, FileSize.LowPart, pFilePathName, nullptr, nullptr, szEntryPoint, szShaderModel, D3D10_SHADER_ENABLE_STRICTNESS, 0, ppBlobOut, &pErrorBlob);
+    hr = D3DCompile(pFileData, FileSize.LowPart, pFilePathName, nullptr, nullptr, szEntryPoint, szShaderModel, D3DCOMPILE_ENABLE_STRICTNESS, 0, ppBlobOut, &pErrorBlob);
 
     delete []pFileData;
 

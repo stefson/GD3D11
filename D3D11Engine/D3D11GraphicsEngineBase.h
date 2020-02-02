@@ -137,7 +137,7 @@ public:
 	XRESULT UpdateRenderStates();
 
 	/** Constructs the makro list for shader compilation */
-	static void ConstructShaderMakroList(std::vector<D3D10_SHADER_MACRO> & list);
+	static void ConstructShaderMakroList(std::vector<D3D_SHADER_MACRO> & list);
 
 	/** Sets up the default rendering state */
 	void SetDefaultStates();

@@ -642,10 +642,10 @@ XRESULT D3D11GraphicsEngineBase::UpdateRenderStates()
 
 
 /** Constructs the makro list for shader compilation */
-void D3D11GraphicsEngineBase::ConstructShaderMakroList(std::vector<D3D10_SHADER_MACRO> & list)
+void D3D11GraphicsEngineBase::ConstructShaderMakroList(std::vector<D3D_SHADER_MACRO> & list)
 {
 	const GothicRendererSettings& s = Engine::GAPI->GetRendererState()->RendererSettings;
-	D3D10_SHADER_MACRO m;
+	D3D_SHADER_MACRO m;
 
 	m.Name = "SHD_ENABLE";
 	m.Definition = s.EnableShadows ? "1" : "0";

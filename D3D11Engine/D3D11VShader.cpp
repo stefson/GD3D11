@@ -34,7 +34,7 @@ D3D11VShader::~D3D11VShader()
 //--------------------------------------------------------------------------------------
 // Find and compile the specified shader
 //--------------------------------------------------------------------------------------
-HRESULT D3D11VShader::CompileShaderFromFile(const CHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut, std::vector<D3D10_SHADER_MACRO> & makros)
+HRESULT D3D11VShader::CompileShaderFromFile(const CHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut, std::vector<D3D_SHADER_MACRO> & makros)
 {
 	HRESULT hr = S_OK;
 
@@ -52,7 +52,7 @@ HRESULT D3D11VShader::CompileShaderFromFile(const CHAR* szFileName, LPCSTR szEnt
 #endif
 
 	// Construct makros
-	std::vector<D3D10_SHADER_MACRO> m;
+	std::vector<D3D_SHADER_MACRO> m;
 	D3D11GraphicsEngineBase::ConstructShaderMakroList(m);
 	
 	// Push these to the front
@@ -89,7 +89,7 @@ HRESULT D3D11VShader::CompileShaderFromFile(const CHAR* szFileName, LPCSTR szEnt
 
 
 /** Loads shader */
-XRESULT D3D11VShader::LoadShader(const char* vertexShader, int layout, std::vector<D3D10_SHADER_MACRO> & makros)
+XRESULT D3D11VShader::LoadShader(const char* vertexShader, int layout, std::vector<D3D_SHADER_MACRO> & makros)
 {
 	HRESULT hr;
 	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase *)Engine::GraphicsEngine;
