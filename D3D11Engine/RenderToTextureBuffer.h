@@ -1,7 +1,5 @@
 #pragma once
 #include "pch.h"
-#include "Logger.h"
-#include <d3d11.h>
 
 /** Helper structs for quickly creating render-to-texture buffers */
 
@@ -66,6 +64,9 @@ struct RenderToTextureBuffer
 			Desc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
 
 		LE(device->CreateTexture2D(&Desc,nullptr,&Texture));
+
+		// Can't do further work if texture is null.
+		if (!Texture) return;
 
 		//Create a render target view
 		D3D11_RENDER_TARGET_VIEW_DESC DescRT = CD3D11_RENDER_TARGET_VIEW_DESC();
