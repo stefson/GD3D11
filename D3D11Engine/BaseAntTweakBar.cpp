@@ -281,22 +281,30 @@ XRESULT BaseAntTweakBar::Init() {
 	TwAddVarRW(Bar_HBAO, "Enable HBAO+", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.HbaoSettings.Enabled, nullptr);
 
 	TwAddVarRW(Bar_HBAO, "Radius", TW_TYPE_FLOAT, &Engine::GAPI->GetRendererState()->RendererSettings.HbaoSettings.Radius, nullptr);
-	TwDefine(" HBAO+/Radius  step=0.01");
+	TwDefine(" HBAO+/Radius  step=0.01 min=0 ");
 	
 	TwAddVarRW(Bar_HBAO, "MetersToViewSpaceUnits", TW_TYPE_FLOAT, &Engine::GAPI->GetRendererState()->RendererSettings.HbaoSettings.MetersToViewSpaceUnits, nullptr);
-	TwDefine(" HBAO+/MetersToViewSpaceUnits  step=0.01");
+	TwDefine(" HBAO+/MetersToViewSpaceUnits  step=0.01 min=0 ");
 
 	TwAddVarRW(Bar_HBAO, "PowerExponent", TW_TYPE_FLOAT, &Engine::GAPI->GetRendererState()->RendererSettings.HbaoSettings.PowerExponent, nullptr);
-	TwDefine(" HBAO+/PowerExponent  step=0.01");
+	TwDefine(" HBAO+/PowerExponent  step=0.01 min=1.0 max=4.0 ");
 
 	TwAddVarRW(Bar_HBAO, "Bias", TW_TYPE_FLOAT, &Engine::GAPI->GetRendererState()->RendererSettings.HbaoSettings.Bias, nullptr);
-	TwDefine(" HBAO+/Bias  step=0.01");
+	TwDefine(" HBAO+/Bias  step=0.01 min=0.0 max=0.5 ");
+
+	TwAddVarRW(Bar_HBAO, "Enable Blur", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.HbaoSettings.EnableBlur, nullptr);
 
 	TwAddVarRW(Bar_HBAO, "BlurSharpness", TW_TYPE_FLOAT, &Engine::GAPI->GetRendererState()->RendererSettings.HbaoSettings.BlurSharpness, nullptr);
 	TwDefine(" HBAO+/BlurSharpness  step=0.01");
 
 	TwType tbm = TwDefineEnumFromString("BlendModeEnum", "0 {Replace}, 1 {Multiply}");
 	TwAddVarRW(Bar_HBAO, "BlendMode", tbm, &Engine::GAPI->GetRendererState()->RendererSettings.HbaoSettings.BlendMode, nullptr);
+
+	TwAddVarRW(Bar_HBAO, "DualLayerAO", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.HbaoSettings.EnableDualLayerAO, nullptr);
+	
+	TwEnumVal hbaoStepCounts[] = { {0, "4"}, {1, "8"} };
+	TwType hbaoStepCountType = TwDefineEnum("GFSDK_SSAO_STEP_COUNT", hbaoStepCounts, 2);
+	TwAddVarRW(Bar_HBAO, "SSAO steps", hbaoStepCountType, &Engine::GAPI->GetRendererState()->RendererSettings.HbaoSettings.SsaoStepCount, nullptr);
 
 	Bar_ShaderMakros = TwNewBar("ShaderMakros");
 	TwDefine(" ShaderMakros position='1200 0'");

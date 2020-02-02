@@ -396,11 +396,14 @@ struct HBAOSettings {
 	HBAOSettings() {
 		MetersToViewSpaceUnits = 100.0f;
 		Radius = 1.00f;
-		Bias = 0.65f;
+		Bias = 0.5f;
 		PowerExponent = 3.0f;
 		BlurSharpness = 4.0f;
 		BlendMode = 1;
 		Enabled = true;
+		EnableDualLayerAO = false;
+		EnableBlur = true;
+		SsaoStepCount = 0; // GFSDK_SSAO_StepCount::GFSDK_SSAO_STEP_COUNT_4;
 	}
 
 	float Bias;
@@ -410,6 +413,9 @@ struct HBAOSettings {
 	float MetersToViewSpaceUnits;
 	int BlendMode;
 	bool Enabled;
+	bool EnableDualLayerAO;
+	bool EnableBlur;
+	int SsaoStepCount;
 };
 
 struct GothicRendererSettings {

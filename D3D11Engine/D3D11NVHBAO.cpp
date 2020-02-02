@@ -57,12 +57,14 @@ XRESULT D3D11NVHBAO::Render(ID3D11RenderTargetView* pOutputColorRTV)
 	Params.Radius = settings.Radius;
 	Params.Bias = settings.Bias;
 	Params.PowerExponent = settings.PowerExponent;
-	Params.Blur.Enable = true;
+	Params.StepCount = GFSDK_SSAO_StepCount(settings.SsaoStepCount);
+	Params.EnableDualLayerAO = settings.EnableDualLayerAO;
+	Params.Blur.Enable = settings.EnableBlur;
 	Params.Blur.Radius = GFSDK_SSAO_BLUR_RADIUS_4;
 	Params.Blur.Sharpness = settings.BlurSharpness;
 	
 	GFSDK_SSAO_Output_D3D11 Output;
-	Output.Blend.Mode = (GFSDK_SSAO_BlendMode)settings.BlendMode;
+	Output.Blend.Mode = GFSDK_SSAO_BlendMode(settings.BlendMode);
 	Output.pRenderTargetView = pOutputColorRTV;
 
 	GFSDK_SSAO_Status status;

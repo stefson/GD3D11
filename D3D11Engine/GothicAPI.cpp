@@ -3690,6 +3690,9 @@ XRESULT GothicAPI::SaveMenuSettings(const std::string & file) {
 	WritePrivateProfileStringA("HBAO", "Radius", std::to_string(s.HbaoSettings.Radius).c_str(), ini.c_str());
 	WritePrivateProfileStringA("HBAO", "PowerExponent", std::to_string(s.HbaoSettings.PowerExponent).c_str(), ini.c_str());
 	WritePrivateProfileStringA("HBAO", "BlurSharpness", std::to_string(s.HbaoSettings.BlurSharpness).c_str(), ini.c_str());
+	WritePrivateProfileStringA("HBAO", "EnableDualLayerAO", std::to_string(s.HbaoSettings.EnableDualLayerAO).c_str(), ini.c_str());
+	WritePrivateProfileStringA("HBAO", "EnableBlur", std::to_string(s.HbaoSettings.EnableBlur).c_str(), ini.c_str());
+	WritePrivateProfileStringA("HBAO", "SsaoStepCount", std::to_string(s.HbaoSettings.SsaoStepCount).c_str(), ini.c_str());
 
 	WritePrivateProfileStringA("Tesselation", "EnableTesselation", std::to_string(s.EnableTesselation ? TRUE : FALSE).c_str(), ini.c_str());
 	WritePrivateProfileStringA("Tesselation", "AllowWorldMeshTesselation", std::to_string(s.AllowWorldMeshTesselation ? TRUE : FALSE).c_str(), ini.c_str());
@@ -3773,7 +3776,10 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 	s.HbaoSettings.Radius = GetPrivateProfileFloatA("HBAO", "Radius", defaultHBAOSettings.Radius, ini.c_str());
 	s.HbaoSettings.PowerExponent = GetPrivateProfileFloatA("HBAO", "PowerExponent", defaultHBAOSettings.PowerExponent, ini.c_str());
 	s.HbaoSettings.BlurSharpness = GetPrivateProfileFloatA("HBAO", "BlurSharpness", defaultHBAOSettings.BlurSharpness, ini.c_str());
-
+	s.HbaoSettings.EnableDualLayerAO = GetPrivateProfileIntA("HBAO", "EnableDualLayerAO", defaultHBAOSettings.EnableDualLayerAO, ini.c_str());
+	s.HbaoSettings.EnableBlur = GetPrivateProfileIntA("HBAO", "EnableBlur", defaultHBAOSettings.EnableBlur, ini.c_str());
+	s.HbaoSettings.SsaoStepCount = GetPrivateProfileIntA("HBAO", "SsaoStepCount", defaultHBAOSettings.SsaoStepCount, ini.c_str());
+	
 	// Fix the shadow range
 	switch (s.ShadowMapSize)
 	{
