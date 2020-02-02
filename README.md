@@ -55,4 +55,8 @@ So its very easy to build any version back to 13.0, just make sure to switch to 
 
 ### Other
 
-- Using HBAO+ files from https://github.com/windystrife/UnrealEngine_NVIDIAGameWorks
+- Using HBAO+ files from https://github.com/dboleslawski/VVVV.HBAOPlus/tree/master/Dependencies/NVIDIA-HBAOPlus
+
+### License
+
+- HBAO+ is licensed under [GameWorks Binary SDK EULA](https://developer.nvidia.com/gameworks-sdk-eula)
