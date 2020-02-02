@@ -1,7 +1,6 @@
 #pragma once
 
 #include "basegraphicsengine.h"
-#include <wrl.h>
 
 class D3D11DepthBufferState;
 class D3D11BlendStateInfo;

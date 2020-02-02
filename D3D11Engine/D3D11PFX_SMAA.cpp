@@ -49,11 +49,12 @@ HRESULT D3DX11CreateEffectFromFile_RES(
   HRESULT *pHResult
 )
 {
-	ID3DBlob* ErrorsBuffer;
+	Microsoft::WRL::ComPtr<ID3DBlob> ErrorsBuffer;
+
 	HRESULT hr = D3DX11CompileEffectFromFile(Toolbox::ToWideChar(pFileName).c_str(), pDefines, D3D_COMPILE_STANDARD_FILE_INCLUDE, HLSLFlags, FXFlags, pDevice, ppEffect, &ErrorsBuffer);
 
 	char* Errors;
-	if (ErrorsBuffer)
+	if (ErrorsBuffer.Get())
 	{
 		Errors=(char *)ErrorsBuffer->GetBufferPointer();
 		if (SUCCEEDED(hr)) {
@@ -63,7 +64,6 @@ HRESULT D3DX11CreateEffectFromFile_RES(
 			LogError() << Errors;
 		}
 		
-		ErrorsBuffer->Release();
 		return hr;
 	}
 	return S_OK;

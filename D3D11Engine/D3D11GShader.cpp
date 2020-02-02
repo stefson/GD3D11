@@ -47,6 +47,8 @@ HRESULT D3D11GShader::CompileShaderFromFile(const CHAR* szFileName, LPCSTR szEnt
 	// the shaders to be optimized and to run exactly the way they will run in 
 	// the release configuration of this program.
 	//dwShaderFlags |= D3DCOMPILE_DEBUG;
+#else
+	dwShaderFlags |= D3DCOMPILE_OPTIMIZATION_LEVEL3;
 #endif
 
 	// Construct makros
@@ -56,29 +58,18 @@ HRESULT D3D11GShader::CompileShaderFromFile(const CHAR* szFileName, LPCSTR szEnt
 	// Push these to the front
 	m.insert(m.begin(), makros.begin(), makros.end());
 
-	ID3DBlob* pErrorBlob;
+	Microsoft::WRL::ComPtr<ID3DBlob> pErrorBlob;
 	hr = D3DCompileFromFile(Toolbox::ToWideChar(szFileName).c_str(), &m[0], D3D_COMPILE_STANDARD_FILE_INCLUDE, szEntryPoint, szShaderModel, dwShaderFlags, 0, ppBlobOut, &pErrorBlob);
 	if (FAILED(hr))
 	{
 		LogInfo() << "Shader compilation failed!";
-		if (pErrorBlob != nullptr)
+		if (pErrorBlob.Get())
 		{
-
 			LogErrorBox() << (char*)pErrorBlob->GetBufferPointer() << "\n\n (You can ignore the next error from Gothic about too small video memory!)";
-			pErrorBlob->Release();
 		}
 
 		SetCurrentDirectoryA(dir);
 		return hr;
-	}
-	if (pErrorBlob)
-	{
-		/*if (Engine->SwapchainCreated())
-		Engine->GetConsole()->PostConsoleMessage((char*)pErrorBlob->GetBufferPointer());
-		else
-		LogWarnBox() << (char*)pErrorBlob->GetBufferPointer() << "\n\n (You can ignore the next error from Gothic about too small video memory!)";
-		*/
-		pErrorBlob->Release();
 	}
 
 	SetCurrentDirectoryA(dir);
@@ -99,7 +90,7 @@ XRESULT D3D11GShader::LoadShader(const char* geometryShader, std::vector<D3D_SHA
 	if (!createStreamOutFromVS)
 	{
 		// Compile shaders
-		if (FAILED(CompileShaderFromFile(geometryShader, "GSMain", "gs_4_0", &gsBlob, makros)))
+		if (FAILED(CompileShaderFromFile(geometryShader, "GSMain", "gs_5_0", &gsBlob, makros)))
 		{
 			return XR_FAILED;
 		}

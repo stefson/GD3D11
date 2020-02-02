@@ -1,7 +1,4 @@
-#include "../pch.h"
 #include "MyDirectDrawSurface7.h"
-#include <ddraw.h>
-#include <d3d11.h>
 #include "../Engine.h"
 #include "../GothicAPI.h"
 #include "../BaseGraphicsEngine.h"

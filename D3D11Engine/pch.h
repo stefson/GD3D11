@@ -3,10 +3,12 @@
 #define WINVER 0x0601 // Windows 7
 #define _WIN32_WINNT 0x0601 // Windows 7
 #define NTDDI_VERSION 0x06010000 // Windows 7
+#define _WIN7_PLATFORM_UPDATE 1
 
 #pragma warning(disable: 4731) // Change of ebp from inline assembly
 #pragma warning(disable: 4244) // Loss of data during conversion
 #include <Windows.h>
+#include <wrl/client.h>
 #include <chrono>
 #include <d3d11.h>
 #include <SimpleMath.h>

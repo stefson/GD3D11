@@ -2,7 +2,6 @@
 
 #include "D3D11GraphicsEngineBase.h"
 #include "fpslimiter.h"
-#include <wrl.h>
 
 struct RenderToDepthStencilBuffer;
 

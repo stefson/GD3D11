@@ -25,7 +25,6 @@
 #include "zCTexture.h"
 #include "zCView.h"
 #include "zCVobLight.h"
-#include <wrl\client.h>
 #include <DDSTextureLoader.h>
 #include <ScreenGrab.h>
 #include <wincodec.h>

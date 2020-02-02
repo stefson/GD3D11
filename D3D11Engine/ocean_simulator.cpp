@@ -226,7 +226,7 @@ OceanSimulator::OceanSimulator(OceanParameter& params, ID3D11Device* pd3dDevice)
 	// Compute shaders
     ID3DBlob* pBlobUpdateSpectrumCS = nullptr;
 
-    CompileShaderFromFile(L"ocean_simulator_cs.hlsl", "UpdateSpectrumCS", "cs_4_0", &pBlobUpdateSpectrumCS);
+    CompileShaderFromFile(L"ocean_simulator_cs.hlsl", "UpdateSpectrumCS", "cs_5_0", &pBlobUpdateSpectrumCS);
 	assert(pBlobUpdateSpectrumCS);
 
     m_pd3dDevice->CreateComputeShader(pBlobUpdateSpectrumCS->GetBufferPointer(), pBlobUpdateSpectrumCS->GetBufferSize(), nullptr, &m_pUpdateSpectrumCS);
@@ -626,7 +626,7 @@ HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szS
     // Compile the shader
     char pFilePathName[MAX_PATH];        
     WideCharToMultiByte(CP_ACP, 0, str, -1, pFilePathName, MAX_PATH, nullptr, nullptr);
-    ID3DBlob* pErrorBlob;
+	Microsoft::WRL::ComPtr<ID3DBlob> pErrorBlob;
     hr = D3DCompile(pFileData, FileSize.LowPart, pFilePathName, nullptr, nullptr, szEntryPoint, szShaderModel, D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_OPTIMIZATION_LEVEL3, 0, ppBlobOut, &pErrorBlob);
 
     delete []pFileData;
@@ -635,10 +635,8 @@ HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szS
     {
         OutputDebugStringA((char*)pErrorBlob->GetBufferPointer());
 		LogError() << "(char*)pErrorBlob->GetBufferPointer()";
-        SAFE_RELEASE(pErrorBlob);
         return hr;
     }
-    SAFE_RELEASE(pErrorBlob);
 
     return S_OK;
 }

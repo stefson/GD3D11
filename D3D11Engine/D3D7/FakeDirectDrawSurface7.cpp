@@ -1,7 +1,4 @@
-#include "../pch.h"
 #include "FakeDirectDrawSurface7.h"
-#include <ddraw.h>
-#include <d3d11.h>
 #include "MyDirectDrawSurface7.h"
 #include "../D3D11Texture.h"
 #include "../Engine.h"

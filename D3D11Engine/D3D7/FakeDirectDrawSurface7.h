@@ -6,7 +6,6 @@
 #pragma once
 #include "../pch.h"
 #include <ddraw.h>
-#include <d3d11.h>
 
 class MyDirectDrawSurface7;
 class FakeDirectDrawSurface7 : public IDirectDrawSurface7
