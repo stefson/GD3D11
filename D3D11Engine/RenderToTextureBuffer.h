@@ -51,16 +51,13 @@ struct RenderToTextureBuffer
 		}
 
 		//Create a new render target texture
-		D3D11_TEXTURE2D_DESC Desc = CD3D11_TEXTURE2D_DESC();
-		ZeroMemory(&Desc, sizeof(D3D10_TEXTURE2D_DESC));
-		Desc.ArraySize = arraySize;
-		Desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-		Desc.Usage = D3D11_USAGE_DEFAULT;
-		Desc.Format = Format;
-		Desc.Width = SizeX;
-		Desc.Height = SizeY;
-		Desc.MipLevels = MipLevels;
-		Desc.SampleDesc.Count = 1;
+		D3D11_TEXTURE2D_DESC Desc = CD3D11_TEXTURE2D_DESC(
+			Format,
+			SizeX,
+			SizeY,
+			arraySize,
+			MipLevels,
+			D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE);
 
 		if (arraySize > 1)
 			Desc.MiscFlags |= D3D11_RESOURCE_MISC_TEXTURECUBE;
@@ -224,16 +221,13 @@ struct RenderToDepthStencilBuffer
 		}
 
 		//Create a new render target texture
-		D3D11_TEXTURE2D_DESC Desc = CD3D11_TEXTURE2D_DESC();
-		ZeroMemory(&Desc, sizeof(D3D10_TEXTURE2D_DESC));
-		Desc.ArraySize = arraySize;
-		Desc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
-		Desc.Usage = D3D11_USAGE_DEFAULT;
-		Desc.Format = Format;
-		Desc.Width = SizeX;
-		Desc.Height = SizeY;
-		Desc.MipLevels = 1;
-		Desc.SampleDesc.Count = 1;
+		D3D11_TEXTURE2D_DESC Desc = CD3D11_TEXTURE2D_DESC(
+			Format,
+			SizeX,
+			SizeY,
+			arraySize,
+			1,
+			D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE);
 
 		if (arraySize > 1)
 			Desc.MiscFlags |= D3D11_RESOURCE_MISC_TEXTURECUBE;
