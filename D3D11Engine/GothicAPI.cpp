@@ -3480,7 +3480,7 @@ XRESULT GothicAPI::SaveSuppressedTextures(const std::string & file)
 	int version = 1;
 	fwrite(&version, sizeof(version), 1, f);
 
-	int count = SuppressedTexturesBySection.size();
+	size_t count = SuppressedTexturesBySection.size();
 	fwrite(&count, sizeof(count), 1, f);
 
 	for (auto const& it : SuppressedTexturesBySection)
@@ -3488,12 +3488,12 @@ XRESULT GothicAPI::SaveSuppressedTextures(const std::string & file)
 		// Write section xy-coords
 		fwrite(&it.first->WorldCoordinates, sizeof(INT2), 1, f);
 
-		int countTX = it.second.size();
+		size_t countTX = it.second.size();
 		fwrite(&countTX, sizeof(countTX), 1, f);
 
-		for (int i = 0; i < countTX; i++)
+		for (size_t i = 0; i < countTX; i++)
 		{
-			unsigned int numChars = it.second[i].size();
+			size_t numChars = it.second[i].size();
 			numChars = std::min(255, (int)numChars);
 
 			// Write num of chars
@@ -3525,23 +3525,23 @@ XRESULT GothicAPI::LoadSuppressedTextures(const std::string & file)
 	int version;
 	fread(&version, sizeof(version), 1, f);
 
-	int count;
+	size_t count;
 	fread(&count, sizeof(count), 1, f);
 
 
-	for (int c = 0; c < count; c++)
+	for (size_t c = 0; c < count; c++)
 	{
-		int countTX;
+		size_t countTX;
 		fread(&countTX, sizeof(countTX), 1, f);
 
-		for (int i = 0; i < countTX; i++)
+		for (size_t i = 0; i < countTX; i++)
 		{
 			// Read section xy-coords
 			INT2 coords;
 			fread(&coords, sizeof(INT2), 1, f);
 
 			// Read num of chars
-			unsigned int numChars;
+			size_t numChars;
 			fread(&numChars, sizeof(numChars), 1, f);
 
 			// Read chars
@@ -3575,12 +3575,12 @@ XRESULT GothicAPI::SaveVegetation(const std::string & file)
 	int version = 1;
 	fwrite(&version, sizeof(version), 1, f);
 
-	int num = VegetationBoxes.size();
+	size_t num = VegetationBoxes.size();
 	fwrite(&num, sizeof(num), 1, f);
 
-	for (std::list<GVegetationBox*>::iterator it = VegetationBoxes.begin(); it != VegetationBoxes.end(); ++it)
+	for (auto const& it : VegetationBoxes)
 	{
-		(*it)->SaveToFILE(f, version);
+		it->SaveToFILE(f, version);
 	}
 
 	fclose(f);
@@ -3604,10 +3604,10 @@ XRESULT GothicAPI::LoadVegetation(const std::string & file)
 	int version;
 	fread(&version, sizeof(version), 1, f);
 
-	int num = VegetationBoxes.size();
+	size_t num = VegetationBoxes.size();
 	fread(&num, sizeof(num), 1, f);
 
-	for (int i = 0; i < num; i++)
+	for (size_t i = 0; i < num; i++)
 	{
 		GVegetationBox* b = new GVegetationBox;
 		b->LoadFromFILE(f, version);

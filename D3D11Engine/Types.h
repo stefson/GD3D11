@@ -27,7 +27,7 @@ struct INT2 {
 		this->y = (int)(v.y + 0.5f);
 	}
 
-	INT2() {}
+	INT2() { x = 0; y = 0; }
 
 	std::string toString() const {
 		return "(" + std::to_string(x) + ", " + std::to_string(y) + ")";
@@ -45,7 +45,7 @@ struct INT4 {
 		this->w = w;
 	}
 
-	INT4() {}
+	INT4() { x = 0; y = 0; z = 0; w = 0; }
 
 	int x;
 	int y;
@@ -129,7 +129,7 @@ struct float3 {
 		return isLike(b, 0.0001f);
 	}
 
-	float3() {}
+	float3() { x = 0; y = 0; z = 0; }
 
 	float x, y, z;
 };
@@ -197,7 +197,7 @@ struct float4 {
 		w = v.w;
 	}
 
-	float4() {}
+	float4() { x = 0; y = 0; z = 0; w = 0; }
 
 	DirectX::SimpleMath::Vector4 * toVector4() const {
 		return (DirectX::SimpleMath::Vector4 *)this;
@@ -246,7 +246,7 @@ struct float2 {
 		this->y = v.y;
 	}
 
-	float2() {}
+	float2() { x = 0; y = 0; }
 
 	DirectX::SimpleMath::Vector2 * toVector2() const {
 		return (DirectX::SimpleMath::Vector2 *)this;

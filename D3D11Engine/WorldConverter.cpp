@@ -1868,27 +1868,27 @@ void WorldConverter::CacheMesh(const std::map<std::string, std::vector<std::pair
 	fwrite(&Version, sizeof(Version), 1, f);
 
 	// Write num textures
-	int numTextures = geometry.size();
+	size_t numTextures = geometry.size();
 	fwrite(&numTextures, sizeof(numTextures), 1, f);
 
 	for (auto const& it : geometry) {
 		// Save texture name
-		unsigned char numTxNameChars = it.first.size();
+		uint8_t numTxNameChars = it.first.size();
 		fwrite(&numTxNameChars, sizeof(numTxNameChars), 1, f);
 		fwrite(&it.first[0], numTxNameChars, 1, f);
 
 		// Save num submeshes
-		unsigned char numSubmeshes = it.second.size();
+		uint8_t numSubmeshes = it.second.size();
 		fwrite(&numSubmeshes, sizeof(numSubmeshes), 1, f);
 
-		for (int i = 0; i < numSubmeshes; i++) {
+		for (uint8_t i = 0; i < numSubmeshes; i++) {
 			// Save vertices
-			int numVertices = it.second[i].first.size();
+			size_t numVertices = it.second[i].first.size();
 			fwrite(&numVertices, sizeof(numVertices), 1, f);
 			fwrite(&it.second[i].first[0], sizeof(ExVertexStruct) * it.second[i].first.size(), 1, f);
 
 			// Save indices
-			int numIndices = it.second[i].second.size();
+			size_t numIndices = it.second[i].second.size();
 			fwrite(&numIndices, sizeof(numIndices), 1, f);
 			fwrite(&it.second[i].second[0], sizeof(VERTEX_INDEX) * it.second[i].second.size(), 1, f);
 		}
