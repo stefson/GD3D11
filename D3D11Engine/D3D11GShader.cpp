@@ -109,7 +109,7 @@ XRESULT D3D11GShader::LoadShader(const char* geometryShader, std::vector<D3D_SHA
 	} else
 	{
 		// Compile vertexshader
-		if (FAILED(CompileShaderFromFile(geometryShader, "VSMain", "vs_4_0", &gsBlob, makros)))
+		if (FAILED(CompileShaderFromFile(geometryShader, "VSMain", "vs_5_0", &gsBlob, makros)))
 		{
 			return XR_FAILED;
 		}

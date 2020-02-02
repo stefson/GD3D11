@@ -102,7 +102,7 @@ XRESULT D3D11VShader::LoadShader(const char* vertexShader, int layout, std::vect
 
 
 	// Compile shader
-	if (FAILED(CompileShaderFromFile(vertexShader, "VSMain", "vs_4_0", &vsBlob, makros)))
+	if (FAILED(CompileShaderFromFile(vertexShader, "VSMain", "vs_5_0", &vsBlob, makros)))
 	{
 		return XR_FAILED;
 	}

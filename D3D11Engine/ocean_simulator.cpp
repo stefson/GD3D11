@@ -239,7 +239,7 @@ OceanSimulator::OceanSimulator(OceanParameter& params, ID3D11Device* pd3dDevice)
     ID3DBlob* pBlobUpdateDisplacementPS = nullptr;
     ID3DBlob* pBlobGenGradientFoldingPS = nullptr;
 
-    CompileShaderFromFile(L"ocean_simulator_vs_ps.hlsl", "QuadVS", "vs_4_0", &pBlobQuadVS);
+    CompileShaderFromFile(L"ocean_simulator_vs_ps.hlsl", "QuadVS", "vs_5_0", &pBlobQuadVS);
     CompileShaderFromFile(L"ocean_simulator_vs_ps.hlsl", "UpdateDisplacementPS", "ps_5_0", &pBlobUpdateDisplacementPS);
     CompileShaderFromFile(L"ocean_simulator_vs_ps.hlsl", "GenGradientFoldingPS", "ps_5_0", &pBlobGenGradientFoldingPS);
 	assert(pBlobQuadVS);
