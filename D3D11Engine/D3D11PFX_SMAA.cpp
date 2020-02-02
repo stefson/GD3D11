@@ -291,7 +291,7 @@ void D3D11PFX_SMAA::OnResize(const INT2 & size)
 	D3D_SHADER_MACRO Null = {nullptr, nullptr};
 	Makros.push_back(Null);
 
-	LE(D3DX11CreateEffectFromFile_RES("system\\GD3D11\\shaders\\SMAA.fx", &Makros[0], "fx_5_0", D3DCOMPILE_OPTIMIZATION_LEVEL3, 0, engine->GetDevice(), nullptr,&SMAAShader, nullptr));
+	LE(D3DX11CreateEffectFromFile_RES("system\\GD3D11\\shaders\\SMAA.fx", &Makros[0], "fx_5_0", D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_OPTIMIZATION_LEVEL3, 0, engine->GetDevice(), nullptr,&SMAAShader, nullptr));
 	
 	if (AreaTextureSRV)AreaTextureSRV->Release();
 	if (SearchTextureSRV)SearchTextureSRV->Release();
