@@ -35,9 +35,9 @@ public:
 	/** Hooks the functions of this Class */
 	static void Hook()
 	{
-		HookedFunctions::OriginalFunctions.original_zCMaterialDestructor = (GenericDestructor)DetourFunction((BYTE *)GothicMemoryLocations::zCMaterial::Destructor, (BYTE *)zCMaterial::Hooked_Destructor);
-		//HookedFunctions::OriginalFunctions.original_zCMaterialConstruktor = (zCMaterialConstruktor)DetourFunction((BYTE *)GothicMemoryLocations::zCMaterial::Constructor, (BYTE *)zCMaterial::Hooked_Constructor);
-		HookedFunctions::OriginalFunctions.original_zCMaterialInitValues = (zCMaterialInitValues)DetourFunction((BYTE *)GothicMemoryLocations::zCMaterial::InitValues, (BYTE *)zCMaterial::Hooked_InitValues);
+		XHook(HookedFunctions::OriginalFunctions.original_zCMaterialDestructor, GothicMemoryLocations::zCMaterial::Destructor, zCMaterial::Hooked_Destructor);
+		//XHook(HookedFunctions::OriginalFunctions.original_zCMaterialConstruktor, GothicMemoryLocations::zCMaterial::Constructor, zCMaterial::Hooked_Constructor);
+		XHook(HookedFunctions::OriginalFunctions.original_zCMaterialInitValues, GothicMemoryLocations::zCMaterial::InitValues, zCMaterial::Hooked_InitValues);
 
 	}
 

@@ -18,7 +18,7 @@ public:
 
 	/** Hooks the functions of this Class */
 	static void Hook() {
-		HookedFunctions::OriginalFunctions.original_zCVisualDestructor = (GenericDestructor)DetourFunction((BYTE *)GothicMemoryLocations::zCVisual::Destructor, (BYTE *)zCVisual::Hooked_Destructor);
+		XHook(HookedFunctions::OriginalFunctions.original_zCVisualDestructor, GothicMemoryLocations::zCVisual::Destructor, zCVisual::Hooked_Destructor);
 	}
 
 	static void __fastcall Hooked_Destructor(void * thisptr, void * unknwn) {

@@ -60,9 +60,9 @@ void HookedFunctionInfo::InitHooks() {
 	oCNPC::Hook();
 	zCSkyController_Outdoor::Hook();
 
-	//original_zCExceptionHandler_UnhandledExceptionFilter = (zCExceptionHandlerUnhandledExceptionFilter)DetourFunction((BYTE *)GothicMemoryLocations::Functions::zCExceptionHandler_UnhandledExceptionFilter, (BYTE *)HookedFunctionInfo::hooked_zCExceptionHandlerUnhandledExceptionFilter);
-	//original_HandledWinMain = (HandledWinMain)DetourFunction((BYTE *)GothicMemoryLocations::Functions::HandledWinMain, (BYTE *)HookedFunctionInfo::hooked_HandledWinMain);
-	//original_ExitGameFunc = (ExitGameFunc)DetourFunction((BYTE *)GothicMemoryLocations::Functions::ExitGameFunc, (BYTE *)HookedFunctionInfo::hooked_ExitGameFunc);
+	//XHook(original_zCExceptionHandler_UnhandledExceptionFilter, GothicMemoryLocations::Functions::zCExceptionHandler_UnhandledExceptionFilter, HookedFunctionInfo::hooked_zCExceptionHandlerUnhandledExceptionFilter);
+	//XHook(original_HandledWinMain, GothicMemoryLocations::Functions::HandledWinMain, HookedFunctionInfo::hooked_HandledWinMain);
+	//XHook(original_ExitGameFunc, GothicMemoryLocations::Functions::ExitGameFunc, HookedFunctionInfo::hooked_ExitGameFunc);
 
 	// Kill the check for doing freelook only in fullscreen, since we force the game to run windowed internally
 	//int flSize = GothicMemoryLocations::GlobalObjects::NOP_FreelookWindowedCheckEnd - GothicMemoryLocations::GlobalObjects::NOP_FreelookWindowedCheckStart;
@@ -73,7 +73,7 @@ void HookedFunctionInfo::InitHooks() {
 	DetourFunction((BYTE *)GothicMemoryLocations::zCBinkPlayer::GetPixelFormat, (BYTE *)HookedFunctionInfo::hooked_zBinkPlayerGetPixelFormat);
 
 #ifdef BUILD_GOTHIC_2_6_fix
-	original_zCBinkPlayerOpenVideo = (zCBinkPlayerOpenVideo)DetourFunction((BYTE *)GothicMemoryLocations::zCBinkPlayer::OpenVideo, (BYTE *)HookedFunctionInfo::hooked_zBinkPlayerOpenVideo);
+	XHook(original_zCBinkPlayerOpenVideo, GothicMemoryLocations::zCBinkPlayer::OpenVideo, HookedFunctionInfo::hooked_zBinkPlayerOpenVideo);
 #endif
 	original_Alg_Rotation3DNRad = (Alg_Rotation3DNRad)GothicMemoryLocations::Functions::Alg_Rotation3DNRad;
 

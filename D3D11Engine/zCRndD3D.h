@@ -11,9 +11,11 @@ public:
 	/** Hooks the functions of this Class */
 	static void Hook()
 	{
-		//HookedFunctions::OriginalFunctions.original_zCRnd_D3DVid_SetScreenMode = (zCRnd_D3DVid_SetScreenMode)DetourFunction((BYTE *)GothicMemoryLocations::zCRndD3D::VidSetScreenMode, (BYTE *)zCRndD3D::hooked_zCRndD3DVidSetScreenMode);
-		DetourFunction((BYTE *)GothicMemoryLocations::zCRndD3D::DrawLineZ, (BYTE *)hooked_zCRndD3DDrawLineZ);
-		HookedFunctions::OriginalFunctions.original_zCRnd_D3D_DrawPoly = (zCRnd_D3D_DrawPoly)DetourFunction((BYTE*)GothicMemoryLocations::zCRndD3D::DrawPoly, (BYTE*)hooked_zCRndD3DDrawPoly);
+		//XHook(HookedFunctions::OriginalFunctions.original_zCRnd_D3DVid_SetScreenMode, GothicMemoryLocations::zCRndD3D::VidSetScreenMode, zCRndD3D::hooked_zCRndD3DVidSetScreenMode);
+		XHook(GothicMemoryLocations::zCRndD3D::DrawLineZ, hooked_zCRndD3DDrawLineZ);
+
+		XHook(HookedFunctions::OriginalFunctions.original_zCRnd_D3D_DrawPoly, GothicMemoryLocations::zCRndD3D::DrawPoly, hooked_zCRndD3DDrawPoly);
+		XHook(HookedFunctions::OriginalFunctions.original_zCRnd_D3D_DrawPolySimple, GothicMemoryLocations::zCRndD3D::DrawPolySimple, hooked_zCRndD3DDrawPolySimple);
 	}
 
 	/** Overwritten to only accept windowed */
@@ -54,6 +56,15 @@ public:
 		if (_ReturnAddress() != polyStripReturnPointer) {
 			HookedFunctions::OriginalFunctions.original_zCRnd_D3D_DrawPoly(thisptr, poly);
 		}
+
+		hook_outfunc
+	}
+
+	static void __fastcall hooked_zCRndD3DDrawPolySimple(void* thisptr, void* unknwn, zCTexture* texture, void* zTRndSimpleVertex, int iVal) {
+	
+		hook_infunc
+
+		HookedFunctions::OriginalFunctions.original_zCRnd_D3D_DrawPolySimple(thisptr, texture, zTRndSimpleVertex, iVal);
 
 		hook_outfunc
 	}

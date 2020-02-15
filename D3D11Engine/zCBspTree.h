@@ -63,10 +63,10 @@ public:
 
 
 #ifdef BUILD_GOTHIC_1_08k
-		HookedFunctions::OriginalFunctions.original_zCBspBaseCollectPolysInBBox3D = (zCBspBaseCollectPolysInBBox3D)DetourFunction((BYTE *)GothicMemoryLocations::zCBspBase::CollectPolysInBBox3D, (BYTE *)zCBspNode::hooked_zCBspBaseCollectPolysInBBox3D);
-		HookedFunctions::OriginalFunctions.original_zCBspBaseCheckRayAgainstPolys = (zCBspBaseCheckRayAgainstPolys)DetourFunction((BYTE *)GothicMemoryLocations::zCBspBase::CheckRayAgainstPolys, (BYTE *)zCBspNode::hooked_zCBspBaseCheckRayAgainstPolys);
-		HookedFunctions::OriginalFunctions.original_zCBspBaseCheckRayAgainstPolysCache = (zCBspBaseCheckRayAgainstPolys)DetourFunction((BYTE *)GothicMemoryLocations::zCBspBase::CheckRayAgainstPolysCache, (BYTE *)zCBspNode::hooked_zCBspBaseCheckRayAgainstPolysCache);
-		HookedFunctions::OriginalFunctions.original_zCBspBaseCheckRayAgainstPolysNearestHit = (zCBspBaseCheckRayAgainstPolys)DetourFunction((BYTE *)GothicMemoryLocations::zCBspBase::CheckRayAgainstPolysNearestHit, (BYTE *)zCBspNode::hooked_zCBspBaseCheckRayAgainstPolysNearestHit);
+		XHook(HookedFunctions::OriginalFunctions.original_zCBspBaseCollectPolysInBBox3D, GothicMemoryLocations::zCBspBase::CollectPolysInBBox3D, zCBspNode::hooked_zCBspBaseCollectPolysInBBox3D);
+		XHook(HookedFunctions::OriginalFunctions.original_zCBspBaseCheckRayAgainstPolys, GothicMemoryLocations::zCBspBase::CheckRayAgainstPolys, zCBspNode::hooked_zCBspBaseCheckRayAgainstPolys);
+		XHook(HookedFunctions::OriginalFunctions.original_zCBspBaseCheckRayAgainstPolysCache, GothicMemoryLocations::zCBspBase::CheckRayAgainstPolysCache, zCBspNode::hooked_zCBspBaseCheckRayAgainstPolysCache);
+		XHook(HookedFunctions::OriginalFunctions.original_zCBspBaseCheckRayAgainstPolysNearestHit, GothicMemoryLocations::zCBspBase::CheckRayAgainstPolysNearestHit, zCBspNode::hooked_zCBspBaseCheckRayAgainstPolysNearestHit);
 		
 #endif
 
@@ -273,8 +273,8 @@ public:
 	/** Hooks the functions of this Class */
 	static void Hook()
 	{
-		HookedFunctions::OriginalFunctions.original_zCBspTreeLoadBIN = (zCBspTreeLoadBIN)DetourFunction((BYTE *)GothicMemoryLocations::zCBspTree::LoadBIN, (BYTE *)zCBspTree::hooked_LoadBIN);
-		HookedFunctions::OriginalFunctions.original_zCBspTreeAddVob = (zCBspTreeAddVob)DetourFunction((BYTE *)GothicMemoryLocations::zCBspTree::AddVob, (BYTE *)zCBspTree::hooked_AddVob);
+		XHook(HookedFunctions::OriginalFunctions.original_zCBspTreeLoadBIN, GothicMemoryLocations::zCBspTree::LoadBIN, zCBspTree::hooked_LoadBIN);
+		XHook(HookedFunctions::OriginalFunctions.original_zCBspTreeAddVob, GothicMemoryLocations::zCBspTree::AddVob, zCBspTree::hooked_AddVob);
 	}
 
 	/** Called when a vob gets added to a bsp-tree */

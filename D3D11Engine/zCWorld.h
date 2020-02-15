@@ -18,22 +18,22 @@ class zCWorld {
 public:
 	/** Hooks the functions of this Class */
 	static void Hook() {
-		HookedFunctions::OriginalFunctions.original_zCWorldRender = (zCWorldRender)DetourFunction((BYTE *)GothicMemoryLocations::zCWorld::Render, (BYTE *)zCWorld::hooked_Render);
-		HookedFunctions::OriginalFunctions.original_zCWorldVobAddedToWorld = (zCWorldVobAddedToWorld)DetourFunction((BYTE *)GothicMemoryLocations::zCWorld::VobAddedToWorld, (BYTE *)zCWorld::hooked_VobAddedToWorld);
+		XHook(HookedFunctions::OriginalFunctions.original_zCWorldRender, GothicMemoryLocations::zCWorld::Render, zCWorld::hooked_Render);
+		XHook(HookedFunctions::OriginalFunctions.original_zCWorldVobAddedToWorld, GothicMemoryLocations::zCWorld::VobAddedToWorld, zCWorld::hooked_VobAddedToWorld);
 
-		HookedFunctions::OriginalFunctions.original_zCWorldLoadWorld = (zCWorldLoadWorld)DetourFunction((BYTE *)GothicMemoryLocations::zCWorld::LoadWorld, (BYTE *)zCWorld::hooked_LoadWorld);
-		HookedFunctions::OriginalFunctions.original_zCWorldVobRemovedFromWorld = (zCWorldVobRemovedFromWorld)DetourFunction((BYTE *)GothicMemoryLocations::zCWorld::VobRemovedFromWorld, (BYTE *)zCWorld::hooked_zCWorldVobRemovedFromWorld);
-		//HookedFunctions::OriginalFunctions.original_zCWorldDisposeWorld = (GenericThiscall)DetourFunction((BYTE *)GothicMemoryLocations::zCWorld::DisposeWorld, (BYTE *)zCWorld::hooked_zCWorldDisposeWorld);
-		HookedFunctions::OriginalFunctions.original_zCWorldDisposeVobs = (zCWorldDisposeVobs)DetourFunction((BYTE *)GothicMemoryLocations::zCWorld::DisposeVobs, (BYTE *)zCWorld::hooked_zCWorldDisposeVobs);
+		XHook(HookedFunctions::OriginalFunctions.original_zCWorldLoadWorld, GothicMemoryLocations::zCWorld::LoadWorld, zCWorld::hooked_LoadWorld);
+		XHook(HookedFunctions::OriginalFunctions.original_zCWorldVobRemovedFromWorld, GothicMemoryLocations::zCWorld::VobRemovedFromWorld, zCWorld::hooked_zCWorldVobRemovedFromWorld);
+		//XHook(HookedFunctions::OriginalFunctions.original_zCWorldDisposeWorld, GothicMemoryLocations::zCWorld::DisposeWorld, zCWorld::hooked_zCWorldDisposeWorld);
+		XHook(HookedFunctions::OriginalFunctions.original_zCWorldDisposeVobs, GothicMemoryLocations::zCWorld::DisposeVobs, zCWorld::hooked_zCWorldDisposeVobs);
 
 #ifdef BUILD_GOTHIC_1_08k
-		HookedFunctions::OriginalFunctions.original_oCWorldInsertVobInWorld = (zCWorldVobAddedToWorld)DetourFunction((BYTE *)GothicMemoryLocations::oCWorld::InsertVobInWorld, (BYTE *)zCWorld::hooked_InsertVobInWorld);		
+		XHook(HookedFunctions::OriginalFunctions.original_oCWorldInsertVobInWorld, GothicMemoryLocations::oCWorld::InsertVobInWorld, zCWorld::hooked_InsertVobInWorld);		
 #endif
 		
-		HookedFunctions::OriginalFunctions.original_oCWorldRemoveFromLists = (oCWorldRemoveFromLists)DetourFunction((BYTE *)GothicMemoryLocations::oCWorld::RemoveFromLists, (BYTE *)zCWorld::hooked_oCWorldRemoveFromLists);
-		HookedFunctions::OriginalFunctions.original_oCWorldEnableVob = (oCWorldEnableVob)DetourFunction((BYTE *)GothicMemoryLocations::oCWorld::EnableVob, (BYTE *)zCWorld::hooked_oCWorldEnableVob);
-		HookedFunctions::OriginalFunctions.original_oCWorldDisableVob = (oCWorldDisableVob)DetourFunction((BYTE*)GothicMemoryLocations::oCWorld::DisableVob, (BYTE*)zCWorld::hooked_oCWorldDisableVob);
-		HookedFunctions::OriginalFunctions.original_oCWorldRemoveVob = (oCWorldRemoveVob)DetourFunction((BYTE *)GothicMemoryLocations::oCWorld::RemoveVob, (BYTE *)zCWorld::hooked_oCWorldRemoveVob);
+		XHook(HookedFunctions::OriginalFunctions.original_oCWorldRemoveFromLists, GothicMemoryLocations::oCWorld::RemoveFromLists, zCWorld::hooked_oCWorldRemoveFromLists);
+		XHook(HookedFunctions::OriginalFunctions.original_oCWorldEnableVob, GothicMemoryLocations::oCWorld::EnableVob, zCWorld::hooked_oCWorldEnableVob);
+		XHook(HookedFunctions::OriginalFunctions.original_oCWorldDisableVob, GothicMemoryLocations::oCWorld::DisableVob, zCWorld::hooked_oCWorldDisableVob);
+		XHook(HookedFunctions::OriginalFunctions.original_oCWorldRemoveVob, GothicMemoryLocations::oCWorld::RemoveVob, zCWorld::hooked_oCWorldRemoveVob);
 	}
 
 	static void __fastcall hooked_oCWorldEnableVob(void * thisptr, void * unknwn, zCVob * vob, zCVob * parent) {

@@ -26,8 +26,8 @@ public:
 	/** Hooks the functions of this Class */
 	static void Hook()
 	{
-		//HookedFunctions::OriginalFunctions.original_zCTex_D3DXTEX_BuildSurfaces = (zCTex_D3DXTEX_BuildSurfaces)DetourFunction((BYTE *)GothicMemoryLocations::zCTexture::XTEX_BuildSurfaces, (BYTE *)zCTexture::hooked_XTEX_BuildSurfaces);
-		HookedFunctions::OriginalFunctions.ofiginal_zCTextureLoadResourceData = (zCTextureLoadResourceData)DetourFunction((BYTE *)GothicMemoryLocations::zCTexture::LoadResourceData, (BYTE *)zCTexture::hooked_LoadResourceData);
+		//XHook(HookedFunctions::OriginalFunctions.original_zCTex_D3DXTEX_BuildSurfaces, GothicMemoryLocations::zCTexture::XTEX_BuildSurfaces, zCTexture::hooked_XTEX_BuildSurfaces);
+		XHook(HookedFunctions::OriginalFunctions.ofiginal_zCTextureLoadResourceData, GothicMemoryLocations::zCTexture::LoadResourceData, zCTexture::hooked_LoadResourceData);
 	
 		zCTextureCacheHack::NumNotCachedTexturesInFrame = 0;
 		zCTextureCacheHack::ForceCacheIn = false;

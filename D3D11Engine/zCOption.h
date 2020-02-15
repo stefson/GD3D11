@@ -14,9 +14,9 @@ public:
 	/** Hooks the functions of this Class */
 	static void Hook()
 	{
-		HookedFunctions::OriginalFunctions.original_zCOptionReadInt = (zCOptionReadInt)DetourFunction((BYTE *)GothicMemoryLocations::zCOption::ReadInt, (BYTE *)zCOption::hooked_zOptionReadInt);
-		HookedFunctions::OriginalFunctions.original_zCOptionReadBool = (zCOptionReadInt)DetourFunction((BYTE *)GothicMemoryLocations::zCOption::ReadBool, (BYTE *)zCOption::hooked_zOptionReadBool);
-		HookedFunctions::OriginalFunctions.original_zCOptionReadDWORD = (zCOptionReadDWORD)DetourFunction((BYTE *)GothicMemoryLocations::zCOption::ReadDWORD, (BYTE *)zCOption::hooked_zOptionReadDWORD);
+		XHook(HookedFunctions::OriginalFunctions.original_zCOptionReadInt, GothicMemoryLocations::zCOption::ReadInt, zCOption::hooked_zOptionReadInt);
+		XHook(HookedFunctions::OriginalFunctions.original_zCOptionReadBool, GothicMemoryLocations::zCOption::ReadBool, zCOption::hooked_zOptionReadBool);
+		XHook(HookedFunctions::OriginalFunctions.original_zCOptionReadDWORD, GothicMemoryLocations::zCOption::ReadDWORD, zCOption::hooked_zOptionReadDWORD);
 	}
 
 	/** Returns true if the given string is in the commandline of the game */

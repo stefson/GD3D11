@@ -13,7 +13,7 @@ public:
 	/** Hooks the functions of this Class */
 	static void Hook()
 	{
-		HookedFunctions::OriginalFunctions.original_zCThreadSuspendThread = (zCThreadSuspendThread)DetourFunction((BYTE *)GothicMemoryLocations::zCThread::SuspendThread, (BYTE *)zCThread::hooked_SuspendThread);
+		XHook(HookedFunctions::OriginalFunctions.original_zCThreadSuspendThread, GothicMemoryLocations::zCThread::SuspendThread, zCThread::hooked_SuspendThread);
 
 		//ThreadSleeping = false;
 	}

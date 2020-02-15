@@ -13,7 +13,7 @@ public:
 	/** Hooks the functions of this Class */
 	static void Hook()
 	{
-		HookedFunctions::OriginalFunctions.original_zFILEOpen = (zFILEOpen)DetourFunction((BYTE *)GothicMemoryLocations::zFILE::Open, (BYTE *)zFILE::hooked_Open);
+		XHook(HookedFunctions::OriginalFunctions.original_zFILEOpen, GothicMemoryLocations::zFILE::Open, zFILE::hooked_Open);
 		//(zCBspNodeRenderOutdoor)DetourFunction((BYTE *)GothicMemoryLocations::zCBspNode::RenderOutdoor, (BYTE *)zCBspNode::hooked_zCBspNodeRenderOutdoor);
 	}
 

@@ -14,9 +14,9 @@ public:
 	static void Hook()
 	{
 #ifndef BUILD_GOTHIC_1_08k
-		HookedFunctions::OriginalFunctions.original_zCQuadMarkCreateQuadMark = (zCQuadMarkCreateQuadMark)DetourFunction((BYTE *)GothicMemoryLocations::zCQuadMark::CreateQuadMark, (BYTE *)zCQuadMark::Hooked_CreateQuadMark);
-		//HookedFunctions::OriginalFunctions.original_zCQuadMarkConstructor = (GenericThiscall)DetourFunction((BYTE *)GothicMemoryLocations::zCQuadMark::Constructor, (BYTE *)zCQuadMark::Hooked_Constructor);
-		HookedFunctions::OriginalFunctions.original_zCQuadMarkDestructor = (GenericDestructor)DetourFunction((BYTE *)GothicMemoryLocations::zCQuadMark::Destructor, (BYTE *)zCQuadMark::Hooked_Destructor);
+		XHook(HookedFunctions::OriginalFunctions.original_zCQuadMarkCreateQuadMark, GothicMemoryLocations::zCQuadMark::CreateQuadMark, zCQuadMark::Hooked_CreateQuadMark);
+		//XHook(HookedFunctions::OriginalFunctions.original_zCQuadMarkConstructor, GothicMemoryLocations::zCQuadMark::Constructor, zCQuadMark::Hooked_Constructor);
+		XHook(HookedFunctions::OriginalFunctions.original_zCQuadMarkDestructor, GothicMemoryLocations::zCQuadMark::Destructor, zCQuadMark::Hooked_Destructor);
 #endif
 	}
 

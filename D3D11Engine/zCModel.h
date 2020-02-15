@@ -135,8 +135,8 @@ public:
 	/** Hooks the functions of this Class */
 	static void Hook()
 	{
-		//HookedFunctions::OriginalFunctions.original_zCModelPrototypeLoadModelASC = (zCModelPrototypeLoadModelASC)DetourFunction((BYTE *)GothicMemoryLocations::zCModelPrototype::LoadModelASC, (BYTE *)zCModelPrototype::Hooked_LoadModelASC);
-		//HookedFunctions::OriginalFunctions.original_zCModelPrototypeReadMeshAndTreeMSB = (zCModelPrototypeReadMeshAndTreeMSB)DetourFunction((BYTE *)GothicMemoryLocations::zCModelPrototype::ReadMeshAndTreeMSB, (BYTE *)zCModelPrototype::Hooked_ReadMeshAndTreeMSB);
+		//XHook(HookedFunctions::OriginalFunctions.original_zCModelPrototypeLoadModelASC, GothicMemoryLocations::zCModelPrototype::LoadModelASC, zCModelPrototype::Hooked_LoadModelASC);
+		//XHook(HookedFunctions::OriginalFunctions.original_zCModelPrototypeReadMeshAndTreeMSB, GothicMemoryLocations::zCModelPrototype::ReadMeshAndTreeMSB, zCModelPrototype::Hooked_ReadMeshAndTreeMSB);
 
 	}
 

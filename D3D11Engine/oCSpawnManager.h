@@ -15,11 +15,11 @@ public:
 	/** Hooks the functions of this Class */
 	static void Hook()
 	{
-		HookedFunctions::OriginalFunctions.original_oCSpawnManagerSpawnNpc = (oCSpawnManagerSpawnNpc)DetourFunction((BYTE*)GothicMemoryLocations::oCSpawnManager::SpawnNpc, (BYTE*)oCSpawnManager::hooked_oCSpawnManagerSpawnNpc);
-		//HookedFunctions::OriginalFunctions.original_oCSpawnManagerCheckInsertNpc = (oCSpawnManagerCheckInsertNpc)DetourFunction((BYTE *)GothicMemoryLocations::oCSpawnManager::CheckInsertNpc, (BYTE *)oCSpawnManager::hooked_oCSpawnManagerCheckInsertNpc);
+		XHook(HookedFunctions::OriginalFunctions.original_oCSpawnManagerSpawnNpc, GothicMemoryLocations::oCSpawnManager::SpawnNpc, oCSpawnManager::hooked_oCSpawnManagerSpawnNpc);
+		//XHook(HookedFunctions::OriginalFunctions.original_oCSpawnManagerCheckInsertNpc, GothicMemoryLocations::oCSpawnManager::CheckInsertNpc, oCSpawnManager::hooked_oCSpawnManagerCheckInsertNpc);
 		
 		// TODO: #8
-		//HookedFunctions::OriginalFunctions.original_oCSpawnManagerCheckRemoveNpc = (oCSpawnManagerCheckRemoveNpc)DetourFunction((BYTE*)GothicMemoryLocations::oCSpawnManager::CheckRemoveNpc, (BYTE*)oCSpawnManager::hooked_oCSpawnManagerCheckRemoveNpc);
+		//XHook(HookedFunctions::OriginalFunctions.original_oCSpawnManagerCheckRemoveNpc, GothicMemoryLocations::oCSpawnManager::CheckRemoveNpc, oCSpawnManager::hooked_oCSpawnManagerCheckRemoveNpc);
 	}
 
 	/** Reads config stuff */

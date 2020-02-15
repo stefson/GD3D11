@@ -32,7 +32,7 @@ public:
 	/** Hooks the functions of this Class */
 	static void Hook()
 	{
-		HookedFunctions::OriginalFunctions.original_oCGameEnterWorld = (oCGameEnterWorld)DetourFunction((BYTE *)GothicMemoryLocations::oCGame::EnterWorld, (BYTE *)oCGame::hooked_EnterWorld);
+		XHook(HookedFunctions::OriginalFunctions.original_oCGameEnterWorld, GothicMemoryLocations::oCGame::EnterWorld, oCGame::hooked_EnterWorld);
 	}
 
 	static void __fastcall hooked_EnterWorld(void * thisptr, void * unknwn, oCNPC* playerVob, int changePlayerPos, const zSTRING& startpoint)
