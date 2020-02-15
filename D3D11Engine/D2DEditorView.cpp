@@ -1114,7 +1114,7 @@ bool D2DEditorView::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wParam, 
 		if (IsEnabled)
 		{
 			// Enable free-cam, the easy way
-			oCGame::GetGame()->TestKey(GOTHIC_KEY_F6);
+			oCGame::GetGame()->TestKey(GOTHIC_KEY::F6);
 
 			Engine::GAPI->SetEnableGothicInput(false);
 			ResetEditorCamera();
@@ -1125,7 +1125,7 @@ bool D2DEditorView::OnWindowMessage(HWND hWnd, unsigned int msg, WPARAM wParam, 
 		else
 		{
 			// Disable free-cam, the easy way
-			oCGame::GetGame()->TestKey(GOTHIC_KEY_F4);
+			oCGame::GetGame()->TestKey(GOTHIC_KEY::F4);
 
 			Engine::GAPI->SetEnableGothicInput(true);
 		}

@@ -10,16 +10,19 @@
 
 class zCView;
 
-#define GOTHIC_KEY_F1 0x3B
-#define GOTHIC_KEY_F2 0x3C
-#define GOTHIC_KEY_F3 0x3D
-#define GOTHIC_KEY_F4 0x3E
-#define GOTHIC_KEY_F5 0x3F
-#define GOTHIC_KEY_F6 0x40
-#define GOTHIC_KEY_F7 0x41
-#define GOTHIC_KEY_F8 0x42
-#define GOTHIC_KEY_F9 0x43
-#define GOTHIC_KEY_F10 0x44
+enum class GOTHIC_KEY : int
+{
+	F1 = 0x3B,
+	F2 = 0x3C,
+	F3 = 0x3D,
+	F4 = 0x3E,
+	F5 = 0x3F,
+	F6 = 0x40,
+	F7 = 0x41,
+	F8 = 0x42,
+	F9 = 0x43,
+	F10 = 0x44,
+};
 
 class oCNPC;
 class oCGame
@@ -56,7 +59,7 @@ public:
 		//Engine::GAPI->OnAddVob(player, playerHomeworld);
 	}
 
-	void TestKey(int key)
+	void TestKey(GOTHIC_KEY key)
 	{
 		XCALL(GothicMemoryLocations::oCGame::TestKeys);
 	}
