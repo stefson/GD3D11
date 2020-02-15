@@ -71,6 +71,7 @@ struct GothicMemoryLocations
 		static const unsigned int VidSetScreenMode = 0x00658BA0;
 		static const unsigned int DrawLineZ = 0x0064DB00;
 		static const unsigned int DrawPoly = 0x0064B260;
+		static const unsigned int DrawPolySimple = 0x0064AC30;
 		static const unsigned int Vid_GetGammaCorrection = 0x00659610;
 	};
 
@@ -102,6 +103,7 @@ struct GothicMemoryLocations
 
 	struct zCView
 	{
+		static const unsigned int Vtbl_ViewText = 0x0083E344;
 		static const unsigned int SetMode = 0x007ABDB0;
 		static const unsigned int REPL_SetMode_ModechangeStart = 0x007ABDD9;
 		static const unsigned int REPL_SetMode_ModechangeEnd = 0x007ABDE8;

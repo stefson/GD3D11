@@ -14,6 +14,7 @@ class zSTRING;
 class zCBspBase;
 class oCNPC;
 class zCPolygon;
+class zCTexture;
 
 template <class T> 
 class zCTree;
@@ -44,6 +45,7 @@ typedef int (__fastcall* zCBspBaseCheckRayAgainstPolys)(void *, const DirectX::S
 typedef int (__thiscall* zFILEOpen)(void *,zSTRING&, bool);
 typedef void (__thiscall* zCRnd_D3DVid_SetScreenMode)(void *, int);
 typedef void (__thiscall* zCRnd_D3D_DrawPoly)(void*, zCPolygon*);
+typedef void (__thiscall* zCRnd_D3D_DrawPolySimple)(void*, zCTexture*, void*, int);
 typedef int (__thiscall* zCOptionReadInt)(void *,zSTRING const&, char const*, int);
 typedef int (__thiscall* zCOptionReadBool)(void *,zSTRING const&, char const*, int);
 typedef unsigned long (__thiscall* zCOptionReadDWORD)(void *,zSTRING const&, char const*, unsigned long);
@@ -104,6 +106,7 @@ struct HookedFunctionInfo
 	zFILEOpen original_zFILEOpen;
 	zCRnd_D3DVid_SetScreenMode original_zCRnd_D3DVid_SetScreenMode;
 	zCRnd_D3D_DrawPoly original_zCRnd_D3D_DrawPoly;
+	zCRnd_D3D_DrawPolySimple original_zCRnd_D3D_DrawPolySimple;
 	zCOptionReadInt original_zCOptionReadInt;
 	zCOptionReadBool original_zCOptionReadBool;
 	zCOptionReadDWORD original_zCOptionReadDWORD;

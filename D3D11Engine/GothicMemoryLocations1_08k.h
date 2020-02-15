@@ -51,6 +51,7 @@ struct GothicMemoryLocations
 		static const unsigned int VidSetScreenMode = 0x0071FC70;
 		static const unsigned int DrawLineZ = 0x00716D20;
 		static const unsigned int DrawPoly = 0x00714B60;
+		static const unsigned int DrawPolySimple = 0x007143F0;
 	};
 
 	struct zCOption
