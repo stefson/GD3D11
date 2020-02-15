@@ -366,7 +366,7 @@ public:
 	void ApplyTesselationSettingsForAllMeshPartsUsing(MaterialInfo * info, int amount = 1);
 
 	/** Returns the GSky-Object */
-	GSky * GetSky();
+	GSky * GetSky() const;
 
 	/** Returns the fog-color */
 	DirectX::SimpleMath::Vector3 GetFogColor();

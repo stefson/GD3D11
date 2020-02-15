@@ -2357,7 +2357,7 @@ Matrix& GothicAPI::GetProjectionMatrix()
 }
 
 /** Returns the GSky-Object */
-GSky* GothicAPI::GetSky()
+GSky* GothicAPI::GetSky() const
 {
 	return SkyRenderer.get();
 }
