@@ -70,7 +70,7 @@ void HookedFunctionInfo::InitHooks() {
 	//REPLACE_RANGE(GothicMemoryLocations::GlobalObjects::NOP_FreelookWindowedCheckStart, GothicMemoryLocations::GlobalObjects::NOP_FreelookWindowedCheckEnd-1, INST_NOP);
 
 	// Hook the single bink-function
-	DetourFunction((BYTE *)GothicMemoryLocations::zCBinkPlayer::GetPixelFormat, (BYTE *)HookedFunctionInfo::hooked_zBinkPlayerGetPixelFormat);
+	XHook(GothicMemoryLocations::zCBinkPlayer::GetPixelFormat, HookedFunctionInfo::hooked_zBinkPlayerGetPixelFormat);
 
 #ifdef BUILD_GOTHIC_2_6_fix
 	XHook(original_zCBinkPlayerOpenVideo, GothicMemoryLocations::zCBinkPlayer::OpenVideo, HookedFunctionInfo::hooked_zBinkPlayerOpenVideo);
@@ -81,7 +81,7 @@ void HookedFunctionInfo::InitHooks() {
 	// Remove automatic volume change of sounds regarding whether the camera is indoor or outdoor
 	// TODO: Implement!
 	if (!GMPModeActive) {
-		DetourFunction((BYTE *)GothicMemoryLocations::zCActiveSnd::AutoCalcObstruction, (BYTE *)HookedFunctionInfo::hooked_zCActiveSndAutoCalcObstruction);
+		XHook(GothicMemoryLocations::zCActiveSnd::AutoCalcObstruction, HookedFunctionInfo::hooked_zCActiveSndAutoCalcObstruction);
 	}
 #endif
 }

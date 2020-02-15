@@ -59,7 +59,7 @@ public:
 	static void Hook()
 	{
 		
-		DetourFunction((BYTE *)GothicMemoryLocations::zCBspTree::Render, (BYTE *)zCBspNode::hooked_zCBspNodeRender);
+		XHook(GothicMemoryLocations::zCBspTree::Render, zCBspNode::hooked_zCBspNodeRender);
 
 
 #ifdef BUILD_GOTHIC_1_08k
