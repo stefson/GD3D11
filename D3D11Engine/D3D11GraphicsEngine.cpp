@@ -4611,18 +4611,16 @@ void D3D11GraphicsEngine::RenderShadowmaps(const DirectX::SimpleMath::Vector3& c
 
 /** Draws a fullscreenquad, copying the given texture to the viewport */
 void D3D11GraphicsEngine::DrawQuad(INT2 position, INT2 size) {
-	ID3D11ShaderResourceView* srv;
+	wrl::ComPtr<ID3D11ShaderResourceView> srv;
 	GetContext()->PSGetShaderResources(0, 1, &srv);
 
-	ID3D11RenderTargetView* rtv;
+	wrl::ComPtr<ID3D11RenderTargetView> rtv;
 	GetContext()->OMGetRenderTargets(1, &rtv, nullptr);
 
-	if (srv) {
-		if (rtv) {
-			PfxRenderer->CopyTextureToRTV(srv, rtv, size, false, position);
-			rtv->Release();
+	if (srv.Get()) {
+		if (rtv.Get()) {
+			PfxRenderer->CopyTextureToRTV(srv.Get(), rtv.Get(), size, false, position);
 		}
-		srv->Release();
 	}
 }
 
@@ -4666,18 +4664,16 @@ void D3D11GraphicsEngine::DrawVobSingle(VobInfo* vob) {
 
 	InfiniteRangeConstantBuffer->BindToPixelShader(3);
 
-	for (std::map<zCMaterial*, std::vector<MeshInfo*>>::iterator itm =
-		vob->VisualInfo->Meshes.begin();
-		itm != vob->VisualInfo->Meshes.end(); itm++) {
-		for (unsigned int i = 0; i < (*itm).second.size(); i++) {
+	for (auto const& itm : vob->VisualInfo->Meshes) {
+		for (size_t i = 0; i < itm.second.size(); i++) {
 			// Cache texture
-			if ((*itm).first) {
-				if ((*itm).first->GetTexture()) {
-					if ((*itm).first->GetTexture()->CacheIn(0.6f) == zRES_CACHED_IN) {
-						(*itm).first->GetTexture()->Bind(0);
+			if (itm.first) {
+				if (itm.first->GetTexture()) {
+					if (itm.first->GetTexture()->CacheIn(0.6f) == zRES_CACHED_IN) {
+						itm.first->GetTexture()->Bind(0);
 
 						MaterialInfo* info =
-							Engine::GAPI->GetMaterialInfoFrom((*itm).first->GetTexture());
+							Engine::GAPI->GetMaterialInfoFrom(itm.first->GetTexture());
 						if (!info->Constantbuffer) info->UpdateConstantbuffer();
 
 						info->Constantbuffer->BindToPixelShader(2);
@@ -4688,8 +4684,8 @@ void D3D11GraphicsEngine::DrawVobSingle(VobInfo* vob) {
 			}
 			// Draw instances
 			Engine::GraphicsEngine->DrawVertexBufferIndexed(
-				(*itm).second[i]->MeshVertexBuffer, (*itm).second[i]->MeshIndexBuffer,
-				(*itm).second[i]->Indices.size());
+				itm.second[i]->MeshVertexBuffer, itm.second[i]->MeshIndexBuffer,
+				itm.second[i]->Indices.size());
 		}
 	}
 
@@ -5177,16 +5173,14 @@ void D3D11GraphicsEngine::DrawQuadMarks() {
 	SetupVS_ExConstantBuffer();
 
 	int alphaFunc = 0;
-	for (stdext::unordered_map<zCQuadMark*, QuadMarkInfo>::const_iterator it =
-		quadMarks.begin();
-		it != quadMarks.end(); ++it) {
-		if (!it->first->GetConnectedVob()) continue;
+	for (auto const& it : quadMarks) {
+		if (!it.first->GetConnectedVob()) continue;
 
-		if ((camPos - it->second.Position).Length() >
+		if ((camPos - it.second.Position).Length() >
 			Engine::GAPI->GetRendererState()->RendererSettings.VisualFXDrawRadius)
 			continue;
 
-		zCMaterial* mat = it->first->GetMaterial();
+		zCMaterial* mat = it.first->GetMaterial();
 		if (mat) mat->BindTexture(0);
 
 		if (alphaFunc != mat->GetAlphaFunc()) {
@@ -5220,12 +5214,11 @@ void D3D11GraphicsEngine::DrawQuadMarks() {
 			UpdateRenderStates();
 		}
 
-		Engine::GAPI->SetWorldTransform(
-			*it->first->GetConnectedVob()->GetWorldMatrixPtr());
+		Engine::GAPI->SetWorldTransform(*it.first->GetConnectedVob()->GetWorldMatrixPtr());
 		SetupVS_ExPerInstanceConstantBuffer();
 
-		Engine::GraphicsEngine->DrawVertexBuffer(it->second.Mesh,
-			it->second.NumVertices);
+		Engine::GraphicsEngine->DrawVertexBuffer(it.second.Mesh,
+			it.second.NumVertices);
 	}
 }
 
