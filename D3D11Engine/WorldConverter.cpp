@@ -1873,12 +1873,12 @@ void WorldConverter::CacheMesh(const std::map<std::string, std::vector<std::pair
 
 	for (auto const& it : geometry) {
 		// Save texture name
-		uint8_t numTxNameChars = it.first.size();
+		uint8_t numTxNameChars = static_cast<uint8_t>(it.first.size());
 		fwrite(&numTxNameChars, sizeof(numTxNameChars), 1, f);
 		fwrite(&it.first[0], numTxNameChars, 1, f);
 
 		// Save num submeshes
-		uint8_t numSubmeshes = it.second.size();
+		uint8_t numSubmeshes = static_cast<uint8_t>(it.second.size());
 		fwrite(&numSubmeshes, sizeof(numSubmeshes), 1, f);
 
 		for (uint8_t i = 0; i < numSubmeshes; i++) {
