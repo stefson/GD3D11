@@ -4,6 +4,23 @@
 #include "Engine.h"
 #include "GothicAPI.h"
 
+struct zColor {
+	union {
+		uint8_t b;
+		uint8_t g;
+		uint8_t r;
+		uint8_t a;
+	};
+	unsigned long dword;
+};
+
+struct zTRndSimpleVertex {
+	float2 pos;
+	float z;
+	float2 uv;
+	zColor color;
+};
+
 class zCRndD3D
 {
 public:
@@ -60,7 +77,7 @@ public:
 		hook_outfunc
 	}
 
-	static void __fastcall hooked_zCRndD3DDrawPolySimple(void* thisptr, void* unknwn, zCTexture* texture, void* zTRndSimpleVertex, int iVal) {
+	static void __fastcall hooked_zCRndD3DDrawPolySimple(void* thisptr, void* unknwn, zCTexture* texture, zTRndSimpleVertex* zTRndSimpleVertex, int iVal) {
 	
 		hook_infunc
 

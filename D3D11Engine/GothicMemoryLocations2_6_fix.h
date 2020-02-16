@@ -108,6 +108,7 @@ struct GothicMemoryLocations
 		static const unsigned int REPL_SetMode_ModechangeStart = 0x007ABDD9;
 		static const unsigned int REPL_SetMode_ModechangeEnd = 0x007ABDE8;
 		static const unsigned int PrintTimed = 0x007A7D20;
+		static const unsigned int PrintChars = 0x007A9B10;
 	};
 
 	struct zCObject

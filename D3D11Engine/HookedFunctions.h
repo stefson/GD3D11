@@ -50,6 +50,7 @@ typedef int (__thiscall* zCOptionReadInt)(void *,zSTRING const&, char const*, in
 typedef int (__thiscall* zCOptionReadBool)(void *,zSTRING const&, char const*, int);
 typedef unsigned long (__thiscall* zCOptionReadDWORD)(void *,zSTRING const&, char const*, unsigned long);
 typedef void (__cdecl * zCViewSetMode)(int, int, int, HWND*);
+typedef void (__thiscall* zCViewPrintChars)(void*, int, int, const zSTRING&);
 typedef int (__stdcall* HandledWinMain)(HINSTANCE, HINSTANCE, LPSTR, int);
 typedef int (__thiscall* CGameManagerExitGame)(void *);
 typedef const zSTRING* (__thiscall* zCVisualGetFileExtension)(void *, int);
@@ -111,6 +112,7 @@ struct HookedFunctionInfo
 	zCOptionReadBool original_zCOptionReadBool;
 	zCOptionReadDWORD original_zCOptionReadDWORD;
 	zCViewSetMode original_zCViewSetMode;
+	zCViewPrintChars original_zCViewPrintChars;
 	HandledWinMain original_HandledWinMain;
 	CGameManagerExitGame original_CGameManagerExitGame;
 	zCExceptionHandlerUnhandledExceptionFilter original_zCExceptionHandler_UnhandledExceptionFilter;
