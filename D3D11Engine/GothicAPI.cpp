@@ -3805,6 +3805,14 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 	s.LoadedResolution = res;
 	s.EnableHDR = false; // TODO: Force HDR to off for now
 
+
+	LogInfo() << "Applying Commandline-Overrides ...";
+	// Override Settings from Commandline Parameters
+	if (Engine::GAPI->HasCommandlineParameter("ZMAXFPS")) {
+		s.FpsLimit = std::stoi(zCOption::GetOptions()->ParameterValue("ZMAXFPS"));
+		LogInfo() << "-> FpsLimit: " <<  s.FpsLimit;
+	}
+
 	return XR_SUCCESS;
 }
 
