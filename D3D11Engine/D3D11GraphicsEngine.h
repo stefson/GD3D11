@@ -4,6 +4,7 @@
 #include "fpslimiter.h"
 #include <SpriteFont.h>
 #include <SpriteBatch.h>
+#include <CommonStates.h>
 
 struct RenderToDepthStencilBuffer;
 
@@ -25,6 +26,7 @@ struct simpleTextBuffer {
 	float y;
 	float4 color;
 	uint8_t fontSize;
+	zTRnd_AlphaBlendFunc blendState;
 };
 
 const int DRAWVERTEXARRAY_BUFFER_SIZE = 2048 * sizeof(ExVertexStruct);
@@ -94,7 +96,7 @@ public:
 	/** Saves a screenshot */
 	virtual void SaveScreenshot() override;
 
-	virtual void DrawString(std::string str, float x, float y, float4 color) override;
+	virtual void DrawString(std::string str, float x, float y, float4 color, zTRnd_AlphaBlendFunc blendState) override;
 
 	/** Draws a vertexbuffer, non-indexed */
 	virtual XRESULT DrawVertexBuffer(D3D11VertexBuffer* vb, unsigned int numVertices, unsigned int stride = sizeof(ExVertexStruct)) override;
@@ -394,6 +396,8 @@ protected:
 
 	std::unique_ptr<DirectX::SpriteFont> m_font;
 	std::unique_ptr<DirectX::SpriteBatch> m_spriteBatch;
+	std::unique_ptr<DirectX::CommonStates> states;
 
 	std::vector<simpleTextBuffer> textToDraw;
+
 };

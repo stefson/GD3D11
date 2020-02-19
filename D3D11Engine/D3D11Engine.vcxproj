@@ -508,6 +508,7 @@ copy "$(OutDir)$(TargetName).pdb" "$(G1_SYSTEM_PATH)\ddraw.pdb"</Command>
     <ClInclude Include="ZipArchive.h" />
     <ClInclude Include="zSTRING.h" />
     <ClInclude Include="zTypes.h" />
+    <ClInclude Include="zViewTypes.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseAntTweakBar.cpp" />

@@ -4,6 +4,10 @@
 #include "HookedFunctions.h"
 #include "oCGame.h"
 
+#if BUILD_GOTHIC_2_6_fix
+	#include "zViewTypes.h"
+#endif
+
 class zCView
 {
 public:
@@ -31,17 +35,28 @@ public:
 		hook_outfunc
 	}
 
-	static void __fastcall hooked_PrintChars(zCView* thisptr, void* unknwn, int x, int y, const zSTRING& str) {
+#if BUILD_GOTHIC_2_6_fix
+
+	static void __fastcall hooked_PrintChars(_zCView* thisptr, void* unknwn, int x, int y, const zSTRING& str) {
 		// zColor (bgra) To RGBA
 		//auto col = thisptr->GetFontColor();
 
+        bool visible = thisptr->isOpen;
+
+        if (thisptr->owner) {
+            if (thisptr->owner->vtbl == 0x830F84)
+            {
+                auto owner = (zCMenuItemText*)thisptr->owner;
+                visible = owner->m_bVisible && !owner->m_bDontRender;
+            }
+        }
+
 		if (Engine::GAPI->GetRendererState()->RendererSettings.EnableCustomFontRendering)
 		{
-			int vtbl = ((int*)thisptr)[0];
-			bool isOpen = *(int*)(((uint8_t*)thisptr) + 176);
-			if (isOpen) {
-				auto col = *(zColor*)(((uint8_t*)thisptr) + 104);
-				Engine::GraphicsEngine->DrawString(str.ToChar(), x, y, float4((float)col.bgra.r / 255.f, (float)col.bgra.g / 255.f, (float)col.bgra.b / 255.f, (float)col.bgra.alpha / 255.f));
+			if (visible) {
+				auto blendFunc = thisptr->alphafunc;
+                auto col = thisptr->GetTextColor();
+				Engine::GraphicsEngine->DrawString(str.ToChar(), x, y, float4((float)col.bgra.r / 255.f, (float)col.bgra.g / 255.f, (float)col.bgra.b / 255.f, (float)col.bgra.alpha / 255.f), blendFunc);
 			}
 		}
 		else
@@ -53,13 +68,7 @@ public:
 			hook_outfunc
 		}
 	}
-
-	zColor GetFontColor() {
-		auto ret = *(zColor*)THISPTR_OFFSET(38);
-		//auto ret = *(zColor*)THISPTR_OFFSET(92);
-		return ret;
-		//XCALL(0x007A6090u);
-	}
+#endif
 
 	/** Prints a message to the screen */
 	void PrintTimed(int posX, int posY, const zSTRING& strMessage, float time = 3000.0f, DWORD* col = nullptr)

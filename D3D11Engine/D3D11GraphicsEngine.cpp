@@ -390,6 +390,7 @@ XRESULT D3D11GraphicsEngine::Init() {
 		Engine::GAPI->GetRendererState()->RendererSettings.EnableCustomFontRendering = false;
 		LogError() << ex.what() << std::endl;
 	}
+	states = std::make_unique<CommonStates>(GetDevice());
 
 	return XR_SUCCESS;
 }
@@ -789,33 +790,65 @@ XRESULT D3D11GraphicsEngine::Present() {
 
 	if (Engine::GAPI->GetRendererState()->RendererSettings.EnableCustomFontRendering && !textToDraw.empty())
 	{
-		m_spriteBatch->Begin();
-		wchar_t buf[255];
-		Vector4 color = Vector4(203.f / 255.f, 186.f /255.f, 158.f / 255.f, 1);
-		for (auto txt : textToDraw) {
-			auto wSize = MultiByteToWideChar(CP_ACP, 0, txt.str.c_str(), txt.str.length(), buf, 255);
-			// TODO: What are we gonna do with too long texts?
-			if (!wSize) {
-				continue;
-			}
-			color = *txt.color.toVector4();
-			std::wstring output = std::wstring(buf, wSize);
-			Vector2 fontPos = Vector2(txt.x, txt.y);
-			m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos + Vector2(1.f, 1.f), Colors::Black, 0.f);
-			m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos + Vector2(-1.f, 1.f), Colors::Black, 0.f);
-			//Vector2 origin = m_font->MeasureString(output.c_str());
-			//m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos, *txt.color.toVector4(), 0.f);
-
-			//color.w = txt.color.w;
-			m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos, color, 0.f);
-		}
-
 		auto r = RECT{};
 		r.top = 0;
 		r.left = 0;
 		r.bottom = Resolution.y;
 		r.right = Resolution.x;
 
+		m_spriteBatch->Begin();
+		//m_spriteBatch->Begin(SpriteSortMode_Deferred, states->NonPremultiplied());
+		wchar_t buf[255];
+		Vector4 gothicColor = Vector4(203.f / 255.f, 186.f /255.f, 158.f / 255.f, 1);
+		std::vector<simpleTextBuffer> alphaBlendTexts;
+
+		for (auto txt : textToDraw) {
+			if (txt.blendState == zRND_ALPHA_FUNC_BLEND)
+			{
+				//alphaBlendTexts.push_back(txt);
+				//continue;
+			}
+
+			auto wSize = MultiByteToWideChar(CP_ACP, 0, txt.str.c_str(), txt.str.length(), buf, 255);
+			// TODO: What are we gonna do with too long texts?
+			if (!wSize) {
+				continue;
+			}
+
+			auto color = *txt.color.toVector4();
+			if (color.x == -1) {
+				color = gothicColor;
+			}
+			std::wstring output = std::wstring(buf, wSize);
+			Vector2 fontPos = Vector2(txt.x, txt.y);
+			m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos + Vector2(1.f, 1.f), Colors::Black, 0.f);
+			m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos + Vector2(-1.f, 1.f), Colors::Black, 0.f);
+
+			m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos, color, 0.f);
+		}
+
+		if (!alphaBlendTexts.empty()) {
+			m_spriteBatch->End();
+			m_spriteBatch->Begin(SpriteSortMode_Deferred, states->AlphaBlend());
+			
+			for (auto txt : alphaBlendTexts) {
+				auto wSize = MultiByteToWideChar(CP_ACP, 0, txt.str.c_str(), txt.str.length(), buf, 255);
+				// TODO: What are we gonna do with too long texts?
+				if (!wSize) {
+					continue;
+				}
+
+				auto color = *txt.color.toVector4();
+				if (color.x == -1) {
+					color = gothicColor;
+				}
+				std::wstring output = std::wstring(buf, wSize);
+				Vector2 fontPos = Vector2(txt.x, txt.y);
+				m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos + Vector2(1.f, 1.f), Colors::Black, 0.f);
+				m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos + Vector2(-1.f, 1.f), Colors::Black, 0.f);
+				m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos, color, 0.f);
+			}
+		}
 		m_spriteBatch->Draw(HDRBackBuffer->GetShaderResView(), r);
 
 		m_spriteBatch->End();
@@ -5678,13 +5711,14 @@ void D3D11GraphicsEngine::SaveScreenshot() {
 	Engine::GAPI->PrintMessageTimed(INT2(30, 30), "Screenshot taken: " + name);
 }
 
-void D3D11GraphicsEngine::DrawString(std::string str, float x, float y, float4 color = (Vector4)(Colors::White)) {
+void D3D11GraphicsEngine::DrawString(std::string str, float x, float y, float4 color = (Vector4)(Colors::White), zTRnd_AlphaBlendFunc blendState = zTRnd_AlphaBlendFunc::zRND_ALPHA_FUNC_NONE) {
 
 	simpleTextBuffer tb = {};
 	tb.color = color;
 	tb.x = x;
 	tb.y = y;
 	tb.str = str;
+	tb.blendState = blendState;
 
 	textToDraw.push_back(tb);
 }
