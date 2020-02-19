@@ -28,6 +28,10 @@
 #include <DDSTextureLoader.h>
 #include <ScreenGrab.h>
 #include <wincodec.h>
+#include <SpriteFont.h>
+#include <SpriteBatch.h>
+#include <locale>
+#include <codecvt>
 
 namespace wrl = Microsoft::WRL;
 using namespace DirectX;
@@ -374,6 +378,18 @@ XRESULT D3D11GraphicsEngine::Init() {
 		GetDevice(), POINTLIGHT_SHADOWMAP_SIZE, POINTLIGHT_SHADOWMAP_SIZE,
 		DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, DXGI_FORMAT_UNKNOWN,
 		DXGI_FORMAT_UNKNOWN, 1, 6);
+	
+	try
+	{
+		auto fontFilePath = L"system\\GD3D11\\Fonts\\" + Toolbox::ToWideChar(Engine::GAPI->GetRendererState()->RendererSettings.FontFileDefault);
+		m_font = std::make_unique<SpriteFont>(GetDevice(), fontFilePath.c_str());
+		m_spriteBatch = std::make_unique<SpriteBatch>(GetContext());
+	}
+	catch (const std::exception& ex)
+	{
+		Engine::GAPI->GetRendererState()->RendererSettings.EnableCustomFontRendering = false;
+		LogError() << ex.what() << std::endl;
+	}
 
 	return XR_SUCCESS;
 }
@@ -771,6 +787,44 @@ XRESULT D3D11GraphicsEngine::Present() {
 	// Copy HDR scene to backbuffer
 	SetDefaultStates();
 
+	if (Engine::GAPI->GetRendererState()->RendererSettings.EnableCustomFontRendering && !textToDraw.empty())
+	{
+		m_spriteBatch->Begin();
+		wchar_t buf[255];
+		Vector4 color = Vector4(203.f / 255.f, 186.f /255.f, 158.f / 255.f, 1);
+		for (auto txt : textToDraw) {
+			auto wSize = MultiByteToWideChar(CP_ACP, 0, txt.str.c_str(), txt.str.length(), buf, 255);
+			// TODO: What are we gonna do with too long texts?
+			if (!wSize) {
+				continue;
+			}
+
+			std::wstring output = std::wstring(buf, wSize);
+			Vector2 fontPos = Vector2(txt.x, txt.y);
+			m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos + Vector2(1.f, 1.f), Colors::Black, 0.f);
+			m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos + Vector2(-1.f, 1.f), Colors::Black, 0.f);
+			//Vector2 origin = m_font->MeasureString(output.c_str());
+			//m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos, *txt.color.toVector4(), 0.f);
+
+			//color.w = txt.color.w;
+			m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos, color, 0.f);
+		}
+
+		auto r = RECT{};
+		r.top = 0;
+		r.left = 0;
+		r.bottom = Resolution.y;
+		r.right = Resolution.x;
+
+		m_spriteBatch->Draw(HDRBackBuffer->GetShaderResView(), r);
+
+		m_spriteBatch->End();
+
+		textToDraw.clear();
+
+		SetDefaultStates();
+	}
+
 	SetActivePixelShader("PS_PFX_GammaCorrectInv");
 
 	ActivePS->Apply();
@@ -800,11 +854,11 @@ XRESULT D3D11GraphicsEngine::Present() {
 		Engine::GAPI->SetPendingMovieFrame(nullptr);
 	}
 
-	// Draw ant tweak bar
-	SetDefaultStates();
-	Engine::AntTweakBar->Draw();
 	SetDefaultStates();
 
+	Engine::AntTweakBar->Draw();
+	SetDefaultStates();
+	
 	if (UIView) UIView->Render(Engine::GAPI->GetFrameTimeSec());
 
 	bool vsync = Engine::GAPI->GetRendererState()->RendererSettings.EnableVSync;
@@ -5622,4 +5676,15 @@ void D3D11GraphicsEngine::SaveScreenshot() {
 
 	// Inform the user that a screenshot has been taken
 	Engine::GAPI->PrintMessageTimed(INT2(30, 30), "Screenshot taken: " + name);
+}
+
+void D3D11GraphicsEngine::DrawString(std::string str, float x, float y, float4 color = (Vector4)(Colors::White)) {
+
+	simpleTextBuffer tb = {};
+	tb.color = color;
+	tb.x = x;
+	tb.y = y;
+	tb.str = str;
+
+	textToDraw.push_back(tb);
 }

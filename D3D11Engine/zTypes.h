@@ -87,3 +87,20 @@ enum zTRnd_AlphaBlendFunc {
 	zRND_ALPHA_FUNC_TEST = 7,				
 	zRND_ALPHA_FUNC_BLEND_TEST = 8			
 };
+
+struct zColor {
+	union {
+		uint8_t b;
+		uint8_t g;
+		uint8_t r;
+		uint8_t a;
+	};
+	unsigned long dword;
+};
+
+struct zTRndSimpleVertex {
+	float2 pos;
+	float z;
+	float2 uv;
+	zColor color;
+};

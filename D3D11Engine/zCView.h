@@ -1,5 +1,6 @@
 #pragma once
 #include "pch.h"
+#include "zTypes.h"
 #include "HookedFunctions.h"
 #include "oCGame.h"
 
@@ -31,16 +32,29 @@ public:
 	}
 
 	static void __fastcall hooked_PrintChars(zCView* thisptr, void* unknwn, int x, int y, const zSTRING& str) {
-		// Sometimes there is garbage in the string
-		//if (strlen(str.ToChar()) == 0) {
-		//	return;
-		//}
+		// zColor (bgra) To RGBA
+		//auto col = thisptr->GetFontColor();
 
-		hook_infunc
+		if (Engine::GAPI->GetRendererState()->RendererSettings.EnableCustomFontRendering)
+		{
+			auto col = *(zColor*)(((char*)thisptr) + 92);
+			Engine::GraphicsEngine->DrawString(str.ToChar(), x, y, float4((float)col.r / 255.f, (float)col.g / 255.f, (float)col.b / 255.f, (float)col.a / 255.f));
+		}
+		else
+		{
+			hook_infunc
+
+			HookedFunctions::OriginalFunctions.original_zCViewPrintChars(thisptr, x, y, str);
 		
-		HookedFunctions::OriginalFunctions.original_zCViewPrintChars(thisptr, x, y, str);
-		
-		hook_outfunc
+			hook_outfunc
+		}
+	}
+
+	zColor GetFontColor() {
+		auto ret = *(zColor*)THISPTR_OFFSET(38);
+		//auto ret = *(zColor*)THISPTR_OFFSET(92);
+		return ret;
+		//XCALL(0x007A6090u);
 	}
 
 	/** Prints a message to the screen */

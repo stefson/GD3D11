@@ -1,25 +1,9 @@
 #pragma once
 #include "pch.h"
+#include "zTypes.h"
 #include "HookedFunctions.h"
 #include "Engine.h"
 #include "GothicAPI.h"
-
-struct zColor {
-	union {
-		uint8_t b;
-		uint8_t g;
-		uint8_t r;
-		uint8_t a;
-	};
-	unsigned long dword;
-};
-
-struct zTRndSimpleVertex {
-	float2 pos;
-	float z;
-	float2 uv;
-	zColor color;
-};
 
 class zCRndD3D
 {

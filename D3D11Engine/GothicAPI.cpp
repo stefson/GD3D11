@@ -3621,17 +3621,36 @@ XRESULT GothicAPI::LoadVegetation(const std::string & file)
 }
 
 float GetPrivateProfileFloatA(
-	_In_     LPCSTR lpAppName,
-	_In_     LPCSTR lpKeyName,
-	_In_     float nDefault,
-	_In_opt_ LPCSTR lpFileName
+	const LPCSTR lpAppName,
+	const LPCSTR lpKeyName,
+	const float nDefault,
+	const std::string& lpFileName
 ) {
 	const int float_str_max = 30;
 	TCHAR nFloat[float_str_max];
-	if (GetPrivateProfileStringA(lpAppName, lpKeyName, nullptr, nFloat, float_str_max, lpFileName)) {
+	if (GetPrivateProfileStringA(lpAppName, lpKeyName, nullptr, nFloat, float_str_max, lpFileName.c_str())) {
 		return std::stof(std::string(nFloat));
 	}
 	return nDefault;
+}
+std::string GetPrivateProfileStringA(
+	const LPCSTR lpAppName,
+	const LPCSTR lpKeyName,
+	const std::string& lpcstrDefault,
+	const std::string& lpFileName)
+{
+	char buffer[MAX_PATH];
+	GetPrivateProfileStringA(lpAppName, lpKeyName, lpcstrDefault.c_str(), buffer, MAX_PATH, lpFileName.c_str());
+	return std::string(buffer);
+}
+
+bool GetPrivateProfileBoolA(
+	const LPCSTR lpAppName,
+	const LPCSTR lpKeyName,
+	const bool nDefault,
+	const std::string& lpFileName)
+{
+	return GetPrivateProfileIntA(lpAppName, lpKeyName, nDefault, lpFileName.c_str()) ? true : false;
 }
 
 /** Saves the users settings from the menu */
@@ -3644,7 +3663,6 @@ XRESULT GothicAPI::SaveMenuSettings(const std::string & file) {
 
 	LogInfo() << "Saving menu settings to " << ini;
 	GothicRendererSettings& s = RendererState.RendererSettings;
-	AtmosphereSettings& aS = Engine::GAPI->GetSky()->GetAtmoshpereSettings();
 
 	WritePrivateProfileStringA("General", "AtmosphericScattering", std::to_string(s.AtmosphericScattering ? TRUE : FALSE).c_str(), ini.c_str());
 	WritePrivateProfileStringA("General", "EnableFog", std::to_string(s.DrawFog ? TRUE : FALSE).c_str(), ini.c_str());
@@ -3662,9 +3680,13 @@ XRESULT GothicAPI::SaveMenuSettings(const std::string & file) {
 	WritePrivateProfileStringA("General", "FpsLimit", std::to_string(s.FpsLimit).c_str(), ini.c_str());
 	WritePrivateProfileStringA("General", "ReplaceSunDirection", std::to_string(s.ReplaceSunDirection ? TRUE : FALSE).c_str(), ini.c_str());
 
-	WritePrivateProfileStringA("Atmoshpere", "LightDirectionX", std::to_string(aS.LightDirection.x).c_str(), ini.c_str());
-	WritePrivateProfileStringA("Atmoshpere", "LightDirectionY", std::to_string(aS.LightDirection.y).c_str(), ini.c_str());
-	WritePrivateProfileStringA("Atmoshpere", "LightDirectionZ", std::to_string(aS.LightDirection.z).c_str(), ini.c_str());
+	if (Engine::GAPI->GetSky()) {
+		AtmosphereSettings& aS = Engine::GAPI->GetSky()->GetAtmoshpereSettings();
+
+		WritePrivateProfileStringA("Atmoshpere", "LightDirectionX", std::to_string(aS.LightDirection.x).c_str(), ini.c_str());
+		WritePrivateProfileStringA("Atmoshpere", "LightDirectionY", std::to_string(aS.LightDirection.y).c_str(), ini.c_str());
+		WritePrivateProfileStringA("Atmoshpere", "LightDirectionZ", std::to_string(aS.LightDirection.z).c_str(), ini.c_str());
+	}
 
 	auto res = Engine::GraphicsEngine->GetResolution();
 	WritePrivateProfileStringA("Display", "Width", std::to_string(res.x).c_str(), ini.c_str());
@@ -3697,6 +3719,11 @@ XRESULT GothicAPI::SaveMenuSettings(const std::string & file) {
 	WritePrivateProfileStringA("Tesselation", "EnableTesselation", std::to_string(s.EnableTesselation ? TRUE : FALSE).c_str(), ini.c_str());
 	WritePrivateProfileStringA("Tesselation", "AllowWorldMeshTesselation", std::to_string(s.AllowWorldMeshTesselation ? TRUE : FALSE).c_str(), ini.c_str());
 
+
+	WritePrivateProfileStringA("FontRendering", "Enable", std::to_string(s.EnableCustomFontRendering ? TRUE : FALSE).c_str(), ini.c_str());
+	WritePrivateProfileStringA("FontRendering", "FontDefault", s.FontFileDefault.c_str(), ini.c_str());
+	WritePrivateProfileStringA("FontRendering", "FontMenu", s.FontFileMenu.c_str(), ini.c_str());
+
 	return XR_SUCCESS;
 }
 
@@ -3709,30 +3736,35 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 	// Get path to Gothic.Ini
 	auto ini = std::string(NPath, len).append("\\" + file);
 
-	if (INVALID_FILE_ATTRIBUTES == GetFileAttributes(ini.c_str()) && GetLastError() == ERROR_FILE_NOT_FOUND)
+	
+	if (!Toolbox::FileExists(ini))
 	{
 		LogWarn() << "Settings file not found: " << ini;
 		return XR_FAILED;
 	}
 	LogInfo() << "Loading menu settings from " << ini;
 
+
+	GothicRendererSettings defaultRendererSettings;
+	defaultRendererSettings.SetDefault();
+
 	GothicRendererSettings& s = RendererState.RendererSettings;
 
-	s.DrawFog = GetPrivateProfileIntA("General", "EnableFog", TRUE, ini.c_str());
-	s.AtmosphericScattering = GetPrivateProfileIntA("General", "AtmosphericScattering", TRUE, ini.c_str());
+	s.DrawFog = GetPrivateProfileBoolA("General", "EnableFog", TRUE, ini.c_str());
+	s.AtmosphericScattering = GetPrivateProfileBoolA("General", "AtmosphericScattering", TRUE, ini.c_str());
 	//s.EnableHDR = GetPrivateProfileIntA("General", "EnableHDR", 1, ini.c_str());
-	s.EnableDebugLog = GetPrivateProfileIntA("General", "EnableDebugLog", TRUE, ini.c_str());
-	s.EnableAutoupdates = GetPrivateProfileIntA("General", "EnableAutoupdates", TRUE, ini.c_str());
-	s.EnableGodRays = GetPrivateProfileIntA("General", "EnableGodRays", TRUE, ini.c_str());
-	s.AllowNormalmaps = GetPrivateProfileIntA("General", "AllowNormalmaps", FALSE, ini.c_str());
-	s.AllowNumpadKeys = GetPrivateProfileIntA("General", "AllowNumpadKeys", FALSE, ini.c_str());
+	s.EnableDebugLog = GetPrivateProfileBoolA("General", "EnableDebugLog", defaultRendererSettings.EnableDebugLog, ini);
+	s.EnableAutoupdates = GetPrivateProfileBoolA("General", "EnableAutoupdates", defaultRendererSettings.EnableAutoupdates, ini);
+	s.EnableGodRays = GetPrivateProfileBoolA("General", "EnableGodRays", defaultRendererSettings.EnableGodRays, ini);
+	s.AllowNormalmaps = GetPrivateProfileBoolA("General", "AllowNormalmaps", defaultRendererSettings.AllowNormalmaps, ini);
+	s.AllowNumpadKeys = GetPrivateProfileBoolA("General", "AllowNumpadKeys", defaultRendererSettings.AllowNumpadKeys, ini);
 	s.VisualFXDrawRadius = GetPrivateProfileFloatA("General", "VisualFXDrawRadius", 8000.0f, ini.c_str());
 	s.OutdoorVobDrawRadius = GetPrivateProfileFloatA("General", "OutdoorVobDrawRadius", 30000.0f, ini.c_str());
 	s.OutdoorSmallVobDrawRadius =  GetPrivateProfileFloatA("General", "OutdoorSmallVobDrawRadius", 10000.0f, ini.c_str());
 	s.SectionDrawRadius = GetPrivateProfileFloatA("General", "SectionDrawRadius", 4, ini.c_str());
-	s.EnableOcclusionCulling = GetPrivateProfileIntA("General", "EnableOcclusionCulling", FALSE, ini.c_str());
+	s.EnableOcclusionCulling = GetPrivateProfileBoolA("General", "EnableOcclusionCulling", defaultRendererSettings.EnableOcclusionCulling, ini);
 	s.FpsLimit = GetPrivateProfileIntA("General", "FpsLimit", 0, ini.c_str());
-	s.ReplaceSunDirection = GetPrivateProfileIntA("General", "ReplaceSunDirection", FALSE, ini.c_str());
+	s.ReplaceSunDirection = GetPrivateProfileBoolA("General", "ReplaceSunDirection", defaultRendererSettings.ReplaceSunDirection, ini);
 
 	static Vector3 defaultLightDirection = Vector3::One;
 
@@ -3746,40 +3778,44 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 		);
 	}
 
-	s.EnableShadows = GetPrivateProfileIntA("Shadows", "EnableShadows", TRUE, ini.c_str());
-	s.EnableSoftShadows = GetPrivateProfileIntA("Shadows", "EnableSoftShadows", TRUE, ini.c_str());
-	s.ShadowMapSize = GetPrivateProfileIntA("Shadows", "ShadowMapSize", 2048, ini.c_str());
+	s.EnableShadows = GetPrivateProfileBoolA("Shadows", "EnableShadows", defaultRendererSettings.EnableShadows, ini);
+	s.EnableSoftShadows = GetPrivateProfileBoolA("Shadows", "EnableSoftShadows", defaultRendererSettings.EnableSoftShadows, ini);
+	s.ShadowMapSize = GetPrivateProfileIntA("Shadows", "ShadowMapSize", defaultRendererSettings.ShadowMapSize, ini.c_str());
 	s.EnablePointlightShadows = GothicRendererSettings::EPointLightShadowMode(GetPrivateProfileIntA("Shadows", "PointlightShadows", GothicRendererSettings::EPointLightShadowMode::PLS_STATIC_ONLY, ini.c_str()));
 	s.WorldShadowRangeScale = GetPrivateProfileFloatA("Shadows", "WorldShadowRangeScale", 1.0f, ini.c_str());
-	s.EnableDynamicLighting = GetPrivateProfileIntA("Shadows", "EnableDynamicLighting", TRUE, ini.c_str());
+	s.EnableDynamicLighting = GetPrivateProfileBoolA("Shadows", "EnableDynamicLighting", defaultRendererSettings.EnableDynamicLighting, ini);
 
 	INT2 res = {};
 	RECT desktopRect;
 	GetClientRect(GetDesktopWindow(), &desktopRect);
 	res.x = GetPrivateProfileIntA("Display", "Width", desktopRect.right, ini.c_str());
 	res.y = GetPrivateProfileIntA("Display", "Height", desktopRect.bottom, ini.c_str());
-	s.EnableVSync = GetPrivateProfileIntA("Display", "VSync", FALSE, ini.c_str());
+	s.EnableVSync = GetPrivateProfileBoolA("Display", "VSync", false, ini);
 	s.FOVHoriz = GetPrivateProfileIntA("Display", "FOVHoriz", 90, ini.c_str());
 	s.FOVVert = GetPrivateProfileIntA("Display", "FOVVert", 90, ini.c_str());
 	s.GammaValue = GetPrivateProfileFloatA("Display", "Gamma", 1.0f, ini.c_str());
 	s.BrightnessValue = GetPrivateProfileFloatA("Display", "Brightness", 1.0f, ini.c_str());
 
-	s.EnableSMAA = GetPrivateProfileIntA("SMAA", "Enabled", FALSE, ini.c_str());
+	s.EnableSMAA = GetPrivateProfileBoolA("SMAA", "Enabled", false, ini);
 	s.SharpenFactor = GetPrivateProfileFloatA("SMAA", "SharpenFactor", 0.30f, ini.c_str());
 
-	s.AllowWorldMeshTesselation = GetPrivateProfileIntA("Tesselation", "AllowWorldMeshTesselation", FALSE, ini.c_str());
-	s.EnableTesselation = GetPrivateProfileIntA("Tesselation", "EnableTesselation", FALSE, ini.c_str());
+	s.AllowWorldMeshTesselation = GetPrivateProfileBoolA("Tesselation", "AllowWorldMeshTesselation", false, ini);
+	s.EnableTesselation = GetPrivateProfileBoolA("Tesselation", "EnableTesselation", false, ini);
 
 	HBAOSettings defaultHBAOSettings;
-	s.HbaoSettings.Enabled = GetPrivateProfileIntA("HBAO", "Enabled", defaultHBAOSettings.Enabled, ini.c_str());
+	s.HbaoSettings.Enabled = GetPrivateProfileBoolA("HBAO", "Enabled", defaultHBAOSettings.Enabled, ini);
 	s.HbaoSettings.Bias = GetPrivateProfileFloatA("HBAO", "Bias", defaultHBAOSettings.Bias, ini.c_str());
 	s.HbaoSettings.Radius = GetPrivateProfileFloatA("HBAO", "Radius", defaultHBAOSettings.Radius, ini.c_str());
 	s.HbaoSettings.PowerExponent = GetPrivateProfileFloatA("HBAO", "PowerExponent", defaultHBAOSettings.PowerExponent, ini.c_str());
 	s.HbaoSettings.BlurSharpness = GetPrivateProfileFloatA("HBAO", "BlurSharpness", defaultHBAOSettings.BlurSharpness, ini.c_str());
 	s.HbaoSettings.EnableDualLayerAO = GetPrivateProfileIntA("HBAO", "EnableDualLayerAO", defaultHBAOSettings.EnableDualLayerAO, ini.c_str());
-	s.HbaoSettings.EnableBlur = GetPrivateProfileIntA("HBAO", "EnableBlur", defaultHBAOSettings.EnableBlur, ini.c_str());
+	s.HbaoSettings.EnableBlur = GetPrivateProfileBoolA("HBAO", "EnableBlur", defaultHBAOSettings.EnableBlur, ini);
 	s.HbaoSettings.SsaoStepCount = GetPrivateProfileIntA("HBAO", "SsaoStepCount", defaultHBAOSettings.SsaoStepCount, ini.c_str());
 	
+	s.EnableCustomFontRendering = GetPrivateProfileBoolA("FontRendering", "Enable", defaultRendererSettings.EnableCustomFontRendering, ini);
+	s.FontFileDefault = GetPrivateProfileStringA("FontRendering", "FontDefault", defaultRendererSettings.FontFileDefault, ini);
+	s.FontFileMenu = GetPrivateProfileStringA("FontRendering", "FontMenu", defaultRendererSettings.FontFileMenu, ini);
+
 	// Fix the shadow range
 	switch (s.ShadowMapSize)
 	{

@@ -2,6 +2,8 @@
 
 #include "D3D11GraphicsEngineBase.h"
 #include "fpslimiter.h"
+#include <SpriteFont.h>
+#include <SpriteBatch.h>
 
 struct RenderToDepthStencilBuffer;
 
@@ -14,6 +16,15 @@ enum D3D11ENGINE_RENDER_STAGE {
 	DES_MAIN,
 	DES_SHADOWMAP,
 	DES_SHADOWMAP_CUBE
+};
+
+
+struct simpleTextBuffer {
+	std::string str;
+	float x;
+	float y;
+	float4 color;
+	uint8_t fontSize;
 };
 
 const int DRAWVERTEXARRAY_BUFFER_SIZE = 2048 * sizeof(ExVertexStruct);
@@ -82,6 +93,8 @@ public:
 
 	/** Saves a screenshot */
 	virtual void SaveScreenshot() override;
+
+	virtual void DrawString(std::string str, float x, float y, float4 color) override;
 
 	/** Draws a vertexbuffer, non-indexed */
 	virtual XRESULT DrawVertexBuffer(D3D11VertexBuffer* vb, unsigned int numVertices, unsigned int stride = sizeof(ExVertexStruct)) override;
@@ -378,4 +391,9 @@ protected:
 
 	/** If true, we will save a screenshot after the next frame */
 	bool SaveScreenshotNextFrame;
+
+	std::unique_ptr<DirectX::SpriteFont> m_font;
+	std::unique_ptr<DirectX::SpriteBatch> m_spriteBatch;
+
+	std::vector<simpleTextBuffer> textToDraw;
 };

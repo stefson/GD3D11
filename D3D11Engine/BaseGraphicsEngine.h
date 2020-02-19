@@ -201,4 +201,6 @@ public:
 
 	/** Draws particle effects */
 	virtual void DrawFrameParticles(std::map<zCTexture *, std::vector<ParticleInstanceInfo>> & particles, std::map<zCTexture *, ParticleRenderInfo> & info) {}
+
+	virtual void DrawString(std::string str, float x, float y, float4 color);
 };

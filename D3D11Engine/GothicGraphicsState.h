@@ -553,6 +553,9 @@ struct GothicRendererSettings {
 
 		AllowNumpadKeys = false;
 		EnableDebugLog = true;
+		EnableCustomFontRendering = false;
+		FontFileDefault = "Gothic_14.spritefont";
+		FontFileMenu = "Gothic_14.spritefont";
 	}
 
 	void SetupOldWorldSpecificValues() {
@@ -683,6 +686,10 @@ struct GothicRendererSettings {
 
 	bool AllowNumpadKeys;
 	bool EnableDebugLog;
+
+	bool EnableCustomFontRendering;
+	std::string FontFileDefault;
+	std::string FontFileMenu;
 };
 
 struct GothicRendererTiming {
