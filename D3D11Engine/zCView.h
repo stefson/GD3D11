@@ -37,8 +37,12 @@ public:
 
 		if (Engine::GAPI->GetRendererState()->RendererSettings.EnableCustomFontRendering)
 		{
-			auto col = *(zColor*)(((char*)thisptr) + 92);
-			Engine::GraphicsEngine->DrawString(str.ToChar(), x, y, float4((float)col.r / 255.f, (float)col.g / 255.f, (float)col.b / 255.f, (float)col.a / 255.f));
+			int vtbl = ((int*)thisptr)[0];
+			bool isOpen = *(int*)(((uint8_t*)thisptr) + 176);
+			if (isOpen) {
+				auto col = *(zColor*)(((uint8_t*)thisptr) + 104);
+				Engine::GraphicsEngine->DrawString(str.ToChar(), x, y, float4((float)col.bgra.r / 255.f, (float)col.bgra.g / 255.f, (float)col.bgra.b / 255.f, (float)col.bgra.alpha / 255.f));
+			}
 		}
 		else
 		{

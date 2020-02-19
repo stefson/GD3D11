@@ -798,7 +798,7 @@ XRESULT D3D11GraphicsEngine::Present() {
 			if (!wSize) {
 				continue;
 			}
-
+			color = *txt.color.toVector4();
 			std::wstring output = std::wstring(buf, wSize);
 			Vector2 fontPos = Vector2(txt.x, txt.y);
 			m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos + Vector2(1.f, 1.f), Colors::Black, 0.f);
