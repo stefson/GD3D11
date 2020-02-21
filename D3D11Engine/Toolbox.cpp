@@ -161,8 +161,7 @@ namespace Toolbox
 	/** Computes the Normal of a triangle */
 	DirectX::SimpleMath::Vector3 ComputeNormal(const DirectX::SimpleMath::Vector3 & v0, const DirectX::SimpleMath::Vector3 & v1, const DirectX::SimpleMath::Vector3 & v2)
 	{
-		DirectX::SimpleMath::Vector3 Normal;
-		Normal = (v1 - v0).Cross(v2 - v0);
+		DirectX::SimpleMath::Vector3 Normal = (v1 - v0).Cross(v2 - v0);
 		Normal.Normalize();
 
 		return Normal;
@@ -182,9 +181,8 @@ namespace Toolbox
 		DirectX::SimpleMath::Vector3 tvec = origin - v0; 
 		u = tvec.Dot(pvec) * invDet; 
 		if (u < 0 || u > 1) return false; 
-		DirectX::SimpleMath::Vector3 qvec;
-		qvec = tvec.Cross(edge1);
 
+		DirectX::SimpleMath::Vector3 qvec = tvec.Cross(edge1);
 		v = direction.Dot(qvec) * invDet;
 		if (v < 0 || u + v > 1) return false; 
 		t = edge2.Dot(qvec) * invDet;

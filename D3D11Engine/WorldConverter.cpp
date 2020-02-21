@@ -1745,8 +1745,7 @@ void WorldConverter::GenerateVertexNormals(std::vector<ExVertexStruct> & vertice
 	for(unsigned int i=0;i<indices.size(); i+=3)
 	{
 		Vector3 v[3] = {*vertices[indices[i]].Position.toVector3(), *vertices[indices[i+1]].Position.toVector3(), *vertices[indices[i+2]].Position.toVector3()};
-		Vector3 normal;
-		normal = (v[1] - v[0]).Cross((v[2] - v[0]));
+		Vector3 normal = (v[1] - v[0]).Cross((v[2] - v[0]));
 
 		for (int j = 0; j < 3; ++j)
 		{

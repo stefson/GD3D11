@@ -897,13 +897,12 @@ void GothicAPI::GetVisibleParticleEffectsList(std::vector<zCVob*> & pfxList)
 {
 	if (RendererState.RendererSettings.DrawParticleEffects)
 	{
-		DirectX::XMVECTOR camPos = GetCameraPosition();
+		Vector3 camPos = GetCameraPosition();
 
 		// now it is save to render
 		for (auto const& it : ParticleEffectVobs)
 		{
-			float dist;
-			XMStoreFloat(&dist, DirectX::XMVector3Length((DirectX::XMVECTOR)it->GetPositionWorld() - camPos));
+			float dist = (it->GetPositionWorld() - camPos).Length();
 			if (dist > RendererState.RendererSettings.OutdoorSmallVobDrawRadius)
 				continue;
 			if (dist > RendererState.RendererSettings.VisualFXDrawRadius)
@@ -923,12 +922,12 @@ static bool DecalSortcmpFunc(const std::pair<zCVob*, float> & a, const std::pair
 
 /** Gets a list of visible decals */
 void GothicAPI::GetVisibleDecalList(std::vector<zCVob*> & decals) {
-	DirectX::XMVECTOR camPos = GetCameraPosition();
+	Vector3 camPos = GetCameraPosition();
 	static std::vector<std::pair<zCVob*, float>> decalDistances; // Static to get around reallocations
 
 	for (auto const& it : DecalVobs) {
-		float dist;
-		XMStoreFloat(&dist, DirectX::XMVector3Length((DirectX::XMVECTOR)it->GetPositionWorld() - camPos));
+		float dist = (it->GetPositionWorld() - camPos).Length();
+
 		if (dist > RendererState.RendererSettings.VisualFXDrawRadius)
 			continue;
 
@@ -1141,7 +1140,7 @@ void GothicAPI::DrawMeshInfo(zCMaterial * mat, MeshInfo * msh) {
 }
 
 /** Draws a SkeletalMeshInfo */
-void GothicAPI::DrawSkeletalMeshInfo(zCMaterial * mat, SkeletalMeshInfo * msh, const std::vector<Matrix> & transforms, float fatness) {
+void GothicAPI::DrawSkeletalMeshInfo(zCMaterial * mat, SkeletalMeshInfo * msh, std::vector<Matrix> & transforms, float fatness) {
 	// Check for material and bind the texture if it exists
 	if (mat) {
 		if (mat->GetTexture()) {
@@ -1559,10 +1558,9 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 	Matrix world;
 	vi->Vob->GetWorldMatrix(&world);
 
-	DirectX::XMMATRIX scale;
 	Vector3 modelScale = model->GetModelScale();
 
-	scale = DirectX::XMMatrixScaling(modelScale.x, modelScale.y, modelScale.z);
+	Matrix scale = Matrix::CreateScale(modelScale.x, modelScale.y, modelScale.z);
 	world = world * scale;
 
 	zCCamera::GetCamera()->SetTransform(zCCamera::TT_WORLD, world);
@@ -1724,7 +1722,7 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 						const float fs = (fatness + 1.0f) * 0.02f; // This is what gothic seems to be doing for heads, and it even looks right...
 
 						// Calculate "patched" scale according to fatness
-						const auto fatnessScale = DirectX::XMMatrixScaling(fs, fs, fs);
+						Matrix fatnessScale = Matrix::CreateScale(fs, fs, fs);
 						const Matrix w = world * scale;
 
 						// Set new "fat" worldmatrix
@@ -1898,7 +1896,7 @@ void GothicAPI::DrawParticleFX(zCVob * source, zCParticleFX * fx, ParticleFrameD
 			}
 			else if (alignment == zPARTICLE_ALIGNMENT_VELOCITY || alignment == zPARTICLE_ALIGNMENT_VELOCITY_3D) {
 				// Rotate velocity so it fits with the vob
-				Vector3 velNrm = DirectX::XMVector3Normalize(p->Vel);
+				Vector3 velNrm; p->Vel.Normalize(velNrm);
 				velNrm = velNrm.TransformNormal(velNrm, sw);
 
 				ii.velocity = velNrm;
@@ -2041,14 +2039,14 @@ void GothicAPI::SetWorldViewTransform(const Matrix & world, const Matrix & view)
 /** Sets the world matrix */
 void GothicAPI::ResetWorldTransform()
 {
-	RendererState.TransformState.TransformWorld = RendererState.TransformState.TransformWorld.Identity;
+	RendererState.TransformState.TransformWorld = Matrix::Identity;
 	RendererState.TransformState.TransformWorld = RendererState.TransformState.TransformWorld.Transpose();
 }
 
 /** Sets the world matrix */
 void GothicAPI::ResetViewTransform()
 {
-	RendererState.TransformState.TransformView = RendererState.TransformState.TransformView.Identity;
+	RendererState.TransformState.TransformView = Matrix::Identity;
 	RendererState.TransformState.TransformView = RendererState.TransformState.TransformView.Transpose();
 }
 
@@ -2078,7 +2076,7 @@ VobInfo* GothicAPI::TraceStaticMeshVobsBB(const Vector3 & origin, const Vector3 
 
 	for (auto it = VobMap.begin(); it != VobMap.end(); ++it)
 	{
-		DirectX::XMMATRIX world = it->first->GetWorldMatrixPtr()->Transpose();
+		Matrix world = it->first->GetWorldMatrixPtr()->Transpose();
 
 		Vector3 min = DirectX::XMVector3TransformCoord(it->second->VisualInfo->BBox.Min, world);
 		Vector3 max = DirectX::XMVector3TransformCoord(it->second->VisualInfo->BBox.Max, world);
@@ -2101,7 +2099,7 @@ VobInfo* GothicAPI::TraceStaticMeshVobsBB(const Vector3 & origin, const Vector3 
 	VobInfo* closestVob = nullptr;
 	for (auto it = hitBBs.begin(); it != hitBBs.end(); ++it)
 	{
-		DirectX::XMMATRIX invWorld = (*it)->Vob->GetWorldMatrixPtr()->Transpose().Invert();
+		Matrix invWorld = (*it)->Vob->GetWorldMatrixPtr()->Transpose().Invert();
 
 		Vector3 localOrigin = DirectX::XMVector3TransformCoord(origin, invWorld);
 		Vector3 localDir = DirectX::XMVector3TransformCoord(dir, invWorld);
@@ -2317,7 +2315,8 @@ Vector3  GothicAPI::GetCameraPosition()
 /** Returns the current forward vector of the camera */
 Vector3  GothicAPI::GetCameraForward()
 {
-	Vector3  fwd = Vector3::TransformNormal(fwd, *oCGame::GetGame()->_zCSession_camVob->GetWorldMatrixPtr());
+	Vector3 fwd = Vector3(1, 0, 0);
+	fwd = Vector3::TransformNormal(fwd, *oCGame::GetGame()->_zCSession_camVob->GetWorldMatrixPtr());
 	return fwd;
 }
 
@@ -2923,7 +2922,7 @@ void GothicAPI::CollectVisibleVobsHelper(BspInfo * base, zTBBox3D boxCell, int c
 			if (RendererState.RendererSettings.EnableDynamicLighting && insideFrustum) {
 				// Add dynamic lights
 				float minDynamicUpdateLightRange = Engine::GAPI->GetRendererState()->RendererSettings.MinLightShadowUpdateRange;
-				auto playerPosition = Engine::GAPI->GetPlayerVob() != nullptr ? Engine::GAPI->GetPlayerVob()->GetPositionWorld() : ::SimpleMath::Vector3(FLT_MAX, FLT_MAX, FLT_MAX);
+				auto playerPosition = Engine::GAPI->GetPlayerVob() != nullptr ? Engine::GAPI->GetPlayerVob()->GetPositionWorld() : Vector3(FLT_MAX, FLT_MAX, FLT_MAX);
 
 				// Take cameraposition if we are freelooking
 				if (zCCamera::IsFreeLookActive()) {

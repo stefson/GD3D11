@@ -4203,9 +4203,9 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	lookAt -= dir;
 
 	// Create shadowmap view-matrix
-	static const XMVECTORF32 s_lookatUp = {0.f, 1.f, 0.f, 0.f};
+	static const Vector3 s_lookatUp = {0.f, 1.f, 0.f};
 	cr.ViewReplacement = DirectX::XMMatrixLookAtLH(p, lookAt, s_lookatUp);
-	cr.ViewReplacement = DirectX::XMMatrixTranspose(cr.ViewReplacement);
+	cr.ViewReplacement = cr.ViewReplacement.Transpose();
 
 	cr.ProjectionReplacement = DirectX::XMMatrixOrthographicLH(
 		WorldShadowmap1->GetSizeX() * Engine::GAPI->GetRendererState()->RendererSettings.WorldShadowRangeScale,
@@ -4344,7 +4344,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 		plcb.PL_Color.y *= lightFactor;
 		plcb.PL_Color.z *= lightFactor;
 
-		XMVECTOR Pl_PositionWorld = *plcb.Pl_PositionWorld.toVector3();
+		Vector3 Pl_PositionWorld = *plcb.Pl_PositionWorld.toVector3();
 		// Need that in view space
 		plcb.Pl_PositionView = (Vector3)XMVector3TransformCoord(Pl_PositionWorld, view);
 		plcb.PL_LightScreenPos = (Vector3)XMVector3TransformCoord(
@@ -4742,8 +4742,6 @@ void D3D11GraphicsEngine::DrawVobSingle(VobInfo* vob) {
 	// SetupVS_ExPerInstanceConstantBuffer();
 	// vob->VobConstantBuffer->BindToVertexShader(1);
 
-	// DirectX::SimpleMath::Matrix id;
-	// DirectX::SimpleMath::MatrixIdentity(&id);
 	ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(vob->Vob->GetWorldMatrixPtr());
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
@@ -5176,12 +5174,10 @@ void D3D11GraphicsEngine::DrawDecalList(const std::vector<zCVob*>& decals,
 		Matrix world;
 		decals[i]->GetWorldMatrix(&world);
 
-		XMMATRIX offset;
-		offset = XMMatrixTranslation(d->GetDecalSettings()->DecalOffset.x, -d->GetDecalSettings()->DecalOffset.y, 0);
+		auto offset = Matrix::CreateTranslation(d->GetDecalSettings()->DecalOffset.x, -d->GetDecalSettings()->DecalOffset.y, 0);
 
-		XMMATRIX scale;
-		scale = XMMatrixScaling(d->GetDecalSettings()->DecalSize.x * 2, -d->GetDecalSettings()->DecalSize.y * 2, 1);
-		scale = XMMatrixTranspose(scale);
+		Matrix scale = Matrix::CreateScale(d->GetDecalSettings()->DecalSize.x * 2, -d->GetDecalSettings()->DecalSize.y * 2, 1);
+		scale = scale.Transpose();
 
 		Matrix mat = view * world;
 
