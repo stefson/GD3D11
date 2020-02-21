@@ -94,7 +94,7 @@ public:
 			if (thisptr->owner->vtbl == 0x830F84)
 			{
 				auto owner = (zCMenuItemText*)thisptr->owner;
-				std::string ownerId = owner->id.ToChar();
+				const std::string& ownerId = owner->id.ToChar();
 
 				if (owner->GetIsDisabled()) return;
 				if (owner->m_bDontRender) return;
@@ -118,8 +118,9 @@ public:
 			textNode = textNode->next;
 
 			x = pposx + thisptr->nax(text->posx);
-			y = pposy + thisptr->nay(text->posy);
-
+			// TODO: Remove additional addition if we get the correct char positioning
+			y = pposy + thisptr->nay(text->posy) - 2;
+			
 			// text->font auswerten!
 
 			if (text->colored && !text->color.IsWhite()) {
@@ -131,7 +132,7 @@ public:
 			}
 			if (!thisptr->font) continue;
 
-			std::string fontName = thisptr->font->name.ToChar();
+			const std::string& fontName = thisptr->font->name.ToChar();
 
 			if ((!fontName.compare(zView::FONT_DEFAULT) || !fontName.compare(zView::FONT_OLD_10_WHITE) || !fontName.compare(zView::FONT_OLD_10_WHITE_HI))) {
 				auto blendFunc = thisptr->alphafunc;
@@ -153,7 +154,7 @@ public:
 		if (!thisptr->font) return 0;
 
 		int result = 0;
-		std::string fontName = thisptr->font->name.ToChar();
+		const std::string& fontName = thisptr->font->name.ToChar();
 
 
 		if (!fontName.compare(zView::FONT_DEFAULT) || !fontName.compare(zView::FONT_OLD_10_WHITE) || !fontName.compare(zView::FONT_OLD_10_WHITE_HI)) {
