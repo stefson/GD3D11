@@ -154,6 +154,7 @@ public:
 	virtual XRESULT SetActiveVertexShader(const std::string & shader);
 	virtual XRESULT SetActiveHDShader(const std::string & shader);
 	virtual XRESULT SetActiveGShader(const std::string & shader);
+	//virtual int MeasureString(std::string str, zFont* zFont);
 
 protected:
 	/** Updates the transformsCB with new values from the GAPI */

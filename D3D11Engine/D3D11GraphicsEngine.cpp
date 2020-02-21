@@ -796,18 +796,25 @@ XRESULT D3D11GraphicsEngine::Present() {
 		r.bottom = Resolution.y;
 		r.right = Resolution.x;
 
-		m_spriteBatch->Begin();
-		//m_spriteBatch->Begin(SpriteSortMode_Deferred, states->NonPremultiplied());
+		//m_spriteBatch->Begin();
+		m_spriteBatch->Begin(SpriteSortMode_Deferred, states->NonPremultiplied());
 		wchar_t buf[255];
-		Vector4 gothicColor = Vector4(203.f / 255.f, 186.f /255.f, 158.f / 255.f, 1);
-		std::vector<simpleTextBuffer> alphaBlendTexts;
+		Vector4 gothicColor = Vector4(203.f / 255.f, 186.f / 255.f, 158.f / 255.f, 1);
 
-		for (auto txt : textToDraw) {
-			if (txt.blendState == zRND_ALPHA_FUNC_BLEND)
+		zTRnd_AlphaBlendFunc lastBlendState = zRND_ALPHA_FUNC_NONE;
+
+		for (auto const& txt : textToDraw) {
+			// TODO: Fix Alpha Blending for SpriteFont.
+			/*if (lastBlendState != zRND_ALPHA_FUNC_BLEND && txt.blendState == zRND_ALPHA_FUNC_BLEND)
 			{
-				//alphaBlendTexts.push_back(txt);
-				//continue;
-			}
+				lastBlendState = txt.blendState;
+				m_spriteBatch->End();
+
+				Engine::GAPI->GetRendererState()->BlendState.SetAlphaBlending();
+				Engine::GAPI->GetRendererState()->BlendState.SetDirty();
+				UpdateRenderStates();
+				m_spriteBatch->Begin(SpriteSortMode_Deferred, states->NonPremultiplied());
+			}*/
 
 			auto wSize = MultiByteToWideChar(CP_ACP, 0, txt.str.c_str(), txt.str.length(), buf, 255);
 			// TODO: What are we gonna do with too long texts?
@@ -827,34 +834,11 @@ XRESULT D3D11GraphicsEngine::Present() {
 			m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos, color, 0.f);
 		}
 
-		if (!alphaBlendTexts.empty()) {
-			m_spriteBatch->End();
-			m_spriteBatch->Begin(SpriteSortMode_Deferred, states->AlphaBlend());
-			
-			for (auto txt : alphaBlendTexts) {
-				auto wSize = MultiByteToWideChar(CP_ACP, 0, txt.str.c_str(), txt.str.length(), buf, 255);
-				// TODO: What are we gonna do with too long texts?
-				if (!wSize) {
-					continue;
-				}
-
-				auto color = *txt.color.toVector4();
-				if (color.x == -1) {
-					color = gothicColor;
-				}
-				std::wstring output = std::wstring(buf, wSize);
-				Vector2 fontPos = Vector2(txt.x, txt.y);
-				m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos + Vector2(1.f, 1.f), Colors::Black, 0.f);
-				m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos + Vector2(-1.f, 1.f), Colors::Black, 0.f);
-				m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos, color, 0.f);
-			}
-		}
 		m_spriteBatch->Draw(HDRBackBuffer->GetShaderResView(), r);
 
 		m_spriteBatch->End();
 
 		textToDraw.clear();
-
 		SetDefaultStates();
 	}
 
@@ -5722,3 +5706,9 @@ void D3D11GraphicsEngine::DrawString(std::string str, float x, float y, float4 c
 
 	textToDraw.push_back(tb);
 }
+
+//int D3D11GraphicsEngine::MeasureString(std::string str, zFont* zFont) {
+//	Vector4 fontSize = m_font->MeasureString(zFont->name.ToChar());
+//	
+//	return static_cast<int>(fontSize.x);
+//}

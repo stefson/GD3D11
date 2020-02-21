@@ -1,8 +1,9 @@
-// Definitions copied from g2ext, Union (c) 2018 Union team, and World of Gothic
-
 #pragma once
+
+// Definitions copied from g2ext, Union (c) 2018 Union team, and World of Gothic
 #include "zTypes.h"
 #include "oCGame.h"
+#include "zFont.h"
 
 #ifdef BUILD_GOTHIC_2_6_fix
 
@@ -12,7 +13,7 @@ public:
     int posx;
     int posy;
     zSTRING text;
-    int font;
+    zFont* font;
     float timer;
     int inPrintWin;
     zColor color;
@@ -46,54 +47,54 @@ public:
         VIEW_FX_MAX
     } zTViewFX;
 
-    int m_bFillZ;                       // 0  (4) // [ 2]
-    _zCView* next;                       // 4  (4) // [ 3]
-    int viewID;                         // 8  (4) // [ 4]
-    int flags;                          // 12 (4) // [ 5]
-    int intflags;                       // 16 (4) // [ 6]
-    int ondesk;                         // 20 (4) // [ 7]
-    zTRnd_AlphaBlendFunc alphafunc;     // 24 (4) // [ 8]
-    zColor color;                       // 28 (4) // [ 9]
-    int alpha;                          // 32 (4) // [10]
-    zList<_zCView> childs;               // 36 (12) // [11]
-    _zCView* owner;                      // 48 (4) // [15]
-    zCTexture* backTex;                 // 52 (4) // [16]
-    int vposx;                          // 56 (4) // [17]
-    int vposy;                          // 60 (4) // [18]
-    int vsizex;                         // 64 (4) // [19]
-    int vsizey;                         // 68 (4) // [20]
-    int pposx;                          // 72 (4) // [21]
-    int pposy;                          // 76 (4) // [22]
-    int psizex;                         // 80 (4) // [23]
-    int psizey;                         // 84 (4) // [24]
-    int font;                           // 88 (4) // [25]
-    zColor fontColor;                   // 92 (4) // [26]
-    int px1;                            // 96 (4) // [27]
-    int py1;                            // 100(4) // [28]
-    int px2;                            // 104 (4)// [29]
-    int py2;                            // 108 (4)// [30]
-    int winx;                           // 112 (4)// [31]
-    int winy;                           // 116 (4)// [32]
-    zCList<zCViewText> textLines;              // 124 (8) // [33] && count + last + root
-    float scrollMaxTime;                // 128 (4)
-    float scrollTimer;                  // 132 (4)
-    zTViewFX fxOpen;                    // 136 (4)
-    zTViewFX fxClose;                   // 140 (4)
-    float timeDialog;                   // 144 (4)
-    float timeOpen;                     // 148 (4) // [40]
-    float timeClose;                    // 152 (4) // [41]
-    float speedOpen;                    // 156 (4)// [42]
-    float speedClose;                   // 160 (4)// [43]
-    int isOpen;                         // 176 (4)// [44]
-    int isClosed;                       // 180 (4)// [45]
-    int continueOpen;                   // 184 (4)// [46]
-    int continueClose;                  // 188 (4)// [47]
-    int removeOnClose;                  // 192 (4) // [48]
-    int resizeOnOpen;                   // 196 (4) // [49]
-    int maxTextLength;                  // 200 (4) // [50]
-    zSTRING textMaxLength;              // 204 (20) // [51]
-    float2 posCurrent[2];               // 224  (8)
-    float2 posOpenClose[2];             // 232  (8)
+    int m_bFillZ;                      
+    _zCView* next;                     
+    int viewID;                        
+    int flags;                         
+    int intflags;                      
+    int ondesk;                        
+    zTRnd_AlphaBlendFunc alphafunc;    
+    zColor color;                      
+    int alpha;                         
+    zList<_zCView> childs;             
+    _zCView* owner;                    
+    zCTexture* backTex;                
+    int vposx;                         
+    int vposy;                         
+    int vsizex;                        
+    int vsizey;                        
+    int pposx;                         
+    int pposy;                         
+    int psizex;                        
+    int psizey;                        
+    zFont* font;                       
+    zColor fontColor;                  
+    int px1;                           
+    int py1;                           
+    int px2;                           
+    int py2;                           
+    int winx;                          
+    int winy;                          
+    zCList<zCViewText> textLines;      
+    float scrollMaxTime;               
+    float scrollTimer;                 
+    zTViewFX fxOpen;                   
+    zTViewFX fxClose;                  
+    float timeDialog;                  
+    float timeOpen;                    
+    float timeClose;                   
+    float speedOpen;                   
+    float speedClose;                  
+    int isOpen;                        
+    int isClosed;                      
+    int continueOpen;                  
+    int continueClose;                 
+    int removeOnClose;                 
+    int resizeOnOpen;                  
+    int maxTextLength;                 
+    zSTRING textMaxLength;             
+    float2 posCurrent[2];              
+    float2 posOpenClose[2];            
 
     bool HasText() {
         return maxTextLength;
@@ -101,9 +102,35 @@ public:
     zColor& GetTextColor() {
         static zColor DefaultColor = zColor(158, 186, 203, 255); // BGRA
         if (maxTextLength) {
-            //return fontColor;
+                return fontColor;
         }
         return DefaultColor;
+    }
+
+    int _zCView::rnd2(float x)
+    {
+        if (x > 0) return (int)(x + 0.5);
+        else return (int)(x - 0.5);
+    }
+    int _zCView::nax(int x)
+    {
+        return rnd2 ((float)(x * psizex) / 8192);
+    }
+
+    int _zCView::nay(int y)
+    {
+        return rnd2 ((float)(y * psizey) / 8192);
+    }
+
+    void _zCView::CheckAutoScroll() {
+        XCALL(0x007A5F60);
+    }
+    void _zCView::CheckTimedText() {
+        XCALL(0x007A7C50);
+    }
+
+    void _zCView::PrintChars(int x, int y, const zSTRING& str) {
+        XCALL(GothicMemoryLocations::zCView::PrintChars);
     }
 };
 
@@ -166,6 +193,15 @@ public:
     float activeTimer;
     int registeredCPP;
     int firstTimeInserted;
+
+    bool zCMenuItem::GetIsDisabled() {
+        if (!m_bVisible) return true;
+        return (m_parItemFlags & 32);
+    }
+private:
+    int zCMenuItem::GetIsDisabledInternal() {
+        XCALL(0x004E1DE0);
+    }
 };
 
 class zCMenuItemText : public zCMenuItem {

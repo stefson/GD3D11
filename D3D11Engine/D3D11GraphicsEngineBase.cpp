@@ -727,6 +727,11 @@ XRESULT D3D11GraphicsEngineBase::SetActiveGShader(const std::string & shader)
 	return XR_SUCCESS;
 }
 
+//int D3D11GraphicsEngineBase::MeasureString(std::string str, zFont* zFont)
+//{
+//	return 0;
+//}
+
 /** Puts the current world matrix into a CB and binds it to the given slot */
 void D3D11GraphicsEngineBase::SetupPerInstanceConstantBuffer(int slot)
 {

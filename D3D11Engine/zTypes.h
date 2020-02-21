@@ -88,6 +88,7 @@ enum zTRnd_AlphaBlendFunc {
 	zRND_ALPHA_FUNC_BLEND_TEST = 8			
 };
 
+
 struct zColor {
 	union {
 		struct bgra {
@@ -105,11 +106,20 @@ struct zColor {
 		bgra.r = r;
 		bgra.alpha = a;
 	}
+	bool IsWhite() {
+		return dword == 4294967295;
+	}
 };
+static zColor zCOLOR_WHITE = zColor(255, 255, 255, 255);
 
 struct zTRndSimpleVertex {
 	float2 pos;
 	float z;
 	float2 uv;
 	zColor color;
+};
+
+struct zVEC2 {
+public:
+	float v[2];
 };

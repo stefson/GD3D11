@@ -98,6 +98,8 @@ public:
 
 	virtual void DrawString(std::string str, float x, float y, float4 color, zTRnd_AlphaBlendFunc blendState) override;
 
+	//virtual int MeasureString(std::string str, zFont* zFont) override;
+
 	/** Draws a vertexbuffer, non-indexed */
 	virtual XRESULT DrawVertexBuffer(D3D11VertexBuffer* vb, unsigned int numVertices, unsigned int stride = sizeof(ExVertexStruct)) override;
 

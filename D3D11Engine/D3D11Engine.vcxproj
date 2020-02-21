@@ -505,6 +505,7 @@ copy "$(OutDir)$(TargetName).pdb" "$(G1_SYSTEM_PATH)\ddraw.pdb"</Command>
     <ClInclude Include="zCWorld.h" />
     <ClInclude Include="ZenGinTypes.h" />
     <ClInclude Include="zFILE.h" />
+    <ClInclude Include="zFont.h" />
     <ClInclude Include="ZipArchive.h" />
     <ClInclude Include="zSTRING.h" />
     <ClInclude Include="zTypes.h" />
