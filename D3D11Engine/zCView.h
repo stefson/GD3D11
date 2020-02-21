@@ -18,6 +18,7 @@ namespace zView {
 	static std::string MENU_ITEM_CONTENT_VIEWER = "MENU_ITEM_CONTENT_VIEWER";
 	
 	static zColor DefaultColor = zColor(158, 186, 203, 255); // BGRA
+	static float4 fDefaultColor = float4(203.0f / 255.0f, 186.0f / 255.0f, 158.0f / 255.0f, 1.0f);
 }
 #endif
 
@@ -42,6 +43,7 @@ public:
 		XHook(HookedFunctions::OriginalFunctions.original_zCViewFontSize, GothicMemoryLocations::zCView::FontSize, hooked_FontSize);
 		// .text:007A62A0; void __thiscall zCView::BlitText(zCView * __hidden this)
 		XHook(HookedFunctions::OriginalFunctions.original_zCViewBlitText, GothicMemoryLocations::zCView::BlitText, hooked_BlitText);
+		XHook(HookedFunctions::OriginalFunctions.original_zCViewPrint, GothicMemoryLocations::zCView::Print, hooked_Print);
 #endif
 	}
 
@@ -53,6 +55,30 @@ public:
 	}
 
 #if BUILD_GOTHIC_2_6_fix
+	static void __fastcall hooked_Print(_zCView* thisptr, void* unknwn, int x, int y, const zSTRING& s) {
+		if (!Engine::GAPI->GetRendererState()->RendererSettings.EnableCustomFontRendering) {
+			HookedFunctions::OriginalFunctions.original_zCViewPrint(thisptr, x, y, s);
+			return;
+		}
+		if (!thisptr->font) return;
+		thisptr->scrollTimer = 0;
+
+		if ((thisptr->viewID == 1) 
+			/*|| (thisptr == Engine::GAPI->GetScreen())*/
+			|| (thisptr->viewID == 0)) {
+			auto const& col = zView::DefaultColor;
+			// Koordinaten auf Pixel umrechnen
+			Engine::GraphicsEngine->DrawString(
+				s.ToChar(),
+				thisptr->nax(x), thisptr->nay(y),
+				zView::fDefaultColor,
+				thisptr->alphafunc);
+		}
+		else {
+			HookedFunctions::OriginalFunctions.original_zCViewPrint(thisptr, x, y, s);
+		}
+	}
+
 	static void __fastcall hooked_BlitText(_zCView* thisptr, void* unknwn) {
 		if (!Engine::GAPI->GetRendererState()->RendererSettings.EnableCustomFontRendering) {
 			HookedFunctions::OriginalFunctions.original_zCViewBlitText(thisptr);

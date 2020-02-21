@@ -1,11 +1,12 @@
 #pragma once
 
+#ifdef BUILD_GOTHIC_2_6_fix
+
 // Definitions copied from g2ext, Union (c) 2018 Union team, and World of Gothic
 #include "zTypes.h"
 #include "oCGame.h"
 #include "zFont.h"
 
-#ifdef BUILD_GOTHIC_2_6_fix
 
 class zCViewText {
 public:
