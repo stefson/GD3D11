@@ -203,4 +203,6 @@ public:
 	virtual void DrawFrameParticles(std::map<zCTexture *, std::vector<ParticleInstanceInfo>> & particles, std::map<zCTexture *, ParticleRenderInfo> & info) {}
 
 	virtual void DrawString(std::string str, float x, float y, float4 color, zTRnd_AlphaBlendFunc blendState);
+
+	virtual int MeasureString(const std::string& str, int font = 0);
 };

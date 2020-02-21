@@ -157,7 +157,7 @@ public:
 
 
 		if (!fontName.compare(zView::FONT_DEFAULT) || !fontName.compare(zView::FONT_OLD_10_WHITE) || !fontName.compare(zView::FONT_OLD_10_WHITE_HI)) {
-			// return Engine::GraphicsEngine->MeasureString(str.ToChar(), thisptr->font);
+			return thisptr->anx(Engine::GraphicsEngine->MeasureString(str.ToChar()));
 		}
 
 		hook_infunc

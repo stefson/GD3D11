@@ -1068,6 +1068,20 @@ XRESULT D3D11GraphicsEngine::BindViewportInformation(const std::string& shader,
 	return XR_SUCCESS;
 }
 
+int D3D11GraphicsEngine::MeasureString(const std::string& str, int font)
+{
+	if (font == 0)
+	{
+		//wchar_t buf[255];
+		//auto wSize = MultiByteToWideChar(CP_ACP, 0, str.c_str(), str.length(), buf, 255);
+		//const std::wstring& output = std::wstring(buf, wSize);
+
+		Vector4 origin = m_font->MeasureString(str.c_str());
+		return static_cast<int>(origin.x);
+	}
+	return 0;
+}
+
 /** Draws a vertexarray, non-indexed (HUD, 2D)*/
 XRESULT D3D11GraphicsEngine::DrawVertexArray(ExVertexStruct* vertices,
 	unsigned int numVertices,
@@ -5707,8 +5721,3 @@ void D3D11GraphicsEngine::DrawString(std::string str, float x, float y, float4 c
 	textToDraw.push_back(tb);
 }
 
-//int D3D11GraphicsEngine::MeasureString(std::string str, zFont* zFont) {
-//	Vector4 fontSize = m_font->MeasureString(zFont->name.ToChar());
-//	
-//	return static_cast<int>(fontSize.x);
-//}

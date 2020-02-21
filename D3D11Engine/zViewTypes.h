@@ -123,6 +123,11 @@ public:
         return rnd2 ((float)(y * psizey) / 8192);
     }
 
+    int _zCView::anx(int x)
+    {
+        return rnd2 ((float)(x * 8192) / psizex);
+    }
+
     void _zCView::CheckAutoScroll() {
         XCALL(0x007A5F60);
     }

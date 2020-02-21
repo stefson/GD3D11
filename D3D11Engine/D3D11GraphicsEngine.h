@@ -113,6 +113,9 @@ public:
 	/** Binds viewport information to the given constantbuffer slot */
 	virtual XRESULT BindViewportInformation(const std::string & shader, int slot) override;
 
+	virtual int MeasureString(const std::string& str, int font = 0) override;
+
+
 	/** Sets up a draw call for a VS_Ex-Mesh */
 	void SetupVS_ExMeshDrawCall();
 	void SetupVS_ExConstantBuffer();
