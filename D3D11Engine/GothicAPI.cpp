@@ -3374,7 +3374,22 @@ zCVob* GothicAPI::GetPlayerVob()
 /** Loads resources created for this .ZEN */
 void GothicAPI::LoadCustomZENResources()
 {
-	std::string zen = "system\\GD3D11\\ZENResources\\" + LoadedWorldInfo->WorldName;
+	auto gameName = GetGameName();
+	std::string zenFolder;
+	if (gameName == "Original")
+	{
+		zenFolder = "system\\GD3D11\\ZENResources\\";
+	}
+	else {
+		zenFolder = "system\\GD3D11\\ZENResources\\" + gameName + "\\";
+	}
+	if (!Toolbox::FolderExists(zenFolder))
+	{
+		LogInfo() << "Custom ZEN-Resources. Directory not found: " << zenFolder;
+		return;
+	}
+
+	std::string zen = zenFolder + LoadedWorldInfo->WorldName;
 
 	LogInfo() << "Loading custom ZEN-Resources from: " << zen;
 
@@ -3391,7 +3406,37 @@ void GothicAPI::LoadCustomZENResources()
 /** Saves resources created for this .ZEN */
 void GothicAPI::SaveCustomZENResources()
 {
-	std::string zen = "system\\GD3D11\\ZENResources\\" + LoadedWorldInfo->WorldName;
+	auto gameName = GetGameName();
+	std::string zenFolder;
+	if (gameName == "Original")
+	{
+		zenFolder = "system\\GD3D11\\ZENResources\\";
+	}
+	else {
+		zenFolder = "system\\GD3D11\\ZENResources\\" + gameName + "\\";
+	}
+
+	bool mkDirErr = false;
+	if (!Toolbox::FolderExists(zenFolder))
+	{
+		unsigned int pos = 0;
+		do
+		{
+			pos = zenFolder.find_first_of("\\/", pos + 1);
+			if (CreateDirectory(zenFolder.substr(0, pos).c_str(), NULL) == FALSE) {
+				mkDirErr = true;
+				break;
+			}
+		} while (pos != std::string::npos);
+	}
+
+	if (mkDirErr)
+	{
+		LogError() << "Could not save custom ZEN-Resources. Could not create directory: " << zenFolder;
+		return;
+	}
+
+	std::string zen = zenFolder + LoadedWorldInfo->WorldName;
 
 	LogInfo() << "Saving custom ZEN-Resources to: " << zen;
 
@@ -3846,6 +3891,25 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 	if (Engine::GAPI->HasCommandlineParameter("ZMAXFPS")) {
 		s.FpsLimit = std::stoi(zCOption::GetOptions()->ParameterValue("ZMAXFPS"));
 		LogInfo() << "-> FpsLimit: " <<  s.FpsLimit;
+	}
+
+	if (Engine::GAPI->HasCommandlineParameter("game"))
+	{
+		auto gameIni = zCOption::GetOptions()->ParameterValue("game");
+		auto nLastDot = gameIni.find_last_of('.');
+		if (gameIni != "GOTHICGAME.INI" && nLastDot != std::string::npos)
+		{
+			Engine::GAPI->SetGameName(gameIni.substr(0, nLastDot));
+			LogInfo() << "-> Game: " << Engine::GAPI->GetGameName();
+		}
+		else {
+			Engine::GAPI->SetGameName("Original");
+			LogInfo() << "-> Game: Original";
+		}
+	}
+	else {
+		Engine::GAPI->SetGameName("Original");
+		LogInfo() << "-> Game: Original";
 	}
 
 	return XR_SUCCESS;

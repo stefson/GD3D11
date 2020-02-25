@@ -22,16 +22,15 @@ public:
 	/** Returns true if the given string is in the commandline of the game */
 	bool IsParameter(const std::string & str)
 	{
-#ifdef BUILD_GOTHIC_1_08k
-		return false; // FIXME
-#endif
+		std::string cmdLine = GetCommandLineNormalized();
+		if (cmdLine == "")
+		{
+			return false;
+		}
 
-		zSTRING* zCmdline = (zSTRING *)THISPTR_OFFSET(GothicMemoryLocations::zCOption::Offset_CommandLine);
-		std::string cmdLine = zCmdline->ToChar();
 		std::string cmd = str;
 
 		// Make them uppercase
-		std::transform(cmdLine.begin(), cmdLine.end(),cmdLine.begin(), ::toupper);
 		std::transform(cmd.begin(), cmd.end(),cmd.begin(), ::toupper);
 
 		return cmdLine.find("-" + cmd) != std::string::npos;
@@ -40,28 +39,32 @@ public:
 	/** Returns the commandline */
 	std::string GetCommandline()
 	{
-#ifdef BUILD_GOTHIC_2_6_fix
-		zSTRING* zCmdline = (zSTRING *)THISPTR_OFFSET(GothicMemoryLocations::zCOption::Offset_CommandLine);
-		std::string cmdLine = zCmdline->ToChar();
+		char* s = GetCommandLineA();
+		if (*s == '"') {
+			++s;
+			while (*s) if (*s++ == '"') break; // skip until end of "..."
+		}
+		else {
+			while (*s && *s != ' ' && *s != '\t') ++s; // skip until first space/tab
+		}
+		while (*s == ' ' || *s == '\t') s++; // Skip whitespace
 
+		std::string cmdLine = s;
 		return cmdLine;
-#endif
-		return "";
 	}
 
 	/** Returns the value of the given parameter. If the parameter is not in the commandline, it returns "" */
 	std::string ParameterValue(const std::string & str)
 	{
-#ifdef BUILD_GOTHIC_1_08k
-		return ""; // TODO
-#endif
+		std::string cmdLine = GetCommandLineNormalized();
+		if (cmdLine == "")
+		{
+			return "";
+		}
 
-		zSTRING* zCmdline = (zSTRING *)THISPTR_OFFSET(GothicMemoryLocations::zCOption::Offset_CommandLine);
-		std::string cmdLine = zCmdline->ToChar();
 		std::string cmd = str;
 
 		// Make them uppercase
-		std::transform(cmdLine.begin(), cmdLine.end(),cmdLine.begin(), ::toupper);
 		std::transform(cmd.begin(), cmd.end(),cmd.begin(), ::toupper);
 
 		int pos = cmdLine.find("-" + cmd);
@@ -212,6 +215,15 @@ public:
 	}
 
 	static zCOption* GetOptions(){return *(zCOption**)GothicMemoryLocations::GlobalObjects::zCOption;}
+private:
+	std::string GetCommandLineNormalized() {
+		std::string cmdLine = this->GetCommandline();
+
+		// Make them uppercase
+		std::transform(cmdLine.begin(), cmdLine.end(), cmdLine.begin(), ::toupper);
+
+		return cmdLine;
+	}
 };
 
 

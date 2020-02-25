@@ -174,6 +174,9 @@ public:
 	/** Call to OnRemoveVob(player) and OnAddVob(player) in case of invisibility */
 	void ReloadPlayerVob();
 
+	inline std::string GetGameName() { return m_gameName; }
+	inline void SetGameName(std::string value) { m_gameName = value; }
+
 	/** Called when the game starts */
 	void OnGameStart();
 
@@ -786,4 +789,6 @@ private:
 	/** Used to only allow deterministic VOB cleanup (e.g. on loading a world.)*/
 	bool _canClearVobsByVisual;
 	bool m_DebugMode;
+
+	std::string m_gameName;
 };
