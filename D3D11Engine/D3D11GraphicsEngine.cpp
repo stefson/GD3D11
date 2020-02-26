@@ -32,7 +32,9 @@
 #include <SpriteBatch.h>
 #include <locale>
 #include <codecvt>
+#include <wrl\client.h>
 
+#include <D3DX11.h>
 #pragma comment(lib, "dxguid.lib")
 
 namespace wrl = Microsoft::WRL;
@@ -323,11 +325,17 @@ XRESULT D3D11GraphicsEngine::Init() {
 	InfiniteRangeConstantBuffer->UpdateBuffer(&ircbData);
 
 	// Load reflectioncube
-	if (S_OK != CreateDDSTextureFromFile(GetDevice(), L"system\\GD3D11\\Textures\\reflect_cube.dds", nullptr, &ReflectionCube))
-		LogWarn() << "Failed to load file: system\\GD3D11\\Textures\\reflect_cube.dds";
+	if (S_OK != D3DX11CreateShaderResourceViewFromFile(
+		GetDevice(), "system\\GD3D11\\Textures\\reflect_cube.dds", nullptr,
+		nullptr, &ReflectionCube, nullptr))
+		LogWarn()
+		<< "Failed to load file: system\\GD3D11\\Textures\\reflect_cube.dds";
 
-	if (S_OK != CreateDDSTextureFromFile(GetDevice(), L"system\\GD3D11\\Textures\\SkyCubemap2.dds", nullptr, &ReflectionCube2))
-		LogWarn() << "Failed to load file: system\\GD3D11\\Textures\\SkyCubemap2.dds";
+	if (S_OK != D3DX11CreateShaderResourceViewFromFile(
+		GetDevice(), "system\\GD3D11\\Textures\\SkyCubemap2.dds", nullptr,
+		nullptr, &ReflectionCube2, nullptr))
+		LogWarn()
+		<< "Failed to load file: system\\GD3D11\\Textures\\SkyCubemap2.dds";
 
 	// Init quad buffers
 	Engine::GraphicsEngine->CreateVertexBuffer(&QuadVertexBuffer);
@@ -5638,11 +5646,6 @@ void D3D11GraphicsEngine::UpdateOcclusion() {
 
 /** Saves a screenshot */
 void D3D11GraphicsEngine::SaveScreenshot() {
-	if (!SaveScreenshotNextFrame) {
-		SaveScreenshotNextFrame = true;
-		return;
-	}
-	SaveScreenshotNextFrame = false;
 	HRESULT hr;
 
 	// Buffer for scaling down the image
@@ -5664,7 +5667,7 @@ void D3D11GraphicsEngine::SaveScreenshot() {
 	texDesc.MiscFlags = 0;
 	texDesc.SampleDesc.Count = 1;
 	texDesc.SampleDesc.Quality = 0;
-	texDesc.Usage = D3D11_USAGE_DEFAULT;
+	texDesc.Usage = D3D11_USAGE_IMMUTABLE;
 
 	wrl::ComPtr<ID3D11Texture2D> texture;
 	LE(GetDevice()->CreateTexture2D(&texDesc, 0, &texture));
@@ -5689,6 +5692,7 @@ void D3D11GraphicsEngine::SaveScreenshot() {
 
 	LogInfo() << "Saving screenshot to: " << name;
 
+<<<<<<< HEAD
 	// Save the Texture as jpeg using Windows Imaging Component (WIC) with 95% quality.
 
 	LE(SaveWICTextureToFile(GetContext(), texture.Get(), GUID_ContainerFormatJpeg, Toolbox::ToWideChar(name).c_str(), nullptr, [](IPropertyBag2* props)
@@ -5699,6 +5703,10 @@ void D3D11GraphicsEngine::SaveScreenshot() {
 			VARIANT varValues[1];
 			varValues[0].vt = VT_R4;
 			varValues[0].fltVal = 0.95f;
+=======
+	LE(D3DX11SaveTextureToFile(GetContext(), texture, D3DX11_IFF_JPG, name.c_str()));
+	texture->Release();
+>>>>>>> parent of 9ee3141... Remove last dependencies on D3DX
 
 			(void)props->Write(1, options, varValues);
 		}, false));
