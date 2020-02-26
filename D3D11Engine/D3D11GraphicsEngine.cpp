@@ -831,7 +831,7 @@ XRESULT D3D11GraphicsEngine::Present() {
 				continue;
 			}
 
-			auto color = *txt.color.toVector4();
+			auto color = Vector4(txt.color.x, txt.color.y, txt.color.z, txt.color.w);
 			if (color.x == -1) {
 				color = gothicColor;
 			}
@@ -2226,16 +2226,16 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh(bool noTextures) {
 				UpdateRenderStates();
 			}
 
-			if (!info->Constantbuffer) info->UpdateConstantbuffer();
+			if (info) {
+				if (!info->Constantbuffer) info->UpdateConstantbuffer();
 
-			info->Constantbuffer->BindToPixelShader(2);
+				info->Constantbuffer->BindToPixelShader(2);
 
-			// Don't let the game unload the texture after some timep
-			mesh.first.Material->GetAniTexture()->CacheIn(0.6f);
-
-			boundInfo = info;
+				// Don't let the game unload the texture after some timep
+				mesh.first.Material->GetAniTexture()->CacheIn(0.6f);
+				boundInfo = info;
+			}
 			bound = mesh.first.Material->GetAniTexture();
-
 			// Bind normalmap to HDS
 			if (!mesh.second->IndicesPNAEN.empty()) {
 				GetContext()->DSSetShaderResources(0, 1, &boundNormalmap);
@@ -3752,7 +3752,7 @@ XRESULT D3D11GraphicsEngine::DrawPolyStrips(bool noTextures) {
 	Engine::GAPI->GetRendererState()->RasterizerState.SetDirty();
 
 
-	Matrix view;
+	D3DXMATRIX view;
 	Engine::GAPI->GetViewMatrix(&view);
 	Engine::GAPI->SetViewTransform(view);
 	
@@ -3964,7 +3964,7 @@ XRESULT D3D11GraphicsEngine::DrawSky() {
 	ActivePS->GetConstantBuffer()[0]->BindToPixelShader(1);
 
 	VS_ExConstantBuffer_PerInstance cbi;
-	XMStoreFloat4x4(&cbi.World, world);
+	cbi.World = DX4x4ToD3DXMat(world);
 	ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&cbi);
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
@@ -5280,7 +5280,7 @@ void D3D11GraphicsEngine::DrawQuadMarks() {
 	for (auto const& it : quadMarks) {
 		if (!it.first->GetConnectedVob()) continue;
 
-		if (D3DXVec3Length(&(camPos - it->second.Position)) >
+		if (D3DXVec3Length(&(camPos - it.second.Position)) >
 			Engine::GAPI->GetRendererState()->RendererSettings.VisualFXDrawRadius)
 			continue;
 

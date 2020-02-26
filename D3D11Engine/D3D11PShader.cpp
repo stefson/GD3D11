@@ -5,6 +5,9 @@
 #include "Engine.h"
 #include "GothicAPI.h"
 #include "D3D11ConstantBuffer.h"
+#include <d3dcompiler.h>
+
+using namespace DirectX;
 
 D3D11PShader::D3D11PShader()
 {

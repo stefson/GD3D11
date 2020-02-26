@@ -5,6 +5,9 @@
 #include "GothicAPI.h"
 #include <DDSTextureLoader.h>
 #include "RenderToTextureBuffer.h"
+#include <d3dcompiler.h>
+
+using namespace DirectX;
 
 D3D11Texture::D3D11Texture() {
 	Texture = nullptr;

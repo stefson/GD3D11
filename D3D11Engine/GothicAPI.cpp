@@ -2374,7 +2374,7 @@ void GothicAPI::GetInverseViewMatrixDX(DirectX::XMFLOAT4X4 * invView)
 {
 	if (CameraReplacementPtr)
 	{
-		DirectX::XMStoreFloat4x4(invView, DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&((DirectX::XMFLOAT4X4)CameraReplacementPtr->ViewReplacement))));
+		DirectX::XMStoreFloat4x4(invView, DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4((DirectX::XMFLOAT4X4*)&CameraReplacementPtr->ViewReplacement)));
 		return;
 	}
 
@@ -3846,12 +3846,12 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 	s.FpsLimit = GetPrivateProfileIntA("General", "FpsLimit", 0, ini.c_str());
 	s.ReplaceSunDirection = GetPrivateProfileBoolA("General", "ReplaceSunDirection", defaultRendererSettings.ReplaceSunDirection, ini);
 
-	static Vector3 defaultLightDirection = Vector3::One;
+	static D3DXVECTOR3 defaultLightDirection = D3DXVECTOR3(1, 1, 1);
 
 	if (Engine::GAPI->GetSky()) {
 		AtmosphereSettings& aS = Engine::GAPI->GetSky()->GetAtmoshpereSettings();
-
-		aS.LightDirection = Vector3(
+		
+		aS.LightDirection = D3DXVECTOR3(
 			GetPrivateProfileFloatA("Atmoshpere", "LightDirectionX", defaultLightDirection.x, ini.c_str()),
 			GetPrivateProfileFloatA("Atmoshpere", "LightDirectionY", defaultLightDirection.y, ini.c_str()),
 			GetPrivateProfileFloatA("Atmoshpere", "LightDirectionZ", defaultLightDirection.z, ini.c_str())

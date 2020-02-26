@@ -12,7 +12,9 @@
 #include "GSky.h"
 #include <DDSTextureLoader.h>
 #include "RenderToTextureBuffer.h"
+#include <d3dcompiler.h>
 
+using namespace DirectX;
 // TODO: Remove this!
 #include "D3D11GraphicsEngine.h"
 

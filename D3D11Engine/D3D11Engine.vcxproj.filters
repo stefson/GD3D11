@@ -951,9 +951,6 @@
     </ClCompile>
     <ClCompile Include="GMeshSimple.cpp" />
     <ClCompile Include="BaseShadowedPointLight.cpp" />
-    <ClCompile Include="zCView.cpp">
-      <Filter>ZenGin\Classes</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="ddraw.def">

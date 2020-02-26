@@ -10,6 +10,7 @@
 #include "D3D11VShader.h"
 #include "GothicAPI.h"
 #include "D3D11PShader.h"
+#include <d3dcompiler.h>
 
 D3D11PFX_SMAA::D3D11PFX_SMAA(D3D11PfxRenderer* rnd) : D3D11PFX_Effect(rnd)
 {
@@ -63,10 +64,6 @@ HRESULT D3DX11CreateEffectFromFile_RES(
 		return hr;
 	}
 
-	D3DX11CreateEffectFromMemory(ShaderBuffer->GetBufferPointer(), ShaderBuffer->GetBufferSize(), HLSLFlags, pDevice, ppEffect);
-
-
-	ShaderBuffer->Release();
 	return S_OK;
 }
 
