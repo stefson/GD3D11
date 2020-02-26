@@ -1,10 +1,10 @@
 #include "pch.h"
 #include "D3D11VShader.h"
 #include "D3D11GraphicsEngineBase.h"
+#include <D3DX11.h>
 #include "Engine.h"
 #include "GothicAPI.h"
 #include "D3D11ConstantBuffer.h"
-#include <d3dcompiler.h>
 
 D3D11VShader::D3D11VShader()
 {

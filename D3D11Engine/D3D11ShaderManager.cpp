@@ -242,9 +242,8 @@ XRESULT D3D11ShaderManager::Init()
 	Shaders.back().cBufferSizes.push_back(sizeof(DS_ScreenQuadConstantBuffer));
 	Shaders.back().cBufferSizes.push_back(sizeof(AtmosphereConstantBuffer));
 	
-	// TODO: REMOVE UNUSED SHADER
-	// Shaders.push_back(ShaderInfo("DefaultTess", "DefaultTess.hlsl", "hd"));
-	// Shaders.back().cBufferSizes.push_back(sizeof(DefaultHullShaderConstantBuffer));
+	Shaders.push_back(ShaderInfo("DefaultTess", "DefaultTess.hlsl", "hd"));
+	Shaders.back().cBufferSizes.push_back(sizeof(DefaultHullShaderConstantBuffer));
 
 	Shaders.push_back(ShaderInfo("OceanTess", "OceanTess.hlsl", "hd"));
 	Shaders.back().cBufferSizes.push_back(sizeof(DefaultHullShaderConstantBuffer));
