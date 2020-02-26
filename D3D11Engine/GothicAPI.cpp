@@ -1,3 +1,4 @@
+#include <Windows.h>
 #include <string>
 #include "pch.h"
 #include "GothicAPI.h"
