@@ -1,10 +1,12 @@
 #pragma once
 #include "pch.h"
+#include <d3d11.h>
+#include <D3DX10math.h>
 
 struct SimpleVertexStruct
 {
-	DirectX::SimpleMath::Vector3 Position;
-	DirectX::SimpleMath::Vector2 TexCoord;
+	D3DXVECTOR3 Position;
+	D3DXVECTOR2 TexCoord;
 };
 
 //This can draw a full screen quad

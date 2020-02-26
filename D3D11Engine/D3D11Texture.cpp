@@ -5,9 +5,9 @@
 #include "GothicAPI.h"
 #include <DDSTextureLoader.h>
 #include "RenderToTextureBuffer.h"
+#include <d3dcompiler.h>
 
 using namespace DirectX;
-using namespace DirectX::SimpleMath;
 
 D3D11Texture::D3D11Texture() {
 	Texture = nullptr;
@@ -223,9 +223,8 @@ XRESULT D3D11Texture::CreateThumbnail()
 	LE(engine->GetDevice()->CreateRenderTargetView(Thumbnail, nullptr, &tempRTV));
 	if (!tempRTV)
 		return XR_FAILED;
-	
-	static auto vecOneZZOne = Vector4(1, 0, 0, 1);
-	engine->GetContext()->ClearRenderTargetView(tempRTV, (float *)&vecOneZZOne);
+
+	engine->GetContext()->ClearRenderTargetView(tempRTV, (float *)&D3DXVECTOR4(1, 0, 0, 1));
 
 	// Copy main texture to it
 	engine->GetContext()->PSSetShaderResources(0, 1, &ShaderResourceView);

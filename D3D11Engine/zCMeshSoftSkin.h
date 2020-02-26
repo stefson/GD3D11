@@ -10,7 +10,7 @@
 #pragma pack (push, 1)
 struct zTWeightEntry {
 	float Weight;
-	DirectX::SimpleMath::Vector3 VertexPosition;
+	D3DXVECTOR3	VertexPosition;
 	unsigned char NodeIndex;
 };
 #pragma pack (pop)
@@ -26,7 +26,7 @@ public:
 	}*/
 
 	struct zTNodeWedgeNormal {
-		DirectX::SimpleMath::Vector3 Normal;
+		D3DXVECTOR3		Normal;
 		int				NodeIndex;
 	};
 

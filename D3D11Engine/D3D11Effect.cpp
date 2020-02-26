@@ -12,12 +12,11 @@
 #include "GSky.h"
 #include <DDSTextureLoader.h>
 #include "RenderToTextureBuffer.h"
+#include <d3dcompiler.h>
+
+using namespace DirectX;
 // TODO: Remove this!
 #include "D3D11GraphicsEngine.h"
-
-using namespace Microsoft::WRL;
-using namespace DirectX;
-using namespace DirectX::SimpleMath;
 
 D3D11Effect::D3D11Effect()
 {
@@ -70,13 +69,13 @@ void D3D11Effect::FillRandomRaindropData(std::vector<ParticleInstanceInfo> & dat
 		float SpeedX = 40.0f*(Toolbox::frand()/20.0f);
 		float SpeedZ = 40.0f*(Toolbox::frand()/20.0f);
 		float SpeedY = 40.0f*(Toolbox::frand()/10.0f); 
-		raindrop.velocity = DirectX::SimpleMath::Vector3(SpeedX,SpeedY,SpeedZ);
+		raindrop.velocity = D3DXVECTOR3(SpeedX,SpeedY,SpeedZ);
 
 		//move the rain particles to a random positions in a cylinder above the camera
 		float x = SeedX + Engine::GAPI->GetCameraPosition().x;
 		float z = SeedZ + Engine::GAPI->GetCameraPosition().z;
 		float y = SeedY + Engine::GAPI->GetCameraPosition().y;
-		raindrop.position = DirectX::SimpleMath::Vector3(x,y,z);
+		raindrop.position = D3DXVECTOR3(x,y,z); 
 
 		//get an integer between 1 and 8 inclusive to decide which of the 8 types of rain textures the particle will use
 		short* s = (short*)&raindrop.drawMode;
@@ -283,22 +282,22 @@ XRESULT D3D11Effect::DrawRainShadowmap()
 	CameraReplacement& cr = RainShadowmapCameraRepl;
 
 	// Get the section we are currently in
-	auto p = Engine::GAPI->GetCameraPosition();
-	DirectX::SimpleMath::Vector3 dir;(-Engine::GAPI->GetRendererState()->RendererSettings.RainGlobalVelocity).Normalize(dir);
+	D3DXVECTOR3 p = Engine::GAPI->GetCameraPosition();
+	D3DXVECTOR3 dir; D3DXVec3Normalize(&dir, &(-Engine::GAPI->GetRendererState()->RendererSettings.RainGlobalVelocity));
 	// Set the camera height to the highest point in this section
 	//p.y = 0;
 	p += dir * 6000.0f;
 
-	DirectX::SimpleMath::Vector3 lookAt = p;
+	D3DXVECTOR3 lookAt = p;
 	lookAt -= dir;
 
 	// Create shadowmap view-matrix
-	cr.ViewReplacement = XMMatrixLookAtLH(p, lookAt, Vector3(0, 1, 0));
-	cr.ViewReplacement = cr.ViewReplacement.Transpose();
+	D3DXMatrixLookAtLH(&cr.ViewReplacement, &p, &lookAt, &D3DXVECTOR3(0, 1, 0));
+	D3DXMatrixTranspose(&cr.ViewReplacement, &cr.ViewReplacement);
 
-	cr.ProjectionReplacement = XMMatrixOrthographicLH(RainShadowmap->GetSizeX() * Engine::GAPI->GetRendererState()->RendererSettings.WorldShadowRangeScale,
+	D3DXMatrixOrthoLH(&cr.ProjectionReplacement, RainShadowmap->GetSizeX() * Engine::GAPI->GetRendererState()->RendererSettings.WorldShadowRangeScale, 
 												 RainShadowmap->GetSizeX() * Engine::GAPI->GetRendererState()->RendererSettings.WorldShadowRangeScale, 1, 20000.0f);
-	cr.ProjectionReplacement = cr.ProjectionReplacement.Transpose();
+	D3DXMatrixTranspose(&cr.ProjectionReplacement, &cr.ProjectionReplacement);
 
 	cr.PositionReplacement = p;
 	cr.LookAtReplacement = lookAt;

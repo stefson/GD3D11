@@ -4,16 +4,13 @@
 #include "Engine.h"
 #include "RenderToTextureBuffer.h"
 #include "D3D11GraphicsEngine.h"
+#include <D3DX11.h>
 #include "D3D11PfxRenderer.h"
 #include "D3D11ShaderManager.h"
 #include "D3D11VShader.h"
 #include "GothicAPI.h"
 #include "D3D11PShader.h"
 #include <d3dcompiler.h>
-#include <DDSTextureLoader.h>
-
-using namespace DirectX;
-using namespace DirectX::SimpleMath;
 
 D3D11PFX_SMAA::D3D11PFX_SMAA(D3D11PfxRenderer* rnd) : D3D11PFX_Effect(rnd)
 {
@@ -66,6 +63,7 @@ HRESULT D3DX11CreateEffectFromFile_RES(
 		
 		return hr;
 	}
+
 	return S_OK;
 }
 
@@ -94,11 +92,14 @@ bool D3D11PFX_SMAA::Init()
 	SMAAShader->AddCustomVariable("searchTex", CVT_SHADER_RES_VIEW, &SearchTexIdx);*/
 
 	// Load the textures
-	hr = CreateDDSTextureFromFile(engine->GetDevice(), L"system\\GD3D11\\Textures\\SMAA_AreaTexDX10.dds", nullptr, &AreaTextureSRV);
+	D3DX11_IMAGE_LOAD_INFO img;
+	img.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+	img.MipLevels = 1;
+	hr = D3DX11CreateShaderResourceViewFromFile(engine->GetDevice(), "system\\GD3D11\\Textures\\SMAA_AreaTexDX10.dds", &img, nullptr, &AreaTextureSRV, nullptr);
 	LE(hr);
 
-	//img.Format = DXGI_FORMAT_R8_UNORM;
-	hr = CreateDDSTextureFromFile(engine->GetDevice(), L"system\\GD3D11\\Textures\\SMAA_SearchTex.dds", nullptr, &SearchTextureSRV);
+	img.Format = DXGI_FORMAT_R8_UNORM;
+	hr = D3DX11CreateShaderResourceViewFromFile(engine->GetDevice(), "system\\GD3D11\\Textures\\SMAA_SearchTex.dds", &img, nullptr, &SearchTextureSRV, nullptr);
 	LE(hr);
 
 	SMAAShader->GetVariableByName("areaTex")->AsShaderResource()->SetResource(AreaTextureSRV);
@@ -135,8 +136,8 @@ void D3D11PFX_SMAA::RenderPostFX(ID3D11ShaderResourceView * renderTargetSRV)
 		OnResize(INT2(engine->GetResolution().x, engine->GetResolution().y));
 	}
 
-	engine->GetContext()->ClearRenderTargetView(EdgesTex->GetRenderTargetView(), (float*)&Vector4::Zero);
-	engine->GetContext()->ClearRenderTargetView(BlendTex->GetRenderTargetView(), (float*)&Vector4::Zero);
+	engine->GetContext()->ClearRenderTargetView(EdgesTex->GetRenderTargetView(), D3DXVECTOR4(0, 0, 0, 0));
+	engine->GetContext()->ClearRenderTargetView(BlendTex->GetRenderTargetView(), D3DXVECTOR4(0, 0, 0, 0));
 
 	ID3D11RenderTargetView* RTV=nullptr;
 	ID3D11RenderTargetView* OldRTV=nullptr;
@@ -297,11 +298,14 @@ void D3D11PFX_SMAA::OnResize(const INT2 & size)
 	if (SearchTextureSRV)SearchTextureSRV->Release();
 
 	// Load the textures
-	hr = CreateDDSTextureFromFile(engine->GetDevice(), L"system\\GD3D11\\Textures\\SMAA_AreaTexDX10.dds", nullptr, &AreaTextureSRV);
+	D3DX11_IMAGE_LOAD_INFO img;
+	img.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+	img.MipLevels = 1;
+	D3DX11CreateShaderResourceViewFromFile(engine->GetDevice(), "system\\GD3D11\\Textures\\SMAA_AreaTexDX10.dds", &img, nullptr, &AreaTextureSRV, &hr);
 	LE(hr);
 
-	//img.Format = DXGI_FORMAT_R8_UNORM;
-	hr = CreateDDSTextureFromFile(engine->GetDevice(), L"system\\GD3D11\\Textures\\SMAA_SearchTex.dds", nullptr, &SearchTextureSRV);
+	img.Format = DXGI_FORMAT_R8_UNORM;
+	D3DX11CreateShaderResourceViewFromFile(engine->GetDevice(), "system\\GD3D11\\Textures\\SMAA_SearchTex.dds", &img, nullptr, &SearchTextureSRV, &hr);
 	LE(hr);
 
 	SMAAShader->GetVariableByName("areaTex")->AsShaderResource()->SetResource(AreaTextureSRV);

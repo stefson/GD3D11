@@ -1,10 +1,13 @@
 #include "pch.h"
 #include "D3D11HDShader.h"
 #include "D3D11GraphicsEngineBase.h"
+#include <D3DX11.h>
 #include "Engine.h"
 #include "GothicAPI.h"
 #include "D3D11ConstantBuffer.h"
 #include <d3dcompiler.h>
+
+using namespace DirectX;
 
 // Patch HLSL-Compiler for http://support.microsoft.com/kb/2448404
 #if D3DX_VERSION == 0xa2b

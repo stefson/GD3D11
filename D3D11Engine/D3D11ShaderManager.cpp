@@ -83,18 +83,18 @@ XRESULT D3D11ShaderManager::Init()
 	Shaders.push_back(ShaderInfo("VS_ExSkeletal", "VS_ExSkeletal.hlsl", "v", 3));
 	Shaders.back().cBufferSizes.push_back(sizeof(VS_ExConstantBuffer_PerFrame));
 	Shaders.back().cBufferSizes.push_back(sizeof(VS_ExConstantBuffer_PerInstanceSkeletal));
-	Shaders.back().cBufferSizes.push_back(NUM_MAX_BONES * sizeof(DirectX::SimpleMath::Matrix));
+	Shaders.back().cBufferSizes.push_back(NUM_MAX_BONES * sizeof(D3DXMATRIX));
 
 	Shaders.push_back(ShaderInfo("VS_ExSkeletalCube", "VS_ExSkeletalCube.hlsl", "v", 3));
 	Shaders.back().cBufferSizes.push_back(sizeof(VS_ExConstantBuffer_PerFrame));
 	Shaders.back().cBufferSizes.push_back(sizeof(VS_ExConstantBuffer_PerInstanceSkeletal));
-	Shaders.back().cBufferSizes.push_back(NUM_MAX_BONES * sizeof(DirectX::SimpleMath::Matrix));
+	Shaders.back().cBufferSizes.push_back(NUM_MAX_BONES * sizeof(D3DXMATRIX));
 
 	
 	Shaders.push_back(ShaderInfo("VS_PNAEN_Skeletal", "VS_PNAEN_Skeletal.hlsl", "v", 3));
 	Shaders.back().cBufferSizes.push_back(sizeof(VS_ExConstantBuffer_PerFrame));
 	Shaders.back().cBufferSizes.push_back(sizeof(VS_ExConstantBuffer_PerInstanceSkeletal));
-	Shaders.back().cBufferSizes.push_back(NUM_MAX_BONES * sizeof(DirectX::SimpleMath::Matrix));
+	Shaders.back().cBufferSizes.push_back(NUM_MAX_BONES * sizeof(D3DXMATRIX));
 
 	Shaders.push_back(ShaderInfo("VS_TransformedEx", "VS_TransformedEx.hlsl", "v", 1));
 	Shaders.back().cBufferSizes.push_back(2 * sizeof(float2));
@@ -242,9 +242,8 @@ XRESULT D3D11ShaderManager::Init()
 	Shaders.back().cBufferSizes.push_back(sizeof(DS_ScreenQuadConstantBuffer));
 	Shaders.back().cBufferSizes.push_back(sizeof(AtmosphereConstantBuffer));
 	
-	// TODO: REMOVE UNUSED SHADER
-	// Shaders.push_back(ShaderInfo("DefaultTess", "DefaultTess.hlsl", "hd"));
-	// Shaders.back().cBufferSizes.push_back(sizeof(DefaultHullShaderConstantBuffer));
+	Shaders.push_back(ShaderInfo("DefaultTess", "DefaultTess.hlsl", "hd"));
+	Shaders.back().cBufferSizes.push_back(sizeof(DefaultHullShaderConstantBuffer));
 
 	Shaders.push_back(ShaderInfo("OceanTess", "OceanTess.hlsl", "hd"));
 	Shaders.back().cBufferSizes.push_back(sizeof(DefaultHullShaderConstantBuffer));

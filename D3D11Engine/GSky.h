@@ -14,9 +14,9 @@ struct AtmosphereSettings {
 	int Samples;
 	float RayleightScaleDepth;
 	float3 WaveLengths;
-	DirectX::SimpleMath::Vector3 SpherePosition;
+	D3DXVECTOR3 SpherePosition;
 	float SphereOffsetY;
-	DirectX::SimpleMath::Vector3 LightDirection;
+	D3DXVECTOR3 LightDirection;
 	float SkyTimeScale;
 };
 

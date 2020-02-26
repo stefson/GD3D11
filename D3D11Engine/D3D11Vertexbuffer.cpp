@@ -3,7 +3,9 @@
 #include "pch.h"
 #include "D3D11GraphicsEngineBase.h"
 #include "Engine.h"
-#include <DirectXMesh.h>
+#include <d3dx9mesh.h>
+
+#pragma comment(lib, "d3dx9.lib")
 
 D3D11VertexBuffer::D3D11VertexBuffer() {
 	VertexBuffer = nullptr;
@@ -153,10 +155,9 @@ ID3D11Buffer * D3D11VertexBuffer::GetVertexBuffer() const {
 /** Optimizes the given set of vertices */
 XRESULT D3D11VertexBuffer::OptimizeVertices(VERTEX_INDEX * indices, byte * vertices, unsigned int numIndices, unsigned int numVertices, unsigned int stride) {
 	return XR_SUCCESS;
-	
-	uint32_t* remap = new uint32_t[numVertices];
-	// TODO: Check if this works, was previously D3DXOptimizeVertices
-	if (FAILED(DirectX::OptimizeVertices(indices, numIndices / 3, numVertices, (uint32_t*)remap))) {
+
+	DWORD * remap = new DWORD[numVertices];
+	if (FAILED(D3DXOptimizeVertices(indices, numIndices / 3, numVertices, FALSE, (DWORD *)remap))) {
 		delete[] remap;
 		return XR_FAILED;
 	}
@@ -185,10 +186,8 @@ XRESULT D3D11VertexBuffer::OptimizeVertices(VERTEX_INDEX * indices, byte * verti
 XRESULT D3D11VertexBuffer::OptimizeFaces(VERTEX_INDEX * indices, byte * vertices, unsigned int numIndices, unsigned int numVertices, unsigned int stride) {
 	return XR_SUCCESS;
 	unsigned int numFaces = numIndices / 3;
-	uint32_t* remap = new uint32_t[numFaces];
-
-	// TODO: Check if this works, was previously D3DXOptimizeFaces
-	if (FAILED(DirectX::OptimizeFaces(indices, numFaces, &numVertices, (uint32_t*)remap))) {
+	DWORD * remap = new DWORD[numFaces];
+	if (FAILED(D3DXOptimizeFaces(indices, numFaces, numVertices, FALSE, (DWORD *)remap))) {
 		delete[] remap;
 		return XR_FAILED;
 	}

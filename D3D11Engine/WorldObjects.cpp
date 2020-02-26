@@ -85,7 +85,7 @@ void VobInfo::UpdateVobConstantBuffer()
 		GroundColor = Vob->GetGroundPoly() ? Vob->GetGroundPoly()->getFeatures()[0]->lightStatic : 0xFFFFFFFF;
 	}
 
-	//DirectX::SimpleMath::MatrixTranspose(&WorldMatrix, &cb.World);
+	//D3DXMatrixTranspose(&WorldMatrix, &cb.World);
 }
 
 /** Updates the vobs constantbuffer */
