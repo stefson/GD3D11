@@ -21,8 +21,8 @@
 #include <d3d11shader.h>
 #endif
 
-#pragma comment( lib, "d3dcompiler.lib" )
-#pragma comment( lib, "dxguid.lib" )
+#pragma comment(lib, "d3dcompiler.lib")
+#pragma comment(lib, "dxguid.lib")
 
 #include <stdint.h>
 

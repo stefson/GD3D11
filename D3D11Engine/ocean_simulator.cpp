@@ -15,7 +15,7 @@
 #include "pch.h"
 #include "ocean_simulator.h"
 #include <assert.h>
-#include <d3dcompiler.h>
+#include <D3Dcompiler.h>
 
 #pragma comment(lib, "D3DCompiler.lib")
 

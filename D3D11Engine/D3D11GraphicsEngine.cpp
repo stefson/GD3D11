@@ -33,6 +33,8 @@
 #include <locale>
 #include <codecvt>
 
+#pragma comment(lib, "dxguid.lib")
+
 namespace wrl = Microsoft::WRL;
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
