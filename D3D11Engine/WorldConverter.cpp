@@ -1740,7 +1740,7 @@ void WorldConverter::IndexVertices(ExSkelVertexStruct* input, unsigned int numIn
 /** Computes vertex normals for a mesh with face normals */
 void WorldConverter::GenerateVertexNormals(std::vector<ExVertexStruct> & vertices, std::vector<VERTEX_INDEX> & indices)
 {
-	std::vector<Vector3> normals(vertices.size(), Vector3::Zero);
+	std::vector<Vector3> normals(vertices.size(), Vector3(0, 0, 0));
 
 	for(unsigned int i=0;i<indices.size(); i+=3)
 	{

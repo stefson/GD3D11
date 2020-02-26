@@ -598,7 +598,7 @@ XRESULT D3D11GraphicsEngineBase::UpdateRenderStates()
 		FFBlendState = state->State;
 
 		Engine::GAPI->GetRendererState()->BlendState.StateDirty = false;
-		GetContext()->OMSetBlendState(FFBlendState.Get(), (float *)&DirectX::SimpleMath::Vector4::Zero, 0xFFFFFFFF);
+		GetContext()->OMSetBlendState(FFBlendState.Get(), (float *)&DirectX::SimpleMath::Vector4(0, 0, 0, 0), 0xFFFFFFFF);
 	}
 
 	if (Engine::GAPI->GetRendererState()->RasterizerState.StateDirty)

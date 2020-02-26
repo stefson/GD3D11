@@ -353,7 +353,7 @@ void MeshModifier::ComputePNAEN18Indices(std::vector<ExVertexStruct> & inVertice
 	{
 		std::vector<ExVertexStruct *> & vx = it->second.second;
 
-		DirectX::SimpleMath::Vector3 nrm = DirectX::SimpleMath::Vector3::Zero;
+		DirectX::SimpleMath::Vector3 nrm = DirectX::SimpleMath::Vector3(0, 0, 0);
 		if (softNormals)
 		{
 			// Average normal of all adj. vertices			
@@ -611,7 +611,7 @@ void MeshModifier::ComputeSmoothNormals(std::vector<ExVertexStruct> & inVertices
 	{
 		std::vector<ExVertexStruct *> & vx = it->second;
 		// Average all face normals
-		DirectX::SimpleMath::Vector3 avgNormal = DirectX::SimpleMath::Vector3::Zero;
+		DirectX::SimpleMath::Vector3 avgNormal = DirectX::SimpleMath::Vector3(0, 0, 0);
 		for(unsigned int i=0;i<vx.size();i++)
 		{
 			avgNormal += *vx[i]->Normal.toVector3();

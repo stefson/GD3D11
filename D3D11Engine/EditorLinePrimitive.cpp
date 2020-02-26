@@ -390,7 +390,7 @@ HRESULT EditorLinePrimitive::CreateFilledCirclePrimitive(float Radius, UINT Deta
 		//s+=Step;
 		i++;
 
-		vx[i].Position = Vector3::Zero;
+		vx[i].Position = Vector3(0, 0, 0);
 		EncodeColor(&vx[i], Color);
 		i++;
 
@@ -502,20 +502,20 @@ HRESULT EditorLinePrimitive::CreateArrowPrimitive(const Vector4 * Color,float Ar
 	
 
 	// Middle streak
-	vx[0].Position = Vector3::Zero;
-	vx[1].Position = Vector3::Right;
+	vx[0].Position = Vector3(0, 0, 0);
+	vx[1].Position = Vector3(1, 0, 0);
 
 	// Outer lines
-	vx[2].Position = Vector3::Right;
+	vx[2].Position = Vector3(1, 0, 0);
 	vx[3].Position = Vector3(ArrowOffset, ArrowRadius, ArrowRadius);
 
-	vx[4].Position = Vector3::Right;
+	vx[4].Position = Vector3(1, 0, 0);
 	vx[5].Position = Vector3(ArrowOffset, ArrowRadius, -ArrowRadius);
 
-	vx[6].Position = Vector3::Right;
+	vx[6].Position = Vector3(1, 0, 0);
 	vx[7].Position = Vector3(ArrowOffset, -ArrowRadius, ArrowRadius);
 
-	vx[8].Position = Vector3::Right;
+	vx[8].Position = Vector3(1, 0, 0);
 	vx[9].Position = Vector3(ArrowOffset, -ArrowRadius, -ArrowRadius);
 
 	for(int i=0; i< 10; i++)
@@ -560,7 +560,7 @@ HRESULT EditorLinePrimitive::CreateSimpleConePrimitive(float Length, float Radiu
 		i++;
 
 		// Connector line #2
-		vx[i].Position = Vector3::Zero;
+		vx[i].Position = Vector3(0, 0, 0);
 		EncodeColor(&vx[i], Color);
 		i++;
 
@@ -815,7 +815,7 @@ void EditorLinePrimitive::RecalcTransforms()
 	MatRot = Matrix::Identity;
 	Vector3 DeltaRot = Rotation - RotationMatrixAngles;
 
-	if (Rotation != Vector3::Zero)
+	if (Rotation != Vector3(0, 0, 0))
 	{
 		// Calculate matrix with the new angles
 		if (bLocalRotation)
@@ -852,7 +852,7 @@ void EditorLinePrimitive::RecalcTransforms()
 	{
 		// Reset matrix to identity (Todo: ROTATION! Ò.ó Y U NO WORK!? (As I want))
 		RotationMatrix = Matrix::Identity;
-		RotationMatrixAngles = Vector3::Zero;
+		RotationMatrixAngles = Vector3(0, 0, 0);
 	}
 
 

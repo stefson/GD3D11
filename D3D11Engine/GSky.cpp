@@ -26,8 +26,8 @@ GSky::GSky() {
 	Atmosphere.G = -0.995f;
 	//Atmosphere.WaveLengths = float3(0.65f, 0.57f, 0.475f);
 	Atmosphere.WaveLengths = float3(0.63f, 0.57f, 0.50f);
-	Atmosphere.SpherePosition = Vector3::Zero;
-	Atmosphere.LightDirection = Vector3::One;
+	Atmosphere.SpherePosition = Vector3(0, 0, 0);
+	Atmosphere.LightDirection = Vector3(1, 1, 1);
 	Atmosphere.SphereOffsetY = -820000;
 	Atmosphere.SkyTimeScale = 1.0f;
 	Atmosphere.LightDirection.Normalize();

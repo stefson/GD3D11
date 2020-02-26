@@ -20,7 +20,7 @@ Widget_TransRot::Widget_TransRot(WidgetContainer * container) : BaseWidget(conta
 	vx[0].Position = Vector4(TransLength, 0, 0, 0);
 	vx[0].Color = Vector4(1, 0, 0, 1);
 
-	vx[1].Position = Vector3::Zero;
+	vx[1].Position = Vector3(0, 0, 0);
 	vx[1].Color = Vector4(1, 0, 0, 1);
 
 	TransLines[0] = new EditorLinePrimitive;
@@ -30,7 +30,7 @@ Widget_TransRot::Widget_TransRot(WidgetContainer * container) : BaseWidget(conta
 	vx[0].Position = Vector4(0,TransLength, 0, 0);
 	vx[0].Color = Vector4(0, 1, 0, 1);
 
-	vx[1].Position = Vector3::Zero;
+	vx[1].Position = Vector3(0, 0, 0);
 	vx[1].Color = Vector4(0, 1, 0, 1);
 
 	TransLines[1] = new EditorLinePrimitive;
@@ -40,7 +40,7 @@ Widget_TransRot::Widget_TransRot(WidgetContainer * container) : BaseWidget(conta
 	vx[0].Position = Vector4(0, 0,TransLength, 0);
 	vx[0].Color = Vector4(0, 0, 1, 1);
 
-	vx[1].Position = Vector3::Zero;
+	vx[1].Position = Vector3(0, 0, 0);
 	vx[1].Color = Vector4(0, 0, 1, 1);
 
 	TransLines[2] = new EditorLinePrimitive;

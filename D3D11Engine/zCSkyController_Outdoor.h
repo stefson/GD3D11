@@ -153,7 +153,7 @@ public:
 #ifndef BUILD_GOTHIC_1_08k
 		return *(DirectX::SimpleMath::Vector3 *)THISPTR_OFFSET(GothicMemoryLocations::zCSkyController_Outdoor::Offset_OverrideColor);
 #else
-		return DirectX::SimpleMath::Vector3::Zero;
+		return DirectX::SimpleMath::Vector3(0, 0, 0);
 #endif
 	}
 
@@ -177,7 +177,7 @@ public:
 
 		DirectX::SimpleMath::Vector3 sunPos = DirectX::SimpleMath::Vector3(-60, 0, 100);
 		sunPos.Normalize();
-		DirectX::SimpleMath::Vector3 rotAxis = DirectX::SimpleMath::Vector3::Right;
+		DirectX::SimpleMath::Vector3 rotAxis = DirectX::SimpleMath::Vector3(1, 0, 0);
 
 		DirectX::SimpleMath::Matrix r = HookedFunctions::OriginalFunctions.original_Alg_Rotation3DNRad(rotAxis, -angle);
 		r = r.Transpose();
