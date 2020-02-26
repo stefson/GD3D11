@@ -2,10 +2,9 @@
 
 #include <string>
 #include <vector>
-#include <d3d11.h>
-#include <SimpleMath.h>
 
 enum XRESULT;
+struct D3DXVECTOR2;
 struct MeshInfo;
 
 class GMesh {
@@ -22,7 +21,7 @@ public:
 	XRESULT LoadMesh(const std::string & file, float scale = 1.0f);
 
 	/** Fills this mesh with a grid */
-	XRESULT CreateGrid(int tesselation, const DirectX::SimpleMath::Vector2 & min, const DirectX::SimpleMath::Vector2 & max, float height);
+	XRESULT CreateGrid(int tesselation, const D3DXVECTOR2 & min, const D3DXVECTOR2 & max, float height);
 
 	/** Draws all buffers this holds */
 	void DrawMesh();

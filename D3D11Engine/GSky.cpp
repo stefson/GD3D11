@@ -11,9 +11,6 @@
 #include "zCSkyController_Outdoor.h"
 #include "zCWorld.h"
 
-using namespace DirectX;
-using namespace DirectX::SimpleMath;
-
 GSky::GSky() {
 
 	Atmosphere.Kr = 0.0075f;
@@ -26,12 +23,12 @@ GSky::GSky() {
 	Atmosphere.G = -0.995f;
 	//Atmosphere.WaveLengths = float3(0.65f, 0.57f, 0.475f);
 	Atmosphere.WaveLengths = float3(0.63f, 0.57f, 0.50f);
-	Atmosphere.SpherePosition = Vector3(0, 0, 0);
-	Atmosphere.LightDirection = Vector3(1, 1, 1);
+	Atmosphere.SpherePosition = D3DXVECTOR3(0, 0, 0);
+	Atmosphere.LightDirection = D3DXVECTOR3(1, 1, 1);
 	Atmosphere.SphereOffsetY = -820000;
 	Atmosphere.SkyTimeScale = 1.0f;
-	Atmosphere.LightDirection.Normalize();
-	
+	D3DXVec3Normalize(&Atmosphere.LightDirection, &Atmosphere.LightDirection);
+
 	ZeroMemory(&AtmosphereCB, sizeof(AtmosphereCB));
 }
 
@@ -62,7 +59,7 @@ XRESULT GSky::InitSky()
 	SkyPlaneVertices[5].Position = float3(-sizeX, sizeY, +sizeX); // 2
 
 	const float scale = 20.0f;
-	auto displacement = Vector2(0, 0);
+	D3DXVECTOR2 displacement = D3DXVECTOR2(0, 0);
 	float4 color = float4(1, 1, 1, 1);
 
 	// Construct vertices
@@ -71,25 +68,25 @@ XRESULT GSky::InitSky()
 	SkyPlaneVertices[0].Color = color.ToDWORD();
 
 	// 1
-	SkyPlaneVertices[1].TexCoord = float2(Vector2(scale, 0) + displacement);
+	SkyPlaneVertices[1].TexCoord = float2(D3DXVECTOR2(scale, 0) + displacement);
 	SkyPlaneVertices[1].Color = color.ToDWORD();
 
 	// 2
-	SkyPlaneVertices[2].TexCoord = float2(Vector2(0, scale) + displacement);
+	SkyPlaneVertices[2].TexCoord = float2(D3DXVECTOR2(0, scale) + displacement);
 	SkyPlaneVertices[2].Color = color.ToDWORD();
 
 	// ---
 
 	// 1
-	SkyPlaneVertices[3].TexCoord = float2(Vector2(scale, 0) + displacement);
+	SkyPlaneVertices[3].TexCoord = float2(D3DXVECTOR2(scale, 0) + displacement);
 	SkyPlaneVertices[3].Color = color.ToDWORD();
 
 	// 3
-	SkyPlaneVertices[4].TexCoord = float2(Vector2(scale, scale) + displacement);
+	SkyPlaneVertices[4].TexCoord = float2(D3DXVECTOR2(scale, scale) + displacement);
 	SkyPlaneVertices[4].Color = color.ToDWORD();
 
 	// 2
-	SkyPlaneVertices[5].TexCoord = float2(Vector2(0, scale) + displacement);
+	SkyPlaneVertices[5].TexCoord = float2(D3DXVECTOR2(0, scale) + displacement);
 	SkyPlaneVertices[5].Color = color.ToDWORD();
 
 	return XR_SUCCESS;
@@ -205,8 +202,8 @@ XRESULT GSky::RenderSky() {
 
 	//return XR_SUCCESS;
 
-	auto camPos = Engine::GAPI->GetCameraPosition();
-	Vector3 LightDir;
+	D3DXVECTOR3 camPos = Engine::GAPI->GetCameraPosition();
+	D3DXVECTOR3 LightDir;
 
 	if (Engine::GAPI->GetRendererState()->RendererSettings.ReplaceSunDirection) {
 		LightDir = Atmosphere.LightDirection;
@@ -217,7 +214,7 @@ XRESULT GSky::RenderSky() {
 			Atmosphere.LightDirection = LightDir;
 		}
 	}
-	LightDir.Normalize();
+	D3DXVec3Normalize(&LightDir, &LightDir);
 
 	//Atmosphere.SpherePosition.y = -Atmosphere.InnerRadius;
 
@@ -225,11 +222,11 @@ XRESULT GSky::RenderSky() {
 	Atmosphere.SpherePosition.z = 0;//Engine::GAPI->GetLoadedWorldInfo()->MidPoint.y;
 	Atmosphere.SpherePosition.y = 0;//Engine::GAPI->GetLoadedWorldInfo()->LowestVertex - Atmosphere.InnerRadius;
 
-	auto sp = camPos;
+	D3DXVECTOR3 sp = camPos;
 	sp.y += Atmosphere.SphereOffsetY;
 
 	// Fill atmosphere buffer for this frame
-	AtmosphereCB.AC_CameraPos = Vector3(0, -Atmosphere.SphereOffsetY, 0);
+	AtmosphereCB.AC_CameraPos = D3DXVECTOR3(0, -Atmosphere.SphereOffsetY, 0);
 	AtmosphereCB.AC_Time = Engine::GAPI->GetTimeSeconds();
 	AtmosphereCB.AC_LightPos = LightDir;
 	AtmosphereCB.AC_CameraHeight = -Atmosphere.SphereOffsetY;
@@ -238,8 +235,8 @@ XRESULT GSky::RenderSky() {
 	AtmosphereCB.AC_nSamples = Atmosphere.Samples;
 	AtmosphereCB.AC_fSamples = (float)AtmosphereCB.AC_nSamples;
 
-	AtmosphereCB.AC_Kr4PI = Atmosphere.Kr * 4 * (float)XM_PI;
-	AtmosphereCB.AC_Km4PI = Atmosphere.Km * 4 * (float)XM_PI;
+	AtmosphereCB.AC_Kr4PI = Atmosphere.Kr * 4 * (float)D3DX_PI;
+	AtmosphereCB.AC_Km4PI = Atmosphere.Km * 4 * (float)D3DX_PI;
 	AtmosphereCB.AC_KrESun = Atmosphere.Kr * Atmosphere.ESun;
 	AtmosphereCB.AC_KmESun = Atmosphere.Km * Atmosphere.ESun;
 
@@ -316,17 +313,17 @@ float AC_getRayleighPhase(float fCos2)
 	return 0.75f + 0.75f*fCos2;
 }
 // Returns the near intersection point of a line and a sphere
-float AC_getNearIntersection(Vector3 v3Pos, Vector3 v3Ray, float fDistance2, float fRadius2)
+float AC_getNearIntersection(D3DXVECTOR3 v3Pos, D3DXVECTOR3 v3Ray, float fDistance2, float fRadius2)
 {
-	float B = 2.0f * v3Pos.Dot(v3Ray);
+	float B = 2.0f * D3DXVec3Dot(&v3Pos, &v3Ray);
 	float C = fDistance2 - fRadius2;
 	float fDet = std::max(0.0f, B*B - 4.0f * C);
 	return 0.5f * (-B - sqrt(fDet));
 }
 // Returns the far intersection point of a line and a sphere
-float AC_getFarIntersection(Vector3 v3Pos, Vector3 v3Ray, float fDistance2, float fRadius2)
+float AC_getFarIntersection(D3DXVECTOR3 v3Pos, D3DXVECTOR3 v3Ray, float fDistance2, float fRadius2)
 {
-	float B = 2.0f * v3Pos.Dot(v3Ray);
+	float B = 2.0f * D3DXVec3Dot(&v3Pos, &v3Ray);
 	float C = fDistance2 - fRadius2;
 	float fDet = std::max(0.0f, B*B - 4.0f * C);
 	return 0.5f * (-B + sqrt(fDet));
@@ -335,17 +332,17 @@ float AC_getFarIntersection(Vector3 v3Pos, Vector3 v3Ray, float fDistance2, floa
 /** Returns the current sun color */
 float3 GSky::GetSunColor()
 {
-	auto wPos = ((*AtmosphereCB.AC_LightPos.toVector3()) * AtmosphereCB.AC_OuterRadius);
-	wPos += Vector3(Atmosphere.SpherePosition.x,
+	D3DXVECTOR3 wPos = ((*AtmosphereCB.AC_LightPos.toD3DXVECTOR3()) * AtmosphereCB.AC_OuterRadius);
+	wPos += D3DXVECTOR3(Atmosphere.SpherePosition.x, 
 						Atmosphere.SpherePosition.y + Atmosphere.SphereOffsetY, 
 						Atmosphere.SpherePosition.z);
 
 
-	auto camPos = *AtmosphereCB.AC_CameraPos.toVector3();
-	auto vPos = wPos - (*AtmosphereCB.AC_SpherePosition.toVector3());
-	auto vRay = vPos - camPos;
+	D3DXVECTOR3 camPos = *AtmosphereCB.AC_CameraPos.toD3DXVECTOR3();
+	D3DXVECTOR3 vPos = wPos - (*AtmosphereCB.AC_SpherePosition.toD3DXVECTOR3());
+	D3DXVECTOR3 vRay = vPos - camPos;
 				
-	float fFar = vRay.Length();
+	float fFar = D3DXVec3Length(&vRay);
 	vRay /= fFar;
 	
 	//return float4(abs(AC_SpherePosition), 1);
@@ -357,36 +354,36 @@ float3 GSky::GetSunColor()
 	float fNear = AC_getNearIntersection(camPos, vRay, AtmosphereCB.AC_CameraHeight * AtmosphereCB.AC_CameraHeight, AtmosphereCB.AC_OuterRadius * AtmosphereCB.AC_OuterRadius);
 
 	// Calculate the ray's starting position, then calculate its scattering offset
-	auto vStart = camPos;
+	D3DXVECTOR3 vStart = camPos;
 
-	float fHeight = vStart.Length();
+	float fHeight = D3DXVec3Length(&vStart);
 	float fDepth = exp(AtmosphereCB.AC_RayleighOverScaleDepth * (AtmosphereCB.AC_InnerRadius - AtmosphereCB.AC_CameraHeight));
-	float fStartAngle = vRay.Dot(vStart) / fHeight;
+	float fStartAngle = D3DXVec3Dot(&vRay, &vStart) / fHeight;
 	float fStartOffset = fDepth*AC_Escale(fStartAngle, AtmosphereCB.AC_RayleighScaleDepth);
 	
 	// Initialize the scattering loop variables
 	float fSampleLength = fFar / AtmosphereCB.AC_fSamples;
 	float fScaledLength = fSampleLength * AtmosphereCB.AC_Scale;
-	auto vSampleRay = vRay * fSampleLength;
-	auto vSamplePoint = vStart + vSampleRay * 0.5f;
+	D3DXVECTOR3 vSampleRay = vRay * fSampleLength;
+	D3DXVECTOR3 vSamplePoint = vStart + vSampleRay * 0.5f;
 	
-	auto vInvWavelength = Vector3(1.0f / pow(AtmosphereCB.AC_Wavelength.x, 4.0f),
+	D3DXVECTOR3 vInvWavelength = D3DXVECTOR3(1.0f / pow(AtmosphereCB.AC_Wavelength.x, 4.0f),
 		1.0f / pow(AtmosphereCB.AC_Wavelength.y, 4.0f),
 		1.0f / pow(AtmosphereCB.AC_Wavelength.z, 4.0f));
 	
 	//return retF(AC_InnerRadius - length(vSamplePoint));
 	
 	// Now loop through the sample rays
-	auto vFrontColor = Vector3(0.0, 0.0, 0.0);
+	D3DXVECTOR3 vFrontColor = D3DXVECTOR3(0.0, 0.0, 0.0);
 	for(int i=0; i<AtmosphereCB.AC_nSamples; i++)
 	{
-		float fHeight = vSamplePoint.Length();
+		float fHeight = D3DXVec3Length(&vSamplePoint);
 		float fDepth = exp(AtmosphereCB.AC_RayleighOverScaleDepth * (AtmosphereCB.AC_InnerRadius - fHeight));
-		float fLightAngle = AtmosphereCB.AC_LightPos.toVector3()->Dot(vSamplePoint) / fHeight;
-		float fCameraAngle = vRay.Dot(vSamplePoint) / fHeight;
+		float fLightAngle = D3DXVec3Dot(AtmosphereCB.AC_LightPos.toD3DXVECTOR3(), &vSamplePoint) / fHeight;
+		float fCameraAngle = D3DXVec3Dot(&vRay, &vSamplePoint) / fHeight;
 		float fScatter = (fStartOffset + fDepth*(AC_Escale(fLightAngle, AtmosphereCB.AC_RayleighScaleDepth) - AC_Escale(fCameraAngle, AtmosphereCB.AC_RayleighScaleDepth)));
 		
-		Vector3 vAttenuate;
+		D3DXVECTOR3 vAttenuate;
 		vAttenuate.x = exp(-fScatter * (vInvWavelength.x * AtmosphereCB.AC_Kr4PI + AtmosphereCB.AC_Km4PI));
 		vAttenuate.y = exp(-fScatter * (vInvWavelength.y * AtmosphereCB.AC_Kr4PI + AtmosphereCB.AC_Km4PI));
 		vAttenuate.z = exp(-fScatter * (vInvWavelength.z * AtmosphereCB.AC_Kr4PI + AtmosphereCB.AC_Km4PI));
@@ -396,15 +393,15 @@ float3 GSky::GetSunColor()
 	}
 	
 	// Finally, scale the Mie and Rayleigh colors and set up the varying variables for the pixel shader
-	Vector3 c0;
+	D3DXVECTOR3 c0;
 	c0.x = vFrontColor.x * (vInvWavelength.x * AtmosphereCB.AC_KrESun);
 	c0.y = vFrontColor.y * (vInvWavelength.y * AtmosphereCB.AC_KrESun);
 	c0.z = vFrontColor.z * (vInvWavelength.z * AtmosphereCB.AC_KrESun);
 	
-	Vector3 c1 = vFrontColor * AtmosphereCB.AC_KmESun;	
-	Vector3 vDirection = camPos - vPos;
+	D3DXVECTOR3 c1 = vFrontColor * AtmosphereCB.AC_KmESun;	
+	D3DXVECTOR3 vDirection = camPos - vPos;
 	
-	float fCos = AtmosphereCB.AC_LightPos.toVector3()->Dot(vDirection) / vDirection.Length();
+	float fCos = D3DXVec3Dot(AtmosphereCB.AC_LightPos.toD3DXVECTOR3(), &vDirection) / D3DXVec3Length(&vDirection);
 	
 	float fCos2 = fCos*fCos;
 

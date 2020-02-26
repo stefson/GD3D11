@@ -377,19 +377,19 @@ struct GothicSamplerStateInfo : public GothicPipelineState {
 struct GothicTransformInfo {
 	/** Sets the default values for this struct */
 	void SetDefault() {
-		TransformWorld = TransformWorld.Identity;
-		TransformView = TransformView.Identity;
-		TransformProj = TransformProj.Identity;
+		D3DXMatrixIdentity(&TransformWorld);
+		D3DXMatrixIdentity(&TransformView);
+		D3DXMatrixIdentity(&TransformProj);
 	}
 
 	/** This is actually world * view. Gothic never sets the view matrix */
-	DirectX::SimpleMath::Matrix TransformWorld;
+	D3DXMATRIX TransformWorld; 
 
 	/** Though never really set by Gothic, it's listed here for completeness sake */
-	DirectX::SimpleMath::Matrix TransformView;
+	D3DXMATRIX TransformView;
 
 	/** Projectionmatrix */
-	DirectX::SimpleMath::Matrix TransformProj;
+	D3DXMATRIX TransformProj;
 };
 
 struct HBAOSettings {
@@ -528,11 +528,11 @@ struct GothicRendererSettings {
 		RainHeightRange = 1000.0f;
 		RainNumParticles = 50000;
 		RainMoveParticles = true;
-		RainGlobalVelocity = DirectX::SimpleMath::Vector3(250, -1000, 0);
+		RainGlobalVelocity = D3DXVECTOR3(250, -1000, 0);
 		RainUseInitialSet = false;
 		RainSceneWettness = 0.0f;
 		RainSunLightStrength = 0.50f;
-		RainFogColor = DirectX::SimpleMath::Vector3(0.28f, 0.28f, 0.28f);
+		RainFogColor = D3DXVECTOR3(0.28f, 0.28f, 0.28f);
 		RainFogDensity = 0.00500f;
 
 		GodRayDecay = 0.97f;
@@ -675,11 +675,11 @@ struct GothicRendererSettings {
 	UINT RainNumParticles;
 	bool RainMoveParticles;
 	bool RainUseInitialSet;
-	DirectX::SimpleMath::Vector3 RainGlobalVelocity;
+	D3DXVECTOR3 RainGlobalVelocity;
 	float RainSceneWettness;
 
 	float RainSunLightStrength;
-	DirectX::SimpleMath::Vector3 RainFogColor;
+	D3DXVECTOR3 RainFogColor;
 	float RainFogDensity;
 
 	bool AllowNormalmaps;

@@ -49,7 +49,7 @@ const int NUM_UNLOADEDTEXCOUNT_FORCE_LOAD_TEXTURES = 100;
 
 const float DEFAULT_NORMALMAP_STRENGTH = 0.10f;
 const float DEFAULT_FAR_PLANE = 50000.0f;
-const auto UNDERWATER_COLOR_MOD = DirectX::SimpleMath::Vector4(0.5f, 0.7f, 1.0f, 1.0f);
+const D3DXVECTOR4 UNDERWATER_COLOR_MOD = D3DXVECTOR4(0.5f, 0.7f, 1.0f, 1.0f);
 
 const float NUM_FRAME_SHADOW_UPDATES =
 2;  // Fraction of lights to update per frame
@@ -321,8 +321,7 @@ XRESULT D3D11GraphicsEngine::Init() {
 		nullptr, sizeof(float4));
 
 	// Init inf-buffer now
-	auto const&& cbData = DirectX::SimpleMath::Vector4(FLT_MAX, 0, 0, 0);
-	InfiniteRangeConstantBuffer->UpdateBuffer(&cbData);
+	InfiniteRangeConstantBuffer->UpdateBuffer(&D3DXVECTOR4(FLT_MAX, 0, 0, 0));
 
 	// Load reflectioncube
 	if (S_OK != D3DX11CreateShaderResourceViewFromFile(
@@ -692,9 +691,9 @@ XRESULT D3D11GraphicsEngine::Clear(const float4& color) {
 		(float*)& color);
 	GetContext()->ClearRenderTargetView(
 		GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView(),
-		(float*)&Vector4::Zero);
+		(float*)& D3DXVECTOR4(0, 0, 0, 0));
 	GetContext()->ClearRenderTargetView(HDRBackBuffer->GetRenderTargetView(),
-		(float*)&Vector4::Zero);
+		(float*)& D3DXVECTOR4(0, 0, 0, 0));
 
 	return XR_SUCCESS;
 }
@@ -1222,7 +1221,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferFF(D3D11VertexBuffer* vb,
 /** Draws a skeletal mesh */
 XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh(
 	D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices,
-	const std::vector<DirectX::SimpleMath::Matrix>& transforms, float fatness) {
+	const std::vector<D3DXMATRIX>& transforms, float fatness) {
 	GetContext()->RSSetState(WorldRasterizerState.Get());
 	GetContext()->OMSetDepthStencilState(DefaultDepthStencilState.Get(), 0);
 
@@ -1239,9 +1238,9 @@ XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh(
 
 	InfiniteRangeConstantBuffer->BindToPixelShader(3);
 
-	const DirectX::SimpleMath::Matrix& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
-	const DirectX::SimpleMath::Matrix& view  = Engine::GAPI->GetRendererState()->TransformState.TransformView;
-	const DirectX::SimpleMath::Matrix& proj  = Engine::GAPI->GetProjectionMatrix();
+	const D3DXMATRIX& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
+	const D3DXMATRIX& view  = Engine::GAPI->GetRendererState()->TransformState.TransformView;
+	const D3DXMATRIX& proj  = Engine::GAPI->GetProjectionMatrix();
 
 	SetupVS_ExMeshDrawCall();
 	SetupVS_ExConstantBuffer();
@@ -1302,17 +1301,17 @@ XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh(
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
 	// Copy bones
-	memcpy(TempBones, &transforms[0],
-		sizeof(DirectX::SimpleMath::Matrix) *
-		std::min(transforms.size(), sizeof(TempBones) /
-			sizeof(TempBones[0])));
-	ActiveVS->GetConstantBuffer()[2]->UpdateBuffer(TempBones);
+	memcpy(TempBonesD3DXmatrix, &transforms[0],
+		sizeof(D3DXMATRIX) *
+		std::min(transforms.size(), sizeof(TempBonesD3DXmatrix) /
+			sizeof(TempBonesD3DXmatrix[0])));
+	ActiveVS->GetConstantBuffer()[2]->UpdateBuffer(TempBonesD3DXmatrix);
 	ActiveVS->GetConstantBuffer()[2]->BindToVertexShader(2);
 
 	if (transforms.size() >=
-		sizeof(TempBones) / sizeof(TempBones[0])) {
+		sizeof(TempBonesD3DXmatrix) / sizeof(TempBonesD3DXmatrix[0])) {
 		LogWarn() << "SkeletalMesh has more than "
-			<< sizeof(TempBones) / sizeof(TempBones[0])
+			<< sizeof(TempBonesD3DXmatrix) / sizeof(TempBonesD3DXmatrix[0])
 			<< " bones! (" << transforms.size() << ")Up this limit!";
 	}
 
@@ -1393,11 +1392,11 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
 	// Bind shader and pipeline flags
 	D3D11VShader* vShader = ShaderManager->GetVShader("VS_ExInstanced");
 
-	DirectX::SimpleMath::Matrix& world =
+	D3DXMATRIX& world =
 		Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
-	DirectX::SimpleMath::Matrix& view =
+	D3DXMATRIX& view =
 		Engine::GAPI->GetRendererState()->TransformState.TransformView;
-	DirectX::SimpleMath::Matrix& proj = Engine::GAPI->GetProjectionMatrix();
+	D3DXMATRIX& proj = Engine::GAPI->GetProjectionMatrix();
 
 	VS_ExConstantBuffer_PerFrame cb;
 	cb.View = view;
@@ -1530,7 +1529,7 @@ XRESULT D3D11GraphicsEngine::UpdateRenderStates() {
 		FFRasterizerStateHash = Engine::GAPI->GetRendererState()->BlendState.Hash;
 
 		Engine::GAPI->GetRendererState()->BlendState.StateDirty = false;
-		GetContext()->OMSetBlendState(FFBlendState.Get(), (float*)&Vector4::Zero,
+		GetContext()->OMSetBlendState(FFBlendState.Get(), (float*)& D3DXVECTOR4(0, 0, 0, 0),
 			0xFFFFFFFF);
 	}
 
@@ -1629,13 +1628,12 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 	GetContext()->PSSetSamplers(0, 1, DefaultSamplerState.GetAddressOf());
 
 	// Update view distances
-	auto cbData = DirectX::SimpleMath::Vector4(FLT_MAX, 0, 0, 0);
-	InfiniteRangeConstantBuffer->UpdateBuffer(&cbData);
+	InfiniteRangeConstantBuffer->UpdateBuffer(&D3DXVECTOR4(FLT_MAX, 0, 0, 0));
 	OutdoorSmallVobsConstantBuffer->UpdateBuffer(
-		&DirectX::SimpleMath::Vector4(Engine::GAPI->GetRendererState()
+		&D3DXVECTOR4(Engine::GAPI->GetRendererState()
 			->RendererSettings.OutdoorSmallVobDrawRadius,
 			0, 0, 0));
-	OutdoorVobsConstantBuffer->UpdateBuffer(&DirectX::SimpleMath::Vector4(
+	OutdoorVobsConstantBuffer->UpdateBuffer(&D3DXVECTOR4(
 		Engine::GAPI->GetRendererState()->RendererSettings.OutdoorVobDrawRadius,
 		0, 0, 0));
 
@@ -1774,11 +1772,11 @@ void D3D11GraphicsEngine::SetupVS_ExMeshDrawCall() {
 }
 
 void D3D11GraphicsEngine::SetupVS_ExConstantBuffer() {
-	DirectX::SimpleMath::Matrix& world =
+	D3DXMATRIX& world =
 		Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
-	DirectX::SimpleMath::Matrix& view =
+	D3DXMATRIX& view =
 		Engine::GAPI->GetRendererState()->TransformState.TransformView;
-	DirectX::SimpleMath::Matrix& proj = Engine::GAPI->GetProjectionMatrix();
+	D3DXMATRIX& proj = Engine::GAPI->GetProjectionMatrix();
 
 	VS_ExConstantBuffer_PerFrame cb;
 	cb.View = view;
@@ -1793,7 +1791,7 @@ void D3D11GraphicsEngine::SetupVS_ExConstantBuffer() {
 }
 
 void D3D11GraphicsEngine::SetupVS_ExPerInstanceConstantBuffer() {
-	DirectX::SimpleMath::Matrix& world =
+	D3DXMATRIX& world =
 		Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
 
 	VS_ExConstantBuffer_PerInstance cb;
@@ -1805,7 +1803,7 @@ void D3D11GraphicsEngine::SetupVS_ExPerInstanceConstantBuffer() {
 
 /** Puts the current world matrix into a CB and binds it to the given slot */
 void D3D11GraphicsEngine::SetupPerInstanceConstantBuffer(int slot) {
-	DirectX::SimpleMath::Matrix& world =
+	D3DXMATRIX& world =
 		Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
 
 	VS_ExConstantBuffer_PerInstance cb;
@@ -1874,7 +1872,7 @@ XRESULT D3D11GraphicsEngine::DrawMeshInfoListAlphablended(
 	Engine::GAPI->GetRendererState()->RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
 	Engine::GAPI->GetRendererState()->RasterizerState.SetDirty();
 
-	DirectX::SimpleMath::Matrix view;
+	D3DXMATRIX view;
 	Engine::GAPI->GetViewMatrix(&view);
 	Engine::GAPI->SetViewTransform(view);
 	Engine::GAPI->ResetWorldTransform();
@@ -1894,7 +1892,8 @@ XRESULT D3D11GraphicsEngine::DrawMeshInfoListAlphablended(
 	ActivePS->GetConstantBuffer()[1]->UpdateBuffer(&sky->GetAtmosphereCB());
 	ActivePS->GetConstantBuffer()[1]->BindToPixelShader(1);
 
-	DirectX::SimpleMath::Matrix id = DirectX::SimpleMath::Matrix::Identity;
+	D3DXMATRIX id;
+	D3DXMatrixIdentity(&id);
 	ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&id);
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
@@ -1999,7 +1998,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh(bool noTextures) {
 		GothicRasterizerStateInfo::CM_CULL_BACK;
 	Engine::GAPI->GetRendererState()->RasterizerState.SetDirty();
 
-	DirectX::SimpleMath::Matrix view;
+	D3DXMATRIX view;
 	Engine::GAPI->GetViewMatrix(&view);
 	Engine::GAPI->SetViewTransform(view);
 	Engine::GAPI->ResetWorldTransform();
@@ -2022,7 +2021,8 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh(bool noTextures) {
 	ActivePS->GetConstantBuffer()[1]->UpdateBuffer(&sky->GetAtmosphereCB());
 	ActivePS->GetConstantBuffer()[1]->BindToPixelShader(1);
 
-	DirectX::SimpleMath::Matrix id = DirectX::SimpleMath::Matrix::Identity;
+	D3DXMATRIX id;
+	D3DXMatrixIdentity(&id);
 	ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&id);
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
@@ -2321,13 +2321,13 @@ XRESULT D3D11GraphicsEngine::DrawWorldMeshW(bool noTextures) {
 	if (!Engine::GAPI->GetRendererState()->RendererSettings.DrawWorldMesh)
 		return XR_SUCCESS;
 
-	auto camPos = Engine::GAPI->GetCameraPosition();
+	D3DXVECTOR3 camPos = Engine::GAPI->GetCameraPosition();
 
 	// Engine::GAPI->SetFarPlane(DEFAULT_FAR_PLANE);
 
 	INT2 camSection = WorldConverter::GetSectionOfPos(camPos);
 
-	DirectX::SimpleMath::Matrix view;
+	D3DXMATRIX view;
 	Engine::GAPI->GetViewMatrix(&view);
 
 	// Setup renderstates
@@ -2367,7 +2367,8 @@ XRESULT D3D11GraphicsEngine::DrawWorldMeshW(bool noTextures) {
 	SetupVS_ExMeshDrawCall();
 	SetupVS_ExConstantBuffer();
 
-	DirectX::SimpleMath::Matrix id = DirectX::SimpleMath::Matrix::Identity;
+	D3DXMATRIX id;
+	D3DXMatrixIdentity(&id);
 	ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&id);
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
@@ -2609,7 +2610,7 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 		GothicDepthBufferStateInfo::CF_COMPARISON_LESS;
 	Engine::GAPI->GetRendererState()->DepthState.SetDirty();
 
-	DirectX::SimpleMath::Matrix view;
+	D3DXMATRIX view;
 	Engine::GAPI->GetViewMatrix(&view);
 	Engine::GAPI->SetViewTransform(view);  // Update view transform
 
@@ -2619,7 +2620,8 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 	SetupVS_ExMeshDrawCall();
 	SetupVS_ExConstantBuffer();
 
-	DirectX::SimpleMath::Matrix id = DirectX::SimpleMath::Matrix::Identity;
+	D3DXMATRIX id;
+	D3DXMatrixIdentity(&id);
 	ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&id);
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
@@ -2680,7 +2682,7 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 
 /** Draws everything around the given position */
 void D3D11GraphicsEngine::DrawWorldAround(
-	const DirectX::SimpleMath::Vector3& position, float range, bool cullFront, bool indoor,
+	const D3DXVECTOR3& position, float range, bool cullFront, bool indoor,
 	bool noNPCs, std::list<VobInfo*>* renderedVobs,
 	std::list<SkeletalVobInfo*>* renderedMobs,
 	std::map<MeshKey, WorldMeshInfo*, cmpMeshKey>* worldMeshCache) {
@@ -2715,7 +2717,8 @@ void D3D11GraphicsEngine::DrawWorldAround(
 	SetupVS_ExMeshDrawCall();
 	SetupVS_ExConstantBuffer();
 
-	DirectX::SimpleMath::Matrix id = DirectX::SimpleMath::Matrix::Identity;
+	D3DXMATRIX id;
+	D3DXMatrixIdentity(&id);
 	ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&id);
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
@@ -2726,7 +2729,7 @@ void D3D11GraphicsEngine::DrawWorldAround(
 	ActivePS->GetConstantBuffer()[3]->BindToPixelShader(3);
 
 	INT2 s = WorldConverter::GetSectionOfPos(position);
-	auto camXZ = DirectX::SimpleMath::Vector2(position.x, position.z);
+	D3DXVECTOR2 camXZ = D3DXVECTOR2(position.x, position.z);
 
 	float vobOutdoorDist =
 		Engine::GAPI->GetRendererState()->RendererSettings.OutdoorVobDrawRadius;
@@ -2753,7 +2756,8 @@ void D3D11GraphicsEngine::DrawWorldAround(
 			Engine::GAPI->GetWrappedWorldMesh()->MeshVertexBuffer,
 			Engine::GAPI->GetWrappedWorldMesh()->MeshIndexBuffer, 0, 0);
 
-		DirectX::SimpleMath::Matrix id = DirectX::SimpleMath::Matrix::Identity;
+		D3DXMATRIX id;
+		D3DXMatrixIdentity(&id);
 		ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&id);
 		ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
@@ -2874,7 +2878,7 @@ void D3D11GraphicsEngine::DrawWorldAround(
 					}
 
 					// Check vob range
-					float dist = (position - (*it)->LastRenderPosition).Length();
+					float dist = D3DXVec3Length(&(position - (*it)->LastRenderPosition));
 					if (dist > range) {
 						continue;
 					}
@@ -2954,7 +2958,8 @@ void D3D11GraphicsEngine::DrawWorldAround(
 				}
 
 				// Check vob range
-				float dist = (position - (*it)->Vob->GetPositionWorld()).Length();
+				float dist =
+					D3DXVec3Length(&(position - (*it)->Vob->GetPositionWorld()));
 				if (dist > range) {
 					continue;
 				}
@@ -2996,7 +3001,8 @@ void D3D11GraphicsEngine::DrawWorldAround(
 					continue;
 				}
 				// Check vob range
-				float dist = (position - skeletalMeshVob->Vob->GetPositionWorld()).Length();
+				float dist =
+					D3DXVec3Length(&(position - skeletalMeshVob->Vob->GetPositionWorld()));
 				if (dist > range) {
 					// Not in range
 					continue;
@@ -3015,7 +3021,7 @@ void D3D11GraphicsEngine::DrawWorldAround(
 }
 
 /** Draws everything around the given position */
-void D3D11GraphicsEngine::DrawWorldAround(const DirectX::SimpleMath::Vector3& position,
+void D3D11GraphicsEngine::DrawWorldAround(const D3DXVECTOR3& position,
 	int sectionRange, float vobXZRange,
 	bool cullFront, bool dontCull) {
 	// Setup renderstates
@@ -3033,7 +3039,7 @@ void D3D11GraphicsEngine::DrawWorldAround(const DirectX::SimpleMath::Vector3& po
 	Engine::GAPI->GetRendererState()->DepthState.SetDefault();
 	Engine::GAPI->GetRendererState()->DepthState.SetDirty();
 
-	DirectX::SimpleMath::Matrix view;
+	D3DXMATRIX view;
 	Engine::GAPI->GetViewMatrix(&view);
 
 	Engine::GAPI->ResetWorldTransform();
@@ -3066,7 +3072,8 @@ void D3D11GraphicsEngine::DrawWorldAround(const DirectX::SimpleMath::Vector3& po
 	SetupVS_ExMeshDrawCall();
 	SetupVS_ExConstantBuffer();
 
-	DirectX::SimpleMath::Matrix id = DirectX::SimpleMath::Matrix::Identity;
+	D3DXMATRIX id;
+	D3DXMatrixIdentity(&id);
 	ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&id);
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
@@ -3077,7 +3084,7 @@ void D3D11GraphicsEngine::DrawWorldAround(const DirectX::SimpleMath::Vector3& po
 	ActivePS->GetConstantBuffer()[3]->BindToPixelShader(3);
 
 	INT2 s = WorldConverter::GetSectionOfPos(position);
-	auto camXZ = DirectX::SimpleMath::Vector2(position.x, position.z);
+	D3DXVECTOR2 camXZ = D3DXVECTOR2(position.x, position.z);
 
 	float vobOutdoorDist =
 		Engine::GAPI->GetRendererState()->RendererSettings.OutdoorVobDrawRadius;
@@ -3102,7 +3109,8 @@ void D3D11GraphicsEngine::DrawWorldAround(const DirectX::SimpleMath::Vector3& po
 			Engine::GAPI->GetWrappedWorldMesh()->MeshVertexBuffer,
 			Engine::GAPI->GetWrappedWorldMesh()->MeshIndexBuffer, 0, 0);
 
-		DirectX::SimpleMath::Matrix id = DirectX::SimpleMath::Matrix::Identity;
+		D3DXMATRIX id;
+		D3DXMatrixIdentity(&id);
 		ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&id);
 		ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
@@ -3112,9 +3120,9 @@ void D3D11GraphicsEngine::DrawWorldAround(const DirectX::SimpleMath::Vector3& po
 			for (std::map<int, WorldMeshSectionInfo>::iterator ity =
 				(*itx).second.begin();
 				ity != (*itx).second.end(); ity++) {
-				auto a = DirectX::SimpleMath::Vector2((float)((*itx).first - s.x),
+				D3DXVECTOR2 a = D3DXVECTOR2((float)((*itx).first - s.x),
 					static_cast<float>(((*ity).first - s.y)));
-				if (a.Length() < sectionRange) {
+				if (D3DXVec2Length(&a) < sectionRange) {
 					WorldMeshSectionInfo& section = (*ity).second;
 
 					if (Engine::GAPI->GetRendererState()->RendererSettings.FastShadows) {
@@ -3178,7 +3186,7 @@ void D3D11GraphicsEngine::DrawWorldAround(const DirectX::SimpleMath::Vector3& po
 		const std::unordered_map<zCProgMeshProto*, MeshVisualInfo*>& staticMeshVisuals =
 			Engine::GAPI->GetStaticMeshVisuals();
 
-		auto camPos = Engine::GAPI->GetCameraPosition();
+		D3DXVECTOR3 camPos = Engine::GAPI->GetCameraPosition();
 		float shadowRange = Engine::GAPI->GetRendererState()
 			->RendererSettings.WorldShadowRangeScale *
 			WorldShadowmap1->GetSizeX();
@@ -3292,7 +3300,7 @@ void D3D11GraphicsEngine::DrawWorldAround(const DirectX::SimpleMath::Vector3& po
 
 			INT2 s = WorldConverter::GetSectionOfPos(skeletalMeshVob->Vob->GetPositionWorld());
 
-			float dist = (skeletalMeshVob->Vob->GetPositionWorld() - position).Length();
+			float dist = D3DXVec3Length(&(skeletalMeshVob->Vob->GetPositionWorld() - position));
 			if (dist > Engine::GAPI->GetRendererState()
 				->RendererSettings.IndoorVobDrawRadius)
 				continue;  // Skip out of range
@@ -3334,10 +3342,10 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 	ActivePS->GetConstantBuffer()[2]->UpdateBuffer(&defInfo);
 	ActivePS->GetConstantBuffer()[2]->BindToPixelShader(2);
 
-	auto camPos = Engine::GAPI->GetCameraPosition();
+	D3DXVECTOR3 camPos = Engine::GAPI->GetCameraPosition();
 	INT2 camSection = WorldConverter::GetSectionOfPos(camPos);
 
-	DirectX::SimpleMath::Matrix view;
+	D3DXMATRIX view;
 	Engine::GAPI->GetViewMatrix(&view);
 	Engine::GAPI->SetViewTransform(view);
 
@@ -3423,7 +3431,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 			if (staticMeshVisual.second->MeshSize <
 				Engine::GAPI->GetRendererState()->RendererSettings.SmallVobSize) {
 				OutdoorSmallVobsConstantBuffer->UpdateBuffer(
-					&DirectX::SimpleMath::Vector4(Engine::GAPI->GetRendererState()
+					&D3DXVECTOR4(Engine::GAPI->GetRendererState()
 						->RendererSettings.OutdoorSmallVobDrawRadius -
 						staticMeshVisual.second->MeshSize,
 						0, 0, 0));
@@ -3431,7 +3439,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 			}
 			else {
 				OutdoorVobsConstantBuffer->UpdateBuffer(
-					&DirectX::SimpleMath::Vector4(Engine::GAPI->GetRendererState()
+					&D3DXVECTOR4(Engine::GAPI->GetRendererState()
 						->RendererSettings.OutdoorVobDrawRadius -
 						staticMeshVisual.second->MeshSize,
 						0, 0, 0));
@@ -3534,7 +3542,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 						else {
 #ifndef PUBLIC_RELEASE
 							for (size_t s = 0; s < staticMeshVisual.second->Instances.size(); s++) {
-								DirectX::SimpleMath::Vector3 pos =
+								D3DXVECTOR3 pos =
 									D3DXVECTOR3(staticMeshVisual.second->Instances[s].world._14,
 										staticMeshVisual.second->Instances[s].world._24,
 										staticMeshVisual.second->Instances[s].world._34);
@@ -3917,10 +3925,10 @@ XRESULT D3D11GraphicsEngine::DrawSky() {
 	}
 	// Create a rotaion only view-matrix
 	Matrix invView;
-	Engine::GAPI->GetInverseViewMatrix(&invView);
+	Engine::GAPI->GetInverseViewMatrixDX(&invView);
 
 	Matrix view;
-	Engine::GAPI->GetViewMatrix(&view);
+	Engine::GAPI->GetViewMatrixDX(&view);
 
 	Matrix scale = XMMatrixScaling(
 		sky->GetAtmoshpereSettings().OuterRadius,
@@ -3937,10 +3945,10 @@ XRESULT D3D11GraphicsEngine::DrawSky() {
 	world = XMMatrixTranspose(scale * world);
 
 	// Apply world matrix
-	Matrix d3dxWorld;
-	XMStoreFloat4x4(&d3dxWorld, world);
+	D3DXMATRIX d3dxWorld;
+	XMStoreFloat4x4((Matrix*)&d3dxWorld, world);
 	Engine::GAPI->SetWorldTransform(d3dxWorld);
-	Engine::GAPI->SetViewTransform(view);
+	Engine::GAPI->SetViewTransform(DX4x4ToD3DXMat(view));
 
 	if (sky->GetAtmosphereCB().AC_CameraHeight >
 		sky->GetAtmosphereCB().AC_OuterRadius) {
@@ -4061,12 +4069,12 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	// Draw world shadows
 	// ********************************
 	CameraReplacement cr;
-	Vector3 cameraPosition = Engine::GAPI->GetCameraPosition();
+	D3DXVECTOR3 cameraPosition = Engine::GAPI->GetCameraPosition();
 	auto playerPosition =
 		Engine::GAPI->GetPlayerVob() != nullptr
-		? Engine::GAPI->GetPlayerVob()->GetPositionWorld()
+		? Engine::GAPI->GetPlayerVob()->GetPositionWorldDX()
 		: Vector3(FLT_MAX, FLT_MAX, FLT_MAX);
-	Vector3 vPlayerPosition = XMLoadFloat3(&playerPosition);
+	XMVECTOR vPlayerPosition = XMLoadFloat3(&playerPosition);
 
 	bool partialShadowUpdate = Engine::GAPI->GetRendererState()->RendererSettings.PartialDynamicShadowUpdates;
 
@@ -4098,7 +4106,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 							// Always render the closest light to the playervob, so the player
 							// doesn't flicker when moving
 							float d;
-							XMStoreFloat(&d, XMVector3LengthSq(XMVectorSubtract(light->Vob->GetPositionWorld(), vPlayerPosition)));
+							XMStoreFloat(&d, XMVector3LengthSq(XMVectorSubtract(light->Vob->GetPositionWorldDX(), vPlayerPosition)));
 
 							float range = light->Vob->GetLightRange();
 							if (d < range * range &&
@@ -4114,7 +4122,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 						// Always render the closest light to the playervob, so the player
 						// doesn't flicker when moving
 						float d;
-						XMStoreFloat(&d, XMVector3LengthSq(XMVectorSubtract(light->Vob->GetPositionWorld(), vPlayerPosition)));
+						XMStoreFloat(&d, XMVector3LengthSq(XMVectorSubtract(light->Vob->GetPositionWorldDX(), vPlayerPosition)));
 						
 						float range = light->Vob->GetLightRange() * 1.5f;
 
@@ -4159,24 +4167,25 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 
 	// Get shadow direction, but don't update every frame, to get around
 	// flickering
-	auto dir = *Engine::GAPI->GetSky()->GetAtmosphereCB().AC_LightPos.toVector3();
-	static auto oldDir = dir;
-	static auto smoothDir = dir;
+	D3DXVECTOR3 dir =
+		*Engine::GAPI->GetSky()->GetAtmosphereCB().AC_LightPos.toD3DXVECTOR3();
+	static D3DXVECTOR3 oldDir = dir;
+	static D3DXVECTOR3 smoothDir = dir;
 
-	static auto oldP = DirectX::SimpleMath::Vector3(0, 0, 0);
+	static D3DXVECTOR3 oldP = D3DXVECTOR3(0, 0, 0);
 
-	DirectX::SimpleMath::Vector3 WorldShadowCP;
+	D3DXVECTOR3 WorldShadowCP;
 
 	// Update dir
-	if (fabs(oldDir.Dot(dir)) > 0.9995f && false) {
+	if (fabs(D3DXVec3Dot(&oldDir, &dir)) > 0.9995f && false) {
 		dir = oldDir;
 	}
 	else {
-		DirectX::SimpleMath::Vector3 target = dir;
+		D3DXVECTOR3 target = dir;
 
 		// Smoothly transition to the next state and wait there
-		if (fabs(smoothDir.Dot(dir)) < 0.99995f)  // but cut it off somewhere or the pixels will flicker
-			dir = DirectX::SimpleMath::Vector3::Lerp(smoothDir, target, Engine::GAPI->GetFrameTimeSec() * 2.0f);
+		if (fabs(D3DXVec3Dot(&smoothDir, &dir)) < 0.99995f)  // but cut it off somewhere or the pixels will flicker
+			D3DXVec3Lerp(&dir, &smoothDir, &target, Engine::GAPI->GetFrameTimeSec() * 2.0f);
 		else
 			oldDir = dir;
 
@@ -4188,12 +4197,11 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	// Update position
 	// Try to update only if the camera went 500 units away from
 	// the last position
-	const float len = (oldP - cameraPosition).Length();
-	if ((len < 64 &&
+	if ((D3DXVec3Length(&(oldP - cameraPosition)) < 64 &&
 		// And is on even space
 		(cameraPosition.x - (int)cameraPosition.x) < 0.1f &&
 		// but don't let it go too far
-		(cameraPosition.y - (int)cameraPosition.y) < 0.1f) || len < 600.0f)
+		(cameraPosition.y - (int)cameraPosition.y) < 0.1f) || D3DXVec3Length(&(oldP - cameraPosition)) < 600.0f)
 	{
 		WorldShadowCP = oldP;
 	}
@@ -4205,23 +4213,23 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	// Get the section we are currently in
 	INT2 cameraSection            = WorldConverter::GetSectionOfPos(WorldShadowCP);
 	WorldMeshSectionInfo& section = Engine::GAPI->GetWorldSections()[cameraSection.x][cameraSection.y];
-	DirectX::SimpleMath::Vector3 p                 = WorldShadowCP;
+	D3DXVECTOR3 p                 = WorldShadowCP;
 	// Set the camera height to the highest point in this section
 	p += dir * 6000.0f;
 
-	DirectX::SimpleMath::Vector3 lookAt = p;
+	D3DXVECTOR3 lookAt = p;
 	lookAt -= dir;
 
 	// Create shadowmap view-matrix
-	cr.ViewReplacement = DirectX::XMMatrixLookAtLH(p, lookAt, Vector3(0, 1, 0));
-	cr.ViewReplacement = DirectX::XMMatrixTranspose(cr.ViewReplacement);
+	D3DXMatrixLookAtLH(&cr.ViewReplacement, &p, &lookAt, &D3DXVECTOR3(0, 1, 0));
+	D3DXMatrixTranspose(&cr.ViewReplacement, &cr.ViewReplacement);
 
-	cr.ProjectionReplacement = DirectX::XMMatrixOrthographicLH(
+	D3DXMatrixOrthoLH(&cr.ProjectionReplacement,
 		WorldShadowmap1->GetSizeX() * Engine::GAPI->GetRendererState()->RendererSettings.WorldShadowRangeScale,
 		WorldShadowmap1->GetSizeX() * Engine::GAPI->GetRendererState()->RendererSettings.WorldShadowRangeScale,
 		1,
 		20000.0f);
-	cr.ProjectionReplacement = cr.ProjectionReplacement.Transpose();
+	D3DXMatrixTranspose(&cr.ProjectionReplacement, &cr.ProjectionReplacement);
 
 	cr.PositionReplacement = p;
 	cr.LookAtReplacement = lookAt;
@@ -4245,7 +4253,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 		Effects->DrawRainShadowmap();
 	}
 
-	DirectX::SimpleMath::Matrix view;
+	D3DXMATRIX view;
 	Engine::GAPI->GetViewMatrix(&view);
 	Engine::GAPI->SetViewTransform(view);
 
@@ -4281,11 +4289,11 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	// Set the main rendertarget
 	GetContext()->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView());
 
-	view = view.Transpose();
+	D3DXMatrixTranspose(&view, &view);
 
 	DS_PointLightConstantBuffer plcb;
-	plcb.PL_InvProj = Engine::GAPI->GetProjectionMatrix().Invert();
-	plcb.PL_InvView = Engine::GAPI->GetRendererState()->TransformState.TransformView.Invert();
+	D3DXMatrixInverse(&plcb.PL_InvProj, nullptr, &Engine::GAPI->GetProjectionMatrix());
+	D3DXMatrixInverse(&plcb.PL_InvView, nullptr, &Engine::GAPI->GetRendererState()->TransformState.TransformView);
 	plcb.PL_ViewportSize = float2(static_cast<float>(Resolution.x), static_cast<float>(Resolution.y));
 
 	GBuffer0_Diffuse->BindToPixelShader(GetContext(), 0);
@@ -4326,7 +4334,8 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 		plcb.Pl_PositionWorld = vob->GetPositionWorld();
 		plcb.PL_Outdoor = light->IsIndoorVob ? 0.0f : 1.0f;
 
-		float dist = (*plcb.Pl_PositionWorld.toVector3() - Engine::GAPI->GetCameraPosition()).Length();
+		float dist = D3DXVec3Length(&(*plcb.Pl_PositionWorld.toD3DXVECTOR3() -
+			Engine::GAPI->GetCameraPosition()));
 
 		// Gradually fade in the lights
 		if (dist + plcb.PL_Range <
@@ -4353,12 +4362,13 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 		plcb.PL_Color.y *= lightFactor;
 		plcb.PL_Color.z *= lightFactor;
 
-		Vector3 Pl_PositionWorld = *plcb.Pl_PositionWorld.toVector3();
+		auto const&& Pl_PositionWorld = plcb.Pl_PositionWorld.toD3DXVECTOR3();
 		// Need that in view space
-		plcb.Pl_PositionView = (Vector3)XMVector3TransformCoord(Pl_PositionWorld, view);
-		plcb.PL_LightScreenPos = (Vector3)XMVector3TransformCoord(
+		D3DXVec3TransformCoord(plcb.Pl_PositionView.toD3DXVECTOR3(),
+			Pl_PositionWorld, &view);
+		D3DXVec3TransformCoord(plcb.PL_LightScreenPos.toD3DXVECTOR3(),
 			Pl_PositionWorld,
-			Engine::GAPI->GetProjectionMatrix());
+			&Engine::GAPI->GetProjectionMatrix());
 
 		if (dist < plcb.PL_Range) {
 			if (Engine::GAPI->GetRendererState()->DepthState.DepthBufferEnabled) {
@@ -4440,9 +4450,9 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	scb.SQ_View =
 		Engine::GAPI->GetRendererState()->TransformState.TransformView;
 
-	scb.SQ_LightDirectionVS = (Vector3)XMVector3TransformNormal(
-		*sky->GetAtmosphereCB().AC_LightPos.toVector3(),
-		view);
+	D3DXVec3TransformNormal(scb.SQ_LightDirectionVS.toD3DXVECTOR3(),
+		sky->GetAtmosphereCB().AC_LightPos.toD3DXVECTOR3(),
+		&view);
 
 	float3 sunColor =
 		Engine::GAPI->GetRendererState()->RendererSettings.SunLightColor;
@@ -4540,7 +4550,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 
 /** Renders the shadowmaps for a pointlight */
 void D3D11GraphicsEngine::RenderShadowCube(
-	const DirectX::SimpleMath::Vector3& position, float range,
+	const D3DXVECTOR3& position, float range,
 	RenderToDepthStencilBuffer* targetCube, ID3D11DepthStencilView* face,
 	ID3D11RenderTargetView* debugRTV, bool cullFront, bool indoor, bool noNPCs,
 	std::list<VobInfo*>* renderedVobs,
@@ -4626,7 +4636,7 @@ void D3D11GraphicsEngine::RenderShadowCube(
 }
 
 /** Renders the shadowmaps for the sun */
-void D3D11GraphicsEngine::RenderShadowmaps(const DirectX::SimpleMath::Vector3& cameraPosition,
+void D3D11GraphicsEngine::RenderShadowmaps(const D3DXVECTOR3& cameraPosition,
 	RenderToDepthStencilBuffer* target,
 	bool cullFront, bool dontCull,
 	ID3D11DepthStencilView* dsvOverwrite,
@@ -4733,7 +4743,7 @@ void D3D11GraphicsEngine::DrawVobSingle(VobInfo* vob) {
 	GetContext()->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
 		DepthStencilBuffer->GetDepthStencilView());
 
-	DirectX::SimpleMath::Matrix view;
+	D3DXMATRIX view;
 	Engine::GAPI->GetViewMatrix(&view);
 	Engine::GAPI->SetViewTransform(view);
 
@@ -4892,11 +4902,11 @@ XRESULT D3D11GraphicsEngine::DrawOcean(GOcean* ocean) {
 	// Bind depth to the shader
 	DepthStencilBufferCopy->BindToPixelShader(GetContext(), 2);
 
-	std::vector<Vector3> patches;
+	std::vector<D3DXVECTOR3> patches;
 	ocean->GetPatchLocations(patches);
 
 	Matrix view;
-	Engine::GAPI->GetViewMatrix(&view);
+	Engine::GAPI->GetViewMatrixDX(&view);
 	XMMATRIX viewMatrix = XMLoadFloat4x4(&view);
 
 	viewMatrix = XMMatrixTranspose(viewMatrix);
@@ -5120,9 +5130,9 @@ void D3D11GraphicsEngine::DrawDecalList(const std::vector<zCVob*>& decals,
 	Engine::GAPI->GetRendererState()->DepthState.DepthWriteEnabled = false;
 	Engine::GAPI->GetRendererState()->DepthState.SetDirty();
 
-	DirectX::SimpleMath::Vector3 camBack = -Engine::GAPI->GetCameraForward();
+	D3DXVECTOR3 camBack = -Engine::GAPI->GetCameraForward();
 
-	DirectX::SimpleMath::Matrix view;
+	D3DXMATRIX view;
 	Engine::GAPI->GetViewMatrix(&view);
 
 	// Set up alpha
@@ -5180,15 +5190,19 @@ void D3D11GraphicsEngine::DrawDecalList(const std::vector<zCVob*>& decals,
 
 		int alignment = decals[i]->GetAlignment();
 
-		Matrix world;
+		D3DXMATRIX world;
 		decals[i]->GetWorldMatrix(&world);
 
-		auto offset = Matrix::CreateTranslation(d->GetDecalSettings()->DecalOffset.x, -d->GetDecalSettings()->DecalOffset.y, 0);
+		D3DXMATRIX offset;
+		D3DXMatrixTranslation(&offset, d->GetDecalSettings()->DecalOffset.x,
+			-d->GetDecalSettings()->DecalOffset.y, 0);
 
-		Matrix scale = Matrix::CreateScale(d->GetDecalSettings()->DecalSize.x * 2, -d->GetDecalSettings()->DecalSize.y * 2, 1);
-		scale = scale.Transpose();
+		D3DXMATRIX scale;
+		D3DXMatrixScaling(&scale, d->GetDecalSettings()->DecalSize.x * 2,
+			-d->GetDecalSettings()->DecalSize.y * 2, 1);
+		D3DXMatrixTranspose(&scale, &scale);
 
-		Matrix mat = view * world;
+		D3DXMATRIX mat = view * world;
 
 		if (alignment == zVISUAL_CAM_ALIGN_FULL ||
 			alignment == zVISUAL_CAM_ALIGN_YAW) {
@@ -5205,7 +5219,7 @@ void D3D11GraphicsEngine::DrawDecalList(const std::vector<zCVob*>& decals,
 		mat = mat * offset * scale;
 
 		ParticleInstanceInfo ii;
-		ii.scale = Vector2(50, 50);
+		ii.scale = D3DXVECTOR2(50, 50);
 		ii.color = 0xFFFFFFFF;
 
 		Engine::GAPI->SetWorldTransform(mat);
@@ -5238,7 +5252,7 @@ void D3D11GraphicsEngine::DrawDecalList(const std::vector<zCVob*>& decals,
 
 /** Draws quadmarks in a simple way */
 void D3D11GraphicsEngine::DrawQuadMarks() {
-	DirectX::SimpleMath::Vector3 camPos = Engine::GAPI->GetCameraPosition();
+	D3DXVECTOR3 camPos = Engine::GAPI->GetCameraPosition();
 	const stdext::unordered_map<zCQuadMark*, QuadMarkInfo>& quadMarks =
 		Engine::GAPI->GetQuadMarks();
 
@@ -5255,7 +5269,7 @@ void D3D11GraphicsEngine::DrawQuadMarks() {
 		&Engine::GAPI->GetRendererState()->GraphicsState);
 	ActivePS->GetConstantBuffer()[0]->BindToPixelShader(0);
 
-	DirectX::SimpleMath::Matrix view;
+	D3DXMATRIX view;
 	Engine::GAPI->GetViewMatrix(&view);
 	Engine::GAPI->SetViewTransform(view);
 
@@ -5266,7 +5280,7 @@ void D3D11GraphicsEngine::DrawQuadMarks() {
 	for (auto const& it : quadMarks) {
 		if (!it.first->GetConnectedVob()) continue;
 
-		if ((camPos - it.second.Position).Length() >
+		if (D3DXVec3Length(&(camPos - it->second.Position)) >
 			Engine::GAPI->GetRendererState()->RendererSettings.VisualFXDrawRadius)
 			continue;
 

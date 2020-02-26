@@ -17,6 +17,7 @@
 
 #include <d3d11.h>
 #include <SimpleMath.h>
+#include <D3DX11.h>
 
 #include "CSFFT/fft_512x512.h"
 
@@ -35,7 +36,7 @@ struct OceanParameter
 	// Amplitude for transverse wave. Around 1.0
 	float wave_amplitude;
 	// Wind direction. Normalization not required.
-	DirectX::SimpleMath::Vector2 wind_dir;
+	D3DXVECTOR2 wind_dir;
 	// Around 100 ~ 1000
 	float wind_speed;
 	// This value damps out the waves against the wind direction.
@@ -87,7 +88,7 @@ protected:
 	ID3D11SamplerState* m_pPointSamplerState;
 
 	// Initialize the vector field.
-	void initHeightMap(OceanParameter& params, DirectX::SimpleMath::Vector2 * out_h0, float * out_omega);
+	void initHeightMap(OceanParameter& params, D3DXVECTOR2 * out_h0, float * out_omega);
 
 
 	// ----------------------------------- CS simulation data ---------------------------------

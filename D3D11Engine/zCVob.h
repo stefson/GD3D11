@@ -138,17 +138,27 @@ public:
 	}
 
 	/** Returns the world-position of this vob */
-	DirectX::SimpleMath::Vector3 GetPositionWorld() const
+	D3DXVECTOR3 GetPositionWorld() const
 	{
 		// Get the data right off the memory to save a function call
-		return DirectX::SimpleMath::Vector3(*(float *)THISPTR_OFFSET(GothicMemoryLocations::zCVob::Offset_WorldPosX),
+		return D3DXVECTOR3(*(float *)THISPTR_OFFSET(GothicMemoryLocations::zCVob::Offset_WorldPosX), 
 			*(float *)THISPTR_OFFSET(GothicMemoryLocations::zCVob::Offset_WorldPosY), 
 			*(float *)THISPTR_OFFSET(GothicMemoryLocations::zCVob::Offset_WorldPosZ));
 		//XCALL(GothicMemoryLocations::zCVob::GetPositionWorld);
 	}
 
+	/** Returns the world-position of this vob */
+	DirectX::SimpleMath::Vector3 GetPositionWorldDX() const
+	{
+		// Get the data right off the memory to save a function call
+		return DirectX::SimpleMath::Vector3(*(float *)THISPTR_OFFSET(GothicMemoryLocations::zCVob::Offset_WorldPosX),
+			*(float *)THISPTR_OFFSET(GothicMemoryLocations::zCVob::Offset_WorldPosY),
+			*(float *)THISPTR_OFFSET(GothicMemoryLocations::zCVob::Offset_WorldPosZ));
+		//XCALL(GothicMemoryLocations::zCVob::GetPositionWorld);
+	}
+
 	/** Sets this vobs position */
-	void SetPositionWorld(const DirectX::SimpleMath::Vector3 & v)
+	void SetPositionWorld(const D3DXVECTOR3 & v) 
 	{
 #ifdef BUILD_SPACER
 		XCALL(GothicMemoryLocations::zCVob::SetPositionWorld);
@@ -162,13 +172,13 @@ public:
 	}
 
 	/** Returns a pointer to this vobs world-matrix */
-	DirectX::SimpleMath::Matrix* GetWorldMatrixPtr()
+	D3DXMATRIX* GetWorldMatrixPtr()
 	{
-		return (DirectX::SimpleMath::Matrix *)(this + GothicMemoryLocations::zCVob::Offset_WorldMatrixPtr);
+		return (D3DXMATRIX *)(this + GothicMemoryLocations::zCVob::Offset_WorldMatrixPtr);
 	}
 
 	/** Copys the world matrix into the given memory location */	
-	void GetWorldMatrix(DirectX::SimpleMath::Matrix* m)
+	void GetWorldMatrix(D3DXMATRIX* m)
 	{
 		*m = *GetWorldMatrixPtr();
 	}
@@ -271,7 +281,7 @@ protected:
 	DWORD LastTimeCollected;
 
 	zCArray<zCBspLeaf*>	LeafList;
-	DirectX::SimpleMath::Matrix WorldMatrix;
+	D3DXMATRIX WorldMatrix;
 	zTBBox3D BoundingBoxWS;*/
 };
 	

@@ -134,7 +134,7 @@ public:
 	void Setup_PNAEN(EPNAENRenderMode mode = PNAEN_Default);
 
 	/** Draws a skeletal mesh */
-	virtual XRESULT DrawSkeletalMesh(D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices, const std::vector<DirectX::SimpleMath::Matrix> & transforms, float fatness = 1.0f) override;
+	virtual XRESULT DrawSkeletalMesh(D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices, const std::vector<D3DXMATRIX> & transforms, float fatness = 1.0f) override;
 
 	/** Draws a vertexarray, non-indexed */
 	virtual XRESULT DrawVertexArray(ExVertexStruct* vertices, unsigned int numVertices, unsigned int startVertex = 0, unsigned int stride = sizeof(ExVertexStruct)) override;
@@ -220,8 +220,8 @@ public:
 	virtual void DrawVobSingle(VobInfo* vob);
 
 	/** Draws everything around the given position */
-	void DrawWorldAround(const DirectX::SimpleMath::Vector3 & position, int sectionRange, float vobXZRange, bool cullFront = true, bool dontCull = false);
-	void DrawWorldAround(const DirectX::SimpleMath::Vector3 & position,
+	void DrawWorldAround(const D3DXVECTOR3 & position, int sectionRange, float vobXZRange, bool cullFront = true, bool dontCull = false);
+	void DrawWorldAround(const D3DXVECTOR3 & position,
 		float range,
 		bool cullFront = true,
 		bool indoor = false,
@@ -241,10 +241,10 @@ public:
 	virtual XRESULT DrawSky();
 
 	/** Renders the shadowmaps for the sun */
-	void RenderShadowmaps(const DirectX::SimpleMath::Vector3 & cameraPosition, RenderToDepthStencilBuffer * target = nullptr, bool cullFront = true, bool dontCull = false, ID3D11DepthStencilView* dsvOverwrite = nullptr, ID3D11RenderTargetView* debugRTV = nullptr);
+	void RenderShadowmaps(const D3DXVECTOR3 & cameraPosition, RenderToDepthStencilBuffer * target = nullptr, bool cullFront = true, bool dontCull = false, ID3D11DepthStencilView* dsvOverwrite = nullptr, ID3D11RenderTargetView* debugRTV = nullptr);
 
 	/** Renders the shadowmaps for a pointlight */
-	void RenderShadowCube(const DirectX::SimpleMath::Vector3 & position,
+	void RenderShadowCube(const D3DXVECTOR3 & position,
 		float range,
 		RenderToDepthStencilBuffer * targetCube,
 		ID3D11DepthStencilView* face,
@@ -342,8 +342,8 @@ protected:
 	std::unique_ptr<RenderToTextureBuffer> DummyShadowCubemapTexture; // PS-Stage needs to have a rendertarget bound to execute SV_Depth-Writes, as it seems.
 
 	/** Temp-Arrays for storing data to be put in constant buffers */
-	DirectX::SimpleMath::Matrix Temp2[2];
-	DirectX::SimpleMath::Matrix TempBones[NUM_MAX_BONES];
+	D3DXMATRIX Temp2D3DXMatrix[2];
+	D3DXMATRIX TempBonesD3DXmatrix[NUM_MAX_BONES];
 	float2 Temp2Float2[2];
 	std::unique_ptr<D3D11VertexBuffer> DynamicInstancingBuffer;
 

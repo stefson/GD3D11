@@ -52,7 +52,7 @@ void DebugWrite_i(LPCSTR lpDebugMessage, void * thisptr);
 /** Computes the size in bytes of the given FVF */
 int ComputeFVFSize(DWORD fvf);
 
-static DirectX::XMFLOAT4X4 D3DXMatToDX(const DirectX::SimpleMath::Matrix& r) {
+static DirectX::XMFLOAT4X4 D3DXMatToDX(const D3DXMATRIX& r) {
 	return DirectX::XMFLOAT4X4(
 		r._11, r._12, r._13, r._14, 
 		r._21, r._22, r._23, r._24,
@@ -60,9 +60,9 @@ static DirectX::XMFLOAT4X4 D3DXMatToDX(const DirectX::SimpleMath::Matrix& r) {
 		r._41, r._42, r._43, r._44);
 }
 
-static DirectX::SimpleMath::Matrix DX4x4ToD3DXMat(const DirectX::XMFLOAT4X4& r) {
+static D3DXMATRIX DX4x4ToD3DXMat(const DirectX::XMFLOAT4X4& r) {
 
-	return DirectX::SimpleMath::Matrix(
+	return D3DXMATRIX(
 		r._11, r._12, r._13, r._14,
 		r._21, r._22, r._23, r._24,
 		r._31, r._32, r._33, r._34,
