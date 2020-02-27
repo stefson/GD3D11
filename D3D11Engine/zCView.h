@@ -150,7 +150,11 @@ public:
 		}
 	}
 	static int __fastcall hooked_FontSize(_zCView* thisptr, void* unknwn, const zSTRING& str) {
-		
+		if (!Engine::GAPI->GetRendererState()->RendererSettings.EnableCustomFontRendering) {
+			return HookedFunctions::OriginalFunctions.original_zCViewFontSize(thisptr, str);
+		}
+
+
 		if (!thisptr->font) return 0;
 
 		int result = 0;
