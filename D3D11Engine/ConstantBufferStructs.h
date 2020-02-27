@@ -5,7 +5,7 @@
 /** Actual instance data for a vob */
 struct VobInstanceInfo
 {
-	D3DXMATRIX world;
+	DirectX::XMFLOAT4X4 world;
 	DWORD color;
 
 	// General purpose slots
@@ -248,7 +248,7 @@ struct ParticlePointShadingConstantBuffer
 
 struct VS_ExConstantBuffer_PerInstance
 {
-	D3DXMATRIX World;
+	DirectX::XMFLOAT4X4 World;
 	float4 Color;
 };
 

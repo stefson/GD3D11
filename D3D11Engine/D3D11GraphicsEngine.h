@@ -224,7 +224,7 @@ public:
 
 	/** Draws everything around the given position */
 	void DrawWorldAround(const D3DXVECTOR3 & position, int sectionRange, float vobXZRange, bool cullFront = true, bool dontCull = false);
-	void DrawWorldAround(const D3DXVECTOR3 & position,
+	void DrawWorldAround(const DirectX::XMVECTOR& position,
 		float range,
 		bool cullFront = true,
 		bool indoor = false,
@@ -247,7 +247,7 @@ public:
 	void RenderShadowmaps(const D3DXVECTOR3 & cameraPosition, RenderToDepthStencilBuffer * target = nullptr, bool cullFront = true, bool dontCull = false, ID3D11DepthStencilView* dsvOverwrite = nullptr, ID3D11RenderTargetView* debugRTV = nullptr);
 
 	/** Renders the shadowmaps for a pointlight */
-	void RenderShadowCube(const D3DXVECTOR3 & position,
+	void RenderShadowCube(const DirectX::XMVECTOR& position,
 		float range,
 		RenderToDepthStencilBuffer * targetCube,
 		ID3D11DepthStencilView* face,

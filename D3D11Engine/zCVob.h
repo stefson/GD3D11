@@ -151,9 +151,9 @@ public:
 	DirectX::XMVECTOR GetPositionWorldXM() const
 	{
 		// Get the data right off the memory to save a function call
-		DirectX::XMVECTOR pos = XMLoadFloat3(&DirectX::XMFLOAT3(*(float*)THISPTR_OFFSET(GothicMemoryLocations::zCVob::Offset_WorldPosX),
+		DirectX::XMVECTOR pos = DirectX::XMVectorSet(*(float*)THISPTR_OFFSET(GothicMemoryLocations::zCVob::Offset_WorldPosX),
 			*(float*)THISPTR_OFFSET(GothicMemoryLocations::zCVob::Offset_WorldPosY),
-			*(float*)THISPTR_OFFSET(GothicMemoryLocations::zCVob::Offset_WorldPosZ)));
+			*(float*)THISPTR_OFFSET(GothicMemoryLocations::zCVob::Offset_WorldPosZ), 0);
 		return pos;
 		//XCALL(GothicMemoryLocations::zCVob::GetPositionWorld);
 	}
@@ -182,6 +182,12 @@ public:
 	void GetWorldMatrix(D3DXMATRIX* m)
 	{
 		*m = *GetWorldMatrixPtr();
+	}
+
+	/** Returns a copy of the world matrix */
+	DirectX::XMMATRIX GetWorldMatrixXM()
+	{
+		return XMLoadFloat4x4((DirectX::XMFLOAT4X4*)(this + GothicMemoryLocations::zCVob::Offset_WorldMatrixPtr));
 	}
 
 	/** Returns the world-polygon right under this vob */

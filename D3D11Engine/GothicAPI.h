@@ -342,7 +342,7 @@ public:
 
 	/** Returns the current cameraposition */
 	D3DXVECTOR3 GetCameraPosition();
-	DirectX::XMVECTOR GetCameraPositionDX();
+	DirectX::XMVECTOR GetCameraPositionXM();
 
 	/** Returns the current forward vector of the camera */
 	D3DXVECTOR3 GetCameraForward();

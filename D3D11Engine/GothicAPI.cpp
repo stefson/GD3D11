@@ -997,7 +997,7 @@ void GothicAPI::OnVobMoved(zCVob * vob)
 			MoveVobFromBspToDynamic(it->second);
 		}
 
-		it->second->LastRenderPosition = it->second->Vob->GetPositionWorld();
+		XMStoreFloat3(&it->second->LastRenderPosition, it->second->Vob->GetPositionWorldXM());
 		it->second->UpdateVobConstantBuffer();
 
 		Engine::GAPI->GetRendererState()->RendererInfo.FrameVobUpdates++;
@@ -1008,7 +1008,7 @@ void GothicAPI::OnVobMoved(zCVob * vob)
 
 		if (sit != SkeletalVobMap.end())
 		{
-			if (!(*sit).second || *vob->GetWorldMatrixPtr() == (*sit).second->WorldMatrix)
+			if (!(*sit).second || memcmp(&vob->GetWorldMatrixXM(), &XMLoadFloat4x4(&(*sit).second->WorldMatrix), sizeof(XMMATRIX)) == 0)
 			{
 				// No actual change
 				return;
@@ -1479,7 +1479,7 @@ void GothicAPI::OnAddVob(zCVob * vob, zCWorld * world) {
 			VobsByVisual[vob->GetVisual()].push_back(vi);
 
 			// Save worldmatrix to see if this vob changed positions later
-			vi->WorldMatrix = *vob->GetWorldMatrixPtr();
+			XMStoreFloat4x4(&vi->WorldMatrix, vob->GetWorldMatrixXM());
 
 			// Check for mainworld
 			if (world == oCGame::GetGame()->_zCSession_world) {
@@ -1729,7 +1729,7 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 						SetWorldViewTransform(w * transforms[i], view);
 
 						// Update constantbuffer
-						instanceInfo.World = RendererState.TransformState.TransformWorld;
+						instanceInfo.World = *(XMFLOAT4X4*)&RendererState.TransformState.TransformWorld;
 						vi->VobConstantBuffer->UpdateBuffer(&instanceInfo);
 						vi->VobConstantBuffer->BindToVertexShader(1);
 
@@ -1746,7 +1746,7 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 					mm->GetTexAniState()->UpdateTexList();
 				}
 
-				instanceInfo.World = RendererState.TransformState.TransformWorld;
+				instanceInfo.World = *(XMFLOAT4X4*)&RendererState.TransformState.TransformWorld;
 				vi->VobConstantBuffer->UpdateBuffer(&instanceInfo);
 				vi->VobConstantBuffer->BindToVertexShader(1);
 
@@ -2313,12 +2313,10 @@ D3DXVECTOR3 GothicAPI::GetCameraPosition()
 	return oCGame::GetGame()->_zCSession_camVob->GetPositionWorld();
 }
 /** Returns the current cameraposition */
-XMVECTOR GothicAPI::GetCameraPositionDX()
+XMVECTOR GothicAPI::GetCameraPositionXM()
 {
-	XMVECTOR xmCamPos;
-
 	if (!oCGame::GetGame()->_zCSession_camVob)
-		return  XMLoadFloat3(&DirectX::XMFLOAT3(0, 0, 0));
+		return  XMVectorSet(0, 0, 0, 0);
 
 	if (CameraReplacementPtr)
 		return XMLoadFloat3((XMFLOAT3*)&CameraReplacementPtr->PositionReplacement);
@@ -2830,7 +2828,8 @@ static void CVVH_AddNotDrawnVobToList(std::vector<VobInfo*> & target, std::vecto
 	{
 		if (!it->VisibleInRenderPass)
 		{
-			float vd = D3DXVec3Length(&(Engine::GAPI->GetCameraPosition() - it->LastRenderPosition));
+			float vd;
+			XMStoreFloat(&vd, XMVector3Length(XMVectorSubtract(Engine::GAPI->GetCameraPositionXM(), XMLoadFloat3(&it->LastRenderPosition))));
 			if (vd < dist && it->Vob->GetShowVisual())
 			{
 				VobInstanceInfo vii;

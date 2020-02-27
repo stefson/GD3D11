@@ -355,7 +355,7 @@ struct VobInfo : public BaseVobInfo
 	D3D11ConstantBuffer* VobConstantBuffer;
 
 	/** Position the vob was at while being rendered last time */
-	D3DXVECTOR3 LastRenderPosition;
+	DirectX::XMFLOAT3 LastRenderPosition;
 
 	/** True if this is an indoor-vob */
 	bool IsIndoorVob;
@@ -367,7 +367,7 @@ struct VobInfo : public BaseVobInfo
 	WorldMeshSectionInfo* VobSection;
 
 	/** Current world transform */
-	D3DXMATRIX WorldMatrix;
+	DirectX::XMFLOAT4X4 WorldMatrix;
 
 	/** BSP-Node this is stored in */
 	std::vector<BspInfo*> ParentBSPNodes;
@@ -413,7 +413,7 @@ struct VobLightInfo
 	bool UpdateShadows; // Whether to update this lights shadows on the next occasion
 
 	/** Position where we were rendered the last time */
-	D3DXVECTOR3 LastRenderedPosition;
+	DirectX::XMFLOAT3 LastRenderedPosition;
 };
 
 
@@ -458,7 +458,7 @@ struct SkeletalVobInfo : public BaseVobInfo
 	bool VisibleInRenderPass;
 
 	/** Current world transform */
-	D3DXMATRIX WorldMatrix;
+	DirectX::XMFLOAT4X4 WorldMatrix;
 
 	/** BSP-Node this is stored in */
 	std::vector<BspInfo*> ParentBSPNodes;

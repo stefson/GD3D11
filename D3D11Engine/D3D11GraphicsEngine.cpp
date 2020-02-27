@@ -1392,8 +1392,8 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
 	// Bind shader and pipeline flags
 	D3D11VShader* vShader = ShaderManager->GetVShader("VS_ExInstanced");
 
-	D3DXMATRIX& world =
-		Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
+	D3DXMATRIX* world =
+		&Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
 	D3DXMATRIX& view =
 		Engine::GAPI->GetRendererState()->TransformState.TransformView;
 	D3DXMATRIX& proj = Engine::GAPI->GetProjectionMatrix();
@@ -1402,8 +1402,8 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
 	cb.View = view;
 	cb.Projection = proj;
 
-	VS_ExConstantBuffer_PerInstance cb2;
-	cb2.World = world;
+	VS_ExConstantBuffer_PerInstance cbb;
+	cbb.World = *(DirectX::XMFLOAT4X4*)world;
 
 	vShader->GetConstantBuffer()[0]->UpdateBuffer(&cb);
 	vShader->GetConstantBuffer()[0]->BindToVertexShader(0);
@@ -1791,11 +1791,11 @@ void D3D11GraphicsEngine::SetupVS_ExConstantBuffer() {
 }
 
 void D3D11GraphicsEngine::SetupVS_ExPerInstanceConstantBuffer() {
-	D3DXMATRIX& world =
-		Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
+	D3DXMATRIX* world = &Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
 
 	VS_ExConstantBuffer_PerInstance cb;
-	cb.World = world;
+	cb.World = *(DirectX::XMFLOAT4X4*)world;
+
 
 	ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&cb);
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
@@ -1803,11 +1803,10 @@ void D3D11GraphicsEngine::SetupVS_ExPerInstanceConstantBuffer() {
 
 /** Puts the current world matrix into a CB and binds it to the given slot */
 void D3D11GraphicsEngine::SetupPerInstanceConstantBuffer(int slot) {
-	D3DXMATRIX& world =
-		Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
+	D3DXMATRIX* world = &Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
 
 	VS_ExConstantBuffer_PerInstance cb;
-	cb.World = world;
+	cb.World = *(DirectX::XMFLOAT4X4*)world;
 
 	ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&cb);
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(slot);
@@ -2682,10 +2681,11 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 
 /** Draws everything around the given position */
 void D3D11GraphicsEngine::DrawWorldAround(
-	const D3DXVECTOR3& position, float range, bool cullFront, bool indoor,
+	const DirectX::XMVECTOR& position, float range, bool cullFront, bool indoor,
 	bool noNPCs, std::list<VobInfo*>* renderedVobs,
 	std::list<SkeletalVobInfo*>* renderedMobs,
 	std::map<MeshKey, WorldMeshInfo*, cmpMeshKey>* worldMeshCache) {
+
 	// Setup renderstates
 	Engine::GAPI->GetRendererState()->RasterizerState.SetDefault();
 	Engine::GAPI->GetRendererState()->RasterizerState.CullMode =
@@ -2728,8 +2728,7 @@ void D3D11GraphicsEngine::DrawWorldAround(
 	ActivePS->GetConstantBuffer()[3]->UpdateBuffer(&ocb);
 	ActivePS->GetConstantBuffer()[3]->BindToPixelShader(3);
 
-	INT2 s = WorldConverter::GetSectionOfPos(position);
-	D3DXVECTOR2 camXZ = D3DXVECTOR2(position.x, position.z);
+	INT2 s = WorldConverter::GetSectionOfPos(*reinterpret_cast<const D3DXVECTOR3*>(&position));
 
 	float vobOutdoorDist =
 		Engine::GAPI->GetRendererState()->RendererSettings.OutdoorVobDrawRadius;
@@ -2863,32 +2862,34 @@ void D3D11GraphicsEngine::DrawWorldAround(
 	if (Engine::GAPI->GetRendererState()->RendererSettings.DrawVOBs) {
 		// Draw visible vobs here
 		std::list<VobInfo*> rndVob;
-
+		XMVECTOR xmLastRenderPos;
 		// construct new renderedvob list or fake one
 		if (!renderedVobs || renderedVobs->empty()) {
 			for (size_t i = 0; i < drawnSections.size(); i++) {
-				for (auto it = drawnSections[i]->Vobs.begin();
-					it != drawnSections[i]->Vobs.end(); ++it) {
-					if (!(*it)->VisualInfo) {
+				for (auto it : drawnSections[i]->Vobs) {
+					if (!it->VisualInfo) {
 						continue;  // Seems to happen in Gothic 1
 					}
 
-					if (!(*it)->Vob->GetShowVisual()) {
+					if (!it->Vob->GetShowVisual()) {
 						continue;
 					}
 
+					xmLastRenderPos = XMLoadFloat3(&it->LastRenderPosition);
 					// Check vob range
-					float dist = D3DXVec3Length(&(position - (*it)->LastRenderPosition));
+					
+					float dist;
+					XMStoreFloat(&dist, XMVector3Length(XMVectorSubtract(position, xmLastRenderPos)));
 					if (dist > range) {
 						continue;
 					}
 
 					// Check for inside vob. Don't render inside-vobs when the light is
 					// outside and vice-versa.
-					if (!(*it)->IsIndoorVob && indoor || (*it)->IsIndoorVob && !indoor) {
+					if (!it->IsIndoorVob && indoor || it->IsIndoorVob && !indoor) {
 						continue;
 					}
-					rndVob.push_back((*it));
+					rndVob.push_back(it);
 				}
 			}
 
@@ -2946,39 +2947,38 @@ void D3D11GraphicsEngine::DrawWorldAround(
 
 		// construct new renderedvob list or fake one
 		if (!renderedMobs || renderedMobs->empty()) {
-			for (std::list<SkeletalVobInfo*>::iterator it =
-				Engine::GAPI->GetSkeletalMeshVobs().begin();
-				it != Engine::GAPI->GetSkeletalMeshVobs().end(); ++it) {
-				if (!(*it)->VisualInfo) {
+			for (auto it : Engine::GAPI->GetSkeletalMeshVobs()) {
+				if (!it->VisualInfo) {
 					continue;  // Seems to happen in Gothic 1
 				}
 
-				if (!(*it)->Vob->GetShowVisual()) {
+				if (!it->Vob->GetShowVisual()) {
 					continue;
 				}
 
 				// Check vob range
-				float dist =
-					D3DXVec3Length(&(position - (*it)->Vob->GetPositionWorld()));
+				float dist;
+				XMStoreFloat(&dist, XMVector3Length(XMVectorSubtract(position, it->Vob->GetPositionWorldXM())));
+
 				if (dist > range) {
 					continue;
 				}
 
 				// Check for inside vob. Don't render inside-vobs when the light is
 				// outside and vice-versa.
-				if (!(*it)->Vob->IsIndoorVob() && indoor ||
-					(*it)->Vob->IsIndoorVob() && !indoor) {
+				if (!it->Vob->IsIndoorVob() && indoor ||
+					it->Vob->IsIndoorVob() && !indoor) {
 					continue;
 				}
 
 				// Assume everything that doesn't have a skeletal-mesh won't move very
 				// much This applies to usable things like chests, chairs, beds, etc
-				if (!((SkeletalMeshVisualInfo*)(*it)->VisualInfo)
+				if (!((SkeletalMeshVisualInfo*)it->VisualInfo)
 					->SkeletalMeshes.empty()) {
 					continue;
 				}
 
-				rndVob.push_back((*it));
+				rndVob.push_back(it);
 			}
 
 			if (renderedMobs) {
@@ -3001,8 +3001,9 @@ void D3D11GraphicsEngine::DrawWorldAround(
 					continue;
 				}
 				// Check vob range
-				float dist =
-					D3DXVec3Length(&(position - skeletalMeshVob->Vob->GetPositionWorld()));
+				float dist;
+				XMStoreFloat(&dist, XMVector3Length(XMVectorSubtract(position, skeletalMeshVob->Vob->GetPositionWorldXM())));
+
 				if (dist > range) {
 					// Not in range
 					continue;
@@ -3084,7 +3085,6 @@ void D3D11GraphicsEngine::DrawWorldAround(const D3DXVECTOR3& position,
 	ActivePS->GetConstantBuffer()[3]->BindToPixelShader(3);
 
 	INT2 s = WorldConverter::GetSectionOfPos(position);
-	D3DXVECTOR2 camXZ = D3DXVECTOR2(position.x, position.z);
 
 	float vobOutdoorDist =
 		Engine::GAPI->GetRendererState()->RendererSettings.OutdoorVobDrawRadius;
@@ -3218,13 +3218,11 @@ void D3D11GraphicsEngine::DrawWorldAround(const D3DXVECTOR3& position,
 		UINT loc = 0;
 		DynamicInstancingBuffer->Map(D3D11VertexBuffer::M_WRITE_DISCARD,
 			(void**)& data, &size);
-		static std::vector<VobInstanceInfo, AlignmentAllocator<VobInstanceInfo, 16>>
-			s_InstanceData;
+		static std::vector<VobInstanceInfo, AlignmentAllocator<VobInstanceInfo, 16>> s_InstanceData;
 		for (auto const& staticMeshVisual : staticMeshVisuals) {
 			if (staticMeshVisual.second->Instances.empty()) continue;
 
-			if ((loc + staticMeshVisual.second->Instances.size()) * sizeof(VobInstanceInfo) >=
-				desc.ByteWidth)
+			if ((loc + staticMeshVisual.second->Instances.size()) * sizeof(VobInstanceInfo) >= desc.ByteWidth)
 				break;  // Should never happen
 
 			staticMeshVisual.second->StartInstanceNum = loc;
@@ -3964,7 +3962,7 @@ XRESULT D3D11GraphicsEngine::DrawSky() {
 	ActivePS->GetConstantBuffer()[0]->BindToPixelShader(1);
 
 	VS_ExConstantBuffer_PerInstance cbi;
-	cbi.World = DX4x4ToD3DXMat(world);
+	cbi.World = world;
 	ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&cbi);
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
@@ -4549,7 +4547,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 
 /** Renders the shadowmaps for a pointlight */
 void D3D11GraphicsEngine::RenderShadowCube(
-	const D3DXVECTOR3& position, float range,
+	const DirectX::XMVECTOR& position, float range,
 	RenderToDepthStencilBuffer* targetCube, ID3D11DepthStencilView* face,
 	ID3D11RenderTargetView* debugRTV, bool cullFront, bool indoor, bool noNPCs,
 	std::list<VobInfo*>* renderedVobs,

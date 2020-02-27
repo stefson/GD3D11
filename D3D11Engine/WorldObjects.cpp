@@ -67,11 +67,11 @@ void WorldMeshInfo::LoadWorldMeshInfo(const std::string & name)
 void VobInfo::UpdateVobConstantBuffer()
 {
 	VS_ExConstantBuffer_PerInstance cb;
-	cb.World = *Vob->GetWorldMatrixPtr();
+	DirectX::XMStoreFloat4x4(&cb.World, Vob->GetWorldMatrixXM());
 
 	VobConstantBuffer->UpdateBuffer(&cb);
 
-	LastRenderPosition = Vob->GetPositionWorld();
+	DirectX::XMStoreFloat3(&LastRenderPosition, Vob->GetPositionWorldXM());
 	WorldMatrix = cb.World;
 
 	// Colorize the vob according to the underlaying polygon
@@ -92,7 +92,7 @@ void VobInfo::UpdateVobConstantBuffer()
 void SkeletalVobInfo::UpdateVobConstantBuffer()
 {
 	VS_ExConstantBuffer_PerInstance cb;
-	cb.World = *Vob->GetWorldMatrixPtr();
+	DirectX::XMStoreFloat4x4(&cb.World, Vob->GetWorldMatrixXM());
 
 	WorldMatrix = cb.World;
 
