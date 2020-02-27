@@ -3925,8 +3925,7 @@ XRESULT D3D11GraphicsEngine::DrawSky() {
 	Matrix invView;
 	Engine::GAPI->GetInverseViewMatrixDX(&invView);
 
-	Matrix view;
-	Engine::GAPI->GetViewMatrixDX(&view);
+	Matrix view = Engine::GAPI->GetViewMatrixXM();
 
 	Matrix scale = XMMatrixScaling(
 		sky->GetAtmoshpereSettings().OuterRadius,
@@ -4966,10 +4965,7 @@ XRESULT D3D11GraphicsEngine::DrawOcean(GOcean* ocean) {
 	std::vector<D3DXVECTOR3> patches;
 	ocean->GetPatchLocations(patches);
 
-	Matrix view;
-	Engine::GAPI->GetViewMatrixDX(&view);
-	XMMATRIX viewMatrix = XMLoadFloat4x4(&view);
-
+	XMMATRIX viewMatrix = Engine::GAPI->GetViewMatrixXM();
 	viewMatrix = XMMatrixTranspose(viewMatrix);
 
 	for (auto const& patch : patches) {

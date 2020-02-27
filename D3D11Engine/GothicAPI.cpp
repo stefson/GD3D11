@@ -688,23 +688,16 @@ void GothicAPI::DrawWorldMeshNaive() {
 	Engine::GraphicsEngine->DrawWorldMesh();
 	STOP_TIMING(GothicRendererTiming::TT_WorldMesh);
 
-	// TODO: Get camera position (Make a function for this)
 	D3DXVECTOR3 camPos = GetCameraPosition();
 
 	for (auto const& vegetationBox : VegetationBoxes) {
 		vegetationBox->RenderVegetation(camPos);
 	}
 
-	INT2 camSection = WorldConverter::GetSectionOfPos(camPos);
-
-	D3DXMATRIX view;
-	GetViewMatrix(&view);
-
-	// Clear instances
-	int sectionViewDist = Engine::GAPI->GetRendererState()->RendererSettings.SectionDrawRadius;
-
 	START_TIMING();
 	if (RendererState.RendererSettings.DrawSkeletalMeshes) {
+		XMVECTOR xmCamPos = GetCameraPositionXM();
+
 		Engine::GraphicsEngine->SetActivePixelShader("PS_World");
 		// Set up frustum for the camera
 		zCCamera::GetCamera()->Activate();
@@ -713,9 +706,9 @@ void GothicAPI::DrawWorldMeshNaive() {
 			// Don't render if sleeping and has skeletal meshes available
 			if (!vobInfo->VisualInfo) continue;
 
-			const INT2 s = WorldConverter::GetSectionOfPos(vobInfo->Vob->GetPositionWorld());
+			float dist;
+			XMStoreFloat(&dist, XMVector3Length(XMVectorSubtract(vobInfo->Vob->GetPositionWorldXM(), xmCamPos)));
 
-			float dist = D3DXVec3Length(&(vobInfo->Vob->GetPositionWorld() - camPos));
 			if (dist > RendererState.RendererSettings.SkeletalMeshDrawRadius)
 				continue; // Skip out of range
 
@@ -984,7 +977,7 @@ void GothicAPI::OnVobMoved(zCVob * vob)
 	{
 #ifdef BUILD_GOTHIC_1_08k
 		// Check if the transform changed, since G1 calls this function over and over again
-		if (*vob->GetWorldMatrixPtr() == it->second->WorldMatrix)
+		if (memcmp(&vob->GetWorldMatrixXM(), &XMLoadFloat4x4(&it->second->WorldMatrix), sizeof(XMMATRIX)) == 0)
 		{
 			// No actual change
 			return;
@@ -2344,7 +2337,7 @@ void GothicAPI::GetViewMatrix(D3DXMATRIX * view)
 }
 
 /** Returns the view matrix */
-void GothicAPI::GetViewMatrixDX(DirectX::XMFLOAT4X4 * view)
+DirectX::XMMATRIX GothicAPI::GetViewMatrixXM()
 {
 	/*if (CameraReplacementPtrDX)
 	{
@@ -2354,10 +2347,9 @@ void GothicAPI::GetViewMatrixDX(DirectX::XMFLOAT4X4 * view)
 	// TODO: Switch to pure DirectXMath
 	if (CameraReplacementPtr)
 	{
-		*view = *((DirectX::XMFLOAT4X4*)&CameraReplacementPtr->ViewReplacement);
-		return;
+		return XMLoadFloat4x4((DirectX::XMFLOAT4X4*)&CameraReplacementPtr->ViewReplacement);
 	}
-	*view = zCCamera::GetCamera()->GetTransformDX(zCCamera::ETransformType::TT_VIEW);
+	return XMLoadFloat4x4(&zCCamera::GetCamera()->GetTransformDX(zCCamera::ETransformType::TT_VIEW));
 }
 
 /** Returns the view matrix */

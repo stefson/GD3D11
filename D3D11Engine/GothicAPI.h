@@ -350,7 +350,7 @@ public:
 
 	/** Returns the view matrix */
 	void GetViewMatrix(D3DXMATRIX * view);
-	void GetViewMatrixDX(DirectX::XMFLOAT4X4 * view);
+	DirectX::XMMATRIX GetViewMatrixXM();
 
 	/** Returns the view matrix */
 	void GetInverseViewMatrix(D3DXMATRIX * invView);

@@ -45,11 +45,7 @@ XRESULT D3D11PFX_HeightFog::Render(RenderToTextureBuffer * fxbuffer)
 	xmInvProj = XMMatrixInverse(nullptr, xmInvProj);
 	XMStoreFloat4x4(&cb.InvProj, xmInvProj);
 
-	Engine::GAPI->GetViewMatrixDX(&cb.InvView);
-
-	XMMATRIX xmInvView;
-	xmInvView = XMLoadFloat4x4(&cb.InvView);
-	xmInvView = XMMatrixInverse(nullptr, xmInvView);
+	XMMATRIX xmInvView = XMMatrixInverse(nullptr, Engine::GAPI->GetViewMatrixXM());
 	XMStoreFloat4x4(&cb.InvView, xmInvView);
 
 	cb.CameraPosition = Engine::GAPI->GetCameraPosition();
