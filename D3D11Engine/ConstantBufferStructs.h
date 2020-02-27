@@ -1,6 +1,6 @@
 #pragma once
 #include "pch.h"
-
+#include <DirectXMath.h>
 
 /** Actual instance data for a vob */
 struct VobInstanceInfo
@@ -110,13 +110,13 @@ struct PerObjectState
 
 struct PFXVS_ConstantBuffer
 {
-	D3DXMATRIX PFXVS_InvProj;
+	DirectX::XMFLOAT4X4 PFXVS_InvProj;
 };
 
 struct HeightfogConstantBuffer
 {
-	D3DXMATRIX InvProj;
-	D3DXMATRIX InvView;
+	DirectX::XMFLOAT4X4 InvProj;
+	DirectX::XMFLOAT4X4 InvView;
 	float3 CameraPosition;
 	float HF_FogHeight;
 
@@ -287,8 +287,8 @@ struct DefaultHullShaderConstantBuffer
 
 struct CubemapGSConstantBuffer
 {
-	D3DXMATRIX PCR_View[6]; // View matrices for cube map rendering
-	D3DXMATRIX PCR_ViewProj[6];
+	DirectX::XMFLOAT4X4 PCR_View[6]; // View matrices for cube map rendering
+	DirectX::XMFLOAT4X4 PCR_ViewProj[6];
 };
 
 struct ParticleGSInfoConstantBuffer
@@ -301,7 +301,7 @@ struct ParticleGSInfoConstantBuffer
 
 struct PNAENConstantBuffer
 {
-	D3DXMATRIX    f4x4Projection;           // Projection matrix 
+	DirectX::XMFLOAT4X4    f4x4Projection;           // Projection matrix 
 	float4      f4Eye;                    // Eye 
 	float4      f4TessFactors;            // Tessellation factors 
 											// x=Edge  
@@ -315,7 +315,7 @@ struct PNAENConstantBuffer
 
 struct RefractionInfoConstantBuffer
 {
-	D3DXMATRIX RI_Projection;
+	DirectX::XMFLOAT4X4 RI_Projection;
 	float2 RI_ViewportSize;
 	float RI_Time;
 	float RI_Far;

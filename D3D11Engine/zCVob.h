@@ -148,12 +148,13 @@ public:
 	}
 
 	/** Returns the world-position of this vob */
-	DirectX::SimpleMath::Vector3 GetPositionWorldDX() const
+	DirectX::XMVECTOR GetPositionWorldXM() const
 	{
 		// Get the data right off the memory to save a function call
-		return DirectX::SimpleMath::Vector3(*(float *)THISPTR_OFFSET(GothicMemoryLocations::zCVob::Offset_WorldPosX),
-			*(float *)THISPTR_OFFSET(GothicMemoryLocations::zCVob::Offset_WorldPosY),
-			*(float *)THISPTR_OFFSET(GothicMemoryLocations::zCVob::Offset_WorldPosZ));
+		DirectX::XMVECTOR pos = XMLoadFloat3(&DirectX::XMFLOAT3(*(float*)THISPTR_OFFSET(GothicMemoryLocations::zCVob::Offset_WorldPosX),
+			*(float*)THISPTR_OFFSET(GothicMemoryLocations::zCVob::Offset_WorldPosY),
+			*(float*)THISPTR_OFFSET(GothicMemoryLocations::zCVob::Offset_WorldPosZ)));
+		return pos;
 		//XCALL(GothicMemoryLocations::zCVob::GetPositionWorld);
 	}
 

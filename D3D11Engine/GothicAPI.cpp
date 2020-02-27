@@ -40,6 +40,8 @@
 #include "zCSoundSystem.h"
 #include "zCView.h"
 
+using namespace DirectX;
+
 // Duration how long the scene will stay wet, in MS
 const DWORD SCENE_WETNESS_DURATION_MS = 60 * 2 * 1000;
 
@@ -2311,15 +2313,17 @@ D3DXVECTOR3 GothicAPI::GetCameraPosition()
 	return oCGame::GetGame()->_zCSession_camVob->GetPositionWorld();
 }
 /** Returns the current cameraposition */
-DirectX::XMFLOAT3 GothicAPI::GetCameraPositionDX()
+XMVECTOR GothicAPI::GetCameraPositionDX()
 {
+	XMVECTOR xmCamPos;
+
 	if (!oCGame::GetGame()->_zCSession_camVob)
-		return DirectX::XMFLOAT3(0, 0, 0);
+		return  XMLoadFloat3(&DirectX::XMFLOAT3(0, 0, 0));
 
 	if (CameraReplacementPtr)
-		return (DirectX::XMFLOAT3)CameraReplacementPtr->PositionReplacement;
+		return XMLoadFloat3((XMFLOAT3*)&CameraReplacementPtr->PositionReplacement);
 
-	return oCGame::GetGame()->_zCSession_camVob->GetPositionWorldDX();
+	return oCGame::GetGame()->_zCSession_camVob->GetPositionWorldXM();
 }
 /** Returns the current forward vector of the camera */
 D3DXVECTOR3 GothicAPI::GetCameraForward()
@@ -2352,7 +2356,7 @@ void GothicAPI::GetViewMatrixDX(DirectX::XMFLOAT4X4 * view)
 	// TODO: Switch to pure DirectXMath
 	if (CameraReplacementPtr)
 	{
-		*view = (DirectX::XMFLOAT4X4)CameraReplacementPtr->ViewReplacement;
+		*view = *((DirectX::XMFLOAT4X4*)&CameraReplacementPtr->ViewReplacement);
 		return;
 	}
 	*view = zCCamera::GetCamera()->GetTransformDX(zCCamera::ETransformType::TT_VIEW);

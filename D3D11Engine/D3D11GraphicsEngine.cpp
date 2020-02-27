@@ -2637,7 +2637,7 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 
 	// Fill refraction info CB and bind it
 	RefractionInfoConstantBuffer ricb;
-	ricb.RI_Projection = Engine::GAPI->GetProjectionMatrix();
+	ricb.RI_Projection = *(XMFLOAT4X4*)&Engine::GAPI->GetProjectionMatrix();
 	ricb.RI_ViewportSize = float2(Resolution.x, Resolution.y);
 	ricb.RI_Time = Engine::GAPI->GetTimeSeconds();
 	ricb.RI_CameraPosition = float3(Engine::GAPI->GetCameraPosition());
@@ -4070,11 +4070,10 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	// ********************************
 	CameraReplacement cr;
 	D3DXVECTOR3 cameraPosition = Engine::GAPI->GetCameraPosition();
-	auto playerPosition =
+	XMVECTOR vPlayerPosition =
 		Engine::GAPI->GetPlayerVob() != nullptr
-		? Engine::GAPI->GetPlayerVob()->GetPositionWorldDX()
+		? Engine::GAPI->GetPlayerVob()->GetPositionWorldXM()
 		: Vector3(FLT_MAX, FLT_MAX, FLT_MAX);
-	XMVECTOR vPlayerPosition = XMLoadFloat3(&playerPosition);
 
 	bool partialShadowUpdate = Engine::GAPI->GetRendererState()->RendererSettings.PartialDynamicShadowUpdates;
 
@@ -4106,7 +4105,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 							// Always render the closest light to the playervob, so the player
 							// doesn't flicker when moving
 							float d;
-							XMStoreFloat(&d, XMVector3LengthSq(XMVectorSubtract(light->Vob->GetPositionWorldDX(), vPlayerPosition)));
+							XMStoreFloat(&d, XMVector3LengthSq(XMVectorSubtract(light->Vob->GetPositionWorldXM(), vPlayerPosition)));
 
 							float range = light->Vob->GetLightRange();
 							if (d < range * range &&
@@ -4122,7 +4121,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 						// Always render the closest light to the playervob, so the player
 						// doesn't flicker when moving
 						float d;
-						XMStoreFloat(&d, XMVector3LengthSq(XMVectorSubtract(light->Vob->GetPositionWorldDX(), vPlayerPosition)));
+						XMStoreFloat(&d, XMVector3LengthSq(XMVectorSubtract(light->Vob->GetPositionWorldXM(), vPlayerPosition)));
 						
 						float range = light->Vob->GetLightRange() * 1.5f;
 
@@ -4505,7 +4504,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	ActivePS->GetConstantBuffer()[0]->BindToPixelShader(0);
 
 	PFXVS_ConstantBuffer vscb;
-	vscb.PFXVS_InvProj = scb.SQ_InvProj;
+	vscb.PFXVS_InvProj = *(XMFLOAT4X4*)&scb.SQ_InvProj;
 	ActiveVS->GetConstantBuffer()[0]->UpdateBuffer(&vscb);
 	ActiveVS->GetConstantBuffer()[0]->BindToVertexShader(0);
 
@@ -4948,7 +4947,7 @@ XRESULT D3D11GraphicsEngine::DrawOcean(GOcean* ocean) {
 	// DistortionTexture->BindToPixelShader(0);
 
 	RefractionInfoConstantBuffer ricb;
-	ricb.RI_Projection = Engine::GAPI->GetProjectionMatrix();
+	ricb.RI_Projection = *(XMFLOAT4X4*)&Engine::GAPI->GetProjectionMatrix();
 	ricb.RI_ViewportSize = float2(Resolution.x, Resolution.y);
 	ricb.RI_Time = Engine::GAPI->GetTimeSeconds();
 	ricb.RI_CameraPosition = Engine::GAPI->GetCameraPosition();
@@ -5400,7 +5399,7 @@ void D3D11GraphicsEngine::DrawUnderwaterEffects() {
 	SetDefaultStates();
 
 	RefractionInfoConstantBuffer ricb;
-	ricb.RI_Projection = Engine::GAPI->GetProjectionMatrix();
+	ricb.RI_Projection = *(XMFLOAT4X4*)&Engine::GAPI->GetProjectionMatrix();
 	ricb.RI_ViewportSize = float2(Resolution.x, Resolution.y);
 	ricb.RI_Time = Engine::GAPI->GetTimeSeconds();
 	ricb.RI_CameraPosition = Engine::GAPI->GetCameraPosition();
@@ -5463,7 +5462,7 @@ void D3D11GraphicsEngine::Setup_PNAEN(EPNAENRenderMode mode) {
 		Engine::GAPI->GetRendererState()->RendererSettings.TesselationFactor);
 	cb.f4ViewportScale.x = static_cast<float>(GetResolution().x / 2);
 	cb.f4ViewportScale.y = static_cast<float>(GetResolution().y / 2);
-	cb.f4x4Projection = Engine::GAPI->GetProjectionMatrix();
+	cb.f4x4Projection = *(XMFLOAT4X4*)&Engine::GAPI->GetProjectionMatrix();
 
 	pnaen->GetConstantBuffer()[0]->UpdateBuffer(&cb);
 
@@ -5492,7 +5491,7 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 	D3D11PShader* distPS = ShaderManager->GetPShader("PS_ParticleDistortion");
 
 	RefractionInfoConstantBuffer ricb;
-	ricb.RI_Projection = Engine::GAPI->GetProjectionMatrix();
+	ricb.RI_Projection = *(XMFLOAT4X4*)&Engine::GAPI->GetProjectionMatrix();
 	ricb.RI_ViewportSize = float2(Resolution.x, Resolution.y);
 	ricb.RI_Time = Engine::GAPI->GetTimeSeconds();
 	ricb.RI_CameraPosition = Engine::GAPI->GetCameraPosition();
