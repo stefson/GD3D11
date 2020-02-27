@@ -184,6 +184,9 @@ public:
 	/** Draws a single VOB */
 	virtual void DrawVobSingle(VobInfo* vob) {}
 
+	/** Draws a multiple VOBs (used for inventory) */
+	virtual void DrawVobsList(const std::list<VobInfo*>& vobs, zCCamera& camera) { };
+
 	/** Message-Callback for the main window */
 	virtual LRESULT OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) { return 0; }
 

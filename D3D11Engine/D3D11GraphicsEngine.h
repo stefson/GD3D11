@@ -217,7 +217,10 @@ public:
 	XRESULT DrawPolyStrips(bool noTextures = false);
 
 	/** Draws a single VOB */
-	virtual void DrawVobSingle(VobInfo* vob);
+	virtual void DrawVobSingle(VobInfo* vob) override;
+
+	/** Draws a multiple VOBs (used for inventory) */
+	virtual void DrawVobsList(const std::list<VobInfo*>& vobs, zCCamera& camera) override;
 
 	/** Draws everything around the given position */
 	void DrawWorldAround(const D3DXVECTOR3 & position, int sectionRange, float vobXZRange, bool cullFront = true, bool dontCull = false);

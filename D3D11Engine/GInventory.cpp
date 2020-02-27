@@ -37,15 +37,5 @@ bool GInventory::OnRemovedVob(zCVob * vob, zCWorld* world) {
 
 /** Draws the inventory for the given world */
 void GInventory::DrawInventory(zCWorld * world, zCCamera & camera) {
-	D3DXMATRIX view = camera.GetTransform(zCCamera::TT_VIEW);
-
-	for (std::list<VobInfo *>::iterator it = InventoryVobs[world].begin(); it != InventoryVobs[world].end(); ++it) {	
-		D3DXMATRIX world;
-		(*it)->Vob->GetWorldMatrix(&world);
-
-		D3DXMATRIX mat;
-		Engine::GAPI->SetWorldViewTransform(world, view);
-
-		Engine::GraphicsEngine->DrawVobSingle((*it));
-	}
+	Engine::GraphicsEngine->DrawVobsList(InventoryVobs[world], camera);
 }

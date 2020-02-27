@@ -4795,6 +4795,70 @@ void D3D11GraphicsEngine::DrawVobSingle(VobInfo* vob) {
 		nullptr);
 }
 
+/** Draws a multiple VOBs (used for inventory) */
+void D3D11GraphicsEngine::DrawVobsList(const std::list<VobInfo*>& vobs, zCCamera& camera) {
+	GetContext()->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
+		DepthStencilBuffer->GetDepthStencilView());
+
+	D3DXMATRIX view;
+	Engine::GAPI->GetViewMatrix(&view);
+	Engine::GAPI->SetViewTransform(view);
+
+	SetActivePixelShader("PS_Preview_Textured");
+	SetActiveVertexShader("VS_Ex");
+
+	SetDefaultStates();
+	Engine::GAPI->GetRendererState()->RasterizerState.CullMode =
+		GothicRasterizerStateInfo::CM_CULL_NONE;
+	Engine::GAPI->GetRendererState()->RasterizerState.DepthClipEnable = false;
+	Engine::GAPI->GetRendererState()->RasterizerState.SetDirty();
+
+	SetupVS_ExMeshDrawCall();
+	SetupVS_ExConstantBuffer();
+
+	view = camera.GetTransform(zCCamera::TT_VIEW);
+	D3DXMATRIX worldMatrix;
+
+	for (auto const& vob : vobs)
+	{
+		vob->Vob->GetWorldMatrix(&worldMatrix);
+		Engine::GAPI->SetWorldViewTransform(worldMatrix, view);
+		
+		ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(vob->Vob->GetWorldMatrixPtr());
+		ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
+
+		InfiniteRangeConstantBuffer->BindToPixelShader(3);
+
+		for (auto const& itm : vob->VisualInfo->Meshes) {
+			for (auto const& itm2nd :itm.second) {
+				// Cache texture
+				if (itm.first) {
+					if (itm.first->GetTexture()) {
+						if (itm.first->GetTexture()->CacheIn(0.6f) == zRES_CACHED_IN) {
+							itm.first->GetTexture()->Bind(0);
+
+							MaterialInfo* info =
+								Engine::GAPI->GetMaterialInfoFrom(itm.first->GetTexture());
+							if (!info->Constantbuffer) info->UpdateConstantbuffer();
+
+							info->Constantbuffer->BindToPixelShader(2);
+						}
+						else
+							continue;
+					}
+				}
+				// Draw instances
+				Engine::GraphicsEngine->DrawVertexBufferIndexed(
+					itm2nd->MeshVertexBuffer, itm2nd->MeshIndexBuffer,
+					itm2nd->Indices.size());
+			}
+		}
+	}
+
+	GetContext()->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
+		nullptr);
+}
+
 /** Message-Callback for the main window */
 LRESULT D3D11GraphicsEngine::OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam,
 	LPARAM lParam) {
