@@ -50,7 +50,7 @@ const int NUM_UNLOADEDTEXCOUNT_FORCE_LOAD_TEXTURES = 100;
 
 const float DEFAULT_NORMALMAP_STRENGTH = 0.10f;
 const float DEFAULT_FAR_PLANE = 50000.0f;
-const D3DXVECTOR4 UNDERWATER_COLOR_MOD = D3DXVECTOR4(0.5f, 0.7f, 1.0f, 1.0f);
+const XMFLOAT4 UNDERWATER_COLOR_MOD = XMFLOAT4(0.5f, 0.7f, 1.0f, 1.0f);
 
 const float NUM_FRAME_SHADOW_UPDATES =
 2;  // Fraction of lights to update per frame
@@ -58,40 +58,6 @@ const int NUM_MIN_FRAME_SHADOW_UPDATES =
 4;  // Minimum lights to update per frame
 const int MAX_IMPORTANT_LIGHT_UPDATES = 1;
 //#define DEBUG_D3D11
-
-#define RECORD_LAST_DRAWCALL
-#ifdef RECORD_LAST_DRAWCALL
-struct DrawcallInfo {
-	enum DrawCallType {
-		VB = 0,
-		VB_IX = 1,
-		VB_IX_UINT = 2,
-	};
-
-	DrawCallType Type;
-	unsigned int NumElements;
-	unsigned int BaseVertexLocation;
-	unsigned int BaseIndexLocation;
-
-	void Print() {
-		LogInfo() << "Last Drawcall: " << Type << " NumElements: " << NumElements
-			<< " BaseVertexLocation: " << BaseVertexLocation
-			<< " BaseIndexLocation: " << BaseIndexLocation;
-	}
-
-	bool Check() {
-		if (NumElements > 0xFFFF * 4) {
-			LogWarn() << "Invalid amount of NumElements supplied to drawcall!";
-			Print();
-			return false;
-		}
-
-		return true;
-	}
-};
-
-DrawcallInfo g_LastDrawCall;
-#endif
 
 D3D11GraphicsEngine::D3D11GraphicsEngine() {
 	Resolution = DEFAULT_RESOLUTION;

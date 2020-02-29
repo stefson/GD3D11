@@ -47,7 +47,7 @@ XRESULT D3D11PfxRenderer::RenderDistanceBlur()
 }
 
 /** Blurs the given texture */
-XRESULT D3D11PfxRenderer::BlurTexture(RenderToTextureBuffer * texture, bool leaveResultInD4_2, float scale, const D3DXVECTOR4 & colorMod, const std::string & finalCopyShader)
+XRESULT D3D11PfxRenderer::BlurTexture(RenderToTextureBuffer * texture, bool leaveResultInD4_2, float scale, const DirectX::XMFLOAT4 & colorMod, const std::string & finalCopyShader)
 {
 	FX_Blur->RenderBlur(texture, leaveResultInD4_2, 0.0f, scale, colorMod, finalCopyShader);
 	return XR_SUCCESS;

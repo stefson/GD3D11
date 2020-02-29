@@ -20,7 +20,7 @@ public:
 	XRESULT OnResize(const INT2 & newResolution);
 
 	/** Blurs the given texture */
-	XRESULT BlurTexture(RenderToTextureBuffer * texture, bool leaveResultInD4_2 = false, float scale = 1.0f, const D3DXVECTOR4 & colorMod = D3DXVECTOR4(1, 1, 1, 1), const std::string & finalCopyShader = "PS_PFX_Simple");
+	XRESULT BlurTexture(RenderToTextureBuffer * texture, bool leaveResultInD4_2 = false, float scale = 1.0f, const DirectX::XMFLOAT4& colorMod = DirectX::XMFLOAT4(1, 1, 1, 1), const std::string & finalCopyShader = "PS_PFX_Simple");
 
 	/** Renders the heightfog */
 	XRESULT RenderHeightfog();
