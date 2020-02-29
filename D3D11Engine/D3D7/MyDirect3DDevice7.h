@@ -534,15 +534,18 @@ public:
 		switch(dtstTransformStateType)
 		{
 		case D3DTRANSFORMSTATE_WORLD:
-			D3DXMatrixTranspose(&state->TransformState.TransformWorld, (D3DXMATRIX *)lpD3DMatrix);
+			DirectX::XMMATRIX matrixWorld = DirectX::XMLoadFloat4x4((DirectX::XMFLOAT4X4*)lpD3DMatrix);
+			DirectX::XMStoreFloat4x4(&state->TransformState.TransformWorld, DirectX::XMMatrixTranspose(matrixWorld));
 			break;
 
 		case D3DTRANSFORMSTATE_VIEW:
-			D3DXMatrixTranspose(&state->TransformState.TransformView, (D3DXMATRIX *)lpD3DMatrix);
+			DirectX::XMMATRIX matrixView = DirectX::XMLoadFloat4x4((DirectX::XMFLOAT4X4*)lpD3DMatrix);
+			DirectX::XMStoreFloat4x4(&state->TransformState.TransformView, DirectX::XMMatrixTranspose(matrixView));
 			break;
 
 		case D3DTRANSFORMSTATE_PROJECTION:
-			D3DXMatrixTranspose(&state->TransformState.TransformProj, (D3DXMATRIX *)lpD3DMatrix);
+			DirectX::XMMATRIX matrixProj = DirectX::XMLoadFloat4x4((DirectX::XMFLOAT4X4*)lpD3DMatrix);
+			DirectX::XMStoreFloat4x4(&state->TransformState.TransformProj, DirectX::XMMatrixTranspose(matrixProj));
 			break;
 		}
 

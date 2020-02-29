@@ -354,10 +354,15 @@ public:
 
 	/** Returns the view matrix */
 	void GetInverseViewMatrix(D3DXMATRIX * invView);
+
+	/** Returns the view matrix */
 	void GetInverseViewMatrixDX(DirectX::XMFLOAT4X4 * invView);
 
 	/** Returns the projection-matrix */
-	D3DXMATRIX & GetProjectionMatrix();
+	D3DXMATRIX& GetProjectionMatrix();
+
+	/** Returns the projection-matrix */
+	DirectX::XMFLOAT4X4& GetProjectionMatrixDX();
 
 	/** Unprojects a pixel-position on the screen */
 	void Unproject(const D3DXVECTOR3 & p, D3DXVECTOR3 * worldPos, D3DXVECTOR3 * worldDir);

@@ -1205,9 +1205,9 @@ XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh(
 
 	InfiniteRangeConstantBuffer->BindToPixelShader(3);
 
-	const D3DXMATRIX& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
-	const D3DXMATRIX& view  = Engine::GAPI->GetRendererState()->TransformState.TransformView;
-	const D3DXMATRIX& proj  = Engine::GAPI->GetProjectionMatrix();
+	const auto& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
+	const auto& view  = Engine::GAPI->GetRendererState()->TransformState.TransformView;
+	const auto& proj  = Engine::GAPI->GetProjectionMatrix();
 
 	SetupVS_ExMeshDrawCall();
 	SetupVS_ExConstantBuffer();
@@ -1260,7 +1260,7 @@ XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh(
 		}
 	}
 
-	VS_ExConstantBuffer_PerInstanceSkeletal cb2;
+	VS_ExConstantBuffer_PerInstanceSkeletal cb2 = {};
 	cb2.World = world;
 	cb2.PI_ModelFatness = fatness;
 
@@ -1359,11 +1359,11 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
 	// Bind shader and pipeline flags
 	D3D11VShader* vShader = ShaderManager->GetVShader("VS_ExInstanced");
 
-	D3DXMATRIX* world =
+	auto* world =
 		&Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
-	D3DXMATRIX& view =
+	auto& view =
 		Engine::GAPI->GetRendererState()->TransformState.TransformView;
-	D3DXMATRIX& proj = Engine::GAPI->GetProjectionMatrix();
+	auto& proj = Engine::GAPI->GetProjectionMatrixDX();
 
 	VS_ExConstantBuffer_PerFrame cb = {};
 	cb.View = view;
@@ -1739,16 +1739,16 @@ void D3D11GraphicsEngine::SetupVS_ExMeshDrawCall() {
 }
 
 void D3D11GraphicsEngine::SetupVS_ExConstantBuffer() {
-	D3DXMATRIX& world =
+	auto& world =
 		Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
-	D3DXMATRIX& view =
+	auto& view =
 		Engine::GAPI->GetRendererState()->TransformState.TransformView;
-	D3DXMATRIX& proj = Engine::GAPI->GetProjectionMatrix();
+	auto& proj = Engine::GAPI->GetProjectionMatrixDX();
 
 	VS_ExConstantBuffer_PerFrame cb = {};
 	cb.View = view;
 	cb.Projection = proj;
-	cb.ViewProj = proj * view;
+	XMStoreFloat4x4(&cb.ViewProj, XMMatrixMultiply(XMLoadFloat4x4(&proj), XMLoadFloat4x4(&view)));
 
 	ActiveVS->GetConstantBuffer()[0]->UpdateBuffer(&cb);
 	ActiveVS->GetConstantBuffer()[0]->BindToVertexShader(0);
@@ -1758,10 +1758,10 @@ void D3D11GraphicsEngine::SetupVS_ExConstantBuffer() {
 }
 
 void D3D11GraphicsEngine::SetupVS_ExPerInstanceConstantBuffer() {
-	D3DXMATRIX* world = &Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
+	auto world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
 
 	VS_ExConstantBuffer_PerInstance cb = {};
-	cb.World = *(DirectX::XMFLOAT4X4*)world;
+	cb.World = world;
 
 
 	ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&cb);
@@ -1770,10 +1770,10 @@ void D3D11GraphicsEngine::SetupVS_ExPerInstanceConstantBuffer() {
 
 /** Puts the current world matrix into a CB and binds it to the given slot */
 void D3D11GraphicsEngine::SetupPerInstanceConstantBuffer(int slot) {
-	D3DXMATRIX* world = &Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
+	auto world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
 
 	VS_ExConstantBuffer_PerInstance cb = {};
-	cb.World = *(DirectX::XMFLOAT4X4*)world;
+	cb.World = world;
 
 	ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&cb);
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(slot);
@@ -4256,7 +4256,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 
 	DS_PointLightConstantBuffer plcb = {};
 	D3DXMatrixInverse(&plcb.PL_InvProj, nullptr, &Engine::GAPI->GetProjectionMatrix());
-	D3DXMatrixInverse(&plcb.PL_InvView, nullptr, &Engine::GAPI->GetRendererState()->TransformState.TransformView);
+	D3DXMatrixInverse(&plcb.PL_InvView, nullptr, (D3DXMATRIX*)&Engine::GAPI->GetRendererState()->TransformState.TransformView);
 	plcb.PL_ViewportSize = float2(static_cast<float>(Resolution.x), static_cast<float>(Resolution.y));
 
 	GBuffer0_Diffuse->BindToPixelShader(GetContext(), 0);
@@ -4410,8 +4410,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	DS_ScreenQuadConstantBuffer scb = {};
 	scb.SQ_InvProj = plcb.PL_InvProj;
 	scb.SQ_InvView = plcb.PL_InvView;
-	scb.SQ_View =
-		Engine::GAPI->GetRendererState()->TransformState.TransformView;
+	scb.SQ_View = *(D3DXMATRIX*)&Engine::GAPI->GetRendererState()->TransformState.TransformView;
 
 	D3DXVec3TransformNormal(scb.SQ_LightDirectionVS.toD3DXVECTOR3(),
 		sky->GetAtmosphereCB().AC_LightPos.toD3DXVECTOR3(),

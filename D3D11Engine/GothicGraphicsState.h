@@ -377,19 +377,20 @@ struct GothicSamplerStateInfo : public GothicPipelineState {
 struct GothicTransformInfo {
 	/** Sets the default values for this struct */
 	void SetDefault() {
-		D3DXMatrixIdentity(&TransformWorld);
-		D3DXMatrixIdentity(&TransformView);
-		D3DXMatrixIdentity(&TransformProj);
+		auto const& idMatrix = DirectX::XMMatrixIdentity();
+		XMStoreFloat4x4(&TransformWorld, idMatrix);
+		XMStoreFloat4x4(&TransformView, idMatrix);
+		XMStoreFloat4x4(&TransformProj, idMatrix);
 	}
 
 	/** This is actually world * view. Gothic never sets the view matrix */
-	D3DXMATRIX TransformWorld; 
+	DirectX::XMFLOAT4X4 TransformWorld;
 
 	/** Though never really set by Gothic, it's listed here for completeness sake */
-	D3DXMATRIX TransformView;
+	DirectX::XMFLOAT4X4 TransformView;
 
 	/** Projectionmatrix */
-	D3DXMATRIX TransformProj;
+	DirectX::XMFLOAT4X4 TransformProj;
 };
 
 struct HBAOSettings {

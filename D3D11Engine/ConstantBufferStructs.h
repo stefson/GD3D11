@@ -235,9 +235,9 @@ struct AdvanceRainConstantBuffer
 
 struct VS_ExConstantBuffer_PerFrame
 {
-	D3DXMATRIX View;
-	D3DXMATRIX Projection;
-	D3DXMATRIX ViewProj;
+	DirectX::XMFLOAT4X4 View;
+	DirectX::XMFLOAT4X4 Projection;
+	DirectX::XMFLOAT4X4 ViewProj;
 };
 
 struct ParticlePointShadingConstantBuffer
@@ -254,7 +254,7 @@ struct VS_ExConstantBuffer_PerInstance
 
 struct VS_ExConstantBuffer_PerInstanceSkeletal
 {
-	D3DXMATRIX World;
+	DirectX::XMFLOAT4X4 World;
 	float PI_ModelFatness;
 	float3 PI_Pad1;
 };

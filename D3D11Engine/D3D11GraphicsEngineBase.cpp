@@ -10,6 +10,8 @@
 #include "RenderToTextureBuffer.h"
 #include "zCView.h"
 
+using namespace DirectX;
+
 const int DRAWVERTEXARRAY_BUFFER_SIZE = 2048 * sizeof(ExVertexStruct);
 const int NUM_MAX_BONES = 96;
 const int INSTANCING_BUFFER_SIZE = sizeof(VobInstanceInfo) * 2048;
@@ -672,15 +674,14 @@ void D3D11GraphicsEngineBase::SetupVS_ExMeshDrawCall()
 
 void D3D11GraphicsEngineBase::SetupVS_ExConstantBuffer()
 {
-	const D3DXMATRIX& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
-	const D3DXMATRIX& view  = Engine::GAPI->GetRendererState()->TransformState.TransformView;
-	const D3DXMATRIX& proj  = Engine::GAPI->GetProjectionMatrix();
+	const auto& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
+	const auto& view  = Engine::GAPI->GetRendererState()->TransformState.TransformView;
+	const auto& proj  = Engine::GAPI->GetProjectionMatrixDX();
 
-	VS_ExConstantBuffer_PerFrame cb;
+	VS_ExConstantBuffer_PerFrame cb = {};
 	cb.View = view;
 	cb.Projection = proj;
-	cb.ViewProj = proj * view;
-
+	XMStoreFloat4x4(&cb.ViewProj, XMMatrixMultiply(XMLoadFloat4x4(&proj), XMLoadFloat4x4(&view)));
 	ActiveVS->GetConstantBuffer()[0]->UpdateBuffer(&cb);
 	ActiveVS->GetConstantBuffer()[0]->BindToVertexShader(0);
 	ActiveVS->GetConstantBuffer()[0]->BindToDomainShader(0);
@@ -689,10 +690,10 @@ void D3D11GraphicsEngineBase::SetupVS_ExConstantBuffer()
 
 void D3D11GraphicsEngineBase::SetupVS_ExPerInstanceConstantBuffer()
 {
-	D3DXMATRIX* world = &Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
+	auto world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
 
-	VS_ExConstantBuffer_PerInstance cb;
-	cb.World = *(DirectX::XMFLOAT4X4*)world;
+	VS_ExConstantBuffer_PerInstance cb = {};
+	cb.World = world;
 
 	ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&cb);
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
@@ -735,10 +736,10 @@ XRESULT D3D11GraphicsEngineBase::SetActiveGShader(const std::string & shader)
 /** Puts the current world matrix into a CB and binds it to the given slot */
 void D3D11GraphicsEngineBase::SetupPerInstanceConstantBuffer(int slot)
 {
-	const D3DXMATRIX* world = &Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
+	const auto world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
 
-	VS_ExConstantBuffer_PerInstance cb;
-	cb.World = *(DirectX::XMFLOAT4X4*)world;
+	VS_ExConstantBuffer_PerInstance cb = {};
+	cb.World = world;
 
 
 	ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&cb);
@@ -748,14 +749,14 @@ void D3D11GraphicsEngineBase::SetupPerInstanceConstantBuffer(int slot)
 /** Updates the transformsCB with new values from the GAPI */
 void D3D11GraphicsEngineBase::UpdateTransformsCB()
 {
-	const D3DXMATRIX& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
-	const D3DXMATRIX& view  = Engine::GAPI->GetRendererState()->TransformState.TransformView;
-	const D3DXMATRIX& proj  = Engine::GAPI->GetProjectionMatrix();
+	const auto& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
+	const auto& view  = Engine::GAPI->GetRendererState()->TransformState.TransformView;
+	const auto& proj  = Engine::GAPI->GetProjectionMatrixDX();
 
-	VS_ExConstantBuffer_PerFrame cb;
+	VS_ExConstantBuffer_PerFrame cb = {};
 	cb.View = view;
 	cb.Projection = proj;
-	cb.ViewProj = proj * view;
+	XMStoreFloat4x4(&cb.ViewProj, XMMatrixMultiply(XMLoadFloat4x4(&proj), XMLoadFloat4x4(&view)));
 
 	TransformsCB->UpdateBuffer(&cb);
 }

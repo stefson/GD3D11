@@ -1986,63 +1986,61 @@ void GothicAPI::DrawTriangle(float3 pos = { 0.0f,0.0f,0.0f })
 /** Sets the world matrix */
 void GothicAPI::SetWorldTransform(const D3DXMATRIX & world)
 {
-	RendererState.TransformState.TransformWorld = world;
+	RendererState.TransformState.TransformWorld = (XMFLOAT4X4)world;
 }
 /** Sets the world matrix */
 void GothicAPI::SetViewTransform(const D3DXMATRIX & view)
 {
-	RendererState.TransformState.TransformView = view;
+	RendererState.TransformState.TransformView = (XMFLOAT4X4)view;
 }
 
 /** Sets the Projection matrix */
 void GothicAPI::SetProjTransform(const D3DXMATRIX & proj)
 {
-	RendererState.TransformState.TransformProj = proj;
+	RendererState.TransformState.TransformProj = (XMFLOAT4X4)proj;
 }
 
 /** Sets the Projection matrix */
 D3DXMATRIX GothicAPI::GetProjTransform()
 {
-	return RendererState.TransformState.TransformProj;
+	return *(D3DXMATRIX*)&RendererState.TransformState.TransformProj;
 }
 
 /** Sets the world matrix */
 void GothicAPI::SetWorldTransform(const D3DXMATRIX & world, bool transpose)
 {
 	if (transpose)
-		D3DXMatrixTranspose(&RendererState.TransformState.TransformWorld, &world);
+		D3DXMatrixTranspose((D3DXMATRIX*)&RendererState.TransformState.TransformWorld, &world);
 	else
-		RendererState.TransformState.TransformWorld = world;
+		RendererState.TransformState.TransformWorld = (XMFLOAT4X4)world;
 }
 
 /** Sets the world matrix */
 void GothicAPI::SetViewTransform(const D3DXMATRIX & view, bool transpose)
 {
 	if (transpose)
-		D3DXMatrixTranspose(&RendererState.TransformState.TransformView, &view);
+		D3DXMatrixTranspose((D3DXMATRIX*)&RendererState.TransformState.TransformView, &view);
 	else
-		RendererState.TransformState.TransformView = view;
+		RendererState.TransformState.TransformView = (XMFLOAT4X4)view;
 }
 
 /** Sets the world matrix */
 void GothicAPI::SetWorldViewTransform(const D3DXMATRIX & world, const D3DXMATRIX & view)
 {
-	RendererState.TransformState.TransformWorld = world;
-	RendererState.TransformState.TransformView = view;
+	RendererState.TransformState.TransformWorld = (XMFLOAT4X4)world;
+	RendererState.TransformState.TransformView = (XMFLOAT4X4)view;
 }
 
 /** Sets the world matrix */
 void GothicAPI::ResetWorldTransform()
 {
-	D3DXMatrixIdentity(&RendererState.TransformState.TransformWorld);
-	D3DXMatrixTranspose(&RendererState.TransformState.TransformWorld, &RendererState.TransformState.TransformWorld);
+	XMStoreFloat4x4(&RendererState.TransformState.TransformWorld, XMMatrixTranspose(XMMatrixIdentity()));
 }
 
 /** Sets the world matrix */
 void GothicAPI::ResetViewTransform()
 {
-	D3DXMatrixIdentity(&RendererState.TransformState.TransformView);
-	D3DXMatrixTranspose(&RendererState.TransformState.TransformView, &RendererState.TransformState.TransformView);
+	XMStoreFloat4x4(&RendererState.TransformState.TransformView, XMMatrixTranspose(XMMatrixIdentity()));
 }
 
 /** Returns the wrapped world mesh */
@@ -2380,6 +2378,17 @@ D3DXMATRIX& GothicAPI::GetProjectionMatrix()
 	if (CameraReplacementPtr)
 	{
 		return CameraReplacementPtr->ProjectionReplacement;
+	}
+
+	return (D3DXMATRIX&)RendererState.TransformState.TransformProj;
+}
+
+/** Returns the projection-matrix */
+DirectX::XMFLOAT4X4& GothicAPI::GetProjectionMatrixDX()
+{
+	if (CameraReplacementPtr)
+	{
+		return (DirectX::XMFLOAT4X4&)CameraReplacementPtr->ProjectionReplacement;
 	}
 
 	return RendererState.TransformState.TransformProj;

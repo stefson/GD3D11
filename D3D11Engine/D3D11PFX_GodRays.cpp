@@ -12,6 +12,8 @@
 #include "GothicAPI.h"
 #include "GSky.h"
 
+using namespace DirectX;
+
 D3D11PFX_GodRays::D3D11PFX_GodRays(D3D11PfxRenderer* rnd) : D3D11PFX_Effect(rnd)
 {
 }
@@ -28,25 +30,27 @@ XRESULT D3D11PFX_GodRays::Render(RenderToTextureBuffer * fxbuffer)
 
 	engine->SetDefaultStates();
 
-	D3DXVECTOR3 sunPosition = *Engine::GAPI->GetSky()->GetAtmosphereCB().AC_LightPos.toD3DXVECTOR3();
-	sunPosition *= Engine::GAPI->GetSky()->GetAtmosphereCB().AC_OuterRadius;
-	sunPosition += Engine::GAPI->GetCameraPosition(); // Maybe use cameraposition from sky?
+	XMVECTOR xmSunPosition = XMLoadFloat3(Engine::GAPI->GetSky()->GetAtmosphereCB().AC_LightPos.toXMFLOAT3());
 
-	D3DXMATRIX& view = Engine::GAPI->GetRendererState()->TransformState.TransformView;
-	D3DXMATRIX& proj = Engine::GAPI->GetProjectionMatrix();
+	float outerRadius = Engine::GAPI->GetSky()->GetAtmosphereCB().AC_OuterRadius;
+	xmSunPosition = XMVectorMultiply(xmSunPosition, XMVectorSet(outerRadius, outerRadius, outerRadius, outerRadius));
+	xmSunPosition = XMVectorAdd(xmSunPosition, Engine::GAPI->GetCameraPositionXM()); // Maybe use cameraposition from sky?
 
-	D3DXMATRIX viewProj = proj * view;
-	D3DXMatrixTranspose(&viewProj, &viewProj);
-	D3DXMatrixTranspose(&view, &view);
+	XMMATRIX view = XMLoadFloat4x4(&Engine::GAPI->GetRendererState()->TransformState.TransformView);
+	XMMATRIX proj = XMLoadFloat4x4(&Engine::GAPI->GetProjectionMatrixDX());
 
-	D3DXVECTOR3 sunViewPosition;
-	D3DXVec3TransformCoord(&sunViewPosition, &sunPosition, &view); // This is for checking if the light is behind the camera
-	D3DXVec3TransformCoord(&sunPosition, &sunPosition, &viewProj);
+	XMMATRIX viewProj = XMMatrixMultiply(proj, view);
+
+	viewProj = XMMatrixTranspose(viewProj);
+	view = XMMatrixTranspose(view);
+
+	XMFLOAT3 sunViewPosition; XMStoreFloat3(&sunViewPosition, XMVector3TransformCoord(xmSunPosition, view)); // This is for checking if the light is behind the camera
+	XMFLOAT3 sunPosition; XMStoreFloat3(&sunPosition, XMVector3TransformCoord(xmSunPosition, viewProj));
 
 	if (sunViewPosition.z < 0.0f)
 		return XR_SUCCESS; // Don't render the godrays when the sun is behind the camera
 
-	GodRayZoomConstantBuffer gcb;
+	GodRayZoomConstantBuffer gcb = {};
 	gcb.GR_Weight = 1.0f;
 	gcb.GR_Decay = Engine::GAPI->GetRendererState()->RendererSettings.GodRayDecay;
 	gcb.GR_Weight = Engine::GAPI->GetRendererState()->RendererSettings.GodRayWeight;
@@ -83,7 +87,7 @@ XRESULT D3D11PFX_GodRays::Render(RenderToTextureBuffer * fxbuffer)
 	engine->GetHDRBackBuffer()->BindToPixelShader(engine->GetContext(), 0);
 	engine->GetGBuffer1()->BindToPixelShader(engine->GetContext(), 1);
 
-	D3D11_VIEWPORT vp;
+	D3D11_VIEWPORT vp = {};
 	vp.TopLeftX = 0.0f;
 	vp.TopLeftY = 0.0f;
 	vp.MinDepth = 0.0f;
