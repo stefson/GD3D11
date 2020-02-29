@@ -15,9 +15,7 @@
 #include "pch.h"
 #include "ocean_simulator.h"
 #include <assert.h>
-#include <D3Dcompiler.h>
-
-#pragma comment(lib, "D3DCompiler.lib")
+#include <d3dcompiler.h>
 
 // Disable warning "conditional expression is constant"
 #pragma warning(disable:4127)

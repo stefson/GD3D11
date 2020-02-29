@@ -33,6 +33,7 @@
 #include <locale>
 #include <codecvt>
 #include <wrl\client.h>
+#include <SimpleMath.h>
 
 #include <D3DX11.h>
 #pragma comment(lib, "dxguid.lib")

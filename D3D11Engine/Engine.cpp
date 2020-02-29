@@ -51,14 +51,14 @@ namespace Engine {
 	void OnShutDown() {
 		LogInfo() << "Shutting down...";
 
-		// TODO: remove this hack in the future, just a temporary workaround to fix crash on shutdown with the need to kill process via TaskManager
-		//exit(0); 
-
 		SAFE_DELETE(Engine::RenderingThreadPool);
 		SAFE_DELETE(Engine::AntTweakBar);
 		SAFE_DELETE(Engine::GAPI);
-		SAFE_DELETE(Engine::GraphicsEngine);
 		SAFE_DELETE(Engine::WorkerThreadPool);
+
+		// TODO: remove this hack in the future, just a temporary workaround to fix crash on shutdown with the need to kill process via TaskManager
+		exit(0);
+		SAFE_DELETE(Engine::GraphicsEngine);
 	}
 
 };

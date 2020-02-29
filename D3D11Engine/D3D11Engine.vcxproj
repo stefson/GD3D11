@@ -85,34 +85,34 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(IncludePath);$(DXSDK_DIR)\include;squish-1.11;include;$(SolutionDir)DirectXTK\Inc</IncludePath>
-    <LibraryPath>$(DXSDK_DIR)\lib\x86;lib;$(LibraryPath);$(SolutionDir)DirectXTK\Bin\$(Configuration)\Desktop_2019\Win32\Release</LibraryPath>
+    <IncludePath>$(IncludePath);$(DXSDK_DIR)\include;squish-1.11;include</IncludePath>
+    <LibraryPath>$(fx11-LibPath)\..\Release;lib;$(LibraryPath);$(DXSDK_DIR)\lib\x86</LibraryPath>
     <TargetName>ddraw</TargetName>
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_G1|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(IncludePath);$(DXSDK_DIR)\include;squish-1.11;include;;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include</IncludePath>
-    <LibraryPath>$(IncludePath);$(DXSDK_DIR)\lib\x86;lib;$(LibraryPath);C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86</LibraryPath>
+    <IncludePath>$(IncludePath);$(DXSDK_DIR)\include;squish-1.11;include</IncludePath>
+    <LibraryPath>$(fx11-LibPath)\..\Release;lib;$(LibraryPath);$(DXSDK_DIR)\lib\x86</LibraryPath>
     <TargetName>ddraw</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(IncludePath);$(DXSDK_DIR)\include;squish-1.11;include;;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include</IncludePath>
-    <LibraryPath>$(DXSDK_DIR)\lib\x86;lib;$(LibraryPath);C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86</LibraryPath>
+    <IncludePath>$(IncludePath);$(DXSDK_DIR)\include;squish-1.11;include</IncludePath>
+    <LibraryPath>$(fx11-LibPath)\..\Release;lib;$(LibraryPath);$(DXSDK_DIR)\lib\x86</LibraryPath>
     <TargetName>ddraw</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt_Spacer|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(IncludePath);$(DXSDK_DIR)\include;squish-1.11;include;;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include</IncludePath>
-    <LibraryPath>$(DXSDK_DIR)\lib\x86;lib;$(LibraryPath);C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86</LibraryPath>
+    <IncludePath>$(IncludePath);$(DXSDK_DIR)\include;squish-1.11;include</IncludePath>
+    <LibraryPath>$(fx11-LibPath)\..\Release;lib;$(LibraryPath);$(DXSDK_DIR)\lib\x86</LibraryPath>
     <TargetName>ddraw</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt_G1|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(IncludePath);$(DXSDK_DIR)\include;squish-1.11;include;;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include</IncludePath>
-    <LibraryPath>$(DXSDK_DIR)\lib\x86;lib;$(LibraryPath);C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86</LibraryPath>
+    <IncludePath>$(IncludePath);$(DXSDK_DIR)\include;squish-1.11;include</IncludePath>
+    <LibraryPath>$(fx11-LibPath)\..\Release;lib;$(LibraryPath);$(DXSDK_DIR)\lib\x86</LibraryPath>
     <TargetName>ddraw</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -130,7 +130,8 @@
       <OpenMPSupport>true</OpenMPSupport>
       <EnablePREfast>true</EnablePREfast>
       <DisableSpecificWarnings>4005;4530;4577;26812;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
       <FloatingPointModel>Fast</FloatingPointModel>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <AdditionalOptions>/Zc:inline /Zc:throwingNew %(AdditionalOptions)</AdditionalOptions>
@@ -148,7 +149,8 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <DelayLoadDLLs>
       </DelayLoadDLLs>
-      <AdditionalLibraryDirectories>$(WindowsSDK_LibraryPath_x86)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <CustomBuildStep>
@@ -182,7 +184,8 @@ copy "$(OutDir)$(TargetName).pdb" "$(G2_SYSTEM_PATH)\ddraw.pdb"</Command>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <DelayLoadDLLs>
       </DelayLoadDLLs>
-      <AdditionalLibraryDirectories>$(WindowsSDK_LibraryPath_x86);</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Link>
     <CustomBuildStep>
       <Command>copy "shaders\*.*" "$(G1_SYSTEM_PATH)\GD3D11\shaders\"
@@ -215,7 +218,8 @@ copy "$(OutDir)$(TargetName).pdb" "$(G1_SYSTEM_PATH)\ddraw.pdb"</Command>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <DelayLoadDLLs>
       </DelayLoadDLLs>
-      <AdditionalLibraryDirectories>$(WindowsSDK_LibraryPath_x86);</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Link>
     <CustomBuildStep>
       <Command>copy "shaders\*.*" "$(G2_SYSTEM_PATH)\GD3D11\shaders\"
@@ -278,7 +282,8 @@ copy "$(OutDir)$(TargetName).pdb" "$(G2_SYSTEM_PATH)\ddraw.pdb"</Command>
       <ModuleDefinitionFile>ddraw.def</ModuleDefinitionFile>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <DelayLoadDLLs>d3dcompiler_46.dll;FW1FontWrapper.dll;Assimp32.dll;AntTweakBar.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
-      <AdditionalLibraryDirectories>$(WindowsSDK_LibraryPath_x86);</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Link>
     <CustomBuildStep>
       <Command>copy "shaders\*.*" "$(G1_SYSTEM_PATH)\GD3D11\shaders\"
@@ -673,21 +678,24 @@ copy "$(OutDir)$(TargetName).pdb" "$(G1_SYSTEM_PATH)\ddraw.pdb"</Command>
     <None Include="include\assimp\vector3.inl" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Effects11\Effects11_2015.vcxproj">
-      <Project>{df460eab-570d-4b50-9089-2e2fc801bf38}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\directxmesh_desktop_2015.2019.12.17.1\build\native\directxmesh_desktop_2015.targets" Condition="Exists('..\packages\directxmesh_desktop_2015.2019.12.17.1\build\native\directxmesh_desktop_2015.targets')" />
-    <Import Project="..\packages\directxtk_desktop_2015.2019.12.17.1\build\native\directxtk_desktop_2015.targets" Condition="Exists('..\packages\directxtk_desktop_2015.2019.12.17.1\build\native\directxtk_desktop_2015.targets')" />
+    <Import Project="..\packages\fx11_desktop_2015.2019.4.27.1\build\native\fx11_desktop_2015.targets" Condition="Exists('..\packages\fx11_desktop_2015.2019.4.27.1\build\native\fx11_desktop_2015.targets')" />
+    <Import Project="..\packages\Microsoft.XAudio2.Redist.1.2.0\build\native\Microsoft.XAudio2.Redist.targets" Condition="Exists('..\packages\Microsoft.XAudio2.Redist.1.2.0\build\native\Microsoft.XAudio2.Redist.targets')" />
+    <Import Project="..\packages\directxtk_desktop_2017.2020.2.24.4\build\native\directxtk_desktop_2017.targets" Condition="Exists('..\packages\directxtk_desktop_2017.2020.2.24.4\build\native\directxtk_desktop_2017.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>Dieses Projekt verweist auf mindestens ein NuGet-Paket, das auf diesem Computer fehlt. Verwenden Sie die Wiederherstellung von NuGet-Paketen, um die fehlenden Dateien herunterzuladen. Weitere Informationen finden Sie unter "http://go.microsoft.com/fwlink/?LinkID=322105". Die fehlende Datei ist "{0}".</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\directxmesh_desktop_2015.2019.12.17.1\build\native\directxmesh_desktop_2015.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxmesh_desktop_2015.2019.12.17.1\build\native\directxmesh_desktop_2015.targets'))" />
-    <Error Condition="!Exists('..\packages\directxtk_desktop_2015.2019.12.17.1\build\native\directxtk_desktop_2015.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtk_desktop_2015.2019.12.17.1\build\native\directxtk_desktop_2015.targets'))" />
+    <Error Condition="!Exists('..\packages\fx11_desktop_2015.2019.4.27.1\build\native\fx11_desktop_2015.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\fx11_desktop_2015.2019.4.27.1\build\native\fx11_desktop_2015.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.XAudio2.Redist.1.2.0\build\native\Microsoft.XAudio2.Redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.XAudio2.Redist.1.2.0\build\native\Microsoft.XAudio2.Redist.targets'))" />
+    <Error Condition="!Exists('..\packages\directxtk_desktop_2017.2020.2.24.4\build\native\directxtk_desktop_2017.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtk_desktop_2017.2020.2.24.4\build\native\directxtk_desktop_2017.targets'))" />
   </Target>
+  
+  <!-- For NuGet! This is needed because we use different configuration names than the defaults -->
+  <PropertyGroup>
+    <directxtk-LibPath>$(directxtk-LibPath)\..\Release</directxtk-LibPath>
+    <fx11-LibPath>$(fx11-LibPath)\..\Release</fx11-LibPath>
+  </PropertyGroup>
 </Project>

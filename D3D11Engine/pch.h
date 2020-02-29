@@ -11,7 +11,7 @@
 #include <wrl/client.h>
 #include <chrono>
 #include <d3d11.h>
-#include <SimpleMath.h>
+#include <DirectXMath.h>
 #include <future>
 #include <list>
 #include <map>
