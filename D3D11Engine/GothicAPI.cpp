@@ -2299,7 +2299,7 @@ D3DXVECTOR3 GothicAPI::GetCameraPosition()
 		return D3DXVECTOR3(0, 0, 0);
 
 	if (CameraReplacementPtr)
-		return CameraReplacementPtr->PositionReplacement;
+		return *(D3DXVECTOR3*)&CameraReplacementPtr->PositionReplacement;
 
 	return oCGame::GetGame()->_zCSession_camVob->GetPositionWorld();
 }
@@ -2310,7 +2310,7 @@ XMVECTOR GothicAPI::GetCameraPositionXM()
 		return  XMVectorSet(0, 0, 0, 0);
 
 	if (CameraReplacementPtr)
-		return XMLoadFloat3((XMFLOAT3*)&CameraReplacementPtr->PositionReplacement);
+		return XMLoadFloat3(&CameraReplacementPtr->PositionReplacement);
 
 	return oCGame::GetGame()->_zCSession_camVob->GetPositionWorldXM();
 }
@@ -2327,7 +2327,7 @@ void GothicAPI::GetViewMatrix(D3DXMATRIX * view)
 {
 	if (CameraReplacementPtr)
 	{
-		*view = CameraReplacementPtr->ViewReplacement;
+		*view = *(D3DXMATRIX*)&CameraReplacementPtr->ViewReplacement;
 		return;
 	}
 
@@ -2342,10 +2342,9 @@ DirectX::XMMATRIX GothicAPI::GetViewMatrixXM()
 		*view = CameraReplacementPtrDX->ViewReplacement;
 		return;
 	}*/
-	// TODO: Switch to pure DirectXMath
 	if (CameraReplacementPtr)
 	{
-		return XMLoadFloat4x4((DirectX::XMFLOAT4X4*)&CameraReplacementPtr->ViewReplacement);
+		return XMLoadFloat4x4(&CameraReplacementPtr->ViewReplacement);
 	}
 	return XMLoadFloat4x4(&zCCamera::GetCamera()->GetTransformDX(zCCamera::ETransformType::TT_VIEW));
 }
@@ -2355,7 +2354,7 @@ void GothicAPI::GetInverseViewMatrix(D3DXMATRIX * invView)
 {
 	if (CameraReplacementPtr)
 	{
-		D3DXMatrixInverse(invView, nullptr, &CameraReplacementPtr->ViewReplacement);
+		D3DXMatrixInverse(invView, nullptr, (D3DXMATRIX*)&CameraReplacementPtr->ViewReplacement);
 		return;
 	}
 
@@ -2366,7 +2365,7 @@ void GothicAPI::GetInverseViewMatrixDX(DirectX::XMFLOAT4X4 * invView)
 {
 	if (CameraReplacementPtr)
 	{
-		DirectX::XMStoreFloat4x4(invView, DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4((DirectX::XMFLOAT4X4*)&CameraReplacementPtr->ViewReplacement)));
+		DirectX::XMStoreFloat4x4(invView, DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&CameraReplacementPtr->ViewReplacement)));
 		return;
 	}
 
@@ -2377,7 +2376,7 @@ D3DXMATRIX& GothicAPI::GetProjectionMatrix()
 {
 	if (CameraReplacementPtr)
 	{
-		return CameraReplacementPtr->ProjectionReplacement;
+		return (D3DXMATRIX&)CameraReplacementPtr->ProjectionReplacement;
 	}
 
 	return (D3DXMATRIX&)RendererState.TransformState.TransformProj;
@@ -2388,7 +2387,7 @@ DirectX::XMFLOAT4X4& GothicAPI::GetProjectionMatrixDX()
 {
 	if (CameraReplacementPtr)
 	{
-		return (DirectX::XMFLOAT4X4&)CameraReplacementPtr->ProjectionReplacement;
+		return CameraReplacementPtr->ProjectionReplacement;
 	}
 
 	return RendererState.TransformState.TransformProj;

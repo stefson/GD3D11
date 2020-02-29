@@ -68,17 +68,11 @@ struct BspInfo {
 };
 
 
-struct CameraReplacementDX {
+struct CameraReplacement {
 	DirectX::XMFLOAT4X4 ViewReplacement;
 	DirectX::XMFLOAT4X4 ProjectionReplacement;
 	DirectX::XMFLOAT3 PositionReplacement;
 	DirectX::XMFLOAT3 LookAtReplacement;
-};
-struct CameraReplacement {
-	D3DXMATRIX ViewReplacement;
-	D3DXMATRIX ProjectionReplacement;
-	D3DXVECTOR3 PositionReplacement;
-	D3DXVECTOR3 LookAtReplacement;
 };
 
 /** Version of this struct */
@@ -761,7 +755,6 @@ private:
 
 	/** Replacement values for the camera */
 	CameraReplacement * CameraReplacementPtr;
-	CameraReplacementDX * CameraReplacementPtrDX;
 
 	/** List of available GVegetationBoxes */
 	std::list<GVegetationBox *> VegetationBoxes;

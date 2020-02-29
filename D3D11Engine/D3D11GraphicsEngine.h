@@ -223,7 +223,7 @@ public:
 	virtual void DrawVobsList(const std::list<VobInfo*>& vobs, zCCamera& camera) override;
 
 	/** Draws everything around the given position */
-	void DrawWorldAround(const D3DXVECTOR3 & position, int sectionRange, float vobXZRange, bool cullFront = true, bool dontCull = false);
+	void DrawWorldAround(const DirectX::XMVECTOR& position, int sectionRange, float vobXZRange, bool cullFront = true, bool dontCull = false);
 	void DrawWorldAround(const DirectX::XMVECTOR& position,
 		float range,
 		bool cullFront = true,
@@ -244,7 +244,7 @@ public:
 	virtual XRESULT DrawSky();
 
 	/** Renders the shadowmaps for the sun */
-	void RenderShadowmaps(const D3DXVECTOR3 & cameraPosition, RenderToDepthStencilBuffer * target = nullptr, bool cullFront = true, bool dontCull = false, ID3D11DepthStencilView* dsvOverwrite = nullptr, ID3D11RenderTargetView* debugRTV = nullptr);
+	void RenderShadowmaps(const DirectX::XMVECTOR& cameraPosition, RenderToDepthStencilBuffer * target = nullptr, bool cullFront = true, bool dontCull = false, ID3D11DepthStencilView* dsvOverwrite = nullptr, ID3D11RenderTargetView* debugRTV = nullptr);
 
 	/** Renders the shadowmaps for a pointlight */
 	void RenderShadowCube(const DirectX::XMVECTOR& position,

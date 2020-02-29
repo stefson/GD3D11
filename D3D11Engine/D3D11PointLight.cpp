@@ -264,9 +264,9 @@ void D3D11PointLight::RenderCubemapFace(const DirectX::XMFLOAT4X4& view, const D
 	D3D11GraphicsEngineBase* engineBase = (D3D11GraphicsEngineBase *)Engine::GraphicsEngine;
 	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *) engineBase; // TODO: Remove and use newer system!
 	CameraReplacement cr;
-	cr.PositionReplacement = LightInfo->Vob->GetPositionWorld();
-	cr.ProjectionReplacement = *(D3DXMATRIX*)&proj;
-	cr.ViewReplacement = *(D3DXMATRIX*)&view;
+	XMStoreFloat3(&cr.PositionReplacement, LightInfo->Vob->GetPositionWorldXM());
+	cr.ProjectionReplacement = proj;
+	cr.ViewReplacement = view;
 
 	// Replace gothics camera
 	Engine::GAPI->SetCameraReplacementPtr(&cr);

@@ -237,7 +237,7 @@ XRESULT D3D11Effect::DrawRain()
 	particleGS->Apply();
 
 	// Setup constantbuffers
-	ParticleGSInfoConstantBuffer gcb;
+	ParticleGSInfoConstantBuffer gcb = {};
 	gcb.CameraPosition = Engine::GAPI->GetCameraPosition();
 	gcb.PGS_RainFxWeight = Engine::GAPI->GetRainFXWeight();
 	gcb.PGS_RainHeight = state.RendererSettings.RainHeightRange;
@@ -245,7 +245,7 @@ XRESULT D3D11Effect::DrawRain()
 	particleGS->GetConstantBuffer()[0]->UpdateBuffer(&gcb);
 	particleGS->GetConstantBuffer()[0]->BindToGeometryShader(2);
 
-	ParticlePointShadingConstantBuffer scb;
+	ParticlePointShadingConstantBuffer scb = {};
 	scb.View = GetRainShadowmapCameraRepl().ViewReplacement;
 	scb.Projection = GetRainShadowmapCameraRepl().ProjectionReplacement;
 	particleVS->GetConstantBuffer()[1]->UpdateBuffer(&scb);
@@ -282,25 +282,32 @@ XRESULT D3D11Effect::DrawRainShadowmap()
 	CameraReplacement& cr = RainShadowmapCameraRepl;
 
 	// Get the section we are currently in
-	D3DXVECTOR3 p = Engine::GAPI->GetCameraPosition();
-	D3DXVECTOR3 dir; D3DXVec3Normalize(&dir, &(-Engine::GAPI->GetRendererState()->RendererSettings.RainGlobalVelocity));
+	XMVECTOR p = Engine::GAPI->GetCameraPositionXM();
+	XMVECTOR dir = XMLoadFloat3((XMFLOAT3*)&(-Engine::GAPI->GetRendererState()->RendererSettings.RainGlobalVelocity));
+	dir = XMVector3Normalize(dir);
 	// Set the camera height to the highest point in this section
 	//p.y = 0;
 	p += dir * 6000.0f;
 
-	D3DXVECTOR3 lookAt = p;
+	XMVECTOR lookAt = p;
 	lookAt -= dir;
 
 	// Create shadowmap view-matrix
-	D3DXMatrixLookAtLH(&cr.ViewReplacement, &p, &lookAt, &D3DXVECTOR3(0, 1, 0));
-	D3DXMatrixTranspose(&cr.ViewReplacement, &cr.ViewReplacement);
+	XMMATRIX crViewReplacement = XMMatrixLookAtLH(p, lookAt, XMVectorSet(0, 1, 0, 0));
+	crViewReplacement = XMMatrixTranspose(crViewReplacement);
 
-	D3DXMatrixOrthoLH(&cr.ProjectionReplacement, RainShadowmap->GetSizeX() * Engine::GAPI->GetRendererState()->RendererSettings.WorldShadowRangeScale, 
-												 RainShadowmap->GetSizeX() * Engine::GAPI->GetRendererState()->RendererSettings.WorldShadowRangeScale, 1, 20000.0f);
-	D3DXMatrixTranspose(&cr.ProjectionReplacement, &cr.ProjectionReplacement);
+	XMMATRIX crProjectionReplacement = XMMatrixOrthographicLH(
+		RainShadowmap->GetSizeX() * Engine::GAPI->GetRendererState()->RendererSettings.WorldShadowRangeScale,
+		RainShadowmap->GetSizeX() * Engine::GAPI->GetRendererState()->RendererSettings.WorldShadowRangeScale, 
+		1,
+		20000.0f
+	);
+	crProjectionReplacement = XMMatrixTranspose(crProjectionReplacement);
 
-	cr.PositionReplacement = p;
-	cr.LookAtReplacement = lookAt;
+	XMStoreFloat4x4(&cr.ViewReplacement, crViewReplacement);
+	XMStoreFloat4x4(&cr.ProjectionReplacement, crProjectionReplacement);
+	XMStoreFloat3(&cr.PositionReplacement, p);
+	XMStoreFloat3(&cr.LookAtReplacement, lookAt);
 
 	// Replace gothics camera
 	Engine::GAPI->SetCameraReplacementPtr(&cr);

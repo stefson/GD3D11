@@ -175,8 +175,8 @@ struct DS_PointLightConstantBuffer
 	float2 PL_ViewportSize;
 	float2 PL_Pad2;
 
-	D3DXMATRIX PL_InvProj; // Optimize out!
-	D3DXMATRIX PL_InvView;
+	DirectX::XMFLOAT4X4 PL_InvProj; // Optimize out!
+	DirectX::XMFLOAT4X4 PL_InvView;
 
 	float3 PL_LightScreenPos;
 	float PL_Pad3;
@@ -184,22 +184,22 @@ struct DS_PointLightConstantBuffer
 
 struct DS_ScreenQuadConstantBuffer
 {
-	D3DXMATRIX SQ_InvProj; // Optimize out!
-	D3DXMATRIX SQ_InvView;
-	D3DXMATRIX SQ_View;
+	DirectX::XMFLOAT4X4 SQ_InvProj; // Optimize out!
+	DirectX::XMFLOAT4X4 SQ_InvView;
+	DirectX::XMFLOAT4X4 SQ_View;
 
-	D3DXMATRIX SQ_RainViewProj;
+	DirectX::XMFLOAT4X4 SQ_RainViewProj;
 
 	float3 SQ_LightDirectionVS;
 	float SQ_ShadowmapSize;
 
 	float4 SQ_LightColor;
 
-	D3DXMATRIX SQ_ShadowView;
-	D3DXMATRIX SQ_ShadowProj;
+	DirectX::XMFLOAT4X4 SQ_ShadowView;
+	DirectX::XMFLOAT4X4 SQ_ShadowProj;
 
-	D3DXMATRIX SQ_RainView;
-	D3DXMATRIX SQ_RainProj;
+	DirectX::XMFLOAT4X4 SQ_RainView;
+	DirectX::XMFLOAT4X4 SQ_RainProj;
 
 	//float2 SQ_ProjAB;
 	//float2 SQ_Pad2;
@@ -242,8 +242,8 @@ struct VS_ExConstantBuffer_PerFrame
 
 struct ParticlePointShadingConstantBuffer
 {
-	D3DXMATRIX View;
-	D3DXMATRIX Projection;
+	DirectX::XMFLOAT4X4 View;
+	DirectX::XMFLOAT4X4 Projection;
 };
 
 struct VS_ExConstantBuffer_PerInstance

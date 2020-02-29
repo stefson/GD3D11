@@ -2846,7 +2846,7 @@ void D3D11GraphicsEngine::DrawWorldAround(
 					// Check vob range
 					
 					float dist;
-					XMStoreFloat(&dist, XMVector3Length(XMVectorSubtract(position, xmLastRenderPos)));
+					XMStoreFloat(&dist, XMVector3Length(position - xmLastRenderPos));
 					if (dist > range) {
 						continue;
 					}
@@ -2925,7 +2925,7 @@ void D3D11GraphicsEngine::DrawWorldAround(
 
 				// Check vob range
 				float dist;
-				XMStoreFloat(&dist, XMVector3Length(XMVectorSubtract(position, it->Vob->GetPositionWorldXM())));
+				XMStoreFloat(&dist, XMVector3Length(position - it->Vob->GetPositionWorldXM()));
 
 				if (dist > range) {
 					continue;
@@ -2969,7 +2969,7 @@ void D3D11GraphicsEngine::DrawWorldAround(
 				}
 				// Check vob range
 				float dist;
-				XMStoreFloat(&dist, XMVector3Length(XMVectorSubtract(position, skeletalMeshVob->Vob->GetPositionWorldXM())));
+				XMStoreFloat(&dist, XMVector3Length(position - skeletalMeshVob->Vob->GetPositionWorldXM()));
 
 				if (dist > range) {
 					// Not in range
@@ -2989,7 +2989,7 @@ void D3D11GraphicsEngine::DrawWorldAround(
 }
 
 /** Draws everything around the given position */
-void D3D11GraphicsEngine::DrawWorldAround(const D3DXVECTOR3& position,
+void D3D11GraphicsEngine::DrawWorldAround(const DirectX::XMVECTOR& position,
 	int sectionRange, float vobXZRange,
 	bool cullFront, bool dontCull) {
 	// Setup renderstates
@@ -3051,7 +3051,8 @@ void D3D11GraphicsEngine::DrawWorldAround(const D3DXVECTOR3& position,
 	ActivePS->GetConstantBuffer()[3]->UpdateBuffer(&ocb);
 	ActivePS->GetConstantBuffer()[3]->BindToPixelShader(3);
 
-	INT2 s = WorldConverter::GetSectionOfPos(position);
+	XMFLOAT3 fPosition; XMStoreFloat3(&fPosition, position);
+	INT2 s = WorldConverter::GetSectionOfPos((D3DXVECTOR3&)fPosition);
 
 	float vobOutdoorDist =
 		Engine::GAPI->GetRendererState()->RendererSettings.OutdoorVobDrawRadius;
@@ -3265,7 +3266,7 @@ void D3D11GraphicsEngine::DrawWorldAround(const D3DXVECTOR3& position,
 
 			INT2 s = WorldConverter::GetSectionOfPos(skeletalMeshVob->Vob->GetPositionWorld());
 
-			float dist = D3DXVec3Length(&(skeletalMeshVob->Vob->GetPositionWorld() - position));
+			float dist; XMStoreFloat(&dist, XMVector3Length(skeletalMeshVob->Vob->GetPositionWorldXM() - position));
 			if (dist > Engine::GAPI->GetRendererState()
 				->RendererSettings.IndoorVobDrawRadius)
 				continue;  // Skip out of range
@@ -4033,7 +4034,8 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	// Draw world shadows
 	// ********************************
 	CameraReplacement cr;
-	D3DXVECTOR3 cameraPosition = Engine::GAPI->GetCameraPosition();
+	XMFLOAT3 cameraPosition; 
+	XMStoreFloat3(&cameraPosition, Engine::GAPI->GetCameraPositionXM());
 	XMVECTOR vPlayerPosition =
 		Engine::GAPI->GetPlayerVob() != nullptr
 		? Engine::GAPI->GetPlayerVob()->GetPositionWorldXM()
@@ -4069,7 +4071,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 							// Always render the closest light to the playervob, so the player
 							// doesn't flicker when moving
 							float d;
-							XMStoreFloat(&d, XMVector3LengthSq(XMVectorSubtract(light->Vob->GetPositionWorldXM(), vPlayerPosition)));
+							XMStoreFloat(&d, XMVector3LengthSq(light->Vob->GetPositionWorldXM() - vPlayerPosition));
 
 							float range = light->Vob->GetLightRange();
 							if (d < range * range &&
@@ -4085,7 +4087,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 						// Always render the closest light to the playervob, so the player
 						// doesn't flicker when moving
 						float d;
-						XMStoreFloat(&d, XMVector3LengthSq(XMVectorSubtract(light->Vob->GetPositionWorldXM(), vPlayerPosition)));
+						XMStoreFloat(&d, XMVector3LengthSq(light->Vob->GetPositionWorldXM() - vPlayerPosition));
 						
 						float range = light->Vob->GetLightRange() * 1.5f;
 
@@ -4130,72 +4132,72 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 
 	// Get shadow direction, but don't update every frame, to get around
 	// flickering
-	D3DXVECTOR3 dir =
-		*Engine::GAPI->GetSky()->GetAtmosphereCB().AC_LightPos.toD3DXVECTOR3();
-	static D3DXVECTOR3 oldDir = dir;
-	static D3DXVECTOR3 smoothDir = dir;
+	XMVECTOR dir =
+		XMLoadFloat3(Engine::GAPI->GetSky()->GetAtmosphereCB().AC_LightPos.toXMFLOAT3());
+	static XMVECTOR oldDir = dir;
+	static XMVECTOR smoothDir = dir;
 
-	static D3DXVECTOR3 oldP = D3DXVECTOR3(0, 0, 0);
+	static XMVECTOR oldP = XMVectorSet(0, 0, 0, 0);
 
-	D3DXVECTOR3 WorldShadowCP;
 
 	// Update dir
-	if (fabs(D3DXVec3Dot(&oldDir, &dir)) > 0.9995f && false) {
-		dir = oldDir;
+	XMVECTOR target = dir;
+
+	float dotDir;
+	XMStoreFloat(&dotDir, XMVector3Dot(smoothDir, dir));
+	// Smoothly transition to the next state and wait there
+	if (fabs(dotDir) < 0.99995f)  // but cut it off somewhere or the pixels will flicker
+	{
+		dir = XMVectorLerp(smoothDir, target, Engine::GAPI->GetFrameTimeSec() * 2.0f);
 	}
-	else {
-		D3DXVECTOR3 target = dir;
+	else
+		oldDir = dir;
 
-		// Smoothly transition to the next state and wait there
-		if (fabs(D3DXVec3Dot(&smoothDir, &dir)) < 0.99995f)  // but cut it off somewhere or the pixels will flicker
-			D3DXVec3Lerp(&dir, &smoothDir, &target, Engine::GAPI->GetFrameTimeSec() * 2.0f);
-		else
-			oldDir = dir;
+	smoothDir = dir;
 
-		smoothDir = dir;
-	}
-
-	float smPixelSize = WorldShadowmap1->GetSizeX() * Engine::GAPI->GetRendererState()->RendererSettings.WorldShadowRangeScale;
-
+	XMVECTOR WorldShadowCP;
 	// Update position
 	// Try to update only if the camera went 500 units away from
 	// the last position
-	if ((D3DXVec3Length(&(oldP - cameraPosition)) < 64 &&
+	float len;
+	XMStoreFloat(&len, XMVector3Length(oldP - XMLoadFloat3(&cameraPosition)));
+	if ((len < 64 &&
 		// And is on even space
 		(cameraPosition.x - (int)cameraPosition.x) < 0.1f &&
 		// but don't let it go too far
-		(cameraPosition.y - (int)cameraPosition.y) < 0.1f) || D3DXVec3Length(&(oldP - cameraPosition)) < 600.0f)
+		(cameraPosition.y - (int)cameraPosition.y) < 0.1f) || len < 600.0f)
 	{
 		WorldShadowCP = oldP;
 	}
 	else {
-		oldP = cameraPosition;
-		WorldShadowCP = cameraPosition;
+		oldP = XMLoadFloat3(&cameraPosition);
+		WorldShadowCP = oldP;
 	}
 
-	// Get the section we are currently in
-	INT2 cameraSection            = WorldConverter::GetSectionOfPos(WorldShadowCP);
-	WorldMeshSectionInfo& section = Engine::GAPI->GetWorldSections()[cameraSection.x][cameraSection.y];
-	D3DXVECTOR3 p                 = WorldShadowCP;
+	XMVECTOR p                 = WorldShadowCP;
 	// Set the camera height to the highest point in this section
 	p += dir * 6000.0f;
 
-	D3DXVECTOR3 lookAt = p;
+	XMVECTOR lookAt = p;
 	lookAt -= dir;
 
 	// Create shadowmap view-matrix
-	D3DXMatrixLookAtLH(&cr.ViewReplacement, &p, &lookAt, &D3DXVECTOR3(0, 1, 0));
-	D3DXMatrixTranspose(&cr.ViewReplacement, &cr.ViewReplacement);
+	XMMATRIX crViewRepl = XMMatrixLookAtLH(p, lookAt, XMVectorSet(0, 1, 0, 0));
+	crViewRepl = XMMatrixTranspose(crViewRepl);
 
-	D3DXMatrixOrthoLH(&cr.ProjectionReplacement,
-		WorldShadowmap1->GetSizeX() * Engine::GAPI->GetRendererState()->RendererSettings.WorldShadowRangeScale,
-		WorldShadowmap1->GetSizeX() * Engine::GAPI->GetRendererState()->RendererSettings.WorldShadowRangeScale,
+	XMMATRIX crProjRepl =
+	XMMatrixOrthographicLH(
+		WorldShadowmap1->GetSizeX()* Engine::GAPI->GetRendererState()->RendererSettings.WorldShadowRangeScale,
+		WorldShadowmap1->GetSizeX()* Engine::GAPI->GetRendererState()->RendererSettings.WorldShadowRangeScale,
 		1,
 		20000.0f);
-	D3DXMatrixTranspose(&cr.ProjectionReplacement, &cr.ProjectionReplacement);
 
-	cr.PositionReplacement = p;
-	cr.LookAtReplacement = lookAt;
+	crProjRepl = XMMatrixTranspose(crProjRepl);
+
+	XMStoreFloat4x4(&cr.ViewReplacement, crViewRepl);
+	XMStoreFloat4x4(&cr.ProjectionReplacement, crProjRepl);
+	XMStoreFloat3(&cr.PositionReplacement, p);
+	XMStoreFloat3(&cr.LookAtReplacement, lookAt);
 
 	// Replace gothics camera
 	Engine::GAPI->SetCameraReplacementPtr(&cr);
@@ -4255,8 +4257,10 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	D3DXMatrixTranspose(&view, &view);
 
 	DS_PointLightConstantBuffer plcb = {};
-	D3DXMatrixInverse(&plcb.PL_InvProj, nullptr, &Engine::GAPI->GetProjectionMatrix());
-	D3DXMatrixInverse(&plcb.PL_InvView, nullptr, (D3DXMATRIX*)&Engine::GAPI->GetRendererState()->TransformState.TransformView);
+
+	XMStoreFloat4x4(&plcb.PL_InvProj, XMMatrixInverse(nullptr, XMLoadFloat4x4(&Engine::GAPI->GetProjectionMatrixDX())));
+	XMStoreFloat4x4(&plcb.PL_InvView, XMMatrixInverse(nullptr, XMLoadFloat4x4(&Engine::GAPI->GetRendererState()->TransformState.TransformView)));
+
 	plcb.PL_ViewportSize = float2(static_cast<float>(Resolution.x), static_cast<float>(Resolution.y));
 
 	GBuffer0_Diffuse->BindToPixelShader(GetContext(), 0);
@@ -4410,7 +4414,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	DS_ScreenQuadConstantBuffer scb = {};
 	scb.SQ_InvProj = plcb.PL_InvProj;
 	scb.SQ_InvView = plcb.PL_InvView;
-	scb.SQ_View = *(D3DXMATRIX*)&Engine::GAPI->GetRendererState()->TransformState.TransformView;
+	scb.SQ_View = Engine::GAPI->GetRendererState()->TransformState.TransformView;
 
 	D3DXVec3TransformNormal(scb.SQ_LightDirectionVS.toD3DXVECTOR3(),
 		sky->GetAtmosphereCB().AC_LightPos.toD3DXVECTOR3(),
@@ -4435,8 +4439,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 
 	// Get rain matrix
 	scb.SQ_RainView = Effects->GetRainShadowmapCameraRepl().ViewReplacement;
-	scb.SQ_RainProj =
-		Effects->GetRainShadowmapCameraRepl().ProjectionReplacement;
+	scb.SQ_RainProj = Effects->GetRainShadowmapCameraRepl().ProjectionReplacement;
 
 	scb.SQ_ShadowStrength =
 		Engine::GAPI->GetRendererState()->RendererSettings.ShadowStrength;
@@ -4598,7 +4601,7 @@ void D3D11GraphicsEngine::RenderShadowCube(
 }
 
 /** Renders the shadowmaps for the sun */
-void D3D11GraphicsEngine::RenderShadowmaps(const D3DXVECTOR3& cameraPosition,
+void D3D11GraphicsEngine::RenderShadowmaps(const XMVECTOR& cameraPosition,
 	RenderToDepthStencilBuffer* target,
 	bool cullFront, bool dontCull,
 	ID3D11DepthStencilView* dsvOverwrite,
