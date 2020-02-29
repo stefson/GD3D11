@@ -822,7 +822,7 @@ XRESULT D3D11GraphicsEngine::Present() {
 
 	ActivePS->Apply();
 
-	GammaCorrectConstantBuffer gcb;
+	GammaCorrectConstantBuffer gcb = {};
 	gcb.G_Gamma = Engine::GAPI->GetGammaValue();
 	gcb.G_Brightness = Engine::GAPI->GetBrightnessValue();
 	gcb.G_TextureSize = GetResolution();
@@ -1365,11 +1365,11 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
 		Engine::GAPI->GetRendererState()->TransformState.TransformView;
 	D3DXMATRIX& proj = Engine::GAPI->GetProjectionMatrix();
 
-	VS_ExConstantBuffer_PerFrame cb;
+	VS_ExConstantBuffer_PerFrame cb = {};
 	cb.View = view;
 	cb.Projection = proj;
 
-	VS_ExConstantBuffer_PerInstance cbb;
+	VS_ExConstantBuffer_PerInstance cbb = {};
 	cbb.World = *(DirectX::XMFLOAT4X4*)world;
 
 	vShader->GetConstantBuffer()[0]->UpdateBuffer(&cb);
@@ -1745,7 +1745,7 @@ void D3D11GraphicsEngine::SetupVS_ExConstantBuffer() {
 		Engine::GAPI->GetRendererState()->TransformState.TransformView;
 	D3DXMATRIX& proj = Engine::GAPI->GetProjectionMatrix();
 
-	VS_ExConstantBuffer_PerFrame cb;
+	VS_ExConstantBuffer_PerFrame cb = {};
 	cb.View = view;
 	cb.Projection = proj;
 	cb.ViewProj = proj * view;
@@ -1760,7 +1760,7 @@ void D3D11GraphicsEngine::SetupVS_ExConstantBuffer() {
 void D3D11GraphicsEngine::SetupVS_ExPerInstanceConstantBuffer() {
 	D3DXMATRIX* world = &Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
 
-	VS_ExConstantBuffer_PerInstance cb;
+	VS_ExConstantBuffer_PerInstance cb = {};
 	cb.World = *(DirectX::XMFLOAT4X4*)world;
 
 
@@ -1772,7 +1772,7 @@ void D3D11GraphicsEngine::SetupVS_ExPerInstanceConstantBuffer() {
 void D3D11GraphicsEngine::SetupPerInstanceConstantBuffer(int slot) {
 	D3DXMATRIX* world = &Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
 
-	VS_ExConstantBuffer_PerInstance cb;
+	VS_ExConstantBuffer_PerInstance cb = {};
 	cb.World = *(DirectX::XMFLOAT4X4*)world;
 
 	ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&cb);
@@ -2457,7 +2457,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMeshW(bool noTextures) {
 
 				ActiveHDS = hd;
 
-				DefaultHullShaderConstantBuffer hscb;
+				DefaultHullShaderConstantBuffer hscb = {};
 
 				// convert to EdgesPerScreenHeight
 				hscb.H_EdgesPerScreenHeight =
@@ -2602,7 +2602,7 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 	DepthStencilBufferCopy->BindToPixelShader(GetContext(), 2);
 
 	// Fill refraction info CB and bind it
-	RefractionInfoConstantBuffer ricb;
+	RefractionInfoConstantBuffer ricb = {};
 	ricb.RI_Projection = *(XMFLOAT4X4*)&Engine::GAPI->GetProjectionMatrix();
 	ricb.RI_ViewportSize = float2(Resolution.x, Resolution.y);
 	ricb.RI_Time = Engine::GAPI->GetTimeSeconds();
@@ -2690,7 +2690,7 @@ void D3D11GraphicsEngine::DrawWorldAround(
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
 	// Update and bind buffer of PS
-	PerObjectState ocb;
+	PerObjectState ocb = {};
 	ocb.OS_AmbientColor = float3(1, 1, 1);
 	ActivePS->GetConstantBuffer()[3]->UpdateBuffer(&ocb);
 	ActivePS->GetConstantBuffer()[3]->BindToPixelShader(3);
@@ -3046,7 +3046,7 @@ void D3D11GraphicsEngine::DrawWorldAround(const D3DXVECTOR3& position,
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
 	// Update and bind buffer of PS
-	PerObjectState ocb;
+	PerObjectState ocb = {};
 	ocb.OS_AmbientColor = float3(1, 1, 1);
 	ActivePS->GetConstantBuffer()[3]->UpdateBuffer(&ocb);
 	ActivePS->GetConstantBuffer()[3]->BindToPixelShader(3);
@@ -4254,7 +4254,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 
 	D3DXMatrixTranspose(&view, &view);
 
-	DS_PointLightConstantBuffer plcb;
+	DS_PointLightConstantBuffer plcb = {};
 	D3DXMatrixInverse(&plcb.PL_InvProj, nullptr, &Engine::GAPI->GetProjectionMatrix());
 	D3DXMatrixInverse(&plcb.PL_InvView, nullptr, &Engine::GAPI->GetRendererState()->TransformState.TransformView);
 	plcb.PL_ViewportSize = float2(static_cast<float>(Resolution.x), static_cast<float>(Resolution.y));
@@ -4407,7 +4407,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	ActivePS->GetConstantBuffer()[1]->UpdateBuffer(&sky->GetAtmosphereCB());
 	ActivePS->GetConstantBuffer()[1]->BindToPixelShader(1);
 
-	DS_ScreenQuadConstantBuffer scb;
+	DS_ScreenQuadConstantBuffer scb = {};
 	scb.SQ_InvProj = plcb.PL_InvProj;
 	scb.SQ_InvView = plcb.PL_InvView;
 	scb.SQ_View =
@@ -4467,7 +4467,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	ActivePS->GetConstantBuffer()[0]->UpdateBuffer(&scb);
 	ActivePS->GetConstantBuffer()[0]->BindToPixelShader(0);
 
-	PFXVS_ConstantBuffer vscb;
+	PFXVS_ConstantBuffer vscb = {};
 	vscb.PFXVS_InvProj = *(XMFLOAT4X4*)&scb.SQ_InvProj;
 	ActiveVS->GetConstantBuffer()[0]->UpdateBuffer(&vscb);
 	ActiveVS->GetConstantBuffer()[0]->BindToVertexShader(0);
@@ -4867,7 +4867,7 @@ XRESULT D3D11GraphicsEngine::DrawOcean(GOcean* ocean) {
 	D3D11HDShader* hd = ShaderManager->GetHDShader("OceanTess");
 	if (hd) hd->Apply();
 
-	DefaultHullShaderConstantBuffer hscb;
+	DefaultHullShaderConstantBuffer hscb = {};
 
 	// convert to EdgesPerScreenHeight
 	hscb.H_EdgesPerScreenHeight =
@@ -4886,7 +4886,7 @@ XRESULT D3D11GraphicsEngine::DrawOcean(GOcean* ocean) {
 	ID3D11ShaderResourceView* tex_gradient;
 	ID3D11ShaderResourceView* tex_fresnel;
 	ID3D11ShaderResourceView* cube_reflect = ReflectionCube.Get();
-	OceanSettingsConstantBuffer ocb;
+	OceanSettingsConstantBuffer ocb = {};
 	ocean->GetFFTResources(&tex_displacement, &tex_gradient, &tex_fresnel, &ocb);
 	ocb.OS_SunColor = Engine::GAPI->GetSky()->GetSunColor();
 
@@ -4910,7 +4910,7 @@ XRESULT D3D11GraphicsEngine::DrawOcean(GOcean* ocean) {
 
 	// DistortionTexture->BindToPixelShader(0);
 
-	RefractionInfoConstantBuffer ricb;
+	RefractionInfoConstantBuffer ricb = {};
 	ricb.RI_Projection = *(XMFLOAT4X4*)&Engine::GAPI->GetProjectionMatrix();
 	ricb.RI_ViewportSize = float2(Resolution.x, Resolution.y);
 	ricb.RI_Time = Engine::GAPI->GetTimeSeconds();
@@ -5044,7 +5044,7 @@ void D3D11GraphicsEngine::GetBackbufferData(byte** data, int& pixelsize) {
 	SetActivePixelShader("PS_PFX_GammaCorrectInv");
 	ActivePS->Apply();
 
-	GammaCorrectConstantBuffer gcb;
+	GammaCorrectConstantBuffer gcb = {};
 	gcb.G_Gamma = Engine::GAPI->GetGammaValue();
 	gcb.G_Brightness = Engine::GAPI->GetBrightnessValue();
 	gcb.G_TextureSize = GetResolution();
@@ -5359,7 +5359,7 @@ void D3D11GraphicsEngine::CopyDepthStencil() {
 void D3D11GraphicsEngine::DrawUnderwaterEffects() {
 	SetDefaultStates();
 
-	RefractionInfoConstantBuffer ricb;
+	RefractionInfoConstantBuffer ricb = {};
 	ricb.RI_Projection = *(XMFLOAT4X4*)&Engine::GAPI->GetProjectionMatrix();
 	ricb.RI_ViewportSize = float2(Resolution.x, Resolution.y);
 	ricb.RI_Time = Engine::GAPI->GetTimeSeconds();
@@ -5407,7 +5407,7 @@ void D3D11GraphicsEngine::Setup_PNAEN(EPNAENRenderMode mode) {
 	ActiveHDS = pnaen;
 	pnaen->Apply();
 
-	PNAENConstantBuffer cb;
+	PNAENConstantBuffer cb = {};
 	cb.f4Eye = Engine::GAPI->GetCameraPosition();
 	cb.adaptive = INT4(1, 0, 0, 0);
 	cb.clipping = INT4(Engine::GAPI->GetRendererState()
@@ -5451,7 +5451,7 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 
 	D3D11PShader* distPS = ShaderManager->GetPShader("PS_ParticleDistortion");
 
-	RefractionInfoConstantBuffer ricb;
+	RefractionInfoConstantBuffer ricb = {};
 	ricb.RI_Projection = *(XMFLOAT4X4*)&Engine::GAPI->GetProjectionMatrix();
 	ricb.RI_ViewportSize = float2(Resolution.x, Resolution.y);
 	ricb.RI_Time = Engine::GAPI->GetTimeSeconds();
@@ -5515,7 +5515,7 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 	// Setup GS
 	GS_Billboard->Apply();
 
-	ParticleGSInfoConstantBuffer gcb;
+	ParticleGSInfoConstantBuffer gcb = {};
 	gcb.CameraPosition = Engine::GAPI->GetCameraPosition();
 	GS_Billboard->GetConstantBuffer()[0]->UpdateBuffer(&gcb);
 	GS_Billboard->GetConstantBuffer()[0]->BindToGeometryShader(2);
@@ -5693,7 +5693,7 @@ void D3D11GraphicsEngine::SaveScreenshot() {
 	PfxRenderer->CopyTextureToRTV(HDRBackBuffer->GetShaderResView(),
 		rt->GetRenderTargetView());
 
-	D3D11_TEXTURE2D_DESC texDesc;
+	D3D11_TEXTURE2D_DESC texDesc = {};
 	texDesc.ArraySize = 1;
 	texDesc.BindFlags = 0;
 	texDesc.CPUAccessFlags = 0;
