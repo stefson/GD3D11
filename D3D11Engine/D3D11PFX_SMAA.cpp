@@ -4,13 +4,15 @@
 #include "Engine.h"
 #include "RenderToTextureBuffer.h"
 #include "D3D11GraphicsEngine.h"
-#include <D3DX11.h>
 #include "D3D11PfxRenderer.h"
 #include "D3D11ShaderManager.h"
 #include "D3D11VShader.h"
 #include "GothicAPI.h"
 #include "D3D11PShader.h"
 #include <d3dcompiler.h>
+#include <DDSTextureLoader.h>
+
+using namespace DirectX;
 
 D3D11PFX_SMAA::D3D11PFX_SMAA(D3D11PfxRenderer* rnd) : D3D11PFX_Effect(rnd)
 {
@@ -92,14 +94,10 @@ bool D3D11PFX_SMAA::Init()
 	SMAAShader->AddCustomVariable("searchTex", CVT_SHADER_RES_VIEW, &SearchTexIdx);*/
 
 	// Load the textures
-	D3DX11_IMAGE_LOAD_INFO img;
-	img.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-	img.MipLevels = 1;
-	hr = D3DX11CreateShaderResourceViewFromFile(engine->GetDevice(), "system\\GD3D11\\Textures\\SMAA_AreaTexDX10.dds", &img, nullptr, &AreaTextureSRV, nullptr);
+	hr = CreateDDSTextureFromFile(engine->GetDevice(), L"system\\GD3D11\\Textures\\SMAA_AreaTexDX10.dds", nullptr, &AreaTextureSRV);
 	LE(hr);
-
-	img.Format = DXGI_FORMAT_R8_UNORM;
-	hr = D3DX11CreateShaderResourceViewFromFile(engine->GetDevice(), "system\\GD3D11\\Textures\\SMAA_SearchTex.dds", &img, nullptr, &SearchTextureSRV, nullptr);
+	
+	hr = CreateDDSTextureFromFile(engine->GetDevice(), L"system\\GD3D11\\Textures\\SMAA_SearchTex.dds", nullptr, &SearchTextureSRV);
 	LE(hr);
 
 	SMAAShader->GetVariableByName("areaTex")->AsShaderResource()->SetResource(AreaTextureSRV);
@@ -298,14 +296,11 @@ void D3D11PFX_SMAA::OnResize(const INT2 & size)
 	if (SearchTextureSRV)SearchTextureSRV->Release();
 
 	// Load the textures
-	D3DX11_IMAGE_LOAD_INFO img;
-	img.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-	img.MipLevels = 1;
-	D3DX11CreateShaderResourceViewFromFile(engine->GetDevice(), "system\\GD3D11\\Textures\\SMAA_AreaTexDX10.dds", &img, nullptr, &AreaTextureSRV, &hr);
+
+	hr = CreateDDSTextureFromFile(engine->GetDevice(), L"system\\GD3D11\\Textures\\SMAA_AreaTexDX10.dds", nullptr, &AreaTextureSRV);
 	LE(hr);
 
-	img.Format = DXGI_FORMAT_R8_UNORM;
-	D3DX11CreateShaderResourceViewFromFile(engine->GetDevice(), "system\\GD3D11\\Textures\\SMAA_SearchTex.dds", &img, nullptr, &SearchTextureSRV, &hr);
+	hr = CreateDDSTextureFromFile(engine->GetDevice(), L"system\\GD3D11\\Textures\\SMAA_SearchTex.dds", nullptr, &SearchTextureSRV);
 	LE(hr);
 
 	SMAAShader->GetVariableByName("areaTex")->AsShaderResource()->SetResource(AreaTextureSRV);

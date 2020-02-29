@@ -35,7 +35,6 @@
 #include <wrl\client.h>
 #include <SimpleMath.h>
 
-#include <D3DX11.h>
 #pragma comment(lib, "dxguid.lib")
 
 namespace wrl = Microsoft::WRL;
@@ -291,15 +290,17 @@ XRESULT D3D11GraphicsEngine::Init() {
 	InfiniteRangeConstantBuffer->UpdateBuffer(&D3DXVECTOR4(FLT_MAX, 0, 0, 0));
 
 	// Load reflectioncube
-	if (S_OK != D3DX11CreateShaderResourceViewFromFile(
-		GetDevice(), "system\\GD3D11\\Textures\\reflect_cube.dds", nullptr,
-		nullptr, &ReflectionCube, nullptr))
+	
+	if (S_OK != CreateDDSTextureFromFile(
+		GetDevice(), L"system\\GD3D11\\Textures\\reflect_cube.dds",
+		nullptr,
+		&ReflectionCube))
 		LogWarn()
 		<< "Failed to load file: system\\GD3D11\\Textures\\reflect_cube.dds";
 
-	if (S_OK != D3DX11CreateShaderResourceViewFromFile(
-		GetDevice(), "system\\GD3D11\\Textures\\SkyCubemap2.dds", nullptr,
-		nullptr, &ReflectionCube2, nullptr))
+	if (S_OK != CreateDDSTextureFromFile(
+		GetDevice(), L"system\\GD3D11\\Textures\\SkyCubemap2.dds", 
+		nullptr, &ReflectionCube2))
 		LogWarn()
 		<< "Failed to load file: system\\GD3D11\\Textures\\SkyCubemap2.dds";
 
@@ -3040,8 +3041,7 @@ void D3D11GraphicsEngine::DrawWorldAround(const DirectX::XMVECTOR& position,
 	SetupVS_ExMeshDrawCall();
 	SetupVS_ExConstantBuffer();
 
-	D3DXMATRIX id;
-	D3DXMatrixIdentity(&id);
+	XMMATRIX id = XMMatrixIdentity();
 	ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&id);
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
@@ -3077,21 +3077,20 @@ void D3D11GraphicsEngine::DrawWorldAround(const DirectX::XMVECTOR& position,
 			Engine::GAPI->GetWrappedWorldMesh()->MeshVertexBuffer,
 			Engine::GAPI->GetWrappedWorldMesh()->MeshIndexBuffer, 0, 0);
 
-		D3DXMATRIX id;
-		D3DXMatrixIdentity(&id);
+		XMMATRIX id = XMMatrixIdentity();
 		ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&id);
 		ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
-		for (std::map<int, std::map<int, WorldMeshSectionInfo>>::iterator itx =
-			Engine::GAPI->GetWorldSections().begin();
-			itx != Engine::GAPI->GetWorldSections().end(); itx++) {
-			for (std::map<int, WorldMeshSectionInfo>::iterator ity =
-				(*itx).second.begin();
-				ity != (*itx).second.end(); ity++) {
-				D3DXVECTOR2 a = D3DXVECTOR2((float)((*itx).first - s.x),
-					static_cast<float>(((*ity).first - s.y)));
-				if (D3DXVec2Length(&a) < sectionRange) {
-					WorldMeshSectionInfo& section = (*ity).second;
+		for (const auto& itx : Engine::GAPI->GetWorldSections()) {
+			for (const auto& ity : itx.second) {
+
+				XMVECTOR a = XMVectorSet(
+					(float)(itx.first - s.x),
+					static_cast<float>((ity.first - s.y)), 0, 0);
+				float len;
+				XMStoreFloat(&len, XMVector2Length(a));
+				if (len < sectionRange) {
+					const WorldMeshSectionInfo& section = ity.second;
 
 					if (Engine::GAPI->GetRendererState()->RendererSettings.FastShadows) {
 						// Draw world mesh
@@ -3099,22 +3098,20 @@ void D3D11GraphicsEngine::DrawWorldAround(const DirectX::XMVECTOR& position,
 							Engine::GAPI->DrawMeshInfo(nullptr, section.FullStaticMesh);
 					}
 					else {
-						for (std::map<MeshKey, WorldMeshInfo*>::iterator it =
-							section.WorldMeshes.begin();
-							it != section.WorldMeshes.end(); ++it) {
+						for (const auto& it : section.WorldMeshes) {
 							// Check surface type
-							if (it->first.Info->MaterialType == MaterialInfo::MT_Water) {
+							if (it.first.Info->MaterialType == MaterialInfo::MT_Water) {
 								continue;
 							}
 
 							// Bind texture
-							if (it->first.Material && it->first.Material->GetTexture()) {
-								if (it->first.Material->GetTexture()->HasAlphaChannel() ||
+							if (it.first.Material && it.first.Material->GetTexture()) {
+								if (it.first.Material->GetTexture()->HasAlphaChannel() ||
 									colorWritesEnabled) {
 									if (alphaRef > 0.0f &&
-										it->first.Material->GetTexture()->CacheIn(0.6f) ==
+										it.first.Material->GetTexture()->CacheIn(0.6f) ==
 										zRES_CACHED_IN) {
-										it->first.Material->GetTexture()->Bind(0);
+										it.first.Material->GetTexture()->Bind(0);
 										ActivePS->Apply();
 									}
 									else
@@ -3134,7 +3131,7 @@ void D3D11GraphicsEngine::DrawWorldAround(const DirectX::XMVECTOR& position,
 							DrawVertexBufferIndexedUINT(
 								Engine::GAPI->GetWrappedWorldMesh()->MeshVertexBuffer,
 								Engine::GAPI->GetWrappedWorldMesh()->MeshIndexBuffer,
-								it->second->Indices.size(), it->second->BaseIndexLocation);
+								it.second->Indices.size(), it.second->BaseIndexLocation);
 						}
 					}
 				}
@@ -3154,16 +3151,11 @@ void D3D11GraphicsEngine::DrawWorldAround(const DirectX::XMVECTOR& position,
 		const std::unordered_map<zCProgMeshProto*, MeshVisualInfo*>& staticMeshVisuals =
 			Engine::GAPI->GetStaticMeshVisuals();
 
-		D3DXVECTOR3 camPos = Engine::GAPI->GetCameraPosition();
-		float shadowRange = Engine::GAPI->GetRendererState()
-			->RendererSettings.WorldShadowRangeScale *
-			WorldShadowmap1->GetSizeX();
 		for (auto const& it : RenderedVobs) {
 			VobInstanceInfo vii;
 			vii.world = it->WorldMatrix;
 
-			if (!it->IsIndoorVob)  // && D3DXVec3Length(&((*it)->LastRenderPosition
-									  // - position)) < shadowRange)
+			if (!it->IsIndoorVob) 
 				((MeshVisualInfo*)it->VisualInfo)->Instances.push_back(vii);
 		}
 
