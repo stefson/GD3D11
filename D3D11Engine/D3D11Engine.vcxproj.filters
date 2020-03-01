@@ -289,9 +289,6 @@
     <ClInclude Include="zFILE.h">
       <Filter>ZenGin\Classes</Filter>
     </ClInclude>
-    <ClInclude Include="GCamera.h">
-      <Filter>Engine\GAPI\Objects</Filter>
-    </ClInclude>
     <ClInclude Include="zCRndD3D.h">
       <Filter>ZenGin\Classes</Filter>
     </ClInclude>
@@ -808,9 +805,6 @@
     </ClCompile>
     <ClCompile Include="D3D11PFX_HDR.cpp">
       <Filter>Engine\D3D11\PFX\Effects</Filter>
-    </ClCompile>
-    <ClCompile Include="GCamera.cpp">
-      <Filter>Engine\GAPI\Objects</Filter>
     </ClCompile>
     <ClCompile Include="GVegetationBox.cpp">
       <Filter>Engine\GAPI\Objects</Filter>

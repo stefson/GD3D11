@@ -268,13 +268,6 @@ struct GrassConstantBuffer
 	float3 G_Pad1;
 };
 
-struct WettnessConstantBuffer
-{
-	D3DXMATRIX W_InvProj;
-	float W_Wettness;
-	float3 W_Pad1;
-};
-
 struct DefaultHullShaderConstantBuffer
 {
 	float H_EdgesPerScreenHeight;

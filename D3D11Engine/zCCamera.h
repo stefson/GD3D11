@@ -42,6 +42,15 @@ public:
 	{
 		XCALL(GothicMemoryLocations::zCCamera::SetTransform);
 	}
+	void SetTransform(const ETransformType type, const DirectX::XMFLOAT4X4& mat)
+	{
+		XCALL(GothicMemoryLocations::zCCamera::SetTransform);
+	}
+	void SetTransformXM(const ETransformType type, const DirectX::XMMATRIX& mat)
+	{
+		DirectX::XMFLOAT4X4 m; DirectX::XMStoreFloat4x4(&m, mat);
+		SetTransform(type, m);
+	}
 
 	void Activate()
 	{

@@ -66,13 +66,10 @@ XRESULT GMesh::LoadMesh(const std::string & file, float scale) {
 			texture.erase(period_idx);
 		}
 
-		//s->mMaterials[s->mMeshes[i]->mMaterialIndex]->Get(AI_MATKEY_NAME, texture);
 		if (s->mMeshes[i]->mNumFaces * 3 >= 0xFFFF) {
 			LogWarn() << "Mesh with Texture '" << texture << "' has more than 0xFFFF vertices!";
 			continue;
 		}
-
-		//LogInfo() << " - Submesh: (Num Vertices: " << s->mMeshes[i]->mNumVertices << ") (Texture: " << texture.C_Str() << ")";
 
 		MeshInfo * mi = new MeshInfo;
 
@@ -131,21 +128,6 @@ XRESULT GMesh::LoadMesh(const std::string & file, float scale) {
 
 		//startIndex += s->mMeshes[i]->mNumFaces * 3;
 	}
-
-	return XR_SUCCESS;
-}
-
-/** Fills this mesh with a grid */
-XRESULT GMesh::CreateGrid(int tesselation, const D3DXVECTOR2 & min, const D3DXVECTOR2 & max, float height) {
-	D3DXVECTOR2 tri1[] = {  D3DXVECTOR3(min.x, height, min.y), 
-							D3DXVECTOR3(max.x, height, min.y), 
-							D3DXVECTOR3(min.x, height, max.y) };
-
-	D3DXVECTOR2 tri2[] = {  D3DXVECTOR3(max.x, height, min.y), 
-							D3DXVECTOR3(max.x, height, max.y), 
-							D3DXVECTOR3(min.x, height, max.y) };
-
-	//WorldConverter::TesselateTriangle(
 
 	return XR_SUCCESS;
 }

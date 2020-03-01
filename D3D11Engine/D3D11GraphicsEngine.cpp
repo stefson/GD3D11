@@ -659,9 +659,9 @@ XRESULT D3D11GraphicsEngine::Clear(const float4& color) {
 		(float*)& color);
 	GetContext()->ClearRenderTargetView(
 		GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView(),
-		(float*)& D3DXVECTOR4(0, 0, 0, 0));
+		(float*)&float4(0, 0, 0, 0));
 	GetContext()->ClearRenderTargetView(HDRBackBuffer->GetRenderTargetView(),
-		(float*)& D3DXVECTOR4(0, 0, 0, 0));
+		(float*)&float4(0, 0, 0, 0));
 
 	return XR_SUCCESS;
 }
@@ -1189,7 +1189,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferFF(D3D11VertexBuffer* vb,
 /** Draws a skeletal mesh */
 XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh(
 	D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices,
-	const std::vector<D3DXMATRIX>& transforms, float fatness) {
+	const std::vector<XMFLOAT4X4>& transforms, float fatness) {
 	GetContext()->RSSetState(WorldRasterizerState.Get());
 	GetContext()->OMSetDepthStencilState(DefaultDepthStencilState.Get(), 0);
 
@@ -4757,9 +4757,8 @@ void D3D11GraphicsEngine::DrawVobsList(const std::list<VobInfo*>& vobs, zCCamera
 	GetContext()->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
 		DepthStencilBuffer->GetDepthStencilView());
 
-	D3DXMATRIX view;
-	Engine::GAPI->GetViewMatrix(&view);
-	Engine::GAPI->SetViewTransform(view);
+	XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
+	Engine::GAPI->SetViewTransformXM(view);
 
 	SetActivePixelShader("PS_Preview_Textured");
 	SetActiveVertexShader("VS_Ex");
@@ -4773,12 +4772,12 @@ void D3D11GraphicsEngine::DrawVobsList(const std::list<VobInfo*>& vobs, zCCamera
 	SetupVS_ExMeshDrawCall();
 	SetupVS_ExConstantBuffer();
 
-	view = camera.GetTransform(zCCamera::TT_VIEW);
-	D3DXMATRIX worldMatrix;
+	view = XMLoadFloat4x4(&camera.GetTransformDX(zCCamera::TT_VIEW));
+	XMMATRIX worldMatrix;
 
 	for (auto const& vob : vobs)
 	{
-		vob->Vob->GetWorldMatrix(&worldMatrix);
+		worldMatrix = vob->Vob->GetWorldMatrixXM();
 		Engine::GAPI->SetWorldViewTransform(worldMatrix, view);
 		
 		ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(vob->Vob->GetWorldMatrixPtr());

@@ -201,7 +201,7 @@ void GothicAPI::OnWorldUpdate() {
 		RendererState.RendererInfo.NearPlane = zCCamera::GetCamera()->GetNearPlane();
 
 		//zCCamera::GetCamera()->Activate();
-		SetViewTransform(zCCamera::GetCamera()->GetTransform(zCCamera::ETransformType::TT_VIEW));
+		SetViewTransform(zCCamera::GetCamera()->GetTransform(zCCamera::ETransformType::TT_VIEW), false);
 	}
 
 	// Apply the hints for the sound system to fix voices in indoor locations being quiet
@@ -1132,7 +1132,7 @@ void GothicAPI::DrawMeshInfo(zCMaterial * mat, MeshInfo * msh) {
 }
 
 /** Draws a SkeletalMeshInfo */
-void GothicAPI::DrawSkeletalMeshInfo(zCMaterial * mat, SkeletalMeshInfo * msh, std::vector<D3DXMATRIX> & transforms, float fatness) {
+void GothicAPI::DrawSkeletalMeshInfo(zCMaterial * mat, SkeletalMeshInfo * msh, std::vector<XMFLOAT4X4> & transforms, float fatness) {
 	// Check for material and bind the texture if it exists
 	if (mat) {
 		if (mat->GetTexture()) {
@@ -1530,7 +1530,6 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 	D3D11GraphicsEngine* g = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
 	g->SetActiveVertexShader("VS_Ex");
 
-	std::vector<D3DXMATRIX> transforms;
 	zCModel* model = (zCModel*)vi->Vob->GetVisual();
 	SkeletalMeshVisualInfo* visual = ((SkeletalMeshVisualInfo*)vi->VisualInfo);
 
@@ -1547,23 +1546,21 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 	if (model->GetDrawHandVisualsOnly())
 		return; // Not supported yet
 
-	D3DXMATRIX world;
-	vi->Vob->GetWorldMatrix(&world);
+	XMMATRIX world = vi->Vob->GetWorldMatrixXM();
+	XMVECTOR modelScale = model->GetModelScaleXM();
+	XMMATRIX scale = XMMatrixScalingFromVector(modelScale);
 
-	D3DXMATRIX scale;
-	D3DXVECTOR3 modelScale = model->GetModelScale();
-	D3DXMatrixScaling(&scale, modelScale.x, modelScale.y, modelScale.z);
 	world = world * scale;
 
-	zCCamera::GetCamera()->SetTransform(zCCamera::TT_WORLD, world);
+	zCCamera::GetCamera()->SetTransformXM(zCCamera::TT_WORLD, world);
 
-	D3DXMATRIX view;
-	GetViewMatrix(&view);
+	XMMATRIX view = GetViewMatrixXM();
 	SetWorldViewTransform(world, view);
 
 	float fatness = model->GetModelFatness();
 
 	// Get the bone transforms
+	std::vector<XMFLOAT4X4> transforms;
 	model->GetBoneTransforms(&transforms, vi->Vob);
 
 	// Update attachments
@@ -1578,7 +1575,7 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 	struct fns {
 		// TODO: FIXME
 		// Ugly stuff to get the fucking corrupt visual in returning here
-		static void Draw(SkeletalVobInfo* vi, std::vector<D3DXMATRIX>& transforms, float fatness) {
+		static void Draw(SkeletalVobInfo* vi, std::vector<XMFLOAT4X4>& transforms, float fatness) {
 			for (auto const& itm : dynamic_cast<SkeletalMeshVisualInfo*>(vi->VisualInfo)->SkeletalMeshes) {
 				for (auto& i : itm.second) {
 					Engine::GAPI->DrawSkeletalMeshInfo(itm.first, i, transforms, fatness);
@@ -1586,7 +1583,7 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 			}
 		}
 
-		static bool CatchDraw(SkeletalVobInfo* vi, std::string* visName, std::string* vobName, D3DXVECTOR3* pos, std::vector<D3DXMATRIX>& transforms, float fatness) {
+		static bool CatchDraw(SkeletalVobInfo* vi, std::string* visName, std::string* vobName, D3DXVECTOR3* pos, std::vector<XMFLOAT4X4>& transforms, float fatness) {
 			bool success = true;
 			__try {
 				Draw(vi, transforms, fatness);
@@ -1693,7 +1690,8 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 		if (nodeAttachments.find(i) != nodeAttachments.end()) {
 			// Go through all attachments this node has
 			for (unsigned int n = 0; n < nodeAttachments[i].size(); n++) {
-				SetWorldViewTransform(world * transforms[i], view);
+				XMMATRIX curTransform = XMLoadFloat4x4(&transforms[i]);
+				SetWorldViewTransform(world * curTransform, view);
 
 				if (!nodeAttachments[i][n]->Visual) {
 					LogWarn() << "Attachment without visual on model: " << model->GetVisualName();
@@ -1711,15 +1709,14 @@ void GothicAPI::DrawSkeletalMeshVob(SkeletalVobInfo * vi, float distance) {
 					g->SetActivePixelShader("PS_DiffuseAlphaTest");
 
 					if (g->GetRenderingStage() == DES_MAIN) {// Only draw this as a morphmesh when rendering the main scene
-						D3DXMATRIX fatnessScale;
 						const float fs = (fatness + 1.0f) * 0.02f; // This is what gothic seems to be doing for heads, and it even looks right...
 
 						// Calculate "patched" scale according to fatness
-						D3DXMatrixScaling(&fatnessScale, fs, fs, fs);
-						const D3DXMATRIX w = world * scale;
+						XMMATRIX fatnessScale = XMMatrixScaling(fs, fs, fs);
+						const XMMATRIX w = world * scale;
 
 						// Set new "fat" worldmatrix
-						SetWorldViewTransform(w * transforms[i], view);
+						SetWorldViewTransform(w * curTransform, view);
 
 						// Update constantbuffer
 						instanceInfo.World = *(XMFLOAT4X4*)&RendererState.TransformState.TransformWorld;
@@ -1783,12 +1780,7 @@ void GothicAPI::OnParticleFXDeleted(zCParticleFX * pfx) {
 /** Draws a zCParticleFX */
 void GothicAPI::DrawParticleFX(zCVob * source, zCParticleFX * fx, ParticleFrameData & data) {
 	// Get our view-matrix
-	D3DXMATRIX view;
-	GetViewMatrix(&view);
-
-	D3DXMATRIX world;
-	source->GetWorldMatrix(&world);
-	SetWorldViewTransform(world, view);
+	SetWorldViewTransform(source->GetWorldMatrixXM(), GetViewMatrixXM());
 
 	D3DXMATRIX scale;
 	float effectBrightness = 1.0f;
@@ -1983,17 +1975,6 @@ void GothicAPI::DrawTriangle(float3 pos = { 0.0f,0.0f,0.0f })
 	delete vxb;
 }
 
-/** Sets the world matrix */
-void GothicAPI::SetWorldTransform(const D3DXMATRIX & world)
-{
-	RendererState.TransformState.TransformWorld = (XMFLOAT4X4)world;
-}
-/** Sets the world matrix */
-void GothicAPI::SetViewTransform(const D3DXMATRIX & view)
-{
-	RendererState.TransformState.TransformView = (XMFLOAT4X4)view;
-}
-
 /** Sets the Projection matrix */
 void GothicAPI::SetProjTransform(const D3DXMATRIX & proj)
 {
@@ -2025,12 +2006,26 @@ void GothicAPI::SetViewTransform(const D3DXMATRIX & view, bool transpose)
 }
 
 /** Sets the world matrix */
-void GothicAPI::SetWorldViewTransform(const D3DXMATRIX & world, const D3DXMATRIX & view)
+void GothicAPI::SetViewTransformXM(const XMMATRIX& view, bool transpose)
 {
-	RendererState.TransformState.TransformWorld = (XMFLOAT4X4)world;
-	RendererState.TransformState.TransformView = (XMFLOAT4X4)view;
+	if (transpose)
+		XMStoreFloat4x4(&RendererState.TransformState.TransformView, XMMatrixTranspose(view));
+	else
+		XMStoreFloat4x4(&RendererState.TransformState.TransformView, view);
 }
 
+/** Sets the world matrix */
+void GothicAPI::SetWorldViewTransform(const XMFLOAT4X4& world, const XMFLOAT4X4& view)
+{
+	RendererState.TransformState.TransformWorld = world;
+	RendererState.TransformState.TransformView = view;
+}
+/** Sets the world matrix */
+void GothicAPI::SetWorldViewTransform(const XMMATRIX& world, const XMMATRIX& view)
+{
+	XMStoreFloat4x4(&RendererState.TransformState.TransformWorld, world);
+	XMStoreFloat4x4(&RendererState.TransformState.TransformView, view);
+}
 /** Sets the world matrix */
 void GothicAPI::ResetWorldTransform()
 {

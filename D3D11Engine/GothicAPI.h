@@ -265,7 +265,7 @@ public:
 	void DrawMeshInfo(zCMaterial * mat, MeshInfo * msh);
 
 	/** Draws a SkeletalMeshInfo */
-	void DrawSkeletalMeshInfo(zCMaterial * mat, SkeletalMeshInfo * msh, std::vector<D3DXMATRIX> & transforms, float fatness = 1.0f);
+	void DrawSkeletalMeshInfo(zCMaterial * mat, SkeletalMeshInfo * msh, std::vector<DirectX::XMFLOAT4X4> & transforms, float fatness = 1.0f);
 
 	/** Draws a zCParticleFX */
 	void DrawParticleFX(zCVob * source, zCParticleFX * fx, ParticleFrameData & data);
@@ -276,26 +276,25 @@ public:
 	/** Returns a list of visible particle-effects */
 	void GetVisibleParticleEffectsList(std::vector<zCVob *> & pfxList);
 
-	/** Sets the world matrix */
-	void SetWorldTransform(const D3DXMATRIX & world);
-
-	/** Sets the View matrix */
-	void SetViewTransform(const D3DXMATRIX & view);
-
 	/** Sets the Projection matrix */
 	void SetProjTransform(const D3DXMATRIX & proj);
-
-	/** Sets the Projection matrix */
+	/** Gets the Projection matrix */
 	D3DXMATRIX GetProjTransform();
 
 	/** Sets the world matrix */
-	void SetWorldTransform(const D3DXMATRIX & world, bool transpose);
+	void SetWorldTransform(const D3DXMATRIX & world, bool transpose = false);
 
 	/** Sets the world matrix */
-	void SetViewTransform(const D3DXMATRIX & view, bool transpose);
+	void SetViewTransform(const D3DXMATRIX & view, bool transpose = false);
 
 	/** Sets the world matrix */
-	void SetWorldViewTransform(const D3DXMATRIX & world, const D3DXMATRIX & view);
+	void SetViewTransformXM(const DirectX::XMMATRIX & view, bool transpose = false);
+
+	/** Sets the world matrix */
+	void SetWorldViewTransform(const DirectX::XMFLOAT4X4& world, const DirectX::XMFLOAT4X4& view);
+	
+	/** Sets the world matrix */
+	void SetWorldViewTransform(const DirectX::XMMATRIX& world, const DirectX::XMMATRIX& view);
 
 	/** Sets the world matrix */
 	void ResetWorldTransform();

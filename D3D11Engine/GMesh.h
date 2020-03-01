@@ -20,9 +20,6 @@ public:
 	/** Load a mesh from file  */
 	XRESULT LoadMesh(const std::string & file, float scale = 1.0f);
 
-	/** Fills this mesh with a grid */
-	XRESULT CreateGrid(int tesselation, const D3DXVECTOR2 & min, const D3DXVECTOR2 & max, float height);
-
 	/** Draws all buffers this holds */
 	void DrawMesh();
 

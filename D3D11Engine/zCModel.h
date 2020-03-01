@@ -13,6 +13,7 @@
 #include "zCVisual.h"
 #include "zCMeshSoftSkin.h"
 #include "zCObject.h"
+#include "AlignedAllocator.h"
 
 class zCVisual;
 class zCMeshSoftSkin;
@@ -23,8 +24,8 @@ struct zCModelNodeInst
 	zCModelNodeInst* ParentNode;
 	zCModelNode* ProtoNode;
 	zCVisual* NodeVisual;
-	D3DXMATRIX Trafo;			
-	D3DXMATRIX TrafoObjToCam;	
+	DirectX::XMFLOAT4X4 Trafo;
+	DirectX::XMFLOAT4X4 TrafoObjToCam;	
 	zTBBox3D BBox3D;
 
 	zCModelTexAniState TexAniState;
@@ -286,6 +287,15 @@ public:
 		return *(D3DXVECTOR3 *)THISPTR_OFFSET(GothicMemoryLocations::zCModel::Offset_ModelScale);
 	}
 
+	DirectX::XMVECTOR GetModelScaleXM()
+	{
+#ifdef BUILD_GOTHIC_1_08k
+		return DirectX::XMVectorSet(1, 1, 1, 1);
+#endif
+
+		return DirectX::XMLoadFloat3((DirectX::XMFLOAT3*)THISPTR_OFFSET(GothicMemoryLocations::zCModel::Offset_ModelScale));
+	}
+
 	float GetModelFatness()
 	{
 #ifdef BUILD_GOTHIC_1_08k
@@ -344,34 +354,35 @@ public:
 	}
 
 	/** Fills a vector of (viewspace) bone-transformation matrices for this frame */
-	void GetBoneTransforms(std::vector<D3DXMATRIX>* transforms, zCVob * vob = nullptr)
+	void GetBoneTransforms(std::vector<DirectX::XMFLOAT4X4>* transforms, zCVob* vob = nullptr)
 	{
 		if (!GetNodeList())
 			return;
 
 		// Make this static so we don't reallocate the memory every time
-		static std::vector<D3DXMATRIX*> tptr;
+		static std::vector<DirectX::XMFLOAT4X4*, AlignmentAllocator<DirectX::XMFLOAT4X4*, 16>> tptr;
 		tptr.resize(GetNodeList()->NumInArray, nullptr);
-		for (int i=0; i<GetNodeList()->NumInArray; i++) 
+		for (int i = 0; i < GetNodeList()->NumInArray; i++)
 		{
 			zCModelNodeInst* node = GetNodeList()->Array[i];
 			zCModelNodeInst* parent = node->ParentNode;
 			tptr[i] = &node->TrafoObjToCam;
 
 			// Calculate transform for this node
-			if (parent)	
+			if (parent)
 			{
-				node->TrafoObjToCam = parent->TrafoObjToCam * node->Trafo;
-			} else
+				XMStoreFloat4x4(&node->TrafoObjToCam, XMLoadFloat4x4(&parent->TrafoObjToCam) * XMLoadFloat4x4(&node->Trafo));
+			}
+			else
 			{
 				node->TrafoObjToCam = node->Trafo;
 			}
-		
+
 		}
 		// Put them into our vector
-		for(unsigned int i=0;i<tptr.size();i++)
+		for (unsigned int i = 0; i < tptr.size(); i++)
 		{
-			D3DXMATRIX m = *tptr[i];
+			DirectX::XMFLOAT4X4 m = *tptr[i];
 			transforms->push_back(m);
 		}
 	}
