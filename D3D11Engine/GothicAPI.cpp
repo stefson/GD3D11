@@ -651,14 +651,16 @@ void GothicAPI::DrawWorldMeshNaive() {
 	static float setfovH = RendererState.RendererSettings.FOVHoriz;
 	static float setfovV = RendererState.RendererSettings.FOVVert;
 
-#ifdef BUILD_GOTHIC_1_08k 
-	setfovH = RendererState.RendererSettings.FOVHoriz;
-	setfovV = RendererState.RendererSettings.FOVVert;
+#ifdef BUILD_GOTHIC_1_08k
+	if (RendererState.RendererSettings.ForceFOV) {
+		setfovH = RendererState.RendererSettings.FOVHoriz;
+		setfovV = RendererState.RendererSettings.FOVVert;
 
-	// Fix camera FOV-Bug
-	zCCamera::GetCamera()->SetFOV(RendererState.RendererSettings.FOVHoriz, (Engine::GraphicsEngine->GetResolution().y / (float)Engine::GraphicsEngine->GetResolution().x) * RendererState.RendererSettings.FOVVert);
+		// Fix camera FOV-Bug
+		zCCamera::GetCamera()->SetFOV(RendererState.RendererSettings.FOVHoriz, (Engine::GraphicsEngine->GetResolution().y / (float)Engine::GraphicsEngine->GetResolution().x) * RendererState.RendererSettings.FOVVert);
 
-	CurrentCamera = zCCamera::GetCamera();
+		CurrentCamera = zCCamera::GetCamera();
+	}
 #else
 	float fovH = 90.0f, fovV = 90.0f;
 	if (zCCamera::GetCamera())
@@ -3750,6 +3752,7 @@ XRESULT GothicAPI::SaveMenuSettings(const std::string & file) {
 	WritePrivateProfileStringA("Display", "Width", std::to_string(res.x).c_str(), ini.c_str());
 	WritePrivateProfileStringA("Display", "Height", std::to_string(res.y).c_str(), ini.c_str());
 	WritePrivateProfileStringA("Display", "VSync", std::to_string(s.EnableVSync ? TRUE : FALSE).c_str(), ini.c_str());
+	WritePrivateProfileStringA("Display", "ForceFOV", std::to_string(s.ForceFOV ? TRUE : FALSE).c_str(), ini.c_str());
 	WritePrivateProfileStringA("Display", "FOVHoriz", std::to_string((int)s.FOVHoriz).c_str(), ini.c_str());
 	WritePrivateProfileStringA("Display", "FOVVert", std::to_string((int)s.FOVVert).c_str(), ini.c_str());
 	WritePrivateProfileStringA("Display", "Gamma", std::to_string(s.GammaValue).c_str(), ini.c_str());
@@ -3781,6 +3784,8 @@ XRESULT GothicAPI::SaveMenuSettings(const std::string & file) {
 	WritePrivateProfileStringA("FontRendering", "Enable", std::to_string(s.EnableCustomFontRendering ? TRUE : FALSE).c_str(), ini.c_str());
 	WritePrivateProfileStringA("FontRendering", "FontDefault", s.FontFileDefault.c_str(), ini.c_str());
 	WritePrivateProfileStringA("FontRendering", "FontMenu", s.FontFileMenu.c_str(), ini.c_str());
+
+
 
 	return XR_SUCCESS;
 }
@@ -3849,6 +3854,7 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 	res.x = GetPrivateProfileIntA("Display", "Width", desktopRect.right, ini.c_str());
 	res.y = GetPrivateProfileIntA("Display", "Height", desktopRect.bottom, ini.c_str());
 	s.EnableVSync = GetPrivateProfileBoolA("Display", "VSync", false, ini);
+	s.ForceFOV = GetPrivateProfileBoolA("Display", "ForceFOV", defaultRendererSettings.ForceFOV, ini);
 	s.FOVHoriz = GetPrivateProfileIntA("Display", "FOVHoriz", 90, ini.c_str());
 	s.FOVVert = GetPrivateProfileIntA("Display", "FOVVert", 90, ini.c_str());
 	s.GammaValue = GetPrivateProfileFloatA("Display", "Gamma", 1.0f, ini.c_str());

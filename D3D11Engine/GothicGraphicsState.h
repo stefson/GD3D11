@@ -557,6 +557,7 @@ struct GothicRendererSettings {
 		EnableCustomFontRendering = false;
 		FontFileDefault = "Gothic_14.spritefont";
 		FontFileMenu = "Gothic_14.spritefont";
+		ForceFOV = false;
 	}
 
 	void SetupOldWorldSpecificValues() {
@@ -691,6 +692,7 @@ struct GothicRendererSettings {
 	bool EnableCustomFontRendering;
 	std::string FontFileDefault;
 	std::string FontFileMenu;
+	bool ForceFOV;
 };
 
 struct GothicRendererTiming {
