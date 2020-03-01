@@ -29,6 +29,8 @@
 #include "Widget_TransRot.h"
 #include "WidgetContainer.h"
 
+using namespace DirectX;
+
 D2DEditorView::D2DEditorView(D2DView * view, D2DSubView * parent) : D2DSubView(view, parent)
 {
 	InitControls();
@@ -476,7 +478,7 @@ void D2DEditorView::Update(float deltaTime)
 /** Handles vegetation removing */
 void D2DEditorView::DoVegetationRemove()
 {
-	D3DXVECTOR3 wDir = Engine::GAPI->UnprojectCursor();
+	XMFLOAT3 wDir; XMStoreFloat3(&wDir, Engine::GAPI->UnprojectCursorXM());
 	D3DXVECTOR3 hit;
 	D3DXVECTOR3 hitTri[3];
 
@@ -484,7 +486,7 @@ void D2DEditorView::DoVegetationRemove()
 
 	if (Selection.SelectedVegetationBox)
 	{
-		if (Engine::GAPI->TraceWorldMesh(Engine::GAPI->GetCameraPosition(), wDir, hit, nullptr, hitTri))
+		if (Engine::GAPI->TraceWorldMesh(Engine::GAPI->GetCameraPosition(), *(D3DXVECTOR3*)&wDir, hit, nullptr, hitTri))
 		{
 			D3DXVECTOR4 p;
 			D3DXVec3Cross((D3DXVECTOR3 *)&p, &(hitTri[1] - hitTri[0]), &(hitTri[2] - hitTri[0]));
@@ -519,7 +521,7 @@ void D2DEditorView::DoVegetationRemove()
 /** Handles vegetationbox placement */
 void D2DEditorView::DoVegetationPlacement()
 {
-	D3DXVECTOR3 wDir = Engine::GAPI->UnprojectCursor();
+	XMFLOAT3 wDir; XMStoreFloat3(&wDir, Engine::GAPI->UnprojectCursorXM());
 	D3DXVECTOR3 hit;
 	D3DXVECTOR3 hitTri[3];
 	
@@ -531,7 +533,7 @@ void D2DEditorView::DoVegetationPlacement()
 		rtp = &TracedTexture;
 
 	// Trace the worldmesh from the cursor
-	if (Engine::GAPI->TraceWorldMesh(Engine::GAPI->GetCameraPosition(), wDir, hit, rtp, hitTri))
+	if (Engine::GAPI->TraceWorldMesh(Engine::GAPI->GetCameraPosition(), *(D3DXVECTOR3*)&wDir, hit, rtp, hitTri))
 	{
 		// Update the position if successful
 		DraggedBoxCenter = hit;
@@ -562,7 +564,7 @@ GVegetationBox* D2DEditorView::FindVegetationFromMeshInfo(MeshInfo * info)
 /** Handles selection */
 void D2DEditorView::DoSelection()
 {
-	D3DXVECTOR3 wDir = Engine::GAPI->UnprojectCursor();
+	XMFLOAT3 wDir; XMStoreFloat3(&wDir, Engine::GAPI->UnprojectCursorXM());
 	D3DXVECTOR3 hitVob(FLT_MAX,FLT_MAX,FLT_MAX), hitSkel(FLT_MAX,FLT_MAX,FLT_MAX), hitWorld(FLT_MAX,FLT_MAX,FLT_MAX);
 	D3DXVECTOR3 hitTri[3];
 	MeshInfo * hitMesh;
@@ -577,7 +579,7 @@ void D2DEditorView::DoSelection()
 	TracedMaterial = nullptr;
 
 	// Trace mesh-less vegetationboxes
-	TracedVegetationBox = TraceVegetationBoxes(Engine::GAPI->GetCameraPosition(), wDir);
+	TracedVegetationBox = TraceVegetationBoxes(Engine::GAPI->GetCameraPosition(), *(D3DXVECTOR3*)&wDir);
 	if (TracedVegetationBox)
 	{			
 		TracedVegetationBox->VisualizeGrass(D3DXVECTOR4(1, 1, 1, 1));
@@ -585,11 +587,11 @@ void D2DEditorView::DoSelection()
 	}
 
 	// Trace vobs
-	tVob = Engine::GAPI->TraceStaticMeshVobsBB(Engine::GAPI->GetCameraPosition(), wDir, hitVob, &hitMaterialVob);
-	tSkelVob = Engine::GAPI->TraceSkeletalMeshVobsBB(Engine::GAPI->GetCameraPosition(), wDir, hitSkel);	
+	tVob = Engine::GAPI->TraceStaticMeshVobsBB(Engine::GAPI->GetCameraPosition(), *(D3DXVECTOR3*)&wDir, hitVob, &hitMaterialVob);
+	tSkelVob = Engine::GAPI->TraceSkeletalMeshVobsBB(Engine::GAPI->GetCameraPosition(), *(D3DXVECTOR3*)&wDir, hitSkel);
 
 	// Trace the worldmesh from the cursor
-	Engine::GAPI->TraceWorldMesh(Engine::GAPI->GetCameraPosition(), wDir, hitWorld, &TracedTexture, hitTri, &hitMesh, &hitMaterial);
+	Engine::GAPI->TraceWorldMesh(Engine::GAPI->GetCameraPosition(), *(D3DXVECTOR3*)&wDir, hitWorld, &TracedTexture, hitTri, &hitMesh, &hitMaterial);
 
 	float lenVob = D3DXVec3Length(&(Engine::GAPI->GetCameraPosition()-hitVob));
 	float lenSkel = D3DXVec3Length(&(Engine::GAPI->GetCameraPosition()-hitSkel));
@@ -1026,9 +1028,7 @@ void D2DEditorView::DoEditorMovement()
 	zCCamera::GetCamera()->Activate();
 
 	// Update GAPI
-	D3DXMATRIX view;
-	Engine::GAPI->GetViewMatrix(&view);
-	Engine::GAPI->SetViewTransform(view);
+	Engine::GAPI->SetViewTransformXM(Engine::GAPI->GetViewMatrixXM());
 }
 
 /** Returns if the mouse is inside the editor window */

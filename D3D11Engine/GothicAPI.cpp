@@ -201,7 +201,7 @@ void GothicAPI::OnWorldUpdate() {
 		RendererState.RendererInfo.NearPlane = zCCamera::GetCamera()->GetNearPlane();
 
 		//zCCamera::GetCamera()->Activate();
-		SetViewTransform(zCCamera::GetCamera()->GetTransform(zCCamera::ETransformType::TT_VIEW), false);
+		SetViewTransformDX(zCCamera::GetCamera()->GetTransformDX(zCCamera::ETransformType::TT_VIEW), false);
 	}
 
 	// Apply the hints for the sound system to fix voices in indoor locations being quiet
@@ -1976,21 +1976,9 @@ void GothicAPI::DrawTriangle(float3 pos = { 0.0f,0.0f,0.0f })
 }
 
 /** Sets the Projection matrix */
-void GothicAPI::SetProjTransform(const D3DXMATRIX & proj)
-{
-	RendererState.TransformState.TransformProj = (XMFLOAT4X4)proj;
-}
-
-/** Sets the Projection matrix */
 void GothicAPI::SetProjTransformDX(const DirectX::XMFLOAT4X4& proj)
 {
 	RendererState.TransformState.TransformProj = proj;
-}
-
-/** Sets the Projection matrix */
-D3DXMATRIX GothicAPI::GetProjTransform()
-{
-	return *(D3DXMATRIX*)&RendererState.TransformState.TransformProj;
 }
 
 /** Sets the Projection matrix */
@@ -1999,14 +1987,6 @@ DirectX::XMFLOAT4X4 GothicAPI::GetProjTransformDx()
 	return RendererState.TransformState.TransformProj;
 }
 
-/** Sets the world matrix */
-void GothicAPI::SetWorldTransform(const D3DXMATRIX & world, bool transpose)
-{
-	if (transpose)
-		D3DXMatrixTranspose((D3DXMATRIX*)&RendererState.TransformState.TransformWorld, &world);
-	else
-		RendererState.TransformState.TransformWorld = (XMFLOAT4X4)world;
-}
 
 /** Sets the world matrix */
 void __vectorcall GothicAPI::SetWorldTransformXM(XMMATRIX world, bool transpose)
@@ -2023,14 +2003,6 @@ void GothicAPI::SetWorldTransformDX(const XMFLOAT4X4& world, bool transpose)
 		XMStoreFloat4x4(&RendererState.TransformState.TransformWorld, XMMatrixTranspose(XMLoadFloat4x4(&world)));
 	else
 		RendererState.TransformState.TransformWorld = world;
-}
-/** Sets the world matrix */
-void GothicAPI::SetViewTransform(const D3DXMATRIX & view, bool transpose)
-{
-	if (transpose)
-		D3DXMatrixTranspose((D3DXMATRIX*)&RendererState.TransformState.TransformView, &view);
-	else
-		RendererState.TransformState.TransformView = (XMFLOAT4X4)view;
 }
 
 /** Sets the world matrix */
@@ -2292,26 +2264,6 @@ bool GothicAPI::TraceWorldMesh(const D3DXVECTOR3 & origin, const D3DXVECTOR3 & d
 }
 
 /** Unprojects a pixel-position on the screen */
-void GothicAPI::Unproject(const D3DXVECTOR3 & p, D3DXVECTOR3 * worldPos, D3DXVECTOR3 * worldDir)
-{
-	D3DXVECTOR3 u;
-	D3DXMATRIX proj = GetProjectionMatrix();
-	D3DXMATRIX invView; GetInverseViewMatrix(&invView);
-	D3DXMatrixTranspose(&invView, &invView);
-	D3DXMatrixTranspose(&proj, &proj);
-
-	// Convert to screenspace
-	u.x = (((2 * p.x) / Engine::GraphicsEngine->GetResolution().x) - 1) / proj(0, 0);
-	u.y = -(((2 * p.y) / Engine::GraphicsEngine->GetResolution().y) - 1) / proj(1, 1);
-	u.z = 1;
-
-	// Transform and output
-	D3DXVec3TransformCoord(worldPos, &u, &invView);
-	D3DXVec3Normalize(&u, &u);
-	D3DXVec3TransformNormal(worldDir, &u, &invView);
-}
-
-/** Unprojects a pixel-position on the screen */
 void __vectorcall GothicAPI::UnprojectXM(FXMVECTOR p, XMVECTOR& worldPos, XMVECTOR& worldDir)
 {
 	XMMATRIX proj = XMLoadFloat4x4(&GetProjectionMatrixDX());
@@ -2334,17 +2286,6 @@ void __vectorcall GothicAPI::UnprojectXM(FXMVECTOR p, XMVECTOR& worldPos, XMVECT
 	worldPos = XMVector3TransformCoord(u, invView);
 	u = XMVector3Normalize(u);
 	worldDir = XMVector3TransformCoord(u, invView);
-}
-
-/** Unprojects the current cursor */
-D3DXVECTOR3 GothicAPI::UnprojectCursor()
-{
-	D3DXVECTOR3 mPos, mDir;
-	POINT p = GetCursorPosition();
-
-	Engine::GAPI->Unproject(D3DXVECTOR3((float)p.x, (float)p.y, 0), &mPos, &mDir);
-
-	return mDir;
 }
 
 /** Unprojects the current cursor */
@@ -2405,17 +2346,6 @@ DirectX::XMMATRIX GothicAPI::GetViewMatrixXM()
 }
 
 /** Returns the view matrix */
-void GothicAPI::GetInverseViewMatrix(D3DXMATRIX * invView)
-{
-	if (CameraReplacementPtr)
-	{
-		D3DXMatrixInverse(invView, nullptr, (D3DXMATRIX*)&CameraReplacementPtr->ViewReplacement);
-		return;
-	}
-
-	*invView = zCCamera::GetCamera()->GetTransform(zCCamera::ETransformType::TT_VIEW_INV);
-}
-/** Returns the view matrix */
 void GothicAPI::GetInverseViewMatrixDX(DirectX::XMFLOAT4X4 * invView)
 {
 	if (CameraReplacementPtr)
@@ -2425,16 +2355,6 @@ void GothicAPI::GetInverseViewMatrixDX(DirectX::XMFLOAT4X4 * invView)
 	}
 
 	*invView = zCCamera::GetCamera()->GetTransformDX(zCCamera::ETransformType::TT_VIEW_INV);
-}
-/** Returns the projection-matrix */
-D3DXMATRIX& GothicAPI::GetProjectionMatrix()
-{
-	if (CameraReplacementPtr)
-	{
-		return (D3DXMATRIX&)CameraReplacementPtr->ProjectionReplacement;
-	}
-
-	return (D3DXMATRIX&)RendererState.TransformState.TransformProj;
 }
 
 /** Returns the projection-matrix */

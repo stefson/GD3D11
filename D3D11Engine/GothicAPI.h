@@ -277,28 +277,16 @@ public:
 	void GetVisibleParticleEffectsList(std::vector<zCVob *> & pfxList);
 
 	/** Sets the Projection matrix */
-	void SetProjTransform(const D3DXMATRIX & proj);
-
-	/** Sets the Projection matrix */
 	void SetProjTransformDX(const DirectX::XMFLOAT4X4& proj);
 	
 	/** Gets the Projection matrix */
-	D3DXMATRIX GetProjTransform();
-
-	/** Gets the Projection matrix */
 	DirectX::XMFLOAT4X4 GetProjTransformDx();
-
-	/** Sets the world matrix */
-	void SetWorldTransform(const D3DXMATRIX & world, bool transpose = false);
 
 	/** Sets the world matrix */
 	void __vectorcall  SetWorldTransformXM(DirectX::XMMATRIX world, bool transpose = false);
 	
 	/** Sets the world matrix */
 	void SetWorldTransformDX(const DirectX::XMFLOAT4X4& world, bool transpose = false);
-
-	/** Sets the world matrix */
-	void SetViewTransform(const D3DXMATRIX & view, bool transpose = false);
 
 	/** Sets the world matrix */
 	void __vectorcall SetViewTransformXM(DirectX::XMMATRIX view, bool transpose = false);
@@ -358,25 +346,13 @@ public:
 	DirectX::XMMATRIX GetViewMatrixXM();
 
 	/** Returns the view matrix */
-	void GetInverseViewMatrix(D3DXMATRIX * invView);
-
-	/** Returns the view matrix */
 	void GetInverseViewMatrixDX(DirectX::XMFLOAT4X4 * invView);
-
-	/** Returns the projection-matrix */
-	D3DXMATRIX& GetProjectionMatrix();
 
 	/** Returns the projection-matrix */
 	DirectX::XMFLOAT4X4& GetProjectionMatrixDX();
 
 	/** Unprojects a pixel-position on the screen */
-	void Unproject(const D3DXVECTOR3 & p, D3DXVECTOR3 * worldPos, D3DXVECTOR3 * worldDir);
-
-	/** Unprojects a pixel-position on the screen */
 	void __vectorcall UnprojectXM(DirectX::FXMVECTOR p, DirectX::XMVECTOR& worldPos, DirectX::XMVECTOR& worldDir);
-
-	/** Unprojects the current cursor, returns it's direction in world-space */
-	D3DXVECTOR3 UnprojectCursor();
 
 	/** Unprojects the current cursor, returns it's direction in world-space */
 	DirectX::XMVECTOR UnprojectCursorXM();

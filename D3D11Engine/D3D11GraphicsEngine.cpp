@@ -1202,8 +1202,6 @@ XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh(
 	InfiniteRangeConstantBuffer->BindToPixelShader(3);
 
 	const auto& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
-	const auto& view  = Engine::GAPI->GetRendererState()->TransformState.TransformView;
-	const auto& proj  = Engine::GAPI->GetProjectionMatrix();
 
 	SetupVS_ExMeshDrawCall();
 	SetupVS_ExConstantBuffer();
@@ -5295,7 +5293,7 @@ void D3D11GraphicsEngine::DrawQuadMarks() {
 			UpdateRenderStates();
 		}
 
-		Engine::GAPI->SetWorldTransform(*it.first->GetConnectedVob()->GetWorldMatrixPtr());
+		Engine::GAPI->SetWorldTransformXM(it.first->GetConnectedVob()->GetWorldMatrixXM());
 		SetupVS_ExPerInstanceConstantBuffer();
 
 		Engine::GraphicsEngine->DrawVertexBuffer(it.second.Mesh,

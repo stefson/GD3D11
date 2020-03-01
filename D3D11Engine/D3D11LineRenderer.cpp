@@ -6,6 +6,8 @@
 #include "GothicAPI.h"
 #include "D3D11VertexBuffer.h"
 
+using namespace DirectX;
+
 D3D11LineRenderer::D3D11LineRenderer()
 {
 	LineBuffer = nullptr;
@@ -54,13 +56,8 @@ XRESULT D3D11LineRenderer::Flush()
 		XLE(LineBuffer->UpdateBuffer(&LineCache[0], LineCache.size() * sizeof(LineVertex)));
 	}
 	
-	D3DXMATRIX world;
-	D3DXMatrixIdentity(&world);
-	Engine::GAPI->SetWorldTransform(world);
-
-	D3DXMATRIX view;
-	Engine::GAPI->GetViewMatrix(&view);
-	Engine::GAPI->SetViewTransform(view);
+	Engine::GAPI->SetWorldTransformXM(XMMatrixIdentity());
+	Engine::GAPI->SetViewTransformXM(Engine::GAPI->GetViewMatrixXM());
 
 	engine->SetActivePixelShader("PS_Lines");
 	engine->SetActiveVertexShader("VS_Lines");
