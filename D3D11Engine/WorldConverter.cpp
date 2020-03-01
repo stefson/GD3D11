@@ -23,6 +23,8 @@
 #include "D3D7\MyDirectDrawSurface7.h"
 #include "zCQuadMark.h"
 
+using namespace DirectX;
+
 WorldConverter::WorldConverter()
 {
 }
@@ -856,7 +858,7 @@ void WorldConverter::GenerateFullSectionMesh(WorldMeshSectionInfo& section)
 }
 
 /** Returns what section the given position is in */
-INT2 WorldConverter::GetSectionOfPos(const D3DXVECTOR3 & pos)
+INT2 WorldConverter::GetSectionOfPos(const float3 & pos)
 {
 	// Find out where it belongs
 	int px = (int)((pos.x / WORLD_SECTION_SIZE) + 0.5f);
@@ -1894,7 +1896,7 @@ void WorldConverter::CacheMesh(const std::map<std::string, std::vector<std::pair
 }
 
 /** Updates a quadmark info */
-void WorldConverter::UpdateQuadMarkInfo(QuadMarkInfo* info, zCQuadMark* mark, const D3DXVECTOR3 & position)
+void WorldConverter::UpdateQuadMarkInfo(QuadMarkInfo* info, zCQuadMark* mark, const float3 & position)
 {
 	zCMesh* mesh = mark->GetQuadMesh();
 

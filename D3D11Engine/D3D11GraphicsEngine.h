@@ -345,8 +345,8 @@ protected:
 	std::unique_ptr<RenderToTextureBuffer> DummyShadowCubemapTexture; // PS-Stage needs to have a rendertarget bound to execute SV_Depth-Writes, as it seems.
 
 	/** Temp-Arrays for storing data to be put in constant buffers */
-	D3DXMATRIX Temp2D3DXMatrix[2];
-	D3DXMATRIX TempBonesD3DXmatrix[NUM_MAX_BONES];
+	DirectX::XMFLOAT4X4 Temp2D3DXMatrix[2];
+	DirectX::XMFLOAT4X4 TempBonesMatrix[NUM_MAX_BONES];
 	float2 Temp2Float2[2];
 	std::unique_ptr<D3D11VertexBuffer> DynamicInstancingBuffer;
 

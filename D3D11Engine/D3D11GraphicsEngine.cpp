@@ -285,7 +285,7 @@ XRESULT D3D11GraphicsEngine::Init() {
 		nullptr, sizeof(float4));
 
 	// Init inf-buffer now
-	InfiniteRangeConstantBuffer->UpdateBuffer(&D3DXVECTOR4(FLT_MAX, 0, 0, 0));
+	InfiniteRangeConstantBuffer->UpdateBuffer(&float4(FLT_MAX, 0, 0, 0));
 
 	// Load reflectioncube
 	
@@ -1264,17 +1264,14 @@ XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh(
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
 	// Copy bones
-	memcpy(TempBonesD3DXmatrix, &transforms[0],
-		sizeof(D3DXMATRIX) *
-		std::min(transforms.size(), sizeof(TempBonesD3DXmatrix) /
-			sizeof(TempBonesD3DXmatrix[0])));
-	ActiveVS->GetConstantBuffer()[2]->UpdateBuffer(TempBonesD3DXmatrix);
+	memcpy(TempBonesMatrix, &transforms[0], sizeof(XMFLOAT4X4) * std::min(transforms.size(), sizeof(TempBonesMatrix) / sizeof(TempBonesMatrix[0])));
+	ActiveVS->GetConstantBuffer()[2]->UpdateBuffer(TempBonesMatrix);
 	ActiveVS->GetConstantBuffer()[2]->BindToVertexShader(2);
 
 	if (transforms.size() >=
-		sizeof(TempBonesD3DXmatrix) / sizeof(TempBonesD3DXmatrix[0])) {
+		sizeof(TempBonesMatrix) / sizeof(TempBonesMatrix[0])) {
 		LogWarn() << "SkeletalMesh has more than "
-			<< sizeof(TempBonesD3DXmatrix) / sizeof(TempBonesD3DXmatrix[0])
+			<< sizeof(TempBonesMatrix) / sizeof(TempBonesMatrix[0])
 			<< " bones! (" << transforms.size() << ")Up this limit!";
 	}
 
@@ -1492,7 +1489,7 @@ XRESULT D3D11GraphicsEngine::UpdateRenderStates() {
 		FFRasterizerStateHash = Engine::GAPI->GetRendererState()->BlendState.Hash;
 
 		Engine::GAPI->GetRendererState()->BlendState.StateDirty = false;
-		GetContext()->OMSetBlendState(FFBlendState.Get(), (float*)& D3DXVECTOR4(0, 0, 0, 0),
+		GetContext()->OMSetBlendState(FFBlendState.Get(), float4(0, 0, 0, 0).toPtr(),
 			0xFFFFFFFF);
 	}
 
@@ -1591,14 +1588,14 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 	GetContext()->PSSetSamplers(0, 1, DefaultSamplerState.GetAddressOf());
 
 	// Update view distances
-	InfiniteRangeConstantBuffer->UpdateBuffer(&D3DXVECTOR4(FLT_MAX, 0, 0, 0));
+	InfiniteRangeConstantBuffer->UpdateBuffer(float4(FLT_MAX, 0, 0, 0).toPtr());
 	OutdoorSmallVobsConstantBuffer->UpdateBuffer(
-		&D3DXVECTOR4(Engine::GAPI->GetRendererState()
+		float4(Engine::GAPI->GetRendererState()
 			->RendererSettings.OutdoorSmallVobDrawRadius,
-			0, 0, 0));
-	OutdoorVobsConstantBuffer->UpdateBuffer(&D3DXVECTOR4(
+			0, 0, 0).toPtr());
+	OutdoorVobsConstantBuffer->UpdateBuffer(float4(
 		Engine::GAPI->GetRendererState()->RendererSettings.OutdoorVobDrawRadius,
-		0, 0, 0));
+		0, 0, 0).toPtr());
 
 	// Update editor
 	if (UIView) {
@@ -1834,9 +1831,8 @@ XRESULT D3D11GraphicsEngine::DrawMeshInfoListAlphablended(
 	Engine::GAPI->GetRendererState()->RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
 	Engine::GAPI->GetRendererState()->RasterizerState.SetDirty();
 
-	D3DXMATRIX view;
-	Engine::GAPI->GetViewMatrix(&view);
-	Engine::GAPI->SetViewTransform(view);
+	XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
+	Engine::GAPI->SetViewTransformXM(view);
 	Engine::GAPI->ResetWorldTransform();
 
 	SetActivePixelShader("PS_Diffuse");
@@ -1854,8 +1850,7 @@ XRESULT D3D11GraphicsEngine::DrawMeshInfoListAlphablended(
 	ActivePS->GetConstantBuffer()[1]->UpdateBuffer(&sky->GetAtmosphereCB());
 	ActivePS->GetConstantBuffer()[1]->BindToPixelShader(1);
 
-	D3DXMATRIX id;
-	D3DXMatrixIdentity(&id);
+	XMFLOAT4X4 id; XMStoreFloat4x4(&id, XMMatrixIdentity());
 	ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&id);
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
@@ -1960,9 +1955,8 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh(bool noTextures) {
 		GothicRasterizerStateInfo::CM_CULL_BACK;
 	Engine::GAPI->GetRendererState()->RasterizerState.SetDirty();
 
-	D3DXMATRIX view;
-	Engine::GAPI->GetViewMatrix(&view);
-	Engine::GAPI->SetViewTransform(view);
+	XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
+	Engine::GAPI->SetViewTransformXM(view);
 	Engine::GAPI->ResetWorldTransform();
 
 	SetActivePixelShader("PS_Diffuse");
@@ -1983,8 +1977,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh(bool noTextures) {
 	ActivePS->GetConstantBuffer()[1]->UpdateBuffer(&sky->GetAtmosphereCB());
 	ActivePS->GetConstantBuffer()[1]->BindToPixelShader(1);
 
-	D3DXMATRIX id;
-	D3DXMatrixIdentity(&id);
+	XMFLOAT4X4 id; XMStoreFloat4x4(&id, XMMatrixIdentity());
 	ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&id);
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
@@ -2283,14 +2276,13 @@ XRESULT D3D11GraphicsEngine::DrawWorldMeshW(bool noTextures) {
 	if (!Engine::GAPI->GetRendererState()->RendererSettings.DrawWorldMesh)
 		return XR_SUCCESS;
 
-	D3DXVECTOR3 camPos = Engine::GAPI->GetCameraPosition();
+	float3 camPos = Engine::GAPI->GetCameraPosition();
 
 	// Engine::GAPI->SetFarPlane(DEFAULT_FAR_PLANE);
 
 	INT2 camSection = WorldConverter::GetSectionOfPos(camPos);
 
-	D3DXMATRIX view;
-	Engine::GAPI->GetViewMatrix(&view);
+	XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
 
 	// Setup renderstates
 	Engine::GAPI->GetRendererState()->RasterizerState.SetDefault();
@@ -2302,7 +2294,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMeshW(bool noTextures) {
 	Engine::GAPI->GetRendererState()->DepthState.SetDirty();
 
 	Engine::GAPI->ResetWorldTransform();
-	Engine::GAPI->SetViewTransform(view);
+	Engine::GAPI->SetViewTransformXM(view);
 
 	// Set shader
 	SetActivePixelShader("PS_AtmosphereGround");
@@ -2329,8 +2321,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMeshW(bool noTextures) {
 	SetupVS_ExMeshDrawCall();
 	SetupVS_ExConstantBuffer();
 
-	D3DXMATRIX id;
-	D3DXMatrixIdentity(&id);
+	XMFLOAT4X4 id; XMStoreFloat4x4(&id, XMMatrixIdentity());
 	ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&id);
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
@@ -2572,9 +2563,8 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 		GothicDepthBufferStateInfo::CF_COMPARISON_LESS;
 	Engine::GAPI->GetRendererState()->DepthState.SetDirty();
 
-	D3DXMATRIX view;
-	Engine::GAPI->GetViewMatrix(&view);
-	Engine::GAPI->SetViewTransform(view);  // Update view transform
+	XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
+	Engine::GAPI->SetViewTransformXM(view);  // Update view transform
 
 	// Bind water shader
 	SetActiveVertexShader("VS_ExWater");
@@ -2582,8 +2572,7 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 	SetupVS_ExMeshDrawCall();
 	SetupVS_ExConstantBuffer();
 
-	D3DXMATRIX id;
-	D3DXMatrixIdentity(&id);
+	XMFLOAT4X4 id; XMStoreFloat4x4(&id, XMMatrixIdentity());
 	ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&id);
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
@@ -2599,7 +2588,7 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 
 	// Fill refraction info CB and bind it
 	RefractionInfoConstantBuffer ricb = {};
-	ricb.RI_Projection = *(XMFLOAT4X4*)&Engine::GAPI->GetProjectionMatrix();
+	ricb.RI_Projection = Engine::GAPI->GetProjectionMatrixDX();
 	ricb.RI_ViewportSize = float2(Resolution.x, Resolution.y);
 	ricb.RI_Time = Engine::GAPI->GetTimeSeconds();
 	ricb.RI_CameraPosition = float3(Engine::GAPI->GetCameraPosition());
@@ -2680,8 +2669,7 @@ void D3D11GraphicsEngine::DrawWorldAround(
 	SetupVS_ExMeshDrawCall();
 	SetupVS_ExConstantBuffer();
 
-	D3DXMATRIX id;
-	D3DXMatrixIdentity(&id);
+	XMFLOAT4X4 id; XMStoreFloat4x4(&id, XMMatrixIdentity());
 	ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&id);
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
@@ -2691,7 +2679,8 @@ void D3D11GraphicsEngine::DrawWorldAround(
 	ActivePS->GetConstantBuffer()[3]->UpdateBuffer(&ocb);
 	ActivePS->GetConstantBuffer()[3]->BindToPixelShader(3);
 
-	INT2 s = WorldConverter::GetSectionOfPos(*reinterpret_cast<const D3DXVECTOR3*>(&position));
+	float3 pos; XMStoreFloat3(pos.toXMFLOAT3(), position);
+	INT2 s = WorldConverter::GetSectionOfPos(pos);
 
 	float vobOutdoorDist =
 		Engine::GAPI->GetRendererState()->RendererSettings.OutdoorVobDrawRadius;
@@ -2718,8 +2707,7 @@ void D3D11GraphicsEngine::DrawWorldAround(
 			Engine::GAPI->GetWrappedWorldMesh()->MeshVertexBuffer,
 			Engine::GAPI->GetWrappedWorldMesh()->MeshIndexBuffer, 0, 0);
 
-		D3DXMATRIX id;
-		D3DXMatrixIdentity(&id);
+		XMFLOAT4X4 id; XMStoreFloat4x4(&id, XMMatrixIdentity());
 		ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&id);
 		ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
@@ -3003,11 +2991,10 @@ void D3D11GraphicsEngine::DrawWorldAround(const DirectX::XMVECTOR& position,
 	Engine::GAPI->GetRendererState()->DepthState.SetDefault();
 	Engine::GAPI->GetRendererState()->DepthState.SetDirty();
 
-	D3DXMATRIX view;
-	Engine::GAPI->GetViewMatrix(&view);
+	XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
 
 	Engine::GAPI->ResetWorldTransform();
-	Engine::GAPI->SetViewTransform(view);
+	Engine::GAPI->SetViewTransformXM(view);
 
 	// Set shader
 	SetActivePixelShader("PS_AtmosphereGround");
@@ -3046,8 +3033,8 @@ void D3D11GraphicsEngine::DrawWorldAround(const DirectX::XMVECTOR& position,
 	ActivePS->GetConstantBuffer()[3]->UpdateBuffer(&ocb);
 	ActivePS->GetConstantBuffer()[3]->BindToPixelShader(3);
 
-	XMFLOAT3 fPosition; XMStoreFloat3(&fPosition, position);
-	INT2 s = WorldConverter::GetSectionOfPos((D3DXVECTOR3&)fPosition);
+	float3 fPosition; XMStoreFloat3(fPosition.toXMFLOAT3(), position);
+	INT2 s = WorldConverter::GetSectionOfPos(fPosition);
 
 	float vobOutdoorDist =
 		Engine::GAPI->GetRendererState()->RendererSettings.OutdoorVobDrawRadius;
@@ -3295,12 +3282,11 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 	ActivePS->GetConstantBuffer()[2]->UpdateBuffer(&defInfo);
 	ActivePS->GetConstantBuffer()[2]->BindToPixelShader(2);
 
-	D3DXVECTOR3 camPos = Engine::GAPI->GetCameraPosition();
+	float3 camPos = Engine::GAPI->GetCameraPosition();
 	INT2 camSection = WorldConverter::GetSectionOfPos(camPos);
 
-	D3DXMATRIX view;
-	Engine::GAPI->GetViewMatrix(&view);
-	Engine::GAPI->SetViewTransform(view);
+	XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
+	Engine::GAPI->SetViewTransformXM(view);
 
 	if (Engine::GAPI->GetRendererState()->RendererSettings.WireframeVobs) {
 		Engine::GAPI->GetRendererState()->RasterizerState.Wireframe = true;
@@ -3384,18 +3370,18 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 			if (staticMeshVisual.second->MeshSize <
 				Engine::GAPI->GetRendererState()->RendererSettings.SmallVobSize) {
 				OutdoorSmallVobsConstantBuffer->UpdateBuffer(
-					&D3DXVECTOR4(Engine::GAPI->GetRendererState()
+					float4(Engine::GAPI->GetRendererState()
 						->RendererSettings.OutdoorSmallVobDrawRadius -
 						staticMeshVisual.second->MeshSize,
-						0, 0, 0));
+						0, 0, 0).toPtr());
 				OutdoorSmallVobsConstantBuffer->BindToPixelShader(3);
 			}
 			else {
 				OutdoorVobsConstantBuffer->UpdateBuffer(
-					&D3DXVECTOR4(Engine::GAPI->GetRendererState()
+					float4(Engine::GAPI->GetRendererState()
 						->RendererSettings.OutdoorVobDrawRadius -
 						staticMeshVisual.second->MeshSize,
-						0, 0, 0));
+						0, 0, 0).toPtr());
 				OutdoorVobsConstantBuffer->BindToPixelShader(3);
 			}
 
@@ -3492,20 +3478,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 
 							info->Constantbuffer->BindToPixelShader(2);
 						}
-						else {
-#ifndef PUBLIC_RELEASE
-							for (size_t s = 0; s < staticMeshVisual.second->Instances.size(); s++) {
-								D3DXVECTOR3 pos =
-									D3DXVECTOR3(staticMeshVisual.second->Instances[s].world._14,
-										staticMeshVisual.second->Instances[s].world._24,
-										staticMeshVisual.second->Instances[s].world._34);
-								GetLineRenderer()->AddAABBMinMax(pos - staticMeshVisual.second->BBox.Min,
-									pos + staticMeshVisual.second->BBox.Max,
-									D3DXVECTOR4(1, 0, 0, 1));
-						}
-#endif
-							continue;
-					}
+					
 			}
 
 					if (tesselationEnabled && !mi->IndicesPNAEN.empty() &&
@@ -3705,9 +3678,8 @@ XRESULT D3D11GraphicsEngine::DrawPolyStrips(bool noTextures) {
 	Engine::GAPI->GetRendererState()->RasterizerState.SetDirty();
 
 
-	D3DXMATRIX view;
-	Engine::GAPI->GetViewMatrix(&view);
-	Engine::GAPI->SetViewTransform(view);
+	XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
+	Engine::GAPI->SetViewTransformXM(view);
 	
 	SetActivePixelShader("PS_Diffuse");//seems like "PS_Simple" is used anyway thanks to BindShaderForTexture function used below
 	SetActiveVertexShader("VS_Ex");
@@ -4203,9 +4175,8 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 		Effects->DrawRainShadowmap();
 	}
 
-	D3DXMATRIX view;
-	Engine::GAPI->GetViewMatrix(&view);
-	Engine::GAPI->SetViewTransform(view);
+	XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
+	Engine::GAPI->SetViewTransformXM(view);
 
 	// ********************************
 	// Draw direct lighting
@@ -4239,7 +4210,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	// Set the main rendertarget
 	GetContext()->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView());
 
-	D3DXMatrixTranspose(&view, &view);
+	view = XMMatrixTranspose(view);
 
 	DS_PointLightConstantBuffer plcb = {};
 
@@ -4286,8 +4257,10 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 		plcb.Pl_PositionWorld = vob->GetPositionWorld();
 		plcb.PL_Outdoor = light->IsIndoorVob ? 0.0f : 1.0f;
 
-		float dist = D3DXVec3Length(&(*plcb.Pl_PositionWorld.toD3DXVECTOR3() -
-			Engine::GAPI->GetCameraPosition()));
+		float dist;
+		XMStoreFloat(&dist, 
+			XMVector3Length(
+				XMLoadFloat3(plcb.Pl_PositionWorld.toXMFLOAT3()) - Engine::GAPI->GetCameraPositionXM()));
 
 		// Gradually fade in the lights
 		if (dist + plcb.PL_Range <
@@ -4314,13 +4287,14 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 		plcb.PL_Color.y *= lightFactor;
 		plcb.PL_Color.z *= lightFactor;
 
-		auto const&& Pl_PositionWorld = plcb.Pl_PositionWorld.toD3DXVECTOR3();
 		// Need that in view space
-		D3DXVec3TransformCoord(plcb.Pl_PositionView.toD3DXVECTOR3(),
-			Pl_PositionWorld, &view);
-		D3DXVec3TransformCoord(plcb.PL_LightScreenPos.toD3DXVECTOR3(),
-			Pl_PositionWorld,
-			&Engine::GAPI->GetProjectionMatrix());
+		XMVECTOR Pl_PositionWorld = XMLoadFloat3(plcb.Pl_PositionWorld.toXMFLOAT3());
+		XMStoreFloat3(plcb.Pl_PositionView.toXMFLOAT3(),
+			XMVector3TransformCoord(Pl_PositionWorld, view));
+
+		XMStoreFloat3(plcb.PL_LightScreenPos.toXMFLOAT3(),
+			XMVector3TransformCoord(Pl_PositionWorld,
+				XMLoadFloat4x4(&Engine::GAPI->GetProjectionMatrixDX())));
 
 		if (dist < plcb.PL_Range) {
 			if (Engine::GAPI->GetRendererState()->DepthState.DepthBufferEnabled) {
@@ -4401,9 +4375,8 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	scb.SQ_InvView = plcb.PL_InvView;
 	scb.SQ_View = Engine::GAPI->GetRendererState()->TransformState.TransformView;
 
-	D3DXVec3TransformNormal(scb.SQ_LightDirectionVS.toD3DXVECTOR3(),
-		sky->GetAtmosphereCB().AC_LightPos.toD3DXVECTOR3(),
-		&view);
+	XMStoreFloat3(scb.SQ_LightDirectionVS.toXMFLOAT3(), 
+		XMVector3TransformNormal(XMLoadFloat3(sky->GetAtmosphereCB().AC_LightPos.toXMFLOAT3()), view));
 
 	float3 sunColor =
 		Engine::GAPI->GetRendererState()->RendererSettings.SunLightColor;
@@ -4455,7 +4428,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	ActivePS->GetConstantBuffer()[0]->BindToPixelShader(0);
 
 	PFXVS_ConstantBuffer vscb = {};
-	vscb.PFXVS_InvProj = *(XMFLOAT4X4*)&scb.SQ_InvProj;
+	vscb.PFXVS_InvProj = scb.SQ_InvProj;
 	ActiveVS->GetConstantBuffer()[0]->UpdateBuffer(&vscb);
 	ActiveVS->GetConstantBuffer()[0]->BindToVertexShader(0);
 
@@ -4693,9 +4666,8 @@ void D3D11GraphicsEngine::DrawVobSingle(VobInfo* vob) {
 	GetContext()->OMSetRenderTargets(1, HDRBackBuffer->GetRenderTargetViewPtr(),
 		DepthStencilBuffer->GetDepthStencilView());
 
-	D3DXMATRIX view;
-	Engine::GAPI->GetViewMatrix(&view);
-	Engine::GAPI->SetViewTransform(view);
+	XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
+	Engine::GAPI->SetViewTransformXM(view);
 
 	SetActivePixelShader("PS_Preview_Textured");
 	SetActiveVertexShader("VS_Ex");
@@ -5140,10 +5112,7 @@ void D3D11GraphicsEngine::DrawDecalList(const std::vector<zCVob*>& decals,
 	Engine::GAPI->GetRendererState()->DepthState.DepthWriteEnabled = false;
 	Engine::GAPI->GetRendererState()->DepthState.SetDirty();
 
-	D3DXVECTOR3 camBack = -Engine::GAPI->GetCameraForward();
-
-	D3DXMATRIX view;
-	Engine::GAPI->GetViewMatrix(&view);
+	XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
 
 	// Set up alpha
 	if (!lighting) {
@@ -5200,28 +5169,27 @@ void D3D11GraphicsEngine::DrawDecalList(const std::vector<zCVob*>& decals,
 
 		int alignment = decals[i]->GetAlignment();
 
-		D3DXMATRIX world;
-		decals[i]->GetWorldMatrix(&world);
+		XMMATRIX world = decals[i]->GetWorldMatrixXM();
 
-		D3DXMATRIX offset;
-		D3DXMatrixTranslation(&offset, d->GetDecalSettings()->DecalOffset.x,
-			-d->GetDecalSettings()->DecalOffset.y, 0);
+		XMMATRIX offset =
+			XMMatrixTranslation(d->GetDecalSettings()->DecalOffset.x, d->GetDecalSettings()->DecalOffset.y, 0);
 
-		D3DXMATRIX scale;
-		D3DXMatrixScaling(&scale, d->GetDecalSettings()->DecalSize.x * 2,
-			-d->GetDecalSettings()->DecalSize.y * 2, 1);
-		D3DXMatrixTranspose(&scale, &scale);
+		XMMATRIX scale =
+			XMMatrixScaling(d->GetDecalSettings()->DecalSize.x * 2,
+				d->GetDecalSettings()->DecalSize.y * 2, 1);
 
-		D3DXMATRIX mat = view * world;
+		scale = XMMatrixTranspose(scale);
 
+		XMMATRIX mat = view * world;
+		
 		if (alignment == zVISUAL_CAM_ALIGN_FULL ||
 			alignment == zVISUAL_CAM_ALIGN_YAW) {
 			for (int x = 0; x < 3; x++) {
 				for (int y = 0; y < 3; y++) {
 					if (x == y)
-						mat(x, y) = 1.0f;
+						mat.r[x].m128_f32[y] = 1.0f;
 					else
-						mat(x, y) = 0.0f;
+						mat.r[x].m128_f32[y] = 0.0f;
 				}
 			}
 		}
@@ -5229,10 +5197,10 @@ void D3D11GraphicsEngine::DrawDecalList(const std::vector<zCVob*>& decals,
 		mat = mat * offset * scale;
 
 		ParticleInstanceInfo ii;
-		ii.scale = D3DXVECTOR2(50, 50);
+		ii.scale = float2(50, 50);
 		ii.color = 0xFFFFFFFF;
 
-		Engine::GAPI->SetWorldTransform(mat);
+		Engine::GAPI->SetWorldTransformXM(mat);
 		SetupVS_ExPerInstanceConstantBuffer();
 
 		if (d->GetDecalSettings()->DecalMaterial) {
@@ -5262,7 +5230,7 @@ void D3D11GraphicsEngine::DrawDecalList(const std::vector<zCVob*>& decals,
 
 /** Draws quadmarks in a simple way */
 void D3D11GraphicsEngine::DrawQuadMarks() {
-	D3DXVECTOR3 camPos = Engine::GAPI->GetCameraPosition();
+	XMVECTOR camPos = Engine::GAPI->GetCameraPositionXM();
 	const stdext::unordered_map<zCQuadMark*, QuadMarkInfo>& quadMarks =
 		Engine::GAPI->GetQuadMarks();
 
@@ -5279,9 +5247,8 @@ void D3D11GraphicsEngine::DrawQuadMarks() {
 		&Engine::GAPI->GetRendererState()->GraphicsState);
 	ActivePS->GetConstantBuffer()[0]->BindToPixelShader(0);
 
-	D3DXMATRIX view;
-	Engine::GAPI->GetViewMatrix(&view);
-	Engine::GAPI->SetViewTransform(view);
+	XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
+	Engine::GAPI->SetViewTransformXM(view);
 
 	SetupVS_ExMeshDrawCall();
 	SetupVS_ExConstantBuffer();
@@ -5290,8 +5257,8 @@ void D3D11GraphicsEngine::DrawQuadMarks() {
 	for (auto const& it : quadMarks) {
 		if (!it.first->GetConnectedVob()) continue;
 
-		if (D3DXVec3Length(&(camPos - it.second.Position)) >
-			Engine::GAPI->GetRendererState()->RendererSettings.VisualFXDrawRadius)
+		float len; XMStoreFloat(&len, XMVector3Length(camPos - XMLoadFloat3(it.second.Position.toXMFLOAT3())));
+		if (len > Engine::GAPI->GetRendererState()->RendererSettings.VisualFXDrawRadius)
 			continue;
 
 		zCMaterial* mat = it.first->GetMaterial();
@@ -5346,7 +5313,7 @@ void D3D11GraphicsEngine::DrawUnderwaterEffects() {
 	SetDefaultStates();
 
 	RefractionInfoConstantBuffer ricb = {};
-	ricb.RI_Projection = *(XMFLOAT4X4*)&Engine::GAPI->GetProjectionMatrix();
+	ricb.RI_Projection = Engine::GAPI->GetProjectionMatrixDX();
 	ricb.RI_ViewportSize = float2(Resolution.x, Resolution.y);
 	ricb.RI_Time = Engine::GAPI->GetTimeSeconds();
 	ricb.RI_CameraPosition = Engine::GAPI->GetCameraPosition();
@@ -5409,7 +5376,7 @@ void D3D11GraphicsEngine::Setup_PNAEN(EPNAENRenderMode mode) {
 		Engine::GAPI->GetRendererState()->RendererSettings.TesselationFactor);
 	cb.f4ViewportScale.x = static_cast<float>(GetResolution().x / 2);
 	cb.f4ViewportScale.y = static_cast<float>(GetResolution().y / 2);
-	cb.f4x4Projection = *(XMFLOAT4X4*)&Engine::GAPI->GetProjectionMatrix();
+	cb.f4x4Projection = Engine::GAPI->GetProjectionMatrixDX();
 
 	pnaen->GetConstantBuffer()[0]->UpdateBuffer(&cb);
 
@@ -5438,7 +5405,7 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 	D3D11PShader* distPS = ShaderManager->GetPShader("PS_ParticleDistortion");
 
 	RefractionInfoConstantBuffer ricb = {};
-	ricb.RI_Projection = *(XMFLOAT4X4*)&Engine::GAPI->GetProjectionMatrix();
+	ricb.RI_Projection = Engine::GAPI->GetProjectionMatrixDX();
 	ricb.RI_ViewportSize = float2(Resolution.x, Resolution.y);
 	ricb.RI_Time = Engine::GAPI->GetTimeSeconds();
 	ricb.RI_CameraPosition = Engine::GAPI->GetCameraPosition();

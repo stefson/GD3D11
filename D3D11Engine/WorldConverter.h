@@ -43,7 +43,7 @@ public:
 	static XRESULT LoadWorldMeshFromFile(const std::string & file, std::map<int, std::map<int, WorldMeshSectionInfo>>* outSections, WorldInfo* info, MeshInfo ** outWrappedMesh);
 
 	/** Returns what section the given position is in */
-	static INT2 GetSectionOfPos(const D3DXVECTOR3 & pos);
+	static INT2 GetSectionOfPos(const float3 & pos);
 
 	/** Converts a world polygon triangle fan to a vertex list */
 	static void TriangleFanToList(ExVertexStruct* input, unsigned int numInputVertices, std::vector<ExVertexStruct>* outVertices);
@@ -72,7 +72,7 @@ public:
 	static void ExtractNodeVisual(int index, zCModelNodeInst* node, std::map<int, std::vector<MeshVisualInfo *>> & attachments);
 
 	/** Updates a quadmark info */
-	static void UpdateQuadMarkInfo(QuadMarkInfo* info, zCQuadMark* mark, const D3DXVECTOR3 & position);
+	static void UpdateQuadMarkInfo(QuadMarkInfo* info, zCQuadMark* mark, const float3& position);
 
 	/** Indexes the given vertex array */
 	static void IndexVertices(ExVertexStruct* input, unsigned int numInputVertices, std::vector<ExVertexStruct> & outVertices, std::vector<VERTEX_INDEX> & outIndices);

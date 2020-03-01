@@ -165,7 +165,7 @@ struct QuadMarkInfo
 	int NumVertices;
 
 	zCQuadMark* Visual;
-	D3DXVECTOR3 Position;
+	float3 Position;
 };
 
 /** Holds information about a skeletal mesh */

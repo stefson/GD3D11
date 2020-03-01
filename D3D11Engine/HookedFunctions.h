@@ -70,7 +70,7 @@ typedef int (__thiscall* zCTex_D3DXTEX_BuildSurfaces)(void *, int);
 typedef int (__thiscall* zCTextureLoadResourceData)(void *);
 typedef int (__thiscall* zCThreadSuspendThread)(void *);
 typedef void (__thiscall* zCResourceManagerCacheOut)(void *,class zCResource*);
-typedef void (__thiscall* zCQuadMarkCreateQuadMark)(void *, zCPolygon*, const D3DXVECTOR3 &, const D3DXVECTOR2 &, struct zTEffectParams*);
+typedef void (__thiscall* zCQuadMarkCreateQuadMark)(void *, zCPolygon*, const float3&, const float2&, struct zTEffectParams*);
 typedef void (__thiscall* oCWorldEnableVob)(void *, zCVob *,zCVob *);
 typedef void (__thiscall* oCWorldRemoveVob)(void *, zCVob *);
 typedef void (__thiscall* oCWorldDisableVob)(void *, zCVob *);

@@ -217,6 +217,9 @@ struct float4 {
 	DirectX::XMFLOAT3* toXMFLOAT3() const {
 		return (DirectX::XMFLOAT3*)this;
 	}
+	float* toPtr() const {
+		return (float*)this;
+	}
 
 	DWORD ToDWORD() const {
 		BYTE a = (BYTE)(w * 255.0f);
