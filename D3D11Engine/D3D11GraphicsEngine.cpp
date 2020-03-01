@@ -797,12 +797,14 @@ XRESULT D3D11GraphicsEngine::Present() {
 				continue;
 			}
 
-			auto color = XMVectorSet(txt.color.x, txt.color.y, txt.color.z, txt.color.w);
+			auto color = XMLoadFloat4(txt.color.toXMFLOAT4());
 
 			std::wstring output = std::wstring(buf, wSize);
 			auto fontPos = XMVectorSet(txt.x, txt.y, 0, 0);
-			m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos + XMVectorSet(1.f, 1.f, 0, 0), Colors::Black, 0.f);
-			m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos + XMVectorSet(-1.f, 1.f, 0, 0), Colors::Black, 0.f);
+
+			// Drop-Shadow
+			//m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos + XMVectorSet(1.f, 1.f, 0, 0), Colors::Black, 0.f);
+			//m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos + XMVectorSet(-1.f, 1.f, 0, 0), Colors::Black, 0.f);
 
 			m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos, color, 0.f);
 		}
