@@ -1997,6 +1997,15 @@ void GothicAPI::SetWorldTransform(const D3DXMATRIX & world, bool transpose)
 }
 
 /** Sets the world matrix */
+void GothicAPI::SetWorldTransformXM(const XMMATRIX& world, bool transpose)
+{
+	if (transpose)
+		XMStoreFloat4x4(&RendererState.TransformState.TransformWorld, XMMatrixTranspose(world));
+	else
+		XMStoreFloat4x4(&RendererState.TransformState.TransformWorld, world);
+}
+
+/** Sets the world matrix */
 void GothicAPI::SetViewTransform(const D3DXMATRIX & view, bool transpose)
 {
 	if (transpose)
@@ -2276,6 +2285,31 @@ void GothicAPI::Unproject(const D3DXVECTOR3 & p, D3DXVECTOR3 * worldPos, D3DXVEC
 	D3DXVec3TransformNormal(worldDir, &u, &invView);
 }
 
+/** Unprojects a pixel-position on the screen */
+void GothicAPI::UnprojectXM(const XMVECTOR& p, XMVECTOR& worldPos, XMVECTOR& worldDir)
+{
+	XMMATRIX proj = XMLoadFloat4x4(&GetProjectionMatrixDX());
+	XMFLOAT4X4 fInvView;
+	GetInverseViewMatrixDX(&fInvView);
+	XMMATRIX invView = XMLoadFloat4x4(&fInvView);
+	invView = XMMatrixTranspose(invView);
+	proj = XMMatrixTranspose(proj);
+
+	// Convert to screenspace
+	XMFLOAT2 fP; XMStoreFloat2(&fP, p);
+	XMVECTOR u = XMVectorSet(
+		(((2 * fP.x) / Engine::GraphicsEngine->GetResolution().x) - 1) / proj.r[0].m128_f32[0],
+		-(((2 * fP.y) / Engine::GraphicsEngine->GetResolution().y) - 1) / proj.r[1].m128_f32[1],
+		1,
+		0);
+
+
+	// Transform and output
+	worldPos = XMVector3TransformCoord(u, invView);
+	u = XMVector3Normalize(u);
+	worldDir = XMVector3TransformCoord(u, invView);
+}
+
 /** Unprojects the current cursor */
 D3DXVECTOR3 GothicAPI::UnprojectCursor()
 {
@@ -2283,6 +2317,17 @@ D3DXVECTOR3 GothicAPI::UnprojectCursor()
 	POINT p = GetCursorPosition();
 
 	Engine::GAPI->Unproject(D3DXVECTOR3((float)p.x, (float)p.y, 0), &mPos, &mDir);
+
+	return mDir;
+}
+
+/** Unprojects the current cursor */
+XMVECTOR GothicAPI::UnprojectCursorXM()
+{
+	XMVECTOR mPos, mDir;
+	POINT p = GetCursorPosition();
+
+	Engine::GAPI->UnprojectXM(XMVectorSet((float)p.x, (float)p.y, 0, 0), mPos, mDir);
 
 	return mDir;
 }
@@ -2332,11 +2377,6 @@ void GothicAPI::GetViewMatrix(D3DXMATRIX * view)
 /** Returns the view matrix */
 DirectX::XMMATRIX GothicAPI::GetViewMatrixXM()
 {
-	/*if (CameraReplacementPtrDX)
-	{
-		*view = CameraReplacementPtrDX->ViewReplacement;
-		return;
-	}*/
 	if (CameraReplacementPtr)
 	{
 		return XMLoadFloat4x4(&CameraReplacementPtr->ViewReplacement);

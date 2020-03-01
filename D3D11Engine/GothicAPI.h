@@ -285,6 +285,9 @@ public:
 	void SetWorldTransform(const D3DXMATRIX & world, bool transpose = false);
 
 	/** Sets the world matrix */
+	void SetWorldTransformXM(const DirectX::XMMATRIX& world, bool transpose = false);
+
+	/** Sets the world matrix */
 	void SetViewTransform(const D3DXMATRIX & view, bool transpose = false);
 
 	/** Sets the world matrix */
@@ -360,8 +363,14 @@ public:
 	/** Unprojects a pixel-position on the screen */
 	void Unproject(const D3DXVECTOR3 & p, D3DXVECTOR3 * worldPos, D3DXVECTOR3 * worldDir);
 
+	/** Unprojects a pixel-position on the screen */
+	void UnprojectXM(const DirectX::XMVECTOR& p, DirectX::XMVECTOR& worldPos, DirectX::XMVECTOR& worldDir);
+
 	/** Unprojects the current cursor, returns it's direction in world-space */
 	D3DXVECTOR3 UnprojectCursor();
+
+	/** Unprojects the current cursor, returns it's direction in world-space */
+	DirectX::XMVECTOR UnprojectCursorXM();
 
 	/** Traces the worldmesh and returns the hit-location */
 	bool TraceWorldMesh(const D3DXVECTOR3 & origin, const D3DXVECTOR3 & dir, D3DXVECTOR3 & hit, std::string * hitTextureName = nullptr, D3DXVECTOR3 * hitTriangle = nullptr, MeshInfo ** hitMesh = nullptr, zCMaterial ** hitMaterial = nullptr);

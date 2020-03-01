@@ -165,6 +165,19 @@ public:
 		XCALL(GothicMemoryLocations::zCVob::SetPositionWorld);
 #endif
 	}
+	/** Sets this vobs position */
+	void SetPositionWorldDX(const DirectX::XMFLOAT3& v)
+	{
+#ifdef BUILD_SPACER
+		XCALL(GothicMemoryLocations::zCVob::SetPositionWorld);
+#endif
+	}
+	/** Sets this vobs position */
+	void SetPositionWorldXM(const DirectX::XMVECTOR& v)
+	{
+		DirectX::XMFLOAT3 store; DirectX::XMStoreFloat3(&store, v);
+		SetPositionWorldDX(store);
+	}
 
 	/** Returns the local bounding box */
 	zTBBox3D GetBBoxLocal()

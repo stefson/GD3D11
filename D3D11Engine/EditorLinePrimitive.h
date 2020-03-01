@@ -37,38 +37,38 @@ public:
 	HRESULT CreatePrimitive(LineVertex * PrimVerts, UINT NumVertices, D3D11_PRIMITIVE_TOPOLOGY Topology = D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 
 	/** Creates a circle of lines. Axis: 0=xz 1=yx 2=yz*/
-	HRESULT CreateCirclePrimitive(float Radius, UINT Detail, const D3DXVECTOR4 * Color, int Axis = 0);
+	HRESULT CreateCirclePrimitive(float Radius, UINT Detail, const float4& Color, int Axis = 0);
 
 	/** Creates a plate, not of lines. Can't use intersection on this*/
-	HRESULT CreateFilledCirclePrimitive(float Radius, UINT Detail, const D3DXVECTOR4 * Color, int Axis = 0);
+	HRESULT CreateFilledCirclePrimitive(float Radius, UINT Detail, const float4& Color, int Axis = 0);
 
 	/** Creates a ball of lines.*/
-	HRESULT CreateLineBallPrimitive(UINT Detail, const D3DXVECTOR4 * Color);
+	HRESULT CreateLineBallPrimitive(UINT Detail, const float4& Color);
 
 	/** Creates an arrow of lines */
-	HRESULT CreateArrowPrimitive(const D3DXVECTOR4 * Color, float ArrowRadius = 0.25, float ArrowOffset = 0.75);
+	HRESULT CreateArrowPrimitive(const float4& Color, float ArrowRadius = 0.25, float ArrowOffset = 0.75);
 
 	/** Creates a cone of lines */
-	HRESULT CreateSimpleConePrimitive(float Length, float Radius, UINT Detail, const D3DXVECTOR4 * Color);
+	HRESULT CreateSimpleConePrimitive(float Length, float Radius, UINT Detail, const float4& Color);
 
 	/** Creates a box of lines */
-	HRESULT CreateLineBoxPrimitive(D3DXVECTOR4 * Color);
+	HRESULT CreateLineBoxPrimitive(float4& Color);
 
 	/** Creates a solid box */
-	HRESULT CreateSolidBoxPrimitive(D3DXVECTOR4 * Color, float Extends);
+	HRESULT CreateSolidBoxPrimitive(float4& Color, float Extends);
 
 	/** Creates a grid of lines (1x1)*/
-	HRESULT CreateLineGrid(int LinesX,int LinesY,D3DXVECTOR2 * Middle, D3DXVECTOR4 * Color);
+	HRESULT CreateLineGrid(int LinesX,int LinesY, DirectX::XMFLOAT2* Middle, const float4& Color);
 
 	/** Sets the shader to render with */
 	void SetShader(D3D11PShader * Shader);
 	void SetSolidShader(D3D11PShader * SolidShader);
 
 	/** Sets the transforms */
-	void SetLocation(const D3DXVECTOR3 & NewLoc);
-	void SetRotation(const D3DXVECTOR3 & NewRotation);
-	void SetScale(const D3DXVECTOR3 & NewScale);
-	void SetWorldMatrix(const D3DXMATRIX* World,const D3DXVECTOR3 * Loc,const D3DXVECTOR3 * Rot,const D3DXVECTOR3 * Scale);
+	void SetLocation(const DirectX::XMVECTOR& NewLoc);
+	void SetRotation(const DirectX::XMVECTOR& NewRotation);
+	void SetScale(const DirectX::XMVECTOR& NewScale);
+	void SetWorldMatrix(const DirectX::XMMATRIX* World,const DirectX::XMVECTOR* Loc,const DirectX::XMVECTOR* Rot,const DirectX::XMVECTOR* Scale);
 
 	/** Renders the primitive */
 	HRESULT RenderPrimitive(int Pass=-1);
@@ -80,17 +80,17 @@ public:
 	}
 
 	/** Intersects the whole primitive. If hit, it returns a distance other than -1 */
-	float IntersectPrimitive(D3DXVECTOR3 * RayOrigin, D3DXVECTOR3 * RayDirection, float Epsilon = 0.01);
+	float IntersectPrimitive(DirectX::XMVECTOR* RayOrigin, DirectX::XMVECTOR* RayDirection, float Epsilon = 0.01);
 
-	bool IntersectTriangle(const D3DXVECTOR3 * orig, const D3DXVECTOR3 * dir,
-                        D3DXVECTOR3 & v0, D3DXVECTOR3 & v1, D3DXVECTOR3 & v2,
+	bool IntersectTriangle(const DirectX::XMVECTOR* orig, const DirectX::XMVECTOR* dir,
+                        DirectX::XMVECTOR & v0, DirectX::XMVECTOR& v1, DirectX::XMVECTOR& v2,
                         FLOAT* t, FLOAT* u, FLOAT* v);
 
 	/** Puts the color into the Normal and TexCoord channels */
-	static void EncodeColor(LineVertex * vx, const D3DXVECTOR4 * Color);
+	static void EncodeColor(LineVertex * vx, const float4& Color);
 
-	GETSET(D3DXMATRIX, RotationMatrix);
-	GETSET(D3DXVECTOR3, RotationMatrixAngles);
+	GETSET(DirectX::XMFLOAT4X4, RotationMatrix);
+	GETSET(DirectX::XMFLOAT3, RotationMatrixAngles);
 	
 
 	GET_PTR(D3D11PShader *, PrimShader);
@@ -106,7 +106,7 @@ private:
 	void RecalcTransforms();
 
 	/** Intersects only one line segment */
-	float IntersectLineSegment(const D3DXVECTOR3 * rayOrigin,const D3DXVECTOR3 * rayVec,const D3DXVECTOR3 * lineStart,const D3DXVECTOR3 * lineEnd, float Epsilon);
+	float IntersectLineSegment(const DirectX::XMVECTOR * rayOrigin,const DirectX::XMVECTOR* rayVec,const DirectX::XMVECTOR* lineStart,const DirectX::XMVECTOR* lineEnd, float Epsilon);
 
 	
 
@@ -131,16 +131,16 @@ private:
 	ID3D11Buffer* SolidPrimVB;
 
 	/** Transforms */
-	D3DXVECTOR3 Location;
-	D3DXVECTOR3 Rotation;
-	D3DXVECTOR3 Scale;
+	DirectX::XMFLOAT3 Location;
+	DirectX::XMFLOAT3 Rotation;
+	DirectX::XMFLOAT3 Scale;
 
 	/** Transform matrix */
-	D3DXMATRIX WorldMatrix;
+	DirectX::XMFLOAT4X4 WorldMatrix;
 
 	/* Matrix for rotation and it's angles */
-	D3DXMATRIX RotationMatrix;
-	D3DXVECTOR3 RotationMatrixAngles;
+	DirectX::XMFLOAT4X4 RotationMatrix;
+	DirectX::XMFLOAT3 RotationMatrixAngles;
 
 	/** If true, ignore drawcalls */
 	bool bHidden;
