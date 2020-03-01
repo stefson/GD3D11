@@ -210,6 +210,14 @@ struct float4 {
 		return (D3DXVECTOR3 *)this;
 	}
 
+	DirectX::XMFLOAT4* toXMFLOAT4() const {
+		return (DirectX::XMFLOAT4*)this;
+	}
+
+	DirectX::XMFLOAT3* toXMFLOAT3() const {
+		return (DirectX::XMFLOAT3*)this;
+	}
+
 	DWORD ToDWORD() const {
 		BYTE a = (BYTE)(w * 255.0f);
 		BYTE r = (BYTE)(x * 255.0f);
