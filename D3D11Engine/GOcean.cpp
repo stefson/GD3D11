@@ -7,6 +7,7 @@
 #include "GothicAPI.h"
 #include <assert.h>
 #include "GSky.h"
+using namespace DirectX;
 
 const int FRESNEL_TEX_SIZE = 256;
 
@@ -145,7 +146,7 @@ void GOcean::CreateFresnelMap(ID3D11Device* pd3dDevice)
 		buffer[i] = (sky_blend << 8) | fresnel;
 	}
 
-	D3D11_TEXTURE1D_DESC tex_desc;
+	D3D11_TEXTURE1D_DESC tex_desc = {};
 	tex_desc.Width = FRESNEL_TEX_SIZE;
 	tex_desc.MipLevels = 1;
 	tex_desc.ArraySize = 1;
@@ -155,7 +156,7 @@ void GOcean::CreateFresnelMap(ID3D11Device* pd3dDevice)
 	tex_desc.CPUAccessFlags = 0;
 	tex_desc.MiscFlags = 0;
 
-	D3D11_SUBRESOURCE_DATA init_data;
+	D3D11_SUBRESOURCE_DATA init_data = {};
 	init_data.pSysMem = buffer;
 	init_data.SysMemPitch = 0;
 	init_data.SysMemSlicePitch = 0;
@@ -166,7 +167,7 @@ void GOcean::CreateFresnelMap(ID3D11Device* pd3dDevice)
 	delete[] buffer; buffer = nullptr;
 
 	// Create shader resource
-	D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
+	D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc = {};
 	srv_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE1D;
 	srv_desc.Texture1D.MipLevels = 1;
@@ -183,13 +184,13 @@ WaterPatchInfo& GOcean::AddWaterPatchAt(int x, int y)
 }
 
 /** Returns a vector of the patch locations */
-void GOcean::GetPatchLocations(std::vector<D3DXVECTOR3> & patchLocations)
+void GOcean::GetPatchLocations(std::vector<XMFLOAT3> & patchLocations)
 {
-	for(std::map<std::pair<int, int>, WaterPatchInfo>::iterator it = Patches.begin(); it != Patches.end(); it++)
+	for(const auto& it : Patches)
 	{
-		patchLocations.push_back(D3DXVECTOR3(	(float)(it->first.first * OCEAN_PATCH_SIZE), 
-												(float)(it->second.PatchHeight), 
-												(float)(it->first.second * OCEAN_PATCH_SIZE)));
+		patchLocations.push_back(XMFLOAT3(	(float)(it.first.first * OCEAN_PATCH_SIZE),
+											(float)(it.second.PatchHeight), 
+											(float)(it.first.second * OCEAN_PATCH_SIZE)));
 	}
 }
 

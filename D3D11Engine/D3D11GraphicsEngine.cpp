@@ -33,13 +33,11 @@
 #include <locale>
 #include <codecvt>
 #include <wrl\client.h>
-#include <SimpleMath.h>
 
 #pragma comment(lib, "dxguid.lib")
 
 namespace wrl = Microsoft::WRL;
 using namespace DirectX;
-using namespace DirectX::SimpleMath;
 
 const int RES_UPSCALE = 1;
 const INT2 DEFAULT_RESOLUTION = INT2(1920 * RES_UPSCALE, 1080 * RES_UPSCALE);
@@ -776,7 +774,7 @@ XRESULT D3D11GraphicsEngine::Present() {
 		//m_spriteBatch->Begin();
 		m_spriteBatch->Begin(SpriteSortMode_Deferred, states->NonPremultiplied());
 		wchar_t buf[255];
-		Vector4 gothicColor = Vector4(203.f / 255.f, 186.f / 255.f, 158.f / 255.f, 1);
+		static XMVECTOR gothicColor = XMVectorSet(203.f / 255.f, 186.f / 255.f, 158.f / 255.f, 1);
 
 		zTRnd_AlphaBlendFunc lastBlendState = zRND_ALPHA_FUNC_NONE;
 
@@ -799,14 +797,12 @@ XRESULT D3D11GraphicsEngine::Present() {
 				continue;
 			}
 
-			auto color = Vector4(txt.color.x, txt.color.y, txt.color.z, txt.color.w);
-			if (color.x == -1) {
-				color = gothicColor;
-			}
+			auto color = XMVectorSet(txt.color.x, txt.color.y, txt.color.z, txt.color.w);
+
 			std::wstring output = std::wstring(buf, wSize);
-			Vector2 fontPos = Vector2(txt.x, txt.y);
-			m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos + Vector2(1.f, 1.f), Colors::Black, 0.f);
-			m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos + Vector2(-1.f, 1.f), Colors::Black, 0.f);
+			auto fontPos = XMVectorSet(txt.x, txt.y, 0, 0);
+			m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos + XMVectorSet(1.f, 1.f, 0, 0), Colors::Black, 0.f);
+			m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos + XMVectorSet(-1.f, 1.f, 0, 0), Colors::Black, 0.f);
 
 			m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos, color, 0.f);
 		}
@@ -1049,12 +1045,9 @@ int D3D11GraphicsEngine::MeasureString(const std::string& str, int font)
 {
 	if (font == 0)
 	{
-		//wchar_t buf[255];
-		//auto wSize = MultiByteToWideChar(CP_ACP, 0, str.c_str(), str.length(), buf, 255);
-		//const std::wstring& output = std::wstring(buf, wSize);
-
-		Vector4 origin = m_font->MeasureString(str.c_str());
-		return static_cast<int>(origin.x);
+		XMVECTOR measure = m_font->MeasureString(str.c_str());
+		float width; XMStoreFloat(&width, measure);
+		return static_cast<int>(width);
 	}
 	return 0;
 }
@@ -2771,7 +2764,7 @@ void D3D11GraphicsEngine::DrawWorldAround(
 		else {
 			for (auto&& itx : Engine::GAPI->GetWorldSections()) {
 				for (auto&& ity : itx.second) {
-					const auto&& vLen = Vector2(itx.first - s.x, ity.first - s.y).Length();
+					float vLen; XMStoreFloat(&vLen, XMVector3Length(XMVectorSet(itx.first - s.x, ity.first - s.y, 0, 0)));
 					
 					if (vLen < 2) {
 						WorldMeshSectionInfo& section = ity.second;
@@ -3745,7 +3738,7 @@ XRESULT D3D11GraphicsEngine::DrawPolyStrips(bool noTextures) {
 		if (!vertices.size()) continue;
 
 		//Setting world transform matrix/////////////
-		Matrix id = Matrix::Identity;
+		XMFLOAT4X4 id; XMStoreFloat4x4(&id, XMMatrixIdentity());
 		
 		//vob->GetWorldMatrix(&id);
 		ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&id);
@@ -3882,18 +3875,17 @@ XRESULT D3D11GraphicsEngine::DrawSky() {
 		return XR_SUCCESS;
 	}
 	// Create a rotaion only view-matrix
-	Matrix invView;
-	Engine::GAPI->GetInverseViewMatrixDX(&invView);
+	XMFLOAT4X4 invView; Engine::GAPI->GetInverseViewMatrixDX(&invView);
 
-	Matrix view = Engine::GAPI->GetViewMatrixXM();
+	XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
 
-	Matrix scale = XMMatrixScaling(
+	XMMATRIX scale = XMMatrixScaling(
 		sky->GetAtmoshpereSettings().OuterRadius,
 		sky->GetAtmoshpereSettings().OuterRadius,
 		sky->GetAtmoshpereSettings()
 		.OuterRadius);  // Upscale it a huge amount. Gothics world is big.
 
-	Matrix world = XMMatrixTranslation(
+	XMMATRIX world = XMMatrixTranslation(
 		Engine::GAPI->GetCameraPosition().x,
 		Engine::GAPI->GetCameraPosition().y +
 		sky->GetAtmoshpereSettings().SphereOffsetY,
@@ -3902,10 +3894,8 @@ XRESULT D3D11GraphicsEngine::DrawSky() {
 	world = XMMatrixTranspose(scale * world);
 
 	// Apply world matrix
-	D3DXMATRIX d3dxWorld;
-	XMStoreFloat4x4((Matrix*)&d3dxWorld, world);
-	Engine::GAPI->SetWorldTransform(d3dxWorld);
-	Engine::GAPI->SetViewTransform(DX4x4ToD3DXMat(view));
+	Engine::GAPI->SetWorldTransformXM(world);
+	Engine::GAPI->SetViewTransformXM(view);
 
 	if (sky->GetAtmosphereCB().AC_CameraHeight >
 		sky->GetAtmosphereCB().AC_OuterRadius) {
@@ -3921,7 +3911,7 @@ XRESULT D3D11GraphicsEngine::DrawSky() {
 	ActivePS->GetConstantBuffer()[0]->BindToPixelShader(1);
 
 	VS_ExConstantBuffer_PerInstance cbi;
-	cbi.World = world;
+	XMStoreFloat4x4(&cbi.World, world);
 	ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&cbi);
 	ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
@@ -4020,6 +4010,7 @@ BaseLineRenderer* D3D11GraphicsEngine::GetLineRenderer() {
 
 /** Applys the lighting to the scene */
 XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
+	static XMVECTOR xmFltMax = XMVectorSet(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX);
 	SetDefaultStates();
 
 	// ********************************
@@ -4031,7 +4022,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	XMVECTOR vPlayerPosition =
 		Engine::GAPI->GetPlayerVob() != nullptr
 		? Engine::GAPI->GetPlayerVob()->GetPositionWorldXM()
-		: Vector3(FLT_MAX, FLT_MAX, FLT_MAX);
+		: xmFltMax;
 
 	bool partialShadowUpdate = Engine::GAPI->GetRendererState()->RendererSettings.PartialDynamicShadowUpdates;
 
@@ -4904,7 +4895,7 @@ XRESULT D3D11GraphicsEngine::DrawOcean(GOcean* ocean) {
 	// DistortionTexture->BindToPixelShader(0);
 
 	RefractionInfoConstantBuffer ricb = {};
-	ricb.RI_Projection = *(XMFLOAT4X4*)&Engine::GAPI->GetProjectionMatrix();
+	ricb.RI_Projection = Engine::GAPI->GetProjectionMatrixDX();
 	ricb.RI_ViewportSize = float2(Resolution.x, Resolution.y);
 	ricb.RI_Time = Engine::GAPI->GetTimeSeconds();
 	ricb.RI_CameraPosition = Engine::GAPI->GetCameraPosition();
@@ -4922,7 +4913,7 @@ XRESULT D3D11GraphicsEngine::DrawOcean(GOcean* ocean) {
 	// Bind depth to the shader
 	DepthStencilBufferCopy->BindToPixelShader(GetContext(), 2);
 
-	std::vector<D3DXVECTOR3> patches;
+	std::vector<XMFLOAT3> patches;
 	ocean->GetPatchLocations(patches);
 
 	XMMATRIX viewMatrix = Engine::GAPI->GetViewMatrixXM();
@@ -4939,13 +4930,13 @@ XRESULT D3D11GraphicsEngine::DrawOcean(GOcean* ocean) {
 		ActiveVS->GetConstantBuffer()[1]->UpdateBuffer(&world);
 		ActiveVS->GetConstantBuffer()[1]->BindToVertexShader(1);
 
-		XMVECTOR localEye = Vector3(0, 0, 0);
+		XMVECTOR localEye = XMVectorSet(0, 0, 0, 0);
 		world = XMMatrixTranspose(world);
 
 		localEye = XMVector3TransformCoord(localEye, XMMatrixInverse(nullptr, world * viewMatrix));
 
 		OceanPerPatchConstantBuffer opp;
-		Vector3 localEye3 = localEye;
+		XMFLOAT3 localEye3; XMStoreFloat3(&localEye3, localEye);
 		opp.OPP_LocalEye = localEye3;
 		opp.OPP_PatchPosition = patch;
 		ActivePS->GetConstantBuffer()[3]->UpdateBuffer(&opp);
@@ -5740,7 +5731,7 @@ void D3D11GraphicsEngine::SaveScreenshot() {
 	Engine::GAPI->PrintMessageTimed(INT2(30, 30), "Screenshot taken: " + name);
 }
 
-void D3D11GraphicsEngine::DrawString(std::string str, float x, float y, float4 color = (Vector4)(Colors::White), zTRnd_AlphaBlendFunc blendState = zTRnd_AlphaBlendFunc::zRND_ALPHA_FUNC_NONE) {
+void D3D11GraphicsEngine::DrawString(std::string str, float x, float y, float4 color = float4(1.f, 1.f, 1.f, 1.f), zTRnd_AlphaBlendFunc blendState = zTRnd_AlphaBlendFunc::zRND_ALPHA_FUNC_NONE) {
 
 	simpleTextBuffer tb = {};
 	tb.color = color;
