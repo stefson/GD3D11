@@ -278,26 +278,39 @@ public:
 
 	/** Sets the Projection matrix */
 	void SetProjTransform(const D3DXMATRIX & proj);
+
+	/** Sets the Projection matrix */
+	void SetProjTransformDX(const DirectX::XMFLOAT4X4& proj);
+	
 	/** Gets the Projection matrix */
 	D3DXMATRIX GetProjTransform();
+
+	/** Gets the Projection matrix */
+	DirectX::XMFLOAT4X4 GetProjTransformDx();
 
 	/** Sets the world matrix */
 	void SetWorldTransform(const D3DXMATRIX & world, bool transpose = false);
 
 	/** Sets the world matrix */
-	void SetWorldTransformXM(const DirectX::XMMATRIX& world, bool transpose = false);
+	void __vectorcall  SetWorldTransformXM(DirectX::XMMATRIX world, bool transpose = false);
+	
+	/** Sets the world matrix */
+	void SetWorldTransformDX(const DirectX::XMFLOAT4X4& world, bool transpose = false);
 
 	/** Sets the world matrix */
 	void SetViewTransform(const D3DXMATRIX & view, bool transpose = false);
 
 	/** Sets the world matrix */
-	void SetViewTransformXM(const DirectX::XMMATRIX & view, bool transpose = false);
+	void __vectorcall SetViewTransformXM(DirectX::XMMATRIX view, bool transpose = false);
+
+	/** Sets the world matrix */
+	void SetViewTransformDX(const DirectX::XMFLOAT4X4& view, bool transpose = false);
 
 	/** Sets the world matrix */
 	void SetWorldViewTransform(const DirectX::XMFLOAT4X4& world, const DirectX::XMFLOAT4X4& view);
 	
 	/** Sets the world matrix */
-	void SetWorldViewTransform(const DirectX::XMMATRIX& world, const DirectX::XMMATRIX& view);
+	void __vectorcall SetWorldViewTransform(DirectX::XMMATRIX world, const DirectX::XMMATRIX& view);
 
 	/** Sets the world matrix */
 	void ResetWorldTransform();

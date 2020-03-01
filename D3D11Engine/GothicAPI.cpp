@@ -1982,9 +1982,21 @@ void GothicAPI::SetProjTransform(const D3DXMATRIX & proj)
 }
 
 /** Sets the Projection matrix */
+void GothicAPI::SetProjTransformDX(const DirectX::XMFLOAT4X4& proj)
+{
+	RendererState.TransformState.TransformProj = proj;
+}
+
+/** Sets the Projection matrix */
 D3DXMATRIX GothicAPI::GetProjTransform()
 {
 	return *(D3DXMATRIX*)&RendererState.TransformState.TransformProj;
+}
+
+/** Sets the Projection matrix */
+DirectX::XMFLOAT4X4 GothicAPI::GetProjTransformDx()
+{
+	return RendererState.TransformState.TransformProj;
 }
 
 /** Sets the world matrix */
@@ -1997,14 +2009,21 @@ void GothicAPI::SetWorldTransform(const D3DXMATRIX & world, bool transpose)
 }
 
 /** Sets the world matrix */
-void GothicAPI::SetWorldTransformXM(const XMMATRIX& world, bool transpose)
+void __vectorcall GothicAPI::SetWorldTransformXM(XMMATRIX world, bool transpose)
 {
 	if (transpose)
 		XMStoreFloat4x4(&RendererState.TransformState.TransformWorld, XMMatrixTranspose(world));
 	else
 		XMStoreFloat4x4(&RendererState.TransformState.TransformWorld, world);
 }
-
+/** Sets the world matrix */
+void GothicAPI::SetWorldTransformDX(const XMFLOAT4X4& world, bool transpose)
+{
+	if (transpose)
+		XMStoreFloat4x4(&RendererState.TransformState.TransformWorld, XMMatrixTranspose(XMLoadFloat4x4(&world)));
+	else
+		RendererState.TransformState.TransformWorld = world;
+}
 /** Sets the world matrix */
 void GothicAPI::SetViewTransform(const D3DXMATRIX & view, bool transpose)
 {
@@ -2015,14 +2034,21 @@ void GothicAPI::SetViewTransform(const D3DXMATRIX & view, bool transpose)
 }
 
 /** Sets the world matrix */
-void GothicAPI::SetViewTransformXM(const XMMATRIX& view, bool transpose)
+void __vectorcall GothicAPI::SetViewTransformXM(XMMATRIX view, bool transpose)
 {
 	if (transpose)
 		XMStoreFloat4x4(&RendererState.TransformState.TransformView, XMMatrixTranspose(view));
 	else
 		XMStoreFloat4x4(&RendererState.TransformState.TransformView, view);
 }
-
+/** Sets the world matrix */
+void GothicAPI::SetViewTransformDX(const XMFLOAT4X4& view, bool transpose)
+{
+	if (transpose)
+		XMStoreFloat4x4(&RendererState.TransformState.TransformView, XMMatrixTranspose(XMLoadFloat4x4(&view)));
+	else
+		RendererState.TransformState.TransformView = view;
+}
 /** Sets the world matrix */
 void GothicAPI::SetWorldViewTransform(const XMFLOAT4X4& world, const XMFLOAT4X4& view)
 {
@@ -2030,7 +2056,7 @@ void GothicAPI::SetWorldViewTransform(const XMFLOAT4X4& world, const XMFLOAT4X4&
 	RendererState.TransformState.TransformView = view;
 }
 /** Sets the world matrix */
-void GothicAPI::SetWorldViewTransform(const XMMATRIX& world, const XMMATRIX& view)
+void __vectorcall  GothicAPI::SetWorldViewTransform(XMMATRIX world, const XMMATRIX& view)
 {
 	XMStoreFloat4x4(&RendererState.TransformState.TransformWorld, world);
 	XMStoreFloat4x4(&RendererState.TransformState.TransformView, view);
