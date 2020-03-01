@@ -583,7 +583,7 @@ void EditorLinePrimitive::EncodeColor(LineVertex * vx, const float4& Color)
 
 
 /** Intersects the whole primitive. If hit, it returns a distance other than -1 */
-float EditorLinePrimitive::IntersectPrimitive(XMVECTOR* RayOrigin, XMVECTOR* RayDirection, float Epsilon)
+float __vectorcall EditorLinePrimitive::IntersectPrimitive(FXMVECTOR RayOrigin, FXMVECTOR RayDirection, float Epsilon)
 {
 	UINT i;
 	float Shortest = -1;
@@ -592,8 +592,8 @@ float EditorLinePrimitive::IntersectPrimitive(XMVECTOR* RayOrigin, XMVECTOR* Ray
 	XMMATRIX wld = XMLoadFloat4x4(&WorldMatrix);
 	XMMATRIX invWorld = XMMatrixInverse(nullptr, wld);
 
-	XMVECTOR Origin = XMVector3TransformCoord(*RayOrigin, invWorld);
-	XMVECTOR Dir = XMVector3TransformCoord(*RayDirection, invWorld);
+	XMVECTOR Origin = XMVector3TransformCoord(RayOrigin, invWorld);
+	XMVECTOR Dir = XMVector3TransformCoord(RayDirection, invWorld);
 
 	// Go through all line segments and intersect them
 	for(i = 0; i < NumVertices; i+=2)
@@ -602,8 +602,7 @@ float EditorLinePrimitive::IntersectPrimitive(XMVECTOR* RayOrigin, XMVECTOR* Ray
 		vx[0] = XMVector3TransformCoord(XMLoadFloat3(Vertices[i].Position.toXMFLOAT3()), wld);
 		vx[1] = XMVector3TransformCoord(XMLoadFloat3(Vertices[i+1].Position.toXMFLOAT3()), wld);
 
-		//float Dist = IntersectLineSegment(&Origin, &Dir, Vertices[i].Position.toD3DXVECTOR3(), Vertices[i+1].Position.toD3DXVECTOR3(), Epsilon);
-		float Dist = IntersectLineSegment(RayOrigin, RayDirection, &vx[0], &vx[1], Epsilon);
+		float Dist = IntersectLineSegment(RayOrigin, RayDirection, vx[0], vx[1], Epsilon);
 		if (Dist < Shortest || Shortest == -1)
 		{
 			Shortest = Dist / Scale.x;
@@ -624,7 +623,7 @@ float EditorLinePrimitive::IntersectPrimitive(XMVECTOR* RayOrigin, XMVECTOR* Ray
 			XMVECTOR v2 = XMLoadFloat3(SolidVertices[i + 2].Position.toXMFLOAT3());
 
 			// Check if the pick ray passes through this point
-			if (IntersectTriangle(&Origin, &Dir, v0, v1, v2,
+			if (IntersectTriangle(Origin, Dir, v0, v1, v2,
 				&fDist, &fBary1, &fBary2))
 			{
 				if (fDist < Shortest  || Shortest == -1)
@@ -642,8 +641,8 @@ float EditorLinePrimitive::IntersectPrimitive(XMVECTOR* RayOrigin, XMVECTOR* Ray
 	return Shortest;
 }
 
-bool EditorLinePrimitive::IntersectTriangle(const XMVECTOR* orig, const XMVECTOR* dir,
-                        XMVECTOR & v0, XMVECTOR& v1, XMVECTOR& v2,
+bool __vectorcall EditorLinePrimitive::IntersectTriangle(FXMVECTOR orig, FXMVECTOR dir,
+                        FXMVECTOR v0, GXMVECTOR v1, HXMVECTOR v2,
                         FLOAT* t, FLOAT* u, FLOAT* v)
 {
     // Find vectors for two edges sharing vert0
@@ -651,7 +650,7 @@ bool EditorLinePrimitive::IntersectTriangle(const XMVECTOR* orig, const XMVECTOR
     XMVECTOR edge2 = v2 - v0;
 
     // Begin calculating determinant - also used to calculate U parameter
-	XMVECTOR pvec = XMVector3Cross(*dir, edge2);
+	XMVECTOR pvec = XMVector3Cross(dir, edge2);
 
     // If determinant is near zero, ray lies in plane of triangle
 	float det; XMStoreFloat(&det, XMVector3Dot(edge1, pvec));
@@ -659,11 +658,11 @@ bool EditorLinePrimitive::IntersectTriangle(const XMVECTOR* orig, const XMVECTOR
     XMVECTOR tvec;
     if (det > 0)
     {
-        tvec = (*orig) - v0;
+        tvec = (orig) - v0;
     }
     else
     {
-        tvec = v0 - (*orig);
+        tvec = v0 - (orig);
         det = -det;
     }
 
@@ -680,7 +679,7 @@ bool EditorLinePrimitive::IntersectTriangle(const XMVECTOR* orig, const XMVECTOR
 	XMVECTOR qvec = XMVector3Cross(tvec, edge1);
 
     // Calculate V parameter and test bounds
-	XMStoreFloat(v, XMVector3Dot(*dir, qvec));
+	XMStoreFloat(v, XMVector3Dot(dir, qvec));
 
 	if (*v < 0.0f || *u + *v > det)
         return FALSE;
@@ -697,12 +696,12 @@ bool EditorLinePrimitive::IntersectTriangle(const XMVECTOR* orig, const XMVECTOR
 }
 
 
-float EditorLinePrimitive::IntersectLineSegment(const XMVECTOR * rayOrigin,const XMVECTOR* rayVec,const XMVECTOR* lineStart,const XMVECTOR* lineEnd, float Epsilon)
+float EditorLinePrimitive::IntersectLineSegment(FXMVECTOR rayOrigin, FXMVECTOR rayVec, FXMVECTOR lineStart, GXMVECTOR lineEnd, float Epsilon)
 {
 	
-	XMVECTOR u = *rayVec;
-	XMVECTOR v = (*lineEnd) - (*lineStart);
-	XMVECTOR w = (*rayOrigin) - (*lineStart);
+	XMVECTOR u = rayVec;
+	XMVECTOR v = (lineEnd) - (lineStart);
+	XMVECTOR w = (rayOrigin) - (lineStart);
 
 	
 	float a; XMStoreFloat(&a, XMVector3Dot(u, u)); // always >= 0
@@ -761,31 +760,30 @@ float EditorLinePrimitive::IntersectLineSegment(const XMVECTOR * rayOrigin,const
 	//info.iFracRay = sc;
 	//info.iFracLine = tc;
 
-	float fDp; XMStoreFloat(&fDp, XMVector3Length(dP));
-	return fDp;	// return the closest distance
+	return Toolbox::XMVector3LengthFloat(dP);	// return the closest distance
 }
 
-void EditorLinePrimitive::SetWorldMatrix(const XMMATRIX* World,const XMVECTOR* Loc,const XMVECTOR* Rot,const XMVECTOR* Scale)
+void __vectorcall EditorLinePrimitive::SetWorldMatrix(XMMATRIX World,FXMVECTOR Loc, FXMVECTOR Rot,GXMVECTOR Scale)
 {
-	XMStoreFloat4x4(&WorldMatrix, *World);
-	XMStoreFloat3(&Location, *Loc);
-	XMStoreFloat3(&Rotation, *Rot);
-	XMStoreFloat3(&this->Scale, *Scale);
+	XMStoreFloat4x4(&WorldMatrix, World);
+	XMStoreFloat3(&Location, Loc);
+	XMStoreFloat3(&Rotation, Rot);
+	XMStoreFloat3(&this->Scale, Scale);
 }
 
-void EditorLinePrimitive::SetLocation(const XMVECTOR& NewLoc)
+void __vectorcall EditorLinePrimitive::SetLocation(FXMVECTOR NewLoc)
 {
 	XMStoreFloat3(&Location, NewLoc);
 	RecalcTransforms();
 }
 
-void EditorLinePrimitive::SetRotation(const XMVECTOR& NewRotation)
+void __vectorcall EditorLinePrimitive::SetRotation(FXMVECTOR NewRotation)
 {
 	XMStoreFloat3(&Rotation, NewRotation);
 	RecalcTransforms();
 }
 
-void EditorLinePrimitive::SetScale(const XMVECTOR& NewScale)
+void __vectorcall EditorLinePrimitive::SetScale(FXMVECTOR NewScale)
 {
 	XMStoreFloat3(&Scale, NewScale);
 	RecalcTransforms();

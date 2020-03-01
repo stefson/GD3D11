@@ -34,7 +34,7 @@ WorldConverter::~WorldConverter()
 }
 
 /** Collects all world-polys in the specific range. Drops all materials that have no alphablending */
-void WorldConverter::WorldMeshCollectPolyRange(const D3DXVECTOR3 & position, float range, std::map<int, std::map<int, WorldMeshSectionInfo>> & inSections, std::map<MeshKey, WorldMeshInfo *, cmpMeshKey> & outMeshes) {
+void WorldConverter::WorldMeshCollectPolyRange(const float3& position, float range, std::map<int, std::map<int, WorldMeshSectionInfo>> & inSections, std::map<MeshKey, WorldMeshInfo *, cmpMeshKey> & outMeshes) {
 	INT2 s = GetSectionOfPos(position);
 	MeshKey opaqueKey;
 	opaqueKey.Material = nullptr;
@@ -44,11 +44,13 @@ void WorldConverter::WorldMeshCollectPolyRange(const D3DXVECTOR3 & position, flo
 	WorldMeshInfo * opaqueMesh = new WorldMeshInfo;
 	outMeshes[opaqueKey] = opaqueMesh;
 
+	XMVECTOR xmPosition = XMLoadFloat3(position.toXMFLOAT3());
+
 	// Generate the meshes
 	for (auto const& itx : Engine::GAPI->GetWorldSections()) {
 		for (auto const& ity : itx.second) {
-			const D3DXVECTOR2 a = D3DXVECTOR2(static_cast<float>(itx.first - s.x), static_cast<float>(ity.first - s.y));
-			if (D3DXVec2Length(&a) < 2) {
+			const XMVECTOR a = XMVectorSet(static_cast<float>(itx.first - s.x), static_cast<float>(ity.first - s.y), 0, 0);
+			if (Toolbox::XMVector2LengthFloat(a) < 2) {
 				// Check all polys from all meshes
 				for (auto const& it : ity.second.WorldMeshes) {
 					WorldMeshInfo * m;
@@ -64,10 +66,11 @@ void WorldConverter::WorldMeshCollectPolyRange(const D3DXVECTOR3 & position, flo
 
 					for (unsigned int i = 0; i < it.second->Indices.size(); i += 3) {
 						// Check if one of them is in range
+
 						const float range2 = range*range;
-						if (D3DXVec3LengthSq(&(position - *it.second->Vertices[it.second->Indices[i+0]].Position.toD3DXVECTOR3())) < range2
-							|| D3DXVec3LengthSq(&(position - *it.second->Vertices[it.second->Indices[i+1]].Position.toD3DXVECTOR3())) < range2
-							|| D3DXVec3LengthSq(&(position - *it.second->Vertices[it.second->Indices[i+2]].Position.toD3DXVECTOR3())) < range2)
+						if (Toolbox::XMVector2LengthFloat(xmPosition - XMLoadFloat3(it.second->Vertices[it.second->Indices[i + 0]].Position.toXMFLOAT3())) < range2
+							|| Toolbox::XMVector2LengthFloat(xmPosition - XMLoadFloat3(it.second->Vertices[it.second->Indices[i + 1]].Position.toXMFLOAT3())) < range2
+							|| Toolbox::XMVector2LengthFloat(xmPosition - XMLoadFloat3(it.second->Vertices[it.second->Indices[i + 2]].Position.toXMFLOAT3())) < range2)
 						{
 							for (int v = 0; v < 3; v++)
 								m->Vertices.push_back(it.second->Vertices[it.second->Indices[i+v]]);

@@ -2286,7 +2286,7 @@ void GothicAPI::Unproject(const D3DXVECTOR3 & p, D3DXVECTOR3 * worldPos, D3DXVEC
 }
 
 /** Unprojects a pixel-position on the screen */
-void GothicAPI::UnprojectXM(const XMVECTOR& p, XMVECTOR& worldPos, XMVECTOR& worldDir)
+void __vectorcall GothicAPI::UnprojectXM(FXMVECTOR p, XMVECTOR& worldPos, XMVECTOR& worldDir)
 {
 	XMMATRIX proj = XMLoadFloat4x4(&GetProjectionMatrixDX());
 	XMFLOAT4X4 fInvView;
@@ -2354,13 +2354,7 @@ XMVECTOR GothicAPI::GetCameraPositionXM()
 
 	return oCGame::GetGame()->_zCSession_camVob->GetPositionWorldXM();
 }
-/** Returns the current forward vector of the camera */
-D3DXVECTOR3 GothicAPI::GetCameraForward()
-{
-	D3DXVECTOR3 fwd = D3DXVECTOR3(1, 0, 0);
-	D3DXVec3TransformNormal(&fwd, &fwd, oCGame::GetGame()->_zCSession_camVob->GetWorldMatrixPtr());
-	return fwd;
-}
+
 
 /** Returns the view matrix */
 void GothicAPI::GetViewMatrix(D3DXMATRIX * view)

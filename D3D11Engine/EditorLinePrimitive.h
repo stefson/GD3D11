@@ -65,10 +65,10 @@ public:
 	void SetSolidShader(D3D11PShader * SolidShader);
 
 	/** Sets the transforms */
-	void SetLocation(const DirectX::XMVECTOR& NewLoc);
-	void SetRotation(const DirectX::XMVECTOR& NewRotation);
-	void SetScale(const DirectX::XMVECTOR& NewScale);
-	void SetWorldMatrix(const DirectX::XMMATRIX* World,const DirectX::XMVECTOR* Loc,const DirectX::XMVECTOR* Rot,const DirectX::XMVECTOR* Scale);
+	void __vectorcall SetLocation(DirectX::FXMVECTOR NewLoc);
+	void __vectorcall SetRotation(DirectX::FXMVECTOR NewRotation);
+	void __vectorcall SetScale(DirectX::FXMVECTOR NewScale);
+	void __vectorcall SetWorldMatrix(DirectX::XMMATRIX World, DirectX::FXMVECTOR Loc, DirectX::FXMVECTOR Rot, DirectX::GXMVECTOR Scale);
 
 	/** Renders the primitive */
 	HRESULT RenderPrimitive(int Pass=-1);
@@ -80,10 +80,10 @@ public:
 	}
 
 	/** Intersects the whole primitive. If hit, it returns a distance other than -1 */
-	float IntersectPrimitive(DirectX::XMVECTOR* RayOrigin, DirectX::XMVECTOR* RayDirection, float Epsilon = 0.01);
+	float __vectorcall IntersectPrimitive(DirectX::FXMVECTOR RayOrigin, DirectX::FXMVECTOR RayDirection, float Epsilon = 0.01);
 
-	bool IntersectTriangle(const DirectX::XMVECTOR* orig, const DirectX::XMVECTOR* dir,
-                        DirectX::XMVECTOR & v0, DirectX::XMVECTOR& v1, DirectX::XMVECTOR& v2,
+	bool __vectorcall IntersectTriangle(DirectX::FXMVECTOR orig, DirectX::FXMVECTOR dir,
+                        DirectX::FXMVECTOR v0, DirectX::GXMVECTOR v1, DirectX::HXMVECTOR v2,
                         FLOAT* t, FLOAT* u, FLOAT* v);
 
 	/** Puts the color into the Normal and TexCoord channels */
@@ -106,7 +106,7 @@ private:
 	void RecalcTransforms();
 
 	/** Intersects only one line segment */
-	float IntersectLineSegment(const DirectX::XMVECTOR * rayOrigin,const DirectX::XMVECTOR* rayVec,const DirectX::XMVECTOR* lineStart,const DirectX::XMVECTOR* lineEnd, float Epsilon);
+	float IntersectLineSegment(DirectX::FXMVECTOR rayOrigin,DirectX::FXMVECTOR rayVec, DirectX::FXMVECTOR lineStart, DirectX::GXMVECTOR lineEnd, float Epsilon);
 
 	
 

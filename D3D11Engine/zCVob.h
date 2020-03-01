@@ -173,7 +173,7 @@ public:
 #endif
 	}
 	/** Sets this vobs position */
-	void SetPositionWorldXM(const DirectX::XMVECTOR& v)
+	void __vectorcall SetPositionWorldXM(DirectX::FXMVECTOR v)
 	{
 		DirectX::XMFLOAT3 store; DirectX::XMStoreFloat3(&store, v);
 		SetPositionWorldDX(store);

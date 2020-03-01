@@ -83,6 +83,26 @@ namespace Toolbox {
 		std::unique(vector.begin(), vector.end());
 	}
 
+	FORCEINLINE
+	 float XMVector3LengthFloat(DirectX::FXMVECTOR vector) {
+		float len; DirectX::XMStoreFloat(&len, DirectX::XMVector3Length(vector));
+		return len;
+	}
+	FORCEINLINE
+	 float XMVector3LengthSqFloat(DirectX::FXMVECTOR vector) {
+		float len; DirectX::XMStoreFloat(&len, DirectX::XMVector3LengthSq(vector));
+		return len;
+	}
+	FORCEINLINE
+	 float XMVector2LengthFloat(DirectX::FXMVECTOR vector) {
+		float len; DirectX::XMStoreFloat(&len, DirectX::XMVector2Length(vector));
+		return len;
+	}
+	FORCEINLINE
+	 float XMVector2LengthSqFloat(DirectX::FXMVECTOR vector) {
+		float len; DirectX::XMStoreFloat(&len, DirectX::XMVector2LengthSq(vector));
+		return len;
+	}
 	/** Checks whether a given boundingbox is inside the given frustum. The index in "cache" is tested first, if it isn't set to -1 */
 	zTCam_ClipType BBox3DInFrustumCached(const zTBBox3D & bbox3D, zTPlane * frustumPlanes, byte * signbits, int & cache);
 

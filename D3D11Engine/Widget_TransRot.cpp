@@ -197,9 +197,9 @@ void Widget_TransRot::DoHoverTest(HWND hw) {
 	ActiveSelection = WTR_None;
 	
 
-	float TransXDist = TransLines[0]->IntersectPrimitive(&Pos, &Dir, Eps);
-	float TransYDist = TransLines[1]->IntersectPrimitive(&Pos, &Dir, Eps);
-	float TransZDist = TransLines[2]->IntersectPrimitive(&Pos, &Dir, Eps);
+	float TransXDist = TransLines[0]->IntersectPrimitive(Pos, Dir, Eps);
+	float TransYDist = TransLines[1]->IntersectPrimitive(Pos, Dir, Eps);
+	float TransZDist = TransLines[2]->IntersectPrimitive(Pos, Dir, Eps);
 
 	ActiveSelection = WTR_None;
 

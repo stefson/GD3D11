@@ -2633,7 +2633,7 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 
 /** Draws everything around the given position */
 void D3D11GraphicsEngine::DrawWorldAround(
-	const DirectX::XMVECTOR& position, float range, bool cullFront, bool indoor,
+	FXMVECTOR position, float range, bool cullFront, bool indoor,
 	bool noNPCs, std::list<VobInfo*>* renderedVobs,
 	std::list<SkeletalVobInfo*>* renderedMobs,
 	std::map<MeshKey, WorldMeshInfo*, cmpMeshKey>* worldMeshCache) {
@@ -2973,7 +2973,7 @@ void D3D11GraphicsEngine::DrawWorldAround(
 }
 
 /** Draws everything around the given position */
-void D3D11GraphicsEngine::DrawWorldAround(const DirectX::XMVECTOR& position,
+void D3D11GraphicsEngine::DrawWorldAround(FXMVECTOR position,
 	int sectionRange, float vobXZRange,
 	bool cullFront, bool dontCull) {
 	// Setup renderstates
@@ -4473,7 +4473,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 
 /** Renders the shadowmaps for a pointlight */
 void D3D11GraphicsEngine::RenderShadowCube(
-	const DirectX::XMVECTOR& position, float range,
+	DirectX::FXMVECTOR position, float range,
 	RenderToDepthStencilBuffer* targetCube, ID3D11DepthStencilView* face,
 	ID3D11RenderTargetView* debugRTV, bool cullFront, bool indoor, bool noNPCs,
 	std::list<VobInfo*>* renderedVobs,
@@ -4559,7 +4559,7 @@ void D3D11GraphicsEngine::RenderShadowCube(
 }
 
 /** Renders the shadowmaps for the sun */
-void D3D11GraphicsEngine::RenderShadowmaps(const XMVECTOR& cameraPosition,
+void D3D11GraphicsEngine::RenderShadowmaps(FXMVECTOR cameraPosition,
 	RenderToDepthStencilBuffer* target,
 	bool cullFront, bool dontCull,
 	ID3D11DepthStencilView* dsvOverwrite,

@@ -340,10 +340,6 @@ public:
 	D3DXVECTOR3 GetCameraPosition();
 	DirectX::XMVECTOR GetCameraPositionXM();
 
-	/** Returns the current forward vector of the camera */
-	D3DXVECTOR3 GetCameraForward();
-	DirectX::XMFLOAT3 GetCameraForwardDX();
-
 	/** Returns the view matrix */
 	void GetViewMatrix(D3DXMATRIX * view);
 	DirectX::XMMATRIX GetViewMatrixXM();
@@ -364,7 +360,7 @@ public:
 	void Unproject(const D3DXVECTOR3 & p, D3DXVECTOR3 * worldPos, D3DXVECTOR3 * worldDir);
 
 	/** Unprojects a pixel-position on the screen */
-	void UnprojectXM(const DirectX::XMVECTOR& p, DirectX::XMVECTOR& worldPos, DirectX::XMVECTOR& worldDir);
+	void __vectorcall UnprojectXM(DirectX::FXMVECTOR p, DirectX::XMVECTOR& worldPos, DirectX::XMVECTOR& worldDir);
 
 	/** Unprojects the current cursor, returns it's direction in world-space */
 	D3DXVECTOR3 UnprojectCursor();
