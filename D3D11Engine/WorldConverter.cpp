@@ -68,9 +68,9 @@ void WorldConverter::WorldMeshCollectPolyRange(const float3& position, float ran
 						// Check if one of them is in range
 
 						const float range2 = range*range;
-						if (Toolbox::XMVector2LengthFloat(xmPosition - XMLoadFloat3(it.second->Vertices[it.second->Indices[i + 0]].Position.toXMFLOAT3())) < range2
-							|| Toolbox::XMVector2LengthFloat(xmPosition - XMLoadFloat3(it.second->Vertices[it.second->Indices[i + 1]].Position.toXMFLOAT3())) < range2
-							|| Toolbox::XMVector2LengthFloat(xmPosition - XMLoadFloat3(it.second->Vertices[it.second->Indices[i + 2]].Position.toXMFLOAT3())) < range2)
+						if (Toolbox::XMVector3LengthSqFloat(xmPosition - XMLoadFloat3(it.second->Vertices[it.second->Indices[i + 0]].Position.toXMFLOAT3())) < range2
+							|| Toolbox::XMVector3LengthSqFloat(xmPosition - XMLoadFloat3(it.second->Vertices[it.second->Indices[i + 1]].Position.toXMFLOAT3())) < range2
+							|| Toolbox::XMVector3LengthSqFloat(xmPosition - XMLoadFloat3(it.second->Vertices[it.second->Indices[i + 2]].Position.toXMFLOAT3())) < range2)
 						{
 							for (int v = 0; v < 3; v++)
 								m->Vertices.push_back(it.second->Vertices[it.second->Indices[i+v]]);
