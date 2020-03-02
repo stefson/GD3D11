@@ -92,8 +92,8 @@ void WorldConverter::WorldMeshCollectPolyRange(const float3& position, float ran
 		std::vector<ExVertexStruct> vertices;
 		IndexVertices(&it->second->Vertices[0], it->second->Vertices.size(), vertices, indices);
 
-		it->second->Vertices = vertices;
-		it->second->Indices = indices;
+		it->second->Vertices = std::move(vertices);
+		it->second->Indices = std::move(indices);
 
 		// Create the buffers
 		Engine::GraphicsEngine->CreateVertexBuffer(&it->second->MeshVertexBuffer);
@@ -387,7 +387,7 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN(zCPolygon** polys, unsigned int nu
 		std::vector<ExVertexStruct> polyVertices;
 		for(int v=0;v<poly->GetNumPolyVertices();v++)
 		{
-			ExVertexStruct t;
+			ExVertexStruct t = {};
 			t.Position = poly->getVertices()[v]->Position;
 			t.TexCoord = poly->getFeatures()[v]->texCoord;
 			t.Normal = poly->getFeatures()[v]->normal;

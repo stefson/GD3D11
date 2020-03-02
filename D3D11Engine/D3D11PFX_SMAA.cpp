@@ -16,24 +16,18 @@ using namespace DirectX;
 
 D3D11PFX_SMAA::D3D11PFX_SMAA(D3D11PfxRenderer* rnd) : D3D11PFX_Effect(rnd)
 {
-	EdgesTex = nullptr;
-	BlendTex = nullptr;
-	SMAAShader = nullptr;
-	AreaTextureSRV = nullptr;
-	SearchTextureSRV = nullptr;
-
 	Init();
 }
 
 
 D3D11PFX_SMAA::~D3D11PFX_SMAA()
 {
-	delete EdgesTex;
-	delete BlendTex;
+	EdgesTex.reset();
+	BlendTex.reset();
 
-	if (AreaTextureSRV)AreaTextureSRV->Release();
-	if (SearchTextureSRV)SearchTextureSRV->Release();
-	if (SMAAShader)SMAAShader->Release();
+	AreaTextureSRV.Reset();
+	SearchTextureSRV.Reset();
+	SMAAShader.Reset();
 }
 
 HRESULT D3DX11CreateEffectFromFile_RES(
@@ -78,8 +72,8 @@ bool D3D11PFX_SMAA::Init()
 
 	LE(D3DX11CreateEffectFromFile_RES("System\\GD3D11\\Shaders\\SMAA.fx", nullptr, "fx_5_0", D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_OPTIMIZATION_LEVEL3, 0, engine->GetDevice(), nullptr,&SMAAShader, nullptr));
 	
-	if (AreaTextureSRV)AreaTextureSRV->Release();
-	if (SearchTextureSRV)SearchTextureSRV->Release();
+	AreaTextureSRV.Reset();
+	SearchTextureSRV.Reset();
 
 
 	/*SMAAShader->AddCustomVariable("colorTex", CVT_SHADER_RES_VIEW, &ColorTexIdx);
@@ -100,8 +94,8 @@ bool D3D11PFX_SMAA::Init()
 	hr = CreateDDSTextureFromFile(engine->GetDevice(), L"system\\GD3D11\\Textures\\SMAA_SearchTex.dds", nullptr, &SearchTextureSRV);
 	LE(hr);
 
-	SMAAShader->GetVariableByName("areaTex")->AsShaderResource()->SetResource(AreaTextureSRV);
-	SMAAShader->GetVariableByName("searchTex")->AsShaderResource()->SetResource(SearchTextureSRV);
+	SMAAShader->GetVariableByName("areaTex")->AsShaderResource()->SetResource(AreaTextureSRV.Get());
+	SMAAShader->GetVariableByName("searchTex")->AsShaderResource()->SetResource(SearchTextureSRV.Get());
 
 	LumaEdgeDetection = SMAAShader->GetTechniqueByName("LumaEdgeDetection");
 	BlendingWeightCalculation = SMAAShader->GetTechniqueByName("BlendingWeightCalculation");
@@ -237,16 +231,13 @@ void D3D11PFX_SMAA::OnResize(const INT2 & size)
 {
 	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 
-	delete EdgesTex;
-	delete BlendTex;
-
 	HRESULT hr = S_OK;
 	
 	// Create Edges- and Blend-Textures
-	EdgesTex = new RenderToTextureBuffer(engine->GetDevice(), size.x, size.y, DXGI_FORMAT_R8G8B8A8_UNORM, &hr);
+	EdgesTex = std::make_unique<RenderToTextureBuffer>(engine->GetDevice(), size.x, size.y, DXGI_FORMAT_R8G8B8A8_UNORM, &hr);
 	LE(hr);
 
-	BlendTex = new RenderToTextureBuffer(engine->GetDevice(), size.x, size.y, DXGI_FORMAT_R8G8B8A8_UNORM, &hr);
+	BlendTex = std::make_unique<RenderToTextureBuffer>(engine->GetDevice(), size.x, size.y, DXGI_FORMAT_R8G8B8A8_UNORM, &hr);
 	LE(hr);
 
 	std::vector<D3D_SHADER_MACRO> Makros;
@@ -292,8 +283,8 @@ void D3D11PFX_SMAA::OnResize(const INT2 & size)
 
 	LE(D3DX11CreateEffectFromFile_RES("system\\GD3D11\\shaders\\SMAA.fx", &Makros[0], "fx_5_0", D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_OPTIMIZATION_LEVEL3, 0, engine->GetDevice(), nullptr,&SMAAShader, nullptr));
 	
-	if (AreaTextureSRV)AreaTextureSRV->Release();
-	if (SearchTextureSRV)SearchTextureSRV->Release();
+	AreaTextureSRV.Reset();
+	SearchTextureSRV.Reset();
 
 	// Load the textures
 
@@ -303,8 +294,8 @@ void D3D11PFX_SMAA::OnResize(const INT2 & size)
 	hr = CreateDDSTextureFromFile(engine->GetDevice(), L"system\\GD3D11\\Textures\\SMAA_SearchTex.dds", nullptr, &SearchTextureSRV);
 	LE(hr);
 
-	SMAAShader->GetVariableByName("areaTex")->AsShaderResource()->SetResource(AreaTextureSRV);
-	SMAAShader->GetVariableByName("searchTex")->AsShaderResource()->SetResource(SearchTextureSRV);
+	SMAAShader->GetVariableByName("areaTex")->AsShaderResource()->SetResource(AreaTextureSRV.Get());
+	SMAAShader->GetVariableByName("searchTex")->AsShaderResource()->SetResource(SearchTextureSRV.Get());
 
 	LumaEdgeDetection = SMAAShader->GetTechniqueByName("LumaEdgeDetection");
 	BlendingWeightCalculation = SMAAShader->GetTechniqueByName("BlendingWeightCalculation");

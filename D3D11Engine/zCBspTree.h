@@ -293,6 +293,7 @@ public:
 	static int __fastcall hooked_LoadBIN(void * thisptr, void * unknwn, zCFileBIN& file, int skip)
 	{
 		LogInfo() << "Loading world!";
+		Engine::GraphicsEngine->OnResize(INT2(0,0));
 		int r = HookedFunctions::OriginalFunctions.original_zCBspTreeLoadBIN(thisptr, file, skip);
 
 		LoadLevelGeometry((zCBspTree *)thisptr);

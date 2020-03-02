@@ -181,9 +181,9 @@ XRESULT D3D11PfxRenderer::OnResize(const INT2 & newResolution)
 	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *)Engine::GraphicsEngine;
 
 	// Create temp-buffer
-	TempBuffer.reset(new RenderToTextureBuffer(engine->GetDevice(), newResolution.x, newResolution.y, DXGI_FORMAT_R16G16B16A16_FLOAT, nullptr));
-	TempBufferDS4_1.reset(new RenderToTextureBuffer(engine->GetDevice(), newResolution.x / 4, newResolution.y / 4, DXGI_FORMAT_R16G16B16A16_FLOAT, nullptr));
-	TempBufferDS4_2.reset(new RenderToTextureBuffer(engine->GetDevice(), newResolution.x / 4, newResolution.y / 4, DXGI_FORMAT_R16G16B16A16_FLOAT, nullptr));
+	TempBuffer = std::make_unique<RenderToTextureBuffer>(engine->GetDevice(), newResolution.x, newResolution.y, DXGI_FORMAT_R16G16B16A16_FLOAT, nullptr);
+	TempBufferDS4_1 = std::make_unique<RenderToTextureBuffer>(engine->GetDevice(), newResolution.x / 4, newResolution.y / 4, DXGI_FORMAT_R16G16B16A16_FLOAT, nullptr);
+	TempBufferDS4_2 = std::make_unique<RenderToTextureBuffer>(engine->GetDevice(), newResolution.x / 4, newResolution.y / 4, DXGI_FORMAT_R16G16B16A16_FLOAT, nullptr);
 
 	FX_SMAA->OnResize(newResolution);
 

@@ -25,15 +25,15 @@ public:
 	XRESULT Render(RenderToTextureBuffer * fxbuffer){return XR_SUCCESS;};
 
 private:
-	ID3D11ShaderResourceView * AreaTextureSRV;
-	ID3D11ShaderResourceView * SearchTextureSRV;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> AreaTextureSRV;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> SearchTextureSRV;
 
-	RenderToTextureBuffer * EdgesTex;
-	RenderToTextureBuffer * BlendTex;
+	std::unique_ptr<RenderToTextureBuffer> EdgesTex;
+	std::unique_ptr<RenderToTextureBuffer> BlendTex;
 
-	ID3DX11Effect* SMAAShader;
-	ID3DX11EffectTechnique* LumaEdgeDetection;
-	ID3DX11EffectTechnique* BlendingWeightCalculation;
-	ID3DX11EffectTechnique* NeighborhoodBlending;
+	Microsoft::WRL::ComPtr<ID3DX11Effect> SMAAShader;
+	Microsoft::WRL::ComPtr<ID3DX11EffectTechnique> LumaEdgeDetection;
+	Microsoft::WRL::ComPtr<ID3DX11EffectTechnique> BlendingWeightCalculation;
+	Microsoft::WRL::ComPtr<ID3DX11EffectTechnique> NeighborhoodBlending;
 };
 

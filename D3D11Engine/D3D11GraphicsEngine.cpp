@@ -174,7 +174,7 @@ XRESULT D3D11GraphicsEngine::Init() {
 		nullptr, INSTANCING_BUFFER_SIZE, D3D11VertexBuffer::B_VERTEXBUFFER,
 		D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE);
 
-	D3D11_SAMPLER_DESC samplerDesc;
+	D3D11_SAMPLER_DESC samplerDesc = {};
 	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -215,7 +215,7 @@ XRESULT D3D11GraphicsEngine::Init() {
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 	GetDevice()->CreateSamplerState(&samplerDesc, &CubeSamplerState);
 
-	D3D11_RASTERIZER_DESC rasterizerDesc;
+	D3D11_RASTERIZER_DESC rasterizerDesc = {};
 	rasterizerDesc.CullMode = D3D11_CULL_BACK;
 	rasterizerDesc.FillMode = D3D11_FILL_SOLID;
 	rasterizerDesc.FrontCounterClockwise =
@@ -235,7 +235,7 @@ XRESULT D3D11GraphicsEngine::Init() {
 	rasterizerDesc.FrontCounterClockwise = false;
 	LE(GetDevice()->CreateRasterizerState(&rasterizerDesc, &HUDRasterizerState));
 
-	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
 	// Depth test parameters
 	depthStencilDesc.DepthEnable = true;
 	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
@@ -394,10 +394,13 @@ XRESULT D3D11GraphicsEngine::SetWindow(HWND hWnd) {
 XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 	HRESULT hr;
 
-	if (memcmp(&Resolution, &newSize, sizeof(newSize)) == 0 && SwapChain)
-		return XR_SUCCESS;  // Don't resize if we don't have to
+	//if (memcmp(&Resolution, &newSize, sizeof(newSize)) == 0 && SwapChain)
+	//	return XR_SUCCESS;  // Don't resize if we don't have to
+	// Yes resize.
 
-	Resolution = newSize;
+	if (!(newSize.x <= 0 || newSize.y <= 0)) {
+		Resolution = newSize;
+	}
 	INT2 bbres = GetBackbufferResolution();
 
 #ifndef BUILD_SPACER
@@ -419,8 +422,7 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 	if (!SwapChain) {
 		LogInfo() << "Creating new swapchain! (Format: DXGI_FORMAT_R8G8B8A8_UNORM)";
 
-		DXGI_SWAP_CHAIN_DESC scd;
-		ZeroMemory(&scd, sizeof(DXGI_SWAP_CHAIN_DESC));
+		DXGI_SWAP_CHAIN_DESC scd = {};
 
 		scd.Flags = scflags;
 		scd.BufferCount = 1;
@@ -461,10 +463,10 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 
 	}
 	else {
-		LogInfo() << "Resizing swapchain  (Format: DXGI_FORMAT_R8G8B8A8_UNORM)";
+		LogInfo() << "Resizing swapchain  (Format: Keep Format)";
 
 		if (FAILED(SwapChain->ResizeBuffers(0, bbres.x, bbres.y,
-			DXGI_FORMAT_R8G8B8A8_UNORM, scflags))) {
+			DXGI_FORMAT_UNKNOWN, scflags))) {
 			LogError() << "Failed to resize swapchain!";
 			return XR_FAILED;
 		}
@@ -496,8 +498,7 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 		DepthStencilBuffer->GetDepthStencilView());
 
 	// Set the viewport
-	D3D11_VIEWPORT viewport;
-	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
+	D3D11_VIEWPORT viewport = {};
 
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
@@ -529,7 +530,7 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 		GetDevice(), s, s, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT,
 		DXGI_FORMAT_R32_FLOAT);
 
-	Engine::AntTweakBar->OnResize(newSize);
+	Engine::AntTweakBar->OnResize(Resolution);
 
 	return XR_SUCCESS;
 }
