@@ -5170,11 +5170,11 @@ void D3D11GraphicsEngine::DrawDecalList(const std::vector<zCVob*>& decals,
 		XMMATRIX world = decals[i]->GetWorldMatrixXM();
 
 		XMMATRIX offset =
-			XMMatrixTranslation(d->GetDecalSettings()->DecalOffset.x, d->GetDecalSettings()->DecalOffset.y, 0);
+			XMMatrixTranslation(d->GetDecalSettings()->DecalOffset.x, -d->GetDecalSettings()->DecalOffset.y, 0);
 
 		XMMATRIX scale =
 			XMMatrixScaling(d->GetDecalSettings()->DecalSize.x * 2,
-				d->GetDecalSettings()->DecalSize.y * 2, 1);
+				-d->GetDecalSettings()->DecalSize.y * 2, 1);
 
 		scale = XMMatrixTranspose(scale);
 
