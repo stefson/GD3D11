@@ -12,28 +12,20 @@ public:
 	/** Hooks the functions of this Class */
 	static void Hook()
 	{
-		//XHook(HookedFunctions::OriginalFunctions.original_zCRnd_D3DVid_SetScreenMode, GothicMemoryLocations::zCRndD3D::VidSetScreenMode, zCRndD3D::hooked_zCRndD3DVidSetScreenMode);
 		XHook(GothicMemoryLocations::zCRndD3D::DrawLineZ, hooked_zCRndD3DDrawLineZ);
 
 		XHook(HookedFunctions::OriginalFunctions.original_zCRnd_D3D_DrawPoly, GothicMemoryLocations::zCRndD3D::DrawPoly, hooked_zCRndD3DDrawPoly);
 		XHook(HookedFunctions::OriginalFunctions.original_zCRnd_D3D_DrawPolySimple, GothicMemoryLocations::zCRndD3D::DrawPolySimple, hooked_zCRndD3DDrawPolySimple);
 	}
 
-	/** Overwritten to only accept windowed */
-	static void __fastcall hooked_zCRndD3DVidSetScreenMode(void * thisptr, void * unknwn, int mode)
+	/** Draws a straight line from xyz1 to xyz2 */
+	static void __fastcall hooked_zCRndD3DDrawLineZ(void * thisptr, void * unknwn, float x1, float y1, float z1, float x2, float y2, float z2, zColor color)
 	{
-		hook_infunc
-		// Pass Windowed only.
-		HookedFunctions::OriginalFunctions.original_zCRnd_D3DVid_SetScreenMode(thisptr, 1);
-
-		hook_outfunc
-	}
-
-	/** Overwritten to only accept windowed */
-	static void __fastcall hooked_zCRndD3DDrawLineZ(void * thisptr, void * unknwn, float x1, float y1, float z1, float x2, float y2, float z2, DWORD color)
-	{
-		// Do nothing here yet.
-		// TODO: Implement!
+		return;
+		// TODO: Coordinates are kinda wonky. Wrong space? ScreenSpace to Worldspace neccessery?
+		auto lineRenderer = Engine::GraphicsEngine->GetLineRenderer();
+		if (lineRenderer)
+			lineRenderer->AddLine(LineVertex(D3DXVECTOR3(x1, y1, z1), color.dword), LineVertex(D3DXVECTOR3(x2, y2, z2), color.dword));
 	}
 
 	static void __fastcall hooked_zCRndD3DDrawPoly(void* thisptr, void* unknwn, zCPolygon* poly) {
