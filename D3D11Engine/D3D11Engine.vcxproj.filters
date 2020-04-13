@@ -67,6 +67,9 @@
     <Filter Include="Librarys\Assimp">
       <UniqueIdentifier>{9bec2d0d-0bea-4659-aeef-99300438c197}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\D3D11\Engine">
+      <UniqueIdentifier>{ec0d93fb-3577-4853-a58f-8654d872352e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -186,9 +189,6 @@
     </ClInclude>
     <ClInclude Include="zCMeshSoftSkin.h">
       <Filter>ZenGin\Classes</Filter>
-    </ClInclude>
-    <ClInclude Include="D3D11GraphicsEngine.h">
-      <Filter>Engine\D3D11</Filter>
     </ClInclude>
     <ClInclude Include="D3D11Texture.h">
       <Filter>Engine\D3D11</Filter>
@@ -710,6 +710,9 @@
       <Filter>ZenGin\Classes</Filter>
     </ClInclude>
     <ClInclude Include="zFont.h" />
+    <ClInclude Include="D3D11GraphicsEngine.h">
+      <Filter>Engine\D3D11\Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -739,9 +742,6 @@
     </ClCompile>
     <ClCompile Include="HookedFunctions.cpp">
       <Filter>ZenGin\Classes</Filter>
-    </ClCompile>
-    <ClCompile Include="D3D11GraphicsEngine.cpp">
-      <Filter>Engine\D3D11</Filter>
     </ClCompile>
     <ClCompile Include="D3D11Texture.cpp">
       <Filter>Engine\D3D11</Filter>
@@ -945,6 +945,9 @@
     </ClCompile>
     <ClCompile Include="GMeshSimple.cpp" />
     <ClCompile Include="BaseShadowedPointLight.cpp" />
+    <ClCompile Include="D3D11GraphicsEngine.cpp">
+      <Filter>Engine\D3D11\Engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="ddraw.def">
