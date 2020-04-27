@@ -5180,8 +5180,7 @@ void D3D11GraphicsEngine::DrawDecalList(const std::vector<zCVob*>& decals,
 
 		XMMATRIX mat = view * world;
 		
-		if (alignment == zVISUAL_CAM_ALIGN_FULL ||
-			alignment == zVISUAL_CAM_ALIGN_YAW) {
+		if (alignment == zVISUAL_CAM_ALIGN_FULL) {
 			for (int x = 0; x < 3; x++) {
 				for (int y = 0; y < 3; y++) {
 					if (x == y)
@@ -5190,6 +5189,12 @@ void D3D11GraphicsEngine::DrawDecalList(const std::vector<zCVob*>& decals,
 						mat.r[x].m128_f32[y] = 0.0f;
 				}
 			}
+		}
+		else if (alignment == zVISUAL_CAM_ALIGN_YAW) {
+			// TODO: implement YAW alignment properly?
+			// Tried a few candles, and other lights. They looked ok to me without handling them.
+			// Well, they do not follow the camera if done this way.
+			// This makes them look flat when looked at from a different angle.
 		}
 
 		mat = mat * offset * scale;
