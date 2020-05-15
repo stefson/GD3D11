@@ -34,6 +34,7 @@
 #include <locale>
 #include <codecvt>
 #include <wrl\client.h>
+#include <dxgi1_5.h>
 
 #pragma comment(lib, "dxguid.lib")
 
@@ -385,7 +386,6 @@ XRESULT D3D11GraphicsEngine::SetWindow(HWND hWnd) {
 	res.x = r.right;
 	res.y = r.bottom;
 #endif
-
 	if (res.x != 0 && res.y != 0) OnResize(res);
 
 	return XR_SUCCESS;
@@ -395,7 +395,7 @@ XRESULT D3D11GraphicsEngine::SetWindow(HWND hWnd) {
 XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 	HRESULT hr;
 
-	if (memcmp(&Resolution, &newSize, sizeof(newSize)) == 0 && SwapChain)
+	 if (memcmp(&Resolution, &newSize, sizeof(newSize)) == 0 && SwapChain)
 		return XR_SUCCESS;  // Don't resize if we don't have to
 
 	Resolution = newSize;
@@ -415,16 +415,37 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 
 	if (UIView) UIView->PrepareResize();
 
-	const DXGI_SWAP_CHAIN_FLAG& scflags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+	UINT scflags = flipWithTearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 
 	if (!SwapChain) {
+		Microsoft::WRL::ComPtr<IDXGIDevice> pDXGIDevice;
+		LE(Device.As<IDXGIDevice>(&pDXGIDevice));
+		Microsoft::WRL::ComPtr<IDXGIAdapter> adapter;
+		Microsoft::WRL::ComPtr<IDXGIFactory> factory;
+		Microsoft::WRL::ComPtr<IDXGIFactory5> factory5;
+
+		LE(pDXGIDevice->GetAdapter(&adapter));
+		LE(adapter->GetParent(IID_PPV_ARGS(&factory)));
+		LE(factory.As(&factory5));
+
+		BOOL allowTearing = FALSE;
+		LE(factory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof(allowTearing)));
 		LogInfo() << "Creating new swapchain! (Format: DXGI_FORMAT_R8G8B8A8_UNORM)";
 
-		DXGI_SWAP_CHAIN_DESC scd;
-		ZeroMemory(&scd, sizeof(DXGI_SWAP_CHAIN_DESC));
+		flipWithTearing = allowTearing != 0;
+		LogInfo() << "SwapChain: DXGI_FEATURE_PRESENT_ALLOW_TEARING = " << (flipWithTearing ? "Enabled" : "Disabled");
 
+		DXGI_SWAP_CHAIN_DESC scd = {};
+
+		if (flipWithTearing) {
+			scd.BufferCount = 2;
+			scd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+			scflags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+		} else {
+			scd.BufferCount = 1;
+			scd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+		}
 		scd.Flags = scflags;
-		scd.BufferCount = 1;
 		scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_SHADER_INPUT;
 		scd.OutputWindow = OutputWindow;
@@ -432,34 +453,27 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 		scd.SampleDesc.Quality = 0;
 		scd.BufferDesc.Height = bbres.y;
 		scd.BufferDesc.Width = bbres.x;
-		scd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 
 		bool windowed = Engine::GAPI->HasCommandlineParameter("ZWINDOW") ||
 			Engine::GAPI->GetIntParamFromConfig("zStartupWindowed");
-		scd.Windowed = windowed;
+		if (flipWithTearing) {
+			scd.Windowed = true;
+		} else {
+			scd.Windowed = windowed;
+		}
 
-#ifndef PUBLIC_RELEASE
-		scd.Windowed = true;
-#endif
-
-#ifdef BUILD_GOTHIC_1_08k
-#ifdef PUBLIC_RELEASE
-		scd.Windowed = false;
-#else
-		scd.Windowed = true;
-#endif
-#endif
-
-		LE(DXGIFactory->CreateSwapChain(GetDevice(), &scd, &SwapChain));
+		LE(factory->CreateSwapChain(GetDevice(), &scd, &SwapChain));
 
 		if (!SwapChain) {
 			LogError() << "Failed to create Swapchain! Program will now exit!";
 			exit(0);
 		}
+		if (flipWithTearing) {
+			LE(factory->MakeWindowAssociation(OutputWindow, DXGI_MWA_NO_WINDOW_CHANGES));
+		}
 
 		// Need to init AntTweakBar now that we have a working swapchain
 		XLE(Engine::AntTweakBar->Init());
-
 	}
 	else {
 		LogInfo() << "Resizing swapchain  (Format: DXGI_FORMAT_R8G8B8A8_UNORM)";
@@ -804,7 +818,13 @@ XRESULT D3D11GraphicsEngine::Present() {
 	bool vsync = Engine::GAPI->GetRendererState()->RendererSettings.EnableVSync;
 
 	Engine::GAPI->EnterResourceCriticalSection();
-	if (SwapChain->Present(vsync ? 1 : 0, 0) == DXGI_ERROR_DEVICE_REMOVED) {
+	HRESULT hr;
+	if (flipWithTearing) {
+		hr = SwapChain->Present(vsync ? 1 : 0, vsync ? 0 : DXGI_PRESENT_ALLOW_TEARING);
+	} else {
+		hr = SwapChain->Present(vsync ? 1 : 0, 0);
+	}
+	if (hr == DXGI_ERROR_DEVICE_REMOVED) {
 		switch (GetDevice()->GetDeviceRemovedReason()) {
 			case DXGI_ERROR_DEVICE_HUNG:
 				LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_HUNG)";
@@ -4738,6 +4758,22 @@ void D3D11GraphicsEngine::DrawVobsList(const std::list<VobInfo*>& vobs, zCCamera
 /** Message-Callback for the main window */
 LRESULT D3D11GraphicsEngine::OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam,
 	LPARAM lParam) {
+	switch (msg)
+	{
+	case WM_ACTIVATEAPP:
+		if (wParam) {
+			if (m_previousFpsLimit > 0) {
+				m_FrameLimiter->SetLimit(m_previousFpsLimit);
+			} else {
+				Engine::GAPI->GetRendererState()->RendererSettings.FpsLimit = 0;
+				m_FrameLimiter->Reset();
+			}
+		} else {
+			m_previousFpsLimit = Engine::GAPI->GetRendererState()->RendererSettings.FpsLimit;
+			Engine::GAPI->GetRendererState()->RendererSettings.FpsLimit = 30;
+		}
+		break;
+	}
 	if (UIView) {
 		UIView->OnWindowMessage(hWnd, msg, wParam, lParam);
 	}

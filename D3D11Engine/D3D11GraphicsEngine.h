@@ -409,4 +409,6 @@ protected:
 
 	std::vector<simpleTextBuffer> textToDraw;
 
+	bool flipWithTearing;
+	int m_previousFpsLimit;
 };
