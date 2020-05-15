@@ -36,7 +36,7 @@ public:
 
 #if BUILD_GOTHIC_2_6_fix
 		// 006C3140                             ; void __thiscall oCGame::UpdatePlayerStatus(oCGame *__hidden this)
-		XHook(HookedFunctions::OriginalFunctions.original_oCGameUpdatePlayerStatus, 0x006C3140, oCGame::hooked_UpdatePlayerStatus);
+		//XHook(HookedFunctions::OriginalFunctions.original_oCGameUpdatePlayerStatus, 0x006C3140, oCGame::hooked_UpdatePlayerStatus);
 #endif
 	}
 	static void __fastcall hooked_UpdatePlayerStatus(void* thisptr, void* unknwn) {
