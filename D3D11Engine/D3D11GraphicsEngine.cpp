@@ -4761,18 +4761,19 @@ LRESULT D3D11GraphicsEngine::OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam,
 	switch (msg)
 	{
 	case WM_ACTIVATEAPP:
-		if (wParam) {
-			if (m_previousFpsLimit > 0) {
-				m_FrameLimiter->SetLimit(m_previousFpsLimit);
-			} else {
-				Engine::GAPI->GetRendererState()->RendererSettings.FpsLimit = 0;
-				m_FrameLimiter->Reset();
-			}
-		} else if (UIView->GetSettingsDialog()->IsHidden()) {
-			m_previousFpsLimit = Engine::GAPI->GetRendererState()->RendererSettings.FpsLimit;
-			Engine::GAPI->GetRendererState()->RendererSettings.FpsLimit = 30;
-		}
-		break;
+		break; // Does not work with Union. Will have to find a different way.
+		//if (wParam) {
+		//	if (m_previousFpsLimit > 0) {
+		//		m_FrameLimiter->SetLimit(m_previousFpsLimit);
+		//	} else {
+		//		Engine::GAPI->GetRendererState()->RendererSettings.FpsLimit = 0;
+		//		m_FrameLimiter->Reset();
+		//	}
+		//} else if (UIView->GetSettingsDialog()->IsHidden()) {
+		//	m_previousFpsLimit = Engine::GAPI->GetRendererState()->RendererSettings.FpsLimit;
+		//	Engine::GAPI->GetRendererState()->RendererSettings.FpsLimit = 30;
+		//}
+		//break;
 	}
 	if (UIView) {
 		UIView->OnWindowMessage(hWnd, msg, wParam, lParam);
