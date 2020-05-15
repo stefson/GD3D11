@@ -4768,7 +4768,7 @@ LRESULT D3D11GraphicsEngine::OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam,
 				Engine::GAPI->GetRendererState()->RendererSettings.FpsLimit = 0;
 				m_FrameLimiter->Reset();
 			}
-		} else {
+		} else if (UIView->GetSettingsDialog()->IsHidden()) {
 			m_previousFpsLimit = Engine::GAPI->GetRendererState()->RendererSettings.FpsLimit;
 			Engine::GAPI->GetRendererState()->RendererSettings.FpsLimit = 30;
 		}
