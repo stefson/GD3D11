@@ -310,6 +310,7 @@ public:
 
 	/** Creates the main UI-View */
 	void CreateMainUIView();
+	void RenderStrings() override;
 
 	/** Returns a dummy cube-rendertarget used for pointlight shadowmaps */
 	RenderToTextureBuffer * GetDummyCubeRT() { return DummyShadowCubemapTexture.get(); }

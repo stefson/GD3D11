@@ -109,7 +109,6 @@ public:
 		zCList <zCViewText>* textNode = thisptr->textLines.next;
 		zCViewText* text = nullptr;
 
-		
 
 		zColor color = zView::DefaultColor;
 		while (textNode) {
@@ -137,7 +136,7 @@ public:
 			if ((!fontName.compare(zView::FONT_DEFAULT) || !fontName.compare(zView::FONT_OLD_10_WHITE) || !fontName.compare(zView::FONT_OLD_10_WHITE_HI))) {
 				auto blendFunc = thisptr->alphafunc;
 				auto col = !fontName.compare(zView::FONT_OLD_10_WHITE_HI) ? zCOLOR_WHITE : color;
-				Engine::GraphicsEngine->DrawString(text->text.ToChar(), x, y, float4((float)col.bgra.r / 255.f, (float)col.bgra.g / 255.f, (float)col.bgra.b / 255.f, (float)col.bgra.alpha / 255.f), blendFunc);
+				Engine::GraphicsEngine->DrawString(text->text.ToChar(), x, y, col.ToFloat4(), blendFunc);
 			}
 			else {
 				if(text->font)

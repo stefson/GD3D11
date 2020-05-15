@@ -88,7 +88,7 @@ enum zTRnd_AlphaBlendFunc {
 	zRND_ALPHA_FUNC_BLEND_TEST = 8			
 };
 
-
+struct float4;
 struct zColor {
 	union {
 		struct bgra {
@@ -109,6 +109,9 @@ struct zColor {
 	bool IsWhite() {
 		return dword == 4294967295;
 	}
+	float4 ToFloat4() {
+		return float4((float)bgra.r / 255.f, (float)bgra.g / 255.f, (float)bgra.b / 255.f, (float)bgra.alpha / 255.f);
+	}
 };
 static zColor zCOLOR_WHITE = zColor(255, 255, 255, 255);
 
@@ -122,4 +125,20 @@ struct zTRndSimpleVertex {
 struct zVEC2 {
 public:
 	float v[2];
+};
+
+template <class T>
+class zCList {
+public:
+	T* data;
+	zCList* next;
+};
+
+template <class T>
+class zList {
+public:
+	int (*cmp)(T* ele1, T* ele2);
+	int count;
+	T* last;
+	T* root;
 };

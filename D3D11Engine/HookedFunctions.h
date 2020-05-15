@@ -29,6 +29,7 @@ typedef void (__thiscall* oCWorldInsertVobInWorld)(void *, zCVob *);
 typedef void (__thiscall* zCBspTreeAddVob)(void *, zCVob *);
 typedef void (__thiscall* zCWorldLoadWorld)(void *, const zSTRING& fileName, const int loadMode);
 typedef void (__thiscall* oCGameEnterWorld)(void *, oCNPC* playerVob, int changePlayerPos, const zSTRING& startpoint);
+typedef void(__thiscall* oCGameUpdatePlayerStatus)(void*);
 typedef void (__thiscall* zCWorldVobRemovedFromWorld)(void *, zCVob *);
 typedef D3DXMATRIX (__cdecl * Alg_Rotation3DNRad)(const D3DXVECTOR3 & axis, const float angle);
 typedef int (__cdecl * vidGetFPSRate)();
@@ -100,6 +101,7 @@ struct HookedFunctionInfo
 	oCWorldInsertVobInWorld original_oCWorldInsertVobInWorld;
 	zCWorldLoadWorld original_zCWorldLoadWorld;
 	oCGameEnterWorld original_oCGameEnterWorld;
+	oCGameUpdatePlayerStatus original_oCGameUpdatePlayerStatus;
 	zCWorldVobRemovedFromWorld original_zCWorldVobRemovedFromWorld;
 	Alg_Rotation3DNRad original_Alg_Rotation3DNRad;
 	GenericDestructor original_zCMaterialDestructor;

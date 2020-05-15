@@ -764,60 +764,7 @@ XRESULT D3D11GraphicsEngine::Present() {
 	// Copy HDR scene to backbuffer
 	SetDefaultStates();
 
-	if (Engine::GAPI->GetRendererState()->RendererSettings.EnableCustomFontRendering && !textToDraw.empty())
-	{
-		auto r = RECT{};
-		r.top = 0;
-		r.left = 0;
-		r.bottom = Resolution.y;
-		r.right = Resolution.x;
-
-		//m_spriteBatch->Begin();
-		m_spriteBatch->Begin(SpriteSortMode_Deferred, states->NonPremultiplied());
-		wchar_t buf[255];
-		static XMVECTOR gothicColor = XMVectorSet(203.f / 255.f, 186.f / 255.f, 158.f / 255.f, 1);
-
-		zTRnd_AlphaBlendFunc lastBlendState = zRND_ALPHA_FUNC_NONE;
-
-		for (auto const& txt : textToDraw) {
-			// TODO: Fix Alpha Blending for SpriteFont.
-			/*if (lastBlendState != zRND_ALPHA_FUNC_BLEND && txt.blendState == zRND_ALPHA_FUNC_BLEND)
-			{
-				lastBlendState = txt.blendState;
-				m_spriteBatch->End();
-
-				Engine::GAPI->GetRendererState()->BlendState.SetAlphaBlending();
-				Engine::GAPI->GetRendererState()->BlendState.SetDirty();
-				UpdateRenderStates();
-				m_spriteBatch->Begin(SpriteSortMode_Deferred, states->NonPremultiplied());
-			}*/
-
-			auto wSize = MultiByteToWideChar(CP_ACP, 0, txt.str.c_str(), txt.str.length(), buf, 255);
-			// TODO: What are we gonna do with too long texts?
-			if (!wSize) {
-				continue;
-			}
-
-			auto color = XMLoadFloat4(txt.color.toXMFLOAT4());
-
-			std::wstring output = std::wstring(buf, wSize);
-			auto fontPos = XMVectorSet(txt.x, txt.y, 0, 0);
-
-			// Drop-Shadow
-			//m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos + XMVectorSet(1.f, 1.f, 0, 0), Colors::Black, 0.f);
-			//m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos + XMVectorSet(-1.f, 1.f, 0, 0), Colors::Black, 0.f);
-
-			m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos, color, 0.f);
-		}
-
-		m_spriteBatch->Draw(HDRBackBuffer->GetShaderResView(), r);
-
-		m_spriteBatch->End();
-
-		textToDraw.clear();
-		SetDefaultStates();
-	}
-
+	RenderStrings();
 	SetActivePixelShader("PS_PFX_GammaCorrectInv");
 
 	ActivePS->Apply();
@@ -5354,6 +5301,63 @@ void D3D11GraphicsEngine::CreateMainUIView() {
 			UIView.reset();
 			return;
 		}
+	}
+}
+
+void D3D11GraphicsEngine::RenderStrings()
+{
+	if (Engine::GAPI->GetRendererState()->RendererSettings.EnableCustomFontRendering && !textToDraw.empty())
+	{
+		auto r = RECT{};
+		r.top = 0;
+		r.left = 0;
+		r.bottom = Resolution.y;
+		r.right = Resolution.x;
+
+		//m_spriteBatch->Begin();
+		m_spriteBatch->Begin(SpriteSortMode_Deferred, states->NonPremultiplied());
+		wchar_t buf[255];
+		static XMVECTOR gothicColor = XMVectorSet(203.f / 255.f, 186.f / 255.f, 158.f / 255.f, 1);
+
+		zTRnd_AlphaBlendFunc lastBlendState = zRND_ALPHA_FUNC_NONE;
+
+		for (auto const& txt : textToDraw) {
+			// TODO: Fix Alpha Blending for SpriteFont.
+			/*if (lastBlendState != zRND_ALPHA_FUNC_BLEND && txt.blendState == zRND_ALPHA_FUNC_BLEND)
+			{
+				lastBlendState = txt.blendState;
+				m_spriteBatch->End();
+
+				Engine::GAPI->GetRendererState()->BlendState.SetAlphaBlending();
+				Engine::GAPI->GetRendererState()->BlendState.SetDirty();
+				UpdateRenderStates();
+				m_spriteBatch->Begin(SpriteSortMode_Deferred, states->NonPremultiplied());
+			}*/
+
+			auto wSize = MultiByteToWideChar(CP_ACP, 0, txt.str.c_str(), txt.str.length(), buf, 255);
+			// TODO: What are we gonna do with too long texts?
+			if (!wSize) {
+				continue;
+			}
+
+			auto color = XMLoadFloat4(txt.color.toXMFLOAT4());
+
+			std::wstring output = std::wstring(buf, wSize);
+			auto fontPos = XMVectorSet(txt.x, txt.y, 0, 0);
+
+			// Drop-Shadow
+			//m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos + XMVectorSet(1.f, 1.f, 0, 0), Colors::Black, 0.f);
+			//m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos + XMVectorSet(-1.f, 1.f, 0, 0), Colors::Black, 0.f);
+
+			m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos, color, 0.f);
+		}
+
+		m_spriteBatch->Draw(HDRBackBuffer->GetShaderResView(), r);
+
+		m_spriteBatch->End();
+
+		textToDraw.clear();
+		SetDefaultStates();
 	}
 }
 
