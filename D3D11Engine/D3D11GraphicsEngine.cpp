@@ -25,6 +25,7 @@
 #include "zCTexture.h"
 #include "zCView.h"
 #include "zCVobLight.h"
+//#include "oCNPC.h"
 #include <DDSTextureLoader.h>
 #include <ScreenGrab.h>
 #include <wincodec.h>
@@ -3242,6 +3243,15 @@ void D3D11GraphicsEngine::DrawWorldAround(FXMVECTOR position,
 			if (dist > Engine::GAPI->GetRendererState()
 				->RendererSettings.IndoorVobDrawRadius)
 				continue;  // Skip out of range
+
+			// TODO: Handle transparent NPCs
+			//if (skeletalMeshVob->Vob->AsNpc()) {
+			//	oCNPC* npc = skeletalMeshVob->Vob->AsNpc();
+			//	if (npc->HasFlag(4)) {
+			//		// GHOST
+			//		skeletalMeshVob->VisualInfo->Visual->SetAlphaTestingEnabled(1);
+			//	}
+			//}
 
 			Engine::GAPI->DrawSkeletalMeshVob(skeletalMeshVob, FLT_MAX);
 		}

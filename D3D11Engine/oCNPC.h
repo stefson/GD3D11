@@ -5,6 +5,7 @@
 #include "Engine.h"
 #include "GothicAPI.h"
 #include "zCVob.h"
+#include "zViewTypes.h"
 
 class oCNPC : public zCVob
 {
@@ -25,47 +26,47 @@ public:
 
 		XHook(HookedFunctions::OriginalFunctions.original_oCNPCInitModel, GothicMemoryLocations::oCNPC::InitModel, oCNPC::hooked_oCNPCInitModel);
 	}
-	 
-	static void __fastcall hooked_oCNPCInitModel(void * thisptr, void * unknwn)
-	{
-		hook_infunc	
-		HookedFunctions::OriginalFunctions.original_oCNPCInitModel(thisptr);
 
-		if (/*((zCVob *)thisptr)->GetVisual() || */Engine::GAPI->GetSkeletalVobByVob((zCVob *)thisptr))
+	static void __fastcall hooked_oCNPCInitModel(void* thisptr, void* unknwn)
+	{
+		hook_infunc
+			HookedFunctions::OriginalFunctions.original_oCNPCInitModel(thisptr);
+
+		if (/*((zCVob *)thisptr)->GetVisual() || */Engine::GAPI->GetSkeletalVobByVob((zCVob*)thisptr))
 		{
 			// This may causes the vob to be added and removed multiple times, but makes sure we get all changes of armor
-			Engine::GAPI->OnRemovedVob((zCVob *)thisptr, ((zCVob *)thisptr)->GetHomeWorld());	
-			Engine::GAPI->OnAddVob((zCVob *)thisptr, ((zCVob *)thisptr)->GetHomeWorld());
+			Engine::GAPI->OnRemovedVob((zCVob*)thisptr, ((zCVob*)thisptr)->GetHomeWorld());
+			Engine::GAPI->OnAddVob((zCVob*)thisptr, ((zCVob*)thisptr)->GetHomeWorld());
 		}
 		hook_outfunc
 	}
 
 	/** Reads config stuff */
-	static void __fastcall hooked_oCNPCEnable(void * thisptr, void * unknwn, D3DXVECTOR3 & position)
+	static void __fastcall hooked_oCNPCEnable(void* thisptr, void* unknwn, D3DXVECTOR3& position)
 	{
 		hook_infunc
-		HookedFunctions::OriginalFunctions.original_oCNPCEnable(thisptr, position);
+			HookedFunctions::OriginalFunctions.original_oCNPCEnable(thisptr, position);
 
 		// Re-Add if needed
-		Engine::GAPI->OnRemovedVob((zCVob *)thisptr, ((zCVob *)thisptr)->GetHomeWorld());	
-		Engine::GAPI->OnAddVob((zCVob *)thisptr, ((zCVob *)thisptr)->GetHomeWorld());
+		Engine::GAPI->OnRemovedVob((zCVob*)thisptr, ((zCVob*)thisptr)->GetHomeWorld());
+		Engine::GAPI->OnAddVob((zCVob*)thisptr, ((zCVob*)thisptr)->GetHomeWorld());
 		hook_outfunc
 	}
 
-	static void __fastcall hooked_oCNPCDisable(void * thisptr, void * unknwn)
+	static void __fastcall hooked_oCNPCDisable(void* thisptr, void* unknwn)
 	{
 		hook_infunc
 
-		// Remove vob from world
-		if (!((oCNPC *)thisptr)->IsAPlayer()) // Never disable the player vob
-			Engine::GAPI->OnRemovedVob((zCVob *)thisptr, ((zCVob *)thisptr)->GetHomeWorld());	
+			// Remove vob from world
+			if (!((oCNPC*)thisptr)->IsAPlayer()) // Never disable the player vob
+				Engine::GAPI->OnRemovedVob((zCVob*)thisptr, ((zCVob*)thisptr)->GetHomeWorld());
 
 		HookedFunctions::OriginalFunctions.original_oCNPCDisable(thisptr);
-	
+
 		hook_outfunc
 	}
 
-	void ResetPos(const D3DXVECTOR3 & pos)
+	void ResetPos(const D3DXVECTOR3& pos)
 	{
 		XCALL(GothicMemoryLocations::oCNPC::ResetPos);
 	}
@@ -78,5 +79,8 @@ public:
 	{
 		XCALL(GothicMemoryLocations::oCNPC::GetName);
 	}
+#ifndef BUILD_GOTHIC_1_08k 
+	int HasFlag(int) { XCALL(0x007309E0); }
+#endif
 };
 
