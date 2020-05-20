@@ -419,6 +419,7 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 
 	if (!SwapChain) {
 		Microsoft::WRL::ComPtr<IDXGIDevice> pDXGIDevice;
+		BOOL allowTearing = FALSE;
 		LE(Device.As<IDXGIDevice>(&pDXGIDevice));
 		Microsoft::WRL::ComPtr<IDXGIAdapter> adapter;
 		Microsoft::WRL::ComPtr<IDXGIFactory> factory;
@@ -426,17 +427,18 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 
 		LE(pDXGIDevice->GetAdapter(&adapter));
 		LE(adapter->GetParent(IID_PPV_ARGS(&factory)));
-		LE(factory.As(&factory5));
 
-		BOOL allowTearing = FALSE;
-		LE(factory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof(allowTearing)));
-		LogInfo() << "Creating new swapchain! (Format: DXGI_FORMAT_R8G8B8A8_UNORM)";
 
-		flipWithTearing = allowTearing != 0;
+		if (SUCCEEDED(factory.As(&factory5))) {
+			if (factory5.Get() && SUCCEEDED(factory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof(allowTearing)))) {
+				flipWithTearing = allowTearing != 0;		
+			}
+		}
 		LogInfo() << "SwapChain: DXGI_FEATURE_PRESENT_ALLOW_TEARING = " << (flipWithTearing ? "Enabled" : "Disabled");
 
 		DXGI_SWAP_CHAIN_DESC scd = {};
 
+		LogInfo() << "Creating new swapchain! (Format: DXGI_FORMAT_R8G8B8A8_UNORM)";
 		if (flipWithTearing) {
 			scd.BufferCount = 2;
 			scd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
