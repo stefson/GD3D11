@@ -415,11 +415,12 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 
 	if (UIView) UIView->PrepareResize();
 
-	UINT scflags = flipWithTearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
+	UINT scflags = m_flipWithTearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 
 	if (!SwapChain) {
+		m_swapchainflip = Engine::GAPI->GetRendererState()->RendererSettings.DisplayFlip;
+
 		Microsoft::WRL::ComPtr<IDXGIDevice> pDXGIDevice;
-		BOOL allowTearing = FALSE;
 		LE(Device.As<IDXGIDevice>(&pDXGIDevice));
 		Microsoft::WRL::ComPtr<IDXGIAdapter> adapter;
 		Microsoft::WRL::ComPtr<IDXGIFactory> factory;
@@ -428,21 +429,26 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 		LE(pDXGIDevice->GetAdapter(&adapter));
 		LE(adapter->GetParent(IID_PPV_ARGS(&factory)));
 
-
 		if (SUCCEEDED(factory.As(&factory5))) {
+			BOOL allowTearing = FALSE;
 			if (factory5.Get() && SUCCEEDED(factory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof(allowTearing)))) {
-				flipWithTearing = allowTearing != 0;		
+				m_flipWithTearing = allowTearing != 0;
+				m_swapchainflip = m_flipWithTearing;
 			}
 		}
-		LogInfo() << "SwapChain: DXGI_FEATURE_PRESENT_ALLOW_TEARING = " << (flipWithTearing ? "Enabled" : "Disabled");
+		LogInfo() << "SwapChain Mode: " << (m_swapchainflip ? "DXGI_SWAP_EFFECT_FLIP_DISCARD" : "DXGI_SWAP_EFFECT_DISCARD");
+		LogInfo() << "SwapChain: DXGI_FEATURE_PRESENT_ALLOW_TEARING = " << (m_flipWithTearing ? "Enabled" : "Disabled");
 
 		DXGI_SWAP_CHAIN_DESC scd = {};
 
 		LogInfo() << "Creating new swapchain! (Format: DXGI_FORMAT_R8G8B8A8_UNORM)";
-		if (flipWithTearing) {
+		
+		if (m_swapchainflip) {
 			scd.BufferCount = 2;
 			scd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-			scflags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+			if (m_flipWithTearing) {
+				scflags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+			}
 		} else {
 			scd.BufferCount = 1;
 			scd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
@@ -456,11 +462,11 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 		scd.BufferDesc.Height = bbres.y;
 		scd.BufferDesc.Width = bbres.x;
 
-		bool windowed = Engine::GAPI->HasCommandlineParameter("ZWINDOW") ||
-			Engine::GAPI->GetIntParamFromConfig("zStartupWindowed");
-		if (flipWithTearing) {
+		if (m_swapchainflip) {
 			scd.Windowed = true;
 		} else {
+			bool windowed = Engine::GAPI->HasCommandlineParameter("ZWINDOW") ||
+				Engine::GAPI->GetIntParamFromConfig("zStartupWindowed");
 			scd.Windowed = windowed;
 		}
 
@@ -470,7 +476,7 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 			LogError() << "Failed to create Swapchain! Program will now exit!";
 			exit(0);
 		}
-		if (flipWithTearing) {
+		if (m_swapchainflip) {
 			LE(factory->MakeWindowAssociation(OutputWindow, DXGI_MWA_NO_WINDOW_CHANGES));
 		}
 
@@ -821,7 +827,7 @@ XRESULT D3D11GraphicsEngine::Present() {
 
 	Engine::GAPI->EnterResourceCriticalSection();
 	HRESULT hr;
-	if (flipWithTearing) {
+	if (m_flipWithTearing) {
 		hr = SwapChain->Present(vsync ? 1 : 0, vsync ? 0 : DXGI_PRESENT_ALLOW_TEARING);
 	} else {
 		hr = SwapChain->Present(vsync ? 1 : 0, 0);

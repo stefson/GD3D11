@@ -3757,6 +3757,7 @@ XRESULT GothicAPI::SaveMenuSettings(const std::string & file) {
 	WritePrivateProfileStringA("Display", "FOVVert", std::to_string((int)s.FOVVert).c_str(), ini.c_str());
 	WritePrivateProfileStringA("Display", "Gamma", std::to_string(s.GammaValue).c_str(), ini.c_str());
 	WritePrivateProfileStringA("Display", "Brightness", std::to_string(s.BrightnessValue).c_str(), ini.c_str());
+	WritePrivateProfileStringA("Display", "DisplayFlip", std::to_string(s.DisplayFlip ? TRUE : FALSE).c_str(), ini.c_str());
 
 	WritePrivateProfileStringA("Shadows", "EnableShadows", std::to_string(s.EnableShadows ? TRUE : FALSE).c_str(), ini.c_str());
 	WritePrivateProfileStringA("Shadows", "EnableSoftShadows", std::to_string(s.EnableSoftShadows ? TRUE : FALSE).c_str(), ini.c_str());
@@ -3859,6 +3860,7 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 	s.FOVVert = GetPrivateProfileIntA("Display", "FOVVert", 90, ini.c_str());
 	s.GammaValue = GetPrivateProfileFloatA("Display", "Gamma", 1.0f, ini.c_str());
 	s.BrightnessValue = GetPrivateProfileFloatA("Display", "Brightness", 1.0f, ini.c_str());
+	s.DisplayFlip = GetPrivateProfileBoolA("Display", "DisplayFlip", false, ini.c_str());
 
 	s.EnableSMAA = GetPrivateProfileBoolA("SMAA", "Enabled", false, ini);
 	s.SharpenFactor = GetPrivateProfileFloatA("SMAA", "SharpenFactor", 0.30f, ini.c_str());

@@ -693,6 +693,7 @@ struct GothicRendererSettings {
 	std::string FontFileDefault;
 	std::string FontFileMenu;
 	bool ForceFOV;
+	bool DisplayFlip;
 };
 
 struct GothicRendererTiming {
