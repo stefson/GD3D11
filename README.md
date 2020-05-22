@@ -57,6 +57,14 @@ So its very easy to build any version back to 13.0, just make sure to switch to 
 
 - Using HBAO+ files from https://github.com/dboleslawski/VVVV.HBAOPlus/tree/master/Dependencies/NVIDIA-HBAOPlus
 
+### Special Thanks
+
+... to the following people
+
+- @ataulien (Degenerated @ WoG) for creating this project.
+- Bonne6 @ WoG for providing the base for this modified version.
+- Keks1 @ WoG for testing, helping with conversions and implementing several features.
+
 ### License
 
 - HBAO+ is licensed under [GameWorks Binary SDK EULA](https://developer.nvidia.com/gameworks-sdk-eula)
