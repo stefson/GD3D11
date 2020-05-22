@@ -67,11 +67,12 @@ HRESULT EditorLinePrimitive::CreateLineGrid(int LinesX,int LinesY, XMFLOAT2* Mid
 	float SpacingX=(1.0f/LinesX);
 	for(x= -0.5; x<=0.5f+SpacingX; x+=SpacingX)
 	{
-
-		vx[CurVertex].Position=D3DXVECTOR3(x, 0,-0.5)+D3DXVECTOR3(Middle->x, 0,Middle->y);
+		vx[CurVertex].Position.x = x + Middle->x;
+		vx[CurVertex].Position.z = -0.5 + Middle->y;
 		EncodeColor(&vx[CurVertex], Color);
 		CurVertex++;
-		vx[CurVertex].Position=D3DXVECTOR3(x, 0, 0.5)+D3DXVECTOR3(Middle->x, 0,Middle->y);
+		vx[CurVertex].Position.x = x + Middle->x;
+		vx[CurVertex].Position.z = 0.5 + Middle->y;
 		EncodeColor(&vx[CurVertex], Color);
 		CurVertex++;
 	}
@@ -81,10 +82,12 @@ HRESULT EditorLinePrimitive::CreateLineGrid(int LinesX,int LinesY, XMFLOAT2* Mid
 	float SpacingY=(1.0f/LinesY);
 	for(z= -0.5; z<=0.5f+SpacingY; z+=SpacingY)
 	{
-		vx[CurVertex].Position=D3DXVECTOR3(-0.5, 0,z)+D3DXVECTOR3(Middle->x, 0,Middle->y);
+		vx[CurVertex].Position.x = -0.5 + Middle->x;
+		vx[CurVertex].Position.z = z + Middle->y;
 		EncodeColor(&vx[CurVertex], Color);
 		CurVertex++;
-		vx[CurVertex].Position=D3DXVECTOR3(0.5, 0,z)+D3DXVECTOR3(Middle->x, 0,Middle->y);
+		vx[CurVertex].Position.x = 0.5 + Middle->x;
+		vx[CurVertex].Position.z = z + Middle->y;
 		EncodeColor(&vx[CurVertex], Color);
 		CurVertex++;
 	}
@@ -288,7 +291,9 @@ HRESULT EditorLinePrimitive::CreateSolidBoxPrimitive(float4& Color, float Extend
 	// Loop through all vertices and apply the extends
 	for(i = 0; i < 36; i++)
 	{
-		*(D3DXVECTOR4 *)&vx[i].Position *= Extends;
+		vx[i].Position.x *= Extends;
+		vx[i].Position.y *= Extends;
+		vx[i].Position.z *= Extends;
 	}
 
 	HRESULT hr;
@@ -340,7 +345,7 @@ HRESULT EditorLinePrimitive::CreateFilledCirclePrimitive(float Radius, UINT Deta
 	UINT NumVerts = Detail*3;
 	LineVertex * vx = new LineVertex[NumVerts];
 
-	float Step = (D3DX_PI*2)/((float)(Detail)-1);
+	float Step = XM_2PI /((float)(Detail)-1);
 	float s = 0;
 
 	size_t i=0;
@@ -406,7 +411,7 @@ HRESULT EditorLinePrimitive::CreateCirclePrimitive(float Radius, UINT Detail, co
 {
 	LineVertex * vx = new LineVertex[Detail];
 
-	float Step = (D3DX_PI*2)/((float)Detail-1);
+	float Step = XM_2PI /((float)Detail-1);
 	float s = 0;
 
 	for(UINT i = 0; i < Detail; i++)
@@ -446,7 +451,7 @@ HRESULT EditorLinePrimitive::CreateLineBallPrimitive(UINT Detail, const float4& 
 	// Allocate enough memory for all 3 slices
 	LineVertex * vx = new LineVertex[(Detail*3)];
 
-	float Step = (D3DX_PI*2)/((float)Detail-1);
+	float Step = XM_2PI /((float)Detail-1);
 	float s = 0;
 
 	// Create first
@@ -484,7 +489,7 @@ HRESULT EditorLinePrimitive::CreateLineBallPrimitive(UINT Detail, const float4& 
 	}
 
 	// Fix the last position
-	//vx[(Detail*3)].Position = D3DXVECTOR3(sinf(s), cosf(s), 0);
+	//vx[(Detail*3)].Position = XMFLOAT3(sinf(s), cosf(s), 0);
 
 	HRESULT hr = CreatePrimitive(vx, (Detail*3), D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
 	delete[] vx;
@@ -534,7 +539,7 @@ HRESULT EditorLinePrimitive::CreateSimpleConePrimitive(float Length, float Radiu
 
 	LineVertex * vx = new LineVertex[NumVerts];
 
-	float Step = (D3DX_PI*2)/((float)Detail-1);
+	float Step = XM_2PI /((float)Detail-1);
 	float s = 0;
 
 	UINT i = 0;

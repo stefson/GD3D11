@@ -134,8 +134,8 @@ void D3D11PFX_SMAA::RenderPostFX(ID3D11ShaderResourceView * renderTargetSRV)
 		OnResize(INT2(engine->GetResolution().x, engine->GetResolution().y));
 	}
 
-	engine->GetContext()->ClearRenderTargetView(EdgesTex->GetRenderTargetView(), D3DXVECTOR4(0, 0, 0, 0));
-	engine->GetContext()->ClearRenderTargetView(BlendTex->GetRenderTargetView(), D3DXVECTOR4(0, 0, 0, 0));
+	engine->GetContext()->ClearRenderTargetView(EdgesTex->GetRenderTargetView(), (float*)&float4(0, 0, 0, 0));
+	engine->GetContext()->ClearRenderTargetView(BlendTex->GetRenderTargetView(), (float*)&float4(0, 0, 0, 0));
 
 	ID3D11RenderTargetView* RTV=nullptr;
 	ID3D11RenderTargetView* OldRTV=nullptr;
@@ -255,6 +255,9 @@ void D3D11PFX_SMAA::OnResize(const INT2 & size)
 	sprintf(ResStr, "float2(1.0f/%d, 1.0f/%d)", (int)(size.x), (int)(size.y));
 	D3D_SHADER_MACRO PixelSize = {"SMAA_PIXEL_SIZE", ResStr};
 	Makros.push_back(PixelSize);
+
+	D3D_SHADER_MACRO HLSL = {"SMAA_HLSL_4_1", "1"};
+	Makros.push_back(HLSL);
 
 	const int QUALITY = 2;
 	switch(QUALITY)

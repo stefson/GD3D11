@@ -69,13 +69,13 @@ void D3D11Effect::FillRandomRaindropData(std::vector<ParticleInstanceInfo> & dat
 		float SpeedX = 40.0f*(Toolbox::frand()/20.0f);
 		float SpeedZ = 40.0f*(Toolbox::frand()/20.0f);
 		float SpeedY = 40.0f*(Toolbox::frand()/10.0f); 
-		raindrop.velocity = D3DXVECTOR3(SpeedX,SpeedY,SpeedZ);
+		raindrop.velocity = DirectX::XMFLOAT3(SpeedX,SpeedY,SpeedZ);
 
 		//move the rain particles to a random positions in a cylinder above the camera
 		float x = SeedX + Engine::GAPI->GetCameraPosition().x;
 		float z = SeedZ + Engine::GAPI->GetCameraPosition().z;
 		float y = SeedY + Engine::GAPI->GetCameraPosition().y;
-		raindrop.position = D3DXVECTOR3(x,y,z); 
+		raindrop.position = DirectX::XMFLOAT3(x,y,z);
 
 		//get an integer between 1 and 8 inclusive to decide which of the 8 types of rain textures the particle will use
 		short* s = (short*)&raindrop.drawMode;
@@ -190,7 +190,11 @@ XRESULT D3D11Effect::DrawRain()
 
 	// Update constantbuffer for the advance-VS
 	AdvanceRainConstantBuffer acb;
-	acb.AR_LightPosition = Engine::GAPI->GetSky()->GetAtmoshpereSettings().LightDirection * Engine::GAPI->GetSky()->GetAtmoshpereSettings().OuterRadius + Engine::GAPI->GetCameraPosition();
+	XMFLOAT3 LightPosition_XMFloat3;
+	XMStoreFloat3(&LightPosition_XMFloat3, XMLoadFloat3(&Engine::GAPI->GetSky()->GetAtmoshpereSettings().LightDirection) * Engine::GAPI->GetSky()->GetAtmoshpereSettings().OuterRadius + XMLoadFloat3(&Engine::GAPI->GetCameraPosition()));
+	acb.AR_LightPosition.x = LightPosition_XMFloat3.x;
+	acb.AR_LightPosition.y = LightPosition_XMFloat3.y;
+	acb.AR_LightPosition.z = LightPosition_XMFloat3.z;
 	acb.AR_FPS = state.RendererInfo.FPS;
 	acb.AR_Radius = state.RendererSettings.RainRadiusRange;
 	acb.AR_Height = state.RendererSettings.RainHeightRange;
@@ -283,7 +287,7 @@ XRESULT D3D11Effect::DrawRainShadowmap()
 
 	// Get the section we are currently in
 	XMVECTOR p = Engine::GAPI->GetCameraPositionXM();
-	XMVECTOR dir = XMLoadFloat3((XMFLOAT3*)&(-Engine::GAPI->GetRendererState()->RendererSettings.RainGlobalVelocity));
+	XMVECTOR dir = XMVectorSet(-Engine::GAPI->GetRendererState()->RendererSettings.RainGlobalVelocity.x, -Engine::GAPI->GetRendererState()->RendererSettings.RainGlobalVelocity.y, -Engine::GAPI->GetRendererState()->RendererSettings.RainGlobalVelocity.z, 0);
 	dir = XMVector3Normalize(dir);
 	// Set the camera height to the highest point in this section
 	//p.y = 0;

@@ -18,7 +18,7 @@ extern "C"
 		- Size: Size of the cross. (About 25 is the size of a human head) */
 	__declspec(dllexport) void __cdecl GDX_AddPointLocator(float3* position, float size)
 	{
-		Engine::GraphicsEngine->GetLineRenderer()->AddPointLocator(*position->toD3DXVECTOR3(), size, D3DXVECTOR4(1, 0, 0, 1));
+		Engine::GraphicsEngine->GetLineRenderer()->AddPointLocator(*position->toXMFLOAT3(), size, DirectX::XMFLOAT4(1, 0, 0, 1));
 	}
 
 	/** Sets the fog-color to use when not in fog-zone */

@@ -12,11 +12,11 @@ class zCSkyPlanet
 public:
 	int vtbl;
 	void * mesh; // 0
-	D3DXVECTOR4 color0; // 4 
-	D3DXVECTOR4 color1; // 20
+	DirectX::XMFLOAT4 color0; // 4 
+	DirectX::XMFLOAT4 color1; // 20
 	float		size; // 36
-	D3DXVECTOR3 pos; // 40
-	D3DXVECTOR3 rotAxis; // 52
+	DirectX::XMFLOAT3 pos; // 40
+	DirectX::XMFLOAT3 rotAxis; // 52
 
 
 };
@@ -36,7 +36,7 @@ public:
 	
 	float TexAlpha;
 	float TexScale;
-	D3DXVECTOR2	TexSpeed;
+	DirectX::XMFLOAT2 TexSpeed;
 };
 
 
@@ -44,10 +44,10 @@ class zCSkyState
 {
 public:
 	float Time;
-	D3DXVECTOR3	PolyColor;
-	D3DXVECTOR3	FogColor;
-	D3DXVECTOR3	DomeColor1;
-	D3DXVECTOR3	DomeColor0;
+	DirectX::XMFLOAT3	PolyColor;
+	DirectX::XMFLOAT3	FogColor;
+	DirectX::XMFLOAT3	DomeColor1;
+	DirectX::XMFLOAT3	DomeColor0;
 	float FogDist;
 	int	SunOn;
 	int	CloudShadowOn;
@@ -170,12 +170,12 @@ public:
 		XCALL(GothicMemoryLocations::zCSkyController_Outdoor::GetUnderwaterFX);
 	}
 
-	D3DXVECTOR3 GetOverrideColor()
+	DirectX::XMFLOAT3 GetOverrideColor()
 	{
 #ifndef BUILD_GOTHIC_1_08k
-		return *(D3DXVECTOR3 *)THISPTR_OFFSET(GothicMemoryLocations::zCSkyController_Outdoor::Offset_OverrideColor);
+		return *(DirectX::XMFLOAT3 *)THISPTR_OFFSET(GothicMemoryLocations::zCSkyController_Outdoor::Offset_OverrideColor);
 #else
-		return D3DXVECTOR3(0, 0, 0);
+		return DirectX::XMFLOAT3(0, 0, 0);
 #endif
 	}
 
@@ -191,26 +191,26 @@ public:
 	}
 
 	/** Returns the sun position in world coords */
-	D3DXVECTOR3 GetSunWorldPosition(float timeScale = 1.0f) {
+	DirectX::XMFLOAT3 GetSunWorldPosition(float timeScale = 1.0f) {
 		/*if (!GetSun())
 		{
-			return D3DXVECTOR3(0, 0, 0);
+			return DirectX::XMFLOAT3(0, 0, 0);
 		}*/
 
-		//float angle = GetMasterTime() * 2.0f * (float)D3DX_PI; // Get mastertime into rad, 0 and 12 are now at the horizon, 18 is in the sky
-		//angle += (float)D3DX_PI * 0.5f; // 12 is now in the sky, 18 horizon
-		float angle = ((GetMasterTime() * timeScale - 0.3f) * 1.25f + 0.5f) * 2.0f * (float)D3DX_PI;
+		//float angle = GetMasterTime() * DirectX::XM_2PI; // Get mastertime into rad, 0 and 12 are now at the horizon, 18 is in the sky
+		//angle += DirectX::XM_PIDIV2; // 12 is now in the sky, 18 horizon
+		float angle = ((GetMasterTime() * timeScale - 0.3f) * 1.25f + 0.5f) * DirectX::XM_2PI;
 
-		D3DXVECTOR3 sunPos = D3DXVECTOR3(-60, 0, 100);
-		D3DXVec3Normalize(&sunPos, &sunPos);
+		XMVECTOR sunPos = XMVectorSet(-60, 0, 100, 0);
+		sunPos = DirectX::XMVector3Normalize(sunPos);
 
-		D3DXVECTOR3 rotAxis = D3DXVECTOR3(1, 0, 0);
+		DirectX::XMFLOAT3 rotAxis = DirectX::XMFLOAT3(1, 0, 0);
 
-		D3DXMATRIX r = HookedFunctions::OriginalFunctions.original_Alg_Rotation3DNRad(rotAxis, -angle);
-		D3DXMatrixTranspose(&r, &r);
+		XMMATRIX r = XMLoadFloat4x4(&(HookedFunctions::OriginalFunctions.original_Alg_Rotation3DNRad(rotAxis, -angle)));
+		r = DirectX::XMMatrixTranspose(r);
 
-		D3DXVECTOR3 pos;
-		D3DXVec3TransformNormal(&pos, &sunPos, &r);
+		DirectX::XMFLOAT3 pos;
+		XMStoreFloat3(&pos, DirectX::XMVector3TransformNormal(sunPos, r));
 
 		return pos;
 	}
@@ -279,7 +279,7 @@ class zCSkyLayer
 public:
 	zCMesh* SkyPolyMesh;
 	zCPolygon* SkyPoly;
-	D3DXVECTOR2 SkyTexOffs;
+	DirectX::XMFLOAT2 SkyTexOffs;
 	zCMesh*	SkyDomeMesh;
 	zESkyLayerMode SkyMode;
 
@@ -301,15 +301,15 @@ public:
 	{
 		zCSkyController_Outdoor* sky = oCGame::GetGame()->_zCSession_world->GetSkyControllerOutdoor();
 
-		D3DXVECTOR3 c;
+		DirectX::XMFLOAT3 c;
 
 		if (IsNight())
-			c = D3DXVECTOR3(1.0f, 1.0f, 1.0f);
+			c = DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f);
 		else
 			c = sky->GetMasterState()->DomeColor1;
 
 		if ((sky->GetMasterTime() >= 0.35f) && (sky->GetMasterTime() <= 0.65f) && GetLayerChannel() == 1)
-			c = 0.5f * (c + D3DXVECTOR3(1.0f, 1.0f, 1.0f));
+			c = 0.5f * (c + DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f));
 
 		return float3(c);
 	}*/

@@ -109,7 +109,7 @@ public:
 		zCList <zCViewText>* textNode = thisptr->textLines.next;
 		zCViewText* text = nullptr;
 
-
+		
 		zColor color = zView::DefaultColor;
 		while (textNode) {
 

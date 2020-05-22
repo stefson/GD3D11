@@ -23,11 +23,10 @@ GSky::GSky() {
 	Atmosphere.G = -0.995f;
 	//Atmosphere.WaveLengths = float3(0.65f, 0.57f, 0.475f);
 	Atmosphere.WaveLengths = float3(0.63f, 0.57f, 0.50f);
-	Atmosphere.SpherePosition = D3DXVECTOR3(0, 0, 0);
-	Atmosphere.LightDirection = D3DXVECTOR3(1, 1, 1);
+	Atmosphere.SpherePosition = DirectX::XMFLOAT3(0, 0, 0);
 	Atmosphere.SphereOffsetY = -820000;
 	Atmosphere.SkyTimeScale = 1.0f;
-	D3DXVec3Normalize(&Atmosphere.LightDirection, &Atmosphere.LightDirection);
+	XMStoreFloat3(&Atmosphere.LightDirection, XMVector3Normalize(XMVectorSet(1, 1, 1, 0)));
 
 	ZeroMemory(&AtmosphereCB, sizeof(AtmosphereCB));
 }
@@ -59,7 +58,7 @@ XRESULT GSky::InitSky()
 	SkyPlaneVertices[5].Position = float3(-sizeX, sizeY, +sizeX); // 2
 
 	const float scale = 20.0f;
-	D3DXVECTOR2 displacement = D3DXVECTOR2(0, 0);
+	DirectX::XMFLOAT2 displacement;
 	float4 color = float4(1, 1, 1, 1);
 
 	// Construct vertices
@@ -68,25 +67,35 @@ XRESULT GSky::InitSky()
 	SkyPlaneVertices[0].Color = color.ToDWORD();
 
 	// 1
-	SkyPlaneVertices[1].TexCoord = float2(D3DXVECTOR2(scale, 0) + displacement);
+	XMFLOAT2 SkyPlaneVertices1;
+	XMStoreFloat2(&SkyPlaneVertices1, (XMVectorSet(scale, 0, 0, 0) + XMLoadFloat2(&displacement)));
+	SkyPlaneVertices[1].TexCoord = SkyPlaneVertices1;
 	SkyPlaneVertices[1].Color = color.ToDWORD();
 
 	// 2
-	SkyPlaneVertices[2].TexCoord = float2(D3DXVECTOR2(0, scale) + displacement);
+	XMFLOAT2 SkyPlaneVertices2;
+	XMStoreFloat2(&SkyPlaneVertices2, (XMVectorSet(0, scale, 0, 0) + XMLoadFloat2(&displacement)));
+	SkyPlaneVertices[2].TexCoord = SkyPlaneVertices2;
 	SkyPlaneVertices[2].Color = color.ToDWORD();
 
 	// ---
 
 	// 1
-	SkyPlaneVertices[3].TexCoord = float2(D3DXVECTOR2(scale, 0) + displacement);
+	XMFLOAT2 SkyPlaneVertices3;
+	XMStoreFloat2(&SkyPlaneVertices3, (XMVectorSet(scale, 0, 0, 0) + XMLoadFloat2(&displacement)));
+	SkyPlaneVertices[3].TexCoord = SkyPlaneVertices3;
 	SkyPlaneVertices[3].Color = color.ToDWORD();
 
 	// 3
-	SkyPlaneVertices[4].TexCoord = float2(D3DXVECTOR2(scale, scale) + displacement);
+	XMFLOAT2 SkyPlaneVertices4;
+	XMStoreFloat2(&SkyPlaneVertices4, (XMVectorSet(scale, scale, 0, 0) + XMLoadFloat2(&displacement)));
+	SkyPlaneVertices[4].TexCoord = SkyPlaneVertices4;
 	SkyPlaneVertices[4].Color = color.ToDWORD();
 
 	// 2
-	SkyPlaneVertices[5].TexCoord = float2(D3DXVECTOR2(0, scale) + displacement);
+	XMFLOAT2 SkyPlaneVertices5;
+	XMStoreFloat2(&SkyPlaneVertices5, (XMVectorSet(0, scale, 0, 0) + XMLoadFloat2(&displacement)));
+	SkyPlaneVertices[5].TexCoord = SkyPlaneVertices5;
 	SkyPlaneVertices[5].Color = color.ToDWORD();
 
 	return XR_SUCCESS;
@@ -202,8 +211,8 @@ XRESULT GSky::RenderSky() {
 
 	//return XR_SUCCESS;
 
-	D3DXVECTOR3 camPos = Engine::GAPI->GetCameraPosition();
-	D3DXVECTOR3 LightDir;
+	DirectX::XMFLOAT3 camPos = Engine::GAPI->GetCameraPosition();
+	DirectX::XMFLOAT3 LightDir;
 
 	if (Engine::GAPI->GetRendererState()->RendererSettings.ReplaceSunDirection) {
 		LightDir = Atmosphere.LightDirection;
@@ -214,19 +223,18 @@ XRESULT GSky::RenderSky() {
 			Atmosphere.LightDirection = LightDir;
 		}
 	}
-	D3DXVec3Normalize(&LightDir, &LightDir);
-
+	XMStoreFloat3(&LightDir, DirectX::XMVector3Normalize(XMLoadFloat3(&LightDir)));
 	//Atmosphere.SpherePosition.y = -Atmosphere.InnerRadius;
 
 	Atmosphere.SpherePosition.x = 0;//Engine::GAPI->GetLoadedWorldInfo()->MidPoint.x;
 	Atmosphere.SpherePosition.z = 0;//Engine::GAPI->GetLoadedWorldInfo()->MidPoint.y;
 	Atmosphere.SpherePosition.y = 0;//Engine::GAPI->GetLoadedWorldInfo()->LowestVertex - Atmosphere.InnerRadius;
 
-	D3DXVECTOR3 sp = camPos;
+	DirectX::XMFLOAT3 sp = camPos;
 	sp.y += Atmosphere.SphereOffsetY;
 
 	// Fill atmosphere buffer for this frame
-	AtmosphereCB.AC_CameraPos = D3DXVECTOR3(0, -Atmosphere.SphereOffsetY, 0);
+	AtmosphereCB.AC_CameraPos = DirectX::XMFLOAT3(0, -Atmosphere.SphereOffsetY, 0);
 	AtmosphereCB.AC_Time = Engine::GAPI->GetTimeSeconds();
 	AtmosphereCB.AC_LightPos = LightDir;
 	AtmosphereCB.AC_CameraHeight = -Atmosphere.SphereOffsetY;
@@ -235,8 +243,8 @@ XRESULT GSky::RenderSky() {
 	AtmosphereCB.AC_nSamples = Atmosphere.Samples;
 	AtmosphereCB.AC_fSamples = (float)AtmosphereCB.AC_nSamples;
 
-	AtmosphereCB.AC_Kr4PI = Atmosphere.Kr * 4 * (float)D3DX_PI;
-	AtmosphereCB.AC_Km4PI = Atmosphere.Km * 4 * (float)D3DX_PI;
+	AtmosphereCB.AC_Kr4PI = Atmosphere.Kr * 4 * DirectX::XM_PI;
+	AtmosphereCB.AC_Km4PI = Atmosphere.Km * 4 * DirectX::XM_PI;
 	AtmosphereCB.AC_KrESun = Atmosphere.Kr * Atmosphere.ESun;
 	AtmosphereCB.AC_KmESun = Atmosphere.Km * Atmosphere.ESun;
 
@@ -313,17 +321,19 @@ float AC_getRayleighPhase(float fCos2)
 	return 0.75f + 0.75f*fCos2;
 }
 // Returns the near intersection point of a line and a sphere
-float AC_getNearIntersection(D3DXVECTOR3 v3Pos, D3DXVECTOR3 v3Ray, float fDistance2, float fRadius2)
+float AC_getNearIntersection(DirectX::XMVECTOR v3Pos, DirectX::XMVECTOR v3Ray, float fDistance2, float fRadius2)
 {
-	float B = 2.0f * D3DXVec3Dot(&v3Pos, &v3Ray);
+	float B;
+	XMStoreFloat(&B, DirectX::XMVector3Dot(v3Pos, v3Ray) * 2.0f);
 	float C = fDistance2 - fRadius2;
 	float fDet = std::max(0.0f, B*B - 4.0f * C);
 	return 0.5f * (-B - sqrt(fDet));
 }
 // Returns the far intersection point of a line and a sphere
-float AC_getFarIntersection(D3DXVECTOR3 v3Pos, D3DXVECTOR3 v3Ray, float fDistance2, float fRadius2)
+float AC_getFarIntersection(DirectX::XMVECTOR v3Pos, DirectX::XMVECTOR v3Ray, float fDistance2, float fRadius2)
 {
-	float B = 2.0f * D3DXVec3Dot(&v3Pos, &v3Ray);
+	float B;
+	XMStoreFloat(&B, DirectX::XMVector3Dot(v3Pos, v3Ray) * 2.0f);
 	float C = fDistance2 - fRadius2;
 	float fDet = std::max(0.0f, B*B - 4.0f * C);
 	return 0.5f * (-B + sqrt(fDet));
@@ -332,78 +342,102 @@ float AC_getFarIntersection(D3DXVECTOR3 v3Pos, D3DXVECTOR3 v3Ray, float fDistanc
 /** Returns the current sun color */
 float3 GSky::GetSunColor()
 {
-	D3DXVECTOR3 wPos = ((*AtmosphereCB.AC_LightPos.toD3DXVECTOR3()) * AtmosphereCB.AC_OuterRadius);
-	wPos += D3DXVECTOR3(Atmosphere.SpherePosition.x, 
-						Atmosphere.SpherePosition.y + Atmosphere.SphereOffsetY, 
-						Atmosphere.SpherePosition.z);
+	XMFLOAT3 LightPos;
+	LightPos.x = AtmosphereCB.AC_LightPos.x;
+	LightPos.y = AtmosphereCB.AC_LightPos.y;
+	LightPos.z = AtmosphereCB.AC_LightPos.z;
+	XMVECTOR wPos = ((XMLoadFloat3(&LightPos)) * AtmosphereCB.AC_OuterRadius);
+	wPos += XMVectorSet(Atmosphere.SpherePosition.x, Atmosphere.SpherePosition.y + Atmosphere.SphereOffsetY, Atmosphere.SpherePosition.z, 0.0f);
 
 
-	D3DXVECTOR3 camPos = *AtmosphereCB.AC_CameraPos.toD3DXVECTOR3();
-	D3DXVECTOR3 vPos = wPos - (*AtmosphereCB.AC_SpherePosition.toD3DXVECTOR3());
-	D3DXVECTOR3 vRay = vPos - camPos;
+	XMFLOAT3 camPos_FLOAT3;
+	camPos_FLOAT3.x = AtmosphereCB.AC_CameraPos.x;
+	camPos_FLOAT3.y = AtmosphereCB.AC_CameraPos.y;
+	camPos_FLOAT3.z = AtmosphereCB.AC_CameraPos.z;
+	XMVECTOR camPos = XMLoadFloat3(&camPos_FLOAT3);
+	XMFLOAT3 SpherePos_FLOAT3;
+	SpherePos_FLOAT3.x = AtmosphereCB.AC_SpherePosition.x;
+	SpherePos_FLOAT3.y = AtmosphereCB.AC_SpherePosition.y;
+	SpherePos_FLOAT3.z = AtmosphereCB.AC_SpherePosition.z;
+	XMVECTOR vPos = wPos - XMLoadFloat3(&SpherePos_FLOAT3);
+	XMVECTOR vRay = vPos - camPos;
 				
-	float fFar = D3DXVec3Length(&vRay);
+	float fFar;
+	XMStoreFloat(&fFar, DirectX::XMVector3LengthEst(vRay));
 	vRay /= fFar;
 	
 	//return float4(abs(AC_SpherePosition), 1);
 	
 	//if (AC_CameraHeight < AC_InnerRadius)
 	//	return float4(1, 0, 0, 1);
-	
+
 	// Calculate the closest intersection of the ray with the outer atmosphere (which is the near point of the ray passing through the atmosphere)
 	float fNear = AC_getNearIntersection(camPos, vRay, AtmosphereCB.AC_CameraHeight * AtmosphereCB.AC_CameraHeight, AtmosphereCB.AC_OuterRadius * AtmosphereCB.AC_OuterRadius);
 
 	// Calculate the ray's starting position, then calculate its scattering offset
-	D3DXVECTOR3 vStart = camPos;
+	XMVECTOR vStart = camPos;
 
-	float fHeight = D3DXVec3Length(&vStart);
+	XMVECTOR fHeight = DirectX::XMVector3LengthEst(vStart);
 	float fDepth = exp(AtmosphereCB.AC_RayleighOverScaleDepth * (AtmosphereCB.AC_InnerRadius - AtmosphereCB.AC_CameraHeight));
-	float fStartAngle = D3DXVec3Dot(&vRay, &vStart) / fHeight;
+	float fStartAngle;
+	XMStoreFloat(&fStartAngle, DirectX::XMVector3Dot(vRay, vStart) / fHeight);
 	float fStartOffset = fDepth*AC_Escale(fStartAngle, AtmosphereCB.AC_RayleighScaleDepth);
 	
 	// Initialize the scattering loop variables
 	float fSampleLength = fFar / AtmosphereCB.AC_fSamples;
 	float fScaledLength = fSampleLength * AtmosphereCB.AC_Scale;
-	D3DXVECTOR3 vSampleRay = vRay * fSampleLength;
-	D3DXVECTOR3 vSamplePoint = vStart + vSampleRay * 0.5f;
+	XMVECTOR vSampleRay = vRay * fSampleLength;
+	XMVECTOR vSamplePoint = vStart + vSampleRay * 0.5f;
 	
-	D3DXVECTOR3 vInvWavelength = D3DXVECTOR3(1.0f / pow(AtmosphereCB.AC_Wavelength.x, 4.0f),
+	DirectX::XMFLOAT3 vInvWavelength = DirectX::XMFLOAT3(1.0f / pow(AtmosphereCB.AC_Wavelength.x, 4.0f),
 		1.0f / pow(AtmosphereCB.AC_Wavelength.y, 4.0f),
 		1.0f / pow(AtmosphereCB.AC_Wavelength.z, 4.0f));
 	
 	//return retF(AC_InnerRadius - length(vSamplePoint));
 	
 	// Now loop through the sample rays
-	D3DXVECTOR3 vFrontColor = D3DXVECTOR3(0.0, 0.0, 0.0);
+	XMVECTOR vFrontColor = XMVectorZero();
 	for(int i=0; i<AtmosphereCB.AC_nSamples; i++)
 	{
-		float fHeight = D3DXVec3Length(&vSamplePoint);
-		float fDepth = exp(AtmosphereCB.AC_RayleighOverScaleDepth * (AtmosphereCB.AC_InnerRadius - fHeight));
-		float fLightAngle = D3DXVec3Dot(AtmosphereCB.AC_LightPos.toD3DXVECTOR3(), &vSamplePoint) / fHeight;
-		float fCameraAngle = D3DXVec3Dot(&vRay, &vSamplePoint) / fHeight;
+		XMVECTOR fHeight = DirectX::XMVector3LengthEst(vSamplePoint);
+		float fHeight_float;
+		XMStoreFloat(&fHeight_float, fHeight);
+		float fDepth = exp(AtmosphereCB.AC_RayleighOverScaleDepth * (AtmosphereCB.AC_InnerRadius - fHeight_float));
+		float fLightAngle;
+		XMFLOAT3 LightPos;
+		LightPos.x = AtmosphereCB.AC_LightPos.x;
+		LightPos.y = AtmosphereCB.AC_LightPos.y;
+		LightPos.z = AtmosphereCB.AC_LightPos.z;
+		XMStoreFloat(&fLightAngle, DirectX::XMVector3Dot(XMLoadFloat3(&LightPos), vSamplePoint) / fHeight); //check if it works
+		float fCameraAngle;
+		XMStoreFloat(&fCameraAngle, DirectX::XMVector3Dot(vRay, vSamplePoint) / fHeight);
 		float fScatter = (fStartOffset + fDepth*(AC_Escale(fLightAngle, AtmosphereCB.AC_RayleighScaleDepth) - AC_Escale(fCameraAngle, AtmosphereCB.AC_RayleighScaleDepth)));
 		
-		D3DXVECTOR3 vAttenuate;
+		DirectX::XMFLOAT3 vAttenuate;
 		vAttenuate.x = exp(-fScatter * (vInvWavelength.x * AtmosphereCB.AC_Kr4PI + AtmosphereCB.AC_Km4PI));
 		vAttenuate.y = exp(-fScatter * (vInvWavelength.y * AtmosphereCB.AC_Kr4PI + AtmosphereCB.AC_Km4PI));
 		vAttenuate.z = exp(-fScatter * (vInvWavelength.z * AtmosphereCB.AC_Kr4PI + AtmosphereCB.AC_Km4PI));
 		
-		vFrontColor += vAttenuate * (fDepth * fScaledLength);
+		vFrontColor += XMLoadFloat3(&vAttenuate) * fDepth * fScaledLength;
 		vSamplePoint += vSampleRay;
 	}
 	
 	// Finally, scale the Mie and Rayleigh colors and set up the varying variables for the pixel shader
-	D3DXVECTOR3 c0;
-	c0.x = vFrontColor.x * (vInvWavelength.x * AtmosphereCB.AC_KrESun);
-	c0.y = vFrontColor.y * (vInvWavelength.y * AtmosphereCB.AC_KrESun);
-	c0.z = vFrontColor.z * (vInvWavelength.z * AtmosphereCB.AC_KrESun);
+	DirectX::XMFLOAT3 c0; //check propably never used
+	XMStoreFloat3(&c0, vFrontColor * XMLoadFloat3(&vInvWavelength) * AtmosphereCB.AC_KrESun);
+
+	XMVECTOR c1 = vFrontColor * AtmosphereCB.AC_KmESun;
+	XMVECTOR vDirection = camPos - vPos;
 	
-	D3DXVECTOR3 c1 = vFrontColor * AtmosphereCB.AC_KmESun;	
-	D3DXVECTOR3 vDirection = camPos - vPos;
-	
-	float fCos = D3DXVec3Dot(AtmosphereCB.AC_LightPos.toD3DXVECTOR3(), &vDirection) / D3DXVec3Length(&vDirection);
+	float fCos;
+	XMStoreFloat(&fCos, DirectX::XMVector3Dot(XMLoadFloat3(AtmosphereCB.AC_LightPos.toXMFLOAT3()), vDirection) / DirectX::XMVector3LengthEst(vDirection)); //check if it works
 	
 	float fCos2 = fCos*fCos;
-
-	return AC_getMiePhase(fCos, fCos2, AtmosphereCB.AC_g, AtmosphereCB.AC_g * AtmosphereCB.AC_g) * c1;
+	XMFLOAT3 suncolor_convert;
+	XMStoreFloat3(&suncolor_convert, AC_getMiePhase(fCos, fCos2, AtmosphereCB.AC_g, AtmosphereCB.AC_g * AtmosphereCB.AC_g) * c1);
+	float3 suncolor_return;
+	suncolor_return.x = suncolor_convert.x;
+	suncolor_return.y = suncolor_convert.y;
+	suncolor_return.z = suncolor_convert.z;
+	return suncolor_return;
 }

@@ -6,8 +6,8 @@
 
 struct DecalSettings {
 	zCMaterial * DecalMaterial;
-	D3DXVECTOR2 DecalSize;
-	D3DXVECTOR2 DecalOffset;
+	DirectX::XMFLOAT2 DecalSize;
+	DirectX::XMFLOAT2 DecalOffset;
 	BOOL DecalTwoSided;
 	BOOL IgnoreDayLight;
 	BOOL DecalOnTop;

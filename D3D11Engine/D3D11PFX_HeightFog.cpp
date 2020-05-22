@@ -56,7 +56,7 @@ XRESULT D3D11PFX_HeightFog::Render(RenderToTextureBuffer * fxbuffer)
 	cb.HF_HeightFalloff = Engine::GAPI->GetRendererState()->RendererSettings.FogHeightFalloff;
 	
 	float height = Engine::GAPI->GetRendererState()->RendererSettings.FogHeight;
-	D3DXVECTOR3 color = *Engine::GAPI->GetRendererState()->RendererSettings.FogColorMod.toD3DXVECTOR3();
+	DirectX::XMFLOAT3 color = *Engine::GAPI->GetRendererState()->RendererSettings.FogColorMod.toXMFLOAT3();
 
 	float fnear = 15000.0f;
 	float ffar = 60000.0f;
@@ -104,11 +104,12 @@ XRESULT D3D11PFX_HeightFog::Render(RenderToTextureBuffer * fxbuffer)
 	float rain = Engine::GAPI->GetRainFXWeight();
 
 	// Color
-	D3DXVec3Lerp(cb.HF_FogColorMod.toD3DXVECTOR3(), 
-		cb.HF_FogColorMod.toD3DXVECTOR3(), 
-		&Engine::GAPI->GetRendererState()->RendererSettings.RainFogColor, 
-		std::min(1.0f, rain * 2.0f)); // Scale color faster here, so it looks better on light rain
-
+	XMFLOAT3 FogColorMod;
+	FogColorMod.x = cb.HF_FogColorMod.x;
+	FogColorMod.y = cb.HF_FogColorMod.y;
+	FogColorMod.z = cb.HF_FogColorMod.z;
+	XMStoreFloat3(&FogColorMod, DirectX::XMVectorLerpV(XMLoadFloat3(&FogColorMod), XMLoadFloat3(&Engine::GAPI->GetRendererState()->RendererSettings.RainFogColor), XMVectorSet(std::min(1.0f, rain * 2.0f), std::min(1.0f, rain * 2.0f), std::min(1.0f, rain * 2.0f), 0))); // Scale color faster here, so it looks better on light rain //check if it works
+	cb.HF_FogColorMod = FogColorMod;
 	// Raining Density, only when not in fogzone
 	cb.HF_GlobalDensity = Toolbox::lerp(cb.HF_GlobalDensity, Engine::GAPI->GetRendererState()->RendererSettings.RainFogDensity, rain * (1.0f - Engine::GAPI->GetFogOverride()));
 

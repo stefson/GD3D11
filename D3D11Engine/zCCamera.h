@@ -29,7 +29,7 @@ public:
 #endif
 	}
 
-	D3DXMATRIX const& GetTransform(const ETransformType type)
+	DirectX::XMFLOAT4X4 const& GetTransform(const ETransformType type)
 	{
 		XCALL(GothicMemoryLocations::zCCamera::GetTransform);
 	}
@@ -38,15 +38,12 @@ public:
 		XCALL(GothicMemoryLocations::zCCamera::GetTransform);
 	}
 
-	void SetTransform(const ETransformType type, const D3DXMATRIX& mat)
+	void SetTransform(const ETransformType type, const DirectX::XMFLOAT4X4 & mat)
 	{
 		XCALL(GothicMemoryLocations::zCCamera::SetTransform);
 	}
-	void SetTransform(const ETransformType type, const DirectX::XMFLOAT4X4& mat)
-	{
-		XCALL(GothicMemoryLocations::zCCamera::SetTransform);
-	}
-	void SetTransformXM(const ETransformType type, const DirectX::XMMATRIX& mat)
+
+	void SetTransformXM(const ETransformType type, const DirectX::XMMATRIX & mat)
 	{
 		DirectX::XMFLOAT4X4 m; DirectX::XMStoreFloat4x4(&m, mat);
 		SetTransform(type, m);
@@ -109,7 +106,7 @@ public:
 #endif
 	}
 
-	/*void GetCameraPosition(D3DXVECTOR3 & v)
+	/*void GetCameraPosition(DirectX::XMFLOAT3 & v)
 	{
 		XCALL(GADDR::zCCamera_GetCameraPosition);
 	}*/

@@ -101,10 +101,7 @@ XRESULT BaseAntTweakBar::Init() {
 	TwAddVarRW(Bar_General, "Draw Fog", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.DrawFog, nullptr);	
 	TwAddVarRW(Bar_General, "Tesselation", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.EnableTesselation, nullptr);
 	
-#ifndef PUBLIC_RELEASE
-	TwAddVarRW(Bar_General, "HDR (Broken!)", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.EnableHDR, nullptr);	
-#endif
-
+	TwAddVarRW(Bar_General, "HDR", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.EnableHDR, nullptr);
 	TwAddVarRW(Bar_General, "SMAA", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.EnableSMAA, nullptr);
 	TwAddVarRW(Bar_General, "Sharpen", TW_TYPE_FLOAT, &Engine::GAPI->GetRendererState()->RendererSettings.SharpenFactor, nullptr);
 	TwDefine(" General/Sharpen  step=0.01 min=0");
@@ -294,6 +291,10 @@ XRESULT BaseAntTweakBar::Init() {
 
 	TwAddVarRW(Bar_HBAO, "Enable Blur", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState()->RendererSettings.HbaoSettings.EnableBlur, nullptr);
 
+	TwEnumVal hbaoBlurRadii[] = { {0, "2"}, {1, "4"} };
+	TwType hbaoBlurRadiiType = TwDefineEnum("GFSDK_SSAO_BLUR_RADIUS", hbaoBlurRadii, 2);
+	TwAddVarRW(Bar_HBAO, "SSAO radius", hbaoBlurRadiiType, &Engine::GAPI->GetRendererState()->RendererSettings.HbaoSettings.SsaoBlurRadius, nullptr);
+	
 	TwAddVarRW(Bar_HBAO, "BlurSharpness", TW_TYPE_FLOAT, &Engine::GAPI->GetRendererState()->RendererSettings.HbaoSettings.BlurSharpness, nullptr);
 	TwDefine(" HBAO+/BlurSharpness  step=0.01");
 

@@ -5,10 +5,8 @@
 #include "RenderToTextureBuffer.h"
 #include "SV_Panel.h"
 #include "zCTexture.h"
-#include <SimpleMath.h>
 
 using namespace DirectX;
-using namespace DirectX::SimpleMath;
 
 const float MESH_ROT_SPEED = 0.01f;
 const float ZOOM_SPEED = 0.01f;
@@ -51,8 +49,8 @@ void SV_GMeshInfoView::SetMeshes(const std::map<zCTexture *, MeshInfo *> & meshe
 	XMVECTOR _0p5 = XMVectorSet(0.5f, 0.5f, 0.5f, 0.5f);
 	//XMVectorMultiply
 	// Find boundingbox of skeletal
-	Vector3 bbmin = Vector3(FLT_MAX, FLT_MAX, FLT_MAX);
-	Vector3 bbmax = Vector3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+	XMFLOAT3 bbmin = XMFLOAT3(FLT_MAX, FLT_MAX, FLT_MAX);
+	XMFLOAT3 bbmax = XMFLOAT3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 	
 	for (auto it = Meshes.cbegin(); it != Meshes.cend(); ++it) {
 		std::vector<ExVertexStruct> & vertices = it->second->Vertices;
@@ -68,8 +66,13 @@ void SV_GMeshInfoView::SetMeshes(const std::map<zCTexture *, MeshInfo *> & meshe
 		}
 	}
 
-	ObjectPosition = -(bbmin * 0.5f + bbmax * 0.5f);
-	SetObjectOrientation(0, 0, (bbmin - bbmax).Length() / 2.0f);
+	XMVECTOR XMV_bbmin = XMLoadFloat3(&bbmin);
+	XMVECTOR XMV_bbmax = XMLoadFloat3(&bbmax);
+
+	XMStoreFloat3(&ObjectPosition, (XMV_bbmin + XMV_bbmax) * -0.5f);
+	float distance;
+	XMStoreFloat(&distance, XMVector3LengthEst(XMV_bbmin - XMV_bbmin) * 0.5f);
+	SetObjectOrientation(0, 0, distance);
 }
 
 /** Sets the name of this view */

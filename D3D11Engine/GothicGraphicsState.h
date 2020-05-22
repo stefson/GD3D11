@@ -404,6 +404,7 @@ struct HBAOSettings {
 		Enabled = true;
 		EnableDualLayerAO = false;
 		EnableBlur = true;
+		SsaoBlurRadius = 1; // GFSDK_SSAO_BlurRadius::GFSDK_SSAO_BLUR_RADIUS_4;
 		SsaoStepCount = 0; // GFSDK_SSAO_StepCount::GFSDK_SSAO_STEP_COUNT_4;
 	}
 
@@ -416,6 +417,7 @@ struct HBAOSettings {
 	bool Enabled;
 	bool EnableDualLayerAO;
 	bool EnableBlur;
+	int SsaoBlurRadius;
 	int SsaoStepCount;
 };
 
@@ -529,11 +531,11 @@ struct GothicRendererSettings {
 		RainHeightRange = 1000.0f;
 		RainNumParticles = 50000;
 		RainMoveParticles = true;
-		RainGlobalVelocity = D3DXVECTOR3(250, -1000, 0);
+		RainGlobalVelocity = DirectX::XMFLOAT3(250, -1000, 0);
 		RainUseInitialSet = false;
 		RainSceneWettness = 0.0f;
 		RainSunLightStrength = 0.50f;
-		RainFogColor = D3DXVECTOR3(0.28f, 0.28f, 0.28f);
+		RainFogColor = DirectX::XMFLOAT3(0.28f, 0.28f, 0.28f);
 		RainFogDensity = 0.00500f;
 
 		GodRayDecay = 0.97f;
@@ -677,11 +679,11 @@ struct GothicRendererSettings {
 	UINT RainNumParticles;
 	bool RainMoveParticles;
 	bool RainUseInitialSet;
-	D3DXVECTOR3 RainGlobalVelocity;
+	DirectX::XMFLOAT3 RainGlobalVelocity;
 	float RainSceneWettness;
 
 	float RainSunLightStrength;
-	D3DXVECTOR3 RainFogColor;
+	DirectX::XMFLOAT3 RainFogColor;
 	float RainFogDensity;
 
 	bool AllowNormalmaps;

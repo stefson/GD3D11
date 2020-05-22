@@ -10,20 +10,22 @@ class zCLightmap
 {
 public:
 
-	D3DXVECTOR2 GetLightmapUV(const D3DXVECTOR3 & worldPos)
+	DirectX::XMFLOAT2 GetLightmapUV(const DirectX::XMFLOAT3 & worldPos)
 	{
-		D3DXVECTOR3 q = worldPos - LightmapOrigin;
+		XMVECTOR q = XMLoadFloat3(&worldPos) - XMLoadFloat3(&LightmapOrigin);
 
-		return D3DXVECTOR2(D3DXVec3Dot(&q, &LightmapUVRight),
-							D3DXVec3Dot(&q, &LightmapUVUp));
+		XMFLOAT2 lightmap;
+		lightmap.x = XMVectorGetX(DirectX::XMVector3Dot(q, XMLoadFloat3(&LightmapUVRight)));
+		lightmap.y = XMVectorGetY(DirectX::XMVector3Dot(q, XMLoadFloat3(&LightmapUVUp)));
+		return lightmap;
 	}
 
 
 	char data[0x24];
 
-	D3DXVECTOR3	LightmapOrigin;
-	D3DXVECTOR3	LightmapUVUp;
-	D3DXVECTOR3	LightmapUVRight;
+	DirectX::XMFLOAT3 LightmapOrigin;
+	DirectX::XMFLOAT3 LightmapUVUp;
+	DirectX::XMFLOAT3 LightmapUVRight;
 
     zCTexture * Texture;
 };
