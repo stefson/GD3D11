@@ -3842,7 +3842,7 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 
 	s.DrawFog = GetPrivateProfileBoolA("General", "EnableFog", TRUE, ini.c_str());
 	s.AtmosphericScattering = GetPrivateProfileBoolA("General", "AtmosphericScattering", TRUE, ini.c_str());
-	s.EnableHDR = GetPrivateProfileBoolA("General", "EnableHDR", TRUE, ini.c_str());
+	s.EnableHDR = GetPrivateProfileBoolA("General", "EnableHDR", false, ini.c_str());
 	s.EnableDebugLog = GetPrivateProfileBoolA("General", "EnableDebugLog", defaultRendererSettings.EnableDebugLog, ini);
 	s.EnableAutoupdates = GetPrivateProfileBoolA("General", "EnableAutoupdates", defaultRendererSettings.EnableAutoupdates, ini);
 	s.EnableGodRays = GetPrivateProfileBoolA("General", "EnableGodRays", defaultRendererSettings.EnableGodRays, ini);
