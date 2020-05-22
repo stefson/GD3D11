@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Engine">
       <UniqueIdentifier>{e834689b-bac5-40c2-94af-f552da38eb4e}</UniqueIdentifier>
@@ -67,7 +67,7 @@
     <Filter Include="Librarys\Assimp">
       <UniqueIdentifier>{9bec2d0d-0bea-4659-aeef-99300438c197}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\D3D11\Engine">
+   <Filter Include="Engine\D3D11\Engine">
       <UniqueIdentifier>{ec0d93fb-3577-4853-a58f-8654d872352e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -946,7 +946,7 @@
     <ClCompile Include="GMeshSimple.cpp" />
     <ClCompile Include="BaseShadowedPointLight.cpp" />
     <ClCompile Include="D3D11GraphicsEngine.cpp">
-      <Filter>Engine\D3D11\Engine</Filter>
+      <Filter>Engine\D3D11</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

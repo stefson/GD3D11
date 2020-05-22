@@ -198,14 +198,18 @@ XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string & file, std::map
 
 
 			// Calculate midpoint of this triange to get the section
-			D3DXVECTOR3 avgPos = (*v[0]->Position.toD3DXVECTOR3() + *v[1]->Position.toD3DXVECTOR3() + *v[2]->Position.toD3DXVECTOR3()) / 3.0f;
+			XMVECTOR Position0 = XMVectorSet(v[0]->Position.x, v[0]->Position.y, v[0]->Position.z, 0);
+			XMVECTOR Position1 = XMVectorSet(v[1]->Position.x, v[1]->Position.y, v[1]->Position.z, 0);
+			XMVECTOR Position2 = XMVectorSet(v[2]->Position.x, v[2]->Position.y, v[2]->Position.z, 0);
+			DirectX::XMFLOAT3 avgPos;
+			XMStoreFloat3(&avgPos, (Position0 + Position1 + Position2) / 3.0f);
 			INT2 sxy = GetSectionOfPos(avgPos);
 
 			WorldMeshSectionInfo& section = (*outSections)[sxy.x][sxy.y];
 			section.WorldCoordinates = sxy;
 
-			D3DXVECTOR3 & bbmin = section.BoundingBox.Min;
-			D3DXVECTOR3 & bbmax = section.BoundingBox.Max;
+			DirectX::XMFLOAT3 & bbmin = section.BoundingBox.Min;
+			DirectX::XMFLOAT3 & bbmax = section.BoundingBox.Max;
 
 			// Check bounding box
 			bbmin.x = bbmin.x > v[0]->Position.x ? v[0]->Position.x : bbmin.x;
@@ -247,7 +251,7 @@ XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string & file, std::map
 	// Dont need that anymore
 	delete mesh;
 
-	D3DXVECTOR2 avgSections = D3DXVECTOR2(0, 0);
+	XMVECTOR avgSections = XMVectorSet(0, 0, 0, 0);
 	int numSections = 0;
 
 	std::list<std::vector<ExVertexStruct>*> vertexBuffers;
@@ -259,7 +263,7 @@ XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string & file, std::map
 		for (auto const& ity : itx.second)
 		{
 			numSections++;
-			avgSections += D3DXVECTOR2(static_cast<float>(itx.first), static_cast<float>(ity.first));
+			avgSections += XMVectorSet(static_cast<float>(itx.first), static_cast<float>(ity.first), 0, 0);
 
 			for(auto const& it : ity.second.WorldMeshes)
 			{
@@ -345,7 +349,7 @@ XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string & file, std::map
 	if (info)
 	{
 		WorldInfo i;
-		i.MidPoint = avgSections * WORLD_SECTION_SIZE;
+		XMStoreFloat2(&i.MidPoint, avgSections * WORLD_SECTION_SIZE);
 		i.LowestVertex = 0;
 		i.HighestVertex = 0;
 
@@ -370,11 +374,11 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN(zCPolygon** polys, unsigned int nu
 			continue;
 
 		// Use the section of the first point for the whole polygon
-		INT2 section = GetSectionOfPos(*poly->getVertices()[0]->Position.toD3DXVECTOR3());
+		INT2 section = GetSectionOfPos(*poly->getVertices()[0]->Position.toXMFLOAT3());
 		(*outSections)[section.x][section.y].WorldCoordinates = section;
 
-		D3DXVECTOR3 & bbmin = (*outSections)[section.x][section.y].BoundingBox.Min;
-		D3DXVECTOR3 & bbmax = (*outSections)[section.x][section.y].BoundingBox.Max;
+		DirectX::XMFLOAT3 & bbmin = (*outSections)[section.x][section.y].BoundingBox.Min;
+		DirectX::XMFLOAT3 & bbmax = (*outSections)[section.x][section.y].BoundingBox.Max;
 
 		DWORD sectionColor = float4((section.x % 2) + 0.5f, (section.x % 2) + 0.5f, 1, 1).ToDWORD();
 
@@ -404,7 +408,7 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN(zCPolygon** polys, unsigned int nu
 
 			if (poly->GetLightmap())
 			{
-				t.TexCoord2 = poly->GetLightmap()->GetLightmapUV(*t.Position.toD3DXVECTOR3());
+				t.TexCoord2 = poly->GetLightmap()->GetLightmapUV(*t.Position.toXMFLOAT3());
 				t.Color = DEFAULT_LIGHTMAP_POLY_COLOR;
 			} else
 			{
@@ -458,7 +462,7 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN(zCPolygon** polys, unsigned int nu
 			(*outSections)[section.x][section.y].WorldMeshes[key]->Vertices.push_back(finalVertices[v]);
 	}
 	
-	D3DXVECTOR2 avgSections = D3DXVECTOR2(0, 0);
+	XMVECTOR avgSections = XMVectorSet(0, 0, 0, 0);
 	int numSections = 0;
 
 	std::list<std::vector<ExVertexStruct>*> vertexBuffers;
@@ -470,7 +474,7 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN(zCPolygon** polys, unsigned int nu
 		for(auto const& ity : itx.second)
 		{
 			numSections++;
-			avgSections += D3DXVECTOR2((float)itx.first, (float)ity.first);
+			avgSections += XMVectorSet((float)itx.first, (float)ity.first, 0, 0);
 
 			for(auto const& it : ity.second.WorldMeshes)
 			{
@@ -555,7 +559,7 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN(zCPolygon** polys, unsigned int nu
 
 	if (info)
 	{
-		info->MidPoint = avgSections * WORLD_SECTION_SIZE;
+		XMStoreFloat2(&info->MidPoint, avgSections * WORLD_SECTION_SIZE);
 		info->LowestVertex = 0;
 		info->HighestVertex = 0;	
 	}
@@ -579,17 +583,21 @@ HRESULT WorldConverter::ConvertWorldMesh(zCPolygon** polys, unsigned int numPoly
 		//	continue;
 
 		// Calculate midpoint of this triange to get the section
-		D3DXVECTOR3 avgPos = (*poly->getVertices()[0]->Position.toD3DXVECTOR3() + *poly->getVertices()[1]->Position.toD3DXVECTOR3() + *poly->getVertices()[2]->Position.toD3DXVECTOR3()) / 3.0f;
+		DirectX::XMFLOAT3 avgPos;
+		XMVECTOR Position0 = XMVectorSet(poly->getVertices()[0]->Position.x, poly->getVertices()[0]->Position.y, poly->getVertices()[0]->Position.z, 0);
+		XMVECTOR Position1 = XMVectorSet(poly->getVertices()[1]->Position.x, poly->getVertices()[1]->Position.y, poly->getVertices()[1]->Position.z, 0);
+		XMVECTOR Position2 = XMVectorSet(poly->getVertices()[2]->Position.x, poly->getVertices()[2]->Position.y, poly->getVertices()[2]->Position.z, 0);
+		XMStoreFloat3(&avgPos, (Position0 + Position1 + Position2) / 3.0f);
 		INT2 section = GetSectionOfPos(avgPos);
 		(*outSections)[section.x][section.y].WorldCoordinates = section;
 
 		if (poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER) {
-			//(*outSections)[section.x][section.y].OceanPoints.push_back(*poly->getVertices()[0]->Position.toD3DXVECTOR3());
+			//(*outSections)[section.x][section.y].OceanPoints.push_back(*poly->getVertices()[0]->Position.toXMFLOAT3());
 			//continue;
 		}
 
-		D3DXVECTOR3 & bbmin = (*outSections)[section.x][section.y].BoundingBox.Min;
-		D3DXVECTOR3 & bbmax = (*outSections)[section.x][section.y].BoundingBox.Max;
+		DirectX::XMFLOAT3 & bbmin = (*outSections)[section.x][section.y].BoundingBox.Min;
+		DirectX::XMFLOAT3 & bbmax = (*outSections)[section.x][section.y].BoundingBox.Max;
 
 		DWORD sectionColor = float4((section.x % 2) + 0.5f, (section.x % 2) + 0.5f, 1, 1).ToDWORD();
 
@@ -616,7 +624,7 @@ HRESULT WorldConverter::ConvertWorldMesh(zCPolygon** polys, unsigned int numPoly
 			bbmax.z = bbmax.z < poly->getVertices()[v]->Position.z ? poly->getVertices()[v]->Position.z : bbmax.z;
 
 			if (poly->GetLightmap()) {
-				t.TexCoord2 = poly->GetLightmap()->GetLightmapUV(*t.Position.toD3DXVECTOR3());
+				t.TexCoord2 = poly->GetLightmap()->GetLightmapUV(*t.Position.toXMFLOAT3());
 				t.Color = DEFAULT_LIGHTMAP_POLY_COLOR;
 			} else {
 				t.TexCoord2.x = 0.0f;
@@ -681,7 +689,7 @@ HRESULT WorldConverter::ConvertWorldMesh(zCPolygon** polys, unsigned int numPoly
 		}
 	}
 	
-	D3DXVECTOR2 avgSections = D3DXVECTOR2(0, 0);
+	XMVECTOR avgSections = XMVectorSet( 0, 0, 0, 0);
 	int numSections = 0;
 
 	std::list<std::vector<ExVertexStruct>*> vertexBuffers;
@@ -691,7 +699,7 @@ HRESULT WorldConverter::ConvertWorldMesh(zCPolygon** polys, unsigned int numPoly
 	for (auto const& itx : *outSections) {
 		for (auto const& ity : itx.second) {
 			numSections++;
-			avgSections += D3DXVECTOR2((float)itx.first, (float)ity.first);
+			avgSections += XMVectorSet((float)itx.first, (float)ity.first, 0, 0);
 
 			for (auto const& it : ity.second.WorldMeshes) {
 				std::vector<ExVertexStruct> indexedVertices;
@@ -783,7 +791,7 @@ HRESULT WorldConverter::ConvertWorldMesh(zCPolygon** polys, unsigned int numPoly
 
 		memcpy(info, &i, sizeof(WorldInfo));*/
 
-		info->MidPoint = avgSections * WORLD_SECTION_SIZE;
+		XMStoreFloat2(&info->MidPoint, avgSections * WORLD_SECTION_SIZE);
 		info->LowestVertex = 0;
 		info->HighestVertex = 0;	
 	}
@@ -816,9 +824,9 @@ void WorldConverter::GenerateFullSectionMesh(WorldMeshSectionInfo& section)
 		if (it->IsIndoorVob)
 			continue;
 
-		D3DXMATRIX world;
+		DirectX::XMFLOAT4X4 world;
 		it->Vob->GetWorldMatrix(&world);
-		D3DXMatrixTranspose(&world, &world);
+		XMMATRIX XMM_world = DirectX::XMMatrixTranspose(XMLoadFloat4x4(&world));
 
 		// Insert the vob
 		for(auto const& itm : it->VisualInfo->Meshes)
@@ -834,7 +842,12 @@ void WorldConverter::GenerateFullSectionMesh(WorldMeshSectionInfo& section)
 					ExVertexStruct v = itm.second[m]->Vertices[itm.second[m]->Indices[i]];
 
 					// Transform everything into world space
-					D3DXVec3TransformCoord(v.Position.toD3DXVECTOR3(), v.Position.toD3DXVECTOR3(), &world);
+					XMFLOAT3 Position;
+					Position.x = v.Position.x;
+					Position.y = v.Position.y;
+					Position.z = v.Position.z;
+					XMStoreFloat3(&Position, DirectX::XMVector3TransformCoord(XMLoadFloat3(&Position), XMM_world));
+					v.Position = Position;
 					vx.push_back(v);
 				}
 			}
@@ -941,7 +954,7 @@ void WorldConverter::Extract3DSMeshFromVisual(zCProgMeshProto* visual, MeshVisua
 			vertices[idx].TexCoord.x = m->WedgeList.Get(n).texUV.x; // This produces wrong results
 			vertices[idx].TexCoord.y = m->WedgeList.Get(n).texUV.y;
 			vertices[idx].Color = 0xFFFFFFFF;
-			*vertices[idx].Normal.toD3DXVECTOR3() = (*m->WedgeList.Get(n).normal.toD3DXVECTOR3());
+			*vertices[idx].Normal.toXMFLOAT3() = (*m->WedgeList.Get(n).normal.toXMFLOAT3());
 		}
 
 		// Get indices
@@ -1006,7 +1019,7 @@ void WorldConverter::ExtractSkeletalMeshFromVob(zCModel * model, SkeletalMeshVis
 				stream += sizeof(zTWeightEntry);
 
 				//if (s->GetNormalsList() && i < s->GetNormalsList()->NumInArray)
-				//	(*vx.Normal.toD3DXVECTOR3()) += weightEntry.Weight * (*s->GetNormalsList()->Array[i].toD3DXVECTOR3());
+				//	(*vx.Normal.toMFLOAT3()) += weightEntry.Weight * (*s->GetNormalsList()->Array[i].toXMFLOAT3());
 
 				// Get index and weight
 				if (n < 4) {
@@ -1291,13 +1304,10 @@ void WorldConverter::ExtractNodeVisual(int index, zCModelNodeInst* node, std::ma
 /** Extracts a 3DS-Mesh from a zCVisual */
 void WorldConverter::Extract3DSMeshFromVisual2PNAEN(zCProgMeshProto* visual, MeshVisualInfo* meshInfo)
 {
-	D3DXVECTOR3 tri0, tri1, tri2;
-	D3DXVECTOR2	uv0, uv1, uv2;
-	D3DXVECTOR3 bbmin, bbmax;
-	bbmin = D3DXVECTOR3(FLT_MAX, FLT_MAX, FLT_MAX);
-	bbmax = D3DXVECTOR3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+	XMFLOAT3 bbmin = DirectX::XMFLOAT3(FLT_MAX, FLT_MAX, FLT_MAX);
+	XMFLOAT3 bbmax = DirectX::XMFLOAT3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
-	D3DXVECTOR3 * posList = (D3DXVECTOR3 *)visual->GetPositionList()->Array;
+	DirectX::XMFLOAT3 * posList = (DirectX::XMFLOAT3 *)visual->GetPositionList()->Array;
 
 	std::list<std::vector<ExVertexStruct>*> vertexBuffers;
 	std::list<std::vector<VERTEX_INDEX>*> indexBuffers;
@@ -1417,8 +1427,8 @@ void WorldConverter::Extract3DSMeshFromVisual2PNAEN(zCProgMeshProto* visual, Mes
 
 	meshInfo->BBox.Min = bbmin;
 	meshInfo->BBox.Max = bbmax;
-	meshInfo->MeshSize = D3DXVec3Length(&(bbmin - bbmax));
-	meshInfo->MidPoint = 0.5f * bbmin + 0.5f * bbmax;
+	XMStoreFloat(&meshInfo->MeshSize, DirectX::XMVector3LengthEst(XMLoadFloat3(&bbmin) - XMLoadFloat3(&bbmax)));
+	XMStoreFloat3(&meshInfo->MidPoint, 0.5f * XMLoadFloat3(&bbmin) + 0.5f * XMLoadFloat3(&bbmax));
 
 	meshInfo->Visual = visual;
 }
@@ -1428,13 +1438,10 @@ void WorldConverter::Extract3DSMeshFromVisual2PNAEN(zCProgMeshProto* visual, Mes
 /** Extracts a 3DS-Mesh from a zCVisual */
 void WorldConverter::Extract3DSMeshFromVisual2(zCProgMeshProto* visual, MeshVisualInfo* meshInfo)
 {
-	D3DXVECTOR3 tri0, tri1, tri2;
-	D3DXVECTOR2	uv0, uv1, uv2;
-	D3DXVECTOR3 bbmin, bbmax;
-	bbmin = D3DXVECTOR3(FLT_MAX, FLT_MAX, FLT_MAX);
-	bbmax = D3DXVECTOR3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+	XMFLOAT3 bbmin = DirectX::XMFLOAT3(FLT_MAX, FLT_MAX, FLT_MAX);
+	XMFLOAT3 bbmax = DirectX::XMFLOAT3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
-	D3DXVECTOR3 * posList = (D3DXVECTOR3 *)visual->GetPositionList()->Array;
+	DirectX::XMFLOAT3 * posList = (DirectX::XMFLOAT3 *)visual->GetPositionList()->Array;
 
 	std::list<std::vector<ExVertexStruct>*> vertexBuffers;
 	std::list<std::vector<VERTEX_INDEX>*> indexBuffers;
@@ -1567,8 +1574,8 @@ void WorldConverter::Extract3DSMeshFromVisual2(zCProgMeshProto* visual, MeshVisu
 
 	meshInfo->BBox.Min = bbmin;
 	meshInfo->BBox.Max = bbmax;
-	meshInfo->MeshSize = D3DXVec3Length(&(bbmin - bbmax));
-	meshInfo->MidPoint = 0.5f * bbmin + 0.5f * bbmax;
+	XMStoreFloat(&meshInfo->MeshSize, DirectX::XMVector3LengthEst((XMLoadFloat3(&bbmin) - XMLoadFloat3(&bbmax))));
+	XMStoreFloat3(&meshInfo->MidPoint, 0.5f * (XMLoadFloat3(&bbmin) + XMLoadFloat3(&bbmax)));
 
 	meshInfo->Visual = visual;
 	meshInfo->VisualName = visual->GetObjectName();
@@ -1741,37 +1748,41 @@ void WorldConverter::IndexVertices(ExSkelVertexStruct* input, unsigned int numIn
 /** Computes vertex normals for a mesh with face normals */
 void WorldConverter::GenerateVertexNormals(std::vector<ExVertexStruct> & vertices, std::vector<VERTEX_INDEX> & indices)
 {
-	std::vector<D3DXVECTOR3> normals(vertices.size(), D3DXVECTOR3(0, 0, 0));
+	std::vector<DirectX::XMFLOAT3> normals(vertices.size(), DirectX::XMFLOAT3(0, 0, 0));
 
 	for(unsigned int i=0;i<indices.size(); i+=3)
 	{
-		D3DXVECTOR3 v[3] = {*vertices[indices[i]].Position.toD3DXVECTOR3(), *vertices[indices[i+1]].Position.toD3DXVECTOR3(), *vertices[indices[i+2]].Position.toD3DXVECTOR3()};
-		D3DXVECTOR3 normal;
-		D3DXVec3Cross(&normal, &(v[1] - v[0]), &(v[2] - v[0]));
+		DirectX::XMFLOAT3 v[3] = {*vertices[indices[i]].Position.toXMFLOAT3(), *vertices[indices[i+1]].Position.toXMFLOAT3(), *vertices[indices[i+2]].Position.toXMFLOAT3()};
+		XMVECTOR normal = XMVector3Cross((XMLoadFloat3(&v[1]) - XMLoadFloat3(&v[0])), (XMLoadFloat3(&v[2]) - XMLoadFloat3(&v[0])));
 
 		for (int j = 0; j < 3; ++j)
 		{
-			D3DXVECTOR3 a = v[(j+1) % 3] - v[j];
-			D3DXVECTOR3 b = v[(j+2) % 3] - v[j];
-			float weight = acos(D3DXVec3Dot(&a, &b) / (D3DXVec3Length(&a) * D3DXVec3Length(&b)));
-			normals[indices[(i+j)]] += weight * normal;
+			XMVECTOR a = XMLoadFloat3(&v[(j+1) % 3]) - XMLoadFloat3(&v[j]);
+			XMVECTOR b = XMLoadFloat3(&v[(j+2) % 3]) - XMLoadFloat3(&v[j]);
+			XMVECTOR weight = XMVectorACos(XMVector3Dot(a, b) / (XMVector3LengthEst(a) * XMVector3LengthEst(b)));
+			XMVECTOR XMV_normals_indices = XMLoadFloat3(&normals[indices[(i + j)]]);
+			XMV_normals_indices += weight * normal;
+			XMStoreFloat3(&normals[indices[(i + j)]], XMV_normals_indices);
 		}
 	}
 
 	// Normalize everything and store it into the vertices
 	for(unsigned int i=0;i<normals.size(); i++)
 	{
-		D3DXVec3Normalize(vertices[i].Normal.toD3DXVECTOR3(), &normals[i]);
+		XMFLOAT3 Normal;
+		XMStoreFloat3(&Normal, XMVector3NormalizeEst(XMLoadFloat3(&normals[i])));
+		vertices[i].Normal = Normal;
 	}
 }
 
 ExVertexStruct TessTriLerpVertex(ExVertexStruct& a, ExVertexStruct& b, float w)
 {
 	ExVertexStruct v;
-	D3DXVec3Lerp(v.Position.toD3DXVECTOR3(), a.Position.toD3DXVECTOR3(), b.Position.toD3DXVECTOR3(), w);
-	D3DXVec3Lerp(v.Normal.toD3DXVECTOR3(), a.Normal.toD3DXVECTOR3(), b.Normal.toD3DXVECTOR3(), w);
-	D3DXVec2Lerp(v.TexCoord.toD3DXVECTOR2(), a.TexCoord.toD3DXVECTOR2(), b.TexCoord.toD3DXVECTOR2(), w);
-	D3DXVec2Lerp(v.TexCoord2.toD3DXVECTOR2(), a.TexCoord2.toD3DXVECTOR2(), b.TexCoord2.toD3DXVECTOR2(), w);
+	XMVECTOR XMV_w = XMVectorSet(w, w, w, 0);
+	XMStoreFloat3(v.Position.toXMFLOAT3(), XMVectorLerpV(XMLoadFloat3(a.Position.toXMFLOAT3()), XMLoadFloat3(b.Position.toXMFLOAT3()), XMV_w));
+	XMStoreFloat3(v.Normal.toXMFLOAT3(), XMVectorLerpV(XMLoadFloat3(a.Normal.toXMFLOAT3()), XMLoadFloat3(b.Normal.toXMFLOAT3()), XMV_w));
+	XMStoreFloat2(v.TexCoord.toXMFLOAT2(), XMVectorLerpV(XMLoadFloat2(a.TexCoord.toXMFLOAT2()), XMLoadFloat2(b.TexCoord.toXMFLOAT2()), XMV_w));
+	XMStoreFloat2(v.TexCoord2.toXMFLOAT2(), XMVectorLerpV(XMLoadFloat2(a.TexCoord2.toXMFLOAT2()), XMLoadFloat2(b.TexCoord2.toXMFLOAT2()), XMV_w));
 	v.Color = a.Color;
 	return v;
 }

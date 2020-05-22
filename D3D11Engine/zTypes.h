@@ -14,8 +14,8 @@ enum zTCam_ClipFlags {
 
 #pragma pack (push, 1)	
 struct zTBBox3D {
-	D3DXVECTOR3	Min;	
-	D3DXVECTOR3	Max;
+	DirectX::XMFLOAT3	Min;	
+	DirectX::XMFLOAT3	Max;
 
 	enum zTPlaneClass {
 		zPLANE_INFRONT, 
@@ -35,7 +35,7 @@ struct zTBBox3D {
 
 struct zTPlane {
 	float Distance;
-	D3DXVECTOR3 Normal;
+	DirectX::XMFLOAT3 Normal;
 };
 #pragma pack (pop)
 
@@ -55,13 +55,13 @@ struct zTRenderContext {
 
 struct zCRenderLight {
 	int	LightType;            
-	D3DXVECTOR3	ColorDiffuse;			
-	D3DXVECTOR3	Position;				
-	D3DXVECTOR3	Direction;				
+	DirectX::XMFLOAT3	ColorDiffuse;
+	DirectX::XMFLOAT3	Position;
+	DirectX::XMFLOAT3	Direction;
 	float Range;						
 	float RangeInv;
-	D3DXVECTOR3 PositionLS;				
-	D3DXVECTOR3 DirectionLS;			
+	DirectX::XMFLOAT3 PositionLS;
+	DirectX::XMFLOAT3 DirectionLS;
 	float Dir_approxFalloff;			
 };
 
@@ -73,7 +73,7 @@ private:
 	int	DoPrelight;
 	int	DoSmoothPrelit;
 	float PreLightDist;
-	D3DXMATRIX MatObjToCam;
+	DirectX::XMFLOAT4X4 MatObjToCam;
 };
 
 enum zTRnd_AlphaBlendFunc {	

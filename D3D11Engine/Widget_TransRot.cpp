@@ -56,10 +56,10 @@ Widget_TransRot::Widget_TransRot(WidgetContainer * container) : BaseWidget(conta
 	Circles[1]->CreateCirclePrimitive(1,Detail, float4(1, 0, 0, 1), 1);
 	Circles[2]->CreateCirclePrimitive(1,Detail, float4(0, 0, 1, 1), 2);
 
-	//LE_R(TransRotWidget.Rot_Bgr.CreateFilledCirclePrimitive(1,Detail, &D3DXVECTOR4(0, 0, 0, 0), 0));
+	//LE_R(TransRotWidget.Rot_Bgr.CreateFilledCirclePrimitive(1,Detail, &DirectX::XMFLOAT4(0, 0, 0, 0), 0));
 	//TransRotWidget.Rot_Bgr.SetShader(ColorShader);
 
-	//LE_R(TransRotWidget.Rot_Bgr_Line.CreateCirclePrimitive(1.025f,Detail, &D3DXVECTOR4(0.5, 0.5, 0.5, 1), 0));
+	//LE_R(TransRotWidget.Rot_Bgr_Line.CreateCirclePrimitive(1.025f,Detail, &DirectX::XMFLOAT4(0.5, 0.5, 0.5, 1), 0));
 	//TransRotWidget.Rot_Bgr_Line.SetShader(ColorShader);
 
 	Arrows[0] = new EditorLinePrimitive;

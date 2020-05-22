@@ -57,7 +57,7 @@ XRESULT GOcean::InitOcean()
 	// A scale to control the amplitude. Not the world space height
 	ocean_param.wave_amplitude		= 0.35f;
 	// 2D wind direction. No need to be normalized
-	ocean_param.wind_dir			= D3DXVECTOR2(0.8f, 0.6f);
+	ocean_param.wind_dir			= XMFLOAT2(0.8f, 0.6f);
 	// The bigger the wind speed, the larger scale of wave crest.
 	// But the wave scale can be no larger than patch_length
 	ocean_param.wind_speed			= 600.0f;
@@ -135,11 +135,15 @@ void GOcean::CreateFresnelMap(ID3D11Device* pd3dDevice)
 	float SkyBlending = 16.0f;
 
 	DWORD* buffer = new DWORD[FRESNEL_TEX_SIZE];
+	const float waterrefract = 1.33f;
+	XMVECTOR one_andthird = DirectX::XMLoadFloat(&waterrefract);
 	for (int i = 0; i < FRESNEL_TEX_SIZE; i++)
 	{
 		float cos_a = i / (FLOAT)FRESNEL_TEX_SIZE;
 		// Using water's refraction index 1.33
-		DWORD fresnel = (DWORD)(D3DXFresnelTerm(cos_a, 1.33f) * 255);
+		float fresnelPreComp;
+		DirectX::XMStoreFloat(&fresnelPreComp, DirectX::XMFresnelTerm(DirectX::XMLoadFloat(&cos_a), one_andthird));
+		DWORD fresnel = (DWORD)(fresnelPreComp * 255);
 
 		DWORD sky_blend = (DWORD)(powf(1 / (1 + cos_a), SkyBlending) * 255);
 

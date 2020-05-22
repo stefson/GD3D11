@@ -138,10 +138,10 @@ public:
 	}
 
 	/** Returns the world-position of this vob */
-	D3DXVECTOR3 GetPositionWorld() const
+	DirectX::XMFLOAT3 GetPositionWorld() const
 	{
 		// Get the data right off the memory to save a function call
-		return D3DXVECTOR3(*(float *)THISPTR_OFFSET(GothicMemoryLocations::zCVob::Offset_WorldPosX), 
+		return DirectX::XMFLOAT3(*(float *)THISPTR_OFFSET(GothicMemoryLocations::zCVob::Offset_WorldPosX),
 			*(float *)THISPTR_OFFSET(GothicMemoryLocations::zCVob::Offset_WorldPosY), 
 			*(float *)THISPTR_OFFSET(GothicMemoryLocations::zCVob::Offset_WorldPosZ));
 		//XCALL(GothicMemoryLocations::zCVob::GetPositionWorld);
@@ -159,7 +159,7 @@ public:
 	}
 
 	/** Sets this vobs position */
-	void SetPositionWorld(const D3DXVECTOR3 & v) 
+	void SetPositionWorld(const DirectX::XMFLOAT3 & v)
 	{
 #ifdef BUILD_SPACER
 		XCALL(GothicMemoryLocations::zCVob::SetPositionWorld);
@@ -186,13 +186,13 @@ public:
 	}
 
 	/** Returns a pointer to this vobs world-matrix */
-	D3DXMATRIX* GetWorldMatrixPtr()
+	DirectX::XMFLOAT4X4* GetWorldMatrixPtr()
 	{
-		return (D3DXMATRIX *)(this + GothicMemoryLocations::zCVob::Offset_WorldMatrixPtr);
+		return (DirectX::XMFLOAT4X4 *)(this + GothicMemoryLocations::zCVob::Offset_WorldMatrixPtr);
 	}
 
 	/** Copys the world matrix into the given memory location */	
-	void GetWorldMatrix(D3DXMATRIX* m)
+	void GetWorldMatrix(DirectX::XMFLOAT4X4* m)
 	{
 		*m = *GetWorldMatrixPtr();
 	}
@@ -301,7 +301,7 @@ protected:
 	DWORD LastTimeCollected;
 
 	zCArray<zCBspLeaf*>	LeafList;
-	D3DXMATRIX WorldMatrix;
+	DirectX::XMFLOAT4X4 WorldMatrix;
 	zTBBox3D BoundingBoxWS;*/
 };
 	

@@ -456,12 +456,12 @@ HRESULT MyDirectDrawSurface7::Unlock(LPRECT lpRect)
 			unsigned pixel_data = temp1 << 8 | temp0;
 
 			unsigned char blueComponent  = (pixel_data & 0x1F);
-			unsigned char greenComponent = (pixel_data >> 5) & 0x3F;
+			unsigned char greenComponent = (pixel_data >> 6) & 0x1F;
 			unsigned char redComponent   = (pixel_data >> 11) & 0x1F;
 
 			// Extract red, green and blue components from the 16 bits
 			dst[4*i+0] = (unsigned char)((redComponent  / 32.0) * 255.0f);
-			dst[4*i+1] = (unsigned char)((greenComponent  / 64.0) * 255.0f);
+			dst[4*i+1] = (unsigned char)((greenComponent  / 32.0) * 255.0f);
 			dst[4*i+2] = (unsigned char)((blueComponent  / 32.0) * 255.0f);
 			dst[4*i+3] = 255;
 		}
@@ -503,9 +503,11 @@ HRESULT MyDirectDrawSurface7::Unlock(LPRECT lpRect)
 			if (vidRes.x == 0 || vidRes.y == 0)
 				vidRes = Engine::GraphicsEngine->GetResolution();
 
-			D3DXVECTOR2 mid = D3DXVECTOR2(Engine::GraphicsEngine->GetResolution().x / 2, Engine::GraphicsEngine->GetResolution().y / 2);
-			D3DXVECTOR2 tl = mid - D3DXVECTOR2(vidRes.x, vidRes.y) * 0.5f;
-			D3DXVECTOR2 br = mid + D3DXVECTOR2(vidRes.x, vidRes.y) * 0.5f;
+			XMVECTOR mid = XMVectorSet(Engine::GraphicsEngine->GetResolution().x / 2, Engine::GraphicsEngine->GetResolution().y / 2, 0, 0);
+			DirectX::XMFLOAT2 tl;
+			XMStoreFloat2(&tl, mid - XMVectorSet(vidRes.x, vidRes.y, 0, 0) * 0.5f); //check propably never used
+			DirectX::XMFLOAT2 br;
+			XMStoreFloat2(&br, mid + XMVectorSet(vidRes.x, vidRes.y, 0, 0) * 0.5f); //check propably never used
 
 			// Compute how much we would have to scale the video on both axis
 			float scaleX = Engine::GraphicsEngine->GetResolution().x / (float)vidRes.x;

@@ -235,7 +235,7 @@ struct BaseVisualInfo
 	zTBBox3D BBox;
 
 	/** Meshes midpoint */
-	D3DXVECTOR3 MidPoint; 
+	DirectX::XMFLOAT3 MidPoint;
 
 	/** Games visual */
 	zCVisual* Visual;
@@ -488,8 +488,8 @@ struct WorldMeshSectionInfo
 {
 	WorldMeshSectionInfo()
 	{
-		BoundingBox.Min = D3DXVECTOR3(FLT_MAX, FLT_MAX, FLT_MAX);
-		BoundingBox.Max = D3DXVECTOR3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+		BoundingBox.Min = DirectX::XMFLOAT3(FLT_MAX, FLT_MAX, FLT_MAX);
+		BoundingBox.Max = DirectX::XMFLOAT3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 		FullStaticMesh = nullptr;
 	}
 
@@ -546,7 +546,7 @@ struct WorldMeshSectionInfo
 	std::list<VobInfo*> Vobs;
 
 	/** Loaded ocean-polys of this section */
-	std::vector<D3DXVECTOR3> OceanPoints;
+	std::vector<DirectX::XMFLOAT3> OceanPoints;
 
 	// This is filled in case we have loaded a custom worldmesh
 	std::vector<zCPolygon *> SectionPolygons;
@@ -576,7 +576,7 @@ struct WorldInfo
 		CustomWorldLoaded = false;
 	}
 
-	D3DXVECTOR2 MidPoint;
+	DirectX::XMFLOAT2 MidPoint;
 	float LowestVertex;
 	float HighestVertex;
 	zCBspTree* BspTree;

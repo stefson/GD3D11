@@ -183,17 +183,17 @@ XRESULT D2DSettingsDialog::InitControls() {
 	fpsLimitSlider->SetValue(Engine::GAPI->GetRendererState()->RendererSettings.FpsLimit);
 
 	// Next column
-	/*SV_Checkbox* hdrCheckbox = new SV_Checkbox(MainView, MainPanel);
+	SV_Checkbox* hdrCheckbox = new SV_Checkbox(MainView, MainPanel);
 	hdrCheckbox->SetSize(D2D1::SizeF(160, 20));
 	hdrCheckbox->SetCaption("Enable HDR");
 	hdrCheckbox->SetDataToUpdate(&Engine::GAPI->GetRendererState()->RendererSettings.EnableHDR);
 	hdrCheckbox->AlignUnder(Header, 5);
 	hdrCheckbox->SetPosition(D2D1::Point2F(170, hdrCheckbox->GetPosition().y));
-	hdrCheckbox->SetChecked(Engine::GAPI->GetRendererState()->RendererSettings.EnableHDR);*/
+	hdrCheckbox->SetChecked(Engine::GAPI->GetRendererState()->RendererSettings.EnableHDR);
 
 	SV_Label * outdoorVobsDDLabel = new SV_Label(MainView, MainPanel);
 	outdoorVobsDDLabel->SetPositionAndSize(D2D1::Point2F(10, 10), D2D1::SizeF(150, 12));
-	outdoorVobsDDLabel->AlignUnder(Header, 5);
+	outdoorVobsDDLabel->AlignUnder(hdrCheckbox, 5);
 	outdoorVobsDDLabel->SetPosition(D2D1::Point2F(170, outdoorVobsDDLabel->GetPosition().y));
 	outdoorVobsDDLabel->SetCaption("Object draw distance:");
 

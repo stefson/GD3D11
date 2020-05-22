@@ -136,7 +136,7 @@ namespace Toolbox
 	}
 
 	/** Returns true if the given position is inside the box */
-	bool PositionInsideBox(const D3DXVECTOR3 & p, const D3DXVECTOR3 & min, const D3DXVECTOR3 & max)
+	bool PositionInsideBox(const DirectX::XMFLOAT3 & p, const DirectX::XMFLOAT3 & min, const DirectX::XMFLOAT3 & max)
 	{
 		if (p.x > min.x &&
 			p.y > min.y &&
@@ -150,7 +150,7 @@ namespace Toolbox
 	}
 
 	/** Computes the Distance of a point to an AABB */
-	float ComputePointAABBDistance(const D3DXVECTOR3 & p, const D3DXVECTOR3 & min, const D3DXVECTOR3 & max)
+	float ComputePointAABBDistance(const DirectX::XMFLOAT3 & p, const DirectX::XMFLOAT3 & min, const DirectX::XMFLOAT3 & max)
 	{
 		float dx = std::max(std::max(min.x - p.x, 0.0f), p.x - max.x);
 		float dy = std::max(std::max(min.y - p.y, 0.0f), p.y - max.y);
@@ -159,43 +159,44 @@ namespace Toolbox
 	}
 
 	/** Computes the Normal of a triangle */
-	D3DXVECTOR3 ComputeNormal(const D3DXVECTOR3 & v0, const D3DXVECTOR3 & v1, const D3DXVECTOR3 & v2)
+	DirectX::XMFLOAT3 ComputeNormal(const DirectX::XMFLOAT3 & v0, const DirectX::XMFLOAT3 & v1, const DirectX::XMFLOAT3 & v2)
 	{
-		D3DXVECTOR3 Normal;
-		D3DXVec3Cross(&Normal, &(v1 - v0), &(v2 - v0));
-		D3DXVec3Normalize(&Normal, &Normal);
+		XMVECTOR Normal = XMVector3Cross((XMLoadFloat3(&v1) - XMLoadFloat3(&v0)), (XMLoadFloat3(&v2) - XMLoadFloat3(&v0)));
+		Normal= XMVector3Normalize(Normal);
 
-		return Normal;
+		XMFLOAT3 Normal_XMFLOAT3;
+		XMStoreFloat3(&Normal_XMFLOAT3, Normal);
+		return Normal_XMFLOAT3;
 	}
 
 	/** Does a ray vs aabb test */
-	bool IntersectTri(const D3DXVECTOR3 & v0, const D3DXVECTOR3 & v1, const D3DXVECTOR3 & v2, const D3DXVECTOR3 & origin, const D3DXVECTOR3 & direction, float & u, float & v, float & t)
+	bool IntersectTri(const DirectX::XMFLOAT3 & v0, const DirectX::XMFLOAT3 & v1, const DirectX::XMFLOAT3 & v2, const DirectX::XMFLOAT3 & origin, const DirectX::XMFLOAT3 & direction, float & u, float & v, float & t)
 	{
 		const float EPSILON = 0.00001f;
-		D3DXVECTOR3 edge1 = v1 - v0; 
-		D3DXVECTOR3 edge2 = v2 - v0; 
-		D3DXVECTOR3 pvec; D3DXVec3Cross(&pvec, &direction, &edge2); 
-		float det = D3DXVec3Dot(&edge1, &pvec); 
+		XMVECTOR edge1 = XMLoadFloat3(&v1) - XMLoadFloat3(&v0);
+		XMVECTOR edge2 = XMLoadFloat3(&v2) - XMLoadFloat3(&v0);
+		XMVECTOR pvec = DirectX::XMVector3Cross(XMLoadFloat3(&direction), edge2);
+		float det;
+		XMStoreFloat(&det, DirectX::XMVector3Dot(edge1, pvec));
 		if (det > -EPSILON && det < EPSILON) return false; 
 
 		float invDet = 1 / det; 
-		D3DXVECTOR3 tvec = origin - v0; 
-		u = D3DXVec3Dot(&tvec, &pvec) * invDet; 
+		XMVECTOR tvec = XMLoadFloat3(&origin) - XMLoadFloat3(&v0);
+		XMStoreFloat(&u, DirectX::XMVector3Dot(tvec, pvec) * invDet);
 		if (u < 0 || u > 1) return false; 
-		D3DXVECTOR3 qvec;
-		D3DXVec3Cross(&qvec, &tvec, &edge1); 
+		XMVECTOR qvec =  DirectX::XMVector3Cross(tvec, edge1);
 
-		v = D3DXVec3Dot(&direction, &qvec) * invDet; 
+		XMStoreFloat(&v, DirectX::XMVector3Dot(XMLoadFloat3(&direction), qvec) * invDet);
 		if (v < 0 || u + v > 1) return false; 
-		t = D3DXVec3Dot(&edge2, &qvec) * invDet; 
+		XMStoreFloat(&t, DirectX::XMVector3Dot(edge2, qvec) * invDet);
 
 		return true; 
 	}
 
 	/** Does a ray vs aabb test */
-	bool IntersectBox(const D3DXVECTOR3 & min, const D3DXVECTOR3 & max, const D3DXVECTOR3 & origin, const D3DXVECTOR3 & direction, float & t)
+	bool IntersectBox(const DirectX::XMFLOAT3 & min, const DirectX::XMFLOAT3 & max, const DirectX::XMFLOAT3 & origin, const DirectX::XMFLOAT3 & direction, float & t)
 	{
-		D3DXVECTOR3 dirfrac;
+		DirectX::XMFLOAT3 dirfrac;
 
 		// r.dir is unit direction vector of ray
 		dirfrac.x = 1.0f / direction.x;
@@ -232,7 +233,7 @@ namespace Toolbox
 	}
 
 	/** Returns whether two AABBs are intersecting or not */
-	bool AABBsOverlapping(const D3DXVECTOR3 & minA, const D3DXVECTOR3 & maxA, const D3DXVECTOR3 & minB, const D3DXVECTOR3 & maxB)
+	bool AABBsOverlapping(const DirectX::XMFLOAT3 & minA, const DirectX::XMFLOAT3 & maxA, const DirectX::XMFLOAT3 & minB, const DirectX::XMFLOAT3 & maxB)
 	{
 		//Check if Box1's max is greater than Box2's min and Box1's min is less than Box2's max
 		return(maxA.x > minB.x &&

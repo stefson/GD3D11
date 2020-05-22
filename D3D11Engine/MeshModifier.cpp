@@ -545,15 +545,20 @@ void MeshModifier::ComputePNAEN18Indices(std::vector<ExVertexStruct> & inVertice
 	{
 		std::vector<ExVertexStruct *> & vx = it->second.second;
 
-		D3DXVECTOR3 nrm = D3DXVECTOR3(0, 0, 0);
+		DirectX::XMFLOAT3 nrm = DirectX::XMFLOAT3(0, 0, 0);
+		XMVECTOR XMV_nrm = XMVectorZero();
 		if (softNormals)
 		{
 			// Average normal of all adj. vertices			
 			for(unsigned int i=0;i<vx.size();i++)
 			{
-				nrm += *vx[i]->Normal.toD3DXVECTOR3();
+				nrm.x = vx[i]->Normal.x;
+				nrm.y = vx[i]->Normal.y;
+				nrm.z = vx[i]->Normal.z;
+				XMV_nrm += XMLoadFloat3(&nrm);
 			}
-			nrm /= vx.size();
+			XMV_nrm /= vx.size();
+			XMStoreFloat3(&nrm, XMV_nrm);
 		}
 
 		// Set it to all of them
@@ -803,13 +808,14 @@ void MeshModifier::ComputeSmoothNormals(std::vector<ExVertexStruct> & inVertices
 	{
 		std::vector<ExVertexStruct *> & vx = it->second;
 		// Average all face normals
-		D3DXVECTOR3 avgNormal = D3DXVECTOR3(0, 0, 0);
+		DirectX::XMFLOAT3 avgNormal;
+		XMVECTOR XMV_avgNormal = XMVectorZero();
 		for(unsigned int i=0;i<vx.size();i++)
 		{
-			avgNormal += *vx[i]->Normal.toD3DXVECTOR3();
+			XMV_avgNormal += XMLoadFloat3(vx[i]->Normal.toXMFLOAT3());
 		}
-		avgNormal /= (float)vx.size();
-
+		XMV_avgNormal /= (float)vx.size();
+		XMStoreFloat3(&avgNormal, XMV_avgNormal);
 		// Lerp between the average and the face normal for every vertex
 		for(unsigned int i=0;i<vx.size();i++)
 		{
@@ -825,7 +831,7 @@ void MeshModifier::ComputeSmoothNormals(std::vector<ExVertexStruct> & inVertices
 			}
 
 			vx[i]->Normal = avgNormal;
-			//D3DXVec3Lerp(vx[i]->Normal.toD3DXVECTOR3(), &avgNormal, vx[i]->Normal.toD3DXVECTOR3(), 0.7f);
+			//&vx[i]->Normal.toXMFLOAT3() = DirectX::XMVectorLerpV(&avgNormal, &vx[i]->Normal.toXMFLOAT3(), 0.7f);
 		}
 	}
 }

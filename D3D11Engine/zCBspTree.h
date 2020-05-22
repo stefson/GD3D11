@@ -91,7 +91,7 @@ public:
 		REPLACE_CALL(GothicMemoryLocations::zCBspTree::CALL_RenderTrivIndoor, INST_NOP);*/
 	}
 
-	static int _fastcall hooked_zCBspBaseCheckRayAgainstPolysNearestHit(void * thisptr, const D3DXVECTOR3 & start, const D3DXVECTOR3 & end, D3DXVECTOR3 & intersection)
+	static int _fastcall hooked_zCBspBaseCheckRayAgainstPolysNearestHit(void * thisptr, const DirectX::XMFLOAT3 & start, const DirectX::XMFLOAT3 & end, DirectX::XMFLOAT3 & intersection)
 	{
 		// Get our version of this node
 		//Engine::GAPI->Get
@@ -130,7 +130,7 @@ public:
 		
 	}
 
-	static int _fastcall hooked_zCBspBaseCheckRayAgainstPolysCache(void * thisptr, const D3DXVECTOR3 & start, const D3DXVECTOR3 & end, D3DXVECTOR3 & intersection)
+	static int _fastcall hooked_zCBspBaseCheckRayAgainstPolysCache(void * thisptr, const DirectX::XMFLOAT3 & start, const DirectX::XMFLOAT3 & end, DirectX::XMFLOAT3 & intersection)
 	{
 		// Get our version of this node
 		//Engine::GAPI->Get
@@ -168,7 +168,7 @@ public:
 		}
 	}
 
-	static int _fastcall hooked_zCBspBaseCheckRayAgainstPolys(void * thisptr, const D3DXVECTOR3 & start, const D3DXVECTOR3 & end, D3DXVECTOR3 & intersection)
+	static int _fastcall hooked_zCBspBaseCheckRayAgainstPolys(void * thisptr, const DirectX::XMFLOAT3 & start, const DirectX::XMFLOAT3 & end, DirectX::XMFLOAT3 & intersection)
 	{
 #ifdef DEBUG_SHOW_COLLISION
 		Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(start, 0xFF0000FF), LineVertex(end, 0xFFFFFFFF));
@@ -211,13 +211,13 @@ public:
 	#ifdef DEBUG_SHOW_COLLISION
 			for(int i=0;i<numFound;i++)
 			{
-				Engine::GraphicsEngine->GetLineRenderer()->AddTriangle(*polyList[i]->getVertices()[0]->Position.toD3DXVECTOR3(),
-					*polyList[i]->getVertices()[1]->Position.toD3DXVECTOR3(),
-					*polyList[i]->getVertices()[2]->Position.toD3DXVECTOR3());
+				Engine::GraphicsEngine->GetLineRenderer()->AddTriangle(*polyList[i]->getVertices()[0]->Position.toXMFLOAT3(),
+					*polyList[i]->getVertices()[1]->Position.toXMFLOAT3(),
+					*polyList[i]->getVertices()[2]->Position.toXMFLOAT3());
 			}
 
 
-			Engine::GraphicsEngine->GetLineRenderer()->AddAABBMinMax(bbox.Min, bbox.Max, D3DXVECTOR4(1, 0, 0, 1));
+			Engine::GraphicsEngine->GetLineRenderer()->AddAABBMinMax(bbox.Min, bbox.Max, DirectX::XMFLOAT4(1, 0, 0, 1));
 	#endif
 
 			return numFound != 0;

@@ -4,10 +4,11 @@
 #include <string>
 #include <unordered_map>
 
-#include <D3DX10.h>
 #include <Windows.h>
 
 #include "Types.h"
+
+using namespace DirectX;
 
 /** Misc. tools */
 enum zTCam_ClipType;
@@ -116,7 +117,7 @@ namespace Toolbox {
 	void hash_combine(std::size_t & seed, DWORD value);
 
 	/** Returns true if the given position is inside the box */
-	bool PositionInsideBox(const D3DXVECTOR3 & p, const D3DXVECTOR3 & min, const D3DXVECTOR3 & max);
+	bool PositionInsideBox(const DirectX::XMFLOAT3 & p, const DirectX::XMFLOAT3 & min, const DirectX::XMFLOAT3 & max);
 
 	/** Converts an errorcode into a string */
 	std::string MakeErrorString(XRESULT code);
@@ -143,19 +144,19 @@ namespace Toolbox {
 	std::string ToMultiByte(const std::wstring & str);
 
 	/** Returns whether two AABBs are intersecting or not */
-	bool AABBsOverlapping(const D3DXVECTOR3 & minA, const D3DXVECTOR3 & maxA, const D3DXVECTOR3 & minB, const D3DXVECTOR3 & maxB); 
+	bool AABBsOverlapping(const DirectX::XMFLOAT3 & minA, const DirectX::XMFLOAT3 & maxA, const DirectX::XMFLOAT3 & minB, const DirectX::XMFLOAT3 & maxB);
 
 	/** Does a ray vs aabb test */
-	bool IntersectBox(const D3DXVECTOR3 & min, const D3DXVECTOR3 & max, const D3DXVECTOR3 & origin, const D3DXVECTOR3 & direction, float & t);
+	bool IntersectBox(const DirectX::XMFLOAT3 & min, const DirectX::XMFLOAT3 & max, const DirectX::XMFLOAT3 & origin, const DirectX::XMFLOAT3 & direction, float & t);
 
 	/** Does a ray vs aabb test */
-	bool IntersectTri(const D3DXVECTOR3 & v0, const D3DXVECTOR3 & v1, const D3DXVECTOR3 & v2, const D3DXVECTOR3 & origin, const D3DXVECTOR3 & direction, float & u, float & v, float & t);
+	bool IntersectTri(const DirectX::XMFLOAT3 & v0, const DirectX::XMFLOAT3 & v1, const DirectX::XMFLOAT3 & v2, const DirectX::XMFLOAT3 & origin, const DirectX::XMFLOAT3 & direction, float & u, float & v, float & t);
 
 	/** Computes the normal of a triangle */
-	D3DXVECTOR3 ComputeNormal(const D3DXVECTOR3 & v0, const D3DXVECTOR3 & v1, const D3DXVECTOR3 & v2);
+	DirectX::XMFLOAT3 ComputeNormal(const DirectX::XMFLOAT3 & v0, const DirectX::XMFLOAT3 & v1, const DirectX::XMFLOAT3 & v2);
 
 	/** Computes the distance of a point to an AABB */
-	float ComputePointAABBDistance(const D3DXVECTOR3 & p, const D3DXVECTOR3 & min, const D3DXVECTOR3 & max);
+	float ComputePointAABBDistance(const DirectX::XMFLOAT3 & p, const DirectX::XMFLOAT3 & min, const DirectX::XMFLOAT3 & max);
 
 	/** Returns whether the given file exists */
 	bool FileExists(const std::string & file);

@@ -38,13 +38,13 @@ struct zCModelNode
 	zCModelNode* ParentNode;
 	zSTRING	NodeName;
 	zCVisual* Visual;
-	D3DXMATRIX Transform;
+	DirectX::XMFLOAT4X4 Transform;
 
-	D3DXVECTOR3 NodeRotAxis;
+	DirectX::XMFLOAT3 NodeRotAxis;
 	float NodeRotAngle;
-	D3DXVECTOR3	Translation;
-	D3DXMATRIX TransformObjToWorld;
-	D3DXMATRIX* NodeTransformList;
+	DirectX::XMFLOAT3 Translation;
+	DirectX::XMFLOAT4X4 TransformObjToWorld;
+	DirectX::XMFLOAT4X4* NodeTransformList;
 	zCModelNodeInst* LastInstNode;
 };
 
@@ -218,7 +218,7 @@ public:
 
 
 	/** Creates an array of matrices for the bone transforms */
-	void __fastcall RenderNodeList(zTRenderContext& renderContext, zCArray<D3DXMATRIX*> & boneTransforms, zCRenderLightContainer& lightContainer, int lightingMode = 0)
+	void __fastcall RenderNodeList(zTRenderContext& renderContext, zCArray<DirectX::XMFLOAT4X4*> & boneTransforms, zCRenderLightContainer& lightContainer, int lightingMode = 0)
 	{
 		XCALL(GothicMemoryLocations::zCModel::RenderNodeList);
 	}
@@ -278,13 +278,13 @@ public:
 #endif
 	}
 
-	D3DXVECTOR3 GetModelScale()
+	DirectX::XMFLOAT3 GetModelScale()
 	{
 #ifdef BUILD_GOTHIC_1_08k
-		return D3DXVECTOR3(1, 1, 1);
+		return DirectX::XMFLOAT3(1, 1, 1);
 #endif
 
-		return *(D3DXVECTOR3 *)THISPTR_OFFSET(GothicMemoryLocations::zCModel::Offset_ModelScale);
+		return *(DirectX::XMFLOAT3 *)THISPTR_OFFSET(GothicMemoryLocations::zCModel::Offset_ModelScale);
 	}
 
 	DirectX::XMVECTOR GetModelScaleXM()

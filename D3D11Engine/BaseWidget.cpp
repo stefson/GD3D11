@@ -75,7 +75,7 @@ void BaseWidget::CreateArrowCone(int Detail, int Axis, const float4& Color, Edit
 
 	LineVertex * vx = new LineVertex[NumVerts];
 
-	float Step = (D3DX_PI * 2) / ((float)Detail - 1);
+	float Step = XM_2PI / ((float)Detail - 1);
 	float s = 0;
 
 	float Length = BASEWIDGET_CONE_LENGTH;
@@ -198,123 +198,122 @@ void BaseWidget::CreateArrowCone(int Detail, int Axis, const float4& Color, Edit
 	delete[] vx;
 }
 
-void BaseWidget::CreateArrowCube(XMFLOAT3 * Offset, float Extends, const float4& Color, EditorLinePrimitive * Prim) {
+void BaseWidget::CreateArrowCube(DirectX::XMFLOAT3 * Offset, float Extends, const float4& Color, EditorLinePrimitive * Prim) {
 	LineVertex vx[36];
 	int i = 0;
 
-	vx[i].Position = D3DXVECTOR3(-1, -1, -1);
+	vx[i].Position = DirectX::XMFLOAT3(-1, -1, -1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1, -1, 1);
+	vx[i].Position = DirectX::XMFLOAT3(1, -1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(-1, -1, 1);
+	vx[i].Position = DirectX::XMFLOAT3(-1, -1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(-1, -1, -1);
+	vx[i].Position = DirectX::XMFLOAT3(-1, -1, -1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1, -1, -1);
+	vx[i].Position = DirectX::XMFLOAT3(1, -1, -1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1, -1, 1);
+	vx[i].Position = DirectX::XMFLOAT3(1, -1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(-1, 1, -1);
+	vx[i].Position = DirectX::XMFLOAT3(-1, 1, -1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(-1, 1, 1);
+	vx[i].Position = DirectX::XMFLOAT3(-1, 1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1, 1, 1);
+	vx[i].Position = DirectX::XMFLOAT3(1, 1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(-1, 1, -1);
+	vx[i].Position = DirectX::XMFLOAT3(-1, 1, -1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1, 1, 1);
+	vx[i].Position = DirectX::XMFLOAT3(1, 1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1, 1, -1);
+	vx[i].Position = DirectX::XMFLOAT3(1, 1, -1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(-1, -1, -1);
+	vx[i].Position = DirectX::XMFLOAT3(-1, -1, -1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(-1, -1, 1);
+	vx[i].Position = DirectX::XMFLOAT3(-1, -1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(-1, 1, 1);
+	vx[i].Position = DirectX::XMFLOAT3(-1, 1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(-1, -1, -1);
+	vx[i].Position = DirectX::XMFLOAT3(-1, -1, -1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(-1, 1, 1);
+	vx[i].Position = DirectX::XMFLOAT3(-1, 1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(-1, 1, -1);
+	vx[i].Position = DirectX::XMFLOAT3(-1, 1, -1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1, -1, -1);
+	vx[i].Position = DirectX::XMFLOAT3(1, -1, -1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1, 1, 1);
+	vx[i].Position = DirectX::XMFLOAT3(1, 1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1, -1, 1);
+	vx[i].Position = DirectX::XMFLOAT3(1, -1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1, -1, -1);
+	vx[i].Position = DirectX::XMFLOAT3(1, -1, -1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1, 1, -1);
+	vx[i].Position = DirectX::XMFLOAT3(1, 1, -1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1, 1, 1);
+	vx[i].Position = DirectX::XMFLOAT3(1, 1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(-1, -1, -1);
+	vx[i].Position = DirectX::XMFLOAT3(-1, -1, -1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1, 1, -1);
+	vx[i].Position = DirectX::XMFLOAT3(1, 1, -1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1, -1, -1);
+	vx[i].Position = DirectX::XMFLOAT3(1, -1, -1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(-1, -1, -1);
+	vx[i].Position = DirectX::XMFLOAT3(-1, -1, -1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(-1, 1, -1);
+	vx[i].Position = DirectX::XMFLOAT3(-1, 1, -1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1, 1, -1);
+	vx[i].Position = DirectX::XMFLOAT3(1, 1, -1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(-1, -1, 1);
+	vx[i].Position = DirectX::XMFLOAT3(-1, -1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1, -1, 1);
+	vx[i].Position = DirectX::XMFLOAT3(1, -1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1, 1, 1);
+	vx[i].Position = DirectX::XMFLOAT3(1, 1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(-1, -1, 1);
+	vx[i].Position = DirectX::XMFLOAT3(-1, -1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(1, 1, 1);
+	vx[i].Position = DirectX::XMFLOAT3(1, 1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
-	vx[i].Position = D3DXVECTOR3(-1, 1, 1);
+	vx[i].Position = DirectX::XMFLOAT3(-1, 1, 1);
 	EditorLinePrimitive::EncodeColor(&vx[i++], Color);
 
 	// Loop through all vertices and apply the offset and the extends
 	XMVECTOR xmOffset = XMLoadFloat3(Offset);
 	for (i = 0; i < 36; i++) {
-		XMStoreFloat3(vx[i].Position.toXMFLOAT3(), XMLoadFloat3(vx[i].Position.toXMFLOAT3()) * Extends);
-		XMStoreFloat3(vx[i].Position.toXMFLOAT3(), XMLoadFloat3(vx[i].Position.toXMFLOAT3()) + xmOffset);
+		XMStoreFloat3(vx[i].Position.toXMFLOAT3(), (XMLoadFloat3(vx[i].Position.toXMFLOAT3()) * Extends) + xmOffset);
 	}
 
 	Prim->CreateSolidPrimitive(&vx[0], 36);
