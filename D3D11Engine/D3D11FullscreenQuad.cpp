@@ -19,10 +19,10 @@ HRESULT D3D11FullscreenQuad::CreateQuad(ID3D11Device* device)
 		SimpleVertexStruct* vx = new SimpleVertexStruct[6];
 		UINT CurVertex=0;
 
-		/*FarCornersA4[0]		= D3DXVECTOR3(-farX,  farY, farZ);
-		FarCornersA4[1]		= D3DXVECTOR3(farX,  farY, farZ);
-		FarCornersA4[2]		= D3DXVECTOR3(farX, -farY, farZ);
-		FarCornersA4[3]		= D3DXVECTOR3(-farX, -farY, farZ);*/
+		/*FarCornersA4[0]		= DirectX::XMFLOAT3(-farX,  farY, farZ);
+		FarCornersA4[1]		= DirectX::XMFLOAT3(farX,  farY, farZ);
+		FarCornersA4[2]		= DirectX::XMFLOAT3(farX, -farY, farZ);
+		FarCornersA4[3]		= DirectX::XMFLOAT3(-farX, -farY, farZ);*/
 
 		vx[0].Position=XMFLOAT3(-1,-1, 0);
 		vx[0].TexCoord=XMFLOAT2(0, 1);

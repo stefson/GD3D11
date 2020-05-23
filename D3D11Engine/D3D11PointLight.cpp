@@ -126,7 +126,7 @@ void D3D11PointLight::RenderCubemap(bool forceUpdate)
 
 
 	XMVECTOR vEyePt = LightInfo->Vob->GetPositionWorldXM();
-	//vEyePt += D3DXVECTOR3(0, 1, 0) * 20.0f; // Move lightsource out of the ground or other objects (torches!)
+	//vEyePt += XMVectorSet(0, 1, 0, 0) * 20.0f; // Move lightsource out of the ground or other objects (torches!)
 	// TODO: Move the actual lightsource up too!
 
 	XMVECTOR vLookDir;

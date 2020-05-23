@@ -599,11 +599,11 @@ void D2DEditorView::DoSelection()
 	Engine::GAPI->TraceWorldMesh(Engine::GAPI->GetCameraPosition(), *(DirectX::XMFLOAT3*)&wDir, hitWorld, &TracedTexture, hitTri, &hitMesh, &hitMaterial);
 
 	float lenVob;
-	XMStoreFloat(&lenVob, DirectX::XMVector3LengthEst((XMLoadFloat3(&Engine::GAPI->GetCameraPosition()) - XMLoadFloat3(&hitVob))));
+	XMStoreFloat(&lenVob, DirectX::XMVector3LengthEst(Engine::GAPI->GetCameraPositionXM() - XMLoadFloat3(&hitVob)));
 	float lenSkel;
-	XMStoreFloat(&lenSkel, DirectX::XMVector3LengthEst((XMLoadFloat3(&Engine::GAPI->GetCameraPosition()) - XMLoadFloat3(&hitSkel))));
+	XMStoreFloat(&lenSkel, DirectX::XMVector3LengthEst(Engine::GAPI->GetCameraPositionXM() - XMLoadFloat3(&hitSkel)));
 	float lenWorld;
-	XMStoreFloat(&lenWorld, DirectX::XMVector3LengthEst((XMLoadFloat3(&Engine::GAPI->GetCameraPosition()) - XMLoadFloat3(&hitWorld))));
+	XMStoreFloat(&lenWorld, DirectX::XMVector3LengthEst(Engine::GAPI->GetCameraPositionXM() - XMLoadFloat3(&hitWorld)));
 
 	// Check world hit
 	if (lenWorld < lenVob && lenWorld < lenSkel)
@@ -652,10 +652,8 @@ void D2DEditorView::DoSelection()
 		TracedSkeletalVobInfo = tSkelVob;
 		XMFLOAT3 minAABB;
 		XMFLOAT3 maxAABB;
-		XMVECTOR GetBBoxLocal_min = XMVectorSet(TracedSkeletalVobInfo->Vob->GetBBoxLocal().Min.x, TracedSkeletalVobInfo->Vob->GetBBoxLocal().Min.y, TracedSkeletalVobInfo->Vob->GetBBoxLocal().Min.z, 0);
-		XMVECTOR GetBBoxLocal_max = XMVectorSet(TracedSkeletalVobInfo->Vob->GetBBoxLocal().Max.x, TracedSkeletalVobInfo->Vob->GetBBoxLocal().Max.y, TracedSkeletalVobInfo->Vob->GetBBoxLocal().Max.z, 0);
-		XMStoreFloat3(&minAABB, GetBBoxLocal_min + XMLoadFloat3(&TracedSkeletalVobInfo->Vob->GetPositionWorld()));
-		XMStoreFloat3(&maxAABB, GetBBoxLocal_max + XMLoadFloat3(&TracedSkeletalVobInfo->Vob->GetPositionWorld()));
+		XMStoreFloat3(&minAABB, XMVectorSet(TracedSkeletalVobInfo->Vob->GetBBoxLocal().Min.x, TracedSkeletalVobInfo->Vob->GetBBoxLocal().Min.y, TracedSkeletalVobInfo->Vob->GetBBoxLocal().Min.z, 0) + TracedSkeletalVobInfo->Vob->GetPositionWorldXM());
+		XMStoreFloat3(&maxAABB, XMVectorSet(TracedSkeletalVobInfo->Vob->GetBBoxLocal().Max.x, TracedSkeletalVobInfo->Vob->GetBBoxLocal().Max.y, TracedSkeletalVobInfo->Vob->GetBBoxLocal().Max.z, 0) + TracedSkeletalVobInfo->Vob->GetPositionWorldXM());
 		Engine::GraphicsEngine->GetLineRenderer()->AddAABBMinMax(minAABB, maxAABB, DirectX::XMFLOAT4(1, 1, 1, 1));
 
 		if (!TracedSkeletalVobInfo->VisualInfo->Meshes.empty())
@@ -668,12 +666,10 @@ void D2DEditorView::DoSelection()
 	if (tVob && lenVob < lenSkel && lenVob < lenWorld)
 	{
 		TracedVobInfo = tVob;
-		XMVECTOR GetBBoxLocal_min = XMVectorSet(TracedVobInfo->Vob->GetBBoxLocal().Min.x, TracedVobInfo->Vob->GetBBoxLocal().Min.y, TracedVobInfo->Vob->GetBBoxLocal().Min.z, 0);
-		XMVECTOR GetBBoxLocal_max = XMVectorSet(TracedVobInfo->Vob->GetBBoxLocal().Max.x, TracedVobInfo->Vob->GetBBoxLocal().Max.y, TracedVobInfo->Vob->GetBBoxLocal().Max.z, 0);
 		XMFLOAT3 min_XMFloat3;
 		XMFLOAT3 max_XMFloat3;
-		XMStoreFloat3(&min_XMFloat3, GetBBoxLocal_min + XMLoadFloat3(&TracedVobInfo->Vob->GetPositionWorld()));
-		XMStoreFloat3(&max_XMFloat3, GetBBoxLocal_max + XMLoadFloat3(&TracedVobInfo->Vob->GetPositionWorld()));
+		XMStoreFloat3(&min_XMFloat3, XMVectorSet(TracedVobInfo->Vob->GetBBoxLocal().Min.x, TracedVobInfo->Vob->GetBBoxLocal().Min.y, TracedVobInfo->Vob->GetBBoxLocal().Min.z, 0) + TracedVobInfo->Vob->GetPositionWorldXM());
+		XMStoreFloat3(&max_XMFloat3, XMVectorSet(TracedVobInfo->Vob->GetBBoxLocal().Max.x, TracedVobInfo->Vob->GetBBoxLocal().Max.y, TracedVobInfo->Vob->GetBBoxLocal().Max.z, 0) + TracedVobInfo->Vob->GetPositionWorldXM());
 		Engine::GraphicsEngine->GetLineRenderer()->AddAABBMinMax(min_XMFloat3, max_XMFloat3, DirectX::XMFLOAT4(1, 1, 1, 1));
 		
 		TracedMaterial = hitMaterialVob;
@@ -722,12 +718,12 @@ void D2DEditorView::VisualizeMeshInfo(MeshInfo * m, const DirectX::XMFLOAT4 & co
 		if (showBounds)
 		{
 			Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(tri[0], DirectX::XMFLOAT4(1,edge[0], 0, 1)), LineVertex(tri[1], DirectX::XMFLOAT4(1,edge[1], 0, 1)));
-			Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(tri[0], DirectX::XMFLOAT4(1,edge[0], 0, 1)), LineVertex(tri[1], DirectX::XMFLOAT4(1,edge[1], 0, 1)));
+			Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(tri[0], DirectX::XMFLOAT4(1,edge[0], 0, 1)), LineVertex(tri[2], DirectX::XMFLOAT4(1,edge[2], 0, 1)));
 			Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(tri[1], DirectX::XMFLOAT4(1,edge[1], 0, 1)), LineVertex(tri[2], DirectX::XMFLOAT4(1,edge[2], 0, 1)));
 		} else
 		{
 			Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(tri[0], color), LineVertex(tri[1], color));
-			Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(tri[0], color), LineVertex(tri[1], color));
+			Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(tri[0], color), LineVertex(tri[2], color));
 			Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(tri[1], color), LineVertex(tri[2], color));
 		}
 	}

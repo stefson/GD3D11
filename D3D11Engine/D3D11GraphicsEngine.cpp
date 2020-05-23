@@ -676,13 +676,9 @@ XRESULT D3D11GraphicsEngine::Clear(const float4& color) {
 	GetContext()->ClearDepthStencilView(DepthStencilBuffer->GetDepthStencilView(),
 		D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-	GetContext()->ClearRenderTargetView(GBuffer0_Diffuse->GetRenderTargetView(),
-		(float*)& color);
-	GetContext()->ClearRenderTargetView(
-		GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView(),
-		(float*)&float4(0, 0, 0, 0));
-	GetContext()->ClearRenderTargetView(HDRBackBuffer->GetRenderTargetView(),
-		(float*)&float4(0, 0, 0, 0));
+	GetContext()->ClearRenderTargetView(GBuffer0_Diffuse->GetRenderTargetView(), (float*)& color);
+	GetContext()->ClearRenderTargetView(GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView(), (float*)&float4(0, 0, 0, 0));
+	GetContext()->ClearRenderTargetView(HDRBackBuffer->GetRenderTargetView(), (float*)&float4(0, 0, 0, 0));
 
 	return XR_SUCCESS;
 }
@@ -5458,11 +5454,8 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 	// TODO: Maybe make particles draw at a lower res and bilinear upsample the result.
 
 	// Clear GBuffer0 to hold the refraction vectors since it's not needed anymore
-	GetContext()->ClearRenderTargetView(GBuffer0_Diffuse->GetRenderTargetView(),
-		(float*)& float4(0.0f, 0.0f, 0.0f, 0.0f));
-	GetContext()->ClearRenderTargetView(
-		GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView(),
-		(float*)& float4(0.0f, 0.0f, 0.0f, 0.0f));
+	GetContext()->ClearRenderTargetView(GBuffer0_Diffuse->GetRenderTargetView(), (float*)& float4(0, 0, 0, 0));
+	GetContext()->ClearRenderTargetView(GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView(), (float*)& float4(0, 0, 0, 0));
 
 	D3D11PShader* distPS = ShaderManager->GetPShader("PS_ParticleDistortion");
 

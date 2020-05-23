@@ -256,11 +256,6 @@ XRESULT D2DSettingsDialog::InitControls() {
 	worldDDSlider->SetDataToUpdate(&Engine::GAPI->GetRendererState()->RendererSettings.SectionDrawRadius);
 	worldDDSlider->SetIsIntegralSlider(true);
 	worldDDSlider->SetMinMax(1.0f, 10.0f);
-	if (GMPModeActive) {
-		worldDDSlider->SetMinMax(3.0f, 10.0f);
-	} else {
-		worldDDSlider->SetMinMax(1.0f, 10.0f);
-	}
 	worldDDSlider->SetValue((float)Engine::GAPI->GetRendererState()->RendererSettings.SectionDrawRadius);
 
 	SV_Label * dynShadowLabel = new SV_Label(MainView, MainPanel);

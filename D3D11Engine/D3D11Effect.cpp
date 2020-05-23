@@ -62,7 +62,7 @@ void D3D11Effect::FillRandomRaindropData(std::vector<ParticleInstanceInfo> & dat
 		SeedX *= radius;
 		SeedZ *= radius;
 		float SeedY = Toolbox::frand() * height;
-		//raindrop.seed = D3DXVECTOR3(SeedX,SeedY,SeedZ); 
+		//raindrop.seed = DirectX::XMFLOAT3(SeedX,SeedY,SeedZ); 
 
 		//add some random speed to the particles, to prevent all the particles from following exactly the same trajectory
 		//additionally, random speeds in the vertical direction ensure that temporal aliasing is minimized
@@ -191,7 +191,7 @@ XRESULT D3D11Effect::DrawRain()
 	// Update constantbuffer for the advance-VS
 	AdvanceRainConstantBuffer acb;
 	XMFLOAT3 LightPosition_XMFloat3;
-	XMStoreFloat3(&LightPosition_XMFloat3, XMLoadFloat3(&Engine::GAPI->GetSky()->GetAtmoshpereSettings().LightDirection) * Engine::GAPI->GetSky()->GetAtmoshpereSettings().OuterRadius + XMLoadFloat3(&Engine::GAPI->GetCameraPosition()));
+	XMStoreFloat3(&LightPosition_XMFloat3, XMLoadFloat3(&Engine::GAPI->GetSky()->GetAtmoshpereSettings().LightDirection) * Engine::GAPI->GetSky()->GetAtmoshpereSettings().OuterRadius + Engine::GAPI->GetCameraPositionXM());
 	acb.AR_LightPosition.x = LightPosition_XMFloat3.x;
 	acb.AR_LightPosition.y = LightPosition_XMFloat3.y;
 	acb.AR_LightPosition.z = LightPosition_XMFloat3.z;

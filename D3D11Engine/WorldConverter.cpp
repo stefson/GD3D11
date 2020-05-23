@@ -198,11 +198,8 @@ XRESULT WorldConverter::LoadWorldMeshFromFile(const std::string & file, std::map
 
 
 			// Calculate midpoint of this triange to get the section
-			XMVECTOR Position0 = XMVectorSet(v[0]->Position.x, v[0]->Position.y, v[0]->Position.z, 0);
-			XMVECTOR Position1 = XMVectorSet(v[1]->Position.x, v[1]->Position.y, v[1]->Position.z, 0);
-			XMVECTOR Position2 = XMVectorSet(v[2]->Position.x, v[2]->Position.y, v[2]->Position.z, 0);
 			DirectX::XMFLOAT3 avgPos;
-			XMStoreFloat3(&avgPos, (Position0 + Position1 + Position2) / 3.0f);
+			XMStoreFloat3(&avgPos, XMLoadFloat3(&*v[0]->Position.toXMFLOAT3()) + XMLoadFloat3(&*v[1]->Position.toXMFLOAT3()) + XMLoadFloat3(&*v[2]->Position.toXMFLOAT3()) / 3.0f);
 			INT2 sxy = GetSectionOfPos(avgPos);
 
 			WorldMeshSectionInfo& section = (*outSections)[sxy.x][sxy.y];
@@ -584,10 +581,7 @@ HRESULT WorldConverter::ConvertWorldMesh(zCPolygon** polys, unsigned int numPoly
 
 		// Calculate midpoint of this triange to get the section
 		DirectX::XMFLOAT3 avgPos;
-		XMVECTOR Position0 = XMVectorSet(poly->getVertices()[0]->Position.x, poly->getVertices()[0]->Position.y, poly->getVertices()[0]->Position.z, 0);
-		XMVECTOR Position1 = XMVectorSet(poly->getVertices()[1]->Position.x, poly->getVertices()[1]->Position.y, poly->getVertices()[1]->Position.z, 0);
-		XMVECTOR Position2 = XMVectorSet(poly->getVertices()[2]->Position.x, poly->getVertices()[2]->Position.y, poly->getVertices()[2]->Position.z, 0);
-		XMStoreFloat3(&avgPos, (Position0 + Position1 + Position2) / 3.0f);
+		XMStoreFloat3(&avgPos, (XMLoadFloat3(&*poly->getVertices()[0]->Position.toXMFLOAT3()) + XMLoadFloat3(&*poly->getVertices()[1]->Position.toXMFLOAT3()) + XMLoadFloat3(&*poly->getVertices()[2]->Position.toXMFLOAT3())) / 3.0f);
 		INT2 section = GetSectionOfPos(avgPos);
 		(*outSections)[section.x][section.y].WorldCoordinates = section;
 
@@ -1428,7 +1422,7 @@ void WorldConverter::Extract3DSMeshFromVisual2PNAEN(zCProgMeshProto* visual, Mes
 	meshInfo->BBox.Min = bbmin;
 	meshInfo->BBox.Max = bbmax;
 	XMStoreFloat(&meshInfo->MeshSize, DirectX::XMVector3LengthEst(XMLoadFloat3(&bbmin) - XMLoadFloat3(&bbmax)));
-	XMStoreFloat3(&meshInfo->MidPoint, 0.5f * XMLoadFloat3(&bbmin) + 0.5f * XMLoadFloat3(&bbmax));
+	XMStoreFloat3(&meshInfo->MidPoint, 0.5f * (XMLoadFloat3(&bbmin) + XMLoadFloat3(&bbmax)));
 
 	meshInfo->Visual = visual;
 }

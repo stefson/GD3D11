@@ -373,14 +373,10 @@ GothicRendererState* GothicAPI::GetRendererState()
 GVegetationBox* GothicAPI::SpawnVegetationBoxAt(const DirectX::XMFLOAT3 & position, const DirectX::XMFLOAT3 & min, const DirectX::XMFLOAT3 & max, float density, const std::string & restrictByTexture)
 {
 	GVegetationBox* v = new GVegetationBox;
-	XMVECTOR XMV_position = XMVectorSet(position.x, position.y, position.z, 0.0f);
-
-	XMVECTOR XMV_minp = XMVectorSet(min.x, min.y, min.z, 0.0f) + XMV_position;
-	XMVECTOR XMV_maxp = XMVectorSet(max.x, max.y, max.z, 0.0f) + XMV_position;
 	DirectX::XMFLOAT3 minposition;
 	DirectX::XMFLOAT3 maxposition;
-	XMStoreFloat3(&minposition, XMV_minp);
-	XMStoreFloat3(&maxposition, XMV_maxp);
+	XMStoreFloat3(&minposition, XMLoadFloat3(&min) + XMLoadFloat3(&position));
+	XMStoreFloat3(&maxposition, XMLoadFloat3(&max) + XMLoadFloat3(&position));
 	v->InitVegetationBox(minposition, maxposition, "", density, 1.0f, restrictByTexture);
 
 	VegetationBoxes.push_back(v);
@@ -896,13 +892,13 @@ void GothicAPI::GetVisibleParticleEffectsList(std::vector<zCVob*> & pfxList)
 {
 	if (RendererState.RendererSettings.DrawParticleEffects)
 	{
-		DirectX::XMFLOAT3 camPos = GetCameraPosition();
+		XMVECTOR camPos = GetCameraPositionXM();
 
 		// now it is save to render
 		for (auto const& it : ParticleEffectVobs)
 		{
 			float dist;
-			XMStoreFloat(&dist, DirectX::XMVector3LengthEst(XMLoadFloat3(&(it->GetPositionWorld())) - XMLoadFloat3(&(camPos))));
+			XMStoreFloat(&dist, DirectX::XMVector3LengthEst(it->GetPositionWorldXM()) - camPos);
 			if (dist > RendererState.RendererSettings.OutdoorSmallVobDrawRadius)
 				continue;
 			if (dist > RendererState.RendererSettings.VisualFXDrawRadius)
@@ -922,12 +918,12 @@ static bool DecalSortcmpFunc(const std::pair<zCVob*, float> & a, const std::pair
 
 /** Gets a list of visible decals */
 void GothicAPI::GetVisibleDecalList(std::vector<zCVob*> & decals) {
-	DirectX::XMFLOAT3 camPos = GetCameraPosition();
+	XMVECTOR camPos = GetCameraPositionXM();
 	static std::vector<std::pair<zCVob*, float>> decalDistances; // Static to get around reallocations
 
 	for (auto const& it : DecalVobs) {
 		float dist;
-		XMStoreFloat(&dist, DirectX::XMVector3LengthEst(XMLoadFloat3(&(it->GetPositionWorld())) - XMLoadFloat3(&(camPos))));
+		XMStoreFloat(&dist, DirectX::XMVector3LengthEst(it->GetPositionWorldXM()) - camPos);
 		if (dist > RendererState.RendererSettings.VisualFXDrawRadius)
 			continue;
 
@@ -1321,7 +1317,7 @@ void GothicAPI::OnRemovedVob(zCVob * vob, zCWorld * world) {
 
 	for (auto it = AnimatedSkeletalVobs.begin(); it != AnimatedSkeletalVobs.end(); ++it) {
 		if ((*it)->Vob == vob) {
-			SkeletalVobInfo* vi = (*it);
+			SkeletalVobInfo* vi = *it;
 			it = AnimatedSkeletalVobs.erase(it);
 			break;
 		}
@@ -1888,10 +1884,9 @@ void GothicAPI::DrawParticleFX(zCVob * source, zCParticleFX * fx, ParticleFrameD
 			}
 			else if (alignment == zPARTICLE_ALIGNMENT_VELOCITY || alignment == zPARTICLE_ALIGNMENT_VELOCITY_3D) {
 				// Rotate velocity so it fits with the vob
-				XMVECTOR velNrm = DirectX::XMVector3TransformNormal(XMVector3NormalizeEst(XMLoadFloat3(&p->Vel)), XMLoadFloat4x4(&sw));
 
 				XMFLOAT3 velocity;
-				XMStoreFloat3(&velocity, velNrm);
+				XMStoreFloat3(&velocity, DirectX::XMVector3TransformNormal(XMVector3NormalizeEst(XMLoadFloat3(&p->Vel)), XMLoadFloat4x4(&sw)));
 				ii.velocity = velocity;
 
 				ii.drawMode = 3;
@@ -2137,11 +2132,11 @@ SkeletalVobInfo* GothicAPI::TraceSkeletalMeshVobsBB(const DirectX::XMFLOAT3 & or
 	{
 		float t = 0;
 		XMFLOAT3 BBoxlocal_min;
-		XMFLOAT3 BBoxlocal_max;
-		XMFLOAT3 GetBBoxLocal_min = it->Vob->GetBBoxLocal().Min;
-		XMFLOAT3 GetBBoxLocal_max = it->Vob->GetBBoxLocal().Max;
-		XMStoreFloat3(&BBoxlocal_min, XMLoadFloat3(&GetBBoxLocal_min) + XMLoadFloat3(&it->Vob->GetPositionWorld())); //check if it works
-		XMStoreFloat3(&BBoxlocal_max, XMLoadFloat3(&GetBBoxLocal_max) + XMLoadFloat3(&it->Vob->GetPositionWorld())); //check if it works
+		XMFLOAT3 BBoxlocal_max; 
+		XMVECTOR GetBBoxLocal_min = XMVectorSet(it->Vob->GetBBoxLocal().Min.x, it->Vob->GetBBoxLocal().Min.y, it->Vob->GetBBoxLocal().Min.z, 0);
+		XMVECTOR GetBBoxLocal_max = XMVectorSet(it->Vob->GetBBoxLocal().Max.x, it->Vob->GetBBoxLocal().Max.y, it->Vob->GetBBoxLocal().Max.z, 0);
+		XMStoreFloat3(&BBoxlocal_min, GetBBoxLocal_min + it->Vob->GetPositionWorldXM());
+		XMStoreFloat3(&BBoxlocal_max, GetBBoxLocal_max + it->Vob->GetPositionWorldXM());
 		if (Toolbox::IntersectBox(BBoxlocal_min, BBoxlocal_max, origin, dir, t))
 		{
 			if (t < closest)
@@ -2592,7 +2587,7 @@ void GothicAPI::DebugDrawTreeNode(zCBspBase * base, zTBBox3D boxCell, int clipFl
 
 			zTBBox3D tmpbox = boxCell;
 			float plane_normal;
-			XMStoreFloat(&plane_normal, DirectX::XMVector3Dot(XMLoadFloat3(&node->Plane.Normal), XMLoadFloat3(&GetCameraPosition())));
+			XMStoreFloat(&plane_normal, DirectX::XMVector3Dot(XMLoadFloat3(&node->Plane.Normal), GetCameraPositionXM()));
 			if (plane_normal > node->Plane.Distance)
 			{
 				if (node->Front)
@@ -2644,7 +2639,7 @@ void GothicAPI::CollectVisibleVobs(std::vector<VobInfo*> & vobs, std::vector<Vob
 	// Recursively go through the tree and draw all nodes
 	CollectVisibleVobsHelper(root, root->OriginalNode->BBox3D, 63, vobs, lights, mobs);
 
-	const DirectX::XMFLOAT3 camPos = GetCameraPosition();
+	XMVECTOR camPos = GetCameraPositionXM();
 	const float vobIndoorDist = Engine::GAPI->GetRendererState()->RendererSettings.IndoorVobDrawRadius;
 	const float vobOutdoorDist = Engine::GAPI->GetRendererState()->RendererSettings.OutdoorVobDrawRadius;
 	const float vobOutdoorSmallDist = Engine::GAPI->GetRendererState()->RendererSettings.OutdoorSmallVobDrawRadius;
@@ -2658,7 +2653,7 @@ void GothicAPI::CollectVisibleVobs(std::vector<VobInfo*> & vobs, std::vector<Vob
 		for (auto const& it : dynAllocatedVobs) {
 			// Get distance to this vob
 			float dist;
-			XMStoreFloat(&dist, DirectX::XMVector3LengthEst(XMLoadFloat3(&camPos) - XMLoadFloat3(&it->Vob->GetPositionWorld())));
+			XMStoreFloat(&dist, DirectX::XMVector3LengthEst(camPos - it->Vob->GetPositionWorldXM()));
 			// Draw, if in range
 			if (it->VisualInfo && ((dist < vobIndoorDist && it->IsIndoorVob) || (dist < vobOutdoorSmallDist && it->VisualInfo->MeshSize < vobSmallSize) || (dist < vobOutdoorDist))) {
 #ifdef BUILD_GOTHIC_1_08k
@@ -2846,9 +2841,9 @@ static void CVVH_AddNotDrawnVobToList(std::vector<VobLightInfo*> & target, std::
 		if (!it->VisibleInRenderPass)
 		{
 			float d = dist;
-			float veclenght;
-			XMStoreFloat(&veclenght, DirectX::XMVector3LengthEst(XMLoadFloat3(&Engine::GAPI->GetCameraPosition()) - XMLoadFloat3(&it->Vob->GetPositionWorld())));
-			if (veclenght - it->Vob->GetLightRange() < d)
+			float veclength;
+			XMStoreFloat(&veclength, DirectX::XMVector3LengthEst(Engine::GAPI->GetCameraPositionXM() - it->Vob->GetPositionWorldXM()));
+			if (veclength - it->Vob->GetLightRange() < d)
 			{
 				target.push_back(it);
 				it->VisibleInRenderPass = true;
@@ -2864,7 +2859,7 @@ static void CVVH_AddNotDrawnVobToList(std::vector<SkeletalVobInfo*> & target, st
 		if (!it->VisibleInRenderPass)
 		{
 			float vd;
-			XMStoreFloat(&vd, DirectX::XMVector3LengthEst(XMLoadFloat3(&Engine::GAPI->GetCameraPosition()) - XMLoadFloat3(&it->Vob->GetPositionWorld())));
+			XMStoreFloat(&vd, DirectX::XMVector3LengthEst(Engine::GAPI->GetCameraPositionXM() - it->Vob->GetPositionWorldXM()));
 			if (vd < dist && it->Vob->GetShowVisual())
 			{
 				target.push_back(it);
@@ -2968,7 +2963,7 @@ void GothicAPI::CollectVisibleVobsHelper(BspInfo * base, zTBBox3D boxCell, int c
 
 				for (int i = 0; i < leaf->LightVobList.NumInArray; i++) {
 					float lightCameraDist;
-					XMStoreFloat(&lightCameraDist, DirectX::XMVector3LengthEst(XMLoadFloat3(&Engine::GAPI->GetCameraPosition()) - XMLoadFloat3(&leaf->LightVobList.Array[i]->GetPositionWorld())));
+					XMStoreFloat(&lightCameraDist, DirectX::XMVector3LengthEst(Engine::GAPI->GetCameraPositionXM() - leaf->LightVobList.Array[i]->GetPositionWorldXM()));
 					if (lightCameraDist + leaf->LightVobList.Array[i]->GetLightRange() < visualFXDrawRadius) {
 						zCVobLight* v = leaf->LightVobList.Array[i];
 						VobLightInfo** vi = &VobLightMap[leaf->LightVobList.Array[i]];
@@ -2988,7 +2983,7 @@ void GothicAPI::CollectVisibleVobsHelper(BspInfo * base, zTBBox3D boxCell, int c
 							(*vi)->VisibleInRenderPass = true;
 
 							float lightPlayerDist;
-							XMStoreFloat(&lightPlayerDist, DirectX::XMVector3LengthEst(XMLoadFloat3(&playerPosition) - XMLoadFloat3(&leaf->LightVobList.Array[i]->GetPositionWorld())));
+							XMStoreFloat(&lightPlayerDist, DirectX::XMVector3LengthEst(XMLoadFloat3(&playerPosition) - leaf->LightVobList.Array[i]->GetPositionWorldXM()));
 
 							// Update the lights shadows if: Light is dynamic or full shadow-updates are set
 							if (RendererState.RendererSettings.EnablePointlightShadows >= GothicRendererSettings::PLS_FULL
@@ -3016,7 +3011,7 @@ void GothicAPI::CollectVisibleVobsHelper(BspInfo * base, zTBBox3D boxCell, int c
 
 			zTBBox3D tmpbox = boxCell;
 			float plane_normal;
-			XMStoreFloat(&plane_normal, DirectX::XMVector3Dot(XMLoadFloat3(&node->Plane.Normal), XMLoadFloat3(&GetCameraPosition())));
+			XMStoreFloat(&plane_normal, DirectX::XMVector3Dot(XMLoadFloat3(&node->Plane.Normal), GetCameraPositionXM()));
 			if (plane_normal > node->Plane.Distance) {
 				if (node->Front) {
 					((float*)& tmpbox.Min)[planeAxis] = node->Plane.Distance;
@@ -3632,7 +3627,9 @@ XRESULT GothicAPI::LoadSuppressedTextures(const std::string & file)
 			// Read chars
 			char name[256];
 			memset(name, 0, 256);
-			fread(name, numChars, 1, f);
+			if (numChars > 0) {
+				fread(name, numChars, 1, f);
+			}
 
 			// Add to map
 			SuppressedTexturesBySection[&WorldSections[coords.x][coords.y]].push_back(std::string(name));
@@ -3840,8 +3837,8 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 
 	GothicRendererSettings& s = RendererState.RendererSettings;
 
-	s.DrawFog = GetPrivateProfileBoolA("General", "EnableFog", TRUE, ini.c_str());
-	s.AtmosphericScattering = GetPrivateProfileBoolA("General", "AtmosphericScattering", TRUE, ini.c_str());
+	s.DrawFog = GetPrivateProfileBoolA("General", "EnableFog", true, ini.c_str());
+	s.AtmosphericScattering = GetPrivateProfileBoolA("General", "AtmosphericScattering", true, ini.c_str());
 	s.EnableHDR = GetPrivateProfileBoolA("General", "EnableHDR", false, ini.c_str());
 	s.EnableDebugLog = GetPrivateProfileBoolA("General", "EnableDebugLog", defaultRendererSettings.EnableDebugLog, ini);
 	s.EnableAutoupdates = GetPrivateProfileBoolA("General", "EnableAutoupdates", defaultRendererSettings.EnableAutoupdates, ini);
