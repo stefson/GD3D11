@@ -191,7 +191,7 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID) {
 				LogInfo() << "COM initialized";
 			}
 
-			if (Toolbox::FileExists("gmp.dll")) {
+			if (Toolbox::FileExists("gmp.dll") || Toolbox::FileExists("..\\gmp\\gmp.dll")) {
 				GMPModeActive = true;
 				LogInfo() << "GMP Mode Enabled";
 			} else {

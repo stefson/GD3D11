@@ -190,6 +190,9 @@ XRESULT D2DSettingsDialog::InitControls() {
 	hdrCheckbox->AlignUnder(Header, 5);
 	hdrCheckbox->SetPosition(D2D1::Point2F(170, hdrCheckbox->GetPosition().y));
 	hdrCheckbox->SetChecked(Engine::GAPI->GetRendererState()->RendererSettings.EnableHDR);
+	if (GMPModeActive) {
+		hdrCheckbox->SetHidden(true);
+	}
 
 	SV_Label * outdoorVobsDDLabel = new SV_Label(MainView, MainPanel);
 	outdoorVobsDDLabel->SetPositionAndSize(D2D1::Point2F(10, 10), D2D1::SizeF(150, 12));
@@ -203,7 +206,11 @@ XRESULT D2DSettingsDialog::InitControls() {
 	outdoorVobsDDSlider->SetDataToUpdate(&Engine::GAPI->GetRendererState()->RendererSettings.OutdoorVobDrawRadius);
 	outdoorVobsDDSlider->SetIsIntegralSlider(true);
 	outdoorVobsDDSlider->SetDisplayMultiplier(0.001f);
-	outdoorVobsDDSlider->SetMinMax(0.0f, 99999.0f);
+	if (GMPModeActive) {
+		outdoorVobsDDSlider->SetMinMax(20000.0f, 99999.0f);
+	} else {
+		outdoorVobsDDSlider->SetMinMax(0.0f, 99999.0f);
+	}
 	outdoorVobsDDSlider->SetValue(Engine::GAPI->GetRendererState()->RendererSettings.OutdoorVobDrawRadius);
 
 	SV_Label * outdoorVobsSmallDDLabel = new SV_Label(MainView, MainPanel);
@@ -217,7 +224,11 @@ XRESULT D2DSettingsDialog::InitControls() {
 	outdoorVobsSmallDDSlider->SetDataToUpdate(&Engine::GAPI->GetRendererState()->RendererSettings.OutdoorSmallVobDrawRadius);
 	outdoorVobsSmallDDSlider->SetIsIntegralSlider(true);
 	outdoorVobsSmallDDSlider->SetDisplayMultiplier(0.001f);
-	outdoorVobsSmallDDSlider->SetMinMax(0.0f, 99999.0f);
+	if (GMPModeActive) {
+		outdoorVobsSmallDDSlider->SetMinMax(20000.0f, 99999.0f);
+	} else {
+		outdoorVobsSmallDDSlider->SetMinMax(0.0f, 99999.0f);
+	}
 	outdoorVobsSmallDDSlider->SetValue(Engine::GAPI->GetRendererState()->RendererSettings.OutdoorSmallVobDrawRadius);
 
 	SV_Label * visualFXDDLabel = new SV_Label(MainView, MainPanel);
@@ -245,6 +256,11 @@ XRESULT D2DSettingsDialog::InitControls() {
 	worldDDSlider->SetDataToUpdate(&Engine::GAPI->GetRendererState()->RendererSettings.SectionDrawRadius);
 	worldDDSlider->SetIsIntegralSlider(true);
 	worldDDSlider->SetMinMax(1.0f, 10.0f);
+	if (GMPModeActive) {
+		worldDDSlider->SetMinMax(3.0f, 10.0f);
+	} else {
+		worldDDSlider->SetMinMax(1.0f, 10.0f);
+	}
 	worldDDSlider->SetValue((float)Engine::GAPI->GetRendererState()->RendererSettings.SectionDrawRadius);
 
 	SV_Label * dynShadowLabel = new SV_Label(MainView, MainPanel);

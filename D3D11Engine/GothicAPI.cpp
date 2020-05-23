@@ -2479,7 +2479,7 @@ LRESULT GothicAPI::OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 			switch (wParam) {
 				case VK_F11:
 #ifdef PUBLIC_RELEASE
-					if (GetAsyncKeyState(VK_CONTROL)) {
+					if (GetAsyncKeyState(VK_CONTROL) && !GMPModeActive) {
 						Engine::AntTweakBar->SetActive(!Engine::AntTweakBar->GetActive());
 						SetEnableGothicInput(!Engine::AntTweakBar->GetActive());
 					}
@@ -3855,6 +3855,14 @@ XRESULT GothicAPI::LoadMenuSettings(const std::string & file)
 	s.EnableOcclusionCulling = GetPrivateProfileBoolA("General", "EnableOcclusionCulling", defaultRendererSettings.EnableOcclusionCulling, ini);
 	s.FpsLimit = GetPrivateProfileIntA("General", "FpsLimit", 0, ini.c_str());
 	s.ReplaceSunDirection = GetPrivateProfileBoolA("General", "ReplaceSunDirection", defaultRendererSettings.ReplaceSunDirection, ini);
+
+	// override INI settings with GMP minimum values.
+	if (GMPModeActive) {
+		s.OutdoorVobDrawRadius = std::max(20000.f, s.OutdoorVobDrawRadius);
+		s.OutdoorSmallVobDrawRadius = std::max(20000.f, s.OutdoorSmallVobDrawRadius);
+		s.SectionDrawRadius = std::max(3, s.SectionDrawRadius);
+		s.EnableHDR = false;
+	}
 
 	static DirectX::XMFLOAT3 defaultLightDirection = DirectX::XMFLOAT3(1, 1, 1);
 
