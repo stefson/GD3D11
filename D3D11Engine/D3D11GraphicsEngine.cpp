@@ -418,41 +418,65 @@ XRESULT D3D11GraphicsEngine::OnResize(INT2 newSize) {
 	UINT scflags = m_flipWithTearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 
 	if (!SwapChain) {
+
+		static std::map<DXGI_SWAP_EFFECT, std::string> swapEffectMap = {
+			{DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_DISCARD, "DXGI_SWAP_EFFECT_DISCARD"},
+			{DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL, "DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL"},
+			{DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_FLIP_DISCARD, "DXGI_SWAP_EFFECT_FLIP_DISCARD"},
+		};
+
 		m_swapchainflip = Engine::GAPI->GetRendererState()->RendererSettings.DisplayFlip;
 
 		Microsoft::WRL::ComPtr<IDXGIDevice> pDXGIDevice;
 		LE(Device.As<IDXGIDevice>(&pDXGIDevice));
 		Microsoft::WRL::ComPtr<IDXGIAdapter> adapter;
 		Microsoft::WRL::ComPtr<IDXGIFactory> factory;
-		Microsoft::WRL::ComPtr<IDXGIFactory5> factory5;
 
 		LE(pDXGIDevice->GetAdapter(&adapter));
 		LE(adapter->GetParent(IID_PPV_ARGS(&factory)));
 
-		if (SUCCEEDED(factory.As(&factory5))) {
-			BOOL allowTearing = FALSE;
-			if (factory5.Get() && SUCCEEDED(factory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof(allowTearing)))) {
-				m_flipWithTearing = allowTearing != 0;
-				m_swapchainflip = m_flipWithTearing;
+		DXGI_SWAP_EFFECT swapEffect = DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_DISCARD;
+
+		
+		if (m_swapchainflip) {
+			Microsoft::WRL::ComPtr<IDXGIFactory2> factory2;
+			Microsoft::WRL::ComPtr<IDXGIFactory4> factory4;
+			Microsoft::WRL::ComPtr<IDXGIFactory5> factory5;
+
+			if (SUCCEEDED(factory.As(&factory5))) {
+				BOOL allowTearing = FALSE;
+				if (factory5.Get() && SUCCEEDED(factory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof(allowTearing)))) {
+					m_flipWithTearing = allowTearing != 0;
+					m_swapchainflip = m_flipWithTearing;
+				}
+			}
+			if (SUCCEEDED(factory.As(&factory4))) {
+				swapEffect = DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_FLIP_DISCARD;
+			}
+			else if (SUCCEEDED(factory.As(&factory2))) {
+				swapEffect = DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+			}
+			else {
+				m_swapchainflip = false;
 			}
 		}
-		LogInfo() << "SwapChain Mode: " << (m_swapchainflip ? "DXGI_SWAP_EFFECT_FLIP_DISCARD" : "DXGI_SWAP_EFFECT_DISCARD");
-		LogInfo() << "SwapChain: DXGI_FEATURE_PRESENT_ALLOW_TEARING = " << (m_flipWithTearing ? "Enabled" : "Disabled");
 
-		DXGI_SWAP_CHAIN_DESC scd = {};
+		LogInfo() << "SwapChain Mode: " << swapEffectMap.at(swapEffect);
+		swapEffectMap.clear();
+		if (m_swapchainflip) {
+			LogInfo() << "SwapChain: DXGI_FEATURE_PRESENT_ALLOW_TEARING = " << (m_flipWithTearing ? "Enabled" : "Disabled");
+		}
 
 		LogInfo() << "Creating new swapchain! (Format: DXGI_FORMAT_R8G8B8A8_UNORM)";
 		
+		DXGI_SWAP_CHAIN_DESC scd = {};
 		if (m_swapchainflip) {
 			scd.BufferCount = 2;
-			scd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-			if (m_flipWithTearing) {
-				scflags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
-			}
+			if (m_flipWithTearing) { scflags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING; }
 		} else {
 			scd.BufferCount = 1;
-			scd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 		}
+		scd.SwapEffect = swapEffect;
 		scd.Flags = scflags;
 		scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_SHADER_INPUT;
