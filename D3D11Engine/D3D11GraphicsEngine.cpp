@@ -5620,7 +5620,7 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 			TempVertexBuffer = std::make_unique<D3D11VertexBuffer>();
 
 			TempVertexBuffer->Init(
-				nullptr, sizeof(ParticleInstanceInfo) * instances.size(),
+				nullptr, (sizeof(ParticleInstanceInfo) * instances.size()) * 1.15f,
 				D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC,
 				D3D11VertexBuffer::CA_WRITE);
 		}
