@@ -257,24 +257,19 @@ void D3D11OcclusionQuerry::DebugVisualizeNodeMesh(MeshInfo * m, const DirectX::X
 		DirectX::XMFLOAT3 tri[3];
 		float edge[3];
 
-		tri[0].x = m->Vertices[m->Indices[i]].Position.x;
-		tri[0].y = m->Vertices[m->Indices[i]].Position.y;
-		tri[0].z = m->Vertices[m->Indices[i]].Position.z;
+		tri[0] = *m->Vertices[m->Indices[i]].Position.toXMFLOAT3();
+		
+		tri[1] = *m->Vertices[m->Indices[i+1]].Position.toXMFLOAT3();
 
-		tri[1].x = m->Vertices[m->Indices[i+1]].Position.x;
-		tri[1].y = m->Vertices[m->Indices[i+1]].Position.y;
-		tri[1].z = m->Vertices[m->Indices[i+1]].Position.z;
-
-		tri[2].x = m->Vertices[m->Indices[i+2]].Position.x;
-		tri[2].y = m->Vertices[m->Indices[i+2]].Position.y;
-		tri[2].z = m->Vertices[m->Indices[i+2]].Position.z;
-
+		tri[2] = *m->Vertices[m->Indices[i+2]].Position.toXMFLOAT3();
+		
+		// TODO: check if required
 		edge[0] = m->Vertices[m->Indices[i]].TexCoord2.x;
 		edge[1] = m->Vertices[m->Indices[i+1]].TexCoord2.x;
 		edge[2] = m->Vertices[m->Indices[i+2]].TexCoord2.x;
 
 		Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(tri[0], color), LineVertex(tri[1], color));
-		Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(tri[0], color), LineVertex(tri[1], color));
+		Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(tri[0], color), LineVertex(tri[2], color));
 		Engine::GraphicsEngine->GetLineRenderer()->AddLine(LineVertex(tri[1], color), LineVertex(tri[2], color));
 
 	}
