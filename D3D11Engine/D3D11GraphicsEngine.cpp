@@ -5147,6 +5147,7 @@ void D3D11GraphicsEngine::DrawDecalList(const std::vector<zCVob*>& decals,
 
 	SetupVS_ExMeshDrawCall();
 	SetupVS_ExConstantBuffer();
+	XMFLOAT3 camPos = Engine::GAPI->GetCameraPosition();
 
 	int lastAlphaFunc = -1;
 	for (unsigned int i = 0; i < decals.size(); i++) {
@@ -5200,6 +5201,16 @@ void D3D11GraphicsEngine::DrawDecalList(const std::vector<zCVob*>& decals,
 
 		scale = XMMatrixTranspose(scale);
 
+		if (alignment == zVISUAL_CAM_ALIGN_YAW) {
+			// Rotate the FX towards the camera
+			// TODO: some candle flames (and other pfx?) are invisible / very thin when done this way.
+
+			XMFLOAT3 decalPos = decals[i]->GetPositionWorld();
+			float angle = atan2(decalPos.x - camPos.x, decalPos.z - camPos.z) * (180 / XM_PI);
+			float rot = XMConvertToRadians(angle);
+			world = world * XMMatrixTranspose(XMMatrixRotationY(rot));
+		}
+
 		XMMATRIX mat = view * world;
 		
 		if (alignment == zVISUAL_CAM_ALIGN_FULL) {
@@ -5211,12 +5222,6 @@ void D3D11GraphicsEngine::DrawDecalList(const std::vector<zCVob*>& decals,
 						mat.r[x].m128_f32[y] = 0.0f;
 				}
 			}
-		}
-		else if (alignment == zVISUAL_CAM_ALIGN_YAW) {
-			// TODO: implement YAW alignment properly?
-			// Tried a few candles, and other lights. They looked ok to me without handling them.
-			// Well, they do not follow the camera if done this way.
-			// This makes them look flat when looked at from a different angle.
 		}
 
 		mat = mat * offset * scale;

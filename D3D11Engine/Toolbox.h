@@ -105,7 +105,7 @@ namespace Toolbox {
 		return len;
 	}
 	/** Checks whether a given boundingbox is inside the given frustum. The index in "cache" is tested first, if it isn't set to -1 */
-	zTCam_ClipType BBox3DInFrustumCached(const zTBBox3D & bbox3D, zTPlane * frustumPlanes, byte * signbits, int & cache);
+	zTCam_ClipType BBox3DInFrustumCached(const zTBBox3D & bbox3D, zTPlane * frustumPlanes, uint8_t * signbits, int & cache);
 
 	/** Checks if a folder exists */
 	bool FolderExists(const std::string & dirName_in);
