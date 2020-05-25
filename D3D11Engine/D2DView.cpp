@@ -39,6 +39,7 @@ D2DView::D2DView()
 	WriteFactory = nullptr;
 
 	SettingsDialog = nullptr;
+	EditorView = nullptr;
 }
 
 

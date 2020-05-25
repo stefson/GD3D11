@@ -7,6 +7,11 @@
 #pragma comment(lib, "AntTweakBar.lib")
 
 BaseAntTweakBar::BaseAntTweakBar() {
+	Bar_General = nullptr;
+	Bar_HBAO = nullptr;
+	Bar_Info = nullptr;
+	Bar_ShaderMakros = nullptr;
+	Bar_TextureSettings = nullptr;
 	IsActive = false;
 	Bar_Sky = nullptr;
 	TS_Active = false;

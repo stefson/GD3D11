@@ -360,7 +360,7 @@ public:
 			return;
 
 		// Make this static so we don't reallocate the memory every time
-		static std::vector<DirectX::XMFLOAT4X4*, AlignmentAllocator<DirectX::XMFLOAT4X4*, 16>> tptr;
+		static VectorA16<DirectX::XMFLOAT4X4*> tptr;
 		tptr.resize(GetNodeList()->NumInArray, nullptr);
 		for (int i = 0; i < GetNodeList()->NumInArray; i++)
 		{

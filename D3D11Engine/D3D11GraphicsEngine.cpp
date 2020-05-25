@@ -3154,7 +3154,7 @@ void D3D11GraphicsEngine::DrawWorldAround(FXMVECTOR position,
 		UINT loc = 0;
 		DynamicInstancingBuffer->Map(D3D11VertexBuffer::M_WRITE_DISCARD,
 			(void**)& data, &size);
-		static std::vector<VobInstanceInfo, AlignmentAllocator<VobInstanceInfo, 16>> s_InstanceData;
+		static VectorA16<VobInstanceInfo> s_InstanceData;
 		for (auto const& staticMeshVisual : staticMeshVisuals) {
 			if (staticMeshVisual.second->Instances.empty()) continue;
 
@@ -3349,8 +3349,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 		UINT loc = 0;
 		DynamicInstancingBuffer->Map(D3D11VertexBuffer::M_WRITE_DISCARD,
 			(void**)& data, &size);
-		static std::vector<VobInstanceInfo, AlignmentAllocator<VobInstanceInfo, 16>>
-			s_InstanceData;
+		static VectorA16<VobInstanceInfo> s_InstanceData;
 		for (auto const& staticMeshVisual : staticMeshVisuals) {
 			staticMeshVisual.second->StartInstanceNum = loc;
 			memcpy(data + loc * sizeof(VobInstanceInfo), &staticMeshVisual.second->Instances[0],

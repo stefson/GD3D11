@@ -7,8 +7,8 @@
 using namespace DirectX;
 
 BaseWidget::BaseWidget(WidgetContainer * container) {
+	testPrim = nullptr;
 	OwningContainer = container;
-
 	Position = XMFLOAT3(0, 0, 0);
 	Scale = XMFLOAT3(1, 1, 1);
 	XMStoreFloat4x4(&Rotation, XMMatrixIdentity());

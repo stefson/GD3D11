@@ -212,7 +212,7 @@ XRESULT GSky::RenderSky() {
 	//return XR_SUCCESS;
 
 	DirectX::XMFLOAT3 camPos = Engine::GAPI->GetCameraPosition();
-	DirectX::XMFLOAT3 LightDir;
+	DirectX::XMFLOAT3 LightDir = {};
 
 	if (Engine::GAPI->GetRendererState()->RendererSettings.ReplaceSunDirection) {
 		LightDir = Atmosphere.LightDirection;

@@ -14,6 +14,7 @@ SV_Panel::SV_Panel(D2DView * view, D2DSubView * parent) : D2DSubView(view, paren
 	Image = nullptr;
 	HasDarkOverlay = false;
 	HasGlossyOutline = false;
+	ImageSource = nullptr;
 }
 
 SV_Panel::~SV_Panel() {

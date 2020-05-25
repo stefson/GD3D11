@@ -20,6 +20,7 @@ const int INSTANCING_BUFFER_SIZE = sizeof(VobInstanceInfo) * 2048;
 //#define DEBUG_D3D11
 
 D3D11GraphicsEngineBase::D3D11GraphicsEngineBase() {
+	OutputWindow = HWND(0);
 	PresentPending = false;
 
 	// Match the resolution with the current desktop resolution
