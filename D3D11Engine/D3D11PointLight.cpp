@@ -124,14 +124,6 @@ void D3D11PointLight::RenderCubemap(bool forceUpdate)
 	D3D11GraphicsEngineBase* engineBase = (D3D11GraphicsEngineBase *)Engine::GraphicsEngine;
 	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *) engineBase; // TODO: Remove and use newer system!
 
-
-	XMVECTOR vEyePt = LightInfo->Vob->GetPositionWorldXM();
-	//vEyePt += XMVectorSet(0, 1, 0, 0) * 20.0f; // Move lightsource out of the ground or other objects (torches!)
-	// TODO: Move the actual lightsource up too!
-
-	XMVECTOR vLookDir;
-	XMVECTOR vUpDir;
-
 	if (!NeedsUpdate() && !WantsUpdate())
 	{
 		if (!forceUpdate)
@@ -150,48 +142,37 @@ void D3D11PointLight::RenderCubemap(bool forceUpdate)
 		}
 	}
 
-	
+	XMVECTOR vEyePt = LightInfo->Vob->GetPositionWorldXM();
+	//vEyePt += XMVectorSet(0, 1, 0, 0) * 20.0f; // Move lightsource out of the ground or other objects (torches!)
+	// TODO: Move the actual lightsource up too!
+
+	XMVECTOR vLookDir;
+	XMVECTOR vUpDir;
+	XMVECTOR vUpDir0100 = XMVectorSet(0, 1, 0, 0);
 
 	// Update indoor/outdoor-state
 	LightInfo->IsIndoorVob = LightInfo->Vob->IsIndoorVob();
 
-	XMFLOAT3 vec3;
 	// Generate cubemap view-matrices
-	vec3 = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	vLookDir = XMVectorAdd(XMLoadFloat3(&vec3), vEyePt);
-	vec3 = XMFLOAT3(0.0f, 1.0f, 0.0f);
-    vUpDir = XMLoadFloat3(&vec3);
-	XMStoreFloat4x4(&CubeMapViewMatrices[0], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, vUpDir)));
+	vLookDir = XMVectorSet(1, 0, 0, 0) + vEyePt;
+	XMStoreFloat4x4(&CubeMapViewMatrices[0], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, vUpDir0100)));
     
-	vec3 = XMFLOAT3(-1.0f, 0.0f, 0.0f);
-	vLookDir = XMVectorAdd(XMLoadFloat3(&vec3), vEyePt);
-	vec3 = XMFLOAT3(0.0f, 1.0f, 0.0f);
-    vUpDir = XMLoadFloat3(&vec3);
-	XMStoreFloat4x4(&CubeMapViewMatrices[1], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, vUpDir)));
+	vLookDir = XMVectorSet(-1, 0, 0, 0) + vEyePt;
+	XMStoreFloat4x4(&CubeMapViewMatrices[1], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, vUpDir0100)));
 
-	vec3 = XMFLOAT3(0.0f, 0.0f + 1.0f, 0.0f);
-	vLookDir = XMVectorAdd(XMLoadFloat3(&vec3), vEyePt);
-	vec3 = XMFLOAT3(0.0f, 0.0f, -1.0f);
-	vUpDir = XMLoadFloat3(&vec3);
+	vLookDir = XMVectorSet(0, 1, 0, 0) + vEyePt;
+	vUpDir = XMVectorSet(0, 0, -1, 0);
 	XMStoreFloat4x4(&CubeMapViewMatrices[2], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, vUpDir)));
 
-	vec3 = XMFLOAT3(0.0f, 0.0f - 1.0f, 0.0f);
-	vLookDir = XMVectorAdd(XMLoadFloat3(&vec3), vEyePt);
-	vec3 = XMFLOAT3(0.0f, 0.0f, 1.0f);
-	vUpDir = XMLoadFloat3(&vec3);
+	vLookDir = XMVectorSet(0, -1, 0, 0) + vEyePt;
+	vUpDir = XMVectorSet(0, 0, 1, 0);
 	XMStoreFloat4x4(&CubeMapViewMatrices[3], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, vUpDir)));
 
-	vec3 = XMFLOAT3(0.0f, 0.0f, 1.0f);
-	vLookDir = XMVectorAdd(XMLoadFloat3(&vec3), vEyePt);
-	vec3 = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	vUpDir = XMLoadFloat3(&vec3);
-	XMStoreFloat4x4(&CubeMapViewMatrices[4], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, vUpDir)));
+	vLookDir = XMVectorSet(0, 0, 1, 0) + vEyePt;
+	XMStoreFloat4x4(&CubeMapViewMatrices[4], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, vUpDir0100)));
 
-	vec3 = XMFLOAT3(0.0f, 0.0f, -1.0f);
-	vLookDir = XMVectorAdd(XMLoadFloat3(&vec3), vEyePt);
-	vec3 = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	vUpDir = XMLoadFloat3(&vec3);
-	XMStoreFloat4x4(&CubeMapViewMatrices[5], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, vUpDir)));
+	vLookDir = XMVectorSet(0, 0, -1, 0) + vEyePt;
+	XMStoreFloat4x4(&CubeMapViewMatrices[5], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, vUpDir0100)));
 
 	// Create the projection matrix
 	float zNear = 15.0f;
@@ -214,7 +195,7 @@ void D3D11PointLight::RenderCubemap(bool forceUpdate)
 	for(int i=0;i<6;i++)
 	{
 		gcb.PCR_View[i] = CubeMapViewMatrices[i];
-		XMStoreFloat4x4(&gcb.PCR_ViewProj[i], XMMatrixMultiply(proj, XMLoadFloat4x4(&CubeMapViewMatrices[i])));
+		XMStoreFloat4x4(&gcb.PCR_ViewProj[i], proj * XMLoadFloat4x4(&CubeMapViewMatrices[i]));
 	}
 
 	ViewMatricesCB->UpdateBuffer(&gcb);
