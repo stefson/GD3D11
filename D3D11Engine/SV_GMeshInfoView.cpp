@@ -97,7 +97,8 @@ void SV_GMeshInfoView::SetObjectOrientation(float yaw, float pitch, float distan
 
 	XMMATRIX xmObjectViewMatrix = XMLoadFloat4x4(&ObjectViewMatrix);
 
-	xmObjectViewMatrix = XMMatrixLookAtLH(XMVectorSet(-distance, 0, 0, 0), XMVectorSet(0, 0, 0, 0), XMVectorSet(0, 1, 0, 0));
+	constexpr XMVECTORF32 c_XM_0100 = { { { 0.0f, 1.0f, 0.0f, 0.0f } } };
+	xmObjectViewMatrix = XMMatrixLookAtLH(XMVectorSet(-distance, 0, 0, 0), DirectX::g_XMZero, c_XM_0100);
 	xmObjectViewMatrix = XMMatrixTranspose(xmObjectViewMatrix);
 
 	XMStoreFloat4x4(&ObjectWorldMatrix, xmObjectWorldMatrix);

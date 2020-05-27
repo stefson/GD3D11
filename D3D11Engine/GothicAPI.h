@@ -298,7 +298,7 @@ public:
 	void SetWorldViewTransform(const DirectX::XMFLOAT4X4& world, const DirectX::XMFLOAT4X4& view);
 	
 	/** Sets the world matrix */
-	void __vectorcall SetWorldViewTransform(DirectX::XMMATRIX world, const DirectX::XMMATRIX& view);
+	void __vectorcall SetWorldViewTransform(DirectX::XMMATRIX world, DirectX::CXMMATRIX view);
 
 	/** Sets the world matrix */
 	void ResetWorldTransform();

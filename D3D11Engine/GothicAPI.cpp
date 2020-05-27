@@ -2029,7 +2029,7 @@ void GothicAPI::SetWorldViewTransform(const XMFLOAT4X4& world, const XMFLOAT4X4&
 	RendererState.TransformState.TransformView = view;
 }
 /** Sets the world matrix */
-void __vectorcall  GothicAPI::SetWorldViewTransform(XMMATRIX world, const XMMATRIX& view)
+void __vectorcall  GothicAPI::SetWorldViewTransform(XMMATRIX world, CXMMATRIX view)
 {
 	XMStoreFloat4x4(&RendererState.TransformState.TransformWorld, world);
 	XMStoreFloat4x4(&RendererState.TransformState.TransformView, view);
@@ -2323,7 +2323,7 @@ DirectX::XMFLOAT3 GothicAPI::GetCameraPosition()
 XMVECTOR GothicAPI::GetCameraPositionXM()
 {
 	if (!oCGame::GetGame()->_zCSession_camVob)
-		return  XMVectorSet(0, 0, 0, 0);
+		return DirectX::g_XMZero;
 
 	if (CameraReplacementPtr)
 		return XMLoadFloat3(&CameraReplacementPtr->PositionReplacement);

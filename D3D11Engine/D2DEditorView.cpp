@@ -811,7 +811,8 @@ void D2DEditorView::OnMouseClick(int button)
 		{
 			LogInfo() << "Setting player position to: " << float3(TracedPosition).toString();
 			XMFLOAT3 pos;
-			XMStoreFloat3(&pos, XMLoadFloat3(&TracedPosition) + XMVectorSet(0, 500.0f, 0, 0));
+			constexpr XMVECTORF32 c_XM_0_500_0_0 = { { { 0, 500.0f, 0, 0 } } };
+			XMStoreFloat3(&pos, XMLoadFloat3(&TracedPosition) + c_XM_0_500_0_0);
 			Engine::GAPI->SetPlayerPosition(pos);
 		} else if (Mode == EM_PLACE_VEGETATION)
 		{
@@ -964,7 +965,8 @@ void D2DEditorView::ResetEditorCamera()
 
 	// Save current camera-matrix
 	CStartWorld = *oCGame::GetGame()->_zCSession_camVob->GetWorldMatrixPtr();
-	XMVECTOR XMV_dir = DirectX::XMVector3Transform(DirectX::XMVectorSet(1, 0, 0, 0), XMLoadFloat4x4(&CStartWorld));
+	constexpr XMVECTORF32 c_XM_1000 = { { { 1, 0, 0, 0 } } };
+	XMVECTOR XMV_dir = DirectX::XMVector3Transform(c_XM_1000, XMLoadFloat4x4(&CStartWorld));
 	DirectX::XMFLOAT3 dir;
 	XMStoreFloat3(&dir, XMV_dir);
 	CYaw = asinf(-dir.z / XMVectorGetX(DirectX::XMVector3LengthEst(XMV_dir))) + XM_PIDIV2;
@@ -1025,7 +1027,7 @@ void D2DEditorView::DoEditorMovement()
 	{
 		XMVECTOR fwd = DirectX::XMVectorSet(sinf(CYaw), 0.0f, cosf(CYaw), 0.0f);
 
-		XMVECTOR up = DirectX::XMVectorSet(0, 1, 0, 0);
+		constexpr XMVECTORF32 up = { { { 0, 1, 0, 0 } } };
 		XMVECTOR side = DirectX::XMVector3Cross(fwd, up);
 
 		XMVECTOR XMV_position;

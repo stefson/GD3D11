@@ -147,32 +147,34 @@ void D3D11PointLight::RenderCubemap(bool forceUpdate)
 	// TODO: Move the actual lightsource up too!
 
 	XMVECTOR vLookDir;
-	XMVECTOR vUpDir;
-	XMVECTOR vUpDir0100 = XMVectorSet(0, 1, 0, 0);
+	constexpr XMVECTORF32 c_XM_Right    = { { {  1,  0,  0, 0 } } };
+	constexpr XMVECTORF32 c_XM_Left     = { { { -1,  0,  0, 0 } } };
+	constexpr XMVECTORF32 c_XM_Up       = { { {  0,  1,  0, 0 } } };
+	constexpr XMVECTORF32 c_XM_Down     = { { {  0, -1,  0, 0 } } };
+	constexpr XMVECTORF32 c_XM_Forward  = { { {  0,  0,  1, 0 } } };
+	constexpr XMVECTORF32 c_XM_Backward = { { {  0,  0, -1, 0 } } };
 
 	// Update indoor/outdoor-state
 	LightInfo->IsIndoorVob = LightInfo->Vob->IsIndoorVob();
 
 	// Generate cubemap view-matrices
-	vLookDir = XMVectorSet(1, 0, 0, 0) + vEyePt;
-	XMStoreFloat4x4(&CubeMapViewMatrices[0], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, vUpDir0100)));
+	vLookDir = c_XM_Right + vEyePt;
+	XMStoreFloat4x4(&CubeMapViewMatrices[0], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, c_XM_Up)));
     
-	vLookDir = XMVectorSet(-1, 0, 0, 0) + vEyePt;
-	XMStoreFloat4x4(&CubeMapViewMatrices[1], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, vUpDir0100)));
+	vLookDir = c_XM_Left + vEyePt;
+	XMStoreFloat4x4(&CubeMapViewMatrices[1], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, c_XM_Up)));
 
-	vLookDir = XMVectorSet(0, 1, 0, 0) + vEyePt;
-	vUpDir = XMVectorSet(0, 0, -1, 0);
-	XMStoreFloat4x4(&CubeMapViewMatrices[2], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, vUpDir)));
+	vLookDir = c_XM_Up + vEyePt;
+	XMStoreFloat4x4(&CubeMapViewMatrices[2], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, c_XM_Backward)));
 
-	vLookDir = XMVectorSet(0, -1, 0, 0) + vEyePt;
-	vUpDir = XMVectorSet(0, 0, 1, 0);
-	XMStoreFloat4x4(&CubeMapViewMatrices[3], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, vUpDir)));
+	vLookDir = c_XM_Down + vEyePt;
+	XMStoreFloat4x4(&CubeMapViewMatrices[3], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, c_XM_Forward)));
 
-	vLookDir = XMVectorSet(0, 0, 1, 0) + vEyePt;
-	XMStoreFloat4x4(&CubeMapViewMatrices[4], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, vUpDir0100)));
+	vLookDir = c_XM_Forward + vEyePt;
+	XMStoreFloat4x4(&CubeMapViewMatrices[4], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, c_XM_Up)));
 
-	vLookDir = XMVectorSet(0, 0, -1, 0) + vEyePt;
-	XMStoreFloat4x4(&CubeMapViewMatrices[5], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, vUpDir0100)));
+	vLookDir = c_XM_Backward + vEyePt;
+	XMStoreFloat4x4(&CubeMapViewMatrices[5], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, c_XM_Up)));
 
 	// Create the projection matrix
 	float zNear = 15.0f;

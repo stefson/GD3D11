@@ -2626,7 +2626,7 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 }
 
 /** Draws everything around the given position */
-void D3D11GraphicsEngine::DrawWorldAround(
+void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround(
 	FXMVECTOR position, float range, bool cullFront, bool indoor,
 	bool noNPCs, std::list<VobInfo*>* renderedVobs,
 	std::list<SkeletalVobInfo*>* renderedMobs,
@@ -2967,7 +2967,7 @@ void D3D11GraphicsEngine::DrawWorldAround(
 }
 
 /** Draws everything around the given position */
-void D3D11GraphicsEngine::DrawWorldAround(FXMVECTOR position,
+void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround(FXMVECTOR position,
 	int sectionRange, float vobXZRange,
 	bool cullFront, bool dontCull) {
 	// Setup renderstates
@@ -3986,7 +3986,7 @@ BaseLineRenderer* D3D11GraphicsEngine::GetLineRenderer() {
 
 /** Applys the lighting to the scene */
 XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
-	static XMVECTOR xmFltMax = XMVectorSet(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX);
+	static const XMVECTORF32 xmFltMax = { { { FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX } } };
 	SetDefaultStates();
 
 	// ********************************
@@ -4141,7 +4141,8 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 	lookAt -= dir;
 
 	// Create shadowmap view-matrix
-	XMMATRIX crViewRepl = XMMatrixLookAtLH(p, lookAt, XMVectorSet(0, 1, 0, 0));
+	static const XMVECTORF32 c_XM_Up = { { { 0, 1, 0, 0 } } };
+	XMMATRIX crViewRepl = XMMatrixLookAtLH(p, lookAt, c_XM_Up);
 	crViewRepl = XMMatrixTranspose(crViewRepl);
 
 	XMMATRIX crProjRepl =
@@ -4474,7 +4475,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting(std::vector<VobLightInfo*>& lights) {
 }
 
 /** Renders the shadowmaps for a pointlight */
-void D3D11GraphicsEngine::RenderShadowCube(
+void XM_CALLCONV D3D11GraphicsEngine::RenderShadowCube(
 	DirectX::FXMVECTOR position, float range,
 	RenderToDepthStencilBuffer* targetCube, ID3D11DepthStencilView* face,
 	ID3D11RenderTargetView* debugRTV, bool cullFront, bool indoor, bool noNPCs,
@@ -4561,7 +4562,7 @@ void D3D11GraphicsEngine::RenderShadowCube(
 }
 
 /** Renders the shadowmaps for the sun */
-void D3D11GraphicsEngine::RenderShadowmaps(FXMVECTOR cameraPosition,
+void XM_CALLCONV D3D11GraphicsEngine::RenderShadowmaps(FXMVECTOR cameraPosition,
 	RenderToDepthStencilBuffer* target,
 	bool cullFront, bool dontCull,
 	ID3D11DepthStencilView* dsvOverwrite,
@@ -5391,7 +5392,8 @@ void D3D11GraphicsEngine::RenderStrings()
 		//m_spriteBatch->Begin();
 		m_spriteBatch->Begin(SpriteSortMode_Deferred, states->NonPremultiplied());
 		wchar_t buf[255];
-		static XMVECTOR gothicColor = XMVectorSet(203.f / 255.f, 186.f / 255.f, 158.f / 255.f, 1);
+
+		static const XMVECTORF32 gothicColor = { { { 203.f / 255.f, 186.f / 255.f, 158.f / 255.f, 1 } } };
 
 		zTRnd_AlphaBlendFunc lastBlendState = zRND_ALPHA_FUNC_NONE;
 

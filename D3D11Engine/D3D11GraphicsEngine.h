@@ -223,8 +223,8 @@ public:
 	virtual void DrawVobsList(const std::list<VobInfo*>& vobs, zCCamera& camera) override;
 
 	/** Draws everything around the given position */
-	void DrawWorldAround(DirectX::FXMVECTOR position, int sectionRange, float vobXZRange, bool cullFront = true, bool dontCull = false);
-	void DrawWorldAround(DirectX::FXMVECTOR position,
+	void XM_CALLCONV DrawWorldAround(DirectX::FXMVECTOR position, int sectionRange, float vobXZRange, bool cullFront = true, bool dontCull = false);
+	void XM_CALLCONV DrawWorldAround(DirectX::FXMVECTOR position,
 		float range,
 		bool cullFront = true,
 		bool indoor = false,
@@ -244,10 +244,10 @@ public:
 	virtual XRESULT DrawSky();
 
 	/** Renders the shadowmaps for the sun */
-	void RenderShadowmaps(DirectX::FXMVECTOR cameraPosition, RenderToDepthStencilBuffer * target = nullptr, bool cullFront = true, bool dontCull = false, ID3D11DepthStencilView* dsvOverwrite = nullptr, ID3D11RenderTargetView* debugRTV = nullptr);
+	void XM_CALLCONV RenderShadowmaps(DirectX::FXMVECTOR cameraPosition, RenderToDepthStencilBuffer * target = nullptr, bool cullFront = true, bool dontCull = false, ID3D11DepthStencilView* dsvOverwrite = nullptr, ID3D11RenderTargetView* debugRTV = nullptr);
 
 	/** Renders the shadowmaps for a pointlight */
-	void RenderShadowCube(DirectX::FXMVECTOR position,
+	void XM_CALLCONV RenderShadowCube(DirectX::FXMVECTOR position,
 		float range,
 		RenderToDepthStencilBuffer * targetCube,
 		ID3D11DepthStencilView* face,
