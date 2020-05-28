@@ -1,4 +1,7 @@
 #pragma once
+#pragma warning( push )
+#pragma warning( disable : 26495 )
+
 #include "pch.h"
 #include "GothicGraphicsState.h"
 #include "D3D11ConstantBuffer.h"
@@ -584,3 +587,5 @@ struct WorldInfo
 	std::string WorldName;
 	bool CustomWorldLoaded;
 };
+
+#pragma warning( pop )
