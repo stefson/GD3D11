@@ -22,24 +22,23 @@ GSky::GSky() {
 	Atmosphere.RayleightScaleDepth = 0.18f;
 	Atmosphere.G = -0.995f;
 	//Atmosphere.WaveLengths = float3(0.65f, 0.57f, 0.475f);
-	Atmosphere.WaveLengths = float3(0.63f, 0.57f, 0.50f);
-	Atmosphere.SpherePosition = DirectX::XMFLOAT3(0, 0, 0);
+	Atmosphere.WaveLengths = float3( 0.63f, 0.57f, 0.50f );
+	Atmosphere.SpherePosition = DirectX::XMFLOAT3( 0, 0, 0 );
 	Atmosphere.SphereOffsetY = -820000;
 	Atmosphere.SkyTimeScale = 1.0f;
-	XMStoreFloat3(&Atmosphere.LightDirection, XMVector3Normalize(XMVectorSet(1, 1, 1, 0)));
+	XMStoreFloat3( &Atmosphere.LightDirection, XMVector3Normalize( XMVectorSet( 1, 1, 1, 0 ) ) );
 
-	ZeroMemory(&AtmosphereCB, sizeof(AtmosphereCB));
+	ZeroMemory( &AtmosphereCB, sizeof( AtmosphereCB ) );
 }
 
 GSky::~GSky() {
-	for (unsigned int i = 0; i < SkyTextures.size(); i++) {
-		SAFE_DELETE(SkyTextures[i]);
+	for ( unsigned int i = 0; i < SkyTextures.size(); i++ ) {
+		SAFE_DELETE( SkyTextures[i] );
 	}
 }
 
 /** Creates needed resources by the sky */
-XRESULT GSky::InitSky()
-{
+XRESULT GSky::InitSky() {
 	const float sizeX = 500000;
 	const float sizeY = 10000;
 
@@ -49,32 +48,32 @@ XRESULT GSky::InitSky()
 	SkyPlaneVertices[2].Position = float3(-sizeX, sizeY, +sizeX); // 0, 1
 	SkyPlaneVertices[3].Position = float3(-sizeX, sizeY, -sizeX); // 0, 0*/
 
-	SkyPlaneVertices[0].Position = float3(-sizeX, sizeY, -sizeX); // 0
-	SkyPlaneVertices[1].Position = float3(+sizeX, sizeY, -sizeX); // 1
-	SkyPlaneVertices[2].Position = float3(-sizeX, sizeY, +sizeX); // 2
+	SkyPlaneVertices[0].Position = float3( -sizeX, sizeY, -sizeX ); // 0
+	SkyPlaneVertices[1].Position = float3( +sizeX, sizeY, -sizeX ); // 1
+	SkyPlaneVertices[2].Position = float3( -sizeX, sizeY, +sizeX ); // 2
 
-	SkyPlaneVertices[3].Position = float3(+sizeX, sizeY, -sizeX); // 1
-	SkyPlaneVertices[4].Position = float3(+sizeX, sizeY, +sizeX); // 3
-	SkyPlaneVertices[5].Position = float3(-sizeX, sizeY, +sizeX); // 2
+	SkyPlaneVertices[3].Position = float3( +sizeX, sizeY, -sizeX ); // 1
+	SkyPlaneVertices[4].Position = float3( +sizeX, sizeY, +sizeX ); // 3
+	SkyPlaneVertices[5].Position = float3( -sizeX, sizeY, +sizeX ); // 2
 
 	const float scale = 20.0f;
 	DirectX::XMFLOAT2 displacement;
-	float4 color = float4(1, 1, 1, 1);
+	float4 color = float4( 1, 1, 1, 1 );
 
 	// Construct vertices
 	// 0
-	SkyPlaneVertices[0].TexCoord = float2(displacement);
+	SkyPlaneVertices[0].TexCoord = float2( displacement );
 	SkyPlaneVertices[0].Color = color.ToDWORD();
 
 	// 1
 	XMFLOAT2 SkyPlaneVertices1;
-	XMStoreFloat2(&SkyPlaneVertices1, (XMVectorSet(scale, 0, 0, 0) + XMLoadFloat2(&displacement)));
+	XMStoreFloat2( &SkyPlaneVertices1, (XMVectorSet( scale, 0, 0, 0 ) + XMLoadFloat2( &displacement )) );
 	SkyPlaneVertices[1].TexCoord = SkyPlaneVertices1;
 	SkyPlaneVertices[1].Color = color.ToDWORD();
 
 	// 2
 	XMFLOAT2 SkyPlaneVertices2;
-	XMStoreFloat2(&SkyPlaneVertices2, (XMVectorSet(0, scale, 0, 0) + XMLoadFloat2(&displacement)));
+	XMStoreFloat2( &SkyPlaneVertices2, (XMVectorSet( 0, scale, 0, 0 ) + XMLoadFloat2( &displacement )) );
 	SkyPlaneVertices[2].TexCoord = SkyPlaneVertices2;
 	SkyPlaneVertices[2].Color = color.ToDWORD();
 
@@ -82,19 +81,19 @@ XRESULT GSky::InitSky()
 
 	// 1
 	XMFLOAT2 SkyPlaneVertices3;
-	XMStoreFloat2(&SkyPlaneVertices3, (XMVectorSet(scale, 0, 0, 0) + XMLoadFloat2(&displacement)));
+	XMStoreFloat2( &SkyPlaneVertices3, (XMVectorSet( scale, 0, 0, 0 ) + XMLoadFloat2( &displacement )) );
 	SkyPlaneVertices[3].TexCoord = SkyPlaneVertices3;
 	SkyPlaneVertices[3].Color = color.ToDWORD();
 
 	// 3
 	XMFLOAT2 SkyPlaneVertices4;
-	XMStoreFloat2(&SkyPlaneVertices4, (XMVectorSet(scale, scale, 0, 0) + XMLoadFloat2(&displacement)));
+	XMStoreFloat2( &SkyPlaneVertices4, (XMVectorSet( scale, scale, 0, 0 ) + XMLoadFloat2( &displacement )) );
 	SkyPlaneVertices[4].TexCoord = SkyPlaneVertices4;
 	SkyPlaneVertices[4].Color = color.ToDWORD();
 
 	// 2
 	XMFLOAT2 SkyPlaneVertices5;
-	XMStoreFloat2(&SkyPlaneVertices5, (XMVectorSet(0, scale, 0, 0) + XMLoadFloat2(&displacement)));
+	XMStoreFloat2( &SkyPlaneVertices5, (XMVectorSet( 0, scale, 0, 0 ) + XMLoadFloat2( &displacement )) );
 	SkyPlaneVertices[5].TexCoord = SkyPlaneVertices5;
 	SkyPlaneVertices[5].Color = color.ToDWORD();
 
@@ -102,28 +101,25 @@ XRESULT GSky::InitSky()
 }
 
 /** Returns the skyplane */
-MeshInfo * GSky::GetSkyPlane()
-{
+MeshInfo* GSky::GetSkyPlane() {
 	return SkyPlane.get();
 }
 
 /** Adds a sky texture. Sky textures must be in order to make the daytime work */
-XRESULT GSky::AddSkyTexture(const std::string & file)
-{
-	D3D11Texture * t;
-	XLE(Engine::GraphicsEngine->CreateTexture(&t));
-	XLE(t->Init(file));
+XRESULT GSky::AddSkyTexture( const std::string& file ) {
+	D3D11Texture* t;
+	XLE( Engine::GraphicsEngine->CreateTexture( &t ) );
+	XLE( t->Init( file ) );
 
-	SkyTextures.push_back(t);
+	SkyTextures.push_back( t );
 
 	return XR_SUCCESS;
 }
 
 /** Loads the sky resources */
-XRESULT GSky::LoadSkyResources()
-{
+XRESULT GSky::LoadSkyResources() {
 	SkyDome = std::make_unique<GMesh>();
-	SkyDome->LoadMesh("system\\GD3D11\\meshes\\unitSphere.obj");
+	SkyDome->LoadMesh( "system\\GD3D11\\meshes\\unitSphere.obj" );
 	//SkyDome->LoadMesh("system\\GD3D11\\meshes\\skySphere.obj");
 
 	LogInfo() << "Loading sky textures...";
@@ -135,57 +131,54 @@ XRESULT GSky::LoadSkyResources()
 	AddSkyTexture("system\\GD3D11\\textures\\sky\\cgcookie_sky05.dds");*/
 
 	D3D11Texture* cloudTex;
-	XLE(Engine::GraphicsEngine->CreateTexture(&cloudTex));
-	CloudTexture.reset(cloudTex);
+	XLE( Engine::GraphicsEngine->CreateTexture( &cloudTex ) );
+	CloudTexture.reset( cloudTex );
 
 #ifdef BUILD_GOTHIC_1_08k
-	XLE(CloudTexture->Init("system\\GD3D11\\Textures\\SkyDay_G1.dds"));
+	XLE( CloudTexture->Init( "system\\GD3D11\\Textures\\SkyDay_G1.dds" ) );
 #else
-	XLE(CloudTexture->Init("system\\GD3D11\\Textures\\SkyDay.dds"));
+	XLE( CloudTexture->Init( "system\\GD3D11\\Textures\\SkyDay.dds" ) );
 #endif
 
 	D3D11Texture* nightTex;
-	XLE(Engine::GraphicsEngine->CreateTexture(&nightTex));
-	NightTexture.reset(nightTex);
+	XLE( Engine::GraphicsEngine->CreateTexture( &nightTex ) );
+	NightTexture.reset( nightTex );
 
-	XLE(NightTexture->Init("system\\GD3D11\\Textures\\starsh.dds"));
+	XLE( NightTexture->Init( "system\\GD3D11\\Textures\\starsh.dds" ) );
 
-	VERTEX_INDEX indices[] = {0, 1,2,3,4,5};
+	VERTEX_INDEX indices [] = { 0, 1,2,3,4,5 };
 	SkyPlane = std::make_unique<MeshInfo>();
-	SkyPlane->Create(SkyPlaneVertices, 6, indices, 6);
+	SkyPlane->Create( SkyPlaneVertices, 6, indices, 6 );
 
 	return XR_SUCCESS;
 }
 
 /** Sets the current sky texture */
-void GSky::SetSkyTexture(ESkyTexture texture)
-{
+void GSky::SetSkyTexture( ESkyTexture texture ) {
 	D3D11Texture* cloudTex;
-	XLE(Engine::GraphicsEngine->CreateTexture(&cloudTex));
-	CloudTexture.reset(cloudTex);
+	XLE( Engine::GraphicsEngine->CreateTexture( &cloudTex ) );
+	CloudTexture.reset( cloudTex );
 
 	// Load the specific new texture
-	switch(texture)
-	{
+	switch ( texture ) {
 	case ESkyTexture::ST_NewWorld:
-		XLE(CloudTexture->Init("system\\GD3D11\\Textures\\SkyDay.dds"));
-		Atmosphere.WaveLengths = float3(0.63f, 0.57f, 0.50f);
+		XLE( CloudTexture->Init( "system\\GD3D11\\Textures\\SkyDay.dds" ) );
+		Atmosphere.WaveLengths = float3( 0.63f, 0.57f, 0.50f );
 		break;
 
 	case ESkyTexture::ST_OldWorld:
-		XLE(CloudTexture->Init("system\\GD3D11\\Textures\\SkyDay_G1.dds"));
-		Atmosphere.WaveLengths = float3(0.54f, 0.56f, 0.60f);
+		XLE( CloudTexture->Init( "system\\GD3D11\\Textures\\SkyDay_G1.dds" ) );
+		Atmosphere.WaveLengths = float3( 0.54f, 0.56f, 0.60f );
 		break;
 	}
 }
 
 /** Returns the sky-texture for the passed daytime (0..1) */
-void GSky::GetTextureOfDaytime(float time, D3D11Texture ** t1, D3D11Texture ** t2, float * factor)
-{
-	if (!SkyTextures.size())
+void GSky::GetTextureOfDaytime( float time, D3D11Texture** t1, D3D11Texture** t2, float* factor ) {
+	if ( !SkyTextures.size() )
 		return;
 
-	time -= floor(time); // Fractionalize, put into 0..1 range
+	time -= floor( time ); // Fractionalize, put into 0..1 range
 
 	// Get the index of the current texture
 	float index = time * (SkyTextures.size() - 0.5f);
@@ -205,8 +198,8 @@ void GSky::GetTextureOfDaytime(float time, D3D11Texture ** t1, D3D11Texture ** t
 
 /** Renders the sky */
 XRESULT GSky::RenderSky() {
-	if (!SkyDome) {
-		XLE(LoadSkyResources());
+	if ( !SkyDome ) {
+		XLE( LoadSkyResources() );
 	}
 
 	//return XR_SUCCESS;
@@ -214,16 +207,16 @@ XRESULT GSky::RenderSky() {
 	DirectX::XMFLOAT3 camPos = Engine::GAPI->GetCameraPosition();
 	DirectX::XMFLOAT3 LightDir = {};
 
-	if (Engine::GAPI->GetRendererState()->RendererSettings.ReplaceSunDirection) {
+	if ( Engine::GAPI->GetRendererState()->RendererSettings.ReplaceSunDirection ) {
 		LightDir = Atmosphere.LightDirection;
 	} else {
 		zCSkyController_Outdoor* sc = oCGame::GetGame()->_zCSession_world->GetSkyControllerOutdoor();
-		if (sc) {
-			LightDir = sc->GetSunWorldPosition(Atmosphere.SkyTimeScale);
+		if ( sc ) {
+			LightDir = sc->GetSunWorldPosition( Atmosphere.SkyTimeScale );
 			Atmosphere.LightDirection = LightDir;
 		}
 	}
-	XMStoreFloat3(&LightDir, DirectX::XMVector3Normalize(XMLoadFloat3(&LightDir)));
+	XMStoreFloat3( &LightDir, DirectX::XMVector3Normalize( XMLoadFloat3( &LightDir ) ) );
 	//Atmosphere.SpherePosition.y = -Atmosphere.InnerRadius;
 
 	Atmosphere.SpherePosition.x = 0;//Engine::GAPI->GetLoadedWorldInfo()->MidPoint.x;
@@ -234,7 +227,7 @@ XRESULT GSky::RenderSky() {
 	sp.y += Atmosphere.SphereOffsetY;
 
 	// Fill atmosphere buffer for this frame
-	AtmosphereCB.AC_CameraPos = DirectX::XMFLOAT3(0, -Atmosphere.SphereOffsetY, 0);
+	AtmosphereCB.AC_CameraPos = DirectX::XMFLOAT3( 0, -Atmosphere.SphereOffsetY, 0 );
 	AtmosphereCB.AC_Time = Engine::GAPI->GetTimeSeconds();
 	AtmosphereCB.AC_LightPos = LightDir;
 	AtmosphereCB.AC_CameraHeight = -Atmosphere.SphereOffsetY;
@@ -276,12 +269,12 @@ GMesh* GSky::GetSkyDome() {
 /** Returns the current sky-light color */
 float4 GSky::GetSkylightColor() {
 	zCSkyController_Outdoor* sc = oCGame::GetGame()->_zCSession_world->GetSkyControllerOutdoor();
-	float4 color = float4(1, 1, 1, 1);
+	float4 color = float4( 1, 1, 1, 1 );
 
-	if (sc) {
+	if ( sc ) {
 		DWORD* clut = sc->PolyLightCLUTPtr;
 
-		if (clut) {
+		if ( clut ) {
 
 		}
 	}
@@ -290,151 +283,142 @@ float4 GSky::GetSkylightColor() {
 }
 
 /** Returns the cloud texture */
-D3D11Texture * GSky::GetCloudTexture()
-{
+D3D11Texture* GSky::GetCloudTexture() {
 	return CloudTexture.get();
 }
 
 /** Returns the cloud texture */
-D3D11Texture * GSky::GetNightTexture()
-{
+D3D11Texture* GSky::GetNightTexture() {
 	return NightTexture.get();
 }
 
 // The scale equation calculated by Vernier's Graphical Analysis
-float AC_Escale(float fCos, float rayleighScaleDepth)
-{
+float AC_Escale( float fCos, float rayleighScaleDepth ) {
 	float x = 1.0f - fCos;
-	return rayleighScaleDepth * exp(-0.00287f + x*(0.459f + x*(3.83f + x*(-6.80f + x*5.25f))));
+	return rayleighScaleDepth * exp( -0.00287f + x * (0.459f + x * (3.83f + x * (-6.80f + x * 5.25f))) );
 }
 
 // Calculates the Mie phase function
-float AC_getMiePhase(float fCos, float fCos2, float g, float g2)
-{
-	return 1.5f * ((1.0f - g2) / (2.0f + g2)) * (1.0f + fCos2) / pow(abs(1.0f + g2 - 2.0f*g*fCos), 1.5f);
+float AC_getMiePhase( float fCos, float fCos2, float g, float g2 ) {
+	return 1.5f * ((1.0f - g2) / (2.0f + g2)) * (1.0f + fCos2) / pow( abs( 1.0f + g2 - 2.0f * g * fCos ), 1.5f );
 }
 
 // Calculates the Rayleigh phase function
-float AC_getRayleighPhase(float fCos2)
-{
+float AC_getRayleighPhase( float fCos2 ) {
 	//return 1.0;
-	return 0.75f + 0.75f*fCos2;
+	return 0.75f + 0.75f * fCos2;
 }
 // Returns the near intersection point of a line and a sphere
-float AC_getNearIntersection(DirectX::XMVECTOR v3Pos, DirectX::XMVECTOR v3Ray, float fDistance2, float fRadius2)
-{
+float AC_getNearIntersection( DirectX::XMVECTOR v3Pos, DirectX::XMVECTOR v3Ray, float fDistance2, float fRadius2 ) {
 	float B;
-	XMStoreFloat(&B, DirectX::XMVector3Dot(v3Pos, v3Ray) * 2.0f);
+	XMStoreFloat( &B, DirectX::XMVector3Dot( v3Pos, v3Ray ) * 2.0f );
 	float C = fDistance2 - fRadius2;
-	float fDet = std::max(0.0f, B*B - 4.0f * C);
-	return 0.5f * (-B - sqrt(fDet));
+	float fDet = std::max( 0.0f, B * B - 4.0f * C );
+	return 0.5f * (-B - sqrt( fDet ));
 }
 // Returns the far intersection point of a line and a sphere
-float AC_getFarIntersection(DirectX::XMVECTOR v3Pos, DirectX::XMVECTOR v3Ray, float fDistance2, float fRadius2)
-{
+float AC_getFarIntersection( DirectX::XMVECTOR v3Pos, DirectX::XMVECTOR v3Ray, float fDistance2, float fRadius2 ) {
 	float B;
-	XMStoreFloat(&B, DirectX::XMVector3Dot(v3Pos, v3Ray) * 2.0f);
+	XMStoreFloat( &B, DirectX::XMVector3Dot( v3Pos, v3Ray ) * 2.0f );
 	float C = fDistance2 - fRadius2;
-	float fDet = std::max(0.0f, B*B - 4.0f * C);
-	return 0.5f * (-B + sqrt(fDet));
+	float fDet = std::max( 0.0f, B * B - 4.0f * C );
+	return 0.5f * (-B + sqrt( fDet ));
 }
 
 /** Returns the current sun color */
-float3 GSky::GetSunColor()
-{
+float3 GSky::GetSunColor() {
 	XMFLOAT3 LightPos;
 	LightPos.x = AtmosphereCB.AC_LightPos.x;
 	LightPos.y = AtmosphereCB.AC_LightPos.y;
 	LightPos.z = AtmosphereCB.AC_LightPos.z;
-	XMVECTOR wPos = ((XMLoadFloat3(&LightPos)) * AtmosphereCB.AC_OuterRadius);
-	wPos += XMVectorSet(Atmosphere.SpherePosition.x, Atmosphere.SpherePosition.y + Atmosphere.SphereOffsetY, Atmosphere.SpherePosition.z, 0.0f);
+	XMVECTOR wPos = ((XMLoadFloat3( &LightPos )) * AtmosphereCB.AC_OuterRadius);
+	wPos += XMVectorSet( Atmosphere.SpherePosition.x, Atmosphere.SpherePosition.y + Atmosphere.SphereOffsetY, Atmosphere.SpherePosition.z, 0.0f );
 
 
 	XMFLOAT3 camPos_FLOAT3;
 	camPos_FLOAT3.x = AtmosphereCB.AC_CameraPos.x;
 	camPos_FLOAT3.y = AtmosphereCB.AC_CameraPos.y;
 	camPos_FLOAT3.z = AtmosphereCB.AC_CameraPos.z;
-	XMVECTOR camPos = XMLoadFloat3(&camPos_FLOAT3);
+	XMVECTOR camPos = XMLoadFloat3( &camPos_FLOAT3 );
 	XMFLOAT3 SpherePos_FLOAT3;
 	SpherePos_FLOAT3.x = AtmosphereCB.AC_SpherePosition.x;
 	SpherePos_FLOAT3.y = AtmosphereCB.AC_SpherePosition.y;
 	SpherePos_FLOAT3.z = AtmosphereCB.AC_SpherePosition.z;
-	XMVECTOR vPos = wPos - XMLoadFloat3(&SpherePos_FLOAT3);
+	XMVECTOR vPos = wPos - XMLoadFloat3( &SpherePos_FLOAT3 );
 	XMVECTOR vRay = vPos - camPos;
-				
+
 	float fFar;
-	XMStoreFloat(&fFar, DirectX::XMVector3LengthEst(vRay));
+	XMStoreFloat( &fFar, DirectX::XMVector3LengthEst( vRay ) );
 	vRay /= fFar;
-	
+
 	//return float4(abs(AC_SpherePosition), 1);
-	
+
 	//if (AC_CameraHeight < AC_InnerRadius)
 	//	return float4(1, 0, 0, 1);
 
 	// Calculate the closest intersection of the ray with the outer atmosphere (which is the near point of the ray passing through the atmosphere)
-	float fNear = AC_getNearIntersection(camPos, vRay, AtmosphereCB.AC_CameraHeight * AtmosphereCB.AC_CameraHeight, AtmosphereCB.AC_OuterRadius * AtmosphereCB.AC_OuterRadius);
+	float fNear = AC_getNearIntersection( camPos, vRay, AtmosphereCB.AC_CameraHeight * AtmosphereCB.AC_CameraHeight, AtmosphereCB.AC_OuterRadius * AtmosphereCB.AC_OuterRadius );
 
 	// Calculate the ray's starting position, then calculate its scattering offset
 	XMVECTOR vStart = camPos;
 
-	XMVECTOR fHeight = DirectX::XMVector3LengthEst(vStart);
-	float fDepth = exp(AtmosphereCB.AC_RayleighOverScaleDepth * (AtmosphereCB.AC_InnerRadius - AtmosphereCB.AC_CameraHeight));
+	XMVECTOR fHeight = DirectX::XMVector3LengthEst( vStart );
+	float fDepth = exp( AtmosphereCB.AC_RayleighOverScaleDepth * (AtmosphereCB.AC_InnerRadius - AtmosphereCB.AC_CameraHeight) );
 	float fStartAngle;
-	XMStoreFloat(&fStartAngle, DirectX::XMVector3Dot(vRay, vStart) / fHeight);
-	float fStartOffset = fDepth*AC_Escale(fStartAngle, AtmosphereCB.AC_RayleighScaleDepth);
-	
+	XMStoreFloat( &fStartAngle, DirectX::XMVector3Dot( vRay, vStart ) / fHeight );
+	float fStartOffset = fDepth * AC_Escale( fStartAngle, AtmosphereCB.AC_RayleighScaleDepth );
+
 	// Initialize the scattering loop variables
 	float fSampleLength = fFar / AtmosphereCB.AC_fSamples;
 	float fScaledLength = fSampleLength * AtmosphereCB.AC_Scale;
 	XMVECTOR vSampleRay = vRay * fSampleLength;
 	XMVECTOR vSamplePoint = vStart + vSampleRay * 0.5f;
-	
-	DirectX::XMFLOAT3 vInvWavelength = DirectX::XMFLOAT3(1.0f / pow(AtmosphereCB.AC_Wavelength.x, 4.0f),
-		1.0f / pow(AtmosphereCB.AC_Wavelength.y, 4.0f),
-		1.0f / pow(AtmosphereCB.AC_Wavelength.z, 4.0f));
-	
+
+	DirectX::XMFLOAT3 vInvWavelength = DirectX::XMFLOAT3( 1.0f / pow( AtmosphereCB.AC_Wavelength.x, 4.0f ),
+		1.0f / pow( AtmosphereCB.AC_Wavelength.y, 4.0f ),
+		1.0f / pow( AtmosphereCB.AC_Wavelength.z, 4.0f ) );
+
 	//return retF(AC_InnerRadius - length(vSamplePoint));
-	
+
 	// Now loop through the sample rays
 	XMVECTOR vFrontColor = XMVectorZero();
-	for(int i=0; i<AtmosphereCB.AC_nSamples; i++)
-	{
-		XMVECTOR fHeight = DirectX::XMVector3LengthEst(vSamplePoint);
+	for ( int i = 0; i < AtmosphereCB.AC_nSamples; i++ ) {
+		XMVECTOR fHeight = DirectX::XMVector3LengthEst( vSamplePoint );
 		float fHeight_float;
-		XMStoreFloat(&fHeight_float, fHeight);
-		float fDepth = exp(AtmosphereCB.AC_RayleighOverScaleDepth * (AtmosphereCB.AC_InnerRadius - fHeight_float));
+		XMStoreFloat( &fHeight_float, fHeight );
+		float fDepth = exp( AtmosphereCB.AC_RayleighOverScaleDepth * (AtmosphereCB.AC_InnerRadius - fHeight_float) );
 		float fLightAngle;
 		XMFLOAT3 LightPos;
 		LightPos.x = AtmosphereCB.AC_LightPos.x;
 		LightPos.y = AtmosphereCB.AC_LightPos.y;
 		LightPos.z = AtmosphereCB.AC_LightPos.z;
-		XMStoreFloat(&fLightAngle, DirectX::XMVector3Dot(XMLoadFloat3(&LightPos), vSamplePoint) / fHeight); //check if it works
+		XMStoreFloat( &fLightAngle, DirectX::XMVector3Dot( XMLoadFloat3( &LightPos ), vSamplePoint ) / fHeight ); //check if it works
 		float fCameraAngle;
-		XMStoreFloat(&fCameraAngle, DirectX::XMVector3Dot(vRay, vSamplePoint) / fHeight);
-		float fScatter = (fStartOffset + fDepth*(AC_Escale(fLightAngle, AtmosphereCB.AC_RayleighScaleDepth) - AC_Escale(fCameraAngle, AtmosphereCB.AC_RayleighScaleDepth)));
-		
+		XMStoreFloat( &fCameraAngle, DirectX::XMVector3Dot( vRay, vSamplePoint ) / fHeight );
+		float fScatter = (fStartOffset + fDepth * (AC_Escale( fLightAngle, AtmosphereCB.AC_RayleighScaleDepth ) - AC_Escale( fCameraAngle, AtmosphereCB.AC_RayleighScaleDepth )));
+
 		DirectX::XMFLOAT3 vAttenuate;
-		vAttenuate.x = exp(-fScatter * (vInvWavelength.x * AtmosphereCB.AC_Kr4PI + AtmosphereCB.AC_Km4PI));
-		vAttenuate.y = exp(-fScatter * (vInvWavelength.y * AtmosphereCB.AC_Kr4PI + AtmosphereCB.AC_Km4PI));
-		vAttenuate.z = exp(-fScatter * (vInvWavelength.z * AtmosphereCB.AC_Kr4PI + AtmosphereCB.AC_Km4PI));
-		
-		vFrontColor += XMLoadFloat3(&vAttenuate) * fDepth * fScaledLength;
+		vAttenuate.x = exp( -fScatter * (vInvWavelength.x * AtmosphereCB.AC_Kr4PI + AtmosphereCB.AC_Km4PI) );
+		vAttenuate.y = exp( -fScatter * (vInvWavelength.y * AtmosphereCB.AC_Kr4PI + AtmosphereCB.AC_Km4PI) );
+		vAttenuate.z = exp( -fScatter * (vInvWavelength.z * AtmosphereCB.AC_Kr4PI + AtmosphereCB.AC_Km4PI) );
+
+		vFrontColor += XMLoadFloat3( &vAttenuate ) * fDepth * fScaledLength;
 		vSamplePoint += vSampleRay;
 	}
-	
+
 	// Finally, scale the Mie and Rayleigh colors and set up the varying variables for the pixel shader
 	DirectX::XMFLOAT3 c0; //check propably never used
-	XMStoreFloat3(&c0, vFrontColor * XMLoadFloat3(&vInvWavelength) * AtmosphereCB.AC_KrESun);
+	XMStoreFloat3( &c0, vFrontColor * XMLoadFloat3( &vInvWavelength ) * AtmosphereCB.AC_KrESun );
 
 	XMVECTOR c1 = vFrontColor * AtmosphereCB.AC_KmESun;
 	XMVECTOR vDirection = camPos - vPos;
-	
+
 	float fCos;
-	XMStoreFloat(&fCos, DirectX::XMVector3Dot(XMLoadFloat3(AtmosphereCB.AC_LightPos.toXMFLOAT3()), vDirection) / DirectX::XMVector3LengthEst(vDirection)); //check if it works
-	
-	float fCos2 = fCos*fCos;
+	XMStoreFloat( &fCos, DirectX::XMVector3Dot( XMLoadFloat3( AtmosphereCB.AC_LightPos.toXMFLOAT3() ), vDirection ) / DirectX::XMVector3LengthEst( vDirection ) ); //check if it works
+
+	float fCos2 = fCos * fCos;
 	XMFLOAT3 suncolor_convert;
-	XMStoreFloat3(&suncolor_convert, AC_getMiePhase(fCos, fCos2, AtmosphereCB.AC_g, AtmosphereCB.AC_g * AtmosphereCB.AC_g) * c1);
+	XMStoreFloat3( &suncolor_convert, AC_getMiePhase( fCos, fCos2, AtmosphereCB.AC_g, AtmosphereCB.AC_g * AtmosphereCB.AC_g ) * c1 );
 	float3 suncolor_return;
 	suncolor_return.x = suncolor_convert.x;
 	suncolor_return.y = suncolor_convert.y;

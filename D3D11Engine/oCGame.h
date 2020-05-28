@@ -10,8 +10,7 @@
 
 class zCView;
 
-enum class GOTHIC_KEY : int
-{
+enum class GOTHIC_KEY : int {
 	F1 = 0x3B,
 	F2 = 0x3C,
 	F3 = 0x3D,
@@ -25,26 +24,23 @@ enum class GOTHIC_KEY : int
 };
 
 class oCNPC;
-class oCGame
-{
+class oCGame {
 public:
 
 	/** Hooks the functions of this Class */
-	static void Hook()
-	{
-		XHook(HookedFunctions::OriginalFunctions.original_oCGameEnterWorld, GothicMemoryLocations::oCGame::EnterWorld, oCGame::hooked_EnterWorld);
+	static void Hook() {
+		XHook( HookedFunctions::OriginalFunctions.original_oCGameEnterWorld, GothicMemoryLocations::oCGame::EnterWorld, oCGame::hooked_EnterWorld );
 
 #if BUILD_GOTHIC_2_6_fix
 		// 006C3140                             ; void __thiscall oCGame::UpdatePlayerStatus(oCGame *__hidden this)
 		//XHook(HookedFunctions::OriginalFunctions.original_oCGameUpdatePlayerStatus, 0x006C3140, oCGame::hooked_UpdatePlayerStatus);
 #endif
 	}
-	static void __fastcall hooked_UpdatePlayerStatus(void* thisptr, void* unknwn) {
-		HookedFunctions::OriginalFunctions.original_oCGameUpdatePlayerStatus(thisptr);
+	static void __fastcall hooked_UpdatePlayerStatus( void* thisptr, void* unknwn ) {
+		HookedFunctions::OriginalFunctions.original_oCGameUpdatePlayerStatus( thisptr );
 	}
-	static void __fastcall hooked_EnterWorld(void * thisptr, void * unknwn, oCNPC* playerVob, int changePlayerPos, const zSTRING& startpoint)
-	{
-		HookedFunctions::OriginalFunctions.original_oCGameEnterWorld(thisptr, playerVob, changePlayerPos, startpoint);
+	static void __fastcall hooked_EnterWorld( void* thisptr, void* unknwn, oCNPC* playerVob, int changePlayerPos, const zSTRING& startpoint ) {
+		HookedFunctions::OriginalFunctions.original_oCGameEnterWorld( thisptr, playerVob, changePlayerPos, startpoint );
 
 		/*if (!Engine::GAPI->GetLoadedWorldInfo()->BspTree) // Happens in Gothic II - Johannes Edition, zCBspTree::LoadBIN isn't called for some reason
 		{
@@ -66,37 +62,33 @@ public:
 		//Engine::GAPI->OnAddVob(player, playerHomeworld);
 	}
 
-	void TestKey(GOTHIC_KEY key)
-	{
-		XCALL(GothicMemoryLocations::oCGame::TestKeys);
+	void TestKey( GOTHIC_KEY key ) {
+		XCALL( GothicMemoryLocations::oCGame::TestKeys );
 	}
 
-	static oCNPC* GetPlayer()
-	{
-		return *(oCNPC **)GothicMemoryLocations::oCGame::Var_Player;
+	static oCNPC* GetPlayer() {
+		return *(oCNPC**)GothicMemoryLocations::oCGame::Var_Player;
 	}
 
-	zCView* GetGameView()
-	{
-		return *(zCView **)THISPTR_OFFSET(GothicMemoryLocations::oCGame::Offset_GameView);
+	zCView* GetGameView() {
+		return *(zCView**)THISPTR_OFFSET( GothicMemoryLocations::oCGame::Offset_GameView );
 	}
 
-	bool GetSingleStep()
-	{
+	bool GetSingleStep() {
 #ifdef BUILD_SPACER
 		return false;
 #else
-		return (*(int *)THISPTR_OFFSET(GothicMemoryLocations::oCGame::Offset_SingleStep)) != 0;
+		return (*(int*)THISPTR_OFFSET( GothicMemoryLocations::oCGame::Offset_SingleStep )) != 0;
 #endif
 	}
 
-    int _vtbl;
-    int _zCSession_csMan;        //zCCSManager*
-    zCWorld* _zCSession_world;        //zCWorld*
-    int _zCSession_camera;       //zCCamera*
-    int _zCSession_aiCam;        //zCAICamera*
-    zCVob * _zCSession_camVob;       //zCVob *
-    zCView* _zCSession_viewport;     //zCView*
+	int _vtbl;
+	int _zCSession_csMan;        //zCCSManager*
+	zCWorld* _zCSession_world;        //zCWorld*
+	int _zCSession_camera;       //zCCamera*
+	int _zCSession_aiCam;        //zCAICamera*
+	zCVob* _zCSession_camVob;       //zCVob *
+	zCView* _zCSession_viewport;     //zCView*
 
 	static oCGame* GetGame() { return *(oCGame**)GothicMemoryLocations::GlobalObjects::oCGame; };
 };

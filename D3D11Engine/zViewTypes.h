@@ -98,42 +98,38 @@ public:
 		return maxTextLength;
 	}
 	zColor& GetTextColor() {
-		static zColor DefaultColor = zColor(158, 186, 203, 255); // BGRA
-		if (maxTextLength) {
+		static zColor DefaultColor = zColor( 158, 186, 203, 255 ); // BGRA
+		if ( maxTextLength ) {
 			return fontColor;
 		}
 		return DefaultColor;
 	}
 
-	int _zCView::rnd2(float x)
-	{
-		if (x > 0) return (int)(x + 0.5);
+	int _zCView::rnd2( float x ) {
+		if ( x > 0 ) return (int)(x + 0.5);
 		else return (int)(x - 0.5);
 	}
-	int _zCView::nax(int x)
-	{
-		return rnd2 ((float)(x * psizex) / 8192);
+	int _zCView::nax( int x ) {
+		return rnd2( (float)(x * psizex) / 8192 );
 	}
 
-	int _zCView::nay(int y)
-	{
-		return rnd2 ((float)(y * psizey) / 8192);
+	int _zCView::nay( int y ) {
+		return rnd2( (float)(y * psizey) / 8192 );
 	}
 
-	int _zCView::anx(int x)
-	{
-		return rnd2 ((float)(x * 8192) / psizex);
+	int _zCView::anx( int x ) {
+		return rnd2( (float)(x * 8192) / psizex );
 	}
 
 	void _zCView::CheckAutoScroll() {
-		XCALL(0x007A5F60);
+		XCALL( 0x007A5F60 );
 	}
 	void _zCView::CheckTimedText() {
-		XCALL(0x007A7C50);
+		XCALL( 0x007A7C50 );
 	}
 
-	void _zCView::PrintChars(int x, int y, const zSTRING& str) {
-		XCALL(GothicMemoryLocations::zCView::PrintChars);
+	void _zCView::PrintChars( int x, int y, const zSTRING& str ) {
+		XCALL( GothicMemoryLocations::zCView::PrintChars );
 	}
 };
 
@@ -198,12 +194,12 @@ public:
 	int firstTimeInserted;
 
 	bool zCMenuItem::GetIsDisabled() {
-		if (!m_bVisible) return true;
+		if ( !m_bVisible ) return true;
 		return (m_parItemFlags & 32);
 	}
 private:
 	int zCMenuItem::GetIsDisabledInternal() {
-		XCALL(0x004E1DE0);
+		XCALL( 0x004E1DE0 );
 	}
 };
 

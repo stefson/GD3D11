@@ -16,12 +16,12 @@ namespace Engine {
 
 		GraphicsEngine = new D3D11GraphicsEngine;
 
-		if (!GraphicsEngine) {
+		if ( !GraphicsEngine ) {
 			LogErrorBox() << "Failed to create GraphicsEngine! Out of memory!";
-			exit(0);
+			exit( 0 );
 		}
 
-		XLE(GraphicsEngine->Init());
+		XLE( GraphicsEngine->Init() );
 
 		// Create ant tweak bar with it
 		AntTweakBar = new D3D11AntTweakBar;
@@ -41,9 +41,9 @@ namespace Engine {
 		LogInfo() << "Initializing GothicAPI";
 
 		GAPI = new GothicAPI;
-		if (!GAPI) {
+		if ( !GAPI ) {
 			LogErrorBox() << "Failed to create GothicAPI!";
-			exit(0);
+			exit( 0 );
 		}
 	}
 
@@ -53,13 +53,13 @@ namespace Engine {
 
 		// TODO: remove this hack in the future, just a temporary workaround to fix crash on shutdown with the need to kill process via TaskManager
 		// Just killing before GraphicsEngine is not enough.
-		exit(0);
+		exit( 0 );
 
-		SAFE_DELETE(Engine::RenderingThreadPool);
-		SAFE_DELETE(Engine::AntTweakBar);
-		SAFE_DELETE(Engine::GAPI);
-		SAFE_DELETE(Engine::WorkerThreadPool);
-		SAFE_DELETE(Engine::GraphicsEngine);
+		SAFE_DELETE( Engine::RenderingThreadPool );
+		SAFE_DELETE( Engine::AntTweakBar );
+		SAFE_DELETE( Engine::GAPI );
+		SAFE_DELETE( Engine::WorkerThreadPool );
+		SAFE_DELETE( Engine::GraphicsEngine );
 	}
 
 };

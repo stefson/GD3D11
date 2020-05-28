@@ -14,26 +14,23 @@ using namespace DirectX;
 const float LIGHT_COLORCHANGE_POS_MOD = 0.1f;
 
 
-D3D11PointLight::D3D11PointLight(VobLightInfo* info, bool dynamicLight)
-{
-	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase *)Engine::GraphicsEngine;
+D3D11PointLight::D3D11PointLight( VobLightInfo* info, bool dynamicLight ) {
+	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase*)Engine::GraphicsEngine;
 	LightInfo = info;
 	DynamicLight = dynamicLight;
 
- 	XMStoreFloat3(&LastUpdatePosition, LightInfo->Vob->GetPositionWorldXM());
+	XMStoreFloat3( &LastUpdatePosition, LightInfo->Vob->GetPositionWorldXM() );
 
 	DepthCubemap = nullptr;
 	ViewMatricesCB = nullptr;
 
-	if (!dynamicLight)
-	{
+	if ( !dynamicLight ) {
 		InitDone = false;
 
 		// Add to queue
-		Engine::WorkerThreadPool->enqueue([this]{ InitResources(); });
+		Engine::WorkerThreadPool->enqueue( [this] { InitResources(); } );
 
-	} else
-	{
+	} else {
 		InitResources();
 	}
 
@@ -41,51 +38,46 @@ D3D11PointLight::D3D11PointLight(VobLightInfo* info, bool dynamicLight)
 }
 
 
-D3D11PointLight::~D3D11PointLight()
-{
+D3D11PointLight::~D3D11PointLight() {
 	// Make sure we are out of the init-queue
-	while(!InitDone);
+	while ( !InitDone );
 
 	delete DepthCubemap;
 	delete ViewMatricesCB;
 
-	for(auto it=WorldMeshCache.begin();it!=WorldMeshCache.end();it++)
+	for ( auto it = WorldMeshCache.begin(); it != WorldMeshCache.end(); it++ )
 		delete it->second;
 }
 
 /** Returns true if this is the first time that light is being rendered */
-bool D3D11PointLight::NotYetDrawn()
-{
+bool D3D11PointLight::NotYetDrawn() {
 	return !DrawnOnce;
 }
 
 /** Initializes the resources of this light */
-void D3D11PointLight::InitResources()
-{
-	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase *)Engine::GraphicsEngine;
+void D3D11PointLight::InitResources() {
+	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase*)Engine::GraphicsEngine;
 
 	InitMutex.lock();
 
 	// Create texture-cube for this light
-	DepthCubemap = new RenderToDepthStencilBuffer(engine->GetDevice(), 
+	DepthCubemap = new RenderToDepthStencilBuffer( engine->GetDevice(),
 		POINTLIGHT_SHADOWMAP_SIZE,
 		POINTLIGHT_SHADOWMAP_SIZE,
 		DXGI_FORMAT_R32_TYPELESS,
 		nullptr,
 		DXGI_FORMAT_D32_FLOAT,
 		DXGI_FORMAT_R32_FLOAT,
-		6);
+		6 );
 
 	// Create constantbuffer for the view-matrices
-	engine->CreateConstantBuffer(&ViewMatricesCB, nullptr, sizeof(CubemapGSConstantBuffer));
+	engine->CreateConstantBuffer( &ViewMatricesCB, nullptr, sizeof( CubemapGSConstantBuffer ) );
 
 	// Generate worldmesh cache if we aren't a dynamically added light
-	if (!DynamicLight)
-	{
-		WorldConverter::WorldMeshCollectPolyRange(LightInfo->Vob->GetPositionWorld(), LightInfo->Vob->GetLightRange(), Engine::GAPI->GetWorldSections(), WorldMeshCache);
+	if ( !DynamicLight ) {
+		WorldConverter::WorldMeshCollectPolyRange( LightInfo->Vob->GetPositionWorld(), LightInfo->Vob->GetLightRange(), Engine::GAPI->GetWorldSections(), WorldMeshCache );
 		WorldCacheInvalid = false;
-	} else
-	{
+	} else {
 		WorldCacheInvalid = true;
 	}
 
@@ -95,44 +87,38 @@ void D3D11PointLight::InitResources()
 }
 
 /** Returns if this light needs an update */
-bool D3D11PointLight::NeedsUpdate()
-{
-	XMVECTOR lastPos = XMLoadFloat3(&LastUpdatePosition);
-	return !XMVector3Equal(LightInfo->Vob->GetPositionWorldXM(), lastPos) || NotYetDrawn();
+bool D3D11PointLight::NeedsUpdate() {
+	XMVECTOR lastPos = XMLoadFloat3( &LastUpdatePosition );
+	return !XMVector3Equal( LightInfo->Vob->GetPositionWorldXM(), lastPos ) || NotYetDrawn();
 }
 
 /** Returns true if the light could need an update, but it's not very important */
-bool D3D11PointLight::WantsUpdate()
-{
+bool D3D11PointLight::WantsUpdate() {
 	// If dynamic, update colorchanging lights too, because they are mostly lamps and campfires
 	// They wouldn't need an update just because of the colorchange, but most of them are dominant lights so it looks better
-	if (Engine::GAPI->GetRendererState()->RendererSettings.EnablePointlightShadows >= GothicRendererSettings::PLS_UPDATE_DYNAMIC)
-		if (LightInfo->Vob->GetLightColor() != LastUpdateColor)
+	if ( Engine::GAPI->GetRendererState()->RendererSettings.EnablePointlightShadows >= GothicRendererSettings::PLS_UPDATE_DYNAMIC )
+		if ( LightInfo->Vob->GetLightColor() != LastUpdateColor )
 			return true;
 
 	return false;
 }
 
 /** Draws the surrounding scene into the cubemap */
-void D3D11PointLight::RenderCubemap(bool forceUpdate)
-{
-	if (!InitDone)
+void D3D11PointLight::RenderCubemap( bool forceUpdate ) {
+	if ( !InitDone )
 		return;
 
 	//if (!GetAsyncKeyState('X'))
 	//	return;
-	D3D11GraphicsEngineBase* engineBase = (D3D11GraphicsEngineBase *)Engine::GraphicsEngine;
-	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *) engineBase; // TODO: Remove and use newer system!
+	D3D11GraphicsEngineBase* engineBase = (D3D11GraphicsEngineBase*)Engine::GraphicsEngine;
+	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine*)engineBase; // TODO: Remove and use newer system!
 
-	if (!NeedsUpdate() && !WantsUpdate())
-	{
-		if (!forceUpdate)
+	if ( !NeedsUpdate() && !WantsUpdate() ) {
+		if ( !forceUpdate )
 			return; // Don't update when we don't need to
-	} else
-	{
-		XMVECTOR xmlastPos = XMLoadFloat3(&LastUpdatePosition);
-		if (!XMVector3Equal(LightInfo->Vob->GetPositionWorldXM(), xmlastPos))
-		{
+	} else {
+		XMVECTOR xmlastPos = XMLoadFloat3( &LastUpdatePosition );
+		if ( !XMVector3Equal( LightInfo->Vob->GetPositionWorldXM(), xmlastPos ) ) {
 			// Position changed, refresh our caches
 			VobCache.clear();
 			SkeletalVobCache.clear();
@@ -147,11 +133,11 @@ void D3D11PointLight::RenderCubemap(bool forceUpdate)
 	// TODO: Move the actual lightsource up too!
 
 	XMVECTOR vLookDir;
-	constexpr XMVECTORF32 c_XM_Right    = { { {  1,  0,  0, 0 } } };
-	constexpr XMVECTORF32 c_XM_Left     = { { { -1,  0,  0, 0 } } };
-	constexpr XMVECTORF32 c_XM_Up       = { { {  0,  1,  0, 0 } } };
-	constexpr XMVECTORF32 c_XM_Down     = { { {  0, -1,  0, 0 } } };
-	constexpr XMVECTORF32 c_XM_Forward  = { { {  0,  0,  1, 0 } } };
+	constexpr XMVECTORF32 c_XM_Right = { { {  1,  0,  0, 0 } } };
+	constexpr XMVECTORF32 c_XM_Left = { { { -1,  0,  0, 0 } } };
+	constexpr XMVECTORF32 c_XM_Up = { { {  0,  1,  0, 0 } } };
+	constexpr XMVECTORF32 c_XM_Down = { { {  0, -1,  0, 0 } } };
+	constexpr XMVECTORF32 c_XM_Forward = { { {  0,  0,  1, 0 } } };
 	constexpr XMVECTORF32 c_XM_Backward = { { {  0,  0, -1, 0 } } };
 
 	// Update indoor/outdoor-state
@@ -159,65 +145,63 @@ void D3D11PointLight::RenderCubemap(bool forceUpdate)
 
 	// Generate cubemap view-matrices
 	vLookDir = c_XM_Right + vEyePt;
-	XMStoreFloat4x4(&CubeMapViewMatrices[0], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, c_XM_Up)));
-    
+	XMStoreFloat4x4( &CubeMapViewMatrices[0], XMMatrixTranspose( XMMatrixLookAtLH( vEyePt, vLookDir, c_XM_Up ) ) );
+
 	vLookDir = c_XM_Left + vEyePt;
-	XMStoreFloat4x4(&CubeMapViewMatrices[1], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, c_XM_Up)));
+	XMStoreFloat4x4( &CubeMapViewMatrices[1], XMMatrixTranspose( XMMatrixLookAtLH( vEyePt, vLookDir, c_XM_Up ) ) );
 
 	vLookDir = c_XM_Up + vEyePt;
-	XMStoreFloat4x4(&CubeMapViewMatrices[2], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, c_XM_Backward)));
+	XMStoreFloat4x4( &CubeMapViewMatrices[2], XMMatrixTranspose( XMMatrixLookAtLH( vEyePt, vLookDir, c_XM_Backward ) ) );
 
 	vLookDir = c_XM_Down + vEyePt;
-	XMStoreFloat4x4(&CubeMapViewMatrices[3], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, c_XM_Forward)));
+	XMStoreFloat4x4( &CubeMapViewMatrices[3], XMMatrixTranspose( XMMatrixLookAtLH( vEyePt, vLookDir, c_XM_Forward ) ) );
 
 	vLookDir = c_XM_Forward + vEyePt;
-	XMStoreFloat4x4(&CubeMapViewMatrices[4], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, c_XM_Up)));
+	XMStoreFloat4x4( &CubeMapViewMatrices[4], XMMatrixTranspose( XMMatrixLookAtLH( vEyePt, vLookDir, c_XM_Up ) ) );
 
 	vLookDir = c_XM_Backward + vEyePt;
-	XMStoreFloat4x4(&CubeMapViewMatrices[5], XMMatrixTranspose(XMMatrixLookAtLH(vEyePt, vLookDir, c_XM_Up)));
+	XMStoreFloat4x4( &CubeMapViewMatrices[5], XMMatrixTranspose( XMMatrixLookAtLH( vEyePt, vLookDir, c_XM_Up ) ) );
 
 	// Create the projection matrix
 	float zNear = 15.0f;
 	float zFar = LightInfo->Vob->GetLightRange() * 2.0f;
 
-	
-	XMMATRIX proj = XMMatrixPerspectiveFovLH(XM_PIDIV2, 1.0f, zNear, zFar);
-	proj = XMMatrixTranspose(proj);
+
+	XMMATRIX proj = XMMatrixPerspectiveFovLH( XM_PIDIV2, 1.0f, zNear, zFar );
+	proj = XMMatrixTranspose( proj );
 
 	// Setup near/far-planes. We need linear viewspace depth for the cubic shadowmaps.
 	Engine::GAPI->GetRendererState()->GraphicsState.FF_zNear = zNear;
 	Engine::GAPI->GetRendererState()->GraphicsState.FF_zFar = zFar;
-	Engine::GAPI->GetRendererState()->GraphicsState.SetGraphicsSwitch(GSWITCH_LINEAR_DEPTH, true);
+	Engine::GAPI->GetRendererState()->GraphicsState.SetGraphicsSwitch( GSWITCH_LINEAR_DEPTH, true );
 
 	bool oldDepthClip = Engine::GAPI->GetRendererState()->RasterizerState.DepthClipEnable;
 	Engine::GAPI->GetRendererState()->RasterizerState.DepthClipEnable = true;
 
 	// Upload view-matrices to the GPU
 	CubemapGSConstantBuffer gcb;
-	for(int i=0;i<6;i++)
-	{
+	for ( int i = 0; i < 6; i++ ) {
 		gcb.PCR_View[i] = CubeMapViewMatrices[i];
-		XMStoreFloat4x4(&gcb.PCR_ViewProj[i], proj * XMLoadFloat4x4(&CubeMapViewMatrices[i]));
+		XMStoreFloat4x4( &gcb.PCR_ViewProj[i], proj * XMLoadFloat4x4( &CubeMapViewMatrices[i] ) );
 	}
 
-	ViewMatricesCB->UpdateBuffer(&gcb);
-	ViewMatricesCB->BindToGeometryShader(2);
+	ViewMatricesCB->UpdateBuffer( &gcb );
+	ViewMatricesCB->BindToGeometryShader( 2 );
 
 	RenderFullCubemap();
 
 	Engine::GAPI->GetRendererState()->RasterizerState.DepthClipEnable = oldDepthClip;
-	Engine::GAPI->GetRendererState()->GraphicsState.SetGraphicsSwitch(GSWITCH_LINEAR_DEPTH, false);
+	Engine::GAPI->GetRendererState()->GraphicsState.SetGraphicsSwitch( GSWITCH_LINEAR_DEPTH, false );
 
 	LastUpdateColor = LightInfo->Vob->GetLightColor();
-	XMStoreFloat3(&LastUpdatePosition, vEyePt);
+	XMStoreFloat3( &LastUpdatePosition, vEyePt );
 	DrawnOnce = true;
 }
 
 /** Renders all cubemap faces at once, using the geometry shader */
-void D3D11PointLight::RenderFullCubemap()
-{
-	D3D11GraphicsEngineBase* engineBase = (D3D11GraphicsEngineBase *)Engine::GraphicsEngine;
-	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *) engineBase; // TODO: Remove and use newer system!
+void D3D11PointLight::RenderFullCubemap() {
+	D3D11GraphicsEngineBase* engineBase = (D3D11GraphicsEngineBase*)Engine::GraphicsEngine;
+	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine*)engineBase; // TODO: Remove and use newer system!
 
 	// Disable shadows for NPCs
 	// TODO: Only for the player himself, because his shadows look ugly when using a torch
@@ -233,29 +217,28 @@ void D3D11PointLight::RenderFullCubemap()
 	std::map<MeshKey, WorldMeshInfo*, cmpMeshKey>* wc = &WorldMeshCache;
 
 	// Don't use the cache if we have moved
-	if (WorldCacheInvalid)
+	if ( WorldCacheInvalid )
 		wc = nullptr;
 
-	engine->RenderShadowCube(LightInfo->Vob->GetPositionWorldXM(), range, DepthCubemap, nullptr, nullptr, false, LightInfo->IsIndoorVob, noNPCs, &VobCache, &SkeletalVobCache, wc);
+	engine->RenderShadowCube( LightInfo->Vob->GetPositionWorldXM(), range, DepthCubemap, nullptr, nullptr, false, LightInfo->IsIndoorVob, noNPCs, &VobCache, &SkeletalVobCache, wc );
 
 	//Engine::GAPI->GetRendererState()->RendererSettings.DrawSkeletalMeshes = oldDrawSkel;
 }
 
 /** Renders the scene with the given view-proj-matrices */
-void D3D11PointLight::RenderCubemapFace(const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOAT4X4& proj, UINT faceIdx)
-{
-	D3D11GraphicsEngineBase* engineBase = (D3D11GraphicsEngineBase *)Engine::GraphicsEngine;
-	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *) engineBase; // TODO: Remove and use newer system!
+void D3D11PointLight::RenderCubemapFace( const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOAT4X4& proj, UINT faceIdx ) {
+	D3D11GraphicsEngineBase* engineBase = (D3D11GraphicsEngineBase*)Engine::GraphicsEngine;
+	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine*)engineBase; // TODO: Remove and use newer system!
 	CameraReplacement cr;
-	XMStoreFloat3(&cr.PositionReplacement, LightInfo->Vob->GetPositionWorldXM());
+	XMStoreFloat3( &cr.PositionReplacement, LightInfo->Vob->GetPositionWorldXM() );
 	cr.ProjectionReplacement = proj;
 	cr.ViewReplacement = view;
 
 	// Replace gothics camera
-	Engine::GAPI->SetCameraReplacementPtr(&cr);
+	Engine::GAPI->SetCameraReplacementPtr( &cr );
 
-	if (engine->GetDummyCubeRT())
-		engine->GetContext()->ClearRenderTargetView(engine->GetDummyCubeRT()->GetRTVCubemapFace(faceIdx), (float *)&float4(0, 0, 0, 0));
+	if ( engine->GetDummyCubeRT() )
+		engine->GetContext()->ClearRenderTargetView( engine->GetDummyCubeRT()->GetRTVCubemapFace( faceIdx ), (float*)&float4( 0, 0, 0, 0 ) );
 
 	// Disable shadows for NPCs
 	// TODO: Only for the player himself, because his shadows look ugly when using a torch
@@ -265,86 +248,81 @@ void D3D11PointLight::RenderCubemapFace(const DirectX::XMFLOAT4X4& view, const D
 	float range = LightInfo->Vob->GetLightRange() * 1.1f;
 
 	// Draw cubemap face
-	ID3D11RenderTargetView* debugRTV = engine->GetDummyCubeRT() != nullptr ? engine->GetDummyCubeRT()->GetRTVCubemapFace(faceIdx) : nullptr;
-	engine->RenderShadowCube(LightInfo->Vob->GetPositionWorldXM(), range, DepthCubemap, DepthCubemap->GetDSVCubemapFace(faceIdx), debugRTV, false);
+	ID3D11RenderTargetView* debugRTV = engine->GetDummyCubeRT() != nullptr ? engine->GetDummyCubeRT()->GetRTVCubemapFace( faceIdx ) : nullptr;
+	engine->RenderShadowCube( LightInfo->Vob->GetPositionWorldXM(), range, DepthCubemap, DepthCubemap->GetDSVCubemapFace( faceIdx ), debugRTV, false );
 
 	//Engine::GAPI->GetRendererState()->RendererSettings.DrawSkeletalMeshes = oldDrawSkel;
 
 	// Reset settings
-	Engine::GAPI->SetCameraReplacementPtr(nullptr);
+	Engine::GAPI->SetCameraReplacementPtr( nullptr );
 }
 
 /** Binds the shadowmap to the pixelshader */
-void D3D11PointLight::OnRenderLight()
-{	
-	if (!InitDone)
+void D3D11PointLight::OnRenderLight() {
+	if ( !InitDone )
 		return;
 
-	DepthCubemap->BindToPixelShader(((D3D11GraphicsEngineBase *)Engine::GraphicsEngine)->GetContext(), 3);
+	DepthCubemap->BindToPixelShader( ((D3D11GraphicsEngineBase*)Engine::GraphicsEngine)->GetContext(), 3 );
 }
 
 /** Debug-draws the cubemap to the screen */
-void D3D11PointLight::DebugDrawCubeMap()
-{
-	if (!InitDone)
+void D3D11PointLight::DebugDrawCubeMap() {
+	if ( !InitDone )
 		return;
 
-	D3D11GraphicsEngineBase* engineBase = (D3D11GraphicsEngineBase *)Engine::GraphicsEngine;
-	D3D11GraphicsEngine * engine = (D3D11GraphicsEngine *) engineBase; // TODO: Remove and use newer system!
+	D3D11GraphicsEngineBase* engineBase = (D3D11GraphicsEngineBase*)Engine::GraphicsEngine;
+	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine*)engineBase; // TODO: Remove and use newer system!
 
 	const int previewSize = POINTLIGHT_SHADOWMAP_SIZE;
 	const int previewDownscale = 4;
-	
 
 
-	for(int i=0;i<6;i++)
-	{
+
+	for ( int i = 0; i < 6; i++ ) {
 		INT2 pPosition;
 		int stride = (previewSize / previewDownscale);
-		if (i==1) // x-
+		if ( i == 1 ) // x-
 		{
 			pPosition.x = 0;
 			pPosition.y = stride;
-		} else if (i==3) // y-
+		} else if ( i == 3 ) // y-
 		{
 			pPosition.x = stride;
 			pPosition.y = stride;
-		} else if (i==0) // x+
+		} else if ( i == 0 ) // x+
 		{
 			pPosition.x = stride * 2;
 			pPosition.y = stride;
-		} else if (i==2) // y+
+		} else if ( i == 2 ) // y+
 		{
 			pPosition.x = stride * 3;
 			pPosition.y = stride;
-		} else if (i==5) // z-
+		} else if ( i == 5 ) // z-
 		{
 			pPosition.x = stride;
 			pPosition.y = 0;
-		} else if (i==4) // z+
+		} else if ( i == 4 ) // z+
 		{
 			pPosition.x = stride;
 			pPosition.y = stride * 2;
 		}
 
-		INT2 pSize = INT2(previewSize / previewDownscale,previewSize / previewDownscale);
+		INT2 pSize = INT2( previewSize / previewDownscale, previewSize / previewDownscale );
 
-		ID3D11ShaderResourceView * srv = engine->GetDummyCubeRT()->GetSRVCubemapFace(i);
-		engine->GetContext()->PSSetShaderResources(0, 1, &srv);
-		Engine::GraphicsEngine->DrawQuad(pPosition, pSize);
+		ID3D11ShaderResourceView* srv = engine->GetDummyCubeRT()->GetSRVCubemapFace( i );
+		engine->GetContext()->PSSetShaderResources( 0, 1, &srv );
+		Engine::GraphicsEngine->DrawQuad( pPosition, pSize );
 	}
 }
 
 /** Called when a vob got removed from the world */
-void D3D11PointLight::OnVobRemovedFromWorld(BaseVobInfo * vob)
-{
+void D3D11PointLight::OnVobRemovedFromWorld( BaseVobInfo* vob ) {
 	// Wait for cache initialization to finish first
 	InitMutex.lock();
 
 	// See if we have this vob registered
-	if (std::find(VobCache.begin(), VobCache.end(), vob) != VobCache.end()
-		|| std::find(SkeletalVobCache.begin(), SkeletalVobCache.end(), vob) != SkeletalVobCache.end())
-	{
+	if ( std::find( VobCache.begin(), VobCache.end(), vob ) != VobCache.end()
+		|| std::find( SkeletalVobCache.begin(), SkeletalVobCache.end(), vob ) != SkeletalVobCache.end() ) {
 		// Clear cache, if so
 		VobCache.clear();
 		SkeletalVobCache.clear();

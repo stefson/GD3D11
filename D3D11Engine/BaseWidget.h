@@ -16,24 +16,24 @@ class zCVob;
 
 class BaseWidget {
 public:
-	BaseWidget(WidgetContainer * container);
+	BaseWidget( WidgetContainer* container );
 	virtual ~BaseWidget();
 
 	/** Renders the widget */
 	virtual void RenderWidget();
 
 	/** Called when a mousebutton was clicked */
-	virtual void OnMButtonClick(int button);
+	virtual void OnMButtonClick( int button );
 
 	/** Called when the owning window got a message */
-	virtual void OnWindowMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+	virtual void OnWindowMessage( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam );
 
 	/** Called when an object was added to the selection */
-	virtual void OnSelectionAdded(zCVob * vob);
+	virtual void OnSelectionAdded( zCVob* vob );
 
 	/** Widget primitives */
-	void CreateArrowCone(int Detail, int Axis, const float4& Color, EditorLinePrimitive * Prim);
-	void CreateArrowCube(DirectX::XMFLOAT3* Offset, float Extends, const float4& Color, EditorLinePrimitive * Prim);
+	void CreateArrowCone( int Detail, int Axis, const float4& Color, EditorLinePrimitive* Prim );
+	void CreateArrowCube( DirectX::XMFLOAT3* Offset, float Extends, const float4& Color, EditorLinePrimitive* Prim );
 
 	/** Returns whether this widget is active or not */
 	virtual bool IsActive() const { return false; }
@@ -43,7 +43,7 @@ protected:
 	float2 GetMouseDelta() const;
 
 	/** Hides/Shows the mouse */
-	void SetMouseVisibility(bool visible);
+	void SetMouseVisibility( bool visible );
 
 	/** Transforms of the widget */
 	DirectX::XMFLOAT3 Position;
@@ -51,7 +51,7 @@ protected:
 	DirectX::XMFLOAT3 Scale;
 
 	/** Owning widgetcontainer */
-	WidgetContainer * OwningContainer;
+	WidgetContainer* OwningContainer;
 
-	EditorLinePrimitive * testPrim;
+	EditorLinePrimitive* testPrim;
 };

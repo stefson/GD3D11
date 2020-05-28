@@ -16,8 +16,7 @@ struct zTWeightEntry {
 #pragma pack (pop)
 
 class zCOBBox3D;
-class zCMeshSoftSkin : public zCProgMeshProto
-{
+class zCMeshSoftSkin : public zCProgMeshProto {
 public:
 
 	/*zCArray<int>* GetNodeIndexList()
@@ -30,8 +29,7 @@ public:
 		int				NodeIndex;
 	};
 
-	char* GetVertWeightStream()
-	{
-		return *(char **)THISPTR_OFFSET(GothicMemoryLocations::zCMeshSoftSkin::Offset_VertWeightStream);
+	char* GetVertWeightStream() {
+		return *(char**)THISPTR_OFFSET( GothicMemoryLocations::zCMeshSoftSkin::Offset_VertWeightStream );
 	};
 };

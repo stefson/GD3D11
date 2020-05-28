@@ -12,8 +12,7 @@ __declspec(selectany) const char* ENGINE_BASE_DIR = "system\\GD3D11\\";
 
 __declspec(selectany) const char* VERSION_STRING = "Version X" VERSION_NUMBER " (" __DATE__ ")";
 
-namespace Engine
-{
+namespace Engine {
 	/** If true, we will just pass everything to the usual ddraw.dll */
 	__declspec(selectany) bool PassThrough;
 

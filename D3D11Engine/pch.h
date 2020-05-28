@@ -47,9 +47,9 @@ extern bool GMPModeActive;
 //#define V(x) x
 
 /** Writes a string of the D3D7-Call log */
-void DebugWrite_i(LPCSTR lpDebugMessage, void * thisptr);
+void DebugWrite_i( LPCSTR lpDebugMessage, void* thisptr );
 
 /** Computes the size in bytes of the given FVF */
-int ComputeFVFSize(DWORD fvf);
+int ComputeFVFSize( DWORD fvf );
 
 

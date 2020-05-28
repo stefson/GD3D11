@@ -16,80 +16,79 @@ class oCNPC;
 class zCPolygon;
 class zCTexture;
 
-template <class T> 
+template <class T>
 class zCTree;
 
 class zCVisual;
 
-typedef int (__thiscall* zCBspTreeLoadBIN)(void *,zCFileBIN&, int);
-typedef void (__thiscall* zCWorldRender)(void *,zCCamera&);
-typedef void (__thiscall* zCWorldVobAddedToWorld)(void *, zCVob *);
-typedef void (__thiscall* oCNPCEnable)(void *, DirectX::XMFLOAT3 &);
-typedef void (__thiscall* oCWorldInsertVobInWorld)(void *, zCVob *);
-typedef void (__thiscall* zCBspTreeAddVob)(void *, zCVob *);
-typedef void (__thiscall* zCWorldLoadWorld)(void *, const zSTRING& fileName, const int loadMode);
-typedef void (__thiscall* oCGameEnterWorld)(void *, oCNPC* playerVob, int changePlayerPos, const zSTRING& startpoint);
-typedef void(__thiscall* oCGameUpdatePlayerStatus)(void*);
-typedef void (__thiscall* zCWorldVobRemovedFromWorld)(void *, zCVob *);
-typedef XMFLOAT4X4 (__cdecl * Alg_Rotation3DNRad)(const DirectX::XMFLOAT3 & axis, const float angle);
-typedef int (__cdecl * vidGetFPSRate)();
-typedef void (__thiscall* GenericDestructor)(void *);
-typedef void (__thiscall* GenericThiscall)(void *);
-typedef void (__thiscall* zCMaterialConstruktor)(void *);
-typedef void (__thiscall* zCMaterialInitValues)(void *);
-typedef void (__fastcall* zCBspNodeRenderIndoor)(void *, int);
-typedef void (__fastcall* zCBspNodeRenderOutdoor)(void *, zCBspBase*, zTBBox3D, int, int);
+typedef int( __thiscall* zCBspTreeLoadBIN )(void*, zCFileBIN&, int);
+typedef void( __thiscall* zCWorldRender )(void*, zCCamera&);
+typedef void( __thiscall* zCWorldVobAddedToWorld )(void*, zCVob*);
+typedef void( __thiscall* oCNPCEnable )(void*, DirectX::XMFLOAT3&);
+typedef void( __thiscall* oCWorldInsertVobInWorld )(void*, zCVob*);
+typedef void( __thiscall* zCBspTreeAddVob )(void*, zCVob*);
+typedef void( __thiscall* zCWorldLoadWorld )(void*, const zSTRING& fileName, const int loadMode);
+typedef void( __thiscall* oCGameEnterWorld )(void*, oCNPC* playerVob, int changePlayerPos, const zSTRING& startpoint);
+typedef void( __thiscall* oCGameUpdatePlayerStatus )(void*);
+typedef void( __thiscall* zCWorldVobRemovedFromWorld )(void*, zCVob*);
+typedef XMFLOAT4X4( __cdecl* Alg_Rotation3DNRad )(const DirectX::XMFLOAT3& axis, const float angle);
+typedef int( __cdecl* vidGetFPSRate )();
+typedef void( __thiscall* GenericDestructor )(void*);
+typedef void( __thiscall* GenericThiscall )(void*);
+typedef void( __thiscall* zCMaterialConstruktor )(void*);
+typedef void( __thiscall* zCMaterialInitValues )(void*);
+typedef void( __fastcall* zCBspNodeRenderIndoor )(void*, int);
+typedef void( __fastcall* zCBspNodeRenderOutdoor )(void*, zCBspBase*, zTBBox3D, int, int);
 
-typedef int (__fastcall* zCBspBaseCollectPolysInBBox3D)(void *, const zTBBox3D&, zCPolygon **&, int&);
+typedef int( __fastcall* zCBspBaseCollectPolysInBBox3D )(void*, const zTBBox3D&, zCPolygon**&, int&);
 
-typedef int (__fastcall* zCBspBaseCheckRayAgainstPolys)(void *, const DirectX::XMFLOAT3 &, const DirectX::XMFLOAT3 &, DirectX::XMFLOAT3 &);
+typedef int( __fastcall* zCBspBaseCheckRayAgainstPolys )(void*, const DirectX::XMFLOAT3&, const DirectX::XMFLOAT3&, DirectX::XMFLOAT3&);
 
-typedef int (__thiscall* zFILEOpen)(void *,zSTRING&, bool);
-typedef void (__thiscall* zCRnd_D3DVid_SetScreenMode)(void *, int);
-typedef void (__thiscall* zCRnd_D3D_DrawPoly)(void*, zCPolygon*);
-typedef void (__thiscall* zCRnd_D3D_DrawPolySimple)(void*, zCTexture*, void*, int);
-typedef int (__thiscall* zCOptionReadInt)(void *,zSTRING const&, char const*, int);
-typedef int (__thiscall* zCOptionReadBool)(void *,zSTRING const&, char const*, int);
-typedef unsigned long (__thiscall* zCOptionReadDWORD)(void *,zSTRING const&, char const*, unsigned long);
-typedef void (__cdecl * zCViewSetMode)(int, int, int, HWND*);
-typedef int (__thiscall* zCViewFontSize)(void*, const zSTRING&);
-typedef void (__thiscall* zCViewBlitText)(void*);
-typedef void (__thiscall* zCViewPrint)(void*, int, int, const zSTRING&);
-typedef int (__stdcall* HandledWinMain)(HINSTANCE, HINSTANCE, LPSTR, int);
-typedef int (__thiscall* CGameManagerExitGame)(void *);
-typedef const zSTRING* (__thiscall* zCVisualGetFileExtension)(void *, int);
-typedef long (__stdcall* zCExceptionHandlerUnhandledExceptionFilter)(void *);
-typedef void (__thiscall* zCWorldDisposeVobs)(void *, zCTree<zCVob> *);
-typedef void (__thiscall* oCSpawnManagerSpawnNpc)(void *, oCNPC *, const DirectX::XMFLOAT3 &, float);
-typedef void (__thiscall* oCSpawnManagerInsertNpc)(void *, oCNPC *, const DirectX::XMFLOAT3 &);
-typedef int (__thiscall* oCSpawnManagerCheckRemoveNpc)(void *, oCNPC *);
-typedef void (__thiscall* oCSpawnManagerCheckInsertNpc)(void *);
-typedef void (__thiscall* zCVobSetVisual)(void *, zCVisual*);
+typedef int( __thiscall* zFILEOpen )(void*, zSTRING&, bool);
+typedef void( __thiscall* zCRnd_D3DVid_SetScreenMode )(void*, int);
+typedef void( __thiscall* zCRnd_D3D_DrawPoly )(void*, zCPolygon*);
+typedef void( __thiscall* zCRnd_D3D_DrawPolySimple )(void*, zCTexture*, void*, int);
+typedef int( __thiscall* zCOptionReadInt )(void*, zSTRING const&, char const*, int);
+typedef int( __thiscall* zCOptionReadBool )(void*, zSTRING const&, char const*, int);
+typedef unsigned long( __thiscall* zCOptionReadDWORD )(void*, zSTRING const&, char const*, unsigned long);
+typedef void( __cdecl* zCViewSetMode )(int, int, int, HWND*);
+typedef int( __thiscall* zCViewFontSize )(void*, const zSTRING&);
+typedef void( __thiscall* zCViewBlitText )(void*);
+typedef void( __thiscall* zCViewPrint )(void*, int, int, const zSTRING&);
+typedef int( __stdcall* HandledWinMain )(HINSTANCE, HINSTANCE, LPSTR, int);
+typedef int( __thiscall* CGameManagerExitGame )(void*);
+typedef const zSTRING* (__thiscall* zCVisualGetFileExtension)(void*, int);
+typedef long( __stdcall* zCExceptionHandlerUnhandledExceptionFilter )(void*);
+typedef void( __thiscall* zCWorldDisposeVobs )(void*, zCTree<zCVob>*);
+typedef void( __thiscall* oCSpawnManagerSpawnNpc )(void*, oCNPC*, const DirectX::XMFLOAT3&, float);
+typedef void( __thiscall* oCSpawnManagerInsertNpc )(void*, oCNPC*, const DirectX::XMFLOAT3&);
+typedef int( __thiscall* oCSpawnManagerCheckRemoveNpc )(void*, oCNPC*);
+typedef void( __thiscall* oCSpawnManagerCheckInsertNpc )(void*);
+typedef void( __thiscall* zCVobSetVisual )(void*, zCVisual*);
 
 
-typedef int (__thiscall* zCTex_D3DXTEX_BuildSurfaces)(void *, int);
-typedef int (__thiscall* zCTextureLoadResourceData)(void *);
-typedef int (__thiscall* zCThreadSuspendThread)(void *);
-typedef void (__thiscall* zCResourceManagerCacheOut)(void *,class zCResource*);
-typedef void (__thiscall* zCQuadMarkCreateQuadMark)(void *, zCPolygon*, const float3&, const float2&, struct zTEffectParams*);
-typedef void (__thiscall* oCWorldEnableVob)(void *, zCVob *,zCVob *);
-typedef void (__thiscall* oCWorldRemoveVob)(void *, zCVob *);
-typedef void (__thiscall* oCWorldDisableVob)(void *, zCVob *);
-typedef void (__fastcall* oCWorldRemoveFromLists)(void *, zCVob *);
-typedef int (__thiscall* zCBinkPlayerOpenVideo)(void *, class zSTRING);
-typedef int (__thiscall* zCModelPrototypeLoadModelASC)(void *, class zSTRING const &);
-typedef int (__thiscall* zCModelPrototypeReadMeshAndTreeMSB)(void *,int &, class zCFileBIN &);
+typedef int( __thiscall* zCTex_D3DXTEX_BuildSurfaces )(void*, int);
+typedef int( __thiscall* zCTextureLoadResourceData )(void*);
+typedef int( __thiscall* zCThreadSuspendThread )(void*);
+typedef void( __thiscall* zCResourceManagerCacheOut )(void*, class zCResource*);
+typedef void( __thiscall* zCQuadMarkCreateQuadMark )(void*, zCPolygon*, const float3&, const float2&, struct zTEffectParams*);
+typedef void( __thiscall* oCWorldEnableVob )(void*, zCVob*, zCVob*);
+typedef void( __thiscall* oCWorldRemoveVob )(void*, zCVob*);
+typedef void( __thiscall* oCWorldDisableVob )(void*, zCVob*);
+typedef void( __fastcall* oCWorldRemoveFromLists )(void*, zCVob*);
+typedef int( __thiscall* zCBinkPlayerOpenVideo )(void*, class zSTRING);
+typedef int( __thiscall* zCModelPrototypeLoadModelASC )(void*, class zSTRING const&);
+typedef int( __thiscall* zCModelPrototypeReadMeshAndTreeMSB )(void*, int&, class zCFileBIN&);
 
-typedef void (__thiscall* zCActiveSndAutoCalcObstruction)(void *, int);
+typedef void( __thiscall* zCActiveSndAutoCalcObstruction )(void*, int);
 
 #ifdef BUILD_GOTHIC_1_08k
-typedef void (__thiscall* zCVobEndMovement)(void *);
+typedef void( __thiscall* zCVobEndMovement )(void*);
 #else
-typedef void (__thiscall* zCVobEndMovement)(void *, int);
+typedef void( __thiscall* zCVobEndMovement )(void*, int);
 #endif
 struct zTRndSurfaceDesc;
-struct HookedFunctionInfo
-{
+struct HookedFunctionInfo {
 
 	/** Init all hooks here */
 	void InitHooks();
@@ -156,21 +155,20 @@ struct HookedFunctionInfo
 	zCModelPrototypeReadMeshAndTreeMSB original_zCModelPrototypeReadMeshAndTreeMSB;
 
 	/** Function hooks */
-	static int __stdcall hooked_HandledWinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR szCmdLine, int sw);
+	static int __stdcall hooked_HandledWinMain( HINSTANCE hInstance, HINSTANCE hPrev, LPSTR szCmdLine, int sw );
 	static void __cdecl hooked_ExitGameFunc();
 
 	/** Unhandled exception handler */
-	static long __stdcall hooked_zCExceptionHandlerUnhandledExceptionFilter(EXCEPTION_POINTERS* exceptionPtrs);
+	static long __stdcall hooked_zCExceptionHandlerUnhandledExceptionFilter( EXCEPTION_POINTERS* exceptionPtrs );
 
 	/** Single function for making the bink-player working again */
 	/** Returns the pixelformat of a bink-surface */
-	static long __fastcall hooked_zBinkPlayerGetPixelFormat(void * thisptr, void * unknwn, zTRndSurfaceDesc& desc);
-	static int __fastcall hooked_zBinkPlayerOpenVideo(void * thisptr, void * unknwn, zSTRING str);
-	static void __fastcall hooked_zCActiveSndAutoCalcObstruction(void * thisptr, void * unknwn, int i);
+	static long __fastcall hooked_zBinkPlayerGetPixelFormat( void* thisptr, void* unknwn, zTRndSurfaceDesc& desc );
+	static int __fastcall hooked_zBinkPlayerOpenVideo( void* thisptr, void* unknwn, zSTRING str );
+	static void __fastcall hooked_zCActiveSndAutoCalcObstruction( void* thisptr, void* unknwn, int i );
 };
 
-namespace HookedFunctions
-{
+namespace HookedFunctions {
 	/** Holds all the original functions */
 	__declspec(selectany) HookedFunctionInfo OriginalFunctions;
 };

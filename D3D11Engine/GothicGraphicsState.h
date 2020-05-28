@@ -36,8 +36,7 @@ struct FixedFunctionStage {
 	};
 
 	/** Sets the default values for this struct */
-	void SetDefault() {
-	}
+	void SetDefault() {}
 
 	EColorOp ColorOp;
 	ETextureArg ColorArg1;
@@ -55,12 +54,12 @@ struct GothicGraphicsState {
 	/** Sets the default values for this struct */
 	void SetDefault() {
 		FF_FogWeight = 0.0f;
-		FF_FogColor = float3(1.0f, 1.0f, 1.0f);
+		FF_FogColor = float3( 1.0f, 1.0f, 1.0f );
 		FF_FogNear = 1.0f;
 		FF_FogFar = 10000.0f;
 
-		FF_AmbientLighting = float3(1.0f, 1.0f, 1.0f);
-		FF_TextureFactor = float4(1.0f, 1.0f, 1.0f, 1.0f);
+		FF_AmbientLighting = float3( 1.0f, 1.0f, 1.0f );
+		FF_TextureFactor = float4( 1.0f, 1.0f, 1.0f, 1.0f );
 
 		FF_AlphaRef = 0.5f;
 
@@ -68,8 +67,8 @@ struct GothicGraphicsState {
 	}
 
 	/** Sets one of the GraphicsFlags */
-	void SetGraphicsSwitch(int flag, bool enabled) {
-		if (enabled)
+	void SetGraphicsSwitch( int flag, bool enabled ) {
+		if ( enabled )
 			FF_GSwitches |= flag;
 		else
 			FF_GSwitches &= ~flag;
@@ -105,26 +104,26 @@ __declspec(align(4)) struct GothicPipelineState {
 	/** Sets this state dirty, which means that it will be updated before next rendering */
 	void SetDirty() {
 		StateDirty = true;
-		HashThis((char *)this, StructSize); 
+		HashThis( (char*)this, StructSize );
 	}
 
 	/** Hashes the whole struct */
-	void HashThis(char * data, int size) {
+	void HashThis( char* data, int size ) {
 		Hash = 0;
 
 		// Start hashing at the data of the other structs, skip the data of this one
-		for (int i = sizeof(GothicPipelineState); i < size; i += 4) {
+		for ( int i = sizeof( GothicPipelineState ); i < size; i += 4 ) {
 			DWORD d;
-			((char *)&d)[0] = data[i];
-			((char *)&d)[1] = data[i+1];
-			((char *)&d)[2] = data[i+2];
-			((char *)&d)[3] = data[i+3];
+			((char*)&d)[0] = data[i];
+			((char*)&d)[1] = data[i + 1];
+			((char*)&d)[2] = data[i + 2];
+			((char*)&d)[3] = data[i + 3];
 
-			Toolbox::hash_combine(Hash, d);
+			Toolbox::hash_combine( Hash, d );
 		}
 	}
 
-	bool operator==(const GothicPipelineState & o) const {
+	bool operator==( const GothicPipelineState& o ) const {
 		return Hash == o.Hash;
 	}
 
@@ -137,25 +136,25 @@ struct GothicPipelineKeyHasher {
 	static const size_t bucket_size = 10; // mean bucket size that the container should try not to exceed
 	static const size_t min_buckets = (1 << 10); // minimum number of buckets, power of 2, >0
 
-	static std::size_t hash_value(float value) {
+	static std::size_t hash_value( float value ) {
 		stdext::hash<float> hasher;
-		return hasher(value);
+		return hasher( value );
 	}
 
-	static void hash_combine(std::size_t & seed, float value) {	
-		seed ^= hash_value(value) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+	static void hash_combine( std::size_t& seed, float value ) {
+		seed ^= hash_value( value ) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 	}
 
-	std::size_t operator()(const GothicPipelineState & k) const {
+	std::size_t operator()( const GothicPipelineState& k ) const {
 		return k.Hash;
 	}
 };
 
 namespace GothicStateCache {
 	/** Hashmap for caching the state-objects */
-	__declspec(selectany) std::unordered_map<GothicDepthBufferStateInfo, BaseDepthBufferState *, GothicPipelineKeyHasher> s_DepthBufferMap;
-	__declspec(selectany) std::unordered_map<GothicBlendStateInfo, BaseBlendStateInfo *, GothicPipelineKeyHasher> s_BlendStateMap;
-	__declspec(selectany) std::unordered_map<GothicRasterizerStateInfo, BaseRasterizerStateInfo *, GothicPipelineKeyHasher> s_RasterizerStateMap;
+	__declspec(selectany) std::unordered_map<GothicDepthBufferStateInfo, BaseDepthBufferState*, GothicPipelineKeyHasher> s_DepthBufferMap;
+	__declspec(selectany) std::unordered_map<GothicBlendStateInfo, BaseBlendStateInfo*, GothicPipelineKeyHasher> s_BlendStateMap;
+	__declspec(selectany) std::unordered_map<GothicRasterizerStateInfo, BaseRasterizerStateInfo*, GothicPipelineKeyHasher> s_RasterizerStateMap;
 };
 
 /** Depth buffer state information */
@@ -163,19 +162,19 @@ class BaseDepthBufferState;
 
 struct GothicDepthBufferStateInfo : public GothicPipelineState {
 	GothicDepthBufferStateInfo() {
-		StructSize = sizeof(GothicDepthBufferStateInfo);
+		StructSize = sizeof( GothicDepthBufferStateInfo );
 	}
 
 	/** Layed out for D3D11 */
 	enum ECompareFunc {
-		CF_COMPARISON_NEVER	= 1,
-		CF_COMPARISON_LESS	= 2,
-		CF_COMPARISON_EQUAL	= 3,
-		CF_COMPARISON_LESS_EQUAL	= 4,
-		CF_COMPARISON_GREATER	= 5,
-		CF_COMPARISON_NOT_EQUAL	= 6,
-		CF_COMPARISON_GREATER_EQUAL	= 7,
-		CF_COMPARISON_ALWAYS	= 8
+		CF_COMPARISON_NEVER = 1,
+		CF_COMPARISON_LESS = 2,
+		CF_COMPARISON_EQUAL = 3,
+		CF_COMPARISON_LESS_EQUAL = 4,
+		CF_COMPARISON_GREATER = 5,
+		CF_COMPARISON_NOT_EQUAL = 6,
+		CF_COMPARISON_GREATER_EQUAL = 7,
+		CF_COMPARISON_ALWAYS = 8
 	};
 
 	static const ECompareFunc DEFAULT_DEPTH_COMP_STATE = CF_COMPARISON_LESS_EQUAL;
@@ -194,7 +193,7 @@ struct GothicDepthBufferStateInfo : public GothicPipelineState {
 
 	/** Deletes all cached states */
 	static void DeleteCachedObjects() {
-		for (auto it = GothicStateCache::s_DepthBufferMap.begin(); it != GothicStateCache::s_DepthBufferMap.end(); ++it) {
+		for ( auto it = GothicStateCache::s_DepthBufferMap.begin(); it != GothicStateCache::s_DepthBufferMap.end(); ++it ) {
 			delete it->second;
 		}
 		GothicStateCache::s_DepthBufferMap.clear();
@@ -206,37 +205,37 @@ class BaseBlendStateInfo;
 
 struct GothicBlendStateInfo : public GothicPipelineState {
 	GothicBlendStateInfo() {
-		StructSize = sizeof(GothicBlendStateInfo);
+		StructSize = sizeof( GothicBlendStateInfo );
 	}
 
 	/** Layed out for D3D11 */
 	enum EBlendFunc {
-		BF_ZERO	= 1,
-        BF_ONE	= 2,
-        BF_SRC_COLOR	= 3,
-        BF_INV_SRC_COLOR	= 4,
-        BF_SRC_ALPHA	= 5,
-        BF_INV_SRC_ALPHA	= 6,
-        BF_DEST_ALPHA	= 7,
-        BF_INV_DEST_ALPHA	= 8,
-        BF_DEST_COLOR	= 9,
-        BF_INV_DEST_COLOR	= 10,
-        BF_SRC_ALPHA_SAT	= 11,
-        BF_BLEND_FACTOR	= 14,
-        BF_INV_BLEND_FACTOR	= 15,
-        BF_SRC1_COLOR	= 16,
-        BF_INV_SRC1_COLOR	= 17,
-        BF_SRC1_ALPHA	= 18,
-        BF_INV_SRC1_ALPHA	= 19
+		BF_ZERO = 1,
+		BF_ONE = 2,
+		BF_SRC_COLOR = 3,
+		BF_INV_SRC_COLOR = 4,
+		BF_SRC_ALPHA = 5,
+		BF_INV_SRC_ALPHA = 6,
+		BF_DEST_ALPHA = 7,
+		BF_INV_DEST_ALPHA = 8,
+		BF_DEST_COLOR = 9,
+		BF_INV_DEST_COLOR = 10,
+		BF_SRC_ALPHA_SAT = 11,
+		BF_BLEND_FACTOR = 14,
+		BF_INV_BLEND_FACTOR = 15,
+		BF_SRC1_COLOR = 16,
+		BF_INV_SRC1_COLOR = 17,
+		BF_SRC1_ALPHA = 18,
+		BF_INV_SRC1_ALPHA = 19
 	};
 
 	/** Layed out for D3D11 */
 	enum EBlendOp {
-		BO_BLEND_OP_ADD	= 1,
-		BO_BLEND_OP_SUBTRACT	= 2,
-		BO_BLEND_OP_REV_SUBTRACT	= 3,
-		BO_BLEND_OP_MIN	= 4,
-		BO_BLEND_OP_MAX	= 5
+		BO_BLEND_OP_ADD = 1,
+		BO_BLEND_OP_SUBTRACT = 2,
+		BO_BLEND_OP_REV_SUBTRACT = 3,
+		BO_BLEND_OP_MIN = 4,
+		BO_BLEND_OP_MAX = 5
 	};
 
 	/** Sets the default values for this struct */
@@ -246,7 +245,7 @@ struct GothicBlendStateInfo : public GothicPipelineState {
 		BlendOp = BO_BLEND_OP_ADD;
 		SrcBlendAlpha = BF_ONE;
 		DestBlendAlpha = BF_ZERO;
-		BlendOpAlpha =	BO_BLEND_OP_ADD;
+		BlendOpAlpha = BO_BLEND_OP_ADD;
 		BlendEnabled = false;
 		AlphaToCoverage = false;
 		ColorWritesEnabled = true;
@@ -259,7 +258,7 @@ struct GothicBlendStateInfo : public GothicPipelineState {
 		BlendOp = BO_BLEND_OP_ADD;
 		SrcBlendAlpha = BF_ONE;
 		DestBlendAlpha = BF_ZERO;
-		BlendOpAlpha =	BO_BLEND_OP_ADD;
+		BlendOpAlpha = BO_BLEND_OP_ADD;
 		BlendEnabled = true;
 		AlphaToCoverage = false;
 		ColorWritesEnabled = true;
@@ -272,20 +271,19 @@ struct GothicBlendStateInfo : public GothicPipelineState {
 		BlendOp = BO_BLEND_OP_ADD;
 		SrcBlendAlpha = BF_ONE;
 		DestBlendAlpha = BF_ZERO;
-		BlendOpAlpha =	BO_BLEND_OP_ADD;
+		BlendOpAlpha = BO_BLEND_OP_ADD;
 		BlendEnabled = true;
 		AlphaToCoverage = false;
 	}
 
 	/** Sets up modualte blending */
-	void SetModulateBlending()
-	{
+	void SetModulateBlending() {
 		SrcBlend = BF_DEST_COLOR;
 		DestBlend = BF_ZERO;
 		BlendOp = BO_BLEND_OP_ADD;
 		SrcBlendAlpha = BF_ONE;
 		DestBlendAlpha = BF_ZERO;
-		BlendOpAlpha =	BO_BLEND_OP_ADD;
+		BlendOpAlpha = BO_BLEND_OP_ADD;
 		BlendEnabled = true;
 		AlphaToCoverage = false;
 	}
@@ -302,7 +300,7 @@ struct GothicBlendStateInfo : public GothicPipelineState {
 
 	/** Deletes all cached states */
 	static void DeleteCachedObjects() {
-		for (auto it = GothicStateCache::s_BlendStateMap.begin(); it != GothicStateCache::s_BlendStateMap.end(); ++it) {
+		for ( auto it = GothicStateCache::s_BlendStateMap.begin(); it != GothicStateCache::s_BlendStateMap.end(); ++it ) {
 			delete it->second;
 		}
 
@@ -315,14 +313,14 @@ class BaseRasterizerStateInfo;
 
 struct GothicRasterizerStateInfo : public GothicPipelineState {
 	GothicRasterizerStateInfo() {
-		StructSize = sizeof(GothicRasterizerStateInfo);
+		StructSize = sizeof( GothicRasterizerStateInfo );
 	}
 
 	/** Layed out for D3D11 */
 	enum ECullMode {
-		CM_CULL_NONE	= 1,
-		CM_CULL_FRONT	= 2,
-		CM_CULL_BACK	= 3
+		CM_CULL_NONE = 1,
+		CM_CULL_FRONT = 2,
+		CM_CULL_BACK = 3
 	};
 
 	/** Sets the default values for this struct */
@@ -339,10 +337,10 @@ struct GothicRasterizerStateInfo : public GothicPipelineState {
 	bool DepthClipEnable;
 	int ZBias;
 	bool Wireframe;
-	
+
 	/** Deletes all cached states */
 	static void DeleteCachedObjects() {
-		for (auto it = GothicStateCache::s_RasterizerStateMap.begin(); it != GothicStateCache::s_RasterizerStateMap.end(); ++it) {
+		for ( auto it = GothicStateCache::s_RasterizerStateMap.begin(); it != GothicStateCache::s_RasterizerStateMap.end(); ++it ) {
 			delete it->second;
 		}
 
@@ -353,12 +351,12 @@ struct GothicRasterizerStateInfo : public GothicPipelineState {
 /** Sampler state information */
 struct GothicSamplerStateInfo : public GothicPipelineState {
 	GothicSamplerStateInfo() {
-		StructSize = sizeof(GothicSamplerStateInfo);
+		StructSize = sizeof( GothicSamplerStateInfo );
 	}
 
 	/** Layed out for D3D11 */
 	enum ETextureAddress {
-		TA_WRAP	= 1,
+		TA_WRAP = 1,
 		TA_MIRROR = 2,
 		TA_CLAMP = 3,
 		TA_BORDER = 4,
@@ -380,9 +378,9 @@ struct GothicTransformInfo {
 	/** Sets the default values for this struct */
 	void SetDefault() {
 		auto const& idMatrix = DirectX::XMMatrixIdentity();
-		XMStoreFloat4x4(&TransformWorld, idMatrix);
-		XMStoreFloat4x4(&TransformView, idMatrix);
-		XMStoreFloat4x4(&TransformProj, idMatrix);
+		XMStoreFloat4x4( &TransformWorld, idMatrix );
+		XMStoreFloat4x4( &TransformView, idMatrix );
+		XMStoreFloat4x4( &TransformProj, idMatrix );
 	}
 
 	/** This is actually world * view. Gothic never sets the view matrix */
@@ -436,11 +434,11 @@ struct GothicRendererSettings {
 	/** Sets the default values for this struct */
 	void SetDefault() {
 		SectionDrawRadius = 4;
-		
+
 		FpsLimit = 0;
 		DrawVOBs = true;
 		DrawWorldMesh = 3;
-		DrawSkeletalMeshes = true;	
+		DrawSkeletalMeshes = true;
 		DrawMobs = true;
 		DrawDynamicVOBs = true;
 
@@ -467,8 +465,8 @@ struct GothicRendererSettings {
 #else
 		SetupNewWorldSpecificValues();
 #endif
-		
-		SunLightColor = float3::FromColor(255,255,255);
+
+		SunLightColor = float3::FromColor( 255, 255, 255 );
 		SunLightStrength = 1.5f;
 
 		HDRLumWhite = 11.2f;
@@ -533,23 +531,23 @@ struct GothicRendererSettings {
 		RainHeightRange = 1000.0f;
 		RainNumParticles = 50000;
 		RainMoveParticles = true;
-		RainGlobalVelocity = DirectX::XMFLOAT3(250, -1000, 0);
+		RainGlobalVelocity = DirectX::XMFLOAT3( 250, -1000, 0 );
 		RainUseInitialSet = false;
 		RainSceneWettness = 0.0f;
 		RainSunLightStrength = 0.50f;
-		RainFogColor = DirectX::XMFLOAT3(0.28f, 0.28f, 0.28f);
+		RainFogColor = DirectX::XMFLOAT3( 0.28f, 0.28f, 0.28f );
 		RainFogDensity = 0.00500f;
 
 		GodRayDecay = 0.97f;
 		GodRayWeight = 0.85f;
 		GodRayDensity = 0.70f;
-		GodRayColorMod = float3(1.0f, 0.8f, 0.6f);
+		GodRayColorMod = float3( 1.0f, 0.8f, 0.6f );
 
 		RECT desktopRect;
-		GetClientRect(GetDesktopWindow(), &desktopRect);
+		GetClientRect( GetDesktopWindow(), &desktopRect );
 
 		// Match the resolution with the current desktop resolution
-		LoadedResolution = INT2(desktopRect.right, desktopRect.bottom);
+		LoadedResolution = INT2( desktopRect.right, desktopRect.bottom );
 
 		GothicUIScale = 1.0f;
 		//DisableEverything();
@@ -567,26 +565,25 @@ struct GothicRendererSettings {
 	void SetupOldWorldSpecificValues() {
 		FogGlobalDensity = 0.00002f;
 		FogHeightFalloff = 0.00018f;
-		FogColorMod = float3::FromColor(189, 146, 107);
+		FogColorMod = float3::FromColor( 189, 146, 107 );
 		FogHeight = 4000;
 	}
 
 	void SetupNewWorldSpecificValues() {
 		FogGlobalDensity = 0.00004f;
 		FogHeightFalloff = 0.0005f;
-		FogColorMod = float3::FromColor(180, 180,255);
+		FogColorMod = float3::FromColor( 180, 180, 255 );
 		FogHeight = 800;
 	}
 
 	void SetupAddonWorldSpecificValues() {
 		FogGlobalDensity = 0.00004f;
 		FogHeightFalloff = 0.0005f;
-		FogColorMod = float3::FromColor(180, 180,255);
+		FogColorMod = float3::FromColor( 180, 180, 255 );
 		FogHeight = 0;
 	}
 
-	void DisableEverything() {
-	}
+	void DisableEverything() {}
 
 	/** Rendering options */
 	int FpsLimit;
@@ -712,10 +709,10 @@ struct GothicRendererTiming {
 		_timer.Update();
 	}
 
-	void Stop(TIME_TYPE tt) {
+	void Stop( TIME_TYPE tt ) {
 		_timer.Update();
 
-		switch(tt) {
+		switch ( tt ) {
 		case TT_WorldMesh:
 			WorldMeshMS = _timer.GetDelta() * 1000.0f;
 			break;
@@ -758,7 +755,7 @@ struct GothicRendererInfo {
 	GothicRendererInfo() {
 		VOBVerticesDataSize = 0;
 		SkeletalVerticesDataSize = 0;
-		PlayingMovieResolution = INT2(0, 0);
+		PlayingMovieResolution = INT2( 0, 0 );
 		Reset();
 	}
 
@@ -770,13 +767,13 @@ struct GothicRendererInfo {
 		FrameNumSectionsDrawn = 0;
 
 		FarPlane = 0;
-		NearPlane = 0;	
+		NearPlane = 0;
 		FrameDrawnLights = 0;
 		WorldMeshDrawCalls = 0;
 		FramePipelineStates = 0;
 
 		StateChanges = 0;
-		memset(StateChangesByState, 0, sizeof(StateChangesByState));
+		memset( StateChangesByState, 0, sizeof( StateChangesByState ) );
 	}
 
 	enum EStateChange {
@@ -834,7 +831,7 @@ struct GothicRendererState {
 
 		DepthState.SetDirty();
 		BlendState.SetDirty();
-		RasterizerState.SetDirty(); 
+		RasterizerState.SetDirty();
 		SamplerState.SetDirty();
 	}
 
