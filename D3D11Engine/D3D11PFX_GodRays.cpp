@@ -33,7 +33,7 @@ XRESULT D3D11PFX_GodRays::Render(RenderToTextureBuffer * fxbuffer)
 	XMVECTOR xmSunPosition = XMLoadFloat3(Engine::GAPI->GetSky()->GetAtmosphereCB().AC_LightPos.toXMFLOAT3());
 
 	float outerRadius = Engine::GAPI->GetSky()->GetAtmosphereCB().AC_OuterRadius;
-	xmSunPosition = XMVectorMultiply(xmSunPosition, XMVectorSet(outerRadius, outerRadius, outerRadius, outerRadius));
+	xmSunPosition = xmSunPosition * outerRadius;
 	xmSunPosition = XMVectorAdd(xmSunPosition, Engine::GAPI->GetCameraPositionXM()); // Maybe use cameraposition from sky?
 
 	XMMATRIX view = XMLoadFloat4x4(&Engine::GAPI->GetRendererState()->TransformState.TransformView);

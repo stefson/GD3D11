@@ -56,11 +56,11 @@ void BaseLineRenderer::AddPlane(const DirectX::XMFLOAT4 & plane, const DirectX::
 
 	DebugPlaneP1 = DirectX::XMVector3NormalizeEst(DebugPlaneP1);
 
-	XMVECTOR pNormal = DirectX::XMVectorSet(plane.x, plane.y, plane.z, 0);
+	XMVECTOR pNormal = XMLoadFloat4(&plane);
 	XMVECTOR DebugPlaneP2 = DirectX::XMVector3Cross(pNormal, DebugPlaneP1);
 
 	//DebugPlaneP2 += SlidingPlaneOrigin;
-	XMVECTOR O = DirectX::XMVectorSet(origin.x, origin.y, origin.z, 0.0f);
+	XMVECTOR O = XMLoadFloat3(&origin);
 
 	DirectX::XMFLOAT3 from;  DirectX::XMFLOAT3 to;
 	XMStoreFloat3(&from, (O - DebugPlaneP1) - DebugPlaneP2);
