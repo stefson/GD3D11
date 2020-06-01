@@ -4019,8 +4019,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
 			D3D11PointLight* l = (D3D11PointLight*)FrameShadowUpdateLights.front()
 				->LightShadowBuffers;
 
-			// Check if we have to force this light to update itself (NPCs moving
-			// around, for example)
+			// Check if we have to force this light to update itself (NPCs moving around, for example)
 			bool force = FrameShadowUpdateLights.front()->UpdateShadows;
 			FrameShadowUpdateLights.front()->UpdateShadows = false;
 
@@ -4035,8 +4034,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
 		}
 	}
 
-	// Get shadow direction, but don't update every frame, to get around
-	// flickering
+	// Get shadow direction, but don't update every frame, to get around flickering
 	XMVECTOR dir =
 		XMLoadFloat3( Engine::GAPI->GetSky()->GetAtmosphereCB().AC_LightPos.toXMFLOAT3() );
 	static XMVECTOR oldDir = dir;
@@ -4061,8 +4059,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
 
 	XMVECTOR WorldShadowCP;
 	// Update position
-	// Try to update only if the camera went 500 units away from
-	// the last position
+	// Try to update only if the camera went 500 units away from the last position
 	float len;
 	XMStoreFloat( &len, XMVector3Length( oldP - XMLoadFloat3( &cameraPosition ) ) );
 	if ( (len < 64 &&
@@ -4076,12 +4073,10 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
 		WorldShadowCP = oldP;
 	}
 
-	XMVECTOR p = WorldShadowCP;
 	// Set the camera height to the highest point in this section
-	p += dir * 6000.0f;
+	XMVECTOR p = WorldShadowCP + dir * 6000.0f;
 
-	XMVECTOR lookAt = p;
-	lookAt -= dir;
+	XMVECTOR lookAt = p - dir;
 
 	// Create shadowmap view-matrix
 	static const XMVECTORF32 c_XM_Up = { { { 0, 1, 0, 0 } } };
@@ -4148,8 +4143,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
 	SetupVS_ExMeshDrawCall();
 	SetupVS_ExConstantBuffer();
 
-	// Copy this, so we can access depth in the pixelshader and still use the
-	// buffer for culling
+	// Copy this, so we can access depth in the pixelshader and still use the buffer for culling
 	CopyDepthStencil();
 
 	// Set the main rendertarget

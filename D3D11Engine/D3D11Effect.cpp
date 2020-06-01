@@ -67,10 +67,7 @@ void D3D11Effect::FillRandomRaindropData( std::vector<ParticleInstanceInfo>& dat
 		raindrop.velocity = DirectX::XMFLOAT3( SpeedX, SpeedY, SpeedZ );
 
 		//move the rain particles to a random positions in a cylinder above the camera
-		float x = SeedX + Engine::GAPI->GetCameraPosition().x;
-		float z = SeedZ + Engine::GAPI->GetCameraPosition().z;
-		float y = SeedY + Engine::GAPI->GetCameraPosition().y;
-		raindrop.position = DirectX::XMFLOAT3( x, y, z );
+		raindrop.position = float3( SeedX + Engine::GAPI->GetCameraPosition().x, SeedY + Engine::GAPI->GetCameraPosition().y, SeedZ + Engine::GAPI->GetCameraPosition().z );
 
 		//get an integer between 1 and 8 inclusive to decide which of the 8 types of rain textures the particle will use
 		short* s = (short*)&raindrop.drawMode;
@@ -277,14 +274,12 @@ XRESULT D3D11Effect::DrawRainShadowmap() {
 
 	// Get the section we are currently in
 	XMVECTOR p = Engine::GAPI->GetCameraPositionXM();
-	XMVECTOR dir = XMVectorSet( -Engine::GAPI->GetRendererState()->RendererSettings.RainGlobalVelocity.x, -Engine::GAPI->GetRendererState()->RendererSettings.RainGlobalVelocity.y, -Engine::GAPI->GetRendererState()->RendererSettings.RainGlobalVelocity.z, 0 );
-	dir = XMVector3Normalize( dir );
+	XMVECTOR dir = XMVector3Normalize( XMLoadFloat3( &Engine::GAPI->GetRendererState()->RendererSettings.RainGlobalVelocity ) * -1 );
 	// Set the camera height to the highest point in this section
 	//p.y = 0;
 	p += dir * 6000.0f;
 
-	XMVECTOR lookAt = p;
-	lookAt -= dir;
+	XMVECTOR lookAt = p - dir;
 
 	// Create shadowmap view-matrix
 	XMMATRIX crViewReplacement = XMMatrixLookAtLH( p, lookAt, XMVectorSet( 0, 1, 0, 0 ) );

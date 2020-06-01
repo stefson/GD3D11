@@ -2152,7 +2152,7 @@ bool GothicAPI::TraceWorldMesh( const DirectX::XMFLOAT3& origin, const DirectX::
 		return false;
 
 
-	XMStoreFloat3( &hit, XMLoadFloat3( &origin ) + XMLoadFloat3( &dir ) * XMVectorSet( closest, closest, closest, 0 ) );
+	XMStoreFloat3( &hit, XMLoadFloat3( &origin ) + XMLoadFloat3( &dir ) * closest );
 
 	return true;
 }
