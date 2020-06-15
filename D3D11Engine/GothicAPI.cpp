@@ -858,7 +858,7 @@ void GothicAPI::GetVisibleParticleEffectsList( std::vector<zCVob*>& pfxList ) {
 		// now it is save to render
 		for ( auto const& it : ParticleEffectVobs ) {
 			float dist;
-			XMStoreFloat( &dist, DirectX::XMVector3LengthEst( it->GetPositionWorldXM() ) - camPos );
+			XMStoreFloat( &dist, DirectX::XMVector3LengthEst( it->GetPositionWorldXM() - camPos ) );
 			if ( dist > RendererState.RendererSettings.OutdoorSmallVobDrawRadius )
 				continue;
 			if ( dist > RendererState.RendererSettings.VisualFXDrawRadius )
@@ -882,7 +882,7 @@ void GothicAPI::GetVisibleDecalList( std::vector<zCVob*>& decals ) {
 
 	for ( auto const& it : DecalVobs ) {
 		float dist;
-		XMStoreFloat( &dist, DirectX::XMVector3LengthEst( it->GetPositionWorldXM() - camPos ));
+		XMStoreFloat( &dist, DirectX::XMVector3LengthEst( it->GetPositionWorldXM() - camPos ) );
 		if ( dist > RendererState.RendererSettings.VisualFXDrawRadius )
 			continue;
 
