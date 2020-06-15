@@ -398,10 +398,25 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
 	INT2 bbres = GetBackbufferResolution();
 
 #ifndef BUILD_SPACER
-	RECT desktopRect;
-	GetClientRect( GetDesktopWindow(), &desktopRect );
-	SetWindowPos( OutputWindow, nullptr, 0, 0, desktopRect.right,
-		desktopRect.bottom, 0 );
+	BOOL isFullscreen = 0;
+	if ( SwapChain ) {
+		LE( SwapChain->GetFullscreenState( &isFullscreen , nullptr));
+	}
+	if ( isFullscreen || Engine::GAPI->GetRendererState()->RendererSettings.StretchWindow ) {
+		RECT desktopRect;
+		GetClientRect( GetDesktopWindow(), &desktopRect );
+		SetWindowPos( OutputWindow, nullptr, 0, 0, desktopRect.right,
+			desktopRect.bottom, 0 );
+	} else {
+		RECT rect;
+		if ( GetWindowRect( OutputWindow, &rect ) ) {
+			SetWindowPos( OutputWindow, nullptr, rect.left, rect.top, bbres.x,
+				bbres.y, 0 );
+		} else {
+			SetWindowPos( OutputWindow, nullptr, 0, 0, bbres.x,
+				bbres.y, 0 );
+		}
+	}
 #endif
 
 	// Release all referenced buffer resources before we can resize the swapchain. Needed!

@@ -2335,7 +2335,6 @@ LRESULT GothicAPI::OnWindowMessage( HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 		Engine::GraphicsEngine->OnKeyDown( wParam );
 		switch ( wParam ) {
 		case VK_F11:
-#ifdef PUBLIC_RELEASE
 			if ( GetAsyncKeyState( VK_CONTROL ) && !GMPModeActive ) {
 				Engine::AntTweakBar->SetActive( !Engine::AntTweakBar->GetActive() );
 				SetEnableGothicInput( !Engine::AntTweakBar->GetActive() );
@@ -2344,10 +2343,6 @@ LRESULT GothicAPI::OnWindowMessage( HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 				SetEnableGothicInput( true );
 				Engine::GraphicsEngine->OnUIEvent( BaseGraphicsEngine::EUIEvent::UI_OpenSettings );
 			}
-#else
-			Engine::AntTweakBar->SetActive( !Engine::AntTweakBar->GetActive() );
-			SetEnableGothicInput( !Engine::AntTweakBar->GetActive() );
-#endif
 			break;
 
 		case VK_NUMPAD1:
@@ -3515,6 +3510,7 @@ XRESULT GothicAPI::SaveMenuSettings( const std::string& file ) {
 	WritePrivateProfileStringA( "Display", "Gamma", std::to_string( s.GammaValue ).c_str(), ini.c_str() );
 	WritePrivateProfileStringA( "Display", "Brightness", std::to_string( s.BrightnessValue ).c_str(), ini.c_str() );
 	WritePrivateProfileStringA( "Display", "DisplayFlip", std::to_string( s.DisplayFlip ? TRUE : FALSE ).c_str(), ini.c_str() );
+	WritePrivateProfileStringA( "Display", "StretchWindow", std::to_string( s.StretchWindow ? TRUE : FALSE ).c_str(), ini.c_str() );
 
 	WritePrivateProfileStringA( "Shadows", "EnableShadows", std::to_string( s.EnableShadows ? TRUE : FALSE ).c_str(), ini.c_str() );
 	WritePrivateProfileStringA( "Shadows", "EnableSoftShadows", std::to_string( s.EnableSoftShadows ? TRUE : FALSE ).c_str(), ini.c_str() );
@@ -3625,6 +3621,7 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
 	s.GammaValue = GetPrivateProfileFloatA( "Display", "Gamma", 1.0f, ini.c_str() );
 	s.BrightnessValue = GetPrivateProfileFloatA( "Display", "Brightness", 1.0f, ini.c_str() );
 	s.DisplayFlip = GetPrivateProfileBoolA( "Display", "DisplayFlip", false, ini.c_str() );
+	s.StretchWindow = GetPrivateProfileBoolA( "Display", "StretchWindow", false, ini.c_str() );
 
 	s.EnableSMAA = GetPrivateProfileBoolA( "SMAA", "Enabled", false, ini );
 	s.SharpenFactor = GetPrivateProfileFloatA( "SMAA", "SharpenFactor", 0.30f, ini.c_str() );

@@ -560,6 +560,7 @@ struct GothicRendererSettings {
 		FontFileDefault = "Gothic_14.spritefont";
 		FontFileMenu = "Gothic_14.spritefont";
 		ForceFOV = false;
+		StretchWindow = false;
 	}
 
 	void SetupOldWorldSpecificValues() {
@@ -695,6 +696,7 @@ struct GothicRendererSettings {
 	std::string FontFileMenu;
 	bool ForceFOV;
 	bool DisplayFlip;
+	bool StretchWindow;
 };
 
 struct GothicRendererTiming {
