@@ -802,7 +802,6 @@ void EditorLinePrimitive::RecalcTransforms() {
 			XMStoreFloat4x4( &RotationMatrix, xmRotationMatrix );
 
 		} else {
-			MatRot = XMMatrixIdentity();
 
 			MatTemp = XMMatrixRotationAxis( Front, Rotation.x );                   // Pitch
 			MatRot = MatRot * MatTemp;

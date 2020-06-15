@@ -338,23 +338,23 @@ public:
 
 	/** Returns the current cameraposition */
 	DirectX::XMFLOAT3 GetCameraPosition();
-	DirectX::XMVECTOR GetCameraPositionXM();
+	DirectX::XMVECTOR __vectorcall GetCameraPositionXM();
 
 	/** Returns the view matrix */
 	void GetViewMatrix( DirectX::XMFLOAT4X4* view );
-	DirectX::XMMATRIX GetViewMatrixXM();
+	DirectX::XMMATRIX __vectorcall GetViewMatrixXM();
 
 	/** Returns the view matrix */
 	void GetInverseViewMatrixDX( DirectX::XMFLOAT4X4* invView );
 
 	/** Returns the projection-matrix */
-	DirectX::XMFLOAT4X4& GetProjectionMatrixDX();
+	DirectX::XMFLOAT4X4& GetProjectionMatrix();
 
 	/** Unprojects a pixel-position on the screen */
 	void __vectorcall UnprojectXM( DirectX::FXMVECTOR p, DirectX::XMVECTOR& worldPos, DirectX::XMVECTOR& worldDir );
 
 	/** Unprojects the current cursor, returns it's direction in world-space */
-	DirectX::XMVECTOR UnprojectCursorXM();
+	DirectX::XMVECTOR __vectorcall UnprojectCursorXM();
 
 	/** Traces the worldmesh and returns the hit-location */
 	bool TraceWorldMesh( const DirectX::XMFLOAT3& origin, const DirectX::XMFLOAT3& dir, DirectX::XMFLOAT3& hit, std::string* hitTextureName = nullptr, DirectX::XMFLOAT3* hitTriangle = nullptr, MeshInfo** hitMesh = nullptr, zCMaterial** hitMaterial = nullptr );
@@ -730,7 +730,6 @@ private:
 
 	/** Resource critical section */
 	CRITICAL_SECTION ResourceCriticalSection;
-	std::mutex ResourceMutex;
 
 	/** Sky renderer */
 	std::unique_ptr<GSky> SkyRenderer;

@@ -894,10 +894,8 @@ void D2DEditorView::ResetEditorCamera() {
 	// Save current camera-matrix
 	CStartWorld = *oCGame::GetGame()->_zCSession_camVob->GetWorldMatrixPtr();
 	constexpr XMVECTORF32 c_XM_1000 = { { { 1, 0, 0, 0 } } };
-	XMVECTOR XMV_dir = DirectX::XMVector3Transform( c_XM_1000, XMLoadFloat4x4( &CStartWorld ) );
-	DirectX::XMFLOAT3 dir;
-	XMStoreFloat3( &dir, XMV_dir );
-	CYaw = asinf( -dir.z / XMVectorGetX( DirectX::XMVector3LengthEst( XMV_dir ) ) ) + XM_PIDIV2;
+	XMVECTOR dir = DirectX::XMVector3Transform( c_XM_1000, XMLoadFloat4x4( &CStartWorld ) );
+	CYaw = asinf( -XMVectorGetZ(dir) / XMVectorGetX( DirectX::XMVector3LengthEst( dir ) ) ) + XM_PIDIV2;
 	CPitch = 0;//atan(- CStartWorld._31 / sqrt(CStartWorld._32 * CStartWorld._32 + CStartWorld._33 * CStartWorld._33));
 }
 

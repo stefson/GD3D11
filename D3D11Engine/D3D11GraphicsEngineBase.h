@@ -1,6 +1,7 @@
 #pragma once
 
 #include "basegraphicsengine.h"
+#include <dxgi1_5.h>
 
 class D3D11DepthBufferState;
 class D3D11BlendStateInfo;
@@ -161,7 +162,7 @@ protected:
 	void UpdateTransformsCB();
 
 	/** Device-objects */
-	Microsoft::WRL::ComPtr<IDXGIFactory> DXGIFactory;
+	Microsoft::WRL::ComPtr<IDXGIFactory2> DXGIFactory2;
 	Microsoft::WRL::ComPtr<IDXGIAdapter> DXGIAdapter;
 	std::string DeviceDescription;
 
@@ -176,7 +177,7 @@ protected:
 	std::mutex DeferredContextsByThreadMutex;
 
 	/** Swapchain and resources */
-	Microsoft::WRL::ComPtr<IDXGISwapChain> SwapChain;
+	Microsoft::WRL::ComPtr<IDXGISwapChain1> SwapChain;
 	std::unique_ptr<RenderToTextureBuffer> Backbuffer;
 	std::unique_ptr<RenderToDepthStencilBuffer> DepthStencilBuffer;
 	std::unique_ptr<RenderToTextureBuffer> HDRBackBuffer;

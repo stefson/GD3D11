@@ -34,9 +34,7 @@
 #include <locale>
 #include <codecvt>
 #include <wrl\client.h>
-#include <dxgi1_5.h>
 
-#pragma comment(lib, "dxguid.lib")
 
 namespace wrl = Microsoft::WRL;
 using namespace DirectX;
@@ -75,6 +73,7 @@ D3D11GraphicsEngine::D3D11GraphicsEngine() {
 
 	m_FrameLimiter = std::make_unique<FpsLimiter>();
 	m_LastFrameLimit = 0;
+	m_flipWithTearing = false;
 
 	RECT desktopRect;
 	GetClientRect( GetDesktopWindow(), &desktopRect );
@@ -113,8 +112,8 @@ XRESULT D3D11GraphicsEngine::Init() {
 	LogInfo() << "Initializing Device...";
 
 	// Create DXGI factory
-	LE( CreateDXGIFactory( __uuidof(IDXGIFactory), &DXGIFactory ) );
-	LE( DXGIFactory->EnumAdapters( 0, &DXGIAdapter ) );  // Get first adapter
+	LE( CreateDXGIFactory( __uuidof(IDXGIFactory), &DXGIFactory2 ) );
+	LE( DXGIFactory2->EnumAdapters( 0, &DXGIAdapter ) );  // Get first adapter
 
 	// Find out what we are rendering on to write it into the logfile
 	DXGI_ADAPTER_DESC adpDesc;
@@ -424,35 +423,33 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
 
 		m_swapchainflip = Engine::GAPI->GetRendererState()->RendererSettings.DisplayFlip;
 
-		Microsoft::WRL::ComPtr<IDXGIDevice> pDXGIDevice;
-		LE( Device.As<IDXGIDevice>( &pDXGIDevice ) );
+		Microsoft::WRL::ComPtr<IDXGIDevice2> pDXGIDevice;
+		LE( Device.As<IDXGIDevice2>( &pDXGIDevice ) );
 		Microsoft::WRL::ComPtr<IDXGIAdapter> adapter;
-		Microsoft::WRL::ComPtr<IDXGIFactory> factory;
+		Microsoft::WRL::ComPtr<IDXGIFactory2> factory2;
 
+		LE( Device.As( &pDXGIDevice ) );
 		LE( pDXGIDevice->GetAdapter( &adapter ) );
-		LE( adapter->GetParent( IID_PPV_ARGS( &factory ) ) );
+		LE( adapter->GetParent( IID_PPV_ARGS( &factory2 ) ) );
 
 		DXGI_SWAP_EFFECT swapEffect = DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_DISCARD;
 
-
+		DXGI_SWAP_CHAIN_DESC1 scd = {};
 		if ( m_swapchainflip ) {
-			Microsoft::WRL::ComPtr<IDXGIFactory2> factory2;
 			Microsoft::WRL::ComPtr<IDXGIFactory4> factory4;
 			Microsoft::WRL::ComPtr<IDXGIFactory5> factory5;
 
-			if ( SUCCEEDED( factory.As( &factory5 ) ) ) {
+			if ( SUCCEEDED( factory2.As( &factory5 ) ) ) {
 				BOOL allowTearing = FALSE;
 				if ( factory5.Get() && SUCCEEDED( factory5->CheckFeatureSupport( DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof( allowTearing ) ) ) ) {
 					m_flipWithTearing = allowTearing != 0;
 					m_swapchainflip = m_flipWithTearing;
 				}
 			}
-			if ( SUCCEEDED( factory.As( &factory4 ) ) ) {
+			if ( SUCCEEDED( factory2.As( &factory4 ) ) ) {
 				swapEffect = DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_FLIP_DISCARD;
-			} else if ( SUCCEEDED( factory.As( &factory2 ) ) ) {
-				swapEffect = DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
 			} else {
-				m_swapchainflip = false;
+				swapEffect = DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
 			}
 		}
 
@@ -464,7 +461,6 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
 
 		LogInfo() << "Creating new swapchain! (Format: DXGI_FORMAT_R8G8B8A8_UNORM)";
 
-		DXGI_SWAP_CHAIN_DESC scd = {};
 		if ( m_swapchainflip ) {
 			scd.BufferCount = 2;
 			if ( m_flipWithTearing ) { scflags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING; }
@@ -473,39 +469,37 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
 		}
 		scd.SwapEffect = swapEffect;
 		scd.Flags = scflags;
-		scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		scd.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_SHADER_INPUT;
-		scd.OutputWindow = OutputWindow;
 		scd.SampleDesc.Count = 1;
 		scd.SampleDesc.Quality = 0;
-		scd.BufferDesc.Height = bbres.y;
-		scd.BufferDesc.Width = bbres.x;
+		scd.Height = bbres.y;
+		scd.Width = bbres.x;
+
+		DXGI_SWAP_CHAIN_FULLSCREEN_DESC swapChainFSDesc = {};
 
 		if ( m_swapchainflip ) {
-			scd.Windowed = true;
+			swapChainFSDesc.Windowed = true;
 		} else {
 			bool windowed = Engine::GAPI->HasCommandlineParameter( "ZWINDOW" ) ||
 				Engine::GAPI->GetIntParamFromConfig( "zStartupWindowed" );
-			scd.Windowed = windowed;
+			swapChainFSDesc.Windowed = windowed;
 		}
 
-		LE( factory->CreateSwapChain( GetDevice(), &scd, &SwapChain ) );
-
+		LE( factory2->CreateSwapChainForHwnd( GetDevice(), OutputWindow, &scd, &swapChainFSDesc, nullptr, &SwapChain ) );
 		if ( !SwapChain ) {
 			LogError() << "Failed to create Swapchain! Program will now exit!";
 			exit( 0 );
 		}
 		if ( m_swapchainflip ) {
-			LE( factory->MakeWindowAssociation( OutputWindow, DXGI_MWA_NO_WINDOW_CHANGES ) );
+			LE( factory2->MakeWindowAssociation( OutputWindow, DXGI_MWA_NO_WINDOW_CHANGES ) );
 		}
 
 		// Need to init AntTweakBar now that we have a working swapchain
 		XLE( Engine::AntTweakBar->Init() );
 	} else {
 		LogInfo() << "Resizing swapchain  (Format: DXGI_FORMAT_R8G8B8A8_UNORM)";
-
-		if ( FAILED( SwapChain->ResizeBuffers( 0, bbres.x, bbres.y,
-			DXGI_FORMAT_R8G8B8A8_UNORM, scflags ) ) ) {
+		if ( FAILED( SwapChain->ResizeBuffers( 0, bbres.x, bbres.y, DXGI_FORMAT_R8G8B8A8_UNORM, scflags ) ) ) {
 			LogError() << "Failed to resize swapchain!";
 			return XR_FAILED;
 		}
@@ -1336,7 +1330,7 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
 		&Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
 	auto& view =
 		Engine::GAPI->GetRendererState()->TransformState.TransformView;
-	auto& proj = Engine::GAPI->GetProjectionMatrixDX();
+	auto& proj = Engine::GAPI->GetProjectionMatrix();
 
 	VS_ExConstantBuffer_PerFrame cb = {};
 	cb.View = view;
@@ -1714,7 +1708,7 @@ void D3D11GraphicsEngine::SetupVS_ExConstantBuffer() {
 		Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
 	auto& view =
 		Engine::GAPI->GetRendererState()->TransformState.TransformView;
-	auto& proj = Engine::GAPI->GetProjectionMatrixDX();
+	auto& proj = Engine::GAPI->GetProjectionMatrix();
 
 	VS_ExConstantBuffer_PerFrame cb = {};
 	cb.View = view;
@@ -2551,7 +2545,7 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 
 	// Fill refraction info CB and bind it
 	RefractionInfoConstantBuffer ricb = {};
-	ricb.RI_Projection = Engine::GAPI->GetProjectionMatrixDX();
+	ricb.RI_Projection = Engine::GAPI->GetProjectionMatrix();
 	ricb.RI_ViewportSize = float2( Resolution.x, Resolution.y );
 	ricb.RI_Time = Engine::GAPI->GetTimeSeconds();
 	ricb.RI_CameraPosition = float3( Engine::GAPI->GetCameraPosition() );
@@ -4153,7 +4147,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
 
 	DS_PointLightConstantBuffer plcb = {};
 
-	XMStoreFloat4x4( &plcb.PL_InvProj, XMMatrixInverse( nullptr, XMLoadFloat4x4( &Engine::GAPI->GetProjectionMatrixDX() ) ) );
+	XMStoreFloat4x4( &plcb.PL_InvProj, XMMatrixInverse( nullptr, XMLoadFloat4x4( &Engine::GAPI->GetProjectionMatrix() ) ) );
 	XMStoreFloat4x4( &plcb.PL_InvView, XMMatrixInverse( nullptr, XMLoadFloat4x4( &Engine::GAPI->GetRendererState()->TransformState.TransformView ) ) );
 
 	plcb.PL_ViewportSize = float2( static_cast<float>(Resolution.x), static_cast<float>(Resolution.y) );
@@ -4232,7 +4226,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
 
 		XMStoreFloat3( plcb.PL_LightScreenPos.toXMFLOAT3(),
 			XMVector3TransformCoord( Pl_PositionWorld,
-				XMLoadFloat4x4( &Engine::GAPI->GetProjectionMatrixDX() ) ) );
+				XMLoadFloat4x4( &Engine::GAPI->GetProjectionMatrix() ) ) );
 
 		if ( dist < plcb.PL_Range ) {
 			if ( Engine::GAPI->GetRendererState()->DepthState.DepthBufferEnabled ) {
@@ -4812,7 +4806,7 @@ XRESULT D3D11GraphicsEngine::DrawOcean( GOcean* ocean ) {
 	// DistortionTexture->BindToPixelShader(0);
 
 	RefractionInfoConstantBuffer ricb = {};
-	ricb.RI_Projection = Engine::GAPI->GetProjectionMatrixDX();
+	ricb.RI_Projection = Engine::GAPI->GetProjectionMatrix();
 	ricb.RI_ViewportSize = float2( Resolution.x, Resolution.y );
 	ricb.RI_Time = Engine::GAPI->GetTimeSeconds();
 	ricb.RI_CameraPosition = Engine::GAPI->GetCameraPosition();
@@ -5120,7 +5114,7 @@ void D3D11GraphicsEngine::DrawDecalList( const std::vector<zCVob*>& decals,
 			// TODO: some candle flames (and other pfx?) are invisible / very thin when done this way.
 
 			XMFLOAT3 decalPos = decals[i]->GetPositionWorld();
-			float angle = atan2( decalPos.x - camPos.x, decalPos.z - camPos.z ) * (180 / XM_PI);
+			float angle = atan2( decalPos.x - camPos.x, decalPos.z - camPos.z ) * 180 * XM_1DIVPI;
 			float rot = XMConvertToRadians( angle );
 			world = world * XMMatrixTranspose( XMMatrixRotationY( rot ) );
 		}
@@ -5262,7 +5256,7 @@ void D3D11GraphicsEngine::DrawUnderwaterEffects() {
 	SetDefaultStates();
 
 	RefractionInfoConstantBuffer ricb = {};
-	ricb.RI_Projection = Engine::GAPI->GetProjectionMatrixDX();
+	ricb.RI_Projection = Engine::GAPI->GetProjectionMatrix();
 	ricb.RI_ViewportSize = float2( Resolution.x, Resolution.y );
 	ricb.RI_Time = Engine::GAPI->GetTimeSeconds();
 	ricb.RI_CameraPosition = Engine::GAPI->GetCameraPosition();
@@ -5381,7 +5375,7 @@ void D3D11GraphicsEngine::Setup_PNAEN( EPNAENRenderMode mode ) {
 		Engine::GAPI->GetRendererState()->RendererSettings.TesselationFactor );
 	cb.f4ViewportScale.x = static_cast<float>(GetResolution().x / 2);
 	cb.f4ViewportScale.y = static_cast<float>(GetResolution().y / 2);
-	cb.f4x4Projection = Engine::GAPI->GetProjectionMatrixDX();
+	cb.f4x4Projection = Engine::GAPI->GetProjectionMatrix();
 
 	pnaen->GetConstantBuffer()[0]->UpdateBuffer( &cb );
 
@@ -5407,7 +5401,7 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 	D3D11PShader* distPS = ShaderManager->GetPShader( "PS_ParticleDistortion" );
 
 	RefractionInfoConstantBuffer ricb = {};
-	ricb.RI_Projection = Engine::GAPI->GetProjectionMatrixDX();
+	ricb.RI_Projection = Engine::GAPI->GetProjectionMatrix();
 	ricb.RI_ViewportSize = float2( Resolution.x, Resolution.y );
 	ricb.RI_Time = Engine::GAPI->GetTimeSeconds();
 	ricb.RI_CameraPosition = Engine::GAPI->GetCameraPosition();

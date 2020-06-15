@@ -66,14 +66,15 @@ XRESULT GSky::InitSky() {
 	SkyPlaneVertices[0].Color = color.ToDWORD();
 
 	// 1
+	XMVECTOR xm_displacement = XMLoadFloat2( &displacement );
 	XMFLOAT2 SkyPlaneVertices1;
-	XMStoreFloat2( &SkyPlaneVertices1, (XMVectorSet( scale, 0, 0, 0 ) + XMLoadFloat2( &displacement )) );
+	XMStoreFloat2( &SkyPlaneVertices1, (XMVectorSet( scale, 0, 0, 0 ) + xm_displacement) );
 	SkyPlaneVertices[1].TexCoord = SkyPlaneVertices1;
 	SkyPlaneVertices[1].Color = color.ToDWORD();
 
 	// 2
 	XMFLOAT2 SkyPlaneVertices2;
-	XMStoreFloat2( &SkyPlaneVertices2, (XMVectorSet( 0, scale, 0, 0 ) + XMLoadFloat2( &displacement )) );
+	XMStoreFloat2( &SkyPlaneVertices2, (XMVectorSet( 0, scale, 0, 0 ) + xm_displacement) );
 	SkyPlaneVertices[2].TexCoord = SkyPlaneVertices2;
 	SkyPlaneVertices[2].Color = color.ToDWORD();
 
@@ -81,19 +82,19 @@ XRESULT GSky::InitSky() {
 
 	// 1
 	XMFLOAT2 SkyPlaneVertices3;
-	XMStoreFloat2( &SkyPlaneVertices3, (XMVectorSet( scale, 0, 0, 0 ) + XMLoadFloat2( &displacement )) );
+	XMStoreFloat2( &SkyPlaneVertices3, (XMVectorSet( scale, 0, 0, 0 ) + xm_displacement) );
 	SkyPlaneVertices[3].TexCoord = SkyPlaneVertices3;
 	SkyPlaneVertices[3].Color = color.ToDWORD();
 
 	// 3
 	XMFLOAT2 SkyPlaneVertices4;
-	XMStoreFloat2( &SkyPlaneVertices4, (XMVectorSet( scale, scale, 0, 0 ) + XMLoadFloat2( &displacement )) );
+	XMStoreFloat2( &SkyPlaneVertices4, (XMVectorSet( scale, scale, 0, 0 ) + xm_displacement) );
 	SkyPlaneVertices[4].TexCoord = SkyPlaneVertices4;
 	SkyPlaneVertices[4].Color = color.ToDWORD();
 
 	// 2
 	XMFLOAT2 SkyPlaneVertices5;
-	XMStoreFloat2( &SkyPlaneVertices5, (XMVectorSet( 0, scale, 0, 0 ) + XMLoadFloat2( &displacement )) );
+	XMStoreFloat2( &SkyPlaneVertices5, (XMVectorSet( 0, scale, 0, 0 ) + xm_displacement) );
 	SkyPlaneVertices[5].TexCoord = SkyPlaneVertices5;
 	SkyPlaneVertices[5].Color = color.ToDWORD();
 
@@ -331,8 +332,7 @@ float3 GSky::GetSunColor() {
 	LightPos.x = AtmosphereCB.AC_LightPos.x;
 	LightPos.y = AtmosphereCB.AC_LightPos.y;
 	LightPos.z = AtmosphereCB.AC_LightPos.z;
-	XMVECTOR wPos = ((XMLoadFloat3( &LightPos )) * AtmosphereCB.AC_OuterRadius);
-	wPos += XMVectorSet( Atmosphere.SpherePosition.x, Atmosphere.SpherePosition.y + Atmosphere.SphereOffsetY, Atmosphere.SpherePosition.z, 0.0f );
+	XMVECTOR wPos = ((XMLoadFloat3( &LightPos )) * AtmosphereCB.AC_OuterRadius) + XMLoadFloat3( &Atmosphere.SpherePosition );
 
 
 	XMFLOAT3 camPos_FLOAT3;
@@ -374,9 +374,9 @@ float3 GSky::GetSunColor() {
 	XMVECTOR vSampleRay = vRay * fSampleLength;
 	XMVECTOR vSamplePoint = vStart + vSampleRay * 0.5f;
 
-	DirectX::XMFLOAT3 vInvWavelength = DirectX::XMFLOAT3( 1.0f / pow( AtmosphereCB.AC_Wavelength.x, 4.0f ),
-		1.0f / pow( AtmosphereCB.AC_Wavelength.y, 4.0f ),
-		1.0f / pow( AtmosphereCB.AC_Wavelength.z, 4.0f ) );
+	XMVECTOR AC_Wavelenght_XMV = XMVectorSet( AtmosphereCB.AC_Wavelength.x, AtmosphereCB.AC_Wavelength.y, AtmosphereCB.AC_Wavelength.z, 0 );
+	XMVECTOR Four_XMV = XMVectorSet( 4, 4, 4, 0 );
+	DirectX::XMVECTOR vInvWavelength = XMQuaternionInverse( XMVectorPow( AC_Wavelenght_XMV, Four_XMV ) );
 
 	//return retF(AC_InnerRadius - length(vSamplePoint));
 
@@ -397,18 +397,15 @@ float3 GSky::GetSunColor() {
 		XMStoreFloat( &fCameraAngle, DirectX::XMVector3Dot( vRay, vSamplePoint ) / fHeight );
 		float fScatter = (fStartOffset + fDepth * (AC_Escale( fLightAngle, AtmosphereCB.AC_RayleighScaleDepth ) - AC_Escale( fCameraAngle, AtmosphereCB.AC_RayleighScaleDepth )));
 
-		DirectX::XMFLOAT3 vAttenuate;
-		vAttenuate.x = exp( -fScatter * (vInvWavelength.x * AtmosphereCB.AC_Kr4PI + AtmosphereCB.AC_Km4PI) );
-		vAttenuate.y = exp( -fScatter * (vInvWavelength.y * AtmosphereCB.AC_Kr4PI + AtmosphereCB.AC_Km4PI) );
-		vAttenuate.z = exp( -fScatter * (vInvWavelength.z * AtmosphereCB.AC_Kr4PI + AtmosphereCB.AC_Km4PI) );
+		XMVECTOR vAttenuate = XMVectorExp( -fScatter * vInvWavelength * AtmosphereCB.AC_Kr4PI + XMVectorSet( AtmosphereCB.AC_Km4PI, AtmosphereCB.AC_Km4PI, AtmosphereCB.AC_Km4PI, 0 ) );
 
-		vFrontColor += XMLoadFloat3( &vAttenuate ) * fDepth * fScaledLength;
+		vFrontColor += vAttenuate * fDepth * fScaledLength;
 		vSamplePoint += vSampleRay;
 	}
 
 	// Finally, scale the Mie and Rayleigh colors and set up the varying variables for the pixel shader
-	DirectX::XMFLOAT3 c0; //check propably never used
-	XMStoreFloat3( &c0, vFrontColor * XMLoadFloat3( &vInvWavelength ) * AtmosphereCB.AC_KrESun );
+	DirectX::XMFLOAT3 c0; //Either c0 or c1 can be used
+	XMStoreFloat3( &c0, vFrontColor * vInvWavelength * AtmosphereCB.AC_KrESun );
 
 	XMVECTOR c1 = vFrontColor * AtmosphereCB.AC_KmESun;
 	XMVECTOR vDirection = camPos - vPos;
@@ -416,9 +413,8 @@ float3 GSky::GetSunColor() {
 	float fCos;
 	XMStoreFloat( &fCos, DirectX::XMVector3Dot( XMLoadFloat3( AtmosphereCB.AC_LightPos.toXMFLOAT3() ), vDirection ) / DirectX::XMVector3LengthEst( vDirection ) ); //check if it works
 
-	float fCos2 = fCos * fCos;
 	XMFLOAT3 suncolor_convert;
-	XMStoreFloat3( &suncolor_convert, AC_getMiePhase( fCos, fCos2, AtmosphereCB.AC_g, AtmosphereCB.AC_g * AtmosphereCB.AC_g ) * c1 );
+	XMStoreFloat3( &suncolor_convert, AC_getMiePhase( fCos, fCos * fCos, AtmosphereCB.AC_g, AtmosphereCB.AC_g * AtmosphereCB.AC_g ) * c1 );
 	float3 suncolor_return;
 	suncolor_return.x = suncolor_convert.x;
 	suncolor_return.y = suncolor_convert.y;

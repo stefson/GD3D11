@@ -32,7 +32,7 @@ XRESULT D3D11PFX_GodRays::Render( RenderToTextureBuffer* fxbuffer ) {
 	xmSunPosition = XMVectorAdd( xmSunPosition, Engine::GAPI->GetCameraPositionXM() ); // Maybe use cameraposition from sky?
 
 	XMMATRIX view = XMLoadFloat4x4( &Engine::GAPI->GetRendererState()->TransformState.TransformView );
-	XMMATRIX proj = XMLoadFloat4x4( &Engine::GAPI->GetProjectionMatrixDX() );
+	XMMATRIX proj = XMLoadFloat4x4( &Engine::GAPI->GetProjectionMatrix() );
 
 	XMMATRIX viewProj = XMMatrixMultiply( proj, view );
 

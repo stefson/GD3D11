@@ -36,7 +36,7 @@ XRESULT D3D11PFX_HeightFog::Render( RenderToTextureBuffer* fxbuffer ) {
 
 	HeightfogConstantBuffer cb;
 	XMMATRIX xmInvProj;
-	xmInvProj = XMLoadFloat4x4( &Engine::GAPI->GetProjectionMatrixDX() );
+	xmInvProj = XMLoadFloat4x4( &Engine::GAPI->GetProjectionMatrix() );
 	xmInvProj = XMMatrixInverse( nullptr, xmInvProj );
 	XMStoreFloat4x4( &cb.InvProj, xmInvProj );
 
@@ -90,8 +90,8 @@ XRESULT D3D11PFX_HeightFog::Render( RenderToTextureBuffer* fxbuffer ) {
 	cb.HF_FogHeight = height;
 
 	//cb.HF_FogColorMod = Engine::GAPI->GetRendererState()->GraphicsState.FF_FogColor;
-	cb.HF_ProjAB = float2( Engine::GAPI->GetProjectionMatrixDX()._33,
-		Engine::GAPI->GetProjectionMatrixDX()._34 );
+	cb.HF_ProjAB = float2( Engine::GAPI->GetProjectionMatrix()._33,
+		Engine::GAPI->GetProjectionMatrix()._34 );
 
 
 	// Modify fog when raining

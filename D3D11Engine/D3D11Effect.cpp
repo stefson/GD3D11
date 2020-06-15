@@ -283,7 +283,6 @@ XRESULT D3D11Effect::DrawRainShadowmap() {
 
 	// Create shadowmap view-matrix
 	XMMATRIX crViewReplacement = XMMatrixLookAtLH( p, lookAt, XMVectorSet( 0, 1, 0, 0 ) );
-	crViewReplacement = XMMatrixTranspose( crViewReplacement );
 
 	XMMATRIX crProjectionReplacement = XMMatrixOrthographicLH(
 		RainShadowmap->GetSizeX() * Engine::GAPI->GetRendererState()->RendererSettings.WorldShadowRangeScale,
@@ -291,10 +290,9 @@ XRESULT D3D11Effect::DrawRainShadowmap() {
 		1,
 		20000.0f
 	);
-	crProjectionReplacement = XMMatrixTranspose( crProjectionReplacement );
 
-	XMStoreFloat4x4( &cr.ViewReplacement, crViewReplacement );
-	XMStoreFloat4x4( &cr.ProjectionReplacement, crProjectionReplacement );
+	XMStoreFloat4x4( &cr.ViewReplacement, XMMatrixTranspose( crViewReplacement ) );
+	XMStoreFloat4x4( &cr.ProjectionReplacement, XMMatrixTranspose( crProjectionReplacement ) );
 	XMStoreFloat3( &cr.PositionReplacement, p );
 	XMStoreFloat3( &cr.LookAtReplacement, lookAt );
 

@@ -62,6 +62,5 @@ protected:
 	bool DynamicLight;
 	bool InitDone;
 	bool DrawnOnce;
-	std::mutex InitMutex;
 };
 

@@ -882,7 +882,7 @@ void GothicAPI::GetVisibleDecalList( std::vector<zCVob*>& decals ) {
 
 	for ( auto const& it : DecalVobs ) {
 		float dist;
-		XMStoreFloat( &dist, DirectX::XMVector3LengthEst( it->GetPositionWorldXM() ) - camPos );
+		XMStoreFloat( &dist, DirectX::XMVector3LengthEst( it->GetPositionWorldXM() - camPos ));
 		if ( dist > RendererState.RendererSettings.VisualFXDrawRadius )
 			continue;
 
@@ -1103,13 +1103,13 @@ void GothicAPI::DrawSkeletalMeshInfo( zCMaterial* mat, SkeletalMeshInfo* msh, st
 
 /** Locks the resource CriticalSection */
 void GothicAPI::EnterResourceCriticalSection() {
-	//ResourceMutex.lock();
+
 	EnterCriticalSection( &ResourceCriticalSection );
 }
 
 /** Unlocks the resource CriticalSection */
 void GothicAPI::LeaveResourceCriticalSection() {
-	//ResourceMutex.unlock();
+
 	LeaveCriticalSection( &ResourceCriticalSection );
 }
 
@@ -1140,7 +1140,6 @@ void GothicAPI::OnRemovedVob( zCVob* vob, zCWorld* world ) {
 	const auto&& listEnd = list.end();
 	for ( auto&& it = list.begin(); it != listEnd; ++it ) {
 		if ( (*it)->Vob == vob ) {
-			//it = list.erase(it);
 			list.erase( it );
 			break; // Can (should!) only be in here once
 		}
@@ -2159,7 +2158,7 @@ bool GothicAPI::TraceWorldMesh( const DirectX::XMFLOAT3& origin, const DirectX::
 
 /** Unprojects a pixel-position on the screen */
 void __vectorcall GothicAPI::UnprojectXM( FXMVECTOR p, XMVECTOR& worldPos, XMVECTOR& worldDir ) {
-	XMMATRIX proj = XMLoadFloat4x4( &GetProjectionMatrixDX() );
+	XMMATRIX proj = XMLoadFloat4x4( &GetProjectionMatrix() );
 	XMFLOAT4X4 fInvView;
 	GetInverseViewMatrixDX( &fInvView );
 	XMMATRIX invView = XMLoadFloat4x4( &fInvView );
@@ -2242,7 +2241,7 @@ void GothicAPI::GetInverseViewMatrixDX( DirectX::XMFLOAT4X4* invView ) {
 }
 
 /** Returns the projection-matrix */
-DirectX::XMFLOAT4X4& GothicAPI::GetProjectionMatrixDX() {
+DirectX::XMFLOAT4X4& GothicAPI::GetProjectionMatrix() {
 	if ( CameraReplacementPtr ) {
 		return CameraReplacementPtr->ProjectionReplacement;
 	}

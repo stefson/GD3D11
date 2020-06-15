@@ -44,8 +44,8 @@ XRESULT D3D11GraphicsEngineBase::Init() {
 	LogInfo() << "Initializing Device...";
 
 	// Create DXGI factory
-	LE( CreateDXGIFactory( __uuidof(IDXGIFactory), &DXGIFactory ) );
-	LE( DXGIFactory->EnumAdapters( 0, &DXGIAdapter ) ); // Get first adapter
+	LE( CreateDXGIFactory( __uuidof(IDXGIFactory), &DXGIFactory2 ) );
+	LE( DXGIFactory2->EnumAdapters( 0, &DXGIAdapter ) ); // Get first adapter
 
 	// Find out what we are rendering on to write it into the logfile
 	DXGI_ADAPTER_DESC adpDesc;
@@ -159,35 +159,27 @@ XRESULT D3D11GraphicsEngineBase::OnResize( INT2 newSize ) {
 	if ( !SwapChain ) {
 		LogInfo() << "Creating new swapchain! (Format: DXGI_FORMAT_R8G8B8A8_UNORM)";
 
-		DXGI_SWAP_CHAIN_DESC scd;
-		ZeroMemory( &scd, sizeof( DXGI_SWAP_CHAIN_DESC ) );
+		DXGI_SWAP_CHAIN_DESC1 scd;
+		ZeroMemory( &scd, sizeof(DXGI_SWAP_CHAIN_DESC1) );
 
 		scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 		scd.BufferCount = 1;
-		scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		scd.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_SHADER_INPUT;
-		scd.OutputWindow = OutputWindow;
 		scd.SampleDesc.Count = 1;
 		scd.SampleDesc.Quality = 0;
-		scd.BufferDesc.Height = bbres.y;
-		scd.BufferDesc.Width = bbres.x;
+		scd.Height = bbres.y;
+		scd.Width = bbres.x;
 		scd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+
+		DXGI_SWAP_CHAIN_FULLSCREEN_DESC swapChainFSDesc = {};
 
 		// Check for windowed mode
 		bool windowed = Engine::GAPI->HasCommandlineParameter( "ZWINDOW" ) ||
 			Engine::GAPI->GetIntParamFromConfig( "zStartupWindowed" );
-		scd.Windowed = windowed;
+		swapChainFSDesc.Windowed = windowed;
 
-#ifdef BUILD_GOTHIC_1_08k
-#ifdef PUBLIC_RELEASE
-		scd.Windowed = false;
-#else
-		scd.Windowed = true;
-#endif
-#endif
-
-
-		LE( DXGIFactory->CreateSwapChain( GetDevice(), &scd, &SwapChain ) );
+		LE( DXGIFactory2->CreateSwapChainForHwnd( GetDevice(), OutputWindow, &scd, &swapChainFSDesc, nullptr, &SwapChain ) );
 
 		if ( !SwapChain ) {
 			LogError() << "Failed to create Swapchain! Program will now exit!";
@@ -638,9 +630,9 @@ void D3D11GraphicsEngineBase::SetupVS_ExMeshDrawCall() {
 }
 
 void D3D11GraphicsEngineBase::SetupVS_ExConstantBuffer() {
-	const auto& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
-	const auto& view = Engine::GAPI->GetRendererState()->TransformState.TransformView;
-	const auto& proj = Engine::GAPI->GetProjectionMatrixDX();
+	const XMFLOAT4X4& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
+	const XMFLOAT4X4& view = Engine::GAPI->GetRendererState()->TransformState.TransformView;
+	const XMFLOAT4X4& proj = Engine::GAPI->GetProjectionMatrix();
 
 	VS_ExConstantBuffer_PerFrame cb = {};
 	cb.View = view;
@@ -653,7 +645,7 @@ void D3D11GraphicsEngineBase::SetupVS_ExConstantBuffer() {
 }
 
 void D3D11GraphicsEngineBase::SetupVS_ExPerInstanceConstantBuffer() {
-	auto world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
+	XMFLOAT4X4 world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
 
 	VS_ExConstantBuffer_PerInstance cb = {};
 	cb.World = world;
@@ -694,7 +686,7 @@ XRESULT D3D11GraphicsEngineBase::SetActiveGShader( const std::string& shader ) {
 
 /** Puts the current world matrix into a CB and binds it to the given slot */
 void D3D11GraphicsEngineBase::SetupPerInstanceConstantBuffer( int slot ) {
-	const auto world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
+	const XMFLOAT4X4 world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
 
 	VS_ExConstantBuffer_PerInstance cb = {};
 	cb.World = world;
@@ -706,9 +698,9 @@ void D3D11GraphicsEngineBase::SetupPerInstanceConstantBuffer( int slot ) {
 
 /** Updates the transformsCB with new values from the GAPI */
 void D3D11GraphicsEngineBase::UpdateTransformsCB() {
-	const auto& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
-	const auto& view = Engine::GAPI->GetRendererState()->TransformState.TransformView;
-	const auto& proj = Engine::GAPI->GetProjectionMatrixDX();
+	const XMFLOAT4X4& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
+	const XMFLOAT4X4& view = Engine::GAPI->GetRendererState()->TransformState.TransformView;
+	const XMFLOAT4X4& proj = Engine::GAPI->GetProjectionMatrix();
 
 	VS_ExConstantBuffer_PerFrame cb = {};
 	cb.View = view;
