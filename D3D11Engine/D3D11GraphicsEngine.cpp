@@ -75,9 +75,6 @@ D3D11GraphicsEngine::D3D11GraphicsEngine() {
 	m_LastFrameLimit = 0;
 	m_flipWithTearing = false;
 
-	RECT desktopRect;
-	GetClientRect( GetDesktopWindow(), &desktopRect );
-
 	// Match the resolution with the current desktop resolution
 	Resolution =
 		Engine::GAPI->GetRendererState()->RendererSettings.LoadedResolution;
@@ -637,6 +634,7 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
 	case 3: s = 2048; break;
 	case 4: s = 4096; break;
 	case 5: s = 8192; break;
+	case 6: s = 16384; break;
 	}
 
 	if ( WorldShadowmap1->GetSizeX() != s ) {
@@ -733,7 +731,7 @@ D3D11GraphicsEngine::GetDisplayModeList( std::vector<DisplayModeInfo>* modeList,
 	UINT numModes = 0;
 	std::unique_ptr<DXGI_MODE_DESC []> displayModes = nullptr;
 	const DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	IDXGIOutput* output;
+	IDXGIOutput* output = nullptr;
 
 	// Get desktop rect
 	RECT desktop;
@@ -2779,7 +2777,6 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround(
 	if ( Engine::GAPI->GetRendererState()->RendererSettings.DrawVOBs ) {
 		// Draw visible vobs here
 		std::list<VobInfo*> rndVob;
-		XMVECTOR xmLastRenderPos;
 		// construct new renderedvob list or fake one
 		if ( !renderedVobs || renderedVobs->empty() ) {
 			for ( size_t i = 0; i < drawnSections.size(); i++ ) {
@@ -2792,11 +2789,10 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround(
 						continue;
 					}
 
-					xmLastRenderPos = XMLoadFloat3( &it->LastRenderPosition );
 					// Check vob range
 
 					float dist;
-					XMStoreFloat( &dist, XMVector3Length( position - xmLastRenderPos ) );
+					XMStoreFloat( &dist, XMVector3Length( position - XMLoadFloat3( &it->LastRenderPosition ) ) );
 					if ( dist > range ) {
 						continue;
 					}
@@ -3031,11 +3027,8 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround( FXMVECTOR position,
 		for ( const auto& itx : Engine::GAPI->GetWorldSections() ) {
 			for ( const auto& ity : itx.second ) {
 
-				XMVECTOR a = XMVectorSet(
-					(float)(itx.first - s.x),
-					static_cast<float>((ity.first - s.y)), 0, 0 );
 				float len;
-				XMStoreFloat( &len, XMVector2Length( a ) );
+				XMStoreFloat( &len, XMVector2Length( XMVectorSet( itx.first - s.x, ity.first - s.y, 0, 0 ) ) );
 				if ( len < sectionRange ) {
 					const WorldMeshSectionInfo& section = ity.second;
 

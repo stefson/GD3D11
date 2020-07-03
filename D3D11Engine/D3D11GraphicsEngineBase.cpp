@@ -335,7 +335,7 @@ XRESULT D3D11GraphicsEngineBase::GetDisplayModeList( std::vector<DisplayModeInfo
 	UINT numModes = 0;
 	std::unique_ptr<DXGI_MODE_DESC []> displayModes = nullptr;
 	DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	IDXGIOutput* output;
+	IDXGIOutput* output = nullptr;
 
 	// Get desktop rect
 	RECT desktop;
