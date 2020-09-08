@@ -201,6 +201,11 @@ XRESULT D3D11GraphicsEngineBase::OnResize( INT2 newSize ) {
 	ID3D11Texture2D* backbuffer = nullptr;
 	SwapChain->GetBuffer( 0, __uuidof(ID3D11Texture2D), (void**)&backbuffer );
 
+	if ( !backbuffer ) {
+		LogError() << "Failed to get backbuffer!";
+		return XR_FAILED;
+	}
+
 	// Recreate RenderTargetView
 	ID3D11RenderTargetView* backbufferRTV;
 	ID3D11ShaderResourceView* backbufferSRV;

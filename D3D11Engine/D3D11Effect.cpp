@@ -354,6 +354,10 @@ HRESULT LoadTextureArray( ID3D11Device* pd3dDevice, ID3D11DeviceContext* context
 		if ( pRes ) {
 			ID3D11Texture2D* pTemp;
 			pRes->QueryInterface( __uuidof(ID3D11Texture2D), (LPVOID*)&pTemp );
+			if ( !pTemp ) {
+				LogError() << "Could not get ID3D11Texture2D!";
+				return E_FAIL;
+			}
 			pTemp->GetDesc( &desc );
 
 
