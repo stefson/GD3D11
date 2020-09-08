@@ -543,8 +543,7 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
 		DepthStencilBuffer->GetDepthStencilView() );
 
 	// Set the viewport
-	D3D11_VIEWPORT viewport;
-	ZeroMemory( &viewport, sizeof( D3D11_VIEWPORT ) );
+	D3D11_VIEWPORT viewport = {};
 
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
@@ -895,8 +894,7 @@ XRESULT D3D11GraphicsEngine::Present() {
 /** Called to set the current viewport */
 XRESULT D3D11GraphicsEngine::SetViewport( const ViewportInfo& viewportInfo ) {
 	// Set the viewport
-	D3D11_VIEWPORT viewport;
-	ZeroMemory( &viewport, sizeof( D3D11_VIEWPORT ) );
+	D3D11_VIEWPORT viewport = {};
 
 	viewport.TopLeftX = static_cast<float>(viewportInfo.TopLeftX);
 	viewport.TopLeftY = static_cast<float>(viewportInfo.TopLeftY);
