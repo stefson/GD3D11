@@ -134,7 +134,7 @@
       <AdditionalIncludeDirectories>
       </AdditionalIncludeDirectories>
       <FloatingPointModel>Fast</FloatingPointModel>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <AdditionalOptions>/Zc:inline /Zc:throwingNew %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
