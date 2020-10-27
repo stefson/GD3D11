@@ -475,7 +475,7 @@ HRESULT MyDirectDrawSurface7::Unlock( LPRECT lpRect ) {
 			float brx = Engine::GraphicsEngine->GetResolution().x * scale;
 			float bry = Engine::GraphicsEngine->GetResolution().y * scale;
 
-#ifdef BUILD_GOTHIC_2_6_fix
+#if defined(BUILD_GOTHIC_2_6_fix) || defined(BUILD_GOTHIC_1_08k)
 			Engine::GraphicsEngine->DrawQuad( INT2( tlx, tly ),
 				INT2( brx - tlx, bry - tly ) );
 #else
