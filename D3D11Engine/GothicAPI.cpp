@@ -650,6 +650,13 @@ void GothicAPI::LoadRendererWorldSettings(GothicRendererSettings& s) {
 		GetPrivateProfileIntA( "Atmoshpere", "FogColorModG", (int)(s.FogColorMod.y * 255.0f), ini.c_str() ),
 		GetPrivateProfileIntA( "Atmoshpere", "FogColorModB", (int)(s.FogColorMod.z * 255.0f), ini.c_str() )
 	);
+
+	if ( !GMPModeActive ) {
+		s.VisualFXDrawRadius = GetPrivateProfileFloatA( "General", "VisualFXDrawRadius", s.VisualFXDrawRadius, ini.c_str() );
+		s.OutdoorVobDrawRadius = GetPrivateProfileFloatA( "General", "OutdoorVobDrawRadius", s.OutdoorVobDrawRadius, ini.c_str() );
+		s.OutdoorSmallVobDrawRadius = GetPrivateProfileFloatA( "General", "OutdoorSmallVobDrawRadius", s.OutdoorSmallVobDrawRadius, ini.c_str() );
+		s.SectionDrawRadius = GetPrivateProfileFloatA( "General", "SectionDrawRadius", s.SectionDrawRadius, ini.c_str() );
+	}
 }
 
 void GothicAPI::SaveRendererWorldSettings( const GothicRendererSettings & s) {
@@ -683,6 +690,11 @@ void GothicAPI::SaveRendererWorldSettings( const GothicRendererSettings & s) {
 	WritePrivateProfileStringA( "Atmoshpere", "FogColorModR", std::to_string( (int)(s.FogColorMod.x * 255.0f) ).c_str(), ini.c_str() );
 	WritePrivateProfileStringA( "Atmoshpere", "FogColorModG", std::to_string( (int)(s.FogColorMod.y * 255.0f) ).c_str(), ini.c_str() );
 	WritePrivateProfileStringA( "Atmoshpere", "FogColorModB", std::to_string( (int)(s.FogColorMod.z * 255.0f) ).c_str(), ini.c_str() );
+
+	WritePrivateProfileStringA( "General", "VisualFXDrawRadius", std::to_string( s.VisualFXDrawRadius ).c_str(), ini.c_str() );
+	WritePrivateProfileStringA( "General", "OutdoorVobDrawRadius", std::to_string( s.OutdoorVobDrawRadius ).c_str(), ini.c_str() );
+	WritePrivateProfileStringA( "General", "OutdoorSmallVobDrawRadius", std::to_string( s.OutdoorSmallVobDrawRadius ).c_str(), ini.c_str() );
+	WritePrivateProfileStringA( "General", "SectionDrawRadius", std::to_string( s.SectionDrawRadius ).c_str(), ini.c_str() );
 }
 
 /** Goes through the given zCTree and registers all found vobs */
