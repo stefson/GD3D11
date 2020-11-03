@@ -657,6 +657,16 @@ void GothicAPI::LoadRendererWorldSettings(GothicRendererSettings& s) {
 		s.OutdoorSmallVobDrawRadius = GetPrivateProfileFloatA( "General", "OutdoorSmallVobDrawRadius", s.OutdoorSmallVobDrawRadius, ini.c_str() );
 		s.SectionDrawRadius = GetPrivateProfileFloatA( "General", "SectionDrawRadius", s.SectionDrawRadius, ini.c_str() );
 	}
+
+	s.ReplaceSunDirection = GetPrivateProfileBoolA( "Atmoshpere", "ReplaceSunDirection", s.ReplaceSunDirection, ini );
+		
+	AtmosphereSettings& aS = GetSky()->GetAtmoshpereSettings();
+
+	aS.LightDirection = DirectX::XMFLOAT3(
+		GetPrivateProfileFloatA( "Atmoshpere", "LightDirectionX", aS.LightDirection.x, ini.c_str() ),
+		GetPrivateProfileFloatA( "Atmoshpere", "LightDirectionY", aS.LightDirection.y, ini.c_str() ),
+		GetPrivateProfileFloatA( "Atmoshpere", "LightDirectionZ", aS.LightDirection.z, ini.c_str() )
+	);
 }
 
 void GothicAPI::SaveRendererWorldSettings( const GothicRendererSettings & s) {
@@ -695,6 +705,14 @@ void GothicAPI::SaveRendererWorldSettings( const GothicRendererSettings & s) {
 	WritePrivateProfileStringA( "General", "OutdoorVobDrawRadius", std::to_string( s.OutdoorVobDrawRadius ).c_str(), ini.c_str() );
 	WritePrivateProfileStringA( "General", "OutdoorSmallVobDrawRadius", std::to_string( s.OutdoorSmallVobDrawRadius ).c_str(), ini.c_str() );
 	WritePrivateProfileStringA( "General", "SectionDrawRadius", std::to_string( s.SectionDrawRadius ).c_str(), ini.c_str() );
+
+	WritePrivateProfileStringA( "Atmoshpere", "ReplaceSunDirection", std::to_string( s.ReplaceSunDirection ? TRUE : FALSE ).c_str(), ini.c_str() );
+		
+	AtmosphereSettings& aS = GetSky()->GetAtmoshpereSettings();
+
+	WritePrivateProfileStringA( "Atmoshpere", "LightDirectionX", std::to_string( aS.LightDirection.x ).c_str(), ini.c_str() );
+	WritePrivateProfileStringA( "Atmoshpere", "LightDirectionY", std::to_string( aS.LightDirection.y ).c_str(), ini.c_str() );
+	WritePrivateProfileStringA( "Atmoshpere", "LightDirectionZ", std::to_string( aS.LightDirection.z ).c_str(), ini.c_str() );
 }
 
 /** Goes through the given zCTree and registers all found vobs */
@@ -3561,21 +3579,13 @@ XRESULT GothicAPI::SaveMenuSettings( const std::string& file ) {
 	WritePrivateProfileStringA( "General", "EnableGodRays", std::to_string( s.EnableGodRays ? TRUE : FALSE ).c_str(), ini.c_str() );
 	WritePrivateProfileStringA( "General", "AllowNormalmaps", std::to_string( s.AllowNormalmaps ? TRUE : FALSE ).c_str(), ini.c_str() );
 	WritePrivateProfileStringA( "General", "AllowNumpadKeys", std::to_string( s.AllowNumpadKeys ? TRUE : FALSE ).c_str(), ini.c_str() );
-	WritePrivateProfileStringA( "General", "VisualFXDrawRadius", std::to_string( s.VisualFXDrawRadius ).c_str(), ini.c_str() );
-	WritePrivateProfileStringA( "General", "OutdoorVobDrawRadius", std::to_string( s.OutdoorVobDrawRadius ).c_str(), ini.c_str() );
-	WritePrivateProfileStringA( "General", "OutdoorSmallVobDrawRadius", std::to_string( s.OutdoorSmallVobDrawRadius ).c_str(), ini.c_str() );
-	WritePrivateProfileStringA( "General", "SectionDrawRadius", std::to_string( s.SectionDrawRadius ).c_str(), ini.c_str() );
+
+	/*
+	* Draw-distance is saved on a per World basis using SaveRendererWorldSettings
+	*/
+
 	WritePrivateProfileStringA( "General", "EnableOcclusionCulling", std::to_string( s.EnableOcclusionCulling ).c_str(), ini.c_str() );
 	WritePrivateProfileStringA( "General", "FpsLimit", std::to_string( s.FpsLimit ).c_str(), ini.c_str() );
-	WritePrivateProfileStringA( "General", "ReplaceSunDirection", std::to_string( s.ReplaceSunDirection ? TRUE : FALSE ).c_str(), ini.c_str() );
-
-	if ( Engine::GAPI->GetSky() ) {
-		AtmosphereSettings& aS = Engine::GAPI->GetSky()->GetAtmoshpereSettings();
-
-		WritePrivateProfileStringA( "Atmoshpere", "LightDirectionX", std::to_string( aS.LightDirection.x ).c_str(), ini.c_str() );
-		WritePrivateProfileStringA( "Atmoshpere", "LightDirectionY", std::to_string( aS.LightDirection.y ).c_str(), ini.c_str() );
-		WritePrivateProfileStringA( "Atmoshpere", "LightDirectionZ", std::to_string( aS.LightDirection.z ).c_str(), ini.c_str() );
-	}
 
 	auto res = Engine::GraphicsEngine->GetResolution();
 	WritePrivateProfileStringA( "Display", "Width", std::to_string( res.x ).c_str(), ini.c_str() );
@@ -3652,13 +3662,13 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
 	s.EnableGodRays = GetPrivateProfileBoolA( "General", "EnableGodRays", defaultRendererSettings.EnableGodRays, ini );
 	s.AllowNormalmaps = GetPrivateProfileBoolA( "General", "AllowNormalmaps", defaultRendererSettings.AllowNormalmaps, ini );
 	s.AllowNumpadKeys = GetPrivateProfileBoolA( "General", "AllowNumpadKeys", defaultRendererSettings.AllowNumpadKeys, ini );
-	s.VisualFXDrawRadius = GetPrivateProfileFloatA( "General", "VisualFXDrawRadius", 8000.0f, ini.c_str() );
-	s.OutdoorVobDrawRadius = GetPrivateProfileFloatA( "General", "OutdoorVobDrawRadius", 30000.0f, ini.c_str() );
-	s.OutdoorSmallVobDrawRadius = GetPrivateProfileFloatA( "General", "OutdoorSmallVobDrawRadius", 10000.0f, ini.c_str() );
-	s.SectionDrawRadius = GetPrivateProfileFloatA( "General", "SectionDrawRadius", 4, ini.c_str() );
+
+	/*
+	* Draw-distance is Loaded on a per World basis using LoadRendererWorldSettings
+	*/
+
 	s.EnableOcclusionCulling = GetPrivateProfileBoolA( "General", "EnableOcclusionCulling", defaultRendererSettings.EnableOcclusionCulling, ini );
 	s.FpsLimit = GetPrivateProfileIntA( "General", "FpsLimit", 0, ini.c_str() );
-	s.ReplaceSunDirection = GetPrivateProfileBoolA( "General", "ReplaceSunDirection", defaultRendererSettings.ReplaceSunDirection, ini );
 
 	// override INI settings with GMP minimum values.
 	if ( GMPModeActive ) {
@@ -3669,16 +3679,6 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
 	}
 
 	static DirectX::XMFLOAT3 defaultLightDirection = DirectX::XMFLOAT3( 1, 1, 1 );
-
-	if ( Engine::GAPI->GetSky() ) {
-		AtmosphereSettings& aS = Engine::GAPI->GetSky()->GetAtmoshpereSettings();
-
-		aS.LightDirection = DirectX::XMFLOAT3(
-			GetPrivateProfileFloatA( "Atmoshpere", "LightDirectionX", defaultLightDirection.x, ini.c_str() ),
-			GetPrivateProfileFloatA( "Atmoshpere", "LightDirectionY", defaultLightDirection.y, ini.c_str() ),
-			GetPrivateProfileFloatA( "Atmoshpere", "LightDirectionZ", defaultLightDirection.z, ini.c_str() )
-		);
-	}
 
 	s.EnableShadows = GetPrivateProfileBoolA( "Shadows", "EnableShadows", defaultRendererSettings.EnableShadows, ini );
 	s.EnableSoftShadows = GetPrivateProfileBoolA( "Shadows", "EnableSoftShadows", defaultRendererSettings.EnableSoftShadows, ini );
