@@ -1476,10 +1476,8 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
 
 	model->SetIsVisible( true );
 
-#ifndef BUILD_GOTHIC_1_08k
 	if ( !vi->Vob->GetShowVisual() )
 		return;
-#endif
 
 	if ( model->GetDrawHandVisualsOnly() )
 		return; // Not supported yet

@@ -402,7 +402,7 @@ struct GothicMemoryLocations {
 		static const unsigned int Offset_MeshSoftSkinList = 0x70;
 		static const unsigned int Offset_MeshLibList = 0xB0;
 		static const unsigned int Offset_AttachedVobList = 0x8C;
-		static const unsigned int Offset_Flags = 0x1F8;
+		static const unsigned int Offset_Flags = 0x1CC; // was previously 0x1F8
 		//static const unsigned int Offset_DrawHandVisualsOnly = 0x174;
 		static const unsigned int Offset_ModelFatness = 0x118;
 		static const unsigned int Offset_ModelScale = 0x11C;
