@@ -132,6 +132,37 @@ GothicAPI::~GothicAPI() {
 	SAFE_DELETE( WrappedWorldMesh );
 }
 
+float GetPrivateProfileFloatA(
+	const LPCSTR lpAppName,
+	const LPCSTR lpKeyName,
+	const float nDefault,
+	const std::string& lpFileName
+) {
+	const int float_str_max = 30;
+	TCHAR nFloat[float_str_max];
+	if ( GetPrivateProfileStringA( lpAppName, lpKeyName, nullptr, nFloat, float_str_max, lpFileName.c_str() ) ) {
+		return std::stof( std::string( nFloat ) );
+	}
+	return nDefault;
+}
+std::string GetPrivateProfileStringA(
+	const LPCSTR lpAppName,
+	const LPCSTR lpKeyName,
+	const std::string& lpcstrDefault,
+	const std::string& lpFileName ) {
+	char buffer[MAX_PATH];
+	GetPrivateProfileStringA( lpAppName, lpKeyName, lpcstrDefault.c_str(), buffer, MAX_PATH, lpFileName.c_str() );
+	return std::string( buffer );
+}
+
+bool GetPrivateProfileBoolA(
+	const LPCSTR lpAppName,
+	const LPCSTR lpKeyName,
+	const bool nDefault,
+	const std::string& lpFileName ) {
+	return GetPrivateProfileIntA( lpAppName, lpKeyName, nDefault, lpFileName.c_str() ) ? true : false;
+}
+
 /** Called when the game starts */
 void GothicAPI::OnGameStart() {
 	LoadMenuSettings( MENU_SETTINGS_FILE );
@@ -563,6 +594,8 @@ void GothicAPI::OnWorldLoaded() {
 		GetSky()->SetSkyTexture( ESkyTexture::ST_NewWorld ); // Make newworld default
 		RendererState.RendererSettings.SetupNewWorldSpecificValues();
 	}
+	
+	LoadRendererWorldSettings( RendererState.RendererSettings );
 
 	// Reset wetness
 	SceneWetness = GetRainFXWeight();
@@ -578,6 +611,78 @@ void GothicAPI::OnWorldLoaded() {
 #endif
 
 	_canClearVobsByVisual = false;
+}
+
+void GothicAPI::LoadRendererWorldSettings(GothicRendererSettings& s) {
+	if ( !LoadedWorldInfo || LoadedWorldInfo->WorldName.empty() ) {
+		return;
+	}
+
+	auto gameName = GetGameName();
+	std::string zenFolder;
+	if ( gameName == "Original" ) {
+		zenFolder = "system\\GD3D11\\ZENResources\\";
+	} else {
+		zenFolder = "system\\GD3D11\\ZENResources\\" + gameName + "\\";
+	}
+	if ( !Toolbox::FolderExists( zenFolder ) ) {
+		LogInfo() << "Custom ZEN-Resources. Directory not found: " << zenFolder;
+		return;
+	}
+
+	auto const ini = zenFolder + LoadedWorldInfo->WorldName + ".INI";
+	if ( !Toolbox::FileExists( ini ) ) {
+		return;
+	}
+
+	s.FogHeight = GetPrivateProfileFloatA( "Fog", "Height", s.FogHeight, ini.c_str() );
+	s.FogHeightFalloff = GetPrivateProfileFloatA( "Fog", "HeightFalloff", s.FogHeightFalloff, ini.c_str() );
+	s.FogGlobalDensity = GetPrivateProfileFloatA( "Fog", "GlobalDensity", s.FogGlobalDensity, ini.c_str() );
+
+	s.SunLightColor = float3::FromColor(
+		GetPrivateProfileIntA( "Atmoshpere", "SunLightColorR", (int)(s.SunLightColor.x * 255.0f), ini.c_str() ),
+		GetPrivateProfileIntA( "Atmoshpere", "SunLightColorG", (int)(s.SunLightColor.y * 255.0f), ini.c_str() ),
+		GetPrivateProfileIntA( "Atmoshpere", "SunLightColorB", (int)(s.SunLightColor.z * 255.0f), ini.c_str() )
+	);
+
+	s.FogColorMod = float3::FromColor(
+		GetPrivateProfileIntA( "Atmoshpere", "FogColorModR", (int)(s.FogColorMod.x * 255.0f), ini.c_str() ),
+		GetPrivateProfileIntA( "Atmoshpere", "FogColorModG", (int)(s.FogColorMod.y * 255.0f), ini.c_str() ),
+		GetPrivateProfileIntA( "Atmoshpere", "FogColorModB", (int)(s.FogColorMod.z * 255.0f), ini.c_str() )
+	);
+}
+
+void GothicAPI::SaveRendererWorldSettings( const GothicRendererSettings & s) {
+	if ( !LoadedWorldInfo || LoadedWorldInfo->WorldName.empty() ) {
+		return;
+	}
+	auto gameName = GetGameName();
+	std::string zenFolder;
+	if ( gameName == "Original" ) {
+		zenFolder = "system\\GD3D11\\ZENResources\\";
+	} else {
+		zenFolder = "system\\GD3D11\\ZENResources\\" + gameName + "\\";
+	}
+	if ( !Toolbox::FolderExists( zenFolder ) ) {
+		if ( !Toolbox::CreateDirectoryRecursive( zenFolder ) ) {
+			LogError() << "Could not save custom ZEN-Resources. Could not create directory: " << zenFolder;
+			return;
+		}
+	}
+
+	auto const ini = zenFolder + LoadedWorldInfo->WorldName + ".INI";
+
+	WritePrivateProfileStringA( "Fog", "Height", std::to_string( s.FogHeight ).c_str(), ini.c_str() );
+	WritePrivateProfileStringA( "Fog", "HeightFalloff", std::to_string( s.FogHeightFalloff ).c_str(), ini.c_str() );
+	WritePrivateProfileStringA( "Fog", "GlobalDensity", std::to_string( s.FogGlobalDensity ).c_str(), ini.c_str() );
+
+	WritePrivateProfileStringA( "Atmoshpere", "SunLightColorR", std::to_string( (int)(s.SunLightColor.x * 255.0f) ).c_str(), ini.c_str() );
+	WritePrivateProfileStringA( "Atmoshpere", "SunLightColorG", std::to_string( (int)(s.SunLightColor.y * 255.0f) ).c_str(), ini.c_str() );
+	WritePrivateProfileStringA( "Atmoshpere", "SunLightColorB", std::to_string( (int)(s.SunLightColor.z * 255.0f) ).c_str(), ini.c_str() );
+
+	WritePrivateProfileStringA( "Atmoshpere", "FogColorModR", std::to_string( (int)(s.FogColorMod.x * 255.0f) ).c_str(), ini.c_str() );
+	WritePrivateProfileStringA( "Atmoshpere", "FogColorModG", std::to_string( (int)(s.FogColorMod.y * 255.0f) ).c_str(), ini.c_str() );
+	WritePrivateProfileStringA( "Atmoshpere", "FogColorModB", std::to_string( (int)(s.FogColorMod.z * 255.0f) ).c_str(), ini.c_str() );
 }
 
 /** Goes through the given zCTree and registers all found vobs */
@@ -627,7 +732,7 @@ void GothicAPI::DrawWorldMeshNaive() {
 		zCCamera::GetCamera()->SetFOV( RendererState.RendererSettings.FOVHoriz, (Engine::GraphicsEngine->GetResolution().y / (float)Engine::GraphicsEngine->GetResolution().x) * RendererState.RendererSettings.FOVVert );
 
 		CurrentCamera = zCCamera::GetCamera();
-	}
+}
 #else
 	float fovH = 90.0f, fovV = 90.0f;
 	if ( zCCamera::GetCamera() )
@@ -939,7 +1044,7 @@ void GothicAPI::OnVobMoved( zCVob* vob ) {
 		if ( memcmp( &vob->GetWorldMatrixXM(), &XMLoadFloat4x4( &it->second->WorldMatrix ), sizeof( XMMATRIX ) ) == 0 ) {
 			// No actual change
 			return;
-		}
+}
 #endif
 
 		if ( !it->second->ParentBSPNodes.empty() ) {
@@ -2500,7 +2605,7 @@ void GothicAPI::CollectVisibleVobs( std::vector<VobInfo*>& vobs, std::vector<Vob
 				if ( !it->VobConstantBuffer ) {
 					removeList.push_back( it );
 					continue;
-				}
+		}
 #endif
 				if ( !it->Vob->GetShowVisual() ) {
 					continue;
@@ -2514,8 +2619,8 @@ void GothicAPI::CollectVisibleVobs( std::vector<VobInfo*>& vobs, std::vector<Vob
 
 				vobs.push_back( it );
 				it->VisibleInRenderPass = true;
-			}
-		}
+	}
+}
 	}
 
 #ifdef BUILD_GOTHIC_1_08k
@@ -2965,12 +3070,12 @@ void GothicAPI::BuildBspVobMapCacheHelper( zCBspBase* base ) {
 					//if (v)
 					//	MoveVobFromBspToDynamic(v);
 #endif
+					}
 				}
-			}
 
 			bvi.NumStaticLights = leaf->LightVobList.NumInArray;
-		}
-	} else {
+			}
+		} else {
 		zCBspNode* node = (zCBspNode*)base;
 
 		bvi.OriginalNode = base;
@@ -2982,7 +3087,7 @@ void GothicAPI::BuildBspVobMapCacheHelper( zCBspBase* base ) {
 		bvi.Front = &BspLeafVobLists[node->Front];
 		bvi.Back = &BspLeafVobLists[node->Back];
 	}
-}
+	}
 
 /** Builds our BspTreeVobMap */
 void GothicAPI::BuildBspVobMapCache() {
@@ -3208,14 +3313,7 @@ void GothicAPI::SaveCustomZENResources() {
 
 	bool mkDirErr = false;
 	if ( !Toolbox::FolderExists( zenFolder ) ) {
-		unsigned int pos = 0;
-		do {
-			pos = zenFolder.find_first_of( "\\/", pos + 1 );
-			if ( CreateDirectory( zenFolder.substr( 0, pos ).c_str(), NULL ) == FALSE ) {
-				mkDirErr = true;
-				break;
-			}
-		} while ( pos != std::string::npos );
+		mkDirErr = !Toolbox::CreateDirectoryRecursive( zenFolder );
 	}
 
 	if ( mkDirErr ) {
@@ -3430,37 +3528,6 @@ XRESULT GothicAPI::LoadVegetation( const std::string& file ) {
 	fclose( f );
 
 	return XR_SUCCESS;
-}
-
-float GetPrivateProfileFloatA(
-	const LPCSTR lpAppName,
-	const LPCSTR lpKeyName,
-	const float nDefault,
-	const std::string& lpFileName
-) {
-	const int float_str_max = 30;
-	TCHAR nFloat[float_str_max];
-	if ( GetPrivateProfileStringA( lpAppName, lpKeyName, nullptr, nFloat, float_str_max, lpFileName.c_str() ) ) {
-		return std::stof( std::string( nFloat ) );
-	}
-	return nDefault;
-}
-std::string GetPrivateProfileStringA(
-	const LPCSTR lpAppName,
-	const LPCSTR lpKeyName,
-	const std::string& lpcstrDefault,
-	const std::string& lpFileName ) {
-	char buffer[MAX_PATH];
-	GetPrivateProfileStringA( lpAppName, lpKeyName, lpcstrDefault.c_str(), buffer, MAX_PATH, lpFileName.c_str() );
-	return std::string( buffer );
-}
-
-bool GetPrivateProfileBoolA(
-	const LPCSTR lpAppName,
-	const LPCSTR lpKeyName,
-	const bool nDefault,
-	const std::string& lpFileName ) {
-	return GetPrivateProfileIntA( lpAppName, lpKeyName, nDefault, lpFileName.c_str() ) ? true : false;
 }
 
 /** Saves the users settings from the menu */
