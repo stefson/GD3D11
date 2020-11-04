@@ -5254,7 +5254,7 @@ void D3D11GraphicsEngine::DrawQuadMarks() {
 
 /** Copies the depth stencil buffer to DepthStencilBufferCopy */
 void D3D11GraphicsEngine::CopyDepthStencil() {
-	GetContext()->CopyResource( DepthStencilBufferCopy->GetTexture(), DepthStencilBuffer->GetTexture() );
+	GetContext()->CopyResource( DepthStencilBufferCopy->GetTexture(), DepthStencilBuffer->GetTexture().Get() );
 }
 
 /** Draws underwater effects */

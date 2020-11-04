@@ -235,14 +235,14 @@ struct RenderToDepthStencilBuffer {
 		DescDSV.Texture2D.MipSlice = 0;
 		DescDSV.Flags = 0;
 
-		LE( device->CreateDepthStencilView( (ID3D11Resource*)Texture, &DescDSV, &DepthStencilView ) );
+		LE( device->CreateDepthStencilView( (ID3D11Resource*)Texture.Get(), &DescDSV, &DepthStencilView ) );
 
 		if ( arraySize > 1 ) {
 			// Create the one-face render target views
 			DescDSV.Texture2DArray.ArraySize = 1;
 			for ( int i = 0; i < 6; ++i ) {
 				DescDSV.Texture2DArray.FirstArraySlice = i;
-				LE( device->CreateDepthStencilView( Texture, &DescDSV, &CubeMapDSVs[i] ) );
+				LE( device->CreateDepthStencilView( Texture.Get(), &DescDSV, &CubeMapDSVs[i] ) );
 			}
 		}
 
@@ -256,7 +256,7 @@ struct RenderToDepthStencilBuffer {
 
 		DescRV.Texture2D.MipLevels = 1;
 		DescRV.Texture2D.MostDetailedMip = 0;
-		LE( device->CreateShaderResourceView( (ID3D11Resource*)Texture, &DescRV, &ShaderResView ) );
+		LE( device->CreateShaderResourceView( (ID3D11Resource*)Texture.Get(), &DescRV, &ShaderResView ) );
 
 		if ( arraySize > 1 ) {
 			// Create the one-face render target views
@@ -264,7 +264,7 @@ struct RenderToDepthStencilBuffer {
 			DescRV.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
 			for ( int i = 0; i < 6; ++i ) {
 				DescRV.Texture2DArray.FirstArraySlice = i;
-				LE( device->CreateShaderResourceView( Texture, &DescRV, &CubeMapSRVs[i] ) );
+				LE( device->CreateShaderResourceView( Texture.Get(), &DescRV, &CubeMapSRVs[i] ) );
 			}
 		}
 
@@ -288,7 +288,7 @@ struct RenderToDepthStencilBuffer {
 		context->PSSetShaderResources( slot, 1, ShaderResView.GetAddressOf() );
 	}
 
-	ID3D11Texture2D* GetTexture() { return Texture; }
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> GetTexture() { return Texture; }
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetShaderResView() { return ShaderResView; }
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> GetDepthStencilView() { return DepthStencilView; }
 	UINT GetSizeX() { return SizeX; }
@@ -304,7 +304,7 @@ struct RenderToDepthStencilBuffer {
 private:
 
 	// The Texture object
-	ID3D11Texture2D* Texture;
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> Texture;
 
 	UINT SizeX;
 	UINT SizeY;
@@ -318,7 +318,7 @@ private:
 	ID3D11ShaderResourceView* CubeMapSRVs[6];
 
 	void ReleaseAll() {
-		if ( Texture )Texture->Release(); Texture = nullptr;
+		Texture.Reset();
 		ShaderResView.Reset();
 		DepthStencilView.Reset();
 
