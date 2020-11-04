@@ -41,7 +41,7 @@ XRESULT D3D11NVHBAO::Render( ID3D11RenderTargetView* pOutputColorRTV ) {
 
 	GFSDK_SSAO_InputData_D3D11 Input;
 	Input.DepthData.DepthTextureType = GFSDK_SSAO_HARDWARE_DEPTHS;
-	Input.DepthData.pFullResDepthTextureSRV = engine->GetDepthBuffer()->GetShaderResView();
+	Input.DepthData.pFullResDepthTextureSRV = engine->GetDepthBuffer()->GetShaderResView().Get();
 	Input.DepthData.ProjectionMatrix.Data = GFSDK_SSAO_Float4x4( (float*)&Engine::GAPI->GetProjectionMatrix() );
 	Input.DepthData.ProjectionMatrix.Layout = GFSDK_SSAO_COLUMN_MAJOR_ORDER;
 	Input.DepthData.MetersToViewSpaceUnits = settings.MetersToViewSpaceUnits;

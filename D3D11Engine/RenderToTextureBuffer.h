@@ -283,15 +283,15 @@ struct RenderToDepthStencilBuffer {
 	}
 
 	void BindToVertexShader( ID3D11DeviceContext* context, int slot ) {
-		context->VSSetShaderResources( slot, 1, &ShaderResView );
+		context->VSSetShaderResources( slot, 1, ShaderResView.GetAddressOf() );
 	}
 
 	void BindToPixelShader( ID3D11DeviceContext* context, int slot ) {
-		context->PSSetShaderResources( slot, 1, &ShaderResView );
+		context->PSSetShaderResources( slot, 1, ShaderResView.GetAddressOf() );
 	}
 
 	ID3D11Texture2D* GetTexture() { return Texture; }
-	ID3D11ShaderResourceView* GetShaderResView() { return ShaderResView; }
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetShaderResView() { return ShaderResView; }
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> GetDepthStencilView() { return DepthStencilView; }
 	UINT GetSizeX() { return SizeX; }
 	UINT GetSizeY() { return SizeY; }
@@ -312,7 +312,7 @@ private:
 	UINT SizeY;
 
 	// Shader and rendertarget resource views
-	ID3D11ShaderResourceView* ShaderResView;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ShaderResView;
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> DepthStencilView;
 
 	// Rendertargets for the cubemap-faces, if this is a cubemap
@@ -321,7 +321,7 @@ private:
 
 	void ReleaseAll() {
 		if ( Texture )Texture->Release(); Texture = nullptr;
-		if ( ShaderResView )ShaderResView->Release(); ShaderResView = nullptr;
+		ShaderResView.Reset();
 		DepthStencilView.Reset();
 
 		for ( int i = 0; i < 6; i++ )
