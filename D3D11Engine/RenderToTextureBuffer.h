@@ -130,9 +130,9 @@ struct RenderToTextureBuffer {
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetShaderResView() { return ShaderResView; }
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> GetRenderTargetView() { return RenderTargetView; }
 
-	void SetTexture( ID3D11Texture2D* tx ) { Texture = tx; }
-	void SetShaderResView( ID3D11ShaderResourceView* srv ) { ShaderResView = srv; }
-	void SetRenderTargetView( ID3D11RenderTargetView* rtv ) { RenderTargetView = rtv; }
+	//void SetTexture( ID3D11Texture2D* tx ) { Texture = tx; }
+	//void SetShaderResView( ID3D11ShaderResourceView* srv ) { ShaderResView = srv; }
+	//void SetRenderTargetView( ID3D11RenderTargetView* rtv ) { RenderTargetView = rtv; }
 
 	ID3D11RenderTargetView* GetRTVCubemapFace( UINT i ) { return CubeMapRTVs[i]; }
 	ID3D11ShaderResourceView* GetSRVCubemapFace( UINT i ) { return CubeMapSRVs[i]; }
@@ -297,9 +297,9 @@ struct RenderToDepthStencilBuffer {
 	ID3D11DepthStencilView* GetDSVCubemapFace( UINT i ) { return CubeMapDSVs[i]; }
 	ID3D11ShaderResourceView* GetSRVCubemapFace( UINT i ) { return CubeMapSRVs[i]; }
 
-	void SetTexture( ID3D11Texture2D* tx ) { Texture = tx; }
-	void SetShaderResView( ID3D11ShaderResourceView* srv ) { ShaderResView = srv; }
-	void SetDepthStencilView( ID3D11DepthStencilView* dsv ) { DepthStencilView = dsv; }
+	//void SetTexture( ID3D11Texture2D* tx ) { Texture = tx; }
+	//void SetShaderResView( ID3D11ShaderResourceView* srv ) { ShaderResView = srv; }
+	//void SetDepthStencilView( ID3D11DepthStencilView* dsv ) { DepthStencilView = dsv; }
 
 private:
 
