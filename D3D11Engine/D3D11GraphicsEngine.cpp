@@ -4985,7 +4985,7 @@ void D3D11GraphicsEngine::GetBackbufferData( byte** data, int& pixelsize ) {
 		LogInfo() << "Thumbnail failed. Texture could not be created";
 		return;
 	}
-	GetContext()->CopyResource( texture.Get(), rt->GetTexture() );
+	GetContext()->CopyResource( texture.Get(), rt->GetTexture().Get() );
 
 	// Get data
 	D3D11_MAPPED_SUBRESOURCE res;
@@ -5254,7 +5254,7 @@ void D3D11GraphicsEngine::DrawQuadMarks() {
 
 /** Copies the depth stencil buffer to DepthStencilBufferCopy */
 void D3D11GraphicsEngine::CopyDepthStencil() {
-	GetContext()->CopyResource( DepthStencilBufferCopy->GetTexture(), DepthStencilBuffer->GetTexture().Get() );
+	GetContext()->CopyResource( DepthStencilBufferCopy->GetTexture().Get(), DepthStencilBuffer->GetTexture().Get() );
 }
 
 /** Draws underwater effects */
@@ -5666,7 +5666,7 @@ void D3D11GraphicsEngine::SaveScreenshot() {
 		LogError() << "Could not create texture for screenshot!";
 		return;
 	}
-	GetContext()->CopyResource( texture.Get(), rt->GetTexture() );
+	GetContext()->CopyResource( texture.Get(), rt->GetTexture().Get() );
 
 	char date[50];
 	char time[50];

@@ -185,7 +185,7 @@ void SV_GMeshInfoView::UpdateView() {
 	Engine::GAPI->SetProjTransformDX( oldProj );
 
 	// Update panel
-	Panel->SetD3D11TextureAsImage( RT->GetTexture(), INT2( RT->GetSizeX(), RT->GetSizeY() ) );
+	Panel->SetD3D11TextureAsImage( RT->GetTexture().Get(), INT2( RT->GetSizeX(), RT->GetSizeY() ) );
 }
 
 /** Draws the meshes to the buffer */

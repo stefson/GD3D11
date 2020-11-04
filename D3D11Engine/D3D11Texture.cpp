@@ -248,13 +248,13 @@ XRESULT D3D11Texture::GenerateMipMaps() {
 
 	RenderToTextureBuffer* b = new RenderToTextureBuffer( engine->GetDevice(), TextureSize.x, TextureSize.y, DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, DXGI_FORMAT_UNKNOWN, DXGI_FORMAT_UNKNOWN, MipMapCount );
 
-	engine->GetDeferredMediaContext()->CopySubresourceRegion( b->GetTexture(), 0, 0, 0, 0, Texture.Get(), 0, nullptr );
+	engine->GetDeferredMediaContext()->CopySubresourceRegion( b->GetTexture().Get(), 0, 0, 0, 0, Texture.Get(), 0, nullptr );
 
 	// Generate mips
 	engine->GetDeferredMediaContext()->GenerateMips( b->GetShaderResView().Get() );
 
 	// Copy the full chain back
-	engine->GetDeferredMediaContext()->CopyResource( Texture.Get(), b->GetTexture() );
+	engine->GetDeferredMediaContext()->CopyResource( Texture.Get(), b->GetTexture().Get() );
 	delete b;
 
 	Engine::GAPI->LeaveResourceCriticalSection();
