@@ -64,13 +64,13 @@ XRESULT GOcean::InitOcean() {
 	// pointy crests.
 	ocean_param.choppy_scale = 1.3f;
 
-	FFTOceanSimulator = new OceanSimulator( ocean_param, engine->GetDevice() );
+	FFTOceanSimulator = new OceanSimulator( ocean_param, engine->GetDevice().Get() );
 
 	// Update the simulation for the first time.
 	FFTOceanSimulator->updateDisplacementMap( 0 );
 
 	// Create fresnel map
-	CreateFresnelMap( engine->GetDevice() );
+	CreateFresnelMap( engine->GetDevice().Get() );
 
 	return XR_SUCCESS;
 }

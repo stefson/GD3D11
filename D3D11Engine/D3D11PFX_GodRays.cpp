@@ -69,9 +69,9 @@ XRESULT D3D11PFX_GodRays::Render( RenderToTextureBuffer* fxbuffer ) {
 
 	engine->GetContext()->OMGetRenderTargets( 1, &oldRTV, &oldDSV );
 
-	D3D11VShader* vs = engine->GetShaderManager()->GetVShader( "VS_PFX" );
-	D3D11PShader* maskPS = engine->GetShaderManager()->GetPShader( "PS_PFX_GodRayMask" );
-	D3D11PShader* zoomPS = engine->GetShaderManager()->GetPShader( "PS_PFX_GodRayZoom" );
+	auto vs = engine->GetShaderManager()->GetVShader( "VS_PFX" );
+	auto maskPS = engine->GetShaderManager()->GetPShader( "PS_PFX_GodRayMask" );
+	auto zoomPS = engine->GetShaderManager()->GetPShader( "PS_PFX_GodRayZoom" );
 
 	maskPS->Apply();
 	vs->Apply();

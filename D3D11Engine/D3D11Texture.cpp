@@ -76,7 +76,7 @@ XRESULT D3D11Texture::Init( const std::string& file ) {
 	//Engine::GAPI->EnterResourceCriticalSection();
 
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> res;
-	LE( CreateDDSTextureFromFile( engine->GetDevice(), Toolbox::ToWideChar( file.c_str() ).c_str(), (ID3D11Resource**)res.ReleaseAndGetAddressOf(), &ShaderResourceView ) );
+	LE( CreateDDSTextureFromFile( engine->GetDevice().Get(), Toolbox::ToWideChar( file.c_str() ).c_str(), (ID3D11Resource**)res.ReleaseAndGetAddressOf(), &ShaderResourceView ) );
 
 	if ( !ShaderResourceView || !res.Get() )
 		return XR_FAILED;
@@ -246,7 +246,7 @@ XRESULT D3D11Texture::GenerateMipMaps() {
 
 	Engine::GAPI->EnterResourceCriticalSection();
 
-	RenderToTextureBuffer* b = new RenderToTextureBuffer( engine->GetDevice(), TextureSize.x, TextureSize.y, DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, DXGI_FORMAT_UNKNOWN, DXGI_FORMAT_UNKNOWN, MipMapCount );
+	RenderToTextureBuffer* b = new RenderToTextureBuffer( engine->GetDevice().Get(), TextureSize.x, TextureSize.y, DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, DXGI_FORMAT_UNKNOWN, DXGI_FORMAT_UNKNOWN, MipMapCount );
 
 	engine->GetDeferredMediaContext()->CopySubresourceRegion( b->GetTexture().Get(), 0, 0, 0, 0, Texture.Get(), 0, nullptr );
 

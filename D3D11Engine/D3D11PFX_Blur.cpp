@@ -33,8 +33,8 @@ XRESULT D3D11PFX_Blur::RenderBlur( RenderToTextureBuffer* fxbuffer, bool leaveRe
 	/** Pass 1: Downscale/Blur-H */
 	// Apply PFX-VS
 	engine->GetShaderManager()->GetVShader( "VS_PFX" )->Apply();
-	D3D11PShader* gaussPS = engine->GetShaderManager()->GetPShader( "PS_PFX_GaussBlur" );
-	D3D11PShader* simplePS = engine->GetShaderManager()->GetPShader( finalCopyShader );
+	auto gaussPS = engine->GetShaderManager()->GetPShader( "PS_PFX_GaussBlur" );
+	auto simplePS = engine->GetShaderManager()->GetPShader( finalCopyShader );
 
 	// Apply blur-H shader
 	gaussPS->Apply();

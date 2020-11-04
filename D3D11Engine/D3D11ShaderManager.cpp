@@ -23,8 +23,8 @@ D3D11ShaderManager::~D3D11ShaderManager() {
 /** Creates list with ShaderInfos */
 XRESULT D3D11ShaderManager::Init() {
 	Shaders = std::vector<ShaderInfo>();
-	VShaders = std::unordered_map<std::string, D3D11VShader*>();
-	PShaders = std::unordered_map<std::string, D3D11PShader*>();
+	VShaders = std::unordered_map<std::string, std::shared_ptr<D3D11VShader>>();
+	PShaders = std::unordered_map<std::string, std::shared_ptr<D3D11PShader>>();
 
 	Shaders.push_back( ShaderInfo( "VS_Ex", "VS_Ex.hlsl", "v", 1 ) );
 	Shaders.back().cBufferSizes.push_back( sizeof( VS_ExConstantBuffer_PerFrame ) );
@@ -458,8 +458,7 @@ XRESULT D3D11ShaderManager::LoadShaders() {
 						delete vs;
 					} else {
 						// Compilation succeeded, switch the shader
-						delete VShaders[Shaders[i].name];
-						VShaders[Shaders[i].name] = vs;
+						VShaders[Shaders[i].name].reset(vs);
 
 						for ( unsigned int j = 0; j < Shaders[i].cBufferSizes.size(); j++ ) {
 							VShaders[Shaders[i].name]->GetConstantBuffer().push_back( new D3D11ConstantBuffer( Shaders[i].cBufferSizes[j], nullptr ) );
@@ -469,7 +468,7 @@ XRESULT D3D11ShaderManager::LoadShaders() {
 					if ( Engine::GAPI->GetRendererState()->RendererSettings.EnableDebugLog )
 						LogInfo() << "Reloading shader: " << Shaders[i].name;
 
-					VShaders[Shaders[i].name] = new D3D11VShader();
+					VShaders[Shaders[i].name] = std::make_shared<D3D11VShader>();
 					XLE( VShaders[Shaders[i].name]->LoadShader( ("system\\GD3D11\\shaders\\" + Shaders[i].fileName).c_str(), Shaders[i].layout, Shaders[i].shaderMakros ) );
 					for ( unsigned int j = 0; j < Shaders[i].cBufferSizes.size(); j++ ) {
 						VShaders[Shaders[i].name]->GetConstantBuffer().push_back( new D3D11ConstantBuffer( Shaders[i].cBufferSizes[j], nullptr ) );
@@ -485,15 +484,14 @@ XRESULT D3D11ShaderManager::LoadShaders() {
 						delete ps;
 					} else {
 						// Compilation succeeded, switch the shader
-						delete PShaders[Shaders[i].name];
-						PShaders[Shaders[i].name] = ps;
+						PShaders[Shaders[i].name].reset(ps);
 
 						for ( unsigned int j = 0; j < Shaders[i].cBufferSizes.size(); j++ ) {
 							PShaders[Shaders[i].name]->GetConstantBuffer().push_back( new D3D11ConstantBuffer( Shaders[i].cBufferSizes[j], nullptr ) );
 						}
 					}
 				} else {
-					PShaders[Shaders[i].name] = new D3D11PShader();
+					PShaders[Shaders[i].name] = std::make_shared<D3D11PShader>();
 					XLE( PShaders[Shaders[i].name]->LoadShader( ("system\\GD3D11\\shaders\\" + Shaders[i].fileName).c_str(), Shaders[i].shaderMakros ) );
 					for ( unsigned int j = 0; j < Shaders[i].cBufferSizes.size(); j++ ) {
 						PShaders[Shaders[i].name]->GetConstantBuffer().push_back( new D3D11ConstantBuffer( Shaders[i].cBufferSizes[j], nullptr ) );
@@ -509,15 +507,14 @@ XRESULT D3D11ShaderManager::LoadShaders() {
 						delete gs;
 					} else {
 						// Compilation succeeded, switch the shader
-						delete GShaders[Shaders[i].name];
-						GShaders[Shaders[i].name] = gs;
+						GShaders[Shaders[i].name].reset(gs);
 
 						for ( unsigned int j = 0; j < Shaders[i].cBufferSizes.size(); j++ ) {
 							GShaders[Shaders[i].name]->GetConstantBuffer().push_back( new D3D11ConstantBuffer( Shaders[i].cBufferSizes[j], nullptr ) );
 						}
 					}
 				} else {
-					GShaders[Shaders[i].name] = new D3D11GShader();
+					GShaders[Shaders[i].name] = std::make_shared<D3D11GShader>();
 					XLE( GShaders[Shaders[i].name]->LoadShader( ("system\\GD3D11\\shaders\\" + Shaders[i].fileName).c_str(), Shaders[i].shaderMakros, Shaders[i].layout != 0, Shaders[i].layout ) );
 					for ( unsigned int j = 0; j < Shaders[i].cBufferSizes.size(); j++ ) {
 						GShaders[Shaders[i].name]->GetConstantBuffer().push_back( new D3D11ConstantBuffer( Shaders[i].cBufferSizes[j], nullptr ) );
@@ -540,15 +537,14 @@ XRESULT D3D11ShaderManager::LoadShaders() {
 					delete hds;
 				} else {
 					// Compilation succeeded, switch the shader
-					delete HDShaders[Shaders[i].name];
-					HDShaders[Shaders[i].name] = hds;
+					HDShaders[Shaders[i].name].reset(hds);
 
 					for ( unsigned int j = 0; j < Shaders[i].cBufferSizes.size(); j++ ) {
 						HDShaders[Shaders[i].name]->GetConstantBuffer().push_back( new D3D11ConstantBuffer( Shaders[i].cBufferSizes[j], nullptr ) );
 					}
 				}
 			} else {
-				HDShaders[Shaders[i].name] = new D3D11HDShader();
+				HDShaders[Shaders[i].name] = std::make_shared<D3D11HDShader>();
 				XLE( HDShaders[Shaders[i].name]->LoadShader( ("system\\GD3D11\\shaders\\" + Shaders[i].fileName).c_str(),
 					("system\\GD3D11\\shaders\\" + Shaders[i].fileName).c_str() ) );
 				for ( unsigned int j = 0; j < Shaders[i].cBufferSizes.size(); j++ ) {
@@ -581,21 +577,18 @@ XRESULT D3D11ShaderManager::OnFrameStart() {
 
 /** Deletes all shaders */
 XRESULT D3D11ShaderManager::DeleteShaders() {
-	std::unordered_map<std::string, D3D11VShader*>::iterator vIter;
-	for ( vIter = VShaders.begin(); vIter != VShaders.end(); vIter++ ) {
-		delete vIter->second;
+	for ( auto vIter = VShaders.begin(); vIter != VShaders.end(); vIter++ ) {
+		vIter->second.reset();
 	}
 	VShaders.clear();
 
-	std::unordered_map<std::string, D3D11PShader*>::iterator pIter;
-	for ( pIter = PShaders.begin(); pIter != PShaders.end(); pIter++ ) {
-		delete pIter->second;
+	for ( auto pIter = PShaders.begin(); pIter != PShaders.end(); pIter++ ) {
+		pIter->second.reset();
 	}
 	PShaders.clear();
 
-	std::unordered_map<std::string, D3D11HDShader*>::iterator hdIter;
-	for ( hdIter = HDShaders.begin(); hdIter != HDShaders.end(); hdIter++ ) {
-		delete hdIter->second;
+	for ( auto hdIter = HDShaders.begin(); hdIter != HDShaders.end(); hdIter++ ) {
+		hdIter->second.reset();
 	}
 	HDShaders.clear();
 
@@ -603,18 +596,15 @@ XRESULT D3D11ShaderManager::DeleteShaders() {
 }
 
 /** Return a specific shader */
-D3D11VShader* D3D11ShaderManager::GetVShader( std::string shader ) {
+std::shared_ptr<D3D11VShader> D3D11ShaderManager::GetVShader( std::string shader ) {
 	return VShaders[shader];
 }
-D3D11PShader* D3D11ShaderManager::GetPShader( std::string shader ) {
+std::shared_ptr<D3D11PShader> D3D11ShaderManager::GetPShader( std::string shader ) {
 	return PShaders[shader];
 }
-
-D3D11HDShader* D3D11ShaderManager::GetHDShader( std::string shader ) {
+std::shared_ptr<D3D11HDShader> D3D11ShaderManager::GetHDShader( std::string shader ) {
 	return HDShaders[shader];
 }
-
-
-D3D11GShader* D3D11ShaderManager::GetGShader( std::string shader ) {
+std::shared_ptr<D3D11GShader> D3D11ShaderManager::GetGShader( std::string shader ) {
 	return GShaders[shader];
 }

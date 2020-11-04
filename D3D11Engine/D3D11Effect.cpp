@@ -95,11 +95,11 @@ XRESULT D3D11Effect::DrawRain() {
 	GothicRendererState& state = *Engine::GAPI->GetRendererState();
 
 	// Get shaders
-	D3D11GShader* streamOutGS = e->GetShaderManager()->GetGShader( "GS_ParticleStreamOut" );
-	D3D11GShader* particleGS = e->GetShaderManager()->GetGShader( "GS_Raindrops" );
-	D3D11VShader* particleAdvanceVS = e->GetShaderManager()->GetVShader( "VS_AdvanceRain" );
-	D3D11VShader* particleVS = e->GetShaderManager()->GetVShader( "VS_ParticlePointShaded" );
-	D3D11PShader* rainPS = e->GetShaderManager()->GetPShader( "PS_Rain" );
+	auto streamOutGS = e->GetShaderManager()->GetGShader( "GS_ParticleStreamOut" );
+	auto particleGS = e->GetShaderManager()->GetGShader( "GS_Raindrops" );
+	auto particleAdvanceVS = e->GetShaderManager()->GetVShader( "VS_AdvanceRain" );
+	auto particleVS = e->GetShaderManager()->GetVShader( "VS_ParticlePointShaded" );
+	auto rainPS = e->GetShaderManager()->GetPShader( "PS_Rain" );
 
 	UINT numParticles = Engine::GAPI->GetRendererState()->RendererSettings.RainNumParticles;
 
@@ -135,7 +135,7 @@ XRESULT D3D11Effect::DrawRain() {
 			HRESULT hr = S_OK;
 			// Load textures...
 			LogInfo() << "Loading rain-drop textures";
-			LE( LoadTextureArray( e->GetDevice(), e->GetContext(), "system\\GD3D11\\Textures\\Raindrops\\cv0_vPositive_", 370, &RainTextureArray, &RainTextureArraySRV ) );
+			LE( LoadTextureArray( e->GetDevice().Get(), e->GetContext().Get(), "system\\GD3D11\\Textures\\Raindrops\\cv0_vPositive_", 370, &RainTextureArray, &RainTextureArraySRV ) );
 
 		}
 
@@ -306,7 +306,7 @@ XRESULT D3D11Effect::DrawRainShadowmap() {
 	Engine::GAPI->GetRendererState()->GraphicsState.FF_AlphaRef = -1.0f;
 
 	// Bind the FF-Info to the first PS slot
-	D3D11PShader* PS_Diffuse = e->GetShaderManager()->GetPShader( "PS_Diffuse" );
+	auto PS_Diffuse = e->GetShaderManager()->GetPShader( "PS_Diffuse" );
 	if ( PS_Diffuse ) {
 		PS_Diffuse->GetConstantBuffer()[0]->UpdateBuffer( &Engine::GAPI->GetRendererState()->GraphicsState );
 		PS_Diffuse->GetConstantBuffer()[0]->BindToPixelShader( 0 );

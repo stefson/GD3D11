@@ -178,7 +178,7 @@ XRESULT D3D11GraphicsEngineBase::OnResize( INT2 newSize ) {
 			Engine::GAPI->GetIntParamFromConfig( "zStartupWindowed" );
 		swapChainFSDesc.Windowed = windowed;
 
-		LE( DXGIFactory2->CreateSwapChainForHwnd( GetDevice(), OutputWindow, &scd, &swapChainFSDesc, nullptr, &SwapChain ) );
+		LE( DXGIFactory2->CreateSwapChainForHwnd( GetDevice().Get(), OutputWindow, &scd, &swapChainFSDesc, nullptr, &SwapChain ) );
 
 		if ( !SwapChain ) {
 			LogError() << "Failed to create Swapchain! Program will now exit!";
@@ -197,8 +197,8 @@ XRESULT D3D11GraphicsEngineBase::OnResize( INT2 newSize ) {
 	}
 
 	// Successfully resized swapchain, re-get buffers
-	ID3D11Texture2D* backbuffer = nullptr;
-	SwapChain->GetBuffer( 0, __uuidof(ID3D11Texture2D), (void**)&backbuffer );
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> backbuffer;
+	SwapChain->GetBuffer( 0, __uuidof(ID3D11Texture2D), (void**)backbuffer.ReleaseAndGetAddressOf() );
 
 	if ( !backbuffer ) {
 		LogError() << "Failed to get backbuffer!";
@@ -206,10 +206,10 @@ XRESULT D3D11GraphicsEngineBase::OnResize( INT2 newSize ) {
 	}
 
 	// Recreate RenderTargetView
-	ID3D11RenderTargetView* backbufferRTV;
-	ID3D11ShaderResourceView* backbufferSRV;
-	LE( GetDevice()->CreateRenderTargetView( backbuffer, nullptr, &backbufferRTV ) );
-	LE( GetDevice()->CreateShaderResourceView( backbuffer, nullptr, &backbufferSRV ) );
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> backbufferRTV;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> backbufferSRV;
+	LE( GetDevice()->CreateRenderTargetView( backbuffer.Get(), nullptr, &backbufferRTV ) );
+	LE( GetDevice()->CreateShaderResourceView( backbuffer.Get(), nullptr, &backbufferSRV ) );
 
 	Backbuffer = std::make_unique<RenderToTextureBuffer>( backbuffer, backbufferSRV, backbufferRTV, (UINT)Resolution.x, (UINT)Resolution.y );
 
@@ -493,8 +493,8 @@ void D3D11GraphicsEngineBase::SetDefaultStates() {
 /** Draws a vertexarray, used for rendering gothics UI */
 XRESULT D3D11GraphicsEngineBase::DrawVertexArray( ExVertexStruct* vertices, unsigned int numVertices, unsigned int startVertex, unsigned int stride ) {
 	UpdateRenderStates();
-	D3D11VShader* vShader = ShaderManager->GetVShader( "VS_TransformedEx" );
-	D3D11PShader* pShader = ShaderManager->GetPShader( "PS_FixedFunctionPipe" );
+	auto vShader = ShaderManager->GetVShader( "VS_TransformedEx" );
+	auto pShader = ShaderManager->GetPShader( "PS_FixedFunctionPipe" );
 
 	// Bind the FF-Info to the first PS slot
 	pShader->GetConstantBuffer()[0]->UpdateBuffer( &Engine::GAPI->GetRendererState()->GraphicsState );
@@ -758,8 +758,8 @@ XRESULT D3D11GraphicsEngineBase::BindViewportInformation( const std::string& sha
 	f2[1].x = vp.Width / scale;
 	f2[1].y = vp.Height / scale;
 
-	D3D11PShader* ps = ShaderManager->GetPShader( shader );
-	D3D11VShader* vs = ShaderManager->GetVShader( shader );
+	auto ps = ShaderManager->GetPShader( shader );
+	auto vs = ShaderManager->GetVShader( shader );
 
 	if ( vs ) {
 		vs->GetConstantBuffer()[slot]->UpdateBuffer( f2 );

@@ -42,8 +42,8 @@ D3D11PointLight::~D3D11PointLight() {
 	// Make sure we are out of the init-queue
 	while ( !InitDone );
 
-	SAFE_DELETE(DepthCubemap);
-	SAFE_DELETE(ViewMatricesCB);
+	DepthCubemap.reset();
+	ViewMatricesCB.reset();
 
 	for ( auto it = WorldMeshCache.begin(); it != WorldMeshCache.end(); it++ ) {
 		SAFE_DELETE(it->second);
@@ -62,7 +62,7 @@ void D3D11PointLight::InitResources() {
 	Engine::GAPI->EnterResourceCriticalSection();
 
 	// Create texture-cube for this light
-	DepthCubemap = new RenderToDepthStencilBuffer( engine->GetDevice(),
+	DepthCubemap = std::make_unique<RenderToDepthStencilBuffer>( engine->GetDevice(),
 		POINTLIGHT_SHADOWMAP_SIZE,
 		POINTLIGHT_SHADOWMAP_SIZE,
 		DXGI_FORMAT_R32_TYPELESS,
@@ -72,7 +72,9 @@ void D3D11PointLight::InitResources() {
 		6 );
 
 	// Create constantbuffer for the view-matrices
-	engine->CreateConstantBuffer( &ViewMatricesCB, nullptr, sizeof( CubemapGSConstantBuffer ) );
+	D3D11ConstantBuffer* cb = nullptr;
+	engine->CreateConstantBuffer( &cb, nullptr, sizeof( CubemapGSConstantBuffer ) );
+	ViewMatricesCB.reset( cb );
 
 	// Generate worldmesh cache if we aren't a dynamically added light
 	if ( !DynamicLight ) {
@@ -221,7 +223,7 @@ void D3D11PointLight::RenderFullCubemap() {
 	if ( WorldCacheInvalid )
 		wc = nullptr;
 
-	engine->RenderShadowCube( LightInfo->Vob->GetPositionWorldXM(), range, DepthCubemap, nullptr, nullptr, false, LightInfo->IsIndoorVob, noNPCs, &VobCache, &SkeletalVobCache, wc );
+	engine->RenderShadowCube( LightInfo->Vob->GetPositionWorldXM(), range, DepthCubemap.get(), nullptr, nullptr, false, LightInfo->IsIndoorVob, noNPCs, &VobCache, &SkeletalVobCache, wc );
 
 	//Engine::GAPI->GetRendererState()->RendererSettings.DrawSkeletalMeshes = oldDrawSkel;
 }
@@ -250,7 +252,7 @@ void D3D11PointLight::RenderCubemapFace( const DirectX::XMFLOAT4X4& view, const 
 
 	// Draw cubemap face
 	ID3D11RenderTargetView* debugRTV = engine->GetDummyCubeRT() != nullptr ? engine->GetDummyCubeRT()->GetRTVCubemapFace( faceIdx ) : nullptr;
-	engine->RenderShadowCube( LightInfo->Vob->GetPositionWorldXM(), range, DepthCubemap, DepthCubemap->GetDSVCubemapFace( faceIdx ), debugRTV, false );
+	engine->RenderShadowCube( LightInfo->Vob->GetPositionWorldXM(), range, DepthCubemap.get(), DepthCubemap->GetDSVCubemapFace( faceIdx ), debugRTV, false );
 
 	//Engine::GAPI->GetRendererState()->RendererSettings.DrawSkeletalMeshes = oldDrawSkel;
 

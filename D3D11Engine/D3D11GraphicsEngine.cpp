@@ -288,14 +288,14 @@ XRESULT D3D11GraphicsEngine::Init() {
 	// Load reflectioncube
 
 	if ( S_OK != CreateDDSTextureFromFile(
-		GetDevice(), L"system\\GD3D11\\Textures\\reflect_cube.dds",
+		GetDevice().Get(), L"system\\GD3D11\\Textures\\reflect_cube.dds",
 		nullptr,
 		&ReflectionCube ) )
 		LogWarn()
 		<< "Failed to load file: system\\GD3D11\\Textures\\reflect_cube.dds";
 
 	if ( S_OK != CreateDDSTextureFromFile(
-		GetDevice(), L"system\\GD3D11\\Textures\\SkyCubemap2.dds",
+		GetDevice().Get(), L"system\\GD3D11\\Textures\\SkyCubemap2.dds",
 		nullptr, &ReflectionCube2 ) )
 		LogWarn()
 		<< "Failed to load file: system\\GD3D11\\Textures\\SkyCubemap2.dds";
@@ -354,13 +354,13 @@ XRESULT D3D11GraphicsEngine::Init() {
 
 	try {
 		auto fontFilePath = L"system\\GD3D11\\Fonts\\" + Toolbox::ToWideChar( Engine::GAPI->GetRendererState()->RendererSettings.FontFileDefault );
-		m_font = std::make_unique<SpriteFont>( GetDevice(), fontFilePath.c_str() );
-		m_spriteBatch = std::make_unique<SpriteBatch>( GetContext() );
+		m_font = std::make_unique<SpriteFont>( GetDevice().Get(), fontFilePath.c_str() );
+		m_spriteBatch = std::make_unique<SpriteBatch>( GetContext().Get() );
 	} catch ( const std::exception& ex ) {
 		Engine::GAPI->GetRendererState()->RendererSettings.EnableCustomFontRendering = false;
 		LogError() << ex.what() << std::endl;
 	}
-	states = std::make_unique<CommonStates>( GetDevice() );
+	states = std::make_unique<CommonStates>( GetDevice().Get() );
 
 	return XR_SUCCESS;
 }
@@ -498,7 +498,7 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
 			swapChainFSDesc.Windowed = windowed;
 		}
 
-		LE( factory2->CreateSwapChainForHwnd( GetDevice(), OutputWindow, &scd, &swapChainFSDesc, nullptr, &SwapChain ) );
+		LE( factory2->CreateSwapChainForHwnd( GetDevice().Get(), OutputWindow, &scd, &swapChainFSDesc, nullptr, &SwapChain ) );
 		if ( !SwapChain ) {
 			LogError() << "Failed to create Swapchain! Program will now exit!";
 			exit( 0 );
@@ -1018,8 +1018,8 @@ XRESULT D3D11GraphicsEngine::BindViewportInformation( const std::string& shader,
 	Temp2Float2[1].x = vp.Width / scale;
 	Temp2Float2[1].y = vp.Height / scale;
 
-	D3D11PShader* ps = ShaderManager->GetPShader( shader );
-	D3D11VShader* vs = ShaderManager->GetVShader( shader );
+	auto ps = ShaderManager->GetPShader( shader );
+	auto vs = ShaderManager->GetVShader( shader );
 
 	if ( vs ) {
 		vs->GetConstantBuffer()[slot]->UpdateBuffer( Temp2Float2 );
@@ -1049,7 +1049,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexArray( ExVertexStruct* vertices,
 	unsigned int startVertex,
 	unsigned int stride ) {
 	UpdateRenderStates();
-	D3D11VShader* vShader = ActiveVS;
+	auto vShader = ActiveVS;
 	// ShaderManager->GetVShader("VS_TransformedEx");
 
 	// Bind the FF-Info to the first PS slot
@@ -1097,9 +1097,9 @@ XRESULT D3D11GraphicsEngine::DrawIndexedVertexArray( ExVertexStruct* vertices,
 	D3D11VertexBuffer* ib,
 	unsigned int numIndices,
 	unsigned int stride ) {
+
 	UpdateRenderStates();
-	D3D11VShader* vShader =
-		ActiveVS;  // ShaderManager->GetVShader("VS_TransformedEx");
+	auto vShader = ActiveVS;  // ShaderManager->GetVShader("VS_TransformedEx");
 
 	// Bind the FF-Info to the first PS slot
 
@@ -1183,9 +1183,9 @@ XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh(
 		SetActiveVertexShader( "VS_ExSkeletal" );
 	}
 	SetActivePixelShader( "PS_AtmosphereGround" );
-	const D3D11PShader* nrmPS = ActivePS;
+	const auto nrmPS = ActivePS;
 	SetActivePixelShader( "PS_World" );
-	const D3D11PShader* defaultPS = ActivePS;
+	const auto defaultPS = ActivePS;
 
 	InfiniteRangeConstantBuffer->BindToPixelShader( 3 );
 
@@ -1335,7 +1335,7 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
 		instanceDataStride * numInstances );
 
 	// Bind shader and pipeline flags
-	D3D11VShader* vShader = ShaderManager->GetVShader( "VS_ExInstanced" );
+	auto vShader = ShaderManager->GetVShader( "VS_ExInstanced" );
 
 	auto* world =
 		&Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
@@ -2274,11 +2274,11 @@ XRESULT D3D11GraphicsEngine::DrawWorldMeshW( bool noTextures ) {
 
 	// Set shader
 	SetActivePixelShader( "PS_AtmosphereGround" );
-	D3D11PShader* nrmPS = ActivePS;
+	auto nrmPS = ActivePS;
 	SetActivePixelShader( "PS_World" );
-	D3D11PShader* defaultPS = ActivePS;
+	auto defaultPS = ActivePS;
 	SetActiveVertexShader( "VS_Ex" );
-	D3D11VShader* vsEx = ActiveVS;
+	auto vsEx = ActiveVS;
 
 	// Set constant buffer
 	ActivePS->GetConstantBuffer()[0]->UpdateBuffer(
@@ -2410,7 +2410,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMeshW( bool noTextures ) {
 				GetContext()->IASetPrimitiveTopology(
 					D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST );
 
-				D3D11HDShader* hd =
+				auto hd =
 					ShaderManager->GetHDShader( info->TesselationShaderPair );
 				if ( hd ) hd->Apply();
 
@@ -2957,9 +2957,9 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround( FXMVECTOR position,
 
 	// Set shader
 	SetActivePixelShader( "PS_AtmosphereGround" );
-	D3D11PShader* nrmPS = ActivePS;
+	auto nrmPS = ActivePS;
 	SetActivePixelShader( "PS_DiffuseAlphaTest" );
-	D3D11PShader* defaultPS = ActivePS;
+	auto defaultPS = ActivePS;
 	SetActiveVertexShader( "VS_Ex" );
 
 	bool linearDepth =
@@ -3222,9 +3222,9 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 	SetDefaultStates();
 
 	SetActivePixelShader( "PS_AtmosphereGround" );
-	D3D11PShader* nrmPS = ActivePS;
+	auto nrmPS = ActivePS;
 	SetActivePixelShader( "PS_Diffuse" );
-	D3D11PShader* defaultPS = ActivePS;
+	auto defaultPS = ActivePS;
 	SetActiveVertexShader( "VS_ExInstancedObj" );
 
 	// Set constant buffer
@@ -4124,8 +4124,8 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
 	SetActiveVertexShader( "VS_ExPointLight" );
 	SetActivePixelShader( "PS_DS_PointLight" );
 
-	D3D11PShader* psPointLight = ShaderManager->GetPShader( "PS_DS_PointLight" );
-	D3D11PShader* psPointLightDynShadow = ShaderManager->GetPShader( "PS_DS_PointLightDynShadow" );
+	auto psPointLight = ShaderManager->GetPShader( "PS_DS_PointLight" );
+	auto psPointLightDynShadow = ShaderManager->GetPShader( "PS_DS_PointLightDynShadow" );
 
 	Engine::GAPI->SetFarPlane(
 		Engine::GAPI->GetRendererState()->RendererSettings.SectionDrawRadius *
@@ -4765,7 +4765,7 @@ XRESULT D3D11GraphicsEngine::DrawOcean( GOcean* ocean ) {
 	GetContext()->IASetPrimitiveTopology(
 		D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST );
 
-	D3D11HDShader* hd = ShaderManager->GetHDShader( "OceanTess" );
+	auto hd = ShaderManager->GetHDShader( "OceanTess" );
 	if ( hd ) hd->Apply();
 
 	DefaultHullShaderConstantBuffer hscb = {};
@@ -5004,8 +5004,8 @@ void D3D11GraphicsEngine::GetBackbufferData( byte** data, int& pixelsize ) {
 void D3D11GraphicsEngine::BindShaderForTexture( zCTexture* texture,
 	bool forceAlphaTest,
 	int zMatAlphaFunc ) {
-	D3D11PShader* active = ActivePS;
-	D3D11PShader* newShader = ActivePS;
+	auto active = ActivePS;
+	auto newShader = ActivePS;
 
 	bool blendAdd = zMatAlphaFunc == zMAT_ALPHA_FUNC_ADD;
 	bool blendBlend = zMatAlphaFunc == zMAT_ALPHA_FUNC_BLEND;
@@ -5351,7 +5351,7 @@ void D3D11GraphicsEngine::RenderStrings() {
 
 /** Sets up everything for a PNAEN-Mesh */
 void D3D11GraphicsEngine::Setup_PNAEN( EPNAENRenderMode mode ) {
-	D3D11HDShader* pnaen = ShaderManager->GetHDShader( "PNAEN_Tesselation" );
+	auto pnaen = ShaderManager->GetHDShader( "PNAEN_Tesselation" );
 
 	if ( mode == PNAEN_Instanced )
 		SetActiveVertexShader( "VS_PNAEN_Instanced" );
@@ -5404,7 +5404,7 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 	GetContext()->ClearRenderTargetView( GBuffer0_Diffuse->GetRenderTargetView().Get(), (float*)&float4( 0, 0, 0, 0 ) );
 	GetContext()->ClearRenderTargetView( GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView().Get(), (float*)&float4( 0, 0, 0, 0 ) );
 
-	D3D11PShader* distPS = ShaderManager->GetPShader( "PS_ParticleDistortion" );
+	auto distPS = ShaderManager->GetPShader( "PS_ParticleDistortion" );
 
 	RefractionInfoConstantBuffer ricb = {};
 	ricb.RI_Projection = Engine::GAPI->GetProjectionMatrix();
@@ -5685,7 +5685,7 @@ void D3D11GraphicsEngine::SaveScreenshot() {
 
 	// Save the Texture as jpeg using Windows Imaging Component (WIC) with 95% quality.
 
-	LE( SaveWICTextureToFile( GetContext(), texture.Get(), GUID_ContainerFormatJpeg, Toolbox::ToWideChar( name ).c_str(), nullptr, []( IPropertyBag2* props ) {
+	LE( SaveWICTextureToFile( GetContext().Get(), texture.Get(), GUID_ContainerFormatJpeg, Toolbox::ToWideChar( name ).c_str(), nullptr, []( IPropertyBag2* props ) {
 		PROPBAG2 options[1] = { 0 };
 		options[0].pstrName = const_cast<wchar_t*>(L"ImageQuality");
 
