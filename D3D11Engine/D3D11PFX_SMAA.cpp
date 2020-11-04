@@ -154,7 +154,7 @@ void D3D11PFX_SMAA::RenderPostFX( ID3D11ShaderResourceView* renderTargetSRV ) {
 	/** Second pass - BlendingWeightCalculation */
 	engine->GetContext()->OMSetRenderTargets( 1, BlendTex->GetRenderTargetView().GetAddressOf(), OldDSV );
 
-	SMAAShader->GetVariableByName( "edgesTex" )->AsShaderResource()->SetResource( EdgesTex->GetShaderResView() );
+	SMAAShader->GetVariableByName( "edgesTex" )->AsShaderResource()->SetResource( EdgesTex->GetShaderResView().Get() );
 
 	BlendingWeightCalculation->GetPassByIndex( 0 )->Apply( 0, engine->GetContext() );
 	FxRenderer->DrawFullScreenQuad();
@@ -174,7 +174,7 @@ void D3D11PFX_SMAA::RenderPostFX( ID3D11ShaderResourceView* renderTargetSRV ) {
 
 
 	SMAAShader->GetVariableByName( "colorTex" )->AsShaderResource()->SetResource( renderTargetSRV );
-	SMAAShader->GetVariableByName( "blendTex" )->AsShaderResource()->SetResource( BlendTex->GetShaderResView() );
+	SMAAShader->GetVariableByName( "blendTex" )->AsShaderResource()->SetResource( BlendTex->GetShaderResView().Get() );
 
 	NeighborhoodBlending->GetPassByIndex( 0 )->Apply( 0, engine->GetContext() );
 	FxRenderer->DrawFullScreenQuad();
@@ -187,7 +187,7 @@ void D3D11PFX_SMAA::RenderPostFX( ID3D11ShaderResourceView* renderTargetSRV ) {
 	engine->DrawSRVToBackbuffer(TempRTV->GetShaderResView());
 	goto end;*/
 
-	ID3D11ShaderResourceView* srv = TempRTV->GetShaderResView();
+	ID3D11ShaderResourceView* srv = TempRTV->GetShaderResView().Get();
 	engine->GetContext()->PSSetShaderResources( 0, 1, &srv );
 
 
@@ -204,9 +204,9 @@ void D3D11PFX_SMAA::RenderPostFX( ID3D11ShaderResourceView* renderTargetSRV ) {
 		sharpenPS->GetConstantBuffer()[0]->UpdateBuffer( &gcb );
 		sharpenPS->GetConstantBuffer()[0]->BindToPixelShader( 0 );
 
-		FxRenderer->CopyTextureToRTV( TempRTV->GetShaderResView(), OldRTV, INT2( 0, 0 ), true );
+		FxRenderer->CopyTextureToRTV( TempRTV->GetShaderResView().Get(), OldRTV, INT2( 0, 0 ), true );
 	} else {
-		FxRenderer->CopyTextureToRTV( TempRTV->GetShaderResView(), OldRTV );
+		FxRenderer->CopyTextureToRTV( TempRTV->GetShaderResView().Get(), OldRTV );
 	}
 
 	engine->GetContext()->PSSetShaderResources( 0, 3, NoSRV );

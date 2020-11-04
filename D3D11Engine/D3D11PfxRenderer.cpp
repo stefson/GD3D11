@@ -67,7 +67,7 @@ XRESULT D3D11PfxRenderer::RenderHDR() {
 /** Renders the SMAA-Effect */
 XRESULT D3D11PfxRenderer::RenderSMAA() {
 	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
-	FX_SMAA->RenderPostFX( engine->GetHDRBackBuffer()->GetShaderResView() );
+	FX_SMAA->RenderPostFX( engine->GetHDRBackBuffer()->GetShaderResView().Get() );
 
 	return XR_SUCCESS;
 }

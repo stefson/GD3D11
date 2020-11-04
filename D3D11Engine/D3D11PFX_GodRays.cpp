@@ -77,7 +77,7 @@ XRESULT D3D11PFX_GodRays::Render( RenderToTextureBuffer* fxbuffer ) {
 	vs->Apply();
 
 	// Draw downscaled mask
-	engine->GetContext()->OMSetRenderTargets( 1, FxRenderer->GetTempBufferDS4_1()->GetRenderTargetViewPtr(), nullptr );
+	engine->GetContext()->OMSetRenderTargets( 1, FxRenderer->GetTempBufferDS4_1()->GetRenderTargetView().GetAddressOf(), nullptr );
 
 	engine->GetHDRBackBuffer()->BindToPixelShader( engine->GetContext(), 0 );
 	engine->GetGBuffer1()->BindToPixelShader( engine->GetContext(), 1 );
@@ -100,13 +100,13 @@ XRESULT D3D11PFX_GodRays::Render( RenderToTextureBuffer* fxbuffer ) {
 	zoomPS->GetConstantBuffer()[0]->UpdateBuffer( &gcb );
 	zoomPS->GetConstantBuffer()[0]->BindToPixelShader( 0 );
 
-	FxRenderer->CopyTextureToRTV( FxRenderer->GetTempBufferDS4_1()->GetShaderResView(), FxRenderer->GetTempBufferDS4_2()->GetRenderTargetView().Get(), INT2( 0, 0 ), true );
+	FxRenderer->CopyTextureToRTV( FxRenderer->GetTempBufferDS4_1()->GetShaderResView().Get(), FxRenderer->GetTempBufferDS4_2()->GetRenderTargetView().Get(), INT2( 0, 0 ), true );
 
 	// Upscale and blend
 	Engine::GAPI->GetRendererState()->BlendState.SetAdditiveBlending();
 	Engine::GAPI->GetRendererState()->BlendState.SetDirty();
 
-	FxRenderer->CopyTextureToRTV( FxRenderer->GetTempBufferDS4_2()->GetShaderResView(), oldRTV, INT2( engine->GetResolution().x, engine->GetResolution().y ) );
+	FxRenderer->CopyTextureToRTV( FxRenderer->GetTempBufferDS4_2()->GetShaderResView().Get(), oldRTV, INT2( engine->GetResolution().x, engine->GetResolution().y ) );
 
 	vp.Width = (float)engine->GetResolution().x;
 	vp.Height = (float)engine->GetResolution().y;

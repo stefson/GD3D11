@@ -251,7 +251,7 @@ XRESULT D3D11Texture::GenerateMipMaps() {
 	engine->GetDeferredMediaContext()->CopySubresourceRegion( b->GetTexture(), 0, 0, 0, 0, Texture.Get(), 0, nullptr );
 
 	// Generate mips
-	engine->GetDeferredMediaContext()->GenerateMips( b->GetShaderResView() );
+	engine->GetDeferredMediaContext()->GenerateMips( b->GetShaderResView().Get() );
 
 	// Copy the full chain back
 	engine->GetDeferredMediaContext()->CopyResource( Texture.Get(), b->GetTexture() );

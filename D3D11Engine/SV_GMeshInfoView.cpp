@@ -149,7 +149,7 @@ void SV_GMeshInfoView::UpdateView() {
 	g->GetContext()->ClearDepthStencilView( DS->GetDepthStencilView().Get(), D3D11_CLEAR_DEPTH, 1.0f, 0 );
 
 	// Bind RTV
-	g->GetContext()->OMSetRenderTargets( 1, RT->GetRenderTargetViewPtr(), DS->GetDepthStencilView().Get() );
+	g->GetContext()->OMSetRenderTargets( 1, RT->GetRenderTargetView().GetAddressOf(), DS->GetDepthStencilView().Get() );
 
 	// Setup shaders
 	g->SetActiveVertexShader( "VS_Ex" );

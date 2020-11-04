@@ -662,7 +662,7 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
 	UpdateRenderStates();
 
 	// Bind GBuffers
-	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView().Get() );
+	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(), DepthStencilBuffer->GetDepthStencilView().Get() );
 
 	SetActivePixelShader( "PS_Simple" );
 	SetActiveVertexShader( "VS_Ex" );
@@ -818,7 +818,7 @@ XRESULT D3D11GraphicsEngine::Present() {
 	ActivePS->GetConstantBuffer()[0]->UpdateBuffer( &gcb );
 	ActivePS->GetConstantBuffer()[0]->BindToPixelShader( 0 );
 
-	PfxRenderer->CopyTextureToRTV( HDRBackBuffer->GetShaderResView(),
+	PfxRenderer->CopyTextureToRTV( HDRBackBuffer->GetShaderResView().Get(),
 		BackbufferRTV.Get(), INT2( 0, 0 ), true );
 
 	// GetContext()->ClearState();
@@ -1627,7 +1627,7 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 
 	SetDefaultStates();
 
-	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(),
+	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
 		DepthStencilBuffer->GetDepthStencilView().Get() );
 
 	// Draw unlit decals 
@@ -1687,7 +1687,7 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 	// geometry for gothic UI-Rendering
 	GetContext()->ClearDepthStencilView( DepthStencilBuffer->GetDepthStencilView().Get(),
 		D3D11_CLEAR_DEPTH, 1.0f, 0.0f );
-	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(),
+	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
 		nullptr );
 
 	SetDefaultStates();
@@ -2507,14 +2507,14 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 
 	// Copy backbuffer
 	PfxRenderer->CopyTextureToRTV(
-		HDRBackBuffer->GetShaderResView(),
+		HDRBackBuffer->GetShaderResView().Get(),
 		PfxRenderer->GetTempBuffer()->GetRenderTargetView().Get() );
 	CopyDepthStencil();
 
 	// Pre-Draw the surfaces to fix overlaying polygons causing a huge performance
 	// drop Unbind pixelshader
 	GetContext()->PSSetShader( nullptr, nullptr, 0 );
-	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(),
+	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
 		DepthStencilBuffer->GetDepthStencilView().Get() );
 	for ( auto const& it : FrameWaterSurfaces ) {
 		// Draw surfaces
@@ -2549,7 +2549,7 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 
 	// Bind copied backbuffer
 	GetContext()->PSSetShaderResources(
-		5, 1, PfxRenderer->GetTempBuffer()->GetShaderResViewPtr() );
+		5, 1, PfxRenderer->GetTempBuffer()->GetShaderResView().GetAddressOf() );
 
 	// Bind depth to the shader
 	DepthStencilBufferCopy->BindToPixelShader( GetContext(), 2 );
@@ -2591,7 +2591,7 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 	// Draw Ocean
 	if ( Engine::GAPI->GetOcean() ) Engine::GAPI->GetOcean()->Draw();
 
-	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(),
+	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
 		DepthStencilBuffer->GetDepthStencilView().Get() );
 
 	Engine::GAPI->GetRendererState()->DepthState.DepthBufferCompareFunc =
@@ -3526,7 +3526,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 	SetupVS_ExMeshDrawCall();
 	SetupVS_ExConstantBuffer();
 
-	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(),
+	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
 		DepthStencilBuffer->GetDepthStencilView().Get() );
 
 	for ( auto const& alphaMesh : AlphaMeshes ) {
@@ -4147,7 +4147,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
 	CopyDepthStencil();
 
 	// Set the main rendertarget
-	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView().Get() );
+	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(), DepthStencilBuffer->GetDepthStencilView().Get() );
 
 	view = XMMatrixTranspose( view );
 
@@ -4386,7 +4386,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
 	// Reset state
 	ID3D11ShaderResourceView* srv = nullptr;
 	GetContext()->PSSetShaderResources( 2, 1, &srv );
-	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(),
+	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
 		DepthStencilBuffer->GetDepthStencilView().Get() );
 
 	Engine::GAPI->GetRendererState()->BlendState.SetDefault();
@@ -4593,7 +4593,7 @@ D3D11ENGINE_RENDER_STAGE D3D11GraphicsEngine::GetRenderingStage() {
 
 /** Draws a single VOB */
 void D3D11GraphicsEngine::DrawVobSingle( VobInfo* vob ) {
-	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(),
+	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
 		DepthStencilBuffer->GetDepthStencilView().Get() );
 
 	XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
@@ -4642,13 +4642,13 @@ void D3D11GraphicsEngine::DrawVobSingle( VobInfo* vob ) {
 		}
 	}
 
-	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(),
+	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
 		nullptr );
 }
 
 /** Draws a multiple VOBs (used for inventory) */
 void D3D11GraphicsEngine::DrawVobsList( const std::list<VobInfo*>& vobs, zCCamera& camera ) {
-	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(),
+	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
 		DepthStencilBuffer->GetDepthStencilView().Get() );
 
 	XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
@@ -4703,7 +4703,7 @@ void D3D11GraphicsEngine::DrawVobsList( const std::list<VobInfo*>& vobs, zCCamer
 		}
 	}
 
-	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(),
+	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
 		nullptr );
 }
 
@@ -4825,7 +4825,7 @@ XRESULT D3D11GraphicsEngine::DrawOcean( GOcean* ocean ) {
 
 	// Bind copied backbuffer
 	GetContext()->PSSetShaderResources(
-		5, 1, PfxRenderer->GetTempBuffer()->GetShaderResViewPtr() );
+		5, 1, PfxRenderer->GetTempBuffer()->GetShaderResView().GetAddressOf() );
 
 	// Bind depth to the shader
 	DepthStencilBufferCopy->BindToPixelShader( GetContext(), 2 );
@@ -4961,7 +4961,7 @@ void D3D11GraphicsEngine::GetBackbufferData( byte** data, int& pixelsize ) {
 		GetDevice(), width, width, DXGI_FORMAT_R8G8B8A8_UNORM );
 
 	// Downscale to 256x256
-	PfxRenderer->CopyTextureToRTV( HDRBackBuffer->GetShaderResView(),
+	PfxRenderer->CopyTextureToRTV( HDRBackBuffer->GetShaderResView().Get(),
 		rt->GetRenderTargetView().Get(), INT2( width, width ),
 		true );
 
@@ -5340,7 +5340,7 @@ void D3D11GraphicsEngine::RenderStrings() {
 			m_font->DrawString( m_spriteBatch.get(), output.c_str(), fontPos, color, 0.f );
 		}
 
-		m_spriteBatch->Draw( HDRBackBuffer->GetShaderResView(), r );
+		m_spriteBatch->Draw( HDRBackBuffer->GetShaderResView().Get(), r );
 
 		m_spriteBatch->End();
 
@@ -5523,7 +5523,7 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 				SetActivePixelShader( "PS_Simple" );
 				PS_Simple->Apply();
 
-				GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(),
+				GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
 					DepthStencilBuffer->GetDepthStencilView().Get() );
 			}
 		}
@@ -5558,7 +5558,7 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 	GetContext()->GSSetShader( nullptr, 0, 0 );
 
 	// Set usual rendertarget again
-	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(),
+	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
 		DepthStencilBuffer->GetDepthStencilView().Get() );
 
 	state.BlendState.SetDefault();
@@ -5569,7 +5569,7 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 
 	// Copy scene behind the particle systems
 	PfxRenderer->CopyTextureToRTV(
-		HDRBackBuffer->GetShaderResView(),
+		HDRBackBuffer->GetShaderResView().Get(),
 		PfxRenderer->GetTempBuffer()->GetRenderTargetView().Get() );
 
 	SetActivePixelShader( "PS_PFX_ApplyParticleDistortion" );
@@ -5577,7 +5577,7 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 
 	// Copy it back, putting distortion behind it
 	PfxRenderer->CopyTextureToRTV(
-		PfxRenderer->GetTempBuffer()->GetShaderResView(),
+		PfxRenderer->GetTempBuffer()->GetShaderResView().Get(),
 		HDRBackBuffer->GetRenderTargetView().Get(), INT2( 0, 0 ), true );
 
 	SetDefaultStates();
@@ -5644,7 +5644,7 @@ void D3D11GraphicsEngine::SaveScreenshot() {
 		GetDevice(), Resolution.x, Resolution.y, DXGI_FORMAT_R8G8B8A8_UNORM );
 
 	// Downscale to 256x256
-	PfxRenderer->CopyTextureToRTV( HDRBackBuffer->GetShaderResView(),
+	PfxRenderer->CopyTextureToRTV( HDRBackBuffer->GetShaderResView().Get(),
 		rt->GetRenderTargetView().Get() );
 
 	D3D11_TEXTURE2D_DESC texDesc = {};

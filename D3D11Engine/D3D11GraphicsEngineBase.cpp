@@ -217,7 +217,7 @@ XRESULT D3D11GraphicsEngineBase::OnResize( INT2 newSize ) {
 	DepthStencilBuffer = std::make_unique<RenderToDepthStencilBuffer>( GetDevice(), Resolution.x, Resolution.y, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_R32_FLOAT );
 
 	// Bind our newly created resources
-	GetContext()->OMSetRenderTargets( 1, Backbuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView().Get() );
+	GetContext()->OMSetRenderTargets( 1, Backbuffer->GetRenderTargetView().GetAddressOf(), DepthStencilBuffer->GetDepthStencilView().Get() );
 
 	// Set the viewport
 	D3D11_VIEWPORT viewport = {};
@@ -236,7 +236,7 @@ XRESULT D3D11GraphicsEngineBase::OnResize( INT2 newSize ) {
 
 	Engine::AntTweakBar->OnResize( newSize );
 
-	GetContext()->OMSetRenderTargets( 1, Backbuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView().Get() );
+	GetContext()->OMSetRenderTargets( 1, Backbuffer->GetRenderTargetView().GetAddressOf(), DepthStencilBuffer->GetDepthStencilView().Get() );
 
 	return XR_SUCCESS;
 }

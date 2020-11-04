@@ -123,14 +123,12 @@ struct RenderToTextureBuffer {
 
 	/** Binds the texture to the pixel shader */
 	void BindToPixelShader( ID3D11DeviceContext* context, int slot ) {
-		context->PSSetShaderResources( slot, 1, &ShaderResView );
+		context->PSSetShaderResources( slot, 1, ShaderResView.GetAddressOf() );
 	};
 
 	ID3D11Texture2D* GetTexture() { return Texture; }
-	ID3D11ShaderResourceView* GetShaderResView() { return ShaderResView; }
-	ID3D11ShaderResourceView** GetShaderResViewPtr() { return &ShaderResView; }
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetShaderResView() { return ShaderResView; }
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> GetRenderTargetView() { return RenderTargetView; }
-	ID3D11RenderTargetView** GetRenderTargetViewPtr() { return RenderTargetView.GetAddressOf(); }
 
 	void SetTexture( ID3D11Texture2D* tx ) { Texture = tx; }
 	void SetShaderResView( ID3D11ShaderResourceView* srv ) { ShaderResView = srv; }
@@ -147,7 +145,7 @@ private:
 	ID3D11Texture2D* Texture;
 
 	/** Shader and rendertarget resource views */
-	ID3D11ShaderResourceView* ShaderResView;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ShaderResView;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> RenderTargetView;
 
 	// Rendertargets for the cubemap-faces, if this is a cubemap
@@ -161,7 +159,7 @@ private:
 
 	void ReleaseAll() {
 		if ( Texture )Texture->Release(); Texture = nullptr;
-		if ( ShaderResView )ShaderResView->Release(); ShaderResView = nullptr;
+		ShaderResView.Reset();
 		RenderTargetView.Reset();
 	}
 };
