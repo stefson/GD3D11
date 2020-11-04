@@ -161,6 +161,13 @@ private:
 		Texture.Reset();
 		ShaderResView.Reset();
 		RenderTargetView.Reset();
+
+		// TODO: Test if this is ok.
+		//for ( int i = 0; i < 6; i++ )
+		//	if ( CubeMapRTVs[i] )CubeMapRTVs[i]->Release();
+
+		//for ( int i = 0; i < 6; i++ )
+		//	if ( CubeMapSRVs[i] )CubeMapSRVs[i]->Release();
 	}
 };
 
