@@ -305,8 +305,8 @@ D3D11ShaderManager* D3D11GraphicsEngineBase::GetShaderManager() {
 /** Called when the game wants to clear the bound rendertarget */
 XRESULT D3D11GraphicsEngineBase::Clear( const float4& color ) {
 	GetContext()->ClearDepthStencilView( DepthStencilBuffer->GetDepthStencilView().Get(), D3D11_CLEAR_DEPTH, 1.0f, 0 );
-	GetContext()->ClearRenderTargetView( HDRBackBuffer->GetRenderTargetView(), (float*)&color );
-	GetContext()->ClearRenderTargetView( Backbuffer->GetRenderTargetView(), (float*)&color );
+	GetContext()->ClearRenderTargetView( HDRBackBuffer->GetRenderTargetView().Get(), (float*)&color );
+	GetContext()->ClearRenderTargetView( Backbuffer->GetRenderTargetView().Get(), (float*)&color );
 
 	return XR_SUCCESS;
 }

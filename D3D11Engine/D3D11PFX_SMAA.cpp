@@ -126,10 +126,9 @@ void D3D11PFX_SMAA::RenderPostFX( ID3D11ShaderResourceView* renderTargetSRV ) {
 		OnResize( INT2( engine->GetResolution().x, engine->GetResolution().y ) );
 	}
 
-	engine->GetContext()->ClearRenderTargetView( EdgesTex->GetRenderTargetView(), (float*)&float4( 0, 0, 0, 0 ) );
-	engine->GetContext()->ClearRenderTargetView( BlendTex->GetRenderTargetView(), (float*)&float4( 0, 0, 0, 0 ) );
+	engine->GetContext()->ClearRenderTargetView( EdgesTex->GetRenderTargetView().Get(), (float*)&float4( 0, 0, 0, 0 ) );
+	engine->GetContext()->ClearRenderTargetView( BlendTex->GetRenderTargetView().Get(), (float*)&float4( 0, 0, 0, 0 ) );
 
-	ID3D11RenderTargetView* RTV = nullptr;
 	ID3D11RenderTargetView* OldRTV = nullptr;
 	ID3D11DepthStencilView* OldDSV = nullptr;
 	ID3DX11EffectShaderResourceVariable* SRV = nullptr;
@@ -139,8 +138,7 @@ void D3D11PFX_SMAA::RenderPostFX( ID3D11ShaderResourceView* renderTargetSRV ) {
 	engine->GetContext()->ClearDepthStencilView( OldDSV, D3D11_CLEAR_STENCIL, 0, 0 );
 
 	/** First pass - Edge detection */
-	RTV = EdgesTex->GetRenderTargetView();
-	engine->GetContext()->OMSetRenderTargets( 1, &RTV, OldDSV );
+	engine->GetContext()->OMSetRenderTargets( 1, EdgesTex->GetRenderTargetView().GetAddressOf(), OldDSV );
 
 	SMAAShader->GetVariableByName( "colorTexGamma" )->AsShaderResource()->SetResource( renderTargetSRV );
 
@@ -154,8 +152,7 @@ void D3D11PFX_SMAA::RenderPostFX( ID3D11ShaderResourceView* renderTargetSRV ) {
 	engine->GetContext()->PSSetShaderResources( 0, 3, NoSRV );
 
 	/** Second pass - BlendingWeightCalculation */
-	RTV = BlendTex->GetRenderTargetView();
-	engine->GetContext()->OMSetRenderTargets( 1, &RTV, OldDSV );
+	engine->GetContext()->OMSetRenderTargets( 1, BlendTex->GetRenderTargetView().GetAddressOf(), OldDSV );
 
 	SMAAShader->GetVariableByName( "edgesTex" )->AsShaderResource()->SetResource( EdgesTex->GetShaderResView() );
 
@@ -173,8 +170,7 @@ void D3D11PFX_SMAA::RenderPostFX( ID3D11ShaderResourceView* renderTargetSRV ) {
 
 
 	/** Third pass - NeighborhoodBlending */
-	RTV = TempRTV->GetRenderTargetView();
-	engine->GetContext()->OMSetRenderTargets( 1, &RTV, OldDSV );
+	engine->GetContext()->OMSetRenderTargets( 1, TempRTV->GetRenderTargetView().GetAddressOf(), OldDSV );
 
 
 	SMAAShader->GetVariableByName( "colorTex" )->AsShaderResource()->SetResource( renderTargetSRV );

@@ -52,7 +52,7 @@ XRESULT D3D11PFX_Blur::RenderBlur( RenderToTextureBuffer* fxbuffer, bool leaveRe
 	//engine->GetDepthBuffer()->BindToPixelShader(engine->GetContext(), 1);
 
 	// Copy
-	FxRenderer->CopyTextureToRTV( fxbuffer->GetShaderResView(), FxRenderer->GetTempBufferDS4_1()->GetRenderTargetView(), dsRes, true );
+	FxRenderer->CopyTextureToRTV( fxbuffer->GetShaderResView(), FxRenderer->GetTempBufferDS4_1()->GetRenderTargetView().Get(), dsRes, true );
 
 	/** Pass 2: Blur V */
 
@@ -64,13 +64,13 @@ XRESULT D3D11PFX_Blur::RenderBlur( RenderToTextureBuffer* fxbuffer, bool leaveRe
 	gaussPS->GetConstantBuffer()[0]->BindToPixelShader( 0 );
 
 	// Copy
-	FxRenderer->CopyTextureToRTV( FxRenderer->GetTempBufferDS4_1()->GetShaderResView(), FxRenderer->GetTempBufferDS4_2()->GetRenderTargetView(), dsRes, true );
+	FxRenderer->CopyTextureToRTV( FxRenderer->GetTempBufferDS4_1()->GetShaderResView(), FxRenderer->GetTempBufferDS4_2()->GetRenderTargetView().Get(), dsRes, true );
 
 	/** Pass 3: Copy back to FX-Buffer */
 
 	if ( !leaveResultInD4_2 ) {
 		simplePS->Apply();
-		FxRenderer->CopyTextureToRTV( FxRenderer->GetTempBufferDS4_2()->GetShaderResView(), fxbuffer->GetRenderTargetView(), INT2( 0, 0 ), true );
+		FxRenderer->CopyTextureToRTV( FxRenderer->GetTempBufferDS4_2()->GetShaderResView(), fxbuffer->GetRenderTargetView().Get(), INT2( 0, 0 ), true );
 	}
 
 	engine->GetContext()->OMSetRenderTargets( 1, &oldRTV, oldDSV );

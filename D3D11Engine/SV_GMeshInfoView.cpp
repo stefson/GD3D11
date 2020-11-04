@@ -145,7 +145,7 @@ void SV_GMeshInfoView::UpdateView() {
 	g->GetContext()->RSSetViewports( 1, &vp );
 
 	// Clear
-	g->GetContext()->ClearRenderTargetView( RT->GetRenderTargetView(), (float*)&float4( 0, 0, 0, 0 ) );
+	g->GetContext()->ClearRenderTargetView( RT->GetRenderTargetView().Get(), (float*)&float4( 0, 0, 0, 0 ) );
 	g->GetContext()->ClearDepthStencilView( DS->GetDepthStencilView().Get(), D3D11_CLEAR_DEPTH, 1.0f, 0 );
 
 	// Bind RTV

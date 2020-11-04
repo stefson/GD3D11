@@ -697,9 +697,9 @@ XRESULT D3D11GraphicsEngine::Clear( const float4& color ) {
 	GetContext()->ClearDepthStencilView( DepthStencilBuffer->GetDepthStencilView().Get(),
 		D3D11_CLEAR_DEPTH, 1.0f, 0 );
 
-	GetContext()->ClearRenderTargetView( GBuffer0_Diffuse->GetRenderTargetView(), (float*)&color );
-	GetContext()->ClearRenderTargetView( GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView(), (float*)&float4( 0, 0, 0, 0 ) );
-	GetContext()->ClearRenderTargetView( HDRBackBuffer->GetRenderTargetView(), (float*)&float4( 0, 0, 0, 0 ) );
+	GetContext()->ClearRenderTargetView( GBuffer0_Diffuse->GetRenderTargetView().Get(), (float*)&color );
+	GetContext()->ClearRenderTargetView( GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView().Get(), (float*)&float4( 0, 0, 0, 0 ) );
+	GetContext()->ClearRenderTargetView( HDRBackBuffer->GetRenderTargetView().Get(), (float*)&float4( 0, 0, 0, 0 ) );
 
 	return XR_SUCCESS;
 }
@@ -1546,8 +1546,8 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 	GetContext()->RSSetViewports( 1, &vp );
 
 	ID3D11RenderTargetView* rtvs [] = {
-		GBuffer0_Diffuse->GetRenderTargetView(),
-		GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView() };
+		GBuffer0_Diffuse->GetRenderTargetView().Get(),
+		GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView().Get() };
 	GetContext()->OMSetRenderTargets( 2, rtvs,
 		DepthStencilBuffer->GetDepthStencilView().Get() );
 
@@ -1599,7 +1599,7 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 
 	// Draw HBAO
 	if ( Engine::GAPI->GetRendererState()->RendererSettings.HbaoSettings.Enabled )
-		PfxRenderer->DrawHBAO( HDRBackBuffer->GetRenderTargetView() );
+		PfxRenderer->DrawHBAO( HDRBackBuffer->GetRenderTargetView().Get() );
 
 	SetDefaultStates();
 
@@ -2508,7 +2508,7 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 	// Copy backbuffer
 	PfxRenderer->CopyTextureToRTV(
 		HDRBackBuffer->GetShaderResView(),
-		PfxRenderer->GetTempBuffer()->GetRenderTargetView() );
+		PfxRenderer->GetTempBuffer()->GetRenderTargetView().Get() );
 	CopyDepthStencil();
 
 	// Pre-Draw the surfaces to fix overlaying polygons causing a huge performance
@@ -4962,7 +4962,7 @@ void D3D11GraphicsEngine::GetBackbufferData( byte** data, int& pixelsize ) {
 
 	// Downscale to 256x256
 	PfxRenderer->CopyTextureToRTV( HDRBackBuffer->GetShaderResView(),
-		rt->GetRenderTargetView(), INT2( width, width ),
+		rt->GetRenderTargetView().Get(), INT2( width, width ),
 		true );
 
 	D3D11_TEXTURE2D_DESC texDesc;
@@ -5401,8 +5401,8 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 	// TODO: Maybe make particles draw at a lower res and bilinear upsample the result.
 
 	// Clear GBuffer0 to hold the refraction vectors since it's not needed anymore
-	GetContext()->ClearRenderTargetView( GBuffer0_Diffuse->GetRenderTargetView(), (float*)&float4( 0, 0, 0, 0 ) );
-	GetContext()->ClearRenderTargetView( GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView(), (float*)&float4( 0, 0, 0, 0 ) );
+	GetContext()->ClearRenderTargetView( GBuffer0_Diffuse->GetRenderTargetView().Get(), (float*)&float4( 0, 0, 0, 0 ) );
+	GetContext()->ClearRenderTargetView( GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView().Get(), (float*)&float4( 0, 0, 0, 0 ) );
 
 	D3D11PShader* distPS = ShaderManager->GetPShader( "PS_ParticleDistortion" );
 
@@ -5457,8 +5457,8 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 	ActivePS->Apply();
 
 	ID3D11RenderTargetView* rtv [] = {
-		GBuffer0_Diffuse->GetRenderTargetView(),
-		GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView() };
+		GBuffer0_Diffuse->GetRenderTargetView().Get(),
+		GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView().Get() };
 	GetContext()->OMSetRenderTargets( 2, rtv,
 		DepthStencilBuffer->GetDepthStencilView().Get() );
 
@@ -5514,8 +5514,8 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 				ActivePS->Apply();
 
 				ID3D11RenderTargetView* rtv [] = {
-					GBuffer0_Diffuse->GetRenderTargetView(),
-					GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView() };
+					GBuffer0_Diffuse->GetRenderTargetView().Get(),
+					GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView().Get() };
 				GetContext()->OMSetRenderTargets( 2, rtv,
 					DepthStencilBuffer->GetDepthStencilView().Get() );
 			} else {
@@ -5570,7 +5570,7 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 	// Copy scene behind the particle systems
 	PfxRenderer->CopyTextureToRTV(
 		HDRBackBuffer->GetShaderResView(),
-		PfxRenderer->GetTempBuffer()->GetRenderTargetView() );
+		PfxRenderer->GetTempBuffer()->GetRenderTargetView().Get() );
 
 	SetActivePixelShader( "PS_PFX_ApplyParticleDistortion" );
 	ActivePS->Apply();
@@ -5578,7 +5578,7 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 	// Copy it back, putting distortion behind it
 	PfxRenderer->CopyTextureToRTV(
 		PfxRenderer->GetTempBuffer()->GetShaderResView(),
-		HDRBackBuffer->GetRenderTargetView(), INT2( 0, 0 ), true );
+		HDRBackBuffer->GetRenderTargetView().Get(), INT2( 0, 0 ), true );
 
 	SetDefaultStates();
 }
@@ -5645,7 +5645,7 @@ void D3D11GraphicsEngine::SaveScreenshot() {
 
 	// Downscale to 256x256
 	PfxRenderer->CopyTextureToRTV( HDRBackBuffer->GetShaderResView(),
-		rt->GetRenderTargetView() );
+		rt->GetRenderTargetView().Get() );
 
 	D3D11_TEXTURE2D_DESC texDesc = {};
 	texDesc.ArraySize = 1;

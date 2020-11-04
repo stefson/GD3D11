@@ -129,8 +129,8 @@ struct RenderToTextureBuffer {
 	ID3D11Texture2D* GetTexture() { return Texture; }
 	ID3D11ShaderResourceView* GetShaderResView() { return ShaderResView; }
 	ID3D11ShaderResourceView** GetShaderResViewPtr() { return &ShaderResView; }
-	ID3D11RenderTargetView* GetRenderTargetView() { return RenderTargetView; }
-	ID3D11RenderTargetView** GetRenderTargetViewPtr() { return &RenderTargetView; }
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> GetRenderTargetView() { return RenderTargetView; }
+	ID3D11RenderTargetView** GetRenderTargetViewPtr() { return RenderTargetView.GetAddressOf(); }
 
 	void SetTexture( ID3D11Texture2D* tx ) { Texture = tx; }
 	void SetShaderResView( ID3D11ShaderResourceView* srv ) { ShaderResView = srv; }
@@ -148,7 +148,7 @@ private:
 
 	/** Shader and rendertarget resource views */
 	ID3D11ShaderResourceView* ShaderResView;
-	ID3D11RenderTargetView* RenderTargetView;
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> RenderTargetView;
 
 	// Rendertargets for the cubemap-faces, if this is a cubemap
 	ID3D11RenderTargetView* CubeMapRTVs[6];
@@ -162,7 +162,7 @@ private:
 	void ReleaseAll() {
 		if ( Texture )Texture->Release(); Texture = nullptr;
 		if ( ShaderResView )ShaderResView->Release(); ShaderResView = nullptr;
-		if ( RenderTargetView )RenderTargetView->Release(); RenderTargetView = nullptr;
+		RenderTargetView.Reset();
 	}
 };
 
