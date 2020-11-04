@@ -540,7 +540,7 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
 
 	// Bind our newly created resources
 	GetContext()->OMSetRenderTargets( 1, BackbufferRTV.GetAddressOf(),
-		DepthStencilBuffer->GetDepthStencilView() );
+		DepthStencilBuffer->GetDepthStencilView().Get() );
 
 	// Set the viewport
 	D3D11_VIEWPORT viewport = {};
@@ -662,7 +662,7 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
 	UpdateRenderStates();
 
 	// Bind GBuffers
-	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView() );
+	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView().Get() );
 
 	SetActivePixelShader( "PS_Simple" );
 	SetActiveVertexShader( "VS_Ex" );
@@ -694,7 +694,7 @@ XRESULT D3D11GraphicsEngine::OnEndFrame() {
 
 /** Called when the game wants to clear the bound rendertarget */
 XRESULT D3D11GraphicsEngine::Clear( const float4& color ) {
-	GetContext()->ClearDepthStencilView( DepthStencilBuffer->GetDepthStencilView(),
+	GetContext()->ClearDepthStencilView( DepthStencilBuffer->GetDepthStencilView().Get(),
 		D3D11_CLEAR_DEPTH, 1.0f, 0 );
 
 	GetContext()->ClearRenderTargetView( GBuffer0_Diffuse->GetRenderTargetView(), (float*)&color );
@@ -1549,7 +1549,7 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 		GBuffer0_Diffuse->GetRenderTargetView(),
 		GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView() };
 	GetContext()->OMSetRenderTargets( 2, rtvs,
-		DepthStencilBuffer->GetDepthStencilView() );
+		DepthStencilBuffer->GetDepthStencilView().Get() );
 
 	Engine::GAPI->SetFarPlane(
 		Engine::GAPI->GetRendererState()->RendererSettings.SectionDrawRadius *
@@ -1628,7 +1628,7 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 	SetDefaultStates();
 
 	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(),
-		DepthStencilBuffer->GetDepthStencilView() );
+		DepthStencilBuffer->GetDepthStencilView().Get() );
 
 	// Draw unlit decals 
 	// TODO: Only get them once!
@@ -1685,7 +1685,7 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 
 	// Clear here to get a working depthbuffer but no interferences with world
 	// geometry for gothic UI-Rendering
-	GetContext()->ClearDepthStencilView( DepthStencilBuffer->GetDepthStencilView(),
+	GetContext()->ClearDepthStencilView( DepthStencilBuffer->GetDepthStencilView().Get(),
 		D3D11_CLEAR_DEPTH, 1.0f, 0.0f );
 	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(),
 		nullptr );
@@ -2515,7 +2515,7 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 	// drop Unbind pixelshader
 	GetContext()->PSSetShader( nullptr, nullptr, 0 );
 	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(),
-		DepthStencilBuffer->GetDepthStencilView() );
+		DepthStencilBuffer->GetDepthStencilView().Get() );
 	for ( auto const& it : FrameWaterSurfaces ) {
 		// Draw surfaces
 		for ( auto const& mesh : it.second ) {
@@ -2592,7 +2592,7 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 	if ( Engine::GAPI->GetOcean() ) Engine::GAPI->GetOcean()->Draw();
 
 	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(),
-		DepthStencilBuffer->GetDepthStencilView() );
+		DepthStencilBuffer->GetDepthStencilView().Get() );
 
 	Engine::GAPI->GetRendererState()->DepthState.DepthBufferCompareFunc =
 		GothicDepthBufferStateInfo::CF_COMPARISON_LESS_EQUAL;
@@ -3527,7 +3527,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 	SetupVS_ExConstantBuffer();
 
 	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(),
-		DepthStencilBuffer->GetDepthStencilView() );
+		DepthStencilBuffer->GetDepthStencilView().Get() );
 
 	for ( auto const& alphaMesh : AlphaMeshes ) {
 		zCTexture* tx = alphaMesh.first.Material->GetAniTexture();
@@ -4147,7 +4147,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
 	CopyDepthStencil();
 
 	// Set the main rendertarget
-	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView() );
+	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView().Get() );
 
 	view = XMMatrixTranspose( view );
 
@@ -4387,7 +4387,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
 	ID3D11ShaderResourceView* srv = nullptr;
 	GetContext()->PSSetShaderResources( 2, 1, &srv );
 	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(),
-		DepthStencilBuffer->GetDepthStencilView() );
+		DepthStencilBuffer->GetDepthStencilView().Get() );
 
 	Engine::GAPI->GetRendererState()->BlendState.SetDefault();
 	Engine::GAPI->GetRendererState()->BlendState.SetDirty();
@@ -4434,7 +4434,7 @@ void XM_CALLCONV D3D11GraphicsEngine::RenderShadowCube(
 		// Set cubemap shader
 		SetActiveGShader( "GS_Cubemap" );
 		ActiveGS->Apply();
-		face = targetCube->GetDepthStencilView();
+		face = targetCube->GetDepthStencilView().Get();
 
 		SetActiveVertexShader( "VS_ExCube" );
 	}
@@ -4501,7 +4501,7 @@ void XM_CALLCONV D3D11GraphicsEngine::RenderShadowmaps( FXMVECTOR cameraPosition
 		target = WorldShadowmap1.get();
 	}
 
-	if ( !dsvOverwrite ) dsvOverwrite = target->GetDepthStencilView();
+	if ( !dsvOverwrite ) dsvOverwrite = target->GetDepthStencilView().Get();
 
 	D3D11_VIEWPORT oldVP;
 	UINT n = 1;
@@ -4594,7 +4594,7 @@ D3D11ENGINE_RENDER_STAGE D3D11GraphicsEngine::GetRenderingStage() {
 /** Draws a single VOB */
 void D3D11GraphicsEngine::DrawVobSingle( VobInfo* vob ) {
 	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(),
-		DepthStencilBuffer->GetDepthStencilView() );
+		DepthStencilBuffer->GetDepthStencilView().Get() );
 
 	XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
 	Engine::GAPI->SetViewTransformXM( view );
@@ -4649,7 +4649,7 @@ void D3D11GraphicsEngine::DrawVobSingle( VobInfo* vob ) {
 /** Draws a multiple VOBs (used for inventory) */
 void D3D11GraphicsEngine::DrawVobsList( const std::list<VobInfo*>& vobs, zCCamera& camera ) {
 	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(),
-		DepthStencilBuffer->GetDepthStencilView() );
+		DepthStencilBuffer->GetDepthStencilView().Get() );
 
 	XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
 	Engine::GAPI->SetViewTransformXM( view );
@@ -5460,7 +5460,7 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 		GBuffer0_Diffuse->GetRenderTargetView(),
 		GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView() };
 	GetContext()->OMSetRenderTargets( 2, rtv,
-		DepthStencilBuffer->GetDepthStencilView() );
+		DepthStencilBuffer->GetDepthStencilView().Get() );
 
 	int lastBlendMode = -1;
 
@@ -5517,14 +5517,14 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 					GBuffer0_Diffuse->GetRenderTargetView(),
 					GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView() };
 				GetContext()->OMSetRenderTargets( 2, rtv,
-					DepthStencilBuffer->GetDepthStencilView() );
+					DepthStencilBuffer->GetDepthStencilView().Get() );
 			} else {
 				// Set usual rendering for everything else. Alphablending mostly.
 				SetActivePixelShader( "PS_Simple" );
 				PS_Simple->Apply();
 
 				GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(),
-					DepthStencilBuffer->GetDepthStencilView() );
+					DepthStencilBuffer->GetDepthStencilView().Get() );
 			}
 		}
 
@@ -5559,7 +5559,7 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 
 	// Set usual rendertarget again
 	GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetViewPtr(),
-		DepthStencilBuffer->GetDepthStencilView() );
+		DepthStencilBuffer->GetDepthStencilView().Get() );
 
 	state.BlendState.SetDefault();
 	state.BlendState.SetDirty();

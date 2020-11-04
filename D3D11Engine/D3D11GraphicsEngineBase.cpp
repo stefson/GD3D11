@@ -217,7 +217,7 @@ XRESULT D3D11GraphicsEngineBase::OnResize( INT2 newSize ) {
 	DepthStencilBuffer = std::make_unique<RenderToDepthStencilBuffer>( GetDevice(), Resolution.x, Resolution.y, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_R32_FLOAT );
 
 	// Bind our newly created resources
-	GetContext()->OMSetRenderTargets( 1, Backbuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView() );
+	GetContext()->OMSetRenderTargets( 1, Backbuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView().Get() );
 
 	// Set the viewport
 	D3D11_VIEWPORT viewport = {};
@@ -236,7 +236,7 @@ XRESULT D3D11GraphicsEngineBase::OnResize( INT2 newSize ) {
 
 	Engine::AntTweakBar->OnResize( newSize );
 
-	GetContext()->OMSetRenderTargets( 1, Backbuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView() );
+	GetContext()->OMSetRenderTargets( 1, Backbuffer->GetRenderTargetViewPtr(), DepthStencilBuffer->GetDepthStencilView().Get() );
 
 	return XR_SUCCESS;
 }
@@ -304,7 +304,7 @@ D3D11ShaderManager* D3D11GraphicsEngineBase::GetShaderManager() {
 
 /** Called when the game wants to clear the bound rendertarget */
 XRESULT D3D11GraphicsEngineBase::Clear( const float4& color ) {
-	GetContext()->ClearDepthStencilView( DepthStencilBuffer->GetDepthStencilView(), D3D11_CLEAR_DEPTH, 1.0f, 0 );
+	GetContext()->ClearDepthStencilView( DepthStencilBuffer->GetDepthStencilView().Get(), D3D11_CLEAR_DEPTH, 1.0f, 0 );
 	GetContext()->ClearRenderTargetView( HDRBackBuffer->GetRenderTargetView(), (float*)&color );
 	GetContext()->ClearRenderTargetView( Backbuffer->GetRenderTargetView(), (float*)&color );
 
