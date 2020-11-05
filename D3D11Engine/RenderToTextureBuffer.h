@@ -126,9 +126,9 @@ struct RenderToTextureBuffer {
 		context->PSSetShaderResources( slot, 1, ShaderResView.GetAddressOf() );
 	};
 
-	Microsoft::WRL::ComPtr<ID3D11Texture2D> GetTexture() { return Texture; }
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetShaderResView() { return ShaderResView; }
-	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> GetRenderTargetView() { return RenderTargetView; }
+	const Microsoft::WRL::ComPtr<ID3D11Texture2D>& GetTexture() { return Texture; }
+	const Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetShaderResView() { return ShaderResView; }
+	const Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& GetRenderTargetView() { return RenderTargetView; }
 
 	//void SetTexture( ID3D11Texture2D* tx ) { Texture = tx; }
 	//void SetShaderResView( ID3D11ShaderResourceView* srv ) { ShaderResView = srv; }
@@ -295,11 +295,11 @@ struct RenderToDepthStencilBuffer {
 		context->PSSetShaderResources( slot, 1, ShaderResView.GetAddressOf() );
 	}
 
-	Microsoft::WRL::ComPtr<ID3D11Texture2D> GetTexture() { return Texture; }
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetShaderResView() { return ShaderResView; }
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> GetDepthStencilView() { return DepthStencilView; }
-	UINT GetSizeX() { return SizeX; }
-	UINT GetSizeY() { return SizeY; }
+	const Microsoft::WRL::ComPtr<ID3D11Texture2D>& GetTexture() { return Texture; }
+	const Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetShaderResView() { return ShaderResView; }
+	const Microsoft::WRL::ComPtr<ID3D11DepthStencilView>& GetDepthStencilView() { return DepthStencilView; }
+	UINT GetSizeX() const { return SizeX; }
+	UINT GetSizeY() const { return SizeY; }
 
 	ID3D11DepthStencilView* GetDSVCubemapFace( UINT i ) { return CubeMapDSVs[i]; }
 	ID3D11ShaderResourceView* GetSRVCubemapFace( UINT i ) { return CubeMapSRVs[i]; }
