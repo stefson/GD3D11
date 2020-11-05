@@ -209,9 +209,6 @@ void SV_GMeshInfoView::DrawMeshes() {
 			ts->Constantbuffer->BindToHullShader( 1 );
 
 			if ( it->first->CacheIn( -1 ) == zRES_CACHED_IN ) {
-				MyDirectDrawSurface7* surface = it->first->GetSurface();
-				ID3D11ShaderResourceView* srv = surface->GetNormalmap() ? ((D3D11Texture*)surface->GetNormalmap())->GetShaderResourceView() : nullptr;
-
 				// Draw
 				it->first->Bind( 0 );
 				g->DrawVertexBufferIndexed( it->second->MeshVertexBuffer, it->second->MeshIndexBufferPNAEN, it->second->IndicesPNAEN.size() );
