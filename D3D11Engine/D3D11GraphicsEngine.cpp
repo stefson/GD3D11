@@ -1855,15 +1855,13 @@ XRESULT D3D11GraphicsEngine::DrawMeshInfoListAlphablended(
 			ID3D11ShaderResourceView* srv[3];
 
 			// Get diffuse and normalmap
-			srv[0] = ((D3D11Texture*)surface->GetEngineTexture())
-				->GetShaderResourceView();
+			srv[0] = surface->GetEngineTexture()
+				->GetShaderResourceView().Get();
 			srv[1] = surface->GetNormalmap()
-				? ((D3D11Texture*)surface->GetNormalmap())
-				->GetShaderResourceView()
+				? surface->GetNormalmap()->GetShaderResourceView().Get()
 				: nullptr;
-			srv[2] =
-				surface->GetFxMap()
-				? ((D3D11Texture*)surface->GetFxMap())->GetShaderResourceView()
+			srv[2] = surface->GetFxMap()
+				? surface->GetFxMap()->GetShaderResourceView().Get()
 				: nullptr;
 
 			// Bind both
@@ -2098,14 +2096,14 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
 
 			// Get diffuse and normalmap
 			srv[0] = ((D3D11Texture*)surface->GetEngineTexture())
-				->GetShaderResourceView();
+				->GetShaderResourceView().Get();
 			srv[1] = surface->GetNormalmap()
 				? ((D3D11Texture*)surface->GetNormalmap())
-				->GetShaderResourceView()
+				->GetShaderResourceView().Get()
 				: nullptr;
 			srv[2] =
 				surface->GetFxMap()
-				? ((D3D11Texture*)surface->GetFxMap())->GetShaderResourceView()
+				? ((D3D11Texture*)surface->GetFxMap())->GetShaderResourceView().Get()
 				: nullptr;
 
 			// Bind a default normalmap in case the scene is wet and we currently have
@@ -2119,7 +2117,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
 					info->buffer.NormalmapStrength = DEFAULT_NORMALMAP_STRENGTH;
 					info->UpdateConstantbuffer();
 				}
-				srv[1] = DistortionTexture->GetShaderResourceView();
+				srv[1] = DistortionTexture->GetShaderResourceView().Get();
 			}
 
 			boundNormalmap = srv[1];
@@ -3396,14 +3394,14 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 
 							// Get diffuse and normalmap
 							srv[0] = ((D3D11Texture*)surface->GetEngineTexture())
-								->GetShaderResourceView();
+								->GetShaderResourceView().Get();
 							srv[1] = surface->GetNormalmap()
 								? ((D3D11Texture*)surface->GetNormalmap())
-								->GetShaderResourceView()
+								->GetShaderResourceView().Get()
 								: nullptr;
 							srv[2] = surface->GetFxMap()
 								? ((D3D11Texture*)surface->GetFxMap())
-								->GetShaderResourceView()
+								->GetShaderResourceView().Get()
 								: nullptr;
 
 							// Bind a default normalmap in case the scene is wet and we
@@ -3418,7 +3416,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 									info->buffer.NormalmapStrength = DEFAULT_NORMALMAP_STRENGTH;
 									info->UpdateConstantbuffer();
 								}
-								srv[1] = DistortionTexture->GetShaderResourceView();
+								srv[1] = DistortionTexture->GetShaderResourceView().Get();
 							}
 							// Bind both
 							GetContext()->PSSetShaderResources( 0, 3, srv );
@@ -3549,15 +3547,12 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 			ID3D11ShaderResourceView* srv[3];
 
 			// Get diffuse and normalmap
-			srv[0] = ((D3D11Texture*)surface->GetEngineTexture())
-				->GetShaderResourceView();
-			srv[1] = surface->GetNormalmap()
-				? ((D3D11Texture*)surface->GetNormalmap())
-				->GetShaderResourceView()
+			srv[0] = surface->GetEngineTexture()->GetShaderResourceView().Get();
+			srv[1] = surface->GetNormalmap() 
+				? surface->GetNormalmap()->GetShaderResourceView().Get()
 				: nullptr;
-			srv[2] =
-				surface->GetFxMap()
-				? ((D3D11Texture*)surface->GetFxMap())->GetShaderResourceView()
+			srv[2] = surface->GetFxMap()
+				? surface->GetFxMap()->GetShaderResourceView().Get()
 				: nullptr;
 
 			// Bind both
@@ -3684,9 +3679,9 @@ XRESULT D3D11GraphicsEngine::DrawPolyStrips( bool noTextures ) {
 			BindShaderForTexture( mat->GetAniTexture(), false, mat->GetAlphaFunc() );
 
 			// Get diffuse and normalmap
-			srv[0] = ((D3D11Texture*)surface->GetEngineTexture())->GetShaderResourceView();
-			srv[1] = surface->GetNormalmap() ? ((D3D11Texture*)surface->GetNormalmap())->GetShaderResourceView() : NULL;
-			srv[2] = surface->GetFxMap() ? ((D3D11Texture*)surface->GetFxMap())->GetShaderResourceView() : NULL;
+			srv[0] = surface->GetEngineTexture()->GetShaderResourceView().Get();
+			srv[1] = surface->GetNormalmap() ? surface->GetNormalmap()->GetShaderResourceView().Get() : NULL;
+			srv[2] = surface->GetFxMap() ? surface->GetFxMap()->GetShaderResourceView().Get() : NULL;
 
 			// Bind both
 			Context->PSSetShaderResources( 0, 3, srv );

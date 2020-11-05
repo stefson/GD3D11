@@ -10,10 +10,6 @@
 using namespace DirectX;
 
 D3D11Texture::D3D11Texture() {
-	Texture = nullptr;
-	ShaderResourceView = nullptr;
-	Thumbnail = nullptr;
-
 	// Insert into state-map
 	ID = D3D11ObjectIDs::Counters.TextureCounter++;
 
@@ -24,9 +20,9 @@ D3D11Texture::~D3D11Texture() {
 	// Remove from state map
 	Toolbox::EraseByElement( D3D11ObjectIDs::TextureByID, this );
 
-	SAFE_RELEASE( Thumbnail );
-	SAFE_RELEASE( Texture );
-	SAFE_RELEASE( ShaderResourceView );
+	Thumbnail.Reset();
+	Texture.Reset();
+	ShaderResourceView.Reset();
 }
 
 /** Initializes the texture object */
@@ -59,7 +55,7 @@ XRESULT D3D11Texture::Init( INT2 size, ETextureFormat format, UINT mipMapCount, 
 	descRV.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	descRV.Texture2D.MipLevels = mipMapCount;
 	descRV.Texture2D.MostDetailedMip = 0;
-	LE( engine->GetDevice()->CreateShaderResourceView( Texture.Get(), &descRV, &ShaderResourceView ) );
+	LE( engine->GetDevice()->CreateShaderResourceView( Texture.Get(), &descRV, ShaderResourceView.ReleaseAndGetAddressOf() ) );
 
 	//Engine::GAPI->LeaveResourceCriticalSection();
 
@@ -159,8 +155,7 @@ UINT D3D11Texture::GetSizeInBytes( int mip ) {
 XRESULT D3D11Texture::BindToPixelShader( int slot ) {
 	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase*)Engine::GraphicsEngine;
 
-	ID3D11ShaderResourceView* srv = ShaderResourceView;
-	engine->GetContext()->PSSetShaderResources( slot, 1, &srv );
+	engine->GetContext()->PSSetShaderResources( slot, 1, ShaderResourceView.GetAddressOf() );
 
 	return XR_SUCCESS;
 }
@@ -169,9 +164,8 @@ XRESULT D3D11Texture::BindToPixelShader( int slot ) {
 XRESULT D3D11Texture::BindToVertexShader( int slot ) {
 	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase*)Engine::GraphicsEngine;
 
-	ID3D11ShaderResourceView* srv = ShaderResourceView;
-	engine->GetContext()->VSSetShaderResources( slot, 1, &srv );
-	engine->GetContext()->DSSetShaderResources( slot, 1, &srv );
+	engine->GetContext()->VSSetShaderResources( slot, 1, ShaderResourceView.GetAddressOf() );
+	engine->GetContext()->DSSetShaderResources( slot, 1, ShaderResourceView.GetAddressOf() );
 
 	return XR_SUCCESS;
 }
@@ -180,8 +174,7 @@ XRESULT D3D11Texture::BindToVertexShader( int slot ) {
 XRESULT D3D11Texture::BindToDomainShader( int slot ) {
 	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase*)Engine::GraphicsEngine;
 
-	ID3D11ShaderResourceView* srv = ShaderResourceView;
-	engine->GetContext()->DSSetShaderResources( slot, 1, &srv );
+	engine->GetContext()->DSSetShaderResources( slot, 1, ShaderResourceView.GetAddressOf() );
 
 	return XR_SUCCESS;
 }
@@ -205,14 +198,14 @@ XRESULT D3D11Texture::CreateThumbnail() {
 
 	// Create temporary RTV
 	ID3D11RenderTargetView* tempRTV;
-	LE( engine->GetDevice()->CreateRenderTargetView( Thumbnail, nullptr, &tempRTV ) );
+	LE( engine->GetDevice()->CreateRenderTargetView( Thumbnail.Get(), nullptr, &tempRTV ) );
 	if ( !tempRTV )
 		return XR_FAILED;
 
 	engine->GetContext()->ClearRenderTargetView( tempRTV, (float*)&float4( 1, 0, 0, 1 ) );
 
 	// Copy main texture to it
-	engine->GetContext()->PSSetShaderResources( 0, 1, &ShaderResourceView );
+	engine->GetContext()->PSSetShaderResources( 0, 1, ShaderResourceView.GetAddressOf() );
 
 	ID3D11RenderTargetView* oldRTV[2];
 	ID3D11DepthStencilView* oldDSV;
@@ -233,7 +226,7 @@ XRESULT D3D11Texture::CreateThumbnail() {
 }
 
 /** Returns the thumbnail of this texture. If this returns nullptr, you need to create one first */
-ID3D11Texture2D* D3D11Texture::GetThumbnail() {
+const Microsoft::WRL::ComPtr<ID3D11Texture2D>& D3D11Texture::GetThumbnail() {
 	return Thumbnail;
 }
 

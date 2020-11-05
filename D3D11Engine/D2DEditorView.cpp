@@ -844,12 +844,12 @@ void D2DEditorView::UpdateSelectionPanel() {
 		MyDirectDrawSurface7* surface = Engine::GAPI->GetSurface( Selection.SelectedMaterial->GetTexture()->GetNameWithoutExt() );
 
 		if ( surface ) {
-			ID3D11Texture2D* thumb = ((D3D11Texture*)surface->GetEngineTexture())->GetThumbnail();
+			auto thumb = (surface->GetEngineTexture())->GetThumbnail();
 			if ( !thumb ) {
-				XLE( ((D3D11Texture*)surface->GetEngineTexture())->CreateThumbnail() );
-				thumb = ((D3D11Texture*)surface->GetEngineTexture())->GetThumbnail();
+				XLE( (surface->GetEngineTexture())->CreateThumbnail() );
+				thumb = (surface->GetEngineTexture())->GetThumbnail();
 			}
-			SelectedImagePanel->SetD3D11TextureAsImage( thumb, INT2( 256, 256 ) );
+			SelectedImagePanel->SetD3D11TextureAsImage( thumb.Get(), INT2( 256, 256 ) );
 		}
 	}
 
