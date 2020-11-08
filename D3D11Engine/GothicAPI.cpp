@@ -764,23 +764,25 @@ void GothicAPI::DrawWorldMeshNaive() {
 		CurrentCamera = zCCamera::GetCamera();
 }
 #else
-	float fovH = 90.0f, fovV = 90.0f;
-	if ( zCCamera::GetCamera() )
-		zCCamera::GetCamera()->GetFOV( fovH, fovV );
+	if ( RendererState.RendererSettings.ForceFOV ) {
+		float fovH = 90.0f, fovV = 90.0f;
+		if ( zCCamera::GetCamera() )
+			zCCamera::GetCamera()->GetFOV( fovH, fovV );
 
-	// TODO: FOV is being reset after a dialog!
-	if ( zCCamera::GetCamera() && (zCCamera::GetCamera() != CurrentCamera
-		|| setfovH != RendererState.RendererSettings.FOVHoriz
-		|| setfovV != RendererState.RendererSettings.FOVVert
-		|| (fovH == 90.0f && fovV == 90.0f)) ) // FIXME: This is being reset after a dialog!
-	{
-		setfovH = RendererState.RendererSettings.FOVHoriz;
-		setfovV = RendererState.RendererSettings.FOVVert;
+		// TODO: FOV is being reset after a dialog!
+		if ( zCCamera::GetCamera() && (zCCamera::GetCamera() != CurrentCamera
+			|| setfovH != RendererState.RendererSettings.FOVHoriz
+			|| setfovV != RendererState.RendererSettings.FOVVert
+			|| (fovH == 90.0f && fovV == 90.0f)) ) // FIXME: This is being reset after a dialog!
+		{
+			setfovH = RendererState.RendererSettings.FOVHoriz;
+			setfovV = RendererState.RendererSettings.FOVVert;
 
-		// Fix camera FOV-Bug
-		zCCamera::GetCamera()->SetFOV( RendererState.RendererSettings.FOVHoriz, (Engine::GraphicsEngine->GetResolution().y / (float)Engine::GraphicsEngine->GetResolution().x) * RendererState.RendererSettings.FOVVert );
+			// Fix camera FOV-Bug
+			zCCamera::GetCamera()->SetFOV( RendererState.RendererSettings.FOVHoriz, (Engine::GraphicsEngine->GetResolution().y / (float)Engine::GraphicsEngine->GetResolution().x) * RendererState.RendererSettings.FOVVert );
 
-		CurrentCamera = zCCamera::GetCamera();
+			CurrentCamera = zCCamera::GetCamera();
+		}
 	}
 #endif
 
@@ -3567,7 +3569,7 @@ XRESULT GothicAPI::SaveMenuSettings( const std::string& file ) {
 	TCHAR NPath[MAX_PATH];
 	// Returns Gothic directory.
 	int len = GetCurrentDirectory( MAX_PATH, NPath );
-	// Get path to Gothic.Ini
+	// Get path to UserSettings.Ini
 	auto ini = std::string( NPath, len ).append( "\\" + file );
 
 	LogInfo() << "Saving menu settings to " << ini;
@@ -3640,7 +3642,7 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
 	TCHAR NPath[MAX_PATH];
 	// Returns Gothic directory.
 	int len = GetCurrentDirectory( MAX_PATH, NPath );
-	// Get path to Gothic.Ini
+	// Get path to UserSettings.Ini
 	auto ini = std::string( NPath, len ).append( "\\" + file );
 
 
