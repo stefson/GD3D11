@@ -114,7 +114,7 @@ public:
 	virtual void SaveScreenshot() {}
 
 	/** Returns the shadermanager */
-	D3D11ShaderManager* GetShaderManager();
+	D3D11ShaderManager& GetShaderManager();
 
 	/** Draws a vertexarray, used for rendering gothics UI */
 	virtual XRESULT DrawVertexArray( ExVertexStruct* vertices, unsigned int numVertices, unsigned int startVertex = 0, unsigned int stride = sizeof( ExVertexStruct ) );
@@ -126,9 +126,9 @@ public:
 	XRESULT D3D11GraphicsEngineBase::BindViewportInformation( const std::string& shader, int slot );
 
 	/** Returns the Device/Context */
-	ID3D11Device* GetDevice() { return Device.Get(); }
-	ID3D11DeviceContext* GetContext() { return Context.Get(); }
-	ID3D11DeviceContext* GetDeferredMediaContext() { return DeferredContext.Get(); }
+	const Microsoft::WRL::ComPtr<ID3D11Device>& GetDevice() { return Device; }
+	const Microsoft::WRL::ComPtr<ID3D11DeviceContext>& GetContext() { return Context; }
+	const Microsoft::WRL::ComPtr<ID3D11DeviceContext>& GetDeferredMediaContext() { return DeferredContext; }
 
 	/** Returns the current resolution */
 	virtual INT2 GetResolution() { return Resolution; }
@@ -201,25 +201,25 @@ protected:
 	std::unique_ptr<D3D11ConstantBuffer> TransformsCB; // Holds View/Proj-Transforms
 
 	/** Shaders */
-	D3D11PShader* PS_DiffuseNormalmapped;
-	D3D11PShader* PS_DiffuseNormalmappedFxMap;
-	D3D11PShader* PS_Diffuse;
-	D3D11PShader* PS_DiffuseNormalmappedAlphatest;
-	D3D11PShader* PS_DiffuseNormalmappedAlphatestFxMap;
-	D3D11PShader* PS_DiffuseAlphatest;
-	D3D11PShader* PS_Simple;
-	D3D11PShader* PS_SimpleAlphaTest;
-	D3D11PShader* PS_LinDepth;
-	D3D11VShader* VS_Ex;
-	D3D11VShader* VS_ExInstancedObj;
-	D3D11VShader* VS_ExRemapInstancedObj;
-	D3D11VShader* VS_ExSkeletal;
-	D3D11GShader* GS_Billboard;
+	std::shared_ptr<D3D11PShader> PS_DiffuseNormalmapped;
+	std::shared_ptr<D3D11PShader> PS_DiffuseNormalmappedFxMap;
+	std::shared_ptr<D3D11PShader> PS_Diffuse;
+	std::shared_ptr<D3D11PShader> PS_DiffuseNormalmappedAlphatest;
+	std::shared_ptr<D3D11PShader> PS_DiffuseNormalmappedAlphatestFxMap;
+	std::shared_ptr<D3D11PShader> PS_DiffuseAlphatest;
+	std::shared_ptr<D3D11PShader> PS_Simple;
+	std::shared_ptr<D3D11PShader> PS_SimpleAlphaTest;
+	std::shared_ptr<D3D11PShader> PS_LinDepth;
+	std::shared_ptr<D3D11VShader> VS_Ex;
+	std::shared_ptr<D3D11VShader> VS_ExInstancedObj;
+	std::shared_ptr<D3D11VShader> VS_ExRemapInstancedObj;
+	std::shared_ptr<D3D11VShader> VS_ExSkeletal;
+	std::shared_ptr<D3D11GShader> GS_Billboard;
 
-	D3D11VShader* ActiveVS;
-	D3D11PShader* ActivePS;
-	D3D11HDShader* ActiveHDS;
-	D3D11GShader* ActiveGS;
+	std::shared_ptr<D3D11VShader> ActiveVS;
+	std::shared_ptr<D3D11PShader> ActivePS;
+	std::shared_ptr<D3D11HDShader> ActiveHDS;
+	std::shared_ptr<D3D11GShader> ActiveGS;
 
 	/** FixedFunction-State render states */
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> FFRasterizerState;

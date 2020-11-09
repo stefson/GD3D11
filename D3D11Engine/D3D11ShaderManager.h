@@ -60,18 +60,18 @@ public:
 	XRESULT DeleteShaders();
 
 	/** Return a specific shader */
-	D3D11VShader* GetVShader( std::string shader );
-	D3D11PShader* GetPShader( std::string shader );
-	D3D11HDShader* GetHDShader( std::string shader );
-	D3D11GShader* GetGShader( std::string shader );
+	std::shared_ptr<D3D11VShader> GetVShader( std::string shader );
+	std::shared_ptr<D3D11PShader> GetPShader( std::string shader );
+	std::shared_ptr<D3D11HDShader> GetHDShader( std::string shader );
+	std::shared_ptr<D3D11GShader> GetGShader( std::string shader );
 
 
 private:
 	std::vector<ShaderInfo> Shaders;							//Initial shader list for loading
-	std::unordered_map<std::string, D3D11VShader*> VShaders;
-	std::unordered_map<std::string, D3D11PShader*> PShaders;
-	std::unordered_map<std::string, D3D11HDShader*> HDShaders;
-	std::unordered_map<std::string, D3D11GShader*> GShaders;
+	std::unordered_map<std::string, std::shared_ptr<D3D11VShader>> VShaders;
+	std::unordered_map<std::string, std::shared_ptr<D3D11PShader>> PShaders;
+	std::unordered_map<std::string, std::shared_ptr<D3D11HDShader>> HDShaders;
+	std::unordered_map<std::string, std::shared_ptr<D3D11GShader>> GShaders;
 
 
 	/** Whether we need to reload the shaders next frame or not */
