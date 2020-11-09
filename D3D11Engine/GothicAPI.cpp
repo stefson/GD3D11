@@ -1288,12 +1288,12 @@ void GothicAPI::OnRemovedVob( zCVob* vob, zCWorld* world ) {
 	SkeletalVobInfo* svi = SkeletalVobMap[vob];
 
 	// Tell all dynamic lights that we removed a vob they could have cached
-	for ( auto it = VobLightMap.begin(); it != VobLightMap.end(); ++it ) {
-		if ( vi && it->second->LightShadowBuffers )
-			it->second->LightShadowBuffers->OnVobRemovedFromWorld( vi );
+	for ( auto& it : VobLightMap ) {
+		if ( vi && it.second->LightShadowBuffers )
+			it.second->LightShadowBuffers->OnVobRemovedFromWorld( vi );
 
-		if ( svi && it->second->LightShadowBuffers )
-			it->second->LightShadowBuffers->OnVobRemovedFromWorld( svi );
+		if ( svi && it.second->LightShadowBuffers )
+			it.second->LightShadowBuffers->OnVobRemovedFromWorld( svi );
 	}
 
 	VobLightInfo* li = VobLightMap[(zCVobLight*)vob];
