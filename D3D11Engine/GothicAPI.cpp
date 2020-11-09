@@ -876,8 +876,7 @@ void GothicAPI::CalcPolyStripMeshes() {
 
 	PolyStripInfos.clear();
 
-	for ( auto it = PolyStripVisuals.begin(); it != PolyStripVisuals.end(); it++ ) {
-		zCPolyStrip* pStrip = *it;
+	for ( const auto& pStrip : PolyStripVisuals) {
 
 		if ( !pStrip ) return;
 
@@ -907,9 +906,6 @@ void GothicAPI::CalcPolyStripMeshes() {
 		float* alphaList = pStripInst.alphaList;
 		zCVertex* vertList = pStripInst.vertList;
 		zCPolygon* poly = &(pStripInst.polyList[0]);
-
-		std::vector<ExVertexStruct> vertices;
-		std::vector<VERTEX_INDEX> indices;
 
 		//order of vertex indeces that make up a single poly
 		int vertOrder[4] = { 0, 1, 3, 2 };
