@@ -115,12 +115,12 @@ void D3D11PFX_SMAA::RenderPostFX( ID3D11ShaderResourceView* renderTargetSRV ) {
 	vp.TopLeftY = 0.0f;
 	vp.MinDepth = 0.0f;
 	vp.MaxDepth = 0.0f;
-	vp.Width = (float)FxRenderer->GetTempBuffer()->GetSizeX();
-	vp.Height = (float)FxRenderer->GetTempBuffer()->GetSizeY();
+	vp.Width = (float)FxRenderer->GetTempBuffer().GetSizeX();
+	vp.Height = (float)FxRenderer->GetTempBuffer().GetSizeY();
 
-	engine->GetShaderManager()->GetVShader( "VS_PFX" )->Apply(); // Apply vertexlayout for PP-Effects
+	engine->GetShaderManager().GetVShader( "VS_PFX" )->Apply(); // Apply vertexlayout for PP-Effects
 
-	RenderToTextureBuffer* TempRTV = FxRenderer->GetTempBuffer();
+	RenderToTextureBuffer& TempRTV = FxRenderer->GetTempBuffer();
 
 	if ( !EdgesTex ) {
 		OnResize( INT2( engine->GetResolution().x, engine->GetResolution().y ) );
@@ -170,7 +170,7 @@ void D3D11PFX_SMAA::RenderPostFX( ID3D11ShaderResourceView* renderTargetSRV ) {
 
 
 	/** Third pass - NeighborhoodBlending */
-	engine->GetContext()->OMSetRenderTargets( 1, TempRTV->GetRenderTargetView().GetAddressOf(), OldDSV );
+	engine->GetContext()->OMSetRenderTargets( 1, TempRTV.GetRenderTargetView().GetAddressOf(), OldDSV );
 
 
 	SMAAShader->GetVariableByName( "colorTex" )->AsShaderResource()->SetResource( renderTargetSRV );
@@ -187,12 +187,12 @@ void D3D11PFX_SMAA::RenderPostFX( ID3D11ShaderResourceView* renderTargetSRV ) {
 	engine->DrawSRVToBackbuffer(TempRTV->GetShaderResView());
 	goto end;*/
 
-	ID3D11ShaderResourceView* srv = TempRTV->GetShaderResView().Get();
+	ID3D11ShaderResourceView* srv = TempRTV.GetShaderResView().Get();
 	engine->GetContext()->PSSetShaderResources( 0, 1, &srv );
 
 
 	if ( Engine::GAPI->GetRendererState()->RendererSettings.SharpenFactor > 0.0f ) {
-		auto sharpenPS = engine->GetShaderManager()->GetPShader( "PS_PFX_Sharpen" );
+		auto sharpenPS = engine->GetShaderManager().GetPShader( "PS_PFX_Sharpen" );
 		sharpenPS->Apply();
 
 		GammaCorrectConstantBuffer gcb;
@@ -204,9 +204,9 @@ void D3D11PFX_SMAA::RenderPostFX( ID3D11ShaderResourceView* renderTargetSRV ) {
 		sharpenPS->GetConstantBuffer()[0]->UpdateBuffer( &gcb );
 		sharpenPS->GetConstantBuffer()[0]->BindToPixelShader( 0 );
 
-		FxRenderer->CopyTextureToRTV( TempRTV->GetShaderResView().Get(), OldRTV, INT2( 0, 0 ), true );
+		FxRenderer->CopyTextureToRTV( TempRTV.GetShaderResView().Get(), OldRTV, INT2( 0, 0 ), true );
 	} else {
-		FxRenderer->CopyTextureToRTV( TempRTV->GetShaderResView().Get(), OldRTV );
+		FxRenderer->CopyTextureToRTV( TempRTV.GetShaderResView().Get(), OldRTV );
 	}
 
 	engine->GetContext()->PSSetShaderResources( 0, 3, NoSRV );

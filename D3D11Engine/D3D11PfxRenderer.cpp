@@ -67,7 +67,7 @@ XRESULT D3D11PfxRenderer::RenderHDR() {
 /** Renders the SMAA-Effect */
 XRESULT D3D11PfxRenderer::RenderSMAA() {
 	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
-	FX_SMAA->RenderPostFX( engine->GetHDRBackBuffer()->GetShaderResView().Get() );
+	FX_SMAA->RenderPostFX( engine->GetHDRBackBuffer().GetShaderResView().Get() );
 
 	return XR_SUCCESS;
 }
@@ -133,11 +133,11 @@ XRESULT D3D11PfxRenderer::CopyTextureToRTV( ID3D11ShaderResourceView* texture, I
 
 	// Bind shaders
 	if ( !useCustomPS ) {
-		auto simplePS = engine->GetShaderManager()->GetPShader( "PS_PFX_Simple" );
+		auto simplePS = engine->GetShaderManager().GetPShader( "PS_PFX_Simple" );
 		simplePS->Apply();
 	}
 
-	engine->GetShaderManager()->GetVShader( "VS_PFX" )->Apply();
+	engine->GetShaderManager().GetVShader( "VS_PFX" )->Apply();
 
 	ID3D11ShaderResourceView* srv = nullptr;
 	engine->GetContext()->PSSetShaderResources( 0, 1, &srv );

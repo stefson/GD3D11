@@ -223,7 +223,7 @@ void D3D11PointLight::RenderFullCubemap() {
 	if ( WorldCacheInvalid )
 		wc = nullptr;
 
-	engine->RenderShadowCube( LightInfo->Vob->GetPositionWorldXM(), range, DepthCubemap.get(), nullptr, nullptr, false, LightInfo->IsIndoorVob, noNPCs, &VobCache, &SkeletalVobCache, wc );
+	engine->RenderShadowCube( LightInfo->Vob->GetPositionWorldXM(), range, *DepthCubemap, nullptr, nullptr, false, LightInfo->IsIndoorVob, noNPCs, &VobCache, &SkeletalVobCache, wc );
 
 	//Engine::GAPI->GetRendererState()->RendererSettings.DrawSkeletalMeshes = oldDrawSkel;
 }
@@ -252,7 +252,7 @@ void D3D11PointLight::RenderCubemapFace( const DirectX::XMFLOAT4X4& view, const 
 
 	// Draw cubemap face
 	ID3D11RenderTargetView* debugRTV = engine->GetDummyCubeRT() != nullptr ? engine->GetDummyCubeRT()->GetRTVCubemapFace( faceIdx ) : nullptr;
-	engine->RenderShadowCube( LightInfo->Vob->GetPositionWorldXM(), range, DepthCubemap.get(), DepthCubemap->GetDSVCubemapFace( faceIdx ), debugRTV, false );
+	engine->RenderShadowCube( LightInfo->Vob->GetPositionWorldXM(), range, *DepthCubemap, DepthCubemap->GetDSVCubemapFace( faceIdx ), debugRTV, false );
 
 	//Engine::GAPI->GetRendererState()->RendererSettings.DrawSkeletalMeshes = oldDrawSkel;
 

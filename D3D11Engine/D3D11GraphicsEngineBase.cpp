@@ -298,9 +298,8 @@ XRESULT D3D11GraphicsEngineBase::SetViewport( const ViewportInfo& viewportInfo )
 
 
 /** Returns the shadermanager */
-D3D11ShaderManager* D3D11GraphicsEngineBase::GetShaderManager() {
-	return ShaderManager.get();
-}
+D3D11ShaderManager& D3D11GraphicsEngineBase::GetShaderManager() { return *ShaderManager; }
+
 
 /** Called when the game wants to clear the bound rendertarget */
 XRESULT D3D11GraphicsEngineBase::Clear( const float4& color ) {

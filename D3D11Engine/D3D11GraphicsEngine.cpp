@@ -2506,7 +2506,7 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 	// Copy backbuffer
 	PfxRenderer->CopyTextureToRTV(
 		HDRBackBuffer->GetShaderResView().Get(),
-		PfxRenderer->GetTempBuffer()->GetRenderTargetView().Get() );
+		PfxRenderer->GetTempBuffer().GetRenderTargetView().Get() );
 	CopyDepthStencil();
 
 	// Pre-Draw the surfaces to fix overlaying polygons causing a huge performance
@@ -2547,7 +2547,7 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 
 	// Bind copied backbuffer
 	GetContext()->PSSetShaderResources(
-		5, 1, PfxRenderer->GetTempBuffer()->GetShaderResView().GetAddressOf() );
+		5, 1, PfxRenderer->GetTempBuffer().GetShaderResView().GetAddressOf() );
 
 	// Bind depth to the shader
 	DepthStencilBufferCopy->BindToPixelShader( GetContext(), 2 );
@@ -4405,7 +4405,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
 /** Renders the shadowmaps for a pointlight */
 void XM_CALLCONV D3D11GraphicsEngine::RenderShadowCube(
 	DirectX::FXMVECTOR position, float range,
-	RenderToDepthStencilBuffer* targetCube, ID3D11DepthStencilView* face,
+	const RenderToDepthStencilBuffer& targetCube, ID3D11DepthStencilView* face,
 	ID3D11RenderTargetView* debugRTV, bool cullFront, bool indoor, bool noNPCs,
 	std::list<VobInfo*>* renderedVobs,
 	std::list<SkeletalVobInfo*>* renderedMobs,
@@ -4420,8 +4420,8 @@ void XM_CALLCONV D3D11GraphicsEngine::RenderShadowCube(
 	vp.TopLeftY = 0;
 	vp.MinDepth = 0.0f;
 	vp.MaxDepth = 1.0f;
-	vp.Width = static_cast<float>(targetCube->GetSizeX());
-	vp.Height = static_cast<float>(targetCube->GetSizeX());
+	vp.Width = static_cast<float>(targetCube.GetSizeX());
+	vp.Height = static_cast<float>(targetCube.GetSizeX());
 
 	GetContext()->RSSetViewports( 1, &vp );
 
@@ -4429,7 +4429,7 @@ void XM_CALLCONV D3D11GraphicsEngine::RenderShadowCube(
 		// Set cubemap shader
 		SetActiveGShader( "GS_Cubemap" );
 		ActiveGS->Apply();
-		face = targetCube->GetDepthStencilView().Get();
+		face = targetCube.GetDepthStencilView().Get();
 
 		SetActiveVertexShader( "VS_ExCube" );
 	}
@@ -4820,7 +4820,7 @@ XRESULT D3D11GraphicsEngine::DrawOcean( GOcean* ocean ) {
 
 	// Bind copied backbuffer
 	GetContext()->PSSetShaderResources(
-		5, 1, PfxRenderer->GetTempBuffer()->GetShaderResView().GetAddressOf() );
+		5, 1, PfxRenderer->GetTempBuffer().GetShaderResView().GetAddressOf() );
 
 	// Bind depth to the shader
 	DepthStencilBufferCopy->BindToPixelShader( GetContext(), 2 );
@@ -5565,14 +5565,14 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 	// Copy scene behind the particle systems
 	PfxRenderer->CopyTextureToRTV(
 		HDRBackBuffer->GetShaderResView().Get(),
-		PfxRenderer->GetTempBuffer()->GetRenderTargetView().Get() );
+		PfxRenderer->GetTempBuffer().GetRenderTargetView().Get() );
 
 	SetActivePixelShader( "PS_PFX_ApplyParticleDistortion" );
 	ActivePS->Apply();
 
 	// Copy it back, putting distortion behind it
 	PfxRenderer->CopyTextureToRTV(
-		PfxRenderer->GetTempBuffer()->GetShaderResView().Get(),
+		PfxRenderer->GetTempBuffer().GetShaderResView().Get(),
 		HDRBackBuffer->GetRenderTargetView().Get(), INT2( 0, 0 ), true );
 
 	SetDefaultStates();

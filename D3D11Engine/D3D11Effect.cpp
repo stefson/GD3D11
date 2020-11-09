@@ -95,11 +95,11 @@ XRESULT D3D11Effect::DrawRain() {
 	GothicRendererState& state = *Engine::GAPI->GetRendererState();
 
 	// Get shaders
-	auto streamOutGS = e->GetShaderManager()->GetGShader( "GS_ParticleStreamOut" );
-	auto particleGS = e->GetShaderManager()->GetGShader( "GS_Raindrops" );
-	auto particleAdvanceVS = e->GetShaderManager()->GetVShader( "VS_AdvanceRain" );
-	auto particleVS = e->GetShaderManager()->GetVShader( "VS_ParticlePointShaded" );
-	auto rainPS = e->GetShaderManager()->GetPShader( "PS_Rain" );
+	auto streamOutGS = e->GetShaderManager().GetGShader( "GS_ParticleStreamOut" );
+	auto particleGS = e->GetShaderManager().GetGShader( "GS_Raindrops" );
+	auto particleAdvanceVS = e->GetShaderManager().GetVShader( "VS_AdvanceRain" );
+	auto particleVS = e->GetShaderManager().GetVShader( "VS_ParticlePointShaded" );
+	auto rainPS = e->GetShaderManager().GetPShader( "PS_Rain" );
 
 	UINT numParticles = Engine::GAPI->GetRendererState()->RendererSettings.RainNumParticles;
 
@@ -306,7 +306,7 @@ XRESULT D3D11Effect::DrawRainShadowmap() {
 	Engine::GAPI->GetRendererState()->GraphicsState.FF_AlphaRef = -1.0f;
 
 	// Bind the FF-Info to the first PS slot
-	auto PS_Diffuse = e->GetShaderManager()->GetPShader( "PS_Diffuse" );
+	auto PS_Diffuse = e->GetShaderManager().GetPShader( "PS_Diffuse" );
 	if ( PS_Diffuse ) {
 		PS_Diffuse->GetConstantBuffer()[0]->UpdateBuffer( &Engine::GAPI->GetRendererState()->GraphicsState );
 		PS_Diffuse->GetConstantBuffer()[0]->BindToPixelShader( 0 );

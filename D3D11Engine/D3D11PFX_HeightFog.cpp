@@ -28,8 +28,8 @@ XRESULT D3D11PFX_HeightFog::Render( RenderToTextureBuffer* fxbuffer ) {
 	ID3D11DepthStencilView* oldDSV = nullptr;
 	engine->GetContext()->OMGetRenderTargets( 1, &oldRTV, &oldDSV );
 
-	auto vs = engine->GetShaderManager()->GetVShader( "VS_PFX" );
-	auto hfPS = engine->GetShaderManager()->GetPShader( "PS_PFX_Heightfog" );
+	auto vs = engine->GetShaderManager().GetVShader( "VS_PFX" );
+	auto hfPS = engine->GetShaderManager().GetPShader( "PS_PFX_Heightfog" );
 
 	hfPS->Apply();
 	vs->Apply();

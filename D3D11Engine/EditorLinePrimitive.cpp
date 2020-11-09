@@ -32,8 +32,8 @@ EditorLinePrimitive::EditorLinePrimitive() {
 
 	bJustUseRotationMatrix = false;
 
-	SetSolidShader( ((D3D11GraphicsEngineBase*)Engine::GraphicsEngine)->GetShaderManager()->GetPShader( "PS_Lines" ) );
-	SetShader( ((D3D11GraphicsEngineBase*)Engine::GraphicsEngine)->GetShaderManager()->GetPShader( "PS_Lines" ) );
+	SetSolidShader( ((D3D11GraphicsEngineBase*)Engine::GraphicsEngine)->GetShaderManager().GetPShader( "PS_Lines" ) );
+	SetShader( ((D3D11GraphicsEngineBase*)Engine::GraphicsEngine)->GetShaderManager().GetPShader( "PS_Lines" ) );
 }
 
 

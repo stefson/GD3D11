@@ -114,7 +114,7 @@ public:
 	virtual void SaveScreenshot() {}
 
 	/** Returns the shadermanager */
-	D3D11ShaderManager* GetShaderManager();
+	D3D11ShaderManager& GetShaderManager();
 
 	/** Draws a vertexarray, used for rendering gothics UI */
 	virtual XRESULT DrawVertexArray( ExVertexStruct* vertices, unsigned int numVertices, unsigned int startVertex = 0, unsigned int stride = sizeof( ExVertexStruct ) );

@@ -295,9 +295,9 @@ struct RenderToDepthStencilBuffer {
 		context->PSSetShaderResources( slot, 1, ShaderResView.GetAddressOf() );
 	}
 
-	const Microsoft::WRL::ComPtr<ID3D11Texture2D>& GetTexture() { return Texture; }
-	const Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetShaderResView() { return ShaderResView; }
-	const Microsoft::WRL::ComPtr<ID3D11DepthStencilView>& GetDepthStencilView() { return DepthStencilView; }
+	const Microsoft::WRL::ComPtr<ID3D11Texture2D>& GetTexture() const { return Texture; }
+	const Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetShaderResView() const { return ShaderResView; }
+	const Microsoft::WRL::ComPtr<ID3D11DepthStencilView>& GetDepthStencilView() const { return DepthStencilView; }
 	UINT GetSizeX() const { return SizeX; }
 	UINT GetSizeY() const { return SizeY; }
 
