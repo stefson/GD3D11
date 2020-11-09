@@ -31,7 +31,7 @@ XRESULT D3D11PFX_GodRays::Render( RenderToTextureBuffer* fxbuffer ) {
 	xmSunPosition = xmSunPosition * outerRadius;
 	xmSunPosition = XMVectorAdd( xmSunPosition, Engine::GAPI->GetCameraPositionXM() ); // Maybe use cameraposition from sky?
 
-	XMMATRIX view = XMLoadFloat4x4( &Engine::GAPI->GetRendererState()->TransformState.TransformView );
+	XMMATRIX view = XMLoadFloat4x4( &Engine::GAPI->GetRendererState().TransformState.TransformView );
 	XMMATRIX proj = XMLoadFloat4x4( &Engine::GAPI->GetProjectionMatrix() );
 
 	XMMATRIX viewProj = XMMatrixMultiply( proj, view );
@@ -47,14 +47,14 @@ XRESULT D3D11PFX_GodRays::Render( RenderToTextureBuffer* fxbuffer ) {
 
 	GodRayZoomConstantBuffer gcb = {};
 	gcb.GR_Weight = 1.0f;
-	gcb.GR_Decay = Engine::GAPI->GetRendererState()->RendererSettings.GodRayDecay;
-	gcb.GR_Weight = Engine::GAPI->GetRendererState()->RendererSettings.GodRayWeight;
-	gcb.GR_Density = Engine::GAPI->GetRendererState()->RendererSettings.GodRayDensity;
+	gcb.GR_Decay = Engine::GAPI->GetRendererState().RendererSettings.GodRayDecay;
+	gcb.GR_Weight = Engine::GAPI->GetRendererState().RendererSettings.GodRayWeight;
+	gcb.GR_Density = Engine::GAPI->GetRendererState().RendererSettings.GodRayDensity;
 
 	gcb.GR_Center.x = sunPosition.x / 2.0f + 0.5f;
 	gcb.GR_Center.y = sunPosition.y / -2.0f + 0.5f;
 
-	gcb.GR_ColorMod = Engine::GAPI->GetRendererState()->RendererSettings.GodRayColorMod;
+	gcb.GR_ColorMod = Engine::GAPI->GetRendererState().RendererSettings.GodRayColorMod;
 
 	if ( abs( gcb.GR_Center.x - 0.5f ) > 0.5f )
 		gcb.GR_Weight *= std::max( 0.0f, 1.0f - (abs( gcb.GR_Center.x - 0.5f ) - 0.5f) / 0.5f );
@@ -103,8 +103,8 @@ XRESULT D3D11PFX_GodRays::Render( RenderToTextureBuffer* fxbuffer ) {
 	FxRenderer->CopyTextureToRTV( FxRenderer->GetTempBufferDS4_1().GetShaderResView().Get(), FxRenderer->GetTempBufferDS4_2().GetRenderTargetView().Get(), INT2( 0, 0 ), true );
 
 	// Upscale and blend
-	Engine::GAPI->GetRendererState()->BlendState.SetAdditiveBlending();
-	Engine::GAPI->GetRendererState()->BlendState.SetDirty();
+	Engine::GAPI->GetRendererState().BlendState.SetAdditiveBlending();
+	Engine::GAPI->GetRendererState().BlendState.SetDirty();
 
 	FxRenderer->CopyTextureToRTV( FxRenderer->GetTempBufferDS4_2().GetShaderResView().Get(), oldRTV, INT2( engine->GetResolution().x, engine->GetResolution().y ) );
 

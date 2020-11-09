@@ -38,8 +38,8 @@ D3D11PFX_HDR::~D3D11PFX_HDR() {
 XRESULT D3D11PFX_HDR::Render( RenderToTextureBuffer* fxbuffer ) {
 	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
 
-	Engine::GAPI->GetRendererState()->BlendState.BlendEnabled = false;
-	Engine::GAPI->GetRendererState()->BlendState.SetDirty();
+	Engine::GAPI->GetRendererState().BlendState.BlendEnabled = false;
+	Engine::GAPI->GetRendererState().BlendState.SetDirty();
 
 	// Save old rendertargets
 	ID3D11RenderTargetView* oldRTV = nullptr;
@@ -65,10 +65,10 @@ XRESULT D3D11PFX_HDR::Render( RenderToTextureBuffer* fxbuffer ) {
 	hps->Apply();
 
 	HDRSettingsConstantBuffer hcb;
-	hcb.HDR_LumWhite = Engine::GAPI->GetRendererState()->RendererSettings.HDRLumWhite;
-	hcb.HDR_MiddleGray = Engine::GAPI->GetRendererState()->RendererSettings.HDRMiddleGray;
-	hcb.HDR_Threshold = Engine::GAPI->GetRendererState()->RendererSettings.BloomThreshold;
-	hcb.HDR_BloomStrength = Engine::GAPI->GetRendererState()->RendererSettings.BloomStrength;
+	hcb.HDR_LumWhite = Engine::GAPI->GetRendererState().RendererSettings.HDRLumWhite;
+	hcb.HDR_MiddleGray = Engine::GAPI->GetRendererState().RendererSettings.HDRMiddleGray;
+	hcb.HDR_Threshold = Engine::GAPI->GetRendererState().RendererSettings.BloomThreshold;
+	hcb.HDR_BloomStrength = Engine::GAPI->GetRendererState().RendererSettings.BloomStrength;
 	hps->GetConstantBuffer()[0]->UpdateBuffer( &hcb );
 	hps->GetConstantBuffer()[0]->BindToPixelShader( 0 );
 
@@ -97,9 +97,9 @@ void D3D11PFX_HDR::CreateBloom( RenderToTextureBuffer* lum ) {
 	tonemapPS->Apply();
 
 	HDRSettingsConstantBuffer hcb;
-	hcb.HDR_LumWhite = Engine::GAPI->GetRendererState()->RendererSettings.HDRLumWhite;
-	hcb.HDR_MiddleGray = Engine::GAPI->GetRendererState()->RendererSettings.HDRMiddleGray;
-	hcb.HDR_Threshold = Engine::GAPI->GetRendererState()->RendererSettings.BloomThreshold;
+	hcb.HDR_LumWhite = Engine::GAPI->GetRendererState().RendererSettings.HDRLumWhite;
+	hcb.HDR_MiddleGray = Engine::GAPI->GetRendererState().RendererSettings.HDRMiddleGray;
+	hcb.HDR_Threshold = Engine::GAPI->GetRendererState().RendererSettings.BloomThreshold;
 	tonemapPS->GetConstantBuffer()[0]->UpdateBuffer( &hcb );
 	tonemapPS->GetConstantBuffer()[0]->BindToPixelShader( 0 );
 

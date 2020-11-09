@@ -377,9 +377,7 @@ void GothicAPI::OnSetWindow( HWND hWnd ) {
 }
 
 /** Returns the GraphicsState */
-GothicRendererState* GothicAPI::GetRendererState() {
-	return &RendererState;
-}
+GothicRendererState& GothicAPI::GetRendererState() { return RendererState; }
 
 
 /** Spawns a vegetationbox at the camera */
@@ -1085,7 +1083,7 @@ void GothicAPI::OnVobMoved( zCVob* vob ) {
 		XMStoreFloat3( &it->second->LastRenderPosition, it->second->Vob->GetPositionWorldXM() );
 		it->second->UpdateVobConstantBuffer();
 
-		Engine::GAPI->GetRendererState()->RendererInfo.FrameVobUpdates++;
+		Engine::GAPI->GetRendererState().RendererInfo.FrameVobUpdates++;
 	} else {
 		auto sit = SkeletalVobMap.find( vob );
 
@@ -2481,20 +2479,20 @@ LRESULT GothicAPI::OnWindowMessage( HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 			break;
 
 		case VK_NUMPAD1:
-			if ( !Engine::AntTweakBar->GetActive() && !GMPModeActive && Engine::GAPI->GetRendererState()->RendererSettings.AllowNumpadKeys )
+			if ( !Engine::AntTweakBar->GetActive() && !GMPModeActive && Engine::GAPI->GetRendererState().RendererSettings.AllowNumpadKeys )
 				SpawnVegetationBoxAt( GetCameraPosition() );
 			break;
 
 		case VK_NUMPAD2:
 #ifdef PUBLIC_RELEASE
-			if ( !Engine::AntTweakBar->GetActive() && !GMPModeActive && Engine::GAPI->GetRendererState()->RendererSettings.AllowNumpadKeys )
+			if ( !Engine::AntTweakBar->GetActive() && !GMPModeActive && Engine::GAPI->GetRendererState().RendererSettings.AllowNumpadKeys )
 #endif
 				Ocean->AddWaterPatchAt( (unsigned int)(GetCameraPosition().x / OCEAN_PATCH_SIZE), (unsigned int)(GetCameraPosition().z / OCEAN_PATCH_SIZE) );
 			break;
 
 		case VK_NUMPAD3:
 #ifdef PUBLIC_RELEASE
-			if ( !Engine::AntTweakBar->GetActive() && !GMPModeActive && Engine::GAPI->GetRendererState()->RendererSettings.AllowNumpadKeys )
+			if ( !Engine::AntTweakBar->GetActive() && !GMPModeActive && Engine::GAPI->GetRendererState().RendererSettings.AllowNumpadKeys )
 #endif
 			{
 				for ( int x = -1; x <= 1; x++ ) {
@@ -2616,15 +2614,15 @@ void GothicAPI::CollectVisibleVobs( std::vector<VobInfo*>& vobs, std::vector<Vob
 	CollectVisibleVobsHelper( root, root->OriginalNode->BBox3D, 63, vobs, lights, mobs );
 
 	XMVECTOR camPos = GetCameraPositionXM();
-	const float vobIndoorDist = Engine::GAPI->GetRendererState()->RendererSettings.IndoorVobDrawRadius;
-	const float vobOutdoorDist = Engine::GAPI->GetRendererState()->RendererSettings.OutdoorVobDrawRadius;
-	const float vobOutdoorSmallDist = Engine::GAPI->GetRendererState()->RendererSettings.OutdoorSmallVobDrawRadius;
-	const float vobSmallSize = Engine::GAPI->GetRendererState()->RendererSettings.SmallVobSize;
+	const float vobIndoorDist = Engine::GAPI->GetRendererState().RendererSettings.IndoorVobDrawRadius;
+	const float vobOutdoorDist = Engine::GAPI->GetRendererState().RendererSettings.OutdoorVobDrawRadius;
+	const float vobOutdoorSmallDist = Engine::GAPI->GetRendererState().RendererSettings.OutdoorSmallVobDrawRadius;
+	const float vobSmallSize = Engine::GAPI->GetRendererState().RendererSettings.SmallVobSize;
 
 	std::list<VobInfo*> removeList; // TODO: This should not be needed!
 
 	// Add visible dynamically added vobs
-	if ( Engine::GAPI->GetRendererState()->RendererSettings.DrawVOBs ) {
+	if ( Engine::GAPI->GetRendererState().RendererSettings.DrawVOBs ) {
 		auto const& dynAllocatedVobs = DynamicallyAddedVobs;
 		for ( auto const& it : dynAllocatedVobs ) {
 			// Get distance to this vob
@@ -2670,7 +2668,7 @@ void GothicAPI::CollectVisibleSections( std::list<WorldMeshSectionInfo*>& sectio
 	const INT2 camSection = WorldConverter::GetSectionOfPos( camPos );
 
 	// run through every section and check for range and frustum
-	const int sectionViewDist = Engine::GAPI->GetRendererState()->RendererSettings.SectionDrawRadius;
+	const int sectionViewDist = Engine::GAPI->GetRendererState().RendererSettings.SectionDrawRadius;
 	for ( auto& itx : WorldSections ) {
 		for ( auto& ity : itx.second ) {
 			WorldMeshSectionInfo& section = ity.second;
@@ -2835,16 +2833,16 @@ static void CVVH_AddNotDrawnVobToList( std::vector<SkeletalVobInfo*>& target, st
 
 /** Recursive helper function to draw collect the vobs */
 void GothicAPI::CollectVisibleVobsHelper( BspInfo* base, zTBBox3D boxCell, int clipFlags, std::vector<VobInfo*>& vobs, std::vector<VobLightInfo*>& lights, std::vector<SkeletalVobInfo*>& mobs ) {
-	const float vobIndoorDist = Engine::GAPI->GetRendererState()->RendererSettings.IndoorVobDrawRadius;
-	const float vobOutdoorDist = Engine::GAPI->GetRendererState()->RendererSettings.OutdoorVobDrawRadius;
-	const float vobOutdoorSmallDist = Engine::GAPI->GetRendererState()->RendererSettings.OutdoorSmallVobDrawRadius;
-	const float vobSmallSize = Engine::GAPI->GetRendererState()->RendererSettings.SmallVobSize;
-	const float visualFXDrawRadius = Engine::GAPI->GetRendererState()->RendererSettings.VisualFXDrawRadius;
+	const float vobIndoorDist = Engine::GAPI->GetRendererState().RendererSettings.IndoorVobDrawRadius;
+	const float vobOutdoorDist = Engine::GAPI->GetRendererState().RendererSettings.OutdoorVobDrawRadius;
+	const float vobOutdoorSmallDist = Engine::GAPI->GetRendererState().RendererSettings.OutdoorSmallVobDrawRadius;
+	const float vobSmallSize = Engine::GAPI->GetRendererState().RendererSettings.SmallVobSize;
+	const float visualFXDrawRadius = Engine::GAPI->GetRendererState().RendererSettings.VisualFXDrawRadius;
 	const DirectX::XMFLOAT3 camPos = Engine::GAPI->GetCameraPosition();
 
 	while ( base->OriginalNode ) {
 		// Check for occlusion-culling
-		if ( Engine::GAPI->GetRendererState()->RendererSettings.EnableOcclusionCulling && !base->OcclusionInfo.VisibleLastFrame ) {
+		if ( Engine::GAPI->GetRendererState().RendererSettings.EnableOcclusionCulling && !base->OcclusionInfo.VisibleLastFrame ) {
 			return;
 		}
 
@@ -2859,7 +2857,7 @@ void GothicAPI::CollectVisibleVobsHelper( BspInfo* base, zTBBox3D boxCell, int c
 			float dist = Toolbox::ComputePointAABBDistance( camPos, base->OriginalNode->BBox3D.Min, base->OriginalNode->BBox3D.Max );
 			if ( dist < vobOutdoorDist ) {
 				zTCam_ClipType nodeClip;
-				if ( !Engine::GAPI->GetRendererState()->RendererSettings.EnableOcclusionCulling ) {
+				if ( !Engine::GAPI->GetRendererState().RendererSettings.EnableOcclusionCulling ) {
 					nodeClip = zCCamera::GetCamera()->BBox3DInFrustum( nodeBox, clipFlags );
 				} else {
 					nodeClip = static_cast<zTCam_ClipType>(base->OcclusionInfo.LastCameraClipType); // If we are using occlusion-clipping, this test has already been done
@@ -2892,7 +2890,7 @@ void GothicAPI::CollectVisibleVobsHelper( BspInfo* base, zTBBox3D boxCell, int c
 			// float dist = DirectX::XMVector3LengthEst(XMLoadFloat3(&base->BBox3D.Min) - XMLoadFloat3(&camPos));
 
 			if ( insideFrustum ) {
-				if ( Engine::GAPI->GetRendererState()->RendererSettings.DrawVOBs ) {
+				if ( Engine::GAPI->GetRendererState().RendererSettings.DrawVOBs ) {
 					if ( dist < vobIndoorDist ) {
 						CVVH_AddNotDrawnVobToList( vobs, listA, vobIndoorDist );
 					}
@@ -2903,19 +2901,19 @@ void GothicAPI::CollectVisibleVobsHelper( BspInfo* base, zTBBox3D boxCell, int c
 				}
 
 				if ( dist < vobOutdoorDist ) {
-					if ( Engine::GAPI->GetRendererState()->RendererSettings.DrawVOBs ) {
+					if ( Engine::GAPI->GetRendererState().RendererSettings.DrawVOBs ) {
 						CVVH_AddNotDrawnVobToList( vobs, listC, vobOutdoorDist );
 					}
 				}
 
-				if ( Engine::GAPI->GetRendererState()->RendererSettings.DrawMobs && dist < vobOutdoorSmallDist ) {
+				if ( Engine::GAPI->GetRendererState().RendererSettings.DrawMobs && dist < vobOutdoorSmallDist ) {
 					CVVH_AddNotDrawnVobToList( mobs, listD, vobOutdoorDist );
 				}
 			}
 
 			if ( RendererState.RendererSettings.EnableDynamicLighting && insideFrustum ) {
 				// Add dynamic lights
-				float minDynamicUpdateLightRange = Engine::GAPI->GetRendererState()->RendererSettings.MinLightShadowUpdateRange;
+				float minDynamicUpdateLightRange = Engine::GAPI->GetRendererState().RendererSettings.MinLightShadowUpdateRange;
 				DirectX::XMFLOAT3 playerPosition = Engine::GAPI->GetPlayerVob() != nullptr ? Engine::GAPI->GetPlayerVob()->GetPositionWorld() : DirectX::XMFLOAT3( FLT_MAX, FLT_MAX, FLT_MAX );
 
 				// Take cameraposition if we are freelooking
@@ -3018,7 +3016,7 @@ void GothicAPI::BuildBspVobMapCacheHelper( zCBspBase* base ) {
 				VobInfo* v = VobMap[leaf->LeafVobList.Array[i]];
 
 				if ( v ) {
-					float vobSmallSize = Engine::GAPI->GetRendererState()->RendererSettings.SmallVobSize;
+					float vobSmallSize = Engine::GAPI->GetRendererState().RendererSettings.SmallVobSize;
 
 					if ( v->Vob->GetGroundPoly() && v->Vob->GetGroundPoly()->GetLightmap() ) {
 						// Only add once
@@ -3065,7 +3063,7 @@ void GothicAPI::BuildBspVobMapCacheHelper( zCBspBase* base ) {
 					vi->Vob = leaf->LightVobList.Array[i];
 					VobLightMap[leaf->LightVobList.Array[i]] = vi;
 
-					float minDynamicUpdateLightRange = Engine::GAPI->GetRendererState()->RendererSettings.MinLightShadowUpdateRange;
+					float minDynamicUpdateLightRange = Engine::GAPI->GetRendererState().RendererSettings.MinLightShadowUpdateRange;
 					if ( RendererState.RendererSettings.EnablePointlightShadows >= GothicRendererSettings::PLS_STATIC_ONLY
 						&& vi->Vob->GetLightRange() > minDynamicUpdateLightRange ) {
 						// Create shadowcubemap, if wanted

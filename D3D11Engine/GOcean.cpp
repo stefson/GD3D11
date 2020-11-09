@@ -117,7 +117,7 @@ void GOcean::GetFFTResources( ID3D11ShaderResourceView** tex_displacement, ID3D1
 	// Multiple reflection workaround
 	settingsCB->OS_BendParam = bendParam;
 	// Sun streaks
-	settingsCB->OS_SunColor = Engine::GAPI->GetRendererState()->RendererSettings.SunLightColor;
+	settingsCB->OS_SunColor = Engine::GAPI->GetRendererState().RendererSettings.SunLightColor;
 	settingsCB->OS_SunDir = Engine::GAPI->GetSky()->GetAtmoshpereSettings().LightDirection;
 	settingsCB->OS_Shineness = shineness;
 

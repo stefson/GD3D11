@@ -24,7 +24,7 @@ D3D11GraphicsEngineBase::D3D11GraphicsEngineBase() {
 	PresentPending = false;
 
 	// Match the resolution with the current desktop resolution
-	Resolution = Engine::GAPI->GetRendererState()->RendererSettings.LoadedResolution;
+	Resolution = Engine::GAPI->GetRendererState().RendererSettings.LoadedResolution;
 }
 
 D3D11GraphicsEngineBase::~D3D11GraphicsEngineBase() {
@@ -260,7 +260,7 @@ XRESULT D3D11GraphicsEngineBase::OnBeginFrame() {
 	}
 
 	// Force the mode upon Gothic
-	zCView::SetMode( static_cast<int>(Resolution.x / Engine::GAPI->GetRendererState()->RendererSettings.GothicUIScale), static_cast<int>(Resolution.y / Engine::GAPI->GetRendererState()->RendererSettings.GothicUIScale), 32 );
+	zCView::SetMode( static_cast<int>(Resolution.x / Engine::GAPI->GetRendererState().RendererSettings.GothicUIScale), static_cast<int>(Resolution.y / Engine::GAPI->GetRendererState().RendererSettings.GothicUIScale), 32 );
 
 	// Notify the shader manager
 	ShaderManager->OnFrameStart();
@@ -408,7 +408,7 @@ XRESULT D3D11GraphicsEngineBase::Present() {
 	// Draw ant tweak bar
 	Engine::AntTweakBar->Draw();
 
-	bool vsync = Engine::GAPI->GetRendererState()->RendererSettings.EnableVSync;
+	bool vsync = Engine::GAPI->GetRendererState().RendererSettings.EnableVSync;
 	if ( SwapChain->Present( vsync ? 1 : 0, 0 ) == DXGI_ERROR_DEVICE_REMOVED ) {
 		switch ( GetDevice()->GetDeviceRemovedReason() ) {
 		case DXGI_ERROR_DEVICE_HUNG:
@@ -462,7 +462,7 @@ XRESULT D3D11GraphicsEngineBase::OnStartWorldRendering() {
 	UpdateTransformsCB();
 
 	// Force farplane
-	Engine::GAPI->SetFarPlane( Engine::GAPI->GetRendererState()->RendererSettings.SectionDrawRadius * WORLD_SECTION_SIZE );
+	Engine::GAPI->SetFarPlane( Engine::GAPI->GetRendererState().RendererSettings.SectionDrawRadius * WORLD_SECTION_SIZE );
 
 	return XR_SUCCESS;
 }
@@ -474,15 +474,15 @@ BaseLineRenderer* D3D11GraphicsEngineBase::GetLineRenderer() {
 
 /** Sets up the default rendering state */
 void D3D11GraphicsEngineBase::SetDefaultStates() {
-	Engine::GAPI->GetRendererState()->RasterizerState.SetDefault();
-	Engine::GAPI->GetRendererState()->BlendState.SetDefault();
-	Engine::GAPI->GetRendererState()->DepthState.SetDefault();
-	Engine::GAPI->GetRendererState()->SamplerState.SetDefault();
+	Engine::GAPI->GetRendererState().RasterizerState.SetDefault();
+	Engine::GAPI->GetRendererState().BlendState.SetDefault();
+	Engine::GAPI->GetRendererState().DepthState.SetDefault();
+	Engine::GAPI->GetRendererState().SamplerState.SetDefault();
 
-	Engine::GAPI->GetRendererState()->RasterizerState.SetDirty();
-	Engine::GAPI->GetRendererState()->BlendState.SetDirty();
-	Engine::GAPI->GetRendererState()->DepthState.SetDirty();
-	Engine::GAPI->GetRendererState()->SamplerState.SetDirty();
+	Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
+	Engine::GAPI->GetRendererState().BlendState.SetDirty();
+	Engine::GAPI->GetRendererState().DepthState.SetDirty();
+	Engine::GAPI->GetRendererState().SamplerState.SetDirty();
 
 	GetContext()->PSSetSamplers( 0, 1, DefaultSamplerState.GetAddressOf() );
 
@@ -496,7 +496,7 @@ XRESULT D3D11GraphicsEngineBase::DrawVertexArray( ExVertexStruct* vertices, unsi
 	auto pShader = ShaderManager->GetPShader( "PS_FixedFunctionPipe" );
 
 	// Bind the FF-Info to the first PS slot
-	pShader->GetConstantBuffer()[0]->UpdateBuffer( &Engine::GAPI->GetRendererState()->GraphicsState );
+	pShader->GetConstantBuffer()[0]->UpdateBuffer( &Engine::GAPI->GetRendererState().GraphicsState );
 	pShader->GetConstantBuffer()[0]->BindToPixelShader( 0 );
 
 	vShader->Apply();
@@ -511,7 +511,7 @@ XRESULT D3D11GraphicsEngineBase::DrawVertexArray( ExVertexStruct* vertices, unsi
 	GetContext()->RSGetViewports( &num, &vp );
 
 	// Update viewport information
-	const float scale = Engine::GAPI->GetRendererState()->RendererSettings.GothicUIScale;
+	const float scale = Engine::GAPI->GetRendererState().RendererSettings.GothicUIScale;
 	float2 temp2Float2[2];
 	temp2Float2[0].x = vp.TopLeftX / scale;
 	temp2Float2[0].y = vp.TopLeftY / scale;
@@ -526,7 +526,7 @@ XRESULT D3D11GraphicsEngineBase::DrawVertexArray( ExVertexStruct* vertices, unsi
 
 	// Check if we need a bigger vertexbuffer
 	if ( desc.ByteWidth < stride * numVertices ) {
-		if ( Engine::GAPI->GetRendererState()->RendererSettings.EnableDebugLog )
+		if ( Engine::GAPI->GetRendererState().RendererSettings.EnableDebugLog )
 			LogInfo() << "TempVertexBuffer too small (" << desc.ByteWidth << "), need " << stride * numVertices << " bytes. Recreating buffer.";
 
 		// Buffer too small, recreate it
@@ -551,51 +551,51 @@ XRESULT D3D11GraphicsEngineBase::DrawVertexArray( ExVertexStruct* vertices, unsi
 
 /** Recreates the renderstates */
 XRESULT D3D11GraphicsEngineBase::UpdateRenderStates() {
-	if ( Engine::GAPI->GetRendererState()->BlendState.StateDirty ) {
-		D3D11BlendStateInfo* state = (D3D11BlendStateInfo*)GothicStateCache::s_BlendStateMap[Engine::GAPI->GetRendererState()->BlendState];
+	if ( Engine::GAPI->GetRendererState().BlendState.StateDirty ) {
+		D3D11BlendStateInfo* state = (D3D11BlendStateInfo*)GothicStateCache::s_BlendStateMap[Engine::GAPI->GetRendererState().BlendState];
 
 		if ( !state ) {
 			// Create new state
-			state = new D3D11BlendStateInfo( Engine::GAPI->GetRendererState()->BlendState );
+			state = new D3D11BlendStateInfo( Engine::GAPI->GetRendererState().BlendState );
 
-			GothicStateCache::s_BlendStateMap[Engine::GAPI->GetRendererState()->BlendState] = state;
+			GothicStateCache::s_BlendStateMap[Engine::GAPI->GetRendererState().BlendState] = state;
 		}
 
 		FFBlendState = state->State;
 
-		Engine::GAPI->GetRendererState()->BlendState.StateDirty = false;
+		Engine::GAPI->GetRendererState().BlendState.StateDirty = false;
 		GetContext()->OMSetBlendState( FFBlendState.Get(), (float*)&float4( 0, 0, 0, 0 ), 0xFFFFFFFF );
 	}
 
-	if ( Engine::GAPI->GetRendererState()->RasterizerState.StateDirty ) {
-		D3D11RasterizerStateInfo* state = (D3D11RasterizerStateInfo*)GothicStateCache::s_RasterizerStateMap[Engine::GAPI->GetRendererState()->RasterizerState];
+	if ( Engine::GAPI->GetRendererState().RasterizerState.StateDirty ) {
+		D3D11RasterizerStateInfo* state = (D3D11RasterizerStateInfo*)GothicStateCache::s_RasterizerStateMap[Engine::GAPI->GetRendererState().RasterizerState];
 
 		if ( !state ) {
 			// Create new state
-			state = new D3D11RasterizerStateInfo( Engine::GAPI->GetRendererState()->RasterizerState );
+			state = new D3D11RasterizerStateInfo( Engine::GAPI->GetRendererState().RasterizerState );
 
-			GothicStateCache::s_RasterizerStateMap[Engine::GAPI->GetRendererState()->RasterizerState] = state;
+			GothicStateCache::s_RasterizerStateMap[Engine::GAPI->GetRendererState().RasterizerState] = state;
 		}
 
 		FFRasterizerState = state->State;
 
-		Engine::GAPI->GetRendererState()->RasterizerState.StateDirty = false;
+		Engine::GAPI->GetRendererState().RasterizerState.StateDirty = false;
 		GetContext()->RSSetState( FFRasterizerState.Get() );
 	}
 
-	if ( Engine::GAPI->GetRendererState()->DepthState.StateDirty ) {
-		D3D11DepthBufferState* state = (D3D11DepthBufferState*)GothicStateCache::s_DepthBufferMap[Engine::GAPI->GetRendererState()->DepthState];
+	if ( Engine::GAPI->GetRendererState().DepthState.StateDirty ) {
+		D3D11DepthBufferState* state = (D3D11DepthBufferState*)GothicStateCache::s_DepthBufferMap[Engine::GAPI->GetRendererState().DepthState];
 
 		if ( !state ) {
 			// Create new state
-			state = new D3D11DepthBufferState( Engine::GAPI->GetRendererState()->DepthState );
+			state = new D3D11DepthBufferState( Engine::GAPI->GetRendererState().DepthState );
 
-			GothicStateCache::s_DepthBufferMap[Engine::GAPI->GetRendererState()->DepthState] = state;
+			GothicStateCache::s_DepthBufferMap[Engine::GAPI->GetRendererState().DepthState] = state;
 		}
 
 		FFDepthStencilState = state->State;
 
-		Engine::GAPI->GetRendererState()->DepthState.StateDirty = false;
+		Engine::GAPI->GetRendererState().DepthState.StateDirty = false;
 		GetContext()->OMSetDepthStencilState( FFDepthStencilState.Get(), 0 );
 	}
 
@@ -605,7 +605,7 @@ XRESULT D3D11GraphicsEngineBase::UpdateRenderStates() {
 
 /** Constructs the makro list for shader compilation */
 void D3D11GraphicsEngineBase::ConstructShaderMakroList( std::vector<D3D_SHADER_MACRO>& list ) {
-	const GothicRendererSettings& s = Engine::GAPI->GetRendererState()->RendererSettings;
+	const GothicRendererSettings& s = Engine::GAPI->GetRendererState().RendererSettings;
 	D3D_SHADER_MACRO m;
 
 	m.Name = "SHD_ENABLE";
@@ -631,8 +631,8 @@ void D3D11GraphicsEngineBase::SetupVS_ExMeshDrawCall() {
 }
 
 void D3D11GraphicsEngineBase::SetupVS_ExConstantBuffer() {
-	const XMFLOAT4X4& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
-	const XMFLOAT4X4& view = Engine::GAPI->GetRendererState()->TransformState.TransformView;
+	const XMFLOAT4X4& world = Engine::GAPI->GetRendererState().TransformState.TransformWorld;
+	const XMFLOAT4X4& view = Engine::GAPI->GetRendererState().TransformState.TransformView;
 	const XMFLOAT4X4& proj = Engine::GAPI->GetProjectionMatrix();
 
 	VS_ExConstantBuffer_PerFrame cb = {};
@@ -646,7 +646,7 @@ void D3D11GraphicsEngineBase::SetupVS_ExConstantBuffer() {
 }
 
 void D3D11GraphicsEngineBase::SetupVS_ExPerInstanceConstantBuffer() {
-	XMFLOAT4X4 world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
+	XMFLOAT4X4 world = Engine::GAPI->GetRendererState().TransformState.TransformWorld;
 
 	VS_ExConstantBuffer_PerInstance cb = {};
 	cb.World = world;
@@ -687,7 +687,7 @@ XRESULT D3D11GraphicsEngineBase::SetActiveGShader( const std::string& shader ) {
 
 /** Puts the current world matrix into a CB and binds it to the given slot */
 void D3D11GraphicsEngineBase::SetupPerInstanceConstantBuffer( int slot ) {
-	const XMFLOAT4X4 world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
+	const XMFLOAT4X4 world = Engine::GAPI->GetRendererState().TransformState.TransformWorld;
 
 	VS_ExConstantBuffer_PerInstance cb = {};
 	cb.World = world;
@@ -699,8 +699,8 @@ void D3D11GraphicsEngineBase::SetupPerInstanceConstantBuffer( int slot ) {
 
 /** Updates the transformsCB with new values from the GAPI */
 void D3D11GraphicsEngineBase::UpdateTransformsCB() {
-	const XMFLOAT4X4& world = Engine::GAPI->GetRendererState()->TransformState.TransformWorld;
-	const XMFLOAT4X4& view = Engine::GAPI->GetRendererState()->TransformState.TransformView;
+	const XMFLOAT4X4& world = Engine::GAPI->GetRendererState().TransformState.TransformWorld;
+	const XMFLOAT4X4& view = Engine::GAPI->GetRendererState().TransformState.TransformView;
 	const XMFLOAT4X4& proj = Engine::GAPI->GetProjectionMatrix();
 
 	VS_ExConstantBuffer_PerFrame cb = {};
@@ -713,7 +713,7 @@ void D3D11GraphicsEngineBase::UpdateTransformsCB() {
 
 /** Creates a bufferobject for a shadowed point light */
 XRESULT D3D11GraphicsEngineBase::CreateShadowedPointLight( BaseShadowedPointLight** outPL, VobLightInfo* lightInfo, bool dynamic ) {
-	if ( Engine::GAPI->GetRendererState()->RendererSettings.EnablePointlightShadows > 0 )
+	if ( Engine::GAPI->GetRendererState().RendererSettings.EnablePointlightShadows > 0 )
 		*outPL = new D3D11PointLight( lightInfo, dynamic );
 	else
 		*outPL = nullptr;
@@ -726,7 +726,7 @@ XRESULT D3D11GraphicsEngineBase::DrawVertexBufferFF( D3D11VertexBuffer* vb, unsi
 	SetupVS_ExMeshDrawCall();
 
 	// Bind the FF-Info to the first PS slot
-	ActivePS->GetConstantBuffer()[0]->UpdateBuffer( &Engine::GAPI->GetRendererState()->GraphicsState );
+	ActivePS->GetConstantBuffer()[0]->UpdateBuffer( &Engine::GAPI->GetRendererState().GraphicsState );
 	ActivePS->GetConstantBuffer()[0]->BindToPixelShader( 0 );
 
 	UINT offset = 0;
@@ -737,7 +737,7 @@ XRESULT D3D11GraphicsEngineBase::DrawVertexBufferFF( D3D11VertexBuffer* vb, unsi
 	//Draw the mesh
 	GetContext()->Draw( numVertices, startVertex );
 
-	Engine::GAPI->GetRendererState()->RendererInfo.FrameDrawnTriangles += numVertices;
+	Engine::GAPI->GetRendererState().RendererInfo.FrameDrawnTriangles += numVertices;
 
 	return XR_SUCCESS;
 }
@@ -750,7 +750,7 @@ XRESULT D3D11GraphicsEngineBase::BindViewportInformation( const std::string& sha
 	GetContext()->RSGetViewports( &num, &vp );
 
 	// Update viewport information
-	float scale = Engine::GAPI->GetRendererState()->RendererSettings.GothicUIScale;
+	float scale = Engine::GAPI->GetRendererState().RendererSettings.GothicUIScale;
 	float2 f2[2];
 	f2[0].x = vp.TopLeftX / scale;
 	f2[0].y = vp.TopLeftY / scale;

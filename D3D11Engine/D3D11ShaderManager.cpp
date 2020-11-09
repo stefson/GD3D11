@@ -448,7 +448,7 @@ XRESULT D3D11ShaderManager::LoadShaders() {
 			if ( Shaders[i].type == "v" ) {
 				// See if this is a reload
 				if ( VShaders.count( Shaders[i].name ) > 0 ) {
-					if ( Engine::GAPI->GetRendererState()->RendererSettings.EnableDebugLog )
+					if ( Engine::GAPI->GetRendererState().RendererSettings.EnableDebugLog )
 						LogInfo() << "Reloading shader: " << Shaders[i].name;
 
 					D3D11VShader* vs = new D3D11VShader();
@@ -465,7 +465,7 @@ XRESULT D3D11ShaderManager::LoadShaders() {
 						}
 					}
 				} else {
-					if ( Engine::GAPI->GetRendererState()->RendererSettings.EnableDebugLog )
+					if ( Engine::GAPI->GetRendererState().RendererSettings.EnableDebugLog )
 						LogInfo() << "Reloading shader: " << Shaders[i].name;
 
 					VShaders[Shaders[i].name] = std::make_shared<D3D11VShader>();

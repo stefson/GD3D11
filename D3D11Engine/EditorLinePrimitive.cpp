@@ -884,8 +884,8 @@ void EditorLinePrimitive::RenderVertexBuffer( ID3D11Buffer* VB, UINT NumVertices
 	engine->SetupVS_ExPerInstanceConstantBuffer();
 
 	engine->SetDefaultStates();
-	Engine::GAPI->GetRendererState()->BlendState.SetAlphaBlending();
-	Engine::GAPI->GetRendererState()->BlendState.SetDirty();
+	Engine::GAPI->GetRendererState().BlendState.SetAlphaBlending();
+	Engine::GAPI->GetRendererState().BlendState.SetDirty();
 	engine->UpdateRenderStates();
 
 	Shader->Apply();

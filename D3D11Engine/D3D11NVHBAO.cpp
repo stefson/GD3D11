@@ -37,7 +37,7 @@ XRESULT D3D11NVHBAO::Init() {
 XRESULT D3D11NVHBAO::Render( ID3D11RenderTargetView* pOutputColorRTV ) {
 	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
 
-	HBAOSettings& settings = Engine::GAPI->GetRendererState()->RendererSettings.HbaoSettings;
+	HBAOSettings& settings = Engine::GAPI->GetRendererState().RendererSettings.HbaoSettings;
 
 	GFSDK_SSAO_InputData_D3D11 Input;
 	Input.DepthData.DepthTextureType = GFSDK_SSAO_HARDWARE_DEPTHS;

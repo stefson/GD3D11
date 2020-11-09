@@ -191,7 +191,7 @@ void D3D11PFX_SMAA::RenderPostFX( ID3D11ShaderResourceView* renderTargetSRV ) {
 	engine->GetContext()->PSSetShaderResources( 0, 1, &srv );
 
 
-	if ( Engine::GAPI->GetRendererState()->RendererSettings.SharpenFactor > 0.0f ) {
+	if ( Engine::GAPI->GetRendererState().RendererSettings.SharpenFactor > 0.0f ) {
 		auto sharpenPS = engine->GetShaderManager().GetPShader( "PS_PFX_Sharpen" );
 		sharpenPS->Apply();
 
@@ -199,7 +199,7 @@ void D3D11PFX_SMAA::RenderPostFX( ID3D11ShaderResourceView* renderTargetSRV ) {
 		gcb.G_Gamma = Engine::GAPI->GetGammaValue();
 		gcb.G_Brightness = Engine::GAPI->GetBrightnessValue();
 		gcb.G_TextureSize = engine->GetResolution();
-		gcb.G_SharpenStrength = Engine::GAPI->GetRendererState()->RendererSettings.SharpenFactor;
+		gcb.G_SharpenStrength = Engine::GAPI->GetRendererState().RendererSettings.SharpenFactor;
 
 		sharpenPS->GetConstantBuffer()[0]->UpdateBuffer( &gcb );
 		sharpenPS->GetConstantBuffer()[0]->BindToPixelShader( 0 );

@@ -82,7 +82,7 @@ XRESULT D3D11VShader::LoadShader( const char* vertexShader, int layout, std::vec
 
 	ID3DBlob* vsBlob;
 
-	if ( Engine::GAPI->GetRendererState()->RendererSettings.EnableDebugLog )
+	if ( Engine::GAPI->GetRendererState().RendererSettings.EnableDebugLog )
 		LogInfo() << "Compilling vertex shader: " << vertexShader;
 	File = vertexShader;
 

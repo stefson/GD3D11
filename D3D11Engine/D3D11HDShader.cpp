@@ -86,7 +86,7 @@ XRESULT D3D11HDShader::LoadShader( const char* hullShader, const char* domainSha
 	ID3DBlob* hsBlob;
 	ID3DBlob* dsBlob;
 
-	if ( Engine::GAPI->GetRendererState()->RendererSettings.EnableDebugLog )
+	if ( Engine::GAPI->GetRendererState().RendererSettings.EnableDebugLog )
 		LogInfo() << "Compilling hull shader: " << hullShader;
 	File = hullShader;
 

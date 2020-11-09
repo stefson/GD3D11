@@ -119,8 +119,8 @@ void SV_GMeshInfoView::UpdateView() {
 	XMStoreFloat4x4( &ObjectProjMatrix, xmObjectProjMatrix );
 
 	g->SetDefaultStates();
-	Engine::GAPI->GetRendererState()->RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
-	Engine::GAPI->GetRendererState()->RasterizerState.SetDirty();
+	Engine::GAPI->GetRendererState().RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
+	Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
 
 	XMFLOAT4X4 oldProj = Engine::GAPI->GetProjTransformDx();
 
@@ -173,11 +173,11 @@ void SV_GMeshInfoView::UpdateView() {
 
 	case RM_Wireframe:
 		g->SetActivePixelShader( "PS_Preview_White" );
-		Engine::GAPI->GetRendererState()->RasterizerState.Wireframe = true;
-		Engine::GAPI->GetRendererState()->RasterizerState.SetDirty();
+		Engine::GAPI->GetRendererState().RasterizerState.Wireframe = true;
+		Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
 		DrawMeshes();
-		Engine::GAPI->GetRendererState()->RasterizerState.Wireframe = false;
-		Engine::GAPI->GetRendererState()->RasterizerState.SetDirty();
+		Engine::GAPI->GetRendererState().RasterizerState.Wireframe = false;
+		Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
 		break;
 	}
 	// Reset viewport
