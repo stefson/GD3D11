@@ -3569,7 +3569,7 @@ XRESULT GothicAPI::SaveMenuSettings( const std::string& file ) {
 	TCHAR NPath[MAX_PATH];
 	// Returns Gothic directory.
 	int len = GetCurrentDirectory( MAX_PATH, NPath );
-	// Get path to UserSettings.Ini
+	// Get path to Gothic.Ini
 	auto ini = std::string( NPath, len ).append( "\\" + file );
 
 	LogInfo() << "Saving menu settings to " << ini;
@@ -3642,7 +3642,7 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
 	TCHAR NPath[MAX_PATH];
 	// Returns Gothic directory.
 	int len = GetCurrentDirectory( MAX_PATH, NPath );
-	// Get path to UserSettings.Ini
+	// Get path to Gothic.Ini
 	auto ini = std::string( NPath, len ).append( "\\" + file );
 
 
