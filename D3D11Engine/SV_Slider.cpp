@@ -124,7 +124,13 @@ void SV_Slider::RenderSlider() {
 	D2D1_RECT_F bc = ViewRect;
 
 	D2D1_COLOR_F BarBackgroundColor = D2D1::ColorF( 0.2f, 0.2f, 0.2f, 1.0f );
+	D2D1_COLOR_F LineColor = SV_DEF_INNER_LINE_COLOR;
 	float BarInnerShadowStrength = 0.8f;
+	
+	if ( IsDisabled() ) {
+		BarBackgroundColor = SV_DEF_DISABLED_COLOR;
+		LineColor = SV_DEF_DISABLED_COLOR;
+	}
 
 	MainView->GetBrush()->SetColor( BarBackgroundColor );
 	MainView->GetRenderTarget()->FillRectangle( sc, MainView->GetBrush() );
@@ -135,7 +141,7 @@ void SV_Slider::RenderSlider() {
 	MainView->GetLinearReflectBrushHigh()->SetEndPoint( D2D1::Point2F( ViewRect.right, ViewRect.bottom ) );
 	MainView->GetRenderTarget()->DrawRectangle( sc, MainView->GetLinearReflectBrushHigh() );
 
-	MainView->GetBrush()->SetColor( SV_DEF_INNER_LINE_COLOR );
+	MainView->GetBrush()->SetColor( LineColor );
 	D2DView::ShrinkRect( &sc, 1 );
 
 	MainView->GetRenderTarget()->DrawRectangle( sc, MainView->GetBrush() );

@@ -276,11 +276,19 @@ XRESULT D2DSettingsDialog::InitControls() {
 
 	// Third column
 	// FOV
+	SV_Checkbox* fovOverrideCheckbox = new SV_Checkbox( MainView, MainPanel );
+	fovOverrideCheckbox->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 160, 20 ) );
+	fovOverrideCheckbox->AlignUnder( Header, 5 );
+	fovOverrideCheckbox->SetCaption( "Enable FOV Override" );
+	fovOverrideCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.ForceFOV );
+	//fovOverrideCheckbox->AlignUnder( ______, 5 );
+	fovOverrideCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.ForceFOV );
+	fovOverrideCheckbox->SetPosition( D2D1::Point2F( 170 + 160 + 10, fovOverrideCheckbox->GetPosition().y ) );
+
 	SV_Label* horizFOVLabel = new SV_Label( MainView, MainPanel );
 	horizFOVLabel->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 150, 12 ) );
-	//horizFOVLabel->AlignUnder(outdoorVobsSmallDDSlider, 10);
+	horizFOVLabel->AlignUnder(fovOverrideCheckbox, 5);
 	horizFOVLabel->SetCaption( "Horizontal FOV:" );
-	horizFOVLabel->AlignUnder( Header, 5 );
 	horizFOVLabel->SetPosition( D2D1::Point2F( 170 + 160 + 10, horizFOVLabel->GetPosition().y ) );
 
 	SV_Slider* horizFOVSlider = new SV_Slider( MainView, MainPanel );
@@ -303,6 +311,17 @@ XRESULT D2DSettingsDialog::InitControls() {
 	vertFOVSlider->SetIsIntegralSlider( true );
 	vertFOVSlider->SetMinMax( 40.0f, 150.0f );
 	vertFOVSlider->SetValue( Engine::GAPI->GetRendererState().RendererSettings.FOVVert );
+
+	/* THIS BELONGS TO FovOverrideCheckbox ! */
+	auto checkedChangedState = new FovOverrideCheckedChangedState;
+	checkedChangedState->SettingsDialog = this;
+	checkedChangedState->horizFOVLabel = horizFOVLabel;
+	checkedChangedState->horizFOVSlider = horizFOVSlider;
+	checkedChangedState->vertFOVLabel = vertFOVLabel;
+	checkedChangedState->vertFOVSlider = vertFOVSlider;
+
+	fovOverrideCheckbox->SetCheckedChangedCallback( FovOverrideCheckedChanged, checkedChangedState );
+	FovOverrideCheckedChanged( fovOverrideCheckbox, checkedChangedState ); // Apply initial settings
 
 	SV_Label* brightnessLabel = new SV_Label( MainView, MainPanel );
 	brightnessLabel->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 150, 12 ) );
@@ -339,6 +358,15 @@ XRESULT D2DSettingsDialog::InitControls() {
 void D2DSettingsDialog::FpsLimitSliderChanged( SV_Slider* sender, void* userdata ) {
 	auto newValue = (int)sender->GetValue();
 	Engine::GAPI->GetRendererState().RendererSettings.FpsLimit = newValue <= 25 ? 0 : newValue;
+}
+
+void D2DSettingsDialog::FovOverrideCheckedChanged( SV_Checkbox* sender, void* userdata ) {
+	FovOverrideCheckedChangedState* state = (FovOverrideCheckedChangedState*)userdata;
+	auto newValue = sender->GetChecked();
+	state->horizFOVLabel->SetDisabled( !newValue );
+	state->horizFOVSlider->SetDisabled( !newValue );
+	state->vertFOVLabel->SetDisabled( !newValue );
+	state->vertFOVSlider->SetDisabled( !newValue );
 }
 
 /** Tab in main tab-control was switched */

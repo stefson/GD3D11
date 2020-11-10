@@ -7,7 +7,7 @@ SV_Checkbox::SV_Checkbox( D2DView* view, D2DSubView* parent ) : D2DSubView( view
 	CaptionLayout = nullptr;
 	DataToUpdate = nullptr;
 	IsChecked = false;
-	CheckedChangedCallback( nullptr, nullptr );
+	SetCheckedChangedCallback( nullptr, nullptr );
 }
 
 SV_Checkbox::~SV_Checkbox() {
@@ -123,7 +123,7 @@ bool SV_Checkbox::OnWindowMessage( HWND hWnd, unsigned int msg, WPARAM wParam, L
 		if ( PointInsideRect( D2D1::Point2F( (float)p.x, (float)p.y ), clientRectAbs ) ) {
 			auto oldVal = GetChecked();
 			SetChecked( !GetChecked() );
-			if ( oldVal != GetChecked() && CheckedChangedCallback ) {
+			if ( CheckedChangedCallback ) {
 				CheckedChangedCallback( this, CheckedChangedUserdata );
 			}
 			return false;
