@@ -233,6 +233,7 @@ XRESULT BaseAntTweakBar::Init() {
 	TwDefine( " General/GothicUIScale  step=0.01" );
 	TwAddVarRW( Bar_General, "FOVHoriz", TW_TYPE_FLOAT, &Engine::GAPI->GetRendererState().RendererSettings.FOVHoriz, nullptr );
 	TwAddVarRW( Bar_General, "FOVVert", TW_TYPE_FLOAT, &Engine::GAPI->GetRendererState().RendererSettings.FOVVert, nullptr );
+	TwAddVarRW( Bar_General, "ForceFOV", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState().RendererSettings.ForceFOV, nullptr );
 	//TwAddVarRW(Bar_General, "Max Num Indices", TW_TYPE_INT32, &Engine::GAPI->GetRendererState().RendererSettings.MaxNumFaces, nullptr);
 
 	Bar_Info = TwNewBar( "FrameStats" );
