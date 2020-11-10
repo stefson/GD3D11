@@ -51,4 +51,5 @@ protected:
 	/** Current resolution setting */
 	int ResolutionSetting;
 	std::vector<DisplayModeInfo> Resolutions;
+	FovOverrideCheckedChangedState* CheckedChangedState;
 };

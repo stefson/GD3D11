@@ -26,10 +26,13 @@ D2DSettingsDialog::D2DSettingsDialog( D2DView* view, D2DSubView* parent ) : D2DD
 		}
 	}
 
+	CheckedChangedState = nullptr;
 	InitControls();
 }
 
-D2DSettingsDialog::~D2DSettingsDialog() {}
+D2DSettingsDialog::~D2DSettingsDialog() {
+	SAFE_DELETE( CheckedChangedState );
+}
 
 /** Initializes the controls of this view */
 XRESULT D2DSettingsDialog::InitControls() {
@@ -313,15 +316,15 @@ XRESULT D2DSettingsDialog::InitControls() {
 	vertFOVSlider->SetValue( Engine::GAPI->GetRendererState().RendererSettings.FOVVert );
 
 	/* THIS BELONGS TO FovOverrideCheckbox ! */
-	auto checkedChangedState = new FovOverrideCheckedChangedState;
-	checkedChangedState->SettingsDialog = this;
-	checkedChangedState->horizFOVLabel = horizFOVLabel;
-	checkedChangedState->horizFOVSlider = horizFOVSlider;
-	checkedChangedState->vertFOVLabel = vertFOVLabel;
-	checkedChangedState->vertFOVSlider = vertFOVSlider;
+	CheckedChangedState = new FovOverrideCheckedChangedState;
+	CheckedChangedState->SettingsDialog = this;
+	CheckedChangedState->horizFOVLabel = horizFOVLabel;
+	CheckedChangedState->horizFOVSlider = horizFOVSlider;
+	CheckedChangedState->vertFOVLabel = vertFOVLabel;
+	CheckedChangedState->vertFOVSlider = vertFOVSlider;
 
-	fovOverrideCheckbox->SetCheckedChangedCallback( FovOverrideCheckedChanged, checkedChangedState );
-	FovOverrideCheckedChanged( fovOverrideCheckbox, checkedChangedState ); // Apply initial settings
+	fovOverrideCheckbox->SetCheckedChangedCallback( FovOverrideCheckedChanged, CheckedChangedState );
+	FovOverrideCheckedChanged( fovOverrideCheckbox, CheckedChangedState ); // Apply initial settings
 
 	SV_Label* brightnessLabel = new SV_Label( MainView, MainPanel );
 	brightnessLabel->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 150, 12 ) );
