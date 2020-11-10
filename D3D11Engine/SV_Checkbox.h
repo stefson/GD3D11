@@ -29,7 +29,7 @@ public:
 	/** Sets the data location to update with this checkbox */
 	void SetDataToUpdate( bool* data );
 
-	/** Sets the data location to update with this checkbox */
+	/** Sets the callback */
 	void SetCheckedChangedCallback( SV_CheckboxCheckedChangedCallback cb, void* userdata);
 
 	/** Processes a window-message. Return false to stop the message from going to children */

@@ -209,16 +209,17 @@ void D2DSubView::SetHidden( bool hidden ) {
 	Hidden = hidden;
 }
 
-
 /** Returns if this control is hidden */
 bool D2DSubView::IsHidden() const {
 	return Hidden;
 }
 
+/** Sets if this control is disabled */
 void D2DSubView::SetDisabled( bool disabled ) {
 	Disabled = disabled;
 }
-/** Returns if this control is hidden */
+
+/** Returns if this control is disabled */
 bool D2DSubView::IsDisabled() const {
 	return Disabled;
 }
