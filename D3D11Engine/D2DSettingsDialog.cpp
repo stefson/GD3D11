@@ -10,7 +10,7 @@
 #include "SV_Slider.h"
 
 D2DSettingsDialog::D2DSettingsDialog( D2DView* view, D2DSubView* parent ) : D2DDialog( view, parent ) {
-	SetPositionCentered( D2D1::Point2F( view->GetRenderTarget()->GetSize().width / 2, view->GetRenderTarget()->GetSize().height / 2 ), D2D1::SizeF( 500, 300 ) );
+	SetPositionCentered( D2D1::Point2F( view->GetRenderTarget()->GetSize().width / 2, view->GetRenderTarget()->GetSize().height / 2 ), D2D1::SizeF( 500, 340 ) );
 	Header->SetCaption( "Settings" );
 
 	// Get display modes
@@ -43,7 +43,7 @@ XRESULT D2DSettingsDialog::InitControls() {
 
 	SV_Label* resolutionLabel = new SV_Label( MainView, MainPanel );
 	resolutionLabel->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 150, 12 ) );
-	resolutionLabel->AlignUnder( Header, 10 );
+	resolutionLabel->AlignUnder( Header, 5 );
 	resolutionLabel->SetCaption( "Resolution [*]:" );
 	resolutionLabel->SetPosition( D2D1::Point2F( 5, resolutionLabel->GetPosition().y ) );
 
@@ -67,7 +67,7 @@ XRESULT D2DSettingsDialog::InitControls() {
 	normalmapsCheckbox->SetSize( D2D1::SizeF( 160, 20 ) );
 	normalmapsCheckbox->SetCaption( "Enable Normalmaps" );
 	normalmapsCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.AllowNormalmaps );
-	normalmapsCheckbox->AlignUnder( normalmapsCheckbox, 5 );
+	normalmapsCheckbox->AlignUnder( resolutionSlider, 10 );
 	normalmapsCheckbox->SetPosition( D2D1::Point2F( 5, normalmapsCheckbox->GetPosition().y ) );
 	normalmapsCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.AllowNormalmaps );
 
@@ -75,7 +75,7 @@ XRESULT D2DSettingsDialog::InitControls() {
 	numpadCheckbox->SetSize( D2D1::SizeF( 160, 20 ) );
 	numpadCheckbox->SetCaption( "Enable Numpad Keys" );
 	numpadCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.AllowNumpadKeys );
-	numpadCheckbox->AlignUnder( resolutionSlider, 10 );
+	numpadCheckbox->AlignUnder( normalmapsCheckbox, 5 );
 	numpadCheckbox->SetPosition( D2D1::Point2F( 5, numpadCheckbox->GetPosition().y ) );
 	numpadCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.AllowNumpadKeys );
 
@@ -118,11 +118,22 @@ XRESULT D2DSettingsDialog::InitControls() {
 	tesselationCheckbox->SetPosition(D2D1::Point2F(5, tesselationCheckbox->GetPosition().y));
 	tesselationCheckbox->SetChecked(Engine::GAPI->GetRendererState().RendererSettings.EnableTesselation);*/
 
+	SV_Checkbox* hdrCheckbox = new SV_Checkbox(MainView, MainPanel);
+	hdrCheckbox->SetSize(D2D1::SizeF(160, 20));
+	hdrCheckbox->SetCaption("Enable HDR");
+	hdrCheckbox->SetDataToUpdate(&Engine::GAPI->GetRendererState().RendererSettings.EnableHDR);
+	hdrCheckbox->AlignUnder( smaaCheckbox, 5 );
+	hdrCheckbox->SetPosition(D2D1::Point2F(5, hdrCheckbox->GetPosition().y));
+	hdrCheckbox->SetChecked(Engine::GAPI->GetRendererState().RendererSettings.EnableHDR);
+	if (GMPModeActive) {
+		hdrCheckbox->SetHidden(true);
+	}
+
 	SV_Checkbox* shadowsCheckbox = new SV_Checkbox( MainView, MainPanel );
 	shadowsCheckbox->SetSize( D2D1::SizeF( 160, 20 ) );
 	shadowsCheckbox->SetCaption( "Enable Shadows[*]" );
 	shadowsCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.EnableShadows );
-	shadowsCheckbox->AlignUnder( smaaCheckbox, 5 );
+	shadowsCheckbox->AlignUnder( hdrCheckbox, 5 );
 	shadowsCheckbox->SetPosition( D2D1::Point2F( 5, shadowsCheckbox->GetPosition().y ) );
 	shadowsCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.EnableShadows );
 
@@ -184,20 +195,9 @@ XRESULT D2DSettingsDialog::InitControls() {
 	fpsLimitSlider->SetValue( Engine::GAPI->GetRendererState().RendererSettings.FpsLimit );
 
 	// Next column
-	SV_Checkbox* hdrCheckbox = new SV_Checkbox( MainView, MainPanel );
-	hdrCheckbox->SetSize( D2D1::SizeF( 160, 20 ) );
-	hdrCheckbox->SetCaption( "Enable HDR" );
-	hdrCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.EnableHDR );
-	hdrCheckbox->AlignUnder( Header, 5 );
-	hdrCheckbox->SetPosition( D2D1::Point2F( 170, hdrCheckbox->GetPosition().y ) );
-	hdrCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.EnableHDR );
-	if ( GMPModeActive ) {
-		hdrCheckbox->SetHidden( true );
-	}
-
 	SV_Label* outdoorVobsDDLabel = new SV_Label( MainView, MainPanel );
 	outdoorVobsDDLabel->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 150, 12 ) );
-	outdoorVobsDDLabel->AlignUnder( hdrCheckbox, 5 );
+	outdoorVobsDDLabel->AlignUnder( Header, 5 );
 	outdoorVobsDDLabel->SetPosition( D2D1::Point2F( 170, outdoorVobsDDLabel->GetPosition().y ) );
 	outdoorVobsDDLabel->SetCaption( "Object draw distance:" );
 
@@ -284,13 +284,12 @@ XRESULT D2DSettingsDialog::InitControls() {
 	fovOverrideCheckbox->AlignUnder( Header, 5 );
 	fovOverrideCheckbox->SetCaption( "Enable FOV Override" );
 	fovOverrideCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.ForceFOV );
-	//fovOverrideCheckbox->AlignUnder( ______, 5 );
 	fovOverrideCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.ForceFOV );
 	fovOverrideCheckbox->SetPosition( D2D1::Point2F( 170 + 160 + 10, fovOverrideCheckbox->GetPosition().y ) );
 
 	SV_Label* horizFOVLabel = new SV_Label( MainView, MainPanel );
 	horizFOVLabel->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 150, 12 ) );
-	horizFOVLabel->AlignUnder(fovOverrideCheckbox, 5);
+	horizFOVLabel->AlignUnder( fovOverrideCheckbox, 8 );
 	horizFOVLabel->SetCaption( "Horizontal FOV:" );
 	horizFOVLabel->SetPosition( D2D1::Point2F( 170 + 160 + 10, horizFOVLabel->GetPosition().y ) );
 
@@ -328,7 +327,7 @@ XRESULT D2DSettingsDialog::InitControls() {
 
 	SV_Label* brightnessLabel = new SV_Label( MainView, MainPanel );
 	brightnessLabel->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 150, 12 ) );
-	brightnessLabel->AlignUnder( vertFOVSlider, 8 );
+	brightnessLabel->AlignUnder( vertFOVSlider, 16 );
 	brightnessLabel->SetCaption( "Brightness:" );
 
 	SV_Slider* brightnessSlider = new SV_Slider( MainView, MainPanel );
