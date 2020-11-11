@@ -340,8 +340,8 @@ XRESULT D3D11Effect::DrawRainShadowmap() {
 // of textures on disk.
 //--------------------------------------------------------------------------------------
 HRESULT LoadTextureArray( ID3D11Device* pd3dDevice, ID3D11DeviceContext* context, char* sTexturePrefix, int iNumTextures, ID3D11Texture2D** ppTex2D, ID3D11ShaderResourceView** ppSRV ) {
-	if ( !ppTex2D || !*ppTex2D ) {
-		LogError() << "invalid argument: ppTex2D. should not be null/pointing to null";
+	if ( !ppTex2D ) {
+		LogError() << "invalid argument: ppTex2D. should not be null";
 		return E_FAIL;
 	}
 	HRESULT hr = S_OK;
