@@ -46,8 +46,77 @@ namespace D3D11ObjectIDs {
 		int BlendStateCounter;
 		int RasterizerCounter;
 	} Counters;
-
 }
+
+class D3D11ObjectIdManager {
+public:
+	static UINT8 AddVShader( D3D11VShader* s ) {
+		std::unique_lock<std::mutex> lock( VShadersByIDMutex );
+		UINT8 id = 0;
+		if ( !D3D11ObjectIDs::VShadersByID.empty() ) {
+			id = D3D11ObjectIDs::Counters.VShadersCounter++;
+		}
+		D3D11ObjectIDs::VShadersByID[id] = s;
+		return id;
+	}
+	static UINT8 AddPShader( D3D11PShader* s ) {
+		std::unique_lock<std::mutex> lock( PShadersByIDMutex );
+		UINT8 id = 0;
+		if ( !D3D11ObjectIDs::PShadersByID.empty() ) {
+			id = D3D11ObjectIDs::Counters.PShadersCounter++;
+		}
+		D3D11ObjectIDs::PShadersByID[id] = s;
+		return id;
+	}
+	static UINT8 AddHDShader( D3D11HDShader* s ) {
+		std::unique_lock<std::mutex> lock( HDShadersByIDMutex );
+		UINT8 id = 0;
+		if ( !D3D11ObjectIDs::HDShadersByID.empty() ) {
+			id = D3D11ObjectIDs::Counters.HDShadersCounter++;
+		}
+		D3D11ObjectIDs::HDShadersByID[id] = s;
+		return id;
+	}
+	static UINT8 AddGShader( D3D11GShader* s ) {
+		std::unique_lock<std::mutex> lock( GShadersByIDMutex );
+		UINT8 id = 0;
+		if ( !D3D11ObjectIDs::GShadersByID.empty() ) {
+			id = D3D11ObjectIDs::Counters.GShadersCounter++;
+		}
+		D3D11ObjectIDs::GShadersByID[id] = s;
+		return id;
+	}
+
+	static void EraseVShader( D3D11VShader* s ) {
+		std::unique_lock<std::mutex> lock( VShadersByIDMutex );
+		for ( auto it = D3D11ObjectIDs::VShadersByID.begin(); it != D3D11ObjectIDs::VShadersByID.end();) {
+			if ( it->second == s ) { it = D3D11ObjectIDs::VShadersByID.erase( it ); } else { ++it; }
+		}
+	}
+	static void ErasePShader( D3D11PShader* s ) {
+		std::unique_lock<std::mutex> lock( PShadersByIDMutex );
+		for ( auto it = D3D11ObjectIDs::PShadersByID.begin(); it != D3D11ObjectIDs::PShadersByID.end();) {
+			if ( it->second == s ) { it = D3D11ObjectIDs::PShadersByID.erase( it ); } else { ++it; }
+		}
+	}
+	static void EraseHDShader( D3D11HDShader* s ) {
+		std::unique_lock<std::mutex> lock( HDShadersByIDMutex );
+		for ( auto it = D3D11ObjectIDs::HDShadersByID.begin(); it != D3D11ObjectIDs::HDShadersByID.end();) {
+			if ( it->second == s ) { it = D3D11ObjectIDs::HDShadersByID.erase( it ); } else { ++it; }
+		}
+	}
+	static void EraseGShader( D3D11GShader* s ) {
+		std::unique_lock<std::mutex> lock( GShadersByIDMutex );
+		for ( auto it = D3D11ObjectIDs::GShadersByID.begin(); it != D3D11ObjectIDs::GShadersByID.end();) {
+			if ( it->second == s ) { it = D3D11ObjectIDs::GShadersByID.erase( it ); } else { ++it; }
+		}
+	}
+private:
+	inline static std::mutex VShadersByIDMutex;
+	inline static std::mutex PShadersByIDMutex;
+	inline static std::mutex HDShadersByIDMutex;
+	inline static std::mutex GShadersByIDMutex;
+};
 
 struct RenderToTextureBuffer;
 struct RenderToDepthStencilBuffer;

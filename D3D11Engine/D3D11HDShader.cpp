@@ -19,18 +19,13 @@ D3D11HDShader::D3D11HDShader() {
 	ConstantBuffers = std::vector<D3D11ConstantBuffer*>();
 
 	// Insert into state-map
-	ID = 0;
-
-	if ( !D3D11ObjectIDs::HDShadersByID.empty() )
-		ID = D3D11ObjectIDs::Counters.HDShadersCounter + 1;
-
-	D3D11ObjectIDs::HDShadersByID[ID] = this;
+	ID = D3D11ObjectIdManager::AddHDShader( this );
 }
 
 
 D3D11HDShader::~D3D11HDShader() {
 	// Remove from state map
-	Toolbox::EraseByElement( D3D11ObjectIDs::HDShadersByID, this );
+	D3D11ObjectIdManager::EraseHDShader( this );
 
 	if ( HullShader )HullShader->Release();
 	if ( DomainShader )DomainShader->Release();
