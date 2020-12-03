@@ -3094,7 +3094,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround( FXMVECTOR position,
 		UINT loc = 0;
 		DynamicInstancingBuffer->Map( D3D11VertexBuffer::M_WRITE_DISCARD,
 			(void**)&data, &size );
-		static VectorA16<VobInstanceInfo> s_InstanceData;
+		
 		for ( auto const& staticMeshVisual : staticMeshVisuals ) {
 			if ( staticMeshVisual.second->Instances.empty() ) continue;
 
@@ -3284,7 +3284,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 		UINT loc = 0;
 		DynamicInstancingBuffer->Map( D3D11VertexBuffer::M_WRITE_DISCARD,
 			(void**)&data, &size );
-		static VectorA16<VobInstanceInfo> s_InstanceData;
+
 		for ( auto const& staticMeshVisual : staticMeshVisuals ) {
 			staticMeshVisual.second->StartInstanceNum = loc;
 			memcpy( data + loc * sizeof( VobInstanceInfo ), &staticMeshVisual.second->Instances[0],
@@ -3297,9 +3297,6 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 			vobs[i]->VisibleInRenderPass = false;  // Reset this for the next frame
 			RenderedVobs.push_back( vobs[i] );
 		}
-
-		// Reset buffer
-		s_InstanceData.resize( 0 );
 
 		for ( auto const& staticMeshVisual : staticMeshVisuals ) {
 			if ( staticMeshVisual.second->Instances.empty() ) continue;
@@ -4019,15 +4016,16 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
 	XMVECTOR target = dir;
 
 	float dotDir;
-	XMStoreFloat( &dotDir, XMVector3Dot( smoothDir, dir ) );
+	XMStoreFloat( &dotDir, XMVector3Dot( dir, smoothDir ) );
 	// Smoothly transition to the next state and wait there
-	if ( fabs( dotDir ) < 0.99995f )  // but cut it off somewhere or the pixels will flicker
+	if ( fabs( dotDir ) < 0.9999990f )  // but cut it off somewhere or the pixels will flicker
 	{
-		dir = XMVectorLerp( smoothDir, target, Engine::GAPI->GetFrameTimeSec() * 2.0f );
-	} else
 		oldDir = dir;
-
-	smoothDir = dir;
+		smoothDir = dir;
+	} else {
+		smoothDir = XMVectorLerp( oldDir, target, Engine::GAPI->GetFrameTimeSec() * 2.0f );
+	}
+	dir = smoothDir;
 
 	XMVECTOR WorldShadowCP;
 	// Update position
