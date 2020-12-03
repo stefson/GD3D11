@@ -594,7 +594,7 @@ void GothicAPI::OnWorldLoaded() {
 	}
 	
 	LoadRendererWorldSettings( RendererState.RendererSettings );
-
+	SaveRendererWorldSettings( RendererState.RendererSettings );
 	// Reset wetness
 	SceneWetness = GetRainFXWeight();
 
