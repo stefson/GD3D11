@@ -3725,18 +3725,8 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
 	s.FontFileMenu = GetPrivateProfileStringA( "FontRendering", "FontMenu", defaultRendererSettings.FontFileMenu, ini );
 
 	// Fix the shadow range
-	switch ( s.ShadowMapSize ) {
-	case 512:
-	case 1024:
-		s.WorldShadowRangeScale = 16.0f;
-		break;
-	case 2048:
-		s.WorldShadowRangeScale = 8.0f;
-		break;
-	default:
-		s.WorldShadowRangeScale = 4.0f;
-		break;
-	}
+	s.WorldShadowRangeScale = Toolbox::GetRecommendedWorldShadowRangeScaleForSize( s.ShadowMapSize );
+	
 	// Fix the resolution if the players maximum resolution got lower
 	RECT r;
 	GetClientRect( GetDesktopWindow(), &r );

@@ -624,15 +624,6 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
 
 	// Check for shadowmap resize
 	int s = Engine::GAPI->GetRendererState().RendererSettings.ShadowMapSize;
-	switch ( s ) {
-	case 0:
-	case 1: s = 512; break;
-	case 2: s = 1024; break;
-	case 3: s = 2048; break;
-	case 4: s = 4096; break;
-	case 5: s = 8192; break;
-	case 6: s = 16384; break;
-	}
 
 	if ( WorldShadowmap1->GetSizeX() != s ) {
 		int old = WorldShadowmap1->GetSizeX();
@@ -640,8 +631,8 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
 		WorldShadowmap1 = std::make_unique<RenderToDepthStencilBuffer>(
 			GetDevice(), s, s, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT,
 			DXGI_FORMAT_R32_FLOAT );
-
-		Engine::GAPI->GetRendererState().RendererSettings.WorldShadowRangeScale *= old / static_cast<float>(s);
+		Engine::GAPI->GetRendererState().RendererSettings.WorldShadowRangeScale =
+			Toolbox::GetRecommendedWorldShadowRangeScaleForSize(s);
 	}
 
 	// Force the mode

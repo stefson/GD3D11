@@ -403,7 +403,6 @@ void D2DSettingsDialog::CloseButtonPressed( SV_Button* sender, void* userdata ) 
 
 	d->SetHidden( true );
 
-	Engine::GAPI->SaveMenuSettings( MENU_SETTINGS_FILE );
 	Engine::GAPI->SetEnableGothicInput( true );
 }
 
@@ -422,6 +421,7 @@ void D2DSettingsDialog::ApplyButtonPressed( SV_Button* sender, void* userdata ) 
 		Engine::GraphicsEngine->OnResize( INT2( d->Resolutions[d->ResolutionSetting].Width, d->Resolutions[d->ResolutionSetting].Height ) );
 	}
 	Engine::GAPI->SaveRendererWorldSettings( settings );
+	Engine::GAPI->SaveMenuSettings( MENU_SETTINGS_FILE );
 }
 
 /** Checks if a change needs to reload the shaders */

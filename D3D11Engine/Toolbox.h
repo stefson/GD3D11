@@ -16,6 +16,20 @@ struct zTBBox3D;
 struct zTPlane;
 
 namespace Toolbox {
+	FORCEINLINE float GetRecommendedWorldShadowRangeScaleForSize( int size ) {
+		constexpr int MAX_SHADOWMAP_SIZE = 16384;
+		return static_cast<float>( MAX_SHADOWMAP_SIZE / size );
+
+		/* // Equivalent to
+		switch ( size ) {
+		case 512:  return 32.0f;
+		case 1024: return 16.0f;
+		case 2048: return  8.0f;
+		case 4096: return  4.0f;
+		case 8192: return  2.0f;
+		default:   return  1.0f;
+		}*/
+	}
 
 	/** Checks if one of a series of strings is found within the input-string */
 	bool StringContainsOneOf( const std::string& string, const std::string* checkStrings, int numStrings );
