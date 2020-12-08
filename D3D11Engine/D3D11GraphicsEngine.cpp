@@ -34,6 +34,7 @@
 #include <locale>
 #include <codecvt>
 #include <wrl\client.h>
+#include "D3D11_Helpers.h"
 
 #if !PUBLIC_RELEASE
 #define DEBUG_D3D11

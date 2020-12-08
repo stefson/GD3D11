@@ -13,6 +13,7 @@
 #include <DDSTextureLoader.h>
 #include "RenderToTextureBuffer.h"
 #include <d3dcompiler.h>
+#include "D3D11_Helpers.h"
 
 using namespace DirectX;
 // TODO: Remove this!
@@ -125,9 +126,9 @@ XRESULT D3D11Effect::DrawRain() {
 		FillRandomRaindropData( particles );
 
 		// Create vertexbuffers
-		RainBufferInitial->Init( &particles[0], particles.size() * sizeof( ParticleInstanceInfo ), (D3D11VertexBuffer::EBindFlags)(D3D11VertexBuffer::B_VERTEXBUFFER) );
-		RainBufferDrawFrom->Init( &particles[0], particles.size() * sizeof( ParticleInstanceInfo ), (D3D11VertexBuffer::EBindFlags)(D3D11VertexBuffer::B_VERTEXBUFFER | D3D11VertexBuffer::B_STREAM_OUT) );
-		RainBufferStreamTo->Init( &particles[0], particles.size() * sizeof( ParticleInstanceInfo ), (D3D11VertexBuffer::EBindFlags)(D3D11VertexBuffer::B_VERTEXBUFFER | D3D11VertexBuffer::B_STREAM_OUT) );
+		RainBufferInitial->Init( &particles[0], particles.size() * sizeof( ParticleInstanceInfo ), (D3D11VertexBuffer::EBindFlags)(D3D11VertexBuffer::B_VERTEXBUFFER), D3D11VertexBuffer::U_DEFAULT, D3D11VertexBuffer::CA_NONE, "D3D11Effect::DrawRain::RainBufferInitial" );
+		RainBufferDrawFrom->Init( &particles[0], particles.size() * sizeof( ParticleInstanceInfo ), (D3D11VertexBuffer::EBindFlags)(D3D11VertexBuffer::B_VERTEXBUFFER | D3D11VertexBuffer::B_STREAM_OUT), D3D11VertexBuffer::U_DEFAULT, D3D11VertexBuffer::CA_NONE, "D3D11Effect::DrawRain::RainBufferDrawFrom" );
+		RainBufferStreamTo->Init( &particles[0], particles.size() * sizeof( ParticleInstanceInfo ), (D3D11VertexBuffer::EBindFlags)(D3D11VertexBuffer::B_VERTEXBUFFER | D3D11VertexBuffer::B_STREAM_OUT), D3D11VertexBuffer::U_DEFAULT, D3D11VertexBuffer::CA_NONE, "D3D11Effect::DrawRain::RainBufferStreamTo" );
 
 		firstFrame = true;
 
@@ -142,6 +143,9 @@ XRESULT D3D11Effect::DrawRain() {
 		if ( !RainShadowmap.get() ) {
 			const int s = 2048;
 			RainShadowmap = std::make_unique<RenderToDepthStencilBuffer>( e->GetDevice(), s, s, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_R32_FLOAT );
+			SetDebugName( RainShadowmap->GetDepthStencilView().Get(), "RainShadowmap->DepthStencilView" );
+			SetDebugName( RainShadowmap->GetShaderResView().Get(), "RainShadowmap->ShaderResView" );
+			SetDebugName( RainShadowmap->GetTexture().Get(), "RainShadowmap->Texture" );
 		}
 	}
 
