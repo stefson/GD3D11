@@ -4,6 +4,7 @@
 #include "D3D11GraphicsEngineBase.h"
 #include "Engine.h"
 #include <DirectXMesh.h>
+#include "D3D11_Helpers.h"
 
 D3D11VertexBuffer::D3D11VertexBuffer() {
 	VertexBuffer = nullptr;
@@ -55,7 +56,10 @@ XRESULT D3D11VertexBuffer::Init( void* initData, unsigned int sizeInBytes, EBind
 	InitData.SysMemSlicePitch = 0;
 
 	LE( engine->GetDevice()->CreateBuffer( &bufferDesc, &InitData, &VertexBuffer ) );
-
+	if ( !VertexBuffer ) {
+		delete [] data;
+		return XR_SUCCESS;
+	}
 	// Check for structured buffer again to create the SRV
 	if ( (EBindFlags & EBindFlags::B_SHADER_RESOURCE) != 0 && structuredByteSize > 0 ) {
 		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -66,9 +70,7 @@ XRESULT D3D11VertexBuffer::Init( void* initData, unsigned int sizeInBytes, EBind
 		engine->GetDevice()->CreateShaderResourceView( VertexBuffer, &srvDesc, &ShaderResourceView );
 	}
 
-#ifndef PUBLIC_RELEASE
-	VertexBuffer->SetPrivateData( WKPDID_D3DDebugObjectName, fileName.size(), fileName.c_str() );
-#endif
+	SetDebugName( VertexBuffer, fileName );
 
 	delete [] data;
 

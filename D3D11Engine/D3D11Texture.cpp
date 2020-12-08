@@ -6,6 +6,7 @@
 #include <DDSTextureLoader.h>
 #include "RenderToTextureBuffer.h"
 #include <d3dcompiler.h>
+#include "D3D11_Helpers.h"
 
 using namespace DirectX;
 
@@ -45,10 +46,7 @@ XRESULT D3D11Texture::Init( INT2 size, ETextureFormat format, UINT mipMapCount, 
 		D3D11_BIND_SHADER_RESOURCE, D3D11_USAGE_DEFAULT, 0, 1, 0, 0 );
 
 	LE( engine->GetDevice()->CreateTexture2D( &textureDesc, nullptr, Texture.ReleaseAndGetAddressOf() ) );
-
-#ifndef PUBLIC_RELEASE
-	Texture->SetPrivateData( WKPDID_D3DDebugObjectName, fileName.size(), fileName.c_str() );
-#endif
+	SetDebugName( Texture.Get(), "D3D11Texture(\""+fileName + "\")->Texture");
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC descRV = {};
 	descRV.Format = DXGI_FORMAT_UNKNOWN;
@@ -56,6 +54,7 @@ XRESULT D3D11Texture::Init( INT2 size, ETextureFormat format, UINT mipMapCount, 
 	descRV.Texture2D.MipLevels = mipMapCount;
 	descRV.Texture2D.MostDetailedMip = 0;
 	LE( engine->GetDevice()->CreateShaderResourceView( Texture.Get(), &descRV, ShaderResourceView.ReleaseAndGetAddressOf() ) );
+	SetDebugName( ShaderResourceView.Get(), "D3D11Texture(\"" + fileName + "\")->ShaderResourceView" );
 
 	//Engine::GAPI->LeaveResourceCriticalSection();
 
@@ -85,6 +84,8 @@ XRESULT D3D11Texture::Init( const std::string& file ) {
 
 	TextureSize.x = desc.Width;
 	TextureSize.y = desc.Height;
+	SetDebugName( res.Get(), "D3D11Texture(\"" + file + "\")->Texture" );
+	SetDebugName( ShaderResourceView.Get(), "D3D11Texture(\"" + file + "\")->ShaderResourceView" );
 
 	//Engine::GAPI->LeaveResourceCriticalSection();
 

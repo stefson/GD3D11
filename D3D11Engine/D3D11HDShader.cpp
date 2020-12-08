@@ -5,6 +5,7 @@
 #include "GothicAPI.h"
 #include "D3D11ConstantBuffer.h"
 #include <d3dcompiler.h>
+#include "D3D11_Helpers.h"
 
 using namespace DirectX;
 
@@ -98,10 +99,8 @@ XRESULT D3D11HDShader::LoadShader( const char* hullShader, const char* domainSha
 	LE( engine->GetDevice()->CreateHullShader( hsBlob->GetBufferPointer(), hsBlob->GetBufferSize(), nullptr, &HullShader ) );
 	LE( engine->GetDevice()->CreateDomainShader( dsBlob->GetBufferPointer(), dsBlob->GetBufferSize(), nullptr, &DomainShader ) );
 
-#ifndef PUBLIC_RELEASE
-	HullShader->SetPrivateData( WKPDID_D3DDebugObjectName, strlen( hullShader ), hullShader );
-	DomainShader->SetPrivateData( WKPDID_D3DDebugObjectName, strlen( domainShader ), domainShader );
-#endif
+	SetDebugName( HullShader, hullShader );
+	SetDebugName( DomainShader, domainShader );
 
 	hsBlob->Release();
 	dsBlob->Release();

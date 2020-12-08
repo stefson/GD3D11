@@ -5,6 +5,7 @@
 #include "GothicAPI.h"
 #include "D3D11ConstantBuffer.h"
 #include <d3dcompiler.h>
+#include "D3D11_Helpers.h"
 
 using namespace DirectX;
 
@@ -94,9 +95,7 @@ XRESULT D3D11VShader::LoadShader( const char* vertexShader, int layout, const st
 	LE( engine->GetDevice()->CreateVertexShader( vsBlob->GetBufferPointer(),
 		vsBlob->GetBufferSize(), nullptr, &VertexShader ) );
 
-#ifndef PUBLIC_RELEASE
-	VertexShader->SetPrivateData( WKPDID_D3DDebugObjectName, strlen( vertexShader ), vertexShader );
-#endif
+	SetDebugName( VertexShader, vertexShader );
 
 
 	const D3D11_INPUT_ELEMENT_DESC layout1 [] =

@@ -5,6 +5,7 @@
 #include "GothicAPI.h"
 #include "D3D11ConstantBuffer.h"
 #include <d3dcompiler.h>
+#include "D3D11_Helpers.h"
 
 using namespace DirectX;
 
@@ -91,9 +92,7 @@ XRESULT D3D11PShader::LoadShader( const char* pixelShader, const std::vector<D3D
 	// Create the shader
 	LE( engine->GetDevice()->CreatePixelShader( psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &PixelShader ) );
 
-#ifndef PUBLIC_RELEASE
-	PixelShader->SetPrivateData( WKPDID_D3DDebugObjectName, strlen( pixelShader ), pixelShader );
-#endif
+	SetDebugName(PixelShader, pixelShader );
 
 	psBlob->Release();
 

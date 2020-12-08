@@ -35,6 +35,9 @@
 #include <codecvt>
 #include <wrl\client.h>
 
+#if !PUBLIC_RELEASE
+#define DEBUG_D3D11
+#endif
 
 namespace wrl = Microsoft::WRL;
 using namespace DirectX;
@@ -54,7 +57,6 @@ const float NUM_FRAME_SHADOW_UPDATES =
 const int NUM_MIN_FRAME_SHADOW_UPDATES =
 4;  // Minimum lights to update per frame
 const int MAX_IMPORTANT_LIGHT_UPDATES = 1;
-//#define DEBUG_D3D11
 
 D3D11GraphicsEngine::D3D11GraphicsEngine() {
 	Resolution = DEFAULT_RESOLUTION;
@@ -164,11 +166,15 @@ XRESULT D3D11GraphicsEngine::Init() {
 	TempVertexBuffer->Init(
 		nullptr, DRAWVERTEXARRAY_BUFFER_SIZE, D3D11VertexBuffer::B_VERTEXBUFFER,
 		D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE );
+	SetDebugName( TempVertexBuffer->GetShaderResourceView(), "TempVertexBuffer->ShaderResourceView" );
+	SetDebugName( TempVertexBuffer->GetVertexBuffer(), "TempVertexBuffer->VertexBuffer" );
 
 	DynamicInstancingBuffer = std::make_unique<D3D11VertexBuffer>();
 	DynamicInstancingBuffer->Init(
 		nullptr, INSTANCING_BUFFER_SIZE, D3D11VertexBuffer::B_VERTEXBUFFER,
 		D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE );
+	SetDebugName( DynamicInstancingBuffer->GetShaderResourceView(), "DynamicInstancingBuffer->ShaderResourceView" );
+	SetDebugName( DynamicInstancingBuffer->GetVertexBuffer(), "DynamicInstancingBuffer->VertexBuffer" );
 
 	D3D11_SAMPLER_DESC samplerDesc;
 	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
@@ -190,6 +196,7 @@ XRESULT D3D11GraphicsEngine::Init() {
 	GetContext()->VSSetSamplers( 0, 1, DefaultSamplerState.GetAddressOf() );
 	GetContext()->DSSetSamplers( 0, 1, DefaultSamplerState.GetAddressOf() );
 	GetContext()->HSSetSamplers( 0, 1, DefaultSamplerState.GetAddressOf() );
+	SetDebugName( DefaultSamplerState.Get(), "DefaultSamplerState" );
 
 	samplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
 	//TODO: NVidia PCSS
@@ -198,18 +205,21 @@ XRESULT D3D11GraphicsEngine::Init() {
 	GetDevice()->CreateSamplerState( &samplerDesc, &ShadowmapSamplerState );
 	GetContext()->PSSetSamplers( 2, 1, ShadowmapSamplerState.GetAddressOf() );
 	GetContext()->VSSetSamplers( 2, 1, ShadowmapSamplerState.GetAddressOf() );
+	SetDebugName( ShadowmapSamplerState.Get(), "ShadowmapSamplerState" );
 
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
 	GetDevice()->CreateSamplerState( &samplerDesc, &ClampSamplerState );
+	SetDebugName( ClampSamplerState.Get(), "ClampSamplerState" );
 
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 	GetDevice()->CreateSamplerState( &samplerDesc, &CubeSamplerState );
+	SetDebugName( CubeSamplerState.Get(), "CubeSamplerState" );
 
 	D3D11_RASTERIZER_DESC rasterizerDesc;
 	rasterizerDesc.CullMode = D3D11_CULL_BACK;
@@ -282,7 +292,9 @@ XRESULT D3D11GraphicsEngine::Init() {
 
 	// Init inf-buffer now
 	InfiniteRangeConstantBuffer->UpdateBuffer( &float4( FLT_MAX, 0, 0, 0 ) );
-
+	SetDebugName( InfiniteRangeConstantBuffer->Get(), "InfiniteRangeConstantBuffer" );
+	SetDebugName( OutdoorSmallVobsConstantBuffer->Get(), "OutdoorSmallVobsConstantBuffer" );
+	SetDebugName( OutdoorVobsConstantBuffer->Get(), "OutdoorVobsConstantBuffer" );
 	// Load reflectioncube
 
 	if ( S_OK != CreateDDSTextureFromFile(
@@ -572,6 +584,9 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
 	WorldShadowmap1 = std::make_unique<RenderToDepthStencilBuffer>(
 		GetDevice(), s, s, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT,
 		DXGI_FORMAT_R32_FLOAT );
+	SetDebugName( WorldShadowmap1->GetTexture().Get(), "WorldShadowmap1->Texture" );
+	SetDebugName( WorldShadowmap1->GetShaderResView().Get(), "WorldShadowmap1->ShaderResView" );
+	SetDebugName( WorldShadowmap1->GetDepthStencilView().Get(), "WorldShadowmap1->DepthStencilView" );
 
 	Engine::AntTweakBar->OnResize( newSize );
 
@@ -631,6 +646,10 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
 		WorldShadowmap1 = std::make_unique<RenderToDepthStencilBuffer>(
 			GetDevice(), s, s, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT,
 			DXGI_FORMAT_R32_FLOAT );
+		SetDebugName( WorldShadowmap1->GetTexture().Get(), "WorldShadowmap1->Texture" );
+		SetDebugName( WorldShadowmap1->GetShaderResView().Get(), "WorldShadowmap1->ShaderResView" );
+		SetDebugName( WorldShadowmap1->GetDepthStencilView().Get(), "WorldShadowmap1->DepthStencilView" );
+
 		Engine::GAPI->GetRendererState().RendererSettings.WorldShadowRangeScale =
 			Toolbox::GetRecommendedWorldShadowRangeScaleForSize(s);
 	}
@@ -1062,6 +1081,8 @@ XRESULT D3D11GraphicsEngine::DrawVertexArray( ExVertexStruct* vertices,
 		TempVertexBuffer->Init(
 			nullptr, stride * numVertices, D3D11VertexBuffer::B_VERTEXBUFFER,
 			D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE );
+		SetDebugName( TempVertexBuffer->GetShaderResourceView(), "TempVertexBuffer->ShaderResourceView" );
+		SetDebugName( TempVertexBuffer->GetVertexBuffer(), "TempVertexBuffer->VertexBuffer" );
 	}
 
 	TempVertexBuffer->UpdateBuffer( vertices, stride * numVertices );
@@ -1112,6 +1133,8 @@ XRESULT D3D11GraphicsEngine::DrawIndexedVertexArray( ExVertexStruct* vertices,
 		TempVertexBuffer->Init(
 			nullptr, stride * numVertices, D3D11VertexBuffer::B_VERTEXBUFFER,
 			D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE );
+		SetDebugName( TempVertexBuffer->GetShaderResourceView(), "TempVertexBuffer->ShaderResourceView" );
+		SetDebugName( TempVertexBuffer->GetVertexBuffer(), "TempVertexBuffer->VertexBuffer" );
 	}
 
 	TempVertexBuffer->UpdateBuffer( vertices, stride * numVertices );
@@ -1317,6 +1340,9 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
 			nullptr, instanceDataStride * (numInstances + 32),
 			D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC,
 			D3D11VertexBuffer::CA_WRITE );
+
+		SetDebugName( DynamicInstancingBuffer->GetShaderResourceView(), "DynamicInstancingBuffer->ShaderResourceView" );
+		SetDebugName( DynamicInstancingBuffer->GetVertexBuffer(), "DynamicInstancingBuffer->VertexBuffer" );
 	}
 
 	// Update the vertexbuffer
@@ -2312,14 +2338,14 @@ XRESULT D3D11GraphicsEngine::DrawWorldMeshW( bool noTextures ) {
 			it != (*itr)->WorldMeshes.end(); ++it ) {
 			if ( it->first.Material ) {
 				auto p = meshesByMaterial[it->first.Material->GetTexture()];
-				p.second.push_back( it->second );
+				p.second.emplace_back( it->second );
 
 				if ( !p.first ) {
 					p.first = Engine::GAPI->GetMaterialInfoFrom(
 						it->first.Material->GetTextureSingle() );
 				}
 			} else {
-				meshesByMaterial[nullptr].second.push_back( it->second );
+				meshesByMaterial[nullptr].second.emplace_back( it->second );
 				meshesByMaterial[nullptr].first =
 					Engine::GAPI->GetMaterialInfoFrom( nullptr );
 			}
@@ -2699,7 +2725,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround(
 
 					if ( vLen < 2 ) {
 						WorldMeshSectionInfo& section = ity.second;
-						drawnSections.push_back( &section );
+						drawnSections.emplace_back( &section );
 
 						if ( Engine::GAPI->GetRendererState().RendererSettings.FastShadows ) {
 							// Draw world mesh
@@ -2775,7 +2801,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround(
 					if ( !it->IsIndoorVob && indoor || it->IsIndoorVob && !indoor ) {
 						continue;
 					}
-					rndVob.push_back( it );
+					rndVob.emplace_back( it );
 				}
 			}
 
@@ -2862,7 +2888,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround(
 					continue;
 				}
 
-				rndVob.push_back( it );
+				rndVob.emplace_back( it );
 			}
 
 			if ( renderedMobs ) {
@@ -3063,7 +3089,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround( FXMVECTOR position,
 			vii.world = it->WorldMatrix;
 
 			if ( !it->IsIndoorVob )
-				((MeshVisualInfo*)it->VisualInfo)->Instances.push_back( vii );
+				((MeshVisualInfo*)it->VisualInfo)->Instances.emplace_back( vii );
 		}
 
 		// Apply instancing shader
@@ -3268,6 +3294,9 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 				nullptr, sizeof( VobInstanceInfo ) * vobs.size(),
 				D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC,
 				D3D11VertexBuffer::CA_WRITE );
+
+			SetDebugName( DynamicInstancingBuffer->GetShaderResourceView(), "DynamicInstancingBuffer->ShaderResourceView" );
+			SetDebugName( DynamicInstancingBuffer->GetVertexBuffer(), "DynamicInstancingBuffer->VertexBuffer" );
 		}
 
 		byte* data;
@@ -3286,7 +3315,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 
 		for ( unsigned int i = 0; i < vobs.size(); i++ ) {
 			vobs[i]->VisibleInRenderPass = false;  // Reset this for the next frame
-			RenderedVobs.push_back( vobs[i] );
+			RenderedVobs.emplace_back( vobs[i] );
 		}
 
 		for ( auto const& staticMeshVisual : staticMeshVisuals ) {
@@ -3345,7 +3374,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 							MeshVisualInfo* info = staticMeshVisual.second;
 							MeshInfo* mesh = mlist[i];
 
-							AlphaMeshes.push_back(
+							AlphaMeshes.emplace_back(
 								std::make_pair( itt.first, std::make_pair( info, mesh ) ) );
 
 							doReset = false;
@@ -3689,6 +3718,8 @@ XRESULT D3D11GraphicsEngine::DrawPolyStrips( bool noTextures ) {
 			TempVertexBuffer.reset( new D3D11VertexBuffer() );
 			// Reinit with a bit of a margin, so it will not be reinit each time new vertex is added
 			TempVertexBuffer->Init( NULL, sizeof( ExVertexStruct ) * vertices.size() * 1.1, D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE );
+			SetDebugName( TempVertexBuffer->GetShaderResourceView(), "TempVertexBuffer->ShaderResourceView" );
+			SetDebugName( TempVertexBuffer->GetVertexBuffer(), "TempVertexBuffer->VertexBuffer" );
 		}
 
 		TempVertexBuffer->UpdateBuffer( &vertices[0], sizeof( ExVertexStruct ) * vertices.size() );
@@ -3943,9 +3974,9 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
 							float range = light->Vob->GetLightRange();
 							if ( d < range * range &&
 								importantUpdates.size() < MAX_IMPORTANT_LIGHT_UPDATES ) {
-								importantUpdates.push_back( light );
+								importantUpdates.emplace_back( light );
 							} else {
-								FrameShadowUpdateLights.push_back( light );
+								FrameShadowUpdateLights.emplace_back( light );
 							}
 						}
 					} else {
@@ -3959,7 +3990,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
 						// If the engine said this light should be updated, then do so. If
 						// the light said this
 						if ( needsUpdate || d < range * range )
-							importantUpdates.push_back( light );
+							importantUpdates.emplace_back( light );
 					}
 				}
 			}
@@ -5499,6 +5530,8 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 				nullptr, (sizeof( ParticleInstanceInfo ) * instances.size()) * 1.15f,
 				D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC,
 				D3D11VertexBuffer::CA_WRITE );
+			SetDebugName( TempVertexBuffer->GetShaderResourceView(), "TempVertexBuffer->ShaderResourceView" );
+			SetDebugName( TempVertexBuffer->GetVertexBuffer(), "TempVertexBuffer->VertexBuffer" );
 		}
 
 		TempVertexBuffer->UpdateBuffer(

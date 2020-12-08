@@ -5,6 +5,7 @@
 #include "GothicAPI.h"
 #include "D3D11ConstantBuffer.h"
 #include <d3dcompiler.h>
+#include "D3D11_Helpers.h"
 
 using namespace DirectX;
 
@@ -128,9 +129,8 @@ XRESULT D3D11GShader::LoadShader( const char* geometryShader, const std::vector<
 		// Create the shader from a vertexshader
 		engine->GetDevice()->CreateGeometryShaderWithStreamOutput( gsBlob->GetBufferPointer(), gsBlob->GetBufferSize(), soDec, numSoDecElements, &stride, 1, D3D11_SO_NO_RASTERIZED_STREAM, nullptr, &GeometryShader );
 	}
-#ifndef PUBLIC_RELEASE
-	GeometryShader->SetPrivateData( WKPDID_D3DDebugObjectName, strlen( geometryShader ), geometryShader );
-#endif
+
+	SetDebugName(GeometryShader, geometryShader );
 
 	gsBlob->Release();
 
