@@ -5222,6 +5222,33 @@ void D3D11GraphicsEngine::CreateMainUIView() {
 	}
 }
 
+const _zCView* getParentView(const _zCView* view) {
+	if (view->backTex) { return view; }
+
+	if (view->owner) {
+		return getParentView(view->owner);
+	}
+	return view;
+}
+
+bool isObscured(const _zCView* view, const std::set<const _zCView*>& renderedViews) {
+	auto parent = getParentView(view);
+
+	for (auto &v : renderedViews)
+	{
+		auto actParent = getParentView(v);
+		if (
+			(view->pposx >= v->pposx && view->psizex <= v->psizex)
+			&& (view->pposy >= v->pposy && view->psizey <= v->psizey)
+			&& (parent != actParent)
+			)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 void D3D11GraphicsEngine::RenderStrings() {
 	if ( Engine::GAPI->GetRendererState().RendererSettings.EnableCustomFontRendering && !textToDraw.empty() ) {
 		SetDefaultStates();
@@ -5242,14 +5269,25 @@ void D3D11GraphicsEngine::RenderStrings() {
 		GetContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 		
 		BindViewportInformation( "VS_TransformedEx", 0 );
-
+	
 		//
 		// Einzelne Strings rendern
 		//
 		const float UIScale = 1.5f;
-		for ( auto const& txt : textToDraw ) {
 
+		std::reverse(textToDraw.begin(), textToDraw.end());
+		
+		static std::set<const _zCView*> renderedViews;
+		
+		for ( auto const& txt : textToDraw ) {
 			const _zCView* view = txt.view;
+			if (view->viewID == 2) {
+				if ( isObscured( view, renderedViews ) ) {
+					continue;
+				}
+				renderedViews.emplace(view);
+			}
+
 			const std::string& str = txt.str;
 			const float& x = txt.x;
 			const float& y = txt.y;
@@ -5267,7 +5305,6 @@ void D3D11GraphicsEngine::RenderStrings() {
 			//
 			// Glyphen anordnen und in den vertices Vector packen
 			//
-
 			for ( unsigned char const& c : str ) {
 				auto topLeft = view->font->fontuv1[c];
 				auto botRight = view->font->fontuv2[c];
@@ -5397,6 +5434,7 @@ void D3D11GraphicsEngine::RenderStrings() {
 		}
 
 		textToDraw.clear();
+		renderedViews.clear();
 		SetDefaultStates();
 	}
 }
