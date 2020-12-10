@@ -2,9 +2,6 @@
 
 #include "D3D11GraphicsEngineBase.h"
 #include "fpslimiter.h"
-#include <SpriteFont.h>
-#include <SpriteBatch.h>
-#include <CommonStates.h>
 
 struct RenderToDepthStencilBuffer;
 
@@ -24,9 +21,7 @@ struct simpleTextBuffer {
 	std::string str;
 	float x;
 	float y;
-	float4 color;
-	uint8_t fontSize;
-	zTRnd_AlphaBlendFunc blendState;
+	_zCView* view;
 };
 
 const int DRAWVERTEXARRAY_BUFFER_SIZE = 2048 * sizeof( ExVertexStruct );
@@ -96,7 +91,7 @@ public:
 	/** Saves a screenshot */
 	virtual void SaveScreenshot() override;
 
-	virtual void DrawString( std::string str, float x, float y, float4 color, zTRnd_AlphaBlendFunc blendState ) override;
+	virtual void DrawString( std::string str, float x, float y, _zCView* view ) override;
 
 	//virtual int MeasureString(std::string str, zFont* zFont) override;
 
@@ -314,6 +309,8 @@ public:
 
 	/** Returns a dummy cube-rendertarget used for pointlight shadowmaps */
 	RenderToTextureBuffer* GetDummyCubeRT() { return DummyShadowCubemapTexture.get(); }
+
+	void EnsureTempVertexBufferSize( UINT size );
 protected:
 	std::unique_ptr<FpsLimiter> m_FrameLimiter;
 	int m_LastFrameLimit;
@@ -402,10 +399,6 @@ protected:
 
 	/** If true, we will save a screenshot after the next frame */
 	bool SaveScreenshotNextFrame;
-
-	std::unique_ptr<DirectX::SpriteFont> m_font;
-	std::unique_ptr<DirectX::SpriteBatch> m_spriteBatch;
-	std::unique_ptr<DirectX::CommonStates> states;
 
 	std::vector<simpleTextBuffer> textToDraw;
 

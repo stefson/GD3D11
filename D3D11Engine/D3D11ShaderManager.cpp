@@ -239,9 +239,10 @@ XRESULT D3D11ShaderManager::Init() {
 	Shaders.push_back( ShaderInfo( "PS_DS_SimpleSunlight", "PS_DS_SimpleSunlight.hlsl", "p" ) );
 	Shaders.back().cBufferSizes.push_back( sizeof( DS_ScreenQuadConstantBuffer ) );
 	Shaders.back().cBufferSizes.push_back( sizeof( AtmosphereConstantBuffer ) );
-
-	Shaders.push_back( ShaderInfo( "DefaultTess", "DefaultTess.hlsl", "hd" ) );
-	Shaders.back().cBufferSizes.push_back( sizeof( DefaultHullShaderConstantBuffer ) );
+	
+	// UNUSED
+	//Shaders.push_back( ShaderInfo( "DefaultTess", "DefaultTess.hlsl", "hd" ) );
+	//Shaders.back().cBufferSizes.push_back( sizeof( DefaultHullShaderConstantBuffer ) );
 
 	Shaders.push_back( ShaderInfo( "OceanTess", "OceanTess.hlsl", "hd" ) );
 	Shaders.back().cBufferSizes.push_back( sizeof( DefaultHullShaderConstantBuffer ) );

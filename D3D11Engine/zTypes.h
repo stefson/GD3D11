@@ -124,7 +124,10 @@ struct zTRndSimpleVertex {
 
 struct zVEC2 {
 public:
-	float v[2];
+	union {
+		float2 pos;
+		float v[2];
+	};
 };
 
 template <class T>

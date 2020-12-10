@@ -363,16 +363,6 @@ XRESULT D3D11GraphicsEngine::Init() {
 		DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, DXGI_FORMAT_UNKNOWN,
 		DXGI_FORMAT_UNKNOWN, 1, 6 );
 
-	try {
-		auto fontFilePath = L"system\\GD3D11\\Fonts\\" + Toolbox::ToWideChar( Engine::GAPI->GetRendererState().RendererSettings.FontFileDefault );
-		m_font = std::make_unique<SpriteFont>( GetDevice().Get(), fontFilePath.c_str() );
-		m_spriteBatch = std::make_unique<SpriteBatch>( GetContext().Get() );
-	} catch ( const std::exception& ex ) {
-		Engine::GAPI->GetRendererState().RendererSettings.EnableCustomFontRendering = false;
-		LogError() << ex.what() << std::endl;
-	}
-	states = std::make_unique<CommonStates>( GetDevice().Get() );
-
 	return XR_SUCCESS;
 }
 
@@ -808,11 +798,12 @@ XRESULT D3D11GraphicsEngine::Present() {
 	vp.Height = static_cast<float>(GetBackbufferResolution().y);
 
 	GetContext()->RSSetViewports( 1, &vp );
-
 	// Copy HDR scene to backbuffer
-	SetDefaultStates();
 
 	RenderStrings();
+
+	SetDefaultStates();
+
 	SetActivePixelShader( "PS_PFX_GammaCorrectInv" );
 
 	ActivePS->Apply();
@@ -1044,11 +1035,6 @@ XRESULT D3D11GraphicsEngine::BindViewportInformation( const std::string& shader,
 }
 
 int D3D11GraphicsEngine::MeasureString( const std::string& str, int font ) {
-	if ( font == 0 ) {
-		XMVECTOR measure = m_font->MeasureString( str.c_str() );
-		float width; XMStoreFloat( &width, measure );
-		return static_cast<int>(width);
-	}
 	return 0;
 }
 
@@ -1068,24 +1054,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexArray( ExVertexStruct* vertices,
 
 	SetupVS_ExMeshDrawCall();
 
-	D3D11_BUFFER_DESC desc;
-	TempVertexBuffer->GetVertexBuffer()->GetDesc( &desc );
-
-	if ( desc.ByteWidth < stride * numVertices ) {
-		if ( Engine::GAPI->GetRendererState().RendererSettings.EnableDebugLog )
-			LogInfo() << "TempVertexBuffer too small (" << desc.ByteWidth << "), need "
-			<< stride * numVertices << " bytes. Recreating buffer.";
-
-		// Buffer too small, recreate it
-		TempVertexBuffer = std::make_unique<D3D11VertexBuffer>();
-
-		TempVertexBuffer->Init(
-			nullptr, stride * numVertices, D3D11VertexBuffer::B_VERTEXBUFFER,
-			D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE );
-		SetDebugName( TempVertexBuffer->GetShaderResourceView(), "TempVertexBuffer->ShaderResourceView" );
-		SetDebugName( TempVertexBuffer->GetVertexBuffer(), "TempVertexBuffer->VertexBuffer" );
-	}
-
+	EnsureTempVertexBufferSize( stride * numVertices );
 	TempVertexBuffer->UpdateBuffer( vertices, stride * numVertices );
 
 	UINT offset = 0;
@@ -1123,21 +1092,7 @@ XRESULT D3D11GraphicsEngine::DrawIndexedVertexArray( ExVertexStruct* vertices,
 	D3D11_BUFFER_DESC desc;
 	TempVertexBuffer->GetVertexBuffer()->GetDesc( &desc );
 
-	if ( desc.ByteWidth < stride * numVertices ) {
-		if ( Engine::GAPI->GetRendererState().RendererSettings.EnableDebugLog )
-			LogInfo() << "TempVertexBuffer too small (" << desc.ByteWidth << "), need "
-			<< stride * numVertices << " bytes. Recreating buffer.";
-
-		// Buffer too small, recreate it
-		TempVertexBuffer = std::make_unique<D3D11VertexBuffer>();
-
-		TempVertexBuffer->Init(
-			nullptr, stride * numVertices, D3D11VertexBuffer::B_VERTEXBUFFER,
-			D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE );
-		SetDebugName( TempVertexBuffer->GetShaderResourceView(), "TempVertexBuffer->ShaderResourceView" );
-		SetDebugName( TempVertexBuffer->GetVertexBuffer(), "TempVertexBuffer->VertexBuffer" );
-	}
-
+	EnsureTempVertexBufferSize( stride * numVertices );
 	TempVertexBuffer->UpdateBuffer( vertices, stride * numVertices );
 
 	UINT offset = 0;
@@ -3709,20 +3664,7 @@ XRESULT D3D11GraphicsEngine::DrawPolyStrips( bool noTextures ) {
 		}
 
 		//Populate TempVertexBuffer and draw it
-		D3D11_BUFFER_DESC desc;
-		TempVertexBuffer->GetVertexBuffer()->GetDesc( &desc );
-		if ( desc.ByteWidth < sizeof( ExVertexStruct ) * vertices.size() ) {
-			if ( Engine::GAPI->GetRendererState().RendererSettings.EnableDebugLog )
-				LogInfo() << "(PolyStrip) TempVertexBuffer too small (" << desc.ByteWidth << "), need " << sizeof( ExVertexStruct ) * vertices.size() << " bytes. Recreating buffer.";
-
-			// Buffer too small, recreate it
-			TempVertexBuffer.reset( new D3D11VertexBuffer() );
-			// Reinit with a bit of a margin, so it will not be reinit each time new vertex is added
-			TempVertexBuffer->Init( NULL, sizeof( ExVertexStruct ) * vertices.size() * 1.1, D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE );
-			SetDebugName( TempVertexBuffer->GetShaderResourceView(), "TempVertexBuffer->ShaderResourceView" );
-			SetDebugName( TempVertexBuffer->GetVertexBuffer(), "TempVertexBuffer->VertexBuffer" );
-		}
-
+		EnsureTempVertexBufferSize( sizeof( ExVertexStruct ) * vertices.size() );
 		TempVertexBuffer->UpdateBuffer( &vertices[0], sizeof( ExVertexStruct ) * vertices.size() );
 		DrawVertexBuffer( TempVertexBuffer.get(), vertices.size(), sizeof( ExVertexStruct ) );
 	}
@@ -5282,57 +5224,196 @@ void D3D11GraphicsEngine::CreateMainUIView() {
 
 void D3D11GraphicsEngine::RenderStrings() {
 	if ( Engine::GAPI->GetRendererState().RendererSettings.EnableCustomFontRendering && !textToDraw.empty() ) {
-		auto r = RECT{};
-		r.top = 0;
-		r.left = 0;
-		r.bottom = Resolution.y;
-		r.right = Resolution.x;
+		SetDefaultStates();
+		
+		SetActiveVertexShader( "VS_TransformedEx" );
+		SetActivePixelShader( "PS_FixedFunctionPipe" );
 
-		//m_spriteBatch->Begin();
-		m_spriteBatch->Begin( SpriteSortMode_Deferred, states->NonPremultiplied() );
-		wchar_t buf[255];
+		// Bind the FF-Info to the first PS slot
+		ActivePS->GetConstantBuffer()[0]->UpdateBuffer( &Engine::GAPI->GetRendererState().GraphicsState );
+		ActivePS->GetConstantBuffer()[0]->BindToPixelShader( 0 );
 
-		static const XMVECTORF32 gothicColor = { { { 203.f / 255.f, 186.f / 255.f, 158.f / 255.f, 1 } } };
+		BindActiveVertexShader();
+		BindActivePixelShader();
+		
+		const float farZ = 0;
+		
+		// Set vertex type
+		GetContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+		
+		BindViewportInformation( "VS_TransformedEx", 0 );
 
-		zTRnd_AlphaBlendFunc lastBlendState = zRND_ALPHA_FUNC_NONE;
-
+		//
+		// Einzelne Strings rendern
+		//
+		const float UIScale = 1.5f;
 		for ( auto const& txt : textToDraw ) {
-			// TODO: Fix Alpha Blending for SpriteFont.
-			/*if (lastBlendState != zRND_ALPHA_FUNC_BLEND && txt.blendState == zRND_ALPHA_FUNC_BLEND)
-			{
-				lastBlendState = txt.blendState;
-				m_spriteBatch->End();
 
-				Engine::GAPI->GetRendererState().BlendState.SetAlphaBlending();
-				Engine::GAPI->GetRendererState().BlendState.SetDirty();
-				UpdateRenderStates();
-				m_spriteBatch->Begin(SpriteSortMode_Deferred, states->NonPremultiplied());
-			}*/
+			const _zCView* view = txt.view;
+			const std::string& str = txt.str;
+			const float& x = txt.x;
+			const float& y = txt.y;
+			zCTexture* tx = view->font->tex;
 
-			auto wSize = MultiByteToWideChar( CP_ACP, 0, txt.str.c_str(), txt.str.length(), buf, 255 );
-			// TODO: What are we gonna do with too long texts?
-			if ( !wSize ) {
+
+			static std::vector<ExVertexStruct> vertices;
+			vertices.clear();
+
+			int xpos = x;
+			int ypos = y;
+			
+			DWORD fontColor = view->fontColor.dword;
+			
+			//
+			// Glyphen anordnen und in den vertices Vector packen
+			//
+
+			for ( unsigned char const& c : str ) {
+				auto topLeft = view->font->fontuv1[c];
+				auto botRight = view->font->fontuv2[c];
+				auto widthPx = float(view->font->width[c]) * UIScale;
+
+				vertices.resize( vertices.size() + 6 );
+				ExVertexStruct* vertex = &vertices[vertices.size() - 6];
+
+				const float widthf = float( widthPx );
+				const float heightf = float( view->font->height ) * UIScale;
+
+				const float minx = float( xpos );
+				const float miny = float( ypos );
+
+				// prepare for next glyph
+				if      ( c == '\n' ) { ypos += heightf; xpos = x; }
+				else if ( c == ' ' )  { xpos += widthPx; continue; }
+				else                  { xpos += widthPx + 1;       }
+
+				const float maxx = (minx + widthf );
+				const float maxy = (miny + heightf);
+
+				float halfTexel = 0.0f;
+
+				const float texelHalfW = halfTexel / widthf;
+				const float texelHalfH = halfTexel / heightf;
+
+				const float minu = topLeft.pos.x + texelHalfW;
+				const float maxu = botRight.pos.x - texelHalfW;
+				const float minv = topLeft.pos.y + texelHalfH;
+				const float maxv = texelHalfH + botRight.pos.y;
+
+				vertex[0] = vertex[1] = vertex[2] = vertex[3] = vertex[4] = vertex[5] = {};
+				vertex[0].Normal = vertex[1].Normal = vertex[2].Normal = vertex[3].Normal = vertex[4].Normal = vertex[5].Normal = {1,0,0};
+				
+				vertex[0].Position.x = minx;
+				vertex[0].Position.y = miny;
+				vertex[0].Position.z = farZ;
+				vertex[0].TexCoord.x = minu;
+				vertex[0].TexCoord.y = minv;
+				vertex[0].Color = fontColor;
+
+				vertex[1].Position.x = maxx;
+				vertex[1].Position.y = miny;
+				vertex[1].Position.z = farZ;
+				vertex[1].TexCoord.x = maxu;
+				vertex[1].TexCoord.y = minv;
+				vertex[1].Color = fontColor;
+
+				vertex[2].Position.x = maxx;
+				vertex[2].Position.y = maxy;
+				vertex[2].Position.z = farZ;
+				vertex[2].TexCoord.x = maxu;
+				vertex[2].TexCoord.y = maxv;
+				vertex[2].Color = fontColor;
+
+				vertex[3].Position.x = maxx;
+				vertex[3].Position.y = maxy;
+				vertex[3].Position.z = farZ;
+				vertex[3].TexCoord.x = maxu;
+				vertex[3].TexCoord.y = maxv;
+				vertex[3].Color = fontColor;
+
+				vertex[4].Position.x = minx;
+				vertex[4].Position.y = maxy;
+				vertex[4].Position.z = farZ;
+				vertex[4].TexCoord.x = minu;
+				vertex[4].TexCoord.y = maxv;
+				vertex[4].Color = fontColor;
+
+				vertex[5].Position.x = minx;
+				vertex[5].Position.y = miny;
+				vertex[5].Position.z = farZ;
+				vertex[5].TexCoord.x = minu;
+				vertex[5].TexCoord.y = minv;
+				vertex[5].Color = fontColor;
+			}
+
+			// Check for alphablending on world mesh
+			bool blendAdd = view->alphafunc == zMAT_ALPHA_FUNC_ADD;
+			bool blendBlend = view->alphafunc == zMAT_ALPHA_FUNC_BLEND;
+			blendBlend = true;
+			//
+			// Voodoo ... ?
+			//
+
+			if ( tx->CacheIn( 0.6f ) == zRES_CACHED_IN ) {
+				MyDirectDrawSurface7* surface = tx->GetSurface();
+				ID3D11ShaderResourceView* srv[3] = {
+					// Get diffuse and normalmap
+					surface->GetEngineTexture()->GetShaderResourceView().Get(),
+					surface->GetNormalmap() ? surface->GetNormalmap()->GetShaderResourceView().Get() : NULL,
+					surface->GetFxMap() ? surface->GetFxMap()->GetShaderResourceView().Get() : NULL,
+				};
+
+				// Bind both
+				Context->PSSetShaderResources( 0, 3, srv );
+
+				if ( (blendAdd || blendBlend) && !Engine::GAPI->GetRendererState().BlendState.BlendEnabled ) {
+					if ( blendAdd )
+						Engine::GAPI->GetRendererState().BlendState.SetAdditiveBlending();
+					else if ( blendBlend )
+						Engine::GAPI->GetRendererState().BlendState.SetAlphaBlending();
+
+					Engine::GAPI->GetRendererState().BlendState.SetDirty();
+
+					Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled = false;
+					Engine::GAPI->GetRendererState().DepthState.SetDirty();
+
+					UpdateRenderStates();
+				}
+			} else {
+				//Don't draw if texture is not yet cached (I have no idea how can I preload it in advance)
 				continue;
 			}
 
-			auto color = XMLoadFloat4( txt.color.toXMFLOAT4() );
+			//
+			// Populate TempVertexBuffer and draw it
+			//
+			EnsureTempVertexBufferSize( sizeof( ExVertexStruct ) * vertices.size() );
+			TempVertexBuffer->UpdateBuffer( &vertices[0], sizeof( ExVertexStruct ) * vertices.size() );
 
-			std::wstring output = std::wstring( buf, wSize );
-			auto fontPos = XMVectorSet( txt.x, txt.y, 0, 0 );
-
-			// Drop-Shadow
-			//m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos + XMVectorSet(1.f, 1.f, 0, 0), Colors::Black, 0.f);
-			//m_font->DrawString(m_spriteBatch.get(), output.c_str(), fontPos + XMVectorSet(-1.f, 1.f, 0, 0), Colors::Black, 0.f);
-
-			m_font->DrawString( m_spriteBatch.get(), output.c_str(), fontPos, color, 0.f );
+			//
+			// Draw the verticies
+			//
+			DrawVertexBuffer( TempVertexBuffer.get(), vertices.size(), sizeof( ExVertexStruct ) );
 		}
-
-		m_spriteBatch->Draw( HDRBackBuffer->GetShaderResView().Get(), r );
-
-		m_spriteBatch->End();
 
 		textToDraw.clear();
 		SetDefaultStates();
+	}
+}
+
+void D3D11GraphicsEngine::EnsureTempVertexBufferSize( UINT size ) {
+	D3D11_BUFFER_DESC desc;
+	TempVertexBuffer->GetVertexBuffer()->GetDesc( &desc );
+	if ( desc.ByteWidth < size ) {
+		if ( Engine::GAPI->GetRendererState().RendererSettings.EnableDebugLog )
+			LogInfo() << "(EnsureTempVertexBufferSize) TempVertexBuffer too small (" << desc.ByteWidth << "), need " << size << " bytes. Recreating buffer.";
+
+		// Buffer too small, recreate it
+		TempVertexBuffer.reset( new D3D11VertexBuffer() );
+		// Reinit with a bit of a margin, so it will not be reinit each time new vertex is added
+		TempVertexBuffer->Init( NULL, size * 1.1, D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE );
+		SetDebugName( TempVertexBuffer->GetShaderResourceView(), "TempVertexBuffer->ShaderResourceView" );
+		SetDebugName( TempVertexBuffer->GetVertexBuffer(), "TempVertexBuffer->VertexBuffer" );
 	}
 }
 
@@ -5515,26 +5596,7 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 		}
 
 		// Push data for the particles to the GPU
-		D3D11_BUFFER_DESC desc;
-		TempVertexBuffer->GetVertexBuffer()->GetDesc( &desc );
-
-		if ( desc.ByteWidth < sizeof( ParticleInstanceInfo ) * instances.size() ) {
-			if ( Engine::GAPI->GetRendererState().RendererSettings.EnableDebugLog )
-				LogInfo() << "(PARTICLE) TempVertexBuffer too small (" << desc.ByteWidth
-				<< "), need " << sizeof( ParticleInstanceInfo ) * instances.size()
-				<< " bytes. Recreating buffer.";
-
-			// Buffer too small, recreate it
-			TempVertexBuffer = std::make_unique<D3D11VertexBuffer>();
-
-			TempVertexBuffer->Init(
-				nullptr, (sizeof( ParticleInstanceInfo ) * instances.size()) * 1.15f,
-				D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC,
-				D3D11VertexBuffer::CA_WRITE );
-			SetDebugName( TempVertexBuffer->GetShaderResourceView(), "TempVertexBuffer->ShaderResourceView" );
-			SetDebugName( TempVertexBuffer->GetVertexBuffer(), "TempVertexBuffer->VertexBuffer" );
-		}
-
+		EnsureTempVertexBufferSize( sizeof( ParticleInstanceInfo )* instances.size() );
 		TempVertexBuffer->UpdateBuffer(
 			&instances[0], sizeof( ParticleInstanceInfo ) * instances.size() );
 
@@ -5687,15 +5749,14 @@ void D3D11GraphicsEngine::SaveScreenshot() {
 	Engine::GAPI->PrintMessageTimed( INT2( 30, 30 ), "Screenshot taken: " + name );
 }
 
-void D3D11GraphicsEngine::DrawString( std::string str, float x, float y, float4 color = float4( 1.f, 1.f, 1.f, 1.f ), zTRnd_AlphaBlendFunc blendState = zTRnd_AlphaBlendFunc::zRND_ALPHA_FUNC_NONE ) {
+void D3D11GraphicsEngine::DrawString( std::string str, float x, float y, _zCView* view ) {
+	simpleTextBuffer b;
+	b.str = str;
+	b.x = x;
+	b.y = y;
+	b.view = view;
 
-	simpleTextBuffer tb = {};
-	tb.color = color;
-	tb.x = x;
-	tb.y = y;
-	tb.str = str;
-	tb.blendState = blendState;
-
-	textToDraw.push_back( tb );
+	textToDraw.push_back( b );
+	//RenderStrings();
 }
 

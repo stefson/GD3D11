@@ -1,11 +1,13 @@
 #pragma once
 // Definitions copied from g2ext, Union (c) 2018 Union team, and World of Gothic
+
 #include "zTypes.h"
 #include "oCGame.h"
 #include "zFont.h"
 enum zTRnd_AlphaBlendFunc;
 class zFont;
 struct zColor;
+class _zCView;
 
 #ifdef BUILD_GOTHIC_2_6_fix
 
