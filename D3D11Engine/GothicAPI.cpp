@@ -3626,8 +3626,6 @@ XRESULT GothicAPI::SaveMenuSettings( const std::string& file ) {
 
 
 	WritePrivateProfileStringA( "FontRendering", "Enable", std::to_string( s.EnableCustomFontRendering ? TRUE : FALSE ).c_str(), ini.c_str() );
-	WritePrivateProfileStringA( "FontRendering", "FontDefault", s.FontFileDefault.c_str(), ini.c_str() );
-	WritePrivateProfileStringA( "FontRendering", "FontMenu", s.FontFileMenu.c_str(), ini.c_str() );
 
 
 
@@ -3721,8 +3719,6 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
 	s.HbaoSettings.SsaoStepCount = GetPrivateProfileIntA( "HBAO", "SsaoStepCount", defaultHBAOSettings.SsaoStepCount, ini.c_str() );
 
 	s.EnableCustomFontRendering = GetPrivateProfileBoolA( "FontRendering", "Enable", defaultRendererSettings.EnableCustomFontRendering, ini );
-	s.FontFileDefault = GetPrivateProfileStringA( "FontRendering", "FontDefault", defaultRendererSettings.FontFileDefault, ini );
-	s.FontFileMenu = GetPrivateProfileStringA( "FontRendering", "FontMenu", defaultRendererSettings.FontFileMenu, ini );
 
 	// Fix the shadow range
 	s.WorldShadowRangeScale = Toolbox::GetRecommendedWorldShadowRangeScaleForSize( s.ShadowMapSize );

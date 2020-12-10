@@ -557,8 +557,6 @@ struct GothicRendererSettings {
 		AllowNumpadKeys = false;
 		EnableDebugLog = true;
 		EnableCustomFontRendering = false;
-		FontFileDefault = "Gothic_14.spritefont";
-		FontFileMenu = "Gothic_14.spritefont";
 
 #ifdef BUILD_GOTHIC_1_08k
 		ForceFOV = false;
@@ -698,8 +696,6 @@ struct GothicRendererSettings {
 	bool EnableDebugLog;
 
 	bool EnableCustomFontRendering;
-	std::string FontFileDefault;
-	std::string FontFileMenu;
 	bool ForceFOV;
 	bool DisplayFlip;
 	bool StretchWindow;
