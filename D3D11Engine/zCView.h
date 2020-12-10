@@ -97,15 +97,11 @@ public:
 
 			x = pposx + thisptr->nax( text->posx );
 			// TODO: Remove additional addition if we get the correct char positioning
-			y = pposy + thisptr->nay( text->posy ) - 2;
-
-			// text->font auswerten!
+			y = pposy + thisptr->nay( text->posy );
 
 			if ( !thisptr->font ) continue;
-
-			const std::string& fontName = thisptr->font->name.ToChar();
-
-			Engine::GraphicsEngine->DrawString( text->text.ToChar(), x, y, thisptr );
+			
+			Engine::GraphicsEngine->DrawString( text->text.ToChar(), x, y, thisptr, text->colored, text->color.dword );
 		}
 	}
 	static int __fastcall hooked_FontSize( _zCView* thisptr, void* unknwn, const zSTRING& str ) {

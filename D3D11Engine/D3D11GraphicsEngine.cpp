@@ -5301,7 +5301,7 @@ void D3D11GraphicsEngine::RenderStrings() {
 			int ypos = y;
 			
 			DWORD fontColor = view->fontColor.dword;
-			
+			if (txt.colored) fontColor = txt.color;
 			//
 			// Glyphen anordnen und in den vertices Vector packen
 			//
@@ -5787,12 +5787,14 @@ void D3D11GraphicsEngine::SaveScreenshot() {
 	Engine::GAPI->PrintMessageTimed( INT2( 30, 30 ), "Screenshot taken: " + name );
 }
 
-void D3D11GraphicsEngine::DrawString( std::string str, float x, float y, _zCView* view ) {
+void D3D11GraphicsEngine::DrawString( std::string str, float x, float y, _zCView* view, BOOL colored, DWORD color ) {
 	simpleTextBuffer b;
 	b.str = str;
 	b.x = x;
 	b.y = y;
 	b.view = view;
+	b.colored = colored;
+	b.color = color;
 
 	textToDraw.push_back( b );
 	//RenderStrings();

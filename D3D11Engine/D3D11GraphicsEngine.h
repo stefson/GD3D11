@@ -22,6 +22,8 @@ struct simpleTextBuffer {
 	float x;
 	float y;
 	_zCView* view;
+	BOOL colored;
+	DWORD color;
 };
 
 const int DRAWVERTEXARRAY_BUFFER_SIZE = 2048 * sizeof( ExVertexStruct );
@@ -91,7 +93,7 @@ public:
 	/** Saves a screenshot */
 	virtual void SaveScreenshot() override;
 
-	virtual void DrawString( std::string str, float x, float y, _zCView* view ) override;
+	virtual void DrawString( std::string str, float x, float y, _zCView* view, BOOL colored = FALSE, DWORD color = 0 ) override;
 
 	//virtual int MeasureString(std::string str, zFont* zFont) override;
 
