@@ -5273,7 +5273,7 @@ void D3D11GraphicsEngine::RenderStrings() {
 		//
 		// Einzelne Strings rendern
 		//
-		const float UIScale = 1.5f;
+		const float UIScale = Engine::GAPI->GetRendererState().RendererSettings.FontScaling;
 
 		std::reverse(textToDraw.begin(), textToDraw.end());
 		

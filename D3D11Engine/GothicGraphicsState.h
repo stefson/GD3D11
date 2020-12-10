@@ -557,6 +557,7 @@ struct GothicRendererSettings {
 		AllowNumpadKeys = false;
 		EnableDebugLog = true;
 		EnableCustomFontRendering = false;
+		FontScaling = 1.0f;
 
 #ifdef BUILD_GOTHIC_1_08k
 		ForceFOV = false;
@@ -696,6 +697,7 @@ struct GothicRendererSettings {
 	bool EnableDebugLog;
 
 	bool EnableCustomFontRendering;
+	float FontScaling;
 	bool ForceFOV;
 	bool DisplayFlip;
 	bool StretchWindow;
