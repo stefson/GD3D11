@@ -198,6 +198,28 @@ struct GothicDepthBufferStateInfo : public GothicPipelineState {
 		}
 		GothicStateCache::s_DepthBufferMap.clear();
 	}
+
+	GothicDepthBufferStateInfo Clone() {
+		GothicDepthBufferStateInfo c;
+		c.DepthBufferEnabled     = DepthBufferEnabled;
+		c.DepthWriteEnabled      = DepthWriteEnabled;
+		c.DepthBufferCompareFunc = DepthBufferCompareFunc;
+
+		c.StateDirty = StateDirty;
+		c.Hash = Hash;
+		c.StructSize = StructSize;
+		return c;
+	}
+
+	void ApplyTo(GothicDepthBufferStateInfo& c) {
+		c.DepthBufferEnabled = DepthBufferEnabled;
+		c.DepthWriteEnabled = DepthWriteEnabled;
+		c.DepthBufferCompareFunc = DepthBufferCompareFunc;
+
+		c.StateDirty = true;
+		c.Hash = Hash;
+		c.StructSize = StructSize;
+	}
 };
 
 /** Blend state information */
@@ -305,6 +327,40 @@ struct GothicBlendStateInfo : public GothicPipelineState {
 		}
 
 		GothicStateCache::s_BlendStateMap.clear();
+	}
+
+	GothicBlendStateInfo Clone() {
+		GothicBlendStateInfo c;
+		c.SrcBlend           = SrcBlend;
+		c.DestBlend          = DestBlend;
+		c.BlendOp            = BlendOp;
+		c.SrcBlendAlpha      = SrcBlendAlpha;
+		c.DestBlendAlpha     = DestBlendAlpha;
+		c.BlendOpAlpha       = BlendOpAlpha;
+		c.BlendEnabled       = BlendEnabled;
+		c.AlphaToCoverage    = AlphaToCoverage;
+		c.ColorWritesEnabled = ColorWritesEnabled;
+
+		c.StateDirty = StateDirty;
+		c.Hash       = Hash;
+		c.StructSize = StructSize;
+		return c;
+	}
+
+	void ApplyTo(GothicBlendStateInfo& c) {
+		c.SrcBlend = SrcBlend;
+		c.DestBlend = DestBlend;
+		c.BlendOp = BlendOp;
+		c.SrcBlendAlpha = SrcBlendAlpha;
+		c.DestBlendAlpha = DestBlendAlpha;
+		c.BlendOpAlpha = BlendOpAlpha;
+		c.BlendEnabled = BlendEnabled;
+		c.AlphaToCoverage = AlphaToCoverage;
+		c.ColorWritesEnabled = ColorWritesEnabled;
+
+		c.StateDirty = true;
+		c.Hash = Hash;
+		c.StructSize = StructSize;
 	}
 };
 

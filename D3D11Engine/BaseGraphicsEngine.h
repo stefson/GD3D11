@@ -12,7 +12,7 @@ class zCVob;
 struct SkeletalMeshVisualInfo;
 struct VobInfo;
 struct VobLightInfo;
-class _zCView;
+class zFont;
 
 struct DisplayModeInfo {
 	DWORD Height;
@@ -200,5 +200,5 @@ public:
 	/** Draws particle effects */
 	virtual void DrawFrameParticles( std::map<zCTexture*, std::vector<ParticleInstanceInfo>>& particles, std::map<zCTexture*, ParticleRenderInfo>& info ) {}
 
-	virtual void DrawString(const std::string& str, float x, float y, _zCView* view, BOOL colored = FALSE, DWORD color = 0) {};
+	virtual void DrawString(const std::string& str, float x, float y, const zFont* font, DWORD fontColor = 0) {};
 };

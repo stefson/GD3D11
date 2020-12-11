@@ -16,16 +16,6 @@ enum D3D11ENGINE_RENDER_STAGE {
 	DES_SHADOWMAP_CUBE
 };
 
-
-struct simpleTextBuffer {
-	std::string str;
-	float x;
-	float y;
-	_zCView* view;
-	BOOL colored;
-	DWORD color;
-};
-
 const int DRAWVERTEXARRAY_BUFFER_SIZE = 2048 * sizeof( ExVertexStruct );
 const int NUM_MAX_BONES = 96;
 const int INSTANCING_BUFFER_SIZE = sizeof( VobInstanceInfo ) * 2048;
@@ -93,7 +83,7 @@ public:
 	/** Saves a screenshot */
 	virtual void SaveScreenshot() override;
 
-	virtual void DrawString( const std::string& str, float x, float y, _zCView* view, BOOL colored = FALSE, DWORD color = 0 ) override;
+	virtual void DrawString(const std::string& str, float x, float y, const zFont* font, DWORD fontColor = 0) override;
 
 	//virtual int MeasureString(std::string str, zFont* zFont) override;
 
@@ -397,8 +387,6 @@ protected:
 
 	/** If true, we will save a screenshot after the next frame */
 	bool SaveScreenshotNextFrame;
-
-	std::vector<simpleTextBuffer> textToDraw;
 
 	bool m_flipWithTearing;
 	bool m_swapchainflip;

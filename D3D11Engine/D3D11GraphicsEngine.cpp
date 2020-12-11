@@ -5651,25 +5651,23 @@ namespace UI::zFont {
 	}
 }
 
-void D3D11GraphicsEngine::DrawString( const std::string& str, float x, float y, _zCView* view, BOOL colored, DWORD color ) {
+void D3D11GraphicsEngine::DrawString( const std::string& str, float x, float y, const zFont* font, DWORD fontColor) {
 	if (str.empty()) return;
-	if (!view->font) return;
-	if (!view->font->tex) return;
+	if (!font) return;
+	if (!font->tex) return;
 
 	const float UIScale = Engine::GAPI->GetRendererState().RendererSettings.FontScaling;
-	zCTexture* tx = view->font->tex;
+	constexpr float FONT_CACHE_PRIO = -1;
+	zCTexture* tx = font->tex;
 
-	if (tx->CacheIn(0.6f) != zRES_CACHED_IN) {
+	if (tx->CacheIn( FONT_CACHE_PRIO ) != zRES_CACHED_IN) {
 		return;
 	}
 
 	//
-	// Backup old renderstates
+	// Backup old renderstates, BlendState can be ignored here.
 	//
-
-	auto oldDepthWrite = Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled;
-	auto oldDepthCmp = Engine::GAPI->GetRendererState().DepthState.DepthBufferCompareFunc;
-	auto oldAlphaBlend = Engine::GAPI->GetRendererState().BlendState.SrcBlendAlpha;
+	auto oldDepthState = Engine::GAPI->GetRendererState().DepthState.Clone();
 
 	Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled = false;
 	Engine::GAPI->GetRendererState().DepthState.SetDirty();
@@ -5707,8 +5705,6 @@ void D3D11GraphicsEngine::DrawString( const std::string& str, float x, float y, 
 	int xpos = x;
 	int ypos = y;
 
-	DWORD fontColor = view->fontColor.dword;
-	if (colored) fontColor = color;
 	//
 	// Glyphen anordnen und in den vertices Vector packen
 	// Ggf. Sonderzeichen am Ende entfernen.
@@ -5718,13 +5714,18 @@ void D3D11GraphicsEngine::DrawString( const std::string& str, float x, float y, 
 		maxLen--;
 	}
 
-	UI::zFont::AppendGlyphs(vertices, str, maxLen, x, y, view->font, fontColor, UIScale);
+	UI::zFont::AppendGlyphs(vertices, str, maxLen, x, y, font, fontColor, UIScale);
 
-	//
-	// Voodoo ... ?
-	//
+	//if (str[0] == '(') {
+	//	int o = 1;
+	//}
 
+	// Bind the texture.
+	tx->Bind( 0 );
+	
+	// Set PS resources
 	MyDirectDrawSurface7* surface = tx->GetSurface();
+
 	ID3D11ShaderResourceView* srv[3] = {
 		// Get diffuse and normalmap
 		surface->GetEngineTexture()->GetShaderResourceView().Get(),
@@ -5733,8 +5734,8 @@ void D3D11GraphicsEngine::DrawString( const std::string& str, float x, float y, 
 	};
 
 	// Bind both
-	Context->PSSetShaderResources(0, 3, srv);
 
+	GetContext()->PSSetShaderResources(0, 3, srv);
 	if (!Engine::GAPI->GetRendererState().BlendState.BlendEnabled) {
 		Engine::GAPI->GetRendererState().BlendState.SetAlphaBlending();
 		Engine::GAPI->GetRendererState().BlendState.SetDirty();
@@ -5752,15 +5753,8 @@ void D3D11GraphicsEngine::DrawString( const std::string& str, float x, float y, 
 	//
 	DrawVertexBuffer(TempVertexBuffer.get(), vertices.size(), sizeof(ExVertexStruct));
 
-	//
-	// Reset the render state
-	//
-
-	Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled = oldDepthWrite;
+	oldDepthState.ApplyTo(Engine::GAPI->GetRendererState().DepthState);
 	Engine::GAPI->GetRendererState().DepthState.SetDirty();
-
-	Engine::GAPI->GetRendererState().BlendState.SrcBlendAlpha = oldAlphaBlend;
-	Engine::GAPI->GetRendererState().BlendState.SetDirty();
 
 	UpdateRenderStates();
 }

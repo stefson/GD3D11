@@ -51,7 +51,7 @@ public:
 			Engine::GraphicsEngine->DrawString(
 				s.ToChar(),
 				thisptr->pposx + thisptr->nax(x), thisptr->pposy + thisptr->nay(y),
-				thisptr);
+				thisptr->font, thisptr->fontColor.dword);
 		} else {
 			// create a textview for later blitting
 			thisptr->CreateText(x, y, s);
@@ -73,11 +73,14 @@ public:
 
 		zCList <zCViewText>* textNode = thisptr->textLines.next;
 		zCViewText* text = nullptr;
-		
+		DWORD fontColor;
 		while ( textNode ) {
 
 			text = textNode->data;
 			textNode = textNode->next;
+			
+			if   (text->colored) { fontColor = text->color.dword; }
+			else                 { fontColor = thisptr->fontColor.dword;}
 
 			x = thisptr->pposx + thisptr->nax( text->posx );
 			// TODO: Remove additional addition if we get the correct char positioning
@@ -85,7 +88,7 @@ public:
 
 			if ( !thisptr->font ) continue;
 			
-			Engine::GraphicsEngine->DrawString( text->text.ToChar(), x, y, thisptr, text->colored, text->color.dword );
+			Engine::GraphicsEngine->DrawString( text->text.ToChar(), x, y, text->font, fontColor);
 		}
 	}
 
