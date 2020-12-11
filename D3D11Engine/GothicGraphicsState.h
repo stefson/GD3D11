@@ -622,6 +622,7 @@ struct GothicRendererSettings {
 #endif
 
 		StretchWindow = false;
+		SmoothShadowCameraUpdate = true;
 	}
 
 	void SetupOldWorldSpecificValues() {
@@ -757,6 +758,7 @@ struct GothicRendererSettings {
 	bool ForceFOV;
 	bool DisplayFlip;
 	bool StretchWindow;
+	bool SmoothShadowCameraUpdate;
 };
 
 struct GothicRendererTiming {

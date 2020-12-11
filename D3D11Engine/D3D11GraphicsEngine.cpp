@@ -3970,21 +3970,31 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
 
 	static XMVECTOR oldP = XMVectorSet( 0, 0, 0, 0 );
 
+	// Get shadow direction, but don't update every frame, to get around flickering
 
 	// Update dir
-	XMVECTOR target = dir;
+	if (Engine::GAPI->GetRendererState().RendererSettings.SmoothShadowCameraUpdate) {
+		float dotDir;
+		XMStoreFloat( &dotDir, XMVector3Dot(oldDir, dir) );
+		if (fabs(dotDir) > 0.9995f)
+		{
+			dir = oldDir;
+		}
+		else
+		{
+			XMVECTOR target = dir;
 
-	float dotDir;
-	XMStoreFloat( &dotDir, XMVector3Dot( dir, smoothDir ) );
-	// Smoothly transition to the next state and wait there
-	if ( fabs( dotDir ) < 0.9999990f )  // but cut it off somewhere or the pixels will flicker
-	{
-		oldDir = dir;
-		smoothDir = dir;
-	} else {
-		smoothDir = XMVectorLerp( oldDir, target, Engine::GAPI->GetFrameTimeSec() * 2.0f );
+			XMStoreFloat(&dotDir, XMVector3Dot(smoothDir, dir));
+			// Smoothly transition to the next state and wait there
+			if (fabs(dotDir) < 0.99995f) // but cut it off somewhere or the pixels will flicker
+				dir = XMVectorLerp( smoothDir, target, Engine::GAPI->GetFrameTimeSec() * 2.0f);
+			else
+				oldDir = dir;
+
+			smoothDir = dir;
+		}
 	}
-	dir = smoothDir;
+
 
 	XMVECTOR WorldShadowCP;
 	// Update position
