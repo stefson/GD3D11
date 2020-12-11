@@ -3,10 +3,7 @@
 #include "zTypes.h"
 #include "HookedFunctions.h"
 #include "oCGame.h"
-
-#if BUILD_GOTHIC_2_6_fix
 #include "zViewTypes.h"
-#endif
 
 class zCView {
 public:
