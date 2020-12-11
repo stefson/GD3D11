@@ -1980,17 +1980,27 @@ void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameDa
 
 		FrameParticleInfo[texture] = inf;
 	}
+	/*
+		https://forum.worldofplayers.de/forum/threads/1546222-Yet-Another-D3D11-Renderer/page32?p=26626374&viewfull=1#post26626374
+		Liker@WoG: About bad PFX which go to savegame:
+				https://github.com/Kirides/GD3D11/blob/550add8e71b6c6d2673dbcf82e620271cac2503c/D3D11Engine/GothicAPI.cpp#L1984-L1993
+				Don't call the selected code. (killer-m told me about that 
+	*/
 
-	// Create new particles?
-	fx->CreateParticlesUpdateDependencies();
+	// TODO: Test if disabling this does not cause any more issues.
+	/*
+		// Create new particles?
+		fx->CreateParticlesUpdateDependencies();
 
-	// Do something I dont exactly know what it does :)
-	// TODO: Figure out why this crashes sometimes! (G1)
-#ifdef BUILD_GOTHIC_1_08k
-	// fx->GetStaticPFXList()->TouchPfx(fx);
-#else
-	fx->GetStaticPFXList()->TouchPfx( fx );
-#endif
+		// Do something I dont exactly know what it does :)
+		// TODO: Figure out why this crashes sometimes! (G1)
+	#ifdef BUILD_GOTHIC_1_08k
+		// fx->GetStaticPFXList()->TouchPfx(fx);
+	#else
+		fx->GetStaticPFXList()->TouchPfx( fx );
+	#endif
+
+	*/
 }
 
 /** Debugging */
