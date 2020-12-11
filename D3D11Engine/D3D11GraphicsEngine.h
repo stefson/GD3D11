@@ -93,7 +93,7 @@ public:
 	/** Saves a screenshot */
 	virtual void SaveScreenshot() override;
 
-	virtual void DrawString( std::string str, float x, float y, _zCView* view, BOOL colored = FALSE, DWORD color = 0 ) override;
+	virtual void DrawString( const std::string& str, float x, float y, _zCView* view, BOOL colored = FALSE, DWORD color = 0 ) override;
 
 	//virtual int MeasureString(std::string str, zFont* zFont) override;
 
@@ -109,9 +109,6 @@ public:
 
 	/** Binds viewport information to the given constantbuffer slot */
 	virtual XRESULT BindViewportInformation( const std::string& shader, int slot ) override;
-
-	virtual int MeasureString( const std::string& str, int font = 0 ) override;
-
 
 	/** Sets up a draw call for a VS_Ex-Mesh */
 	void SetupVS_ExMeshDrawCall();
@@ -307,7 +304,6 @@ public:
 
 	/** Creates the main UI-View */
 	void CreateMainUIView();
-	void RenderStrings() override;
 
 	/** Returns a dummy cube-rendertarget used for pointlight shadowmaps */
 	RenderToTextureBuffer* GetDummyCubeRT() { return DummyShadowCubemapTexture.get(); }

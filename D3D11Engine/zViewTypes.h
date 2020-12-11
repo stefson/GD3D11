@@ -133,6 +133,9 @@ public:
 	void _zCView::PrintChars( int x, int y, const zSTRING& str ) {
 		XCALL( GothicMemoryLocations::zCView::PrintChars );
 	}
+	zCViewText* _zCView::CreateText( int x, int y, const zSTRING& str ) {
+		XCALL( GothicMemoryLocations::zCView::CreateText );
+	}
 };
 
 const int MAX_ITEMS = 150;

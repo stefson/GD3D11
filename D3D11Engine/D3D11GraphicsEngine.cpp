@@ -800,8 +800,6 @@ XRESULT D3D11GraphicsEngine::Present() {
 	GetContext()->RSSetViewports( 1, &vp );
 	// Copy HDR scene to backbuffer
 
-	RenderStrings();
-
 	SetDefaultStates();
 
 	SetActivePixelShader( "PS_PFX_GammaCorrectInv" );
@@ -1032,10 +1030,6 @@ XRESULT D3D11GraphicsEngine::BindViewportInformation( const std::string& shader,
 	}
 
 	return XR_SUCCESS;
-}
-
-int D3D11GraphicsEngine::MeasureString( const std::string& str, int font ) {
-	return 0;
 }
 
 /** Draws a vertexarray, non-indexed (HUD, 2D)*/
@@ -5222,223 +5216,6 @@ void D3D11GraphicsEngine::CreateMainUIView() {
 	}
 }
 
-const _zCView* getParentView(const _zCView* view) {
-	if (view->backTex) { return view; }
-
-	if (view->owner) {
-		return getParentView(view->owner);
-	}
-	return view;
-}
-
-bool isObscured(const _zCView* view, const std::set<const _zCView*>& renderedViews) {
-	auto parent = getParentView(view);
-
-	for (auto &v : renderedViews)
-	{
-		auto actParent = getParentView(v);
-		if (
-			(view->pposx >= v->pposx && view->psizex <= v->psizex)
-			&& (view->pposy >= v->pposy && view->psizey <= v->psizey)
-			&& (parent != actParent)
-			)
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
-void D3D11GraphicsEngine::RenderStrings() {
-	if ( Engine::GAPI->GetRendererState().RendererSettings.EnableCustomFontRendering && !textToDraw.empty() ) {
-		SetDefaultStates();
-		
-		SetActiveVertexShader( "VS_TransformedEx" );
-		SetActivePixelShader( "PS_FixedFunctionPipe" );
-
-		// Bind the FF-Info to the first PS slot
-		ActivePS->GetConstantBuffer()[0]->UpdateBuffer( &Engine::GAPI->GetRendererState().GraphicsState );
-		ActivePS->GetConstantBuffer()[0]->BindToPixelShader( 0 );
-
-		BindActiveVertexShader();
-		BindActivePixelShader();
-		
-		const float farZ = 0;
-		
-		// Set vertex type
-		GetContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
-		
-		BindViewportInformation( "VS_TransformedEx", 0 );
-	
-		//
-		// Einzelne Strings rendern
-		//
-		const float UIScale = Engine::GAPI->GetRendererState().RendererSettings.FontScaling;
-
-		std::reverse(textToDraw.begin(), textToDraw.end());
-		
-		static std::set<const _zCView*> renderedViews;
-		
-		for ( auto const& txt : textToDraw ) {
-			const _zCView* view = txt.view;
-			if (view->viewID == 2) {
-				if ( isObscured( view, renderedViews ) ) {
-					continue;
-				}
-				renderedViews.emplace(view);
-			}
-
-			const std::string& str = txt.str;
-			const float& x = txt.x;
-			const float& y = txt.y;
-			zCTexture* tx = view->font->tex;
-
-
-			static std::vector<ExVertexStruct> vertices;
-			vertices.clear();
-
-			int xpos = x;
-			int ypos = y;
-			
-			DWORD fontColor = view->fontColor.dword;
-			if (txt.colored) fontColor = txt.color;
-			//
-			// Glyphen anordnen und in den vertices Vector packen
-			//
-			for ( unsigned char const& c : str ) {
-				auto topLeft = view->font->fontuv1[c];
-				auto botRight = view->font->fontuv2[c];
-				auto widthPx = float(view->font->width[c]) * UIScale;
-
-				vertices.resize( vertices.size() + 6 );
-				ExVertexStruct* vertex = &vertices[vertices.size() - 6];
-
-				const float widthf = float( widthPx );
-				const float heightf = float( view->font->height ) * UIScale;
-
-				const float minx = float( xpos );
-				const float miny = float( ypos );
-
-				// prepare for next glyph
-				if      ( c == '\n' ) { ypos += heightf; xpos = x; }
-				else if ( c == ' ' )  { xpos += widthPx; continue; }
-				else                  { xpos += widthPx + 1;       }
-
-				const float maxx = (minx + widthf );
-				const float maxy = (miny + heightf);
-
-				float halfTexel = 0.0f;
-
-				const float texelHalfW = halfTexel / widthf;
-				const float texelHalfH = halfTexel / heightf;
-
-				const float minu = topLeft.pos.x + texelHalfW;
-				const float maxu = botRight.pos.x - texelHalfW;
-				const float minv = topLeft.pos.y + texelHalfH;
-				const float maxv = texelHalfH + botRight.pos.y;
-
-				vertex[0] = vertex[1] = vertex[2] = vertex[3] = vertex[4] = vertex[5] = {};
-				vertex[0].Normal = vertex[1].Normal = vertex[2].Normal = vertex[3].Normal = vertex[4].Normal = vertex[5].Normal = {1,0,0};
-				
-				vertex[0].Position.x = minx;
-				vertex[0].Position.y = miny;
-				vertex[0].Position.z = farZ;
-				vertex[0].TexCoord.x = minu;
-				vertex[0].TexCoord.y = minv;
-				vertex[0].Color = fontColor;
-
-				vertex[1].Position.x = maxx;
-				vertex[1].Position.y = miny;
-				vertex[1].Position.z = farZ;
-				vertex[1].TexCoord.x = maxu;
-				vertex[1].TexCoord.y = minv;
-				vertex[1].Color = fontColor;
-
-				vertex[2].Position.x = maxx;
-				vertex[2].Position.y = maxy;
-				vertex[2].Position.z = farZ;
-				vertex[2].TexCoord.x = maxu;
-				vertex[2].TexCoord.y = maxv;
-				vertex[2].Color = fontColor;
-
-				vertex[3].Position.x = maxx;
-				vertex[3].Position.y = maxy;
-				vertex[3].Position.z = farZ;
-				vertex[3].TexCoord.x = maxu;
-				vertex[3].TexCoord.y = maxv;
-				vertex[3].Color = fontColor;
-
-				vertex[4].Position.x = minx;
-				vertex[4].Position.y = maxy;
-				vertex[4].Position.z = farZ;
-				vertex[4].TexCoord.x = minu;
-				vertex[4].TexCoord.y = maxv;
-				vertex[4].Color = fontColor;
-
-				vertex[5].Position.x = minx;
-				vertex[5].Position.y = miny;
-				vertex[5].Position.z = farZ;
-				vertex[5].TexCoord.x = minu;
-				vertex[5].TexCoord.y = minv;
-				vertex[5].Color = fontColor;
-			}
-
-			// Check for alphablending on world mesh
-			bool blendAdd = view->alphafunc == zMAT_ALPHA_FUNC_ADD;
-			bool blendBlend = view->alphafunc == zMAT_ALPHA_FUNC_BLEND;
-			blendBlend = true;
-			//
-			// Voodoo ... ?
-			//
-
-			if ( tx->CacheIn( 0.6f ) == zRES_CACHED_IN ) {
-				MyDirectDrawSurface7* surface = tx->GetSurface();
-				ID3D11ShaderResourceView* srv[3] = {
-					// Get diffuse and normalmap
-					surface->GetEngineTexture()->GetShaderResourceView().Get(),
-					surface->GetNormalmap() ? surface->GetNormalmap()->GetShaderResourceView().Get() : NULL,
-					surface->GetFxMap() ? surface->GetFxMap()->GetShaderResourceView().Get() : NULL,
-				};
-
-				// Bind both
-				Context->PSSetShaderResources( 0, 3, srv );
-
-				if ( (blendAdd || blendBlend) && !Engine::GAPI->GetRendererState().BlendState.BlendEnabled ) {
-					if ( blendAdd )
-						Engine::GAPI->GetRendererState().BlendState.SetAdditiveBlending();
-					else if ( blendBlend )
-						Engine::GAPI->GetRendererState().BlendState.SetAlphaBlending();
-
-					Engine::GAPI->GetRendererState().BlendState.SetDirty();
-
-					Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled = false;
-					Engine::GAPI->GetRendererState().DepthState.SetDirty();
-
-					UpdateRenderStates();
-				}
-			} else {
-				//Don't draw if texture is not yet cached (I have no idea how can I preload it in advance)
-				continue;
-			}
-
-			//
-			// Populate TempVertexBuffer and draw it
-			//
-			EnsureTempVertexBufferSize( sizeof( ExVertexStruct ) * vertices.size() );
-			TempVertexBuffer->UpdateBuffer( &vertices[0], sizeof( ExVertexStruct ) * vertices.size() );
-
-			//
-			// Draw the verticies
-			//
-			DrawVertexBuffer( TempVertexBuffer.get(), vertices.size(), sizeof( ExVertexStruct ) );
-		}
-
-		textToDraw.clear();
-		renderedViews.clear();
-		SetDefaultStates();
-	}
-}
-
 void D3D11GraphicsEngine::EnsureTempVertexBufferSize( UINT size ) {
 	D3D11_BUFFER_DESC desc;
 	TempVertexBuffer->GetVertexBuffer()->GetDesc( &desc );
@@ -5787,16 +5564,204 @@ void D3D11GraphicsEngine::SaveScreenshot() {
 	Engine::GAPI->PrintMessageTimed( INT2( 30, 30 ), "Screenshot taken: " + name );
 }
 
-void D3D11GraphicsEngine::DrawString( std::string str, float x, float y, _zCView* view, BOOL colored, DWORD color ) {
-	simpleTextBuffer b;
-	b.str = str;
-	b.x = x;
-	b.y = y;
-	b.view = view;
-	b.colored = colored;
-	b.color = color;
+namespace UI::zFont {
+	void AppendGlyphs(
+		std::vector<ExVertexStruct>& vertices, 
+		const std::string& str, size_t strLen,
+		float x, float y, 
+		const ::zFont* font,
+		DWORD fontColor, float scale = 1.0f) {
 
-	textToDraw.push_back( b );
-	//RenderStrings();
+		const float SpaceBetweenChars = 1.0f * scale;
+		
+		int xpos = x, ypos = y;
+		for (size_t i = 0; i < strLen; ++i) {
+			const unsigned char& c = str[i];
+
+			auto topLeft = font->fontuv1[c];
+			auto botRight = font->fontuv2[c];
+			auto widthPx = float(font->width[c]) * scale;
+
+			vertices.resize(vertices.size() + 6);
+			ExVertexStruct* vertex = &vertices[vertices.size() - 6];
+
+			const float widthf = float(widthPx);
+			const float heightf = float(font->height) * scale;
+
+			const float minx = float(xpos);
+			const float miny = float(ypos);
+
+			// prepare for next glyph
+			if (c == '\n') { ypos += heightf; xpos = x; }
+			else if (c == ' ') { xpos += widthPx; continue; }
+			else { xpos += widthPx + SpaceBetweenChars; }
+
+			const float maxx = (minx + widthf);
+			const float maxy = (miny + heightf);
+
+			float halfTexel = 0.0f;
+
+			const float texelHalfW = halfTexel / widthf;
+			const float texelHalfH = halfTexel / heightf;
+
+			const float minu = topLeft.pos.x + texelHalfW;
+			const float maxu = botRight.pos.x - texelHalfW;
+			const float minv = topLeft.pos.y + texelHalfH;
+			const float maxv = texelHalfH + botRight.pos.y;
+
+			vertex[0] = vertex[1] = vertex[2] = vertex[3] = vertex[4] = vertex[5] = {};
+			vertex[0].Normal = vertex[1].Normal = vertex[2].Normal = vertex[3].Normal = vertex[4].Normal = vertex[5].Normal = { 1,0,0 };
+
+			vertex[0].Position.x = minx;
+			vertex[0].Position.y = miny;
+			vertex[0].TexCoord.x = minu;
+			vertex[0].TexCoord.y = minv;
+			vertex[0].Color = fontColor;
+
+			vertex[1].Position.x = maxx;
+			vertex[1].Position.y = miny;
+			vertex[1].TexCoord.x = maxu;
+			vertex[1].TexCoord.y = minv;
+			vertex[1].Color = fontColor;
+
+			vertex[2].Position.x = maxx;
+			vertex[2].Position.y = maxy;
+			vertex[2].TexCoord.x = maxu;
+			vertex[2].TexCoord.y = maxv;
+			vertex[2].Color = fontColor;
+
+			vertex[3].Position.x = maxx;
+			vertex[3].Position.y = maxy;
+			vertex[3].TexCoord.x = maxu;
+			vertex[3].TexCoord.y = maxv;
+			vertex[3].Color = fontColor;
+
+			vertex[4].Position.x = minx;
+			vertex[4].Position.y = maxy;
+			vertex[4].TexCoord.x = minu;
+			vertex[4].TexCoord.y = maxv;
+			vertex[4].Color = fontColor;
+
+			vertex[5].Position.x = minx;
+			vertex[5].Position.y = miny;
+			vertex[5].TexCoord.x = minu;
+			vertex[5].TexCoord.y = minv;
+			vertex[5].Color = fontColor;
+		}
+	}
+}
+
+void D3D11GraphicsEngine::DrawString( const std::string& str, float x, float y, _zCView* view, BOOL colored, DWORD color ) {
+	if (str.empty()) return;
+	if (!view->font) return;
+	if (!view->font->tex) return;
+
+	const float UIScale = Engine::GAPI->GetRendererState().RendererSettings.FontScaling;
+	zCTexture* tx = view->font->tex;
+
+	if (tx->CacheIn(0.6f) != zRES_CACHED_IN) {
+		return;
+	}
+
+	//
+	// Backup old renderstates
+	//
+
+	auto oldDepthWrite = Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled;
+	auto oldDepthCmp = Engine::GAPI->GetRendererState().DepthState.DepthBufferCompareFunc;
+	auto oldAlphaBlend = Engine::GAPI->GetRendererState().BlendState.SrcBlendAlpha;
+
+	Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled = false;
+	Engine::GAPI->GetRendererState().DepthState.SetDirty();
+
+	UpdateRenderStates();
+
+	//
+	// Setup Shaders
+	//
+
+	SetActiveVertexShader("VS_TransformedEx");
+	SetActivePixelShader("PS_FixedFunctionPipe");
+
+	// Bind the FF-Info to the first PS slot
+	ActivePS->GetConstantBuffer()[0]->UpdateBuffer(&Engine::GAPI->GetRendererState().GraphicsState);
+	ActivePS->GetConstantBuffer()[0]->BindToPixelShader(0);
+
+	BindActiveVertexShader();
+	BindActivePixelShader();
+
+	const float farZ = 0;
+
+	// Set vertex type
+	GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	BindViewportInformation("VS_TransformedEx", 0);
+
+	//
+	// Convert the characters to verticies which mask the Font-Texture alias
+	//
+
+	static std::vector<ExVertexStruct> vertices;
+	vertices.clear();
+
+	int xpos = x;
+	int ypos = y;
+
+	DWORD fontColor = view->fontColor.dword;
+	if (colored) fontColor = color;
+	//
+	// Glyphen anordnen und in den vertices Vector packen
+	// Ggf. Sonderzeichen am Ende entfernen.
+	// 
+	size_t maxLen = str.size();
+	while (str[maxLen-1] == '/') {
+		maxLen--;
+	}
+
+	UI::zFont::AppendGlyphs(vertices, str, maxLen, x, y, view->font, fontColor, UIScale);
+
+	//
+	// Voodoo ... ?
+	//
+
+	MyDirectDrawSurface7* surface = tx->GetSurface();
+	ID3D11ShaderResourceView* srv[3] = {
+		// Get diffuse and normalmap
+		surface->GetEngineTexture()->GetShaderResourceView().Get(),
+		surface->GetNormalmap() ? surface->GetNormalmap()->GetShaderResourceView().Get() : NULL,
+		surface->GetFxMap() ? surface->GetFxMap()->GetShaderResourceView().Get() : NULL,
+	};
+
+	// Bind both
+	Context->PSSetShaderResources(0, 3, srv);
+
+	if (!Engine::GAPI->GetRendererState().BlendState.BlendEnabled) {
+		Engine::GAPI->GetRendererState().BlendState.SetAlphaBlending();
+		Engine::GAPI->GetRendererState().BlendState.SetDirty();
+		UpdateRenderStates();
+	}
+
+	//
+	// Populate TempVertexBuffer
+	//
+	EnsureTempVertexBufferSize(sizeof(ExVertexStruct) * vertices.size());
+	TempVertexBuffer->UpdateBuffer(&vertices[0], sizeof(ExVertexStruct) * vertices.size());
+
+	//
+	// Draw the verticies
+	//
+	DrawVertexBuffer(TempVertexBuffer.get(), vertices.size(), sizeof(ExVertexStruct));
+
+	//
+	// Reset the render state
+	//
+
+	Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled = oldDepthWrite;
+	Engine::GAPI->GetRendererState().DepthState.SetDirty();
+
+	Engine::GAPI->GetRendererState().BlendState.SrcBlendAlpha = oldAlphaBlend;
+	Engine::GAPI->GetRendererState().BlendState.SetDirty();
+
+	UpdateRenderStates();
 }
 

@@ -725,9 +725,6 @@
     <ClCompile Include="D3D7\MyDirectDrawSurface7.cpp">
       <Filter>D3D7</Filter>
     </ClCompile>
-    <ClCompile Include="BaseGraphicsEngine.cpp">
-      <Filter>Engine</Filter>
-    </ClCompile>
     <ClCompile Include="Toolbox.cpp">
       <Filter>Tools</Filter>
     </ClCompile>

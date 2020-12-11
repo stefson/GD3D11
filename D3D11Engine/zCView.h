@@ -23,8 +23,6 @@ public:
 		REPLACE_RANGE( GothicMemoryLocations::zCView::REPL_SetMode_ModechangeStart, GothicMemoryLocations::zCView::REPL_SetMode_ModechangeEnd - 1, INST_NOP );
 
 #if BUILD_GOTHIC_2_6_fix
-		// .text:007A9A10                             ; int __thiscall zCView::FontSize(zCView *this, struct zSTRING *)
-		//XHook( HookedFunctions::OriginalFunctions.original_zCViewFontSize, GothicMemoryLocations::zCView::FontSize, hooked_FontSize );
 		// .text:007A62A0; void __thiscall zCView::BlitText(zCView * __hidden this)
 		XHook( HookedFunctions::OriginalFunctions.original_zCViewBlitText, GothicMemoryLocations::zCView::BlitText, hooked_BlitText );
 		XHook( HookedFunctions::OriginalFunctions.original_zCViewPrint, GothicMemoryLocations::zCView::Print, hooked_Print );
@@ -55,8 +53,8 @@ public:
 				thisptr->pposx + thisptr->nax(x), thisptr->pposy + thisptr->nay(y),
 				thisptr);
 		} else {
-			// call zCView::Print to create the Text for later blit
-			HookedFunctions::OriginalFunctions.original_zCViewPrint( thisptr, x, y, s );
+			// create a textview for later blitting
+			thisptr->CreateText(x, y, s);
 		}
 	}
 
@@ -71,41 +69,24 @@ public:
 
 		if ( !thisptr->isOpen || !thisptr->maxTextLength ) return;
 
-		if ( thisptr->owner ) {
-			if ( thisptr->owner->vtbl == 0x830F84 ) {
-				auto owner = (zCMenuItemText*)thisptr->owner;
-				const std::string& ownerId = owner->id.ToChar();
+		int x, y;
 
-				if ( owner->GetIsDisabled() ) return;
-				if ( owner->m_bDontRender ) return;
-				if ( !owner->m_bVisible ) return;
-			}
-		}
-
-		int x, y, pposx, pposy;
-
-		pposx = thisptr->pposx;
-		pposy = thisptr->pposy;
 		zCList <zCViewText>* textNode = thisptr->textLines.next;
 		zCViewText* text = nullptr;
-
-
+		
 		while ( textNode ) {
 
 			text = textNode->data;
 			textNode = textNode->next;
 
-			x = pposx + thisptr->nax( text->posx );
+			x = thisptr->pposx + thisptr->nax( text->posx );
 			// TODO: Remove additional addition if we get the correct char positioning
-			y = pposy + thisptr->nay( text->posy );
+			y = thisptr->pposy + thisptr->nay( text->posy );
 
 			if ( !thisptr->font ) continue;
 			
 			Engine::GraphicsEngine->DrawString( text->text.ToChar(), x, y, thisptr, text->colored, text->color.dword );
 		}
-	}
-	static int __fastcall hooked_FontSize( _zCView* thisptr, void* unknwn, const zSTRING& str ) {
-		return thisptr->anx(Engine::GraphicsEngine->MeasureString(str.ToChar()));
 	}
 
 #endif
