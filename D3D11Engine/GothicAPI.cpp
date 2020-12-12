@@ -1982,25 +1982,32 @@ void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameDa
 	}
 	/*
 		https://forum.worldofplayers.de/forum/threads/1546222-Yet-Another-D3D11-Renderer/page32?p=26626374&viewfull=1#post26626374
-		Liker@WoG: About bad PFX which go to savegame:
-				https://github.com/Kirides/GD3D11/blob/550add8e71b6c6d2673dbcf82e620271cac2503c/D3D11Engine/GothicAPI.cpp#L1984-L1993
-				Don't call the selected code. (killer-m told me about that 
+		Liker@WoG:	
+11.12.2020 14:58	About bad PFX which go to savegame:
+					https://github.com/Kirides/GD3D11/blob/550add8e71b6c6d2673dbcf82e620271cac2503c/D3D11Engine/GothicAPI.cpp#L1984-L1993
+					Don't call the selected code. (killer-m told me about that
+11.12.2020 16:19
+					; ( With PFX patch it does not render any fire/smoke ;( Baad. Revert, I will discuss it with killer-m
+					...
+					Try to remove only https://github.com/Kirides/GD3D11/bl...cAPI.cpp#L1992
+					...
+					Checked, yes, it works, remove only the last code.
+					...
+					Anyway, applying PFX fix requires testing... I will test it. It is better to revert PFX fix for now.
 	*/
 
 	// TODO: Test if disabling this does not cause any more issues.
-	/*
-		// Create new particles?
-		fx->CreateParticlesUpdateDependencies();
+	// Create new particles?
+	fx->CreateParticlesUpdateDependencies();
 
-		// Do something I dont exactly know what it does :)
-		// TODO: Figure out why this crashes sometimes! (G1)
-	#ifdef BUILD_GOTHIC_1_08k
-		// fx->GetStaticPFXList()->TouchPfx(fx);
-	#else
-		fx->GetStaticPFXList()->TouchPfx( fx );
-	#endif
+	// Do something I dont exactly know what it does :)
+	// TODO: Figure out why this crashes sometimes! (G1)
+#ifdef BUILD_GOTHIC_1_08k
+	// fx->GetStaticPFXList()->TouchPfx(fx);
+#else
+	fx->GetStaticPFXList()->TouchPfx( fx );
+#endif
 
-	*/
 }
 
 /** Debugging */
