@@ -311,6 +311,7 @@ struct GothicMemoryLocations {
 		static const unsigned int Offset_SkyControllerOutdoor = 0x0D0;
 		static const unsigned int DisposeVobs = 0x005F55F0;
 		static const unsigned int Offset_BspTree = 0x198;
+		static const unsigned int RemoveVob = 0x005F66C0;
 	};
 
 	struct oCWorld {
@@ -380,7 +381,8 @@ struct GothicMemoryLocations {
 		static const unsigned int Offset_PrivateTotalTime = 0x84; // Offset_TimeScale - 8
 		static const unsigned int Offset_LastTimeRendered = 0x88;
 		static const unsigned int Offset_Emitters = 0x54;
-
+		static const unsigned int Offset_ConnectedVob = 0x70;
+		
 		static const unsigned int OBJ_s_pfxList = 0x0089B2A0;
 		static const unsigned int OBJ_s_partMeshQuad = 0x0089B2BC;
 		static const unsigned int CheckDependentEmitter = 0x005913C0;
@@ -392,6 +394,7 @@ struct GothicMemoryLocations {
 		static const unsigned int SetVisualUsedBy = 0x0058DD60;
 		static const unsigned int Destructor = 0x0058D340;
 		static const unsigned int UpdateParticleFX = 0x0058F130;
+		static const unsigned int GetVisualDied = 0x0058D2F0;
 	};
 
 	struct zCModel {

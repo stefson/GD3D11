@@ -208,30 +208,7 @@ public:
 	}
 
 	int GetVisualDied() {
-		XCALL(0x005AD090);
+		XCALL(GothicMemoryLocations::zCParticleFX::GetVisualDied);
 	}
-
-
-#ifdef BUILD_GOTHIC_1_08k
-	/** Data for this class */
-	struct tData {
-		byte f0[52];
-		zTParticle* firstPart;
-		byte f38[28];
-		void* Emitters;
-		byte f58[24];
-		DWORD dword70;
-		byte f74[4];
-		byte byte78;
-		byte f79[3];
-		DWORD dword7C;
-		DWORD dword80;
-		byte f84[8];
-		float timeScale;
-		float localFrameTime;
-		DWORD dword94;
-	};
-	tData Data;
-#endif
 };
 

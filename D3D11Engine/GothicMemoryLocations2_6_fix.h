@@ -178,6 +178,7 @@ struct GothicMemoryLocations {
 		static const unsigned int Offset_PrevPFX = 0x80; // PrivateTotalTime - 4
 		static const unsigned int Offset_NextPFX = 0x7C; // PrivateTotalTime - 8
 		static const unsigned int Destructor = 0x005AD0E0;
+		static const unsigned int GetVisualDied = 0x005AD090;
 	};
 
 	struct zCStaticPfxList {

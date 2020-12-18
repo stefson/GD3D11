@@ -226,9 +226,7 @@ public:
 		return (zCBspTree*)THISPTR_OFFSET( GothicMemoryLocations::zCWorld::Offset_BspTree );
 	}
 
-#if BUILD_GOTHIC_2_6_fix
 	void RemoveVob(zCVob* vob) {
 		XCALL(GothicMemoryLocations::zCWorld::RemoveVob);
 	}
-#endif
 };
