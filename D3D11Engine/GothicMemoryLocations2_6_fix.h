@@ -471,6 +471,7 @@ struct GothicMemoryLocations {
 		static const unsigned int DisposeWorld = 0x00623D30;
 		static const unsigned int DisposeVobs = 0x00623960;
 		static const unsigned int Offset_BspTree = 0x1AC;
+		static const unsigned int RemoveVob = 0x00624B70;
 	};
 
 	class VobTypes // vftables

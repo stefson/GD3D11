@@ -1983,7 +1983,8 @@ void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameDa
 	/*
 		https://forum.worldofplayers.de/forum/threads/1546222-Yet-Another-D3D11-Renderer/page32?p=26626374&viewfull=1#post26626374
 		Liker@WoG:	
-11.12.2020 14:58	About bad PFX which go to savegame:
+11.12.2020 14:58	
+					About bad PFX which go to savegame:
 					https://github.com/Kirides/GD3D11/blob/550add8e71b6c6d2673dbcf82e620271cac2503c/D3D11Engine/GothicAPI.cpp#L1984-L1993
 					Don't call the selected code. (killer-m told me about that
 11.12.2020 16:19
@@ -1994,6 +1995,22 @@ void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameDa
 					Checked, yes, it works, remove only the last code.
 					...
 					Anyway, applying PFX fix requires testing... I will test it. It is better to revert PFX fix for now.
+14.12.2020 20:25	
+					Restore CreateParticlesUpdateDependencies and TouchPfx(),after that you should call with Dx11 hooks 
+
+					if (GetVisualDied())
+					if (this->GetConnectedVob())
+					{
+					this->GetConnectedVob()->GetHomeWorld()->RemoveVob (this->GetConnectedVob());
+					};
+
+					//adresses
+
+					GetVisualDied() 0x005AD090
+
+					GetConnectedVob is a field connectedVob of zCVob
+
+					RemoveVob() 0x00624B70
 	*/
 
 	// TODO: Test if disabling this does not cause any more issues.
@@ -2006,6 +2023,14 @@ void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameDa
 	// fx->GetStaticPFXList()->TouchPfx(fx);
 #else
 	fx->GetStaticPFXList()->TouchPfx( fx );
+	// TODO: also implement for G1 if this helps!
+	if (fx->GetVisualDied())
+	if (fx->GetConnectedVob())
+	{
+		// delete FX, it will be invalid after this call!
+		fx->GetConnectedVob()->GetHomeWorld()->RemoveVob(fx->GetConnectedVob());
+	};
+
 #endif
 
 }

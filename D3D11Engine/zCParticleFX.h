@@ -16,6 +16,7 @@ enum EZParticleAlignment {
 class zSTRING;
 class zCPolyStrip;
 class zCMesh;
+
 struct zTParticle {
 	zTParticle* Next;
 
@@ -151,10 +152,10 @@ public:
 	}
 
 
-	/*zCVob * GetConntectedVob()
+	zCVob * GetConnectedVob()
 	{
 		return *(zCVob **)THISPTR_OFFSET(GothicMemoryLocations::zCParticleFX::Offset_ConnectedVob);
-	}*/
+	}
 
 	float GetTimeScale() {
 		return *(float*)THISPTR_OFFSET( GothicMemoryLocations::zCParticleFX::Offset_TimeScale );
@@ -204,6 +205,10 @@ public:
 
 	void SetVisualUsedBy( zCVob* vob ) {
 		XCALL( GothicMemoryLocations::zCParticleFX::SetVisualUsedBy );
+	}
+
+	int GetVisualDied() {
+		XCALL(0x005AD090);
 	}
 
 
