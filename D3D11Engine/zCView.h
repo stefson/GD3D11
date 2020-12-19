@@ -35,34 +35,28 @@ public:
 
 #if BUILD_GOTHIC_2_6_fix
 	static void __fastcall hooked_Blit(_zCView* thisptr, void* unknwn) {
+
+		if (true || !Engine::GAPI->GetRendererState().RendererSettings.EnableCustomFontRendering) {
+			HookedFunctions::OriginalFunctions.original_zCViewBlit(thisptr);
+			return;
+		}
+
 		if (thisptr->viewID == 1 /* VIEW_VIEWPORT */) return;
 		if (thisptr == GetScreen()) return;
 		hook_infunc
 			auto oldDepthState = Engine::GAPI->GetRendererState().DepthState.Clone();
-			auto oldBlendState = Engine::GAPI->GetRendererState().BlendState.Clone();
-			if (thisptr) {
-				if (!thisptr->m_bFillZ) Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled = false;
-				else Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled = true;
-				Engine::GAPI->GetRendererState().DepthState.DepthBufferCompareFunc = GothicDepthBufferStateInfo::CF_COMPARISON_ALWAYS;
-				Engine::GAPI->GetRendererState().DepthState.SetDirty();
 
-				if (thisptr->alphafunc == zTRnd_AlphaBlendFunc::zRND_ALPHA_FUNC_ADD) {
-					Engine::GAPI->GetRendererState().BlendState.SetAdditiveBlending();
-					Engine::GAPI->GetRendererState().BlendState.SetDirty();
-				} else if (thisptr->alphafunc == zTRnd_AlphaBlendFunc::zRND_ALPHA_FUNC_BLEND) {
-					Engine::GAPI->GetRendererState().BlendState.SetAlphaBlending();
-					Engine::GAPI->GetRendererState().BlendState.SetDirty();
-				}
+			if (!thisptr->m_bFillZ) Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled = false;
+			else Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled = true;
 
-				Engine::GraphicsEngine->UpdateRenderStates();
+			Engine::GAPI->GetRendererState().DepthState.DepthBufferCompareFunc = GothicDepthBufferStateInfo::CF_COMPARISON_ALWAYS;
+			Engine::GAPI->GetRendererState().DepthState.SetDirty();
 
-				auto x = thisptr;
-			}
+			Engine::GraphicsEngine->UpdateRenderStates();
 
 			HookedFunctions::OriginalFunctions.original_zCViewBlit(thisptr);
 
 			oldDepthState.ApplyTo(Engine::GAPI->GetRendererState().DepthState);
-			oldBlendState.ApplyTo(Engine::GAPI->GetRendererState().BlendState);
 			Engine::GraphicsEngine->UpdateRenderStates();
 		hook_outfunc
 	}
@@ -77,7 +71,6 @@ public:
 
 		// Instantly blit Viewport/global-screen
 		if ( (thisptr->viewID == 1)
-			/*|| (thisptr == Engine::GAPI->GetScreen())*/
 			|| (thisptr == GetScreen()) ) {
 			Engine::GraphicsEngine->DrawString(
 				s.ToChar(),

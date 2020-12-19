@@ -216,9 +216,8 @@ struct GothicDepthBufferStateInfo : public GothicPipelineState {
 		c.DepthWriteEnabled = DepthWriteEnabled;
 		c.DepthBufferCompareFunc = DepthBufferCompareFunc;
 
-		c.StateDirty = true;
-		c.Hash = Hash;
 		c.StructSize = StructSize;
+		c.SetDirty();
 	}
 };
 
@@ -358,9 +357,8 @@ struct GothicBlendStateInfo : public GothicPipelineState {
 		c.AlphaToCoverage = AlphaToCoverage;
 		c.ColorWritesEnabled = ColorWritesEnabled;
 
-		c.StateDirty = true;
-		c.Hash = Hash;
 		c.StructSize = StructSize;
+		c.SetDirty();
 	}
 };
 
