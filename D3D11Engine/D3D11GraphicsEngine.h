@@ -83,7 +83,7 @@ public:
 	/** Saves a screenshot */
 	virtual void SaveScreenshot() override;
 
-	virtual void DrawString(const std::string& str, float x, float y, const zFont* font, DWORD fontColor = 0) override;
+	virtual void DrawString(const std::string& str, float x, float y, const zFont* font, zColor& fontColor) override;
 
 	//virtual int MeasureString(std::string str, zFont* zFont) override;
 
@@ -245,7 +245,7 @@ public:
 	void UpdateOcclusion();
 
 	/** Recreates the renderstates */
-	XRESULT UpdateRenderStates();
+	XRESULT UpdateRenderStates() override;
 
 	/** Returns the textures drawn this frame */
 	const std::set<zCTexture*>& GetFrameTextures() override { return FrameTextures; }

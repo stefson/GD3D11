@@ -23,6 +23,7 @@ public:
 		// .text:007A62A0; void __thiscall zCView::BlitText(zCView * __hidden this)
 		XHook( HookedFunctions::OriginalFunctions.original_zCViewBlitText, GothicMemoryLocations::zCView::BlitText, hooked_BlitText );
 		XHook( HookedFunctions::OriginalFunctions.original_zCViewPrint, GothicMemoryLocations::zCView::Print, hooked_Print );
+		XHook( HookedFunctions::OriginalFunctions.original_zCViewBlit, GothicMemoryLocations::zCView::Blit, hooked_Blit );
 #endif
 	}
 
@@ -33,6 +34,39 @@ public:
 	}
 
 #if BUILD_GOTHIC_2_6_fix
+	static void __fastcall hooked_Blit(_zCView* thisptr, void* unknwn) {
+		if (thisptr->viewID == 1 /* VIEW_VIEWPORT */) return;
+		if (thisptr == GetScreen()) return;
+		hook_infunc
+			auto oldDepthState = Engine::GAPI->GetRendererState().DepthState.Clone();
+			auto oldBlendState = Engine::GAPI->GetRendererState().BlendState.Clone();
+			if (thisptr) {
+				if (!thisptr->m_bFillZ) Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled = false;
+				else Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled = true;
+				Engine::GAPI->GetRendererState().DepthState.DepthBufferCompareFunc = GothicDepthBufferStateInfo::CF_COMPARISON_ALWAYS;
+				Engine::GAPI->GetRendererState().DepthState.SetDirty();
+
+				if (thisptr->alphafunc == zTRnd_AlphaBlendFunc::zRND_ALPHA_FUNC_ADD) {
+					Engine::GAPI->GetRendererState().BlendState.SetAdditiveBlending();
+					Engine::GAPI->GetRendererState().BlendState.SetDirty();
+				} else if (thisptr->alphafunc == zTRnd_AlphaBlendFunc::zRND_ALPHA_FUNC_BLEND) {
+					Engine::GAPI->GetRendererState().BlendState.SetAlphaBlending();
+					Engine::GAPI->GetRendererState().BlendState.SetDirty();
+				}
+
+				Engine::GraphicsEngine->UpdateRenderStates();
+
+				auto x = thisptr;
+			}
+
+			HookedFunctions::OriginalFunctions.original_zCViewBlit(thisptr);
+
+			oldDepthState.ApplyTo(Engine::GAPI->GetRendererState().DepthState);
+			oldBlendState.ApplyTo(Engine::GAPI->GetRendererState().BlendState);
+			Engine::GraphicsEngine->UpdateRenderStates();
+		hook_outfunc
+	}
+
 	static void __fastcall hooked_Print( _zCView* thisptr, void* unknwn, int x, int y, const zSTRING& s ) {
 		if ( !Engine::GAPI->GetRendererState().RendererSettings.EnableCustomFontRendering ) {
 			HookedFunctions::OriginalFunctions.original_zCViewPrint( thisptr, x, y, s );
@@ -44,11 +78,11 @@ public:
 		// Instantly blit Viewport/global-screen
 		if ( (thisptr->viewID == 1)
 			/*|| (thisptr == Engine::GAPI->GetScreen())*/
-			|| (thisptr->viewID == 0) ) {
+			|| (thisptr == GetScreen()) ) {
 			Engine::GraphicsEngine->DrawString(
 				s.ToChar(),
 				thisptr->pposx + thisptr->nax(x), thisptr->pposy + thisptr->nay(y),
-				thisptr->font, thisptr->fontColor.dword);
+				thisptr->font, thisptr->fontColor);
 		} else {
 			// create a textview for later blitting
 			thisptr->CreateText(x, y, s);
@@ -64,20 +98,20 @@ public:
 		thisptr->CheckAutoScroll();
 		thisptr->CheckTimedText();
 
-		if ( !thisptr->isOpen || !thisptr->maxTextLength ) return;
+		if ( !thisptr->isOpen ) return;
 
 		int x, y;
 
 		zCList <zCViewText>* textNode = thisptr->textLines.next;
 		zCViewText* text = nullptr;
-		DWORD fontColor;
+		zColor fontColor = thisptr->fontColor;
 		while ( textNode ) {
 
 			text = textNode->data;
 			textNode = textNode->next;
 			
-			if   (text->colored) { fontColor = text->color.dword; }
-			else                 { fontColor = thisptr->fontColor.dword;}
+			if   (text->colored) { fontColor = text->color; }
+			//else                 { fontColor = thisptr->fontColor;}
 
 			x = thisptr->pposx + thisptr->nax( text->posx );
 			// TODO: Remove additional addition if we get the correct char positioning
@@ -88,6 +122,7 @@ public:
 			Engine::GraphicsEngine->DrawString( text->text.ToChar(), x, y, text->font, fontColor);
 		}
 	}
+	static _zCView* GetScreen() { return *(_zCView**)GothicMemoryLocations::GlobalObjects::screen; }
 
 #endif
 

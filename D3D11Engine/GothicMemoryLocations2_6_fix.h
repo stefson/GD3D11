@@ -98,6 +98,7 @@ struct GothicMemoryLocations {
 		static const unsigned int CreateText = 0x007AA2B0;
 		static const unsigned int BlitText = 0x007A62A0;
 		static const unsigned int Print = 0x007A9A40;
+		static const unsigned int Blit = 0x007a63c0;
 	};
 
 	struct zCObject {
@@ -203,6 +204,7 @@ struct GothicMemoryLocations {
 		static const unsigned int zCParser = 0xAB40C0;
 		static const unsigned int zRenderer = 0x00982F08;
 		static const unsigned int zSound = 0x0099B03C;
+		static const unsigned int screen = 0x00ab6468;
 
 		static const unsigned int NOP_FreelookWindowedCheckStart = 0x004816D7;
 		static const unsigned int NOP_FreelookWindowedCheckEnd = 0x004816DB;

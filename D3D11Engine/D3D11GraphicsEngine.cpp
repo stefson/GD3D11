@@ -5580,11 +5580,16 @@ namespace UI::zFont {
 		const std::string& str, size_t strLen,
 		float x, float y, 
 		const ::zFont* font,
-		DWORD fontColor, float scale = 1.0f) {
+		zColor fontColor, float scale = 1.0f, zCCamera* camera = nullptr) {
 
 		const float SpaceBetweenChars = 1.0f * scale;
 		
 		int xpos = x, ypos = y;
+
+		float farZ;
+		if (camera) farZ = camera->GetNearPlane() + 1.0f;
+		else                       farZ = 1.0f;
+
 		for (size_t i = 0; i < strLen; ++i) {
 			const unsigned char& c = str[i];
 
@@ -5620,48 +5625,48 @@ namespace UI::zFont {
 			const float maxv = texelHalfH + botRight.pos.y;
 
 			vertex[0] = vertex[1] = vertex[2] = vertex[3] = vertex[4] = vertex[5] = {};
-			vertex[0].Normal = vertex[1].Normal = vertex[2].Normal = vertex[3].Normal = vertex[4].Normal = vertex[5].Normal = { 1,0,0 };
+			
+			for (size_t i = 0; i < 6; i++) {
+				vertex[i].Normal = { 1,0,0 };
+				vertex[i].TexCoord2 = { 0, 1 };
+				vertex[i].Position.z = farZ;
+				vertex[i].Color = fontColor.dword;
+			}
 
 			vertex[0].Position.x = minx;
 			vertex[0].Position.y = miny;
 			vertex[0].TexCoord.x = minu;
 			vertex[0].TexCoord.y = minv;
-			vertex[0].Color = fontColor;
 
 			vertex[1].Position.x = maxx;
 			vertex[1].Position.y = miny;
 			vertex[1].TexCoord.x = maxu;
 			vertex[1].TexCoord.y = minv;
-			vertex[1].Color = fontColor;
 
 			vertex[2].Position.x = maxx;
 			vertex[2].Position.y = maxy;
 			vertex[2].TexCoord.x = maxu;
 			vertex[2].TexCoord.y = maxv;
-			vertex[2].Color = fontColor;
 
 			vertex[3].Position.x = maxx;
 			vertex[3].Position.y = maxy;
 			vertex[3].TexCoord.x = maxu;
 			vertex[3].TexCoord.y = maxv;
-			vertex[3].Color = fontColor;
 
 			vertex[4].Position.x = minx;
 			vertex[4].Position.y = maxy;
 			vertex[4].TexCoord.x = minu;
 			vertex[4].TexCoord.y = maxv;
-			vertex[4].Color = fontColor;
 
 			vertex[5].Position.x = minx;
 			vertex[5].Position.y = miny;
 			vertex[5].TexCoord.x = minu;
 			vertex[5].TexCoord.y = minv;
-			vertex[5].Color = fontColor;
 		}
 	}
 }
 
-void D3D11GraphicsEngine::DrawString( const std::string& str, float x, float y, const zFont* font, DWORD fontColor) {
+void D3D11GraphicsEngine::DrawString( const std::string& str, float x, float y, const zFont* font, zColor& fontColor) {
 	if (str.empty()) return;
 	if (!font) return;
 	if (!font->tex) return;
@@ -5680,6 +5685,7 @@ void D3D11GraphicsEngine::DrawString( const std::string& str, float x, float y, 
 	auto oldDepthState = Engine::GAPI->GetRendererState().DepthState.Clone();
 
 	Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled = false;
+	Engine::GAPI->GetRendererState().DepthState.DepthBufferCompareFunc = GothicDepthBufferStateInfo::CF_COMPARISON_ALWAYS;
 	Engine::GAPI->GetRendererState().DepthState.SetDirty();
 
 	UpdateRenderStates();
@@ -5697,8 +5703,6 @@ void D3D11GraphicsEngine::DrawString( const std::string& str, float x, float y, 
 
 	BindActiveVertexShader();
 	BindActivePixelShader();
-
-	const float farZ = 0;
 
 	// Set vertex type
 	GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -5724,7 +5728,7 @@ void D3D11GraphicsEngine::DrawString( const std::string& str, float x, float y, 
 		maxLen--;
 	}
 
-	UI::zFont::AppendGlyphs(vertices, str, maxLen, x, y, font, fontColor, UIScale);
+	UI::zFont::AppendGlyphs(vertices, str, maxLen, x, y, font, fontColor, UIScale, zCCamera::GetCamera());
 
 	//if (str[0] == '(') {
 	//	int o = 1;
