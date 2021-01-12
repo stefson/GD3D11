@@ -3701,10 +3701,6 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
 	s.EnableDynamicLighting = GetPrivateProfileBoolA( "Shadows", "EnableDynamicLighting", defaultRendererSettings.EnableDynamicLighting, ini );
 	s.SmoothShadowCameraUpdate = GetPrivateProfileBoolA( "Shadows", "SmoothCameraUpdate", defaultRendererSettings.SmoothShadowCameraUpdate, ini.c_str() );
 
-	if ( s.SmoothShadowCameraUpdate < 0 ) {
-		s.SmoothShadowCameraUpdate = 0.9999900f; // Lowest value allowed.
-	}
-
 	INT2 res = {};
 	RECT desktopRect;
 	GetClientRect( GetDesktopWindow(), &desktopRect );
