@@ -107,20 +107,23 @@ public:
 		return DefaultColor;
 	}
 
-	int _zCView::rnd2( float x ) {
+	int _zCView::rnd2( float x ) const {
 		if ( x > 0 ) return (int)(x + 0.5);
 		else return (int)(x - 0.5);
 	}
-	int _zCView::nax( int x ) {
+	int _zCView::nax( int x ) const {
 		return rnd2( (float)(x * psizex) / 8192 );
 	}
 
-	int _zCView::nay( int y ) {
+	int _zCView::nay( int y ) const {
 		return rnd2( (float)(y * psizey) / 8192 );
 	}
 
-	int _zCView::anx( int x ) {
+	int _zCView::anx( int x ) const {
 		return rnd2( (float)(x * 8192) / psizex );
+	}
+	int _zCView::any( int x ) const {
+		return rnd2( (float)(x * 8192) / psizey );
 	}
 
 	void _zCView::CheckAutoScroll() {
