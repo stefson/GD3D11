@@ -12,9 +12,9 @@
 
 using namespace DirectX;
 
-const int DRAWVERTEXARRAY_BUFFER_SIZE = 2048 * sizeof( ExVertexStruct );
+const unsigned int DRAWVERTEXARRAY_BUFFER_SIZE = 4096 * sizeof( ExVertexStruct );
 const int NUM_MAX_BONES = 96;
-const int INSTANCING_BUFFER_SIZE = sizeof( VobInstanceInfo ) * 2048;
+const unsigned int INSTANCING_BUFFER_SIZE = sizeof( VobInstanceInfo ) * 2048;
 
 // If defined, creates a debug-version of the d3d11-device
 //#define DEBUG_D3D11
@@ -44,12 +44,12 @@ XRESULT D3D11GraphicsEngineBase::Init() {
 	LogInfo() << "Initializing Device...";
 
 	// Create DXGI factory
-	LE( CreateDXGIFactory( __uuidof(IDXGIFactory), &DXGIFactory ) );
-	LE( DXGIFactory->EnumAdapters( 0, &DXGIAdapter ) ); // Get first adapter
-
+	LE( CreateDXGIFactory1( __uuidof(IDXGIFactory2), &DXGIFactory2 ) );
+	LE( DXGIFactory2->EnumAdapters1( 0, &DXGIAdapter1 ) ); // Get first adapter
+	DXGIAdapter1.As( &DXGIAdapter2 );
 	// Find out what we are rendering on to write it into the logfile
-	DXGI_ADAPTER_DESC adpDesc;
-	DXGIAdapter->GetDesc( &adpDesc );
+	DXGI_ADAPTER_DESC2 adpDesc;
+	DXGIAdapter2->GetDesc2( &adpDesc );
 
 	std::wstring wDeviceDescription( adpDesc.Description );
 	std::string deviceDescription( wDeviceDescription.begin(), wDeviceDescription.end() );
@@ -59,24 +59,25 @@ XRESULT D3D11GraphicsEngineBase::Init() {
 	int flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 
 	D3D_FEATURE_LEVEL featurelevel = D3D_FEATURE_LEVEL_11_0;
-
 	// Create D3D11-Device
 #ifndef DEBUG_D3D11
-	LE( D3D11CreateDevice( DXGIAdapter.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags, &featurelevel, 1, D3D11_SDK_VERSION, &Device, nullptr, &Context ) );
+	LE( D3D11CreateDevice( DXGIAdapter2.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags, &featurelevel, 1, D3D11_SDK_VERSION, &Device11, nullptr, &Context11 ) );
 #else
-	LE( D3D11CreateDevice( DXGIAdapter1.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags | D3D11_CREATE_DEVICE_DEBUG, &featurelevel, 1, D3D11_SDK_VERSION, &Device, nullptr, &Context ) );
+	LE( D3D11CreateDevice( DXGIAdapter2.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags | D3D11_CREATE_DEVICE_DEBUG, &featurelevel, 1, D3D11_SDK_VERSION, &Device11, nullptr, &Context11 ) );
 #endif
+	Device11.As( &Device );
+	Context11.As( &Context );
 
 	if ( hr == DXGI_ERROR_UNSUPPORTED ) {
-		LogErrorBox() << "Your GPU (" << deviceDescription.c_str() << ") does not support Direct3D 11, so it can't run GD3D11!\n"
-			"It has to be at least Featurelevel 11_0 compatible, which requires at least:"
+		LogErrorBox() << "Your GPU (" << deviceDescription.c_str() << ") does not support Direct3D 11.0, so it can't run GD3D11!\n"
+			"It has to be at least Featurelevel 11.0 compatible, which requires at least:"
 			" *	Nvidia GeForce GTX4xx or newer"
 			" *	AMD Radeon 5xxx or newer\n\n"
 			"The game will now close.";
 		exit( 0 );
 	}
 
-	LE( Device->CreateDeferredContext( 0, &DeferredContext ) ); // Used for multithreaded texture loading
+	LE( Device->CreateDeferredContext1( 0, &DeferredContext ) ); // Used for multithreaded texture loading
 
 	LogInfo() << "Creating ShaderManager";
 
@@ -159,24 +160,25 @@ XRESULT D3D11GraphicsEngineBase::OnResize( INT2 newSize ) {
 	if ( !SwapChain ) {
 		LogInfo() << "Creating new swapchain! (Format: DXGI_FORMAT_R8G8B8A8_UNORM)";
 
-		DXGI_SWAP_CHAIN_DESC scd = {};
+		DXGI_SWAP_CHAIN_DESC1 scd = {};
 
 		scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 		scd.BufferCount = 1;
-		scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		scd.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_SHADER_INPUT;
 		scd.SampleDesc.Count = 1;
 		scd.SampleDesc.Quality = 0;
-		scd.BufferDesc.Height = bbres.y;
-		scd.BufferDesc.Width = bbres.x;
+		scd.Height = bbres.y;
+		scd.Width = bbres.x;
 		scd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 
-		// Check for windowed mode
-		bool windowed = Engine::GAPI->HasCommandlineParameter( "ZWINDOW" ) ||
-			Engine::GAPI->GetIntParamFromConfig( "zStartupWindowed" );
-		scd.Windowed = windowed;
+		DXGI_SWAP_CHAIN_FULLSCREEN_DESC swapChainFSDesc = {};
 
-		LE( DXGIFactory->CreateSwapChain( GetDevice().Get(), &scd, &SwapChain ) );
+		// Check for windowed mode
+		bool windowed = Engine::GAPI->HasCommandlineParameter( "ZWINDOW" ) || Engine::GAPI->GetIntParamFromConfig( "zStartupWindowed" );
+		swapChainFSDesc.Windowed = windowed;
+
+		LE( DXGIFactory2->CreateSwapChainForHwnd( GetDevice().Get(), OutputWindow, &scd, &swapChainFSDesc, nullptr, &SwapChain ) );
 
 		if ( !SwapChain ) {
 			LogError() << "Failed to create Swapchain! Program will now exit!";
@@ -244,7 +246,7 @@ XRESULT D3D11GraphicsEngineBase::OnBeginFrame() {
 	// Enter the critical section for safety while executing the deferred command list
 	Engine::GAPI->EnterResourceCriticalSection();
 	ID3D11CommandList* dc_cl = nullptr;
-	GetDeferredMediaContext()->FinishCommandList( true, &dc_cl );
+	GetDeferredMediaContext1()->FinishCommandList( true, &dc_cl );
 
 	// Copy list of textures we are operating on
 	Engine::GAPI->MoveLoadedTexturesToProcessedList();
@@ -332,28 +334,29 @@ XRESULT D3D11GraphicsEngineBase::CreateConstantBuffer( D3D11ConstantBuffer** out
 XRESULT D3D11GraphicsEngineBase::GetDisplayModeList( std::vector<DisplayModeInfo>* modeList, bool includeSuperSampling ) {
 	HRESULT hr;
 	UINT numModes = 0;
-	std::unique_ptr<DXGI_MODE_DESC[]> displayModes = nullptr;
+	std::unique_ptr<DXGI_MODE_DESC1[]> displayModes = nullptr;
 	DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	IDXGIOutput* output = nullptr;
+	IDXGIOutput* output11 = nullptr;
+	IDXGIOutput1* output = nullptr;
 
 	// Get desktop rect
 	RECT desktop;
 	GetClientRect( GetDesktopWindow(), &desktop );
 
-	if ( !DXGIAdapter )
+	if ( !DXGIAdapter2 )
 		return XR_FAILED;
 
-	DXGIAdapter->EnumOutputs( 0, &output );
-
+	DXGIAdapter2->EnumOutputs( 0, &output11 );
+	hr = output11->QueryInterface( __uuidof(IDXGIOutput1), (void**)&output );
 	if ( !output )
 		return XR_FAILED;
 
-	hr = output->GetDisplayModeList( format, 0, &numModes, nullptr );
+	hr = output->GetDisplayModeList1( format, 0, &numModes, nullptr );
 
-	displayModes = std::make_unique<DXGI_MODE_DESC[]>( numModes );
+	displayModes = std::make_unique<DXGI_MODE_DESC1[]>( numModes );
 
 	// Get the list
-	hr = output->GetDisplayModeList( format, 0, &numModes, displayModes.get() );
+	hr = output->GetDisplayModeList1( format, 0, &numModes, displayModes.get() );
 
 	for ( unsigned int i = 0; i < numModes; i++ ) {
 		if ( displayModes[i].Format != format )
@@ -520,7 +523,7 @@ XRESULT D3D11GraphicsEngineBase::DrawVertexArray( ExVertexStruct* vertices, unsi
 	vShader->GetConstantBuffer()[0]->BindToVertexShader( 0 );
 
 	D3D11_BUFFER_DESC desc;
-	TempVertexBuffer->GetVertexBuffer()->GetDesc( &desc );
+	TempVertexBuffer->GetVertexBuffer().Get()->GetDesc( &desc );
 
 	// Check if we need a bigger vertexbuffer
 	if ( desc.ByteWidth < stride * numVertices ) {
@@ -538,8 +541,8 @@ XRESULT D3D11GraphicsEngineBase::DrawVertexArray( ExVertexStruct* vertices, unsi
 
 	UINT offset = 0;
 	UINT uStride = stride;
-	ID3D11Buffer* buffer = TempVertexBuffer->GetVertexBuffer();
-	GetContext()->IASetVertexBuffers( 0, 1, &buffer, &uStride, &offset );
+	Microsoft::WRL::ComPtr<ID3D11Buffer> buffer = TempVertexBuffer->GetVertexBuffer().Get();
+	GetContext()->IASetVertexBuffers( 0, 1, buffer.GetAddressOf(), &uStride, &offset );
 
 	//Draw the mesh
 	GetContext()->Draw( numVertices, startVertex );
@@ -729,8 +732,8 @@ XRESULT D3D11GraphicsEngineBase::DrawVertexBufferFF( D3D11VertexBuffer* vb, unsi
 
 	UINT offset = 0;
 	UINT uStride = stride;
-	ID3D11Buffer* buffer = vb->GetVertexBuffer();
-	GetContext()->IASetVertexBuffers( 0, 1, &buffer, &uStride, &offset );
+	Microsoft::WRL::ComPtr<ID3D11Buffer> buffer = vb->GetVertexBuffer().Get();
+	GetContext()->IASetVertexBuffers( 0, 1, buffer.GetAddressOf(), &uStride, &offset );
 
 	//Draw the mesh
 	GetContext()->Draw( numVertices, startVertex );

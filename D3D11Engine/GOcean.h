@@ -52,7 +52,7 @@ public:
 
 protected:
 	/** Creates the fresnel map */
-	void CreateFresnelMap( ID3D11Device* pd3dDevice );
+	void CreateFresnelMap( ID3D11Device1* pd3dDevice );
 
 	/** Subdivided plane mesh for the ocean */
 	GMesh* PlaneMesh;
@@ -61,8 +61,8 @@ protected:
 	OceanSimulator* FFTOceanSimulator;
 
 	/** Fresnel map */
-	ID3D11ShaderResourceView* FresnelMapSRV;
-	ID3D11Texture1D* FresnelMap;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> FresnelMapSRV;
+	Microsoft::WRL::ComPtr<ID3D11Texture1D> FresnelMap;
 
 
 

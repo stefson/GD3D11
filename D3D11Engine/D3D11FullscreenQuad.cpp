@@ -4,15 +4,15 @@
 using namespace DirectX;
 
 D3D11FullscreenQuad::D3D11FullscreenQuad() {
-    QuadVB = nullptr;
+
 }
 
 
 D3D11FullscreenQuad::~D3D11FullscreenQuad() {
-    if ( QuadVB )QuadVB->Release();
+
 }
 
-HRESULT D3D11FullscreenQuad::CreateQuad( ID3D11Device* device ) {
+HRESULT D3D11FullscreenQuad::CreateQuad( ID3D11Device1* device ) {
     SimpleVertexStruct* vx = new SimpleVertexStruct[6];
     UINT CurVertex = 0;
 
@@ -55,7 +55,7 @@ HRESULT D3D11FullscreenQuad::CreateQuad( ID3D11Device* device ) {
     InitData.SysMemSlicePitch = 0;
 
 
-    device->CreateBuffer( &bufferDesc, &InitData, &QuadVB );
+    device->CreateBuffer( &bufferDesc, &InitData, QuadVB.GetAddressOf() );
 
     delete[] vx;
 

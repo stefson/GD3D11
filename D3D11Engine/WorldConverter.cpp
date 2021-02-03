@@ -45,8 +45,8 @@ void WorldConverter::WorldMeshCollectPolyRange( const float3& position, float ra
 	// Generate the meshes
 	for ( auto const& itx : Engine::GAPI->GetWorldSections() ) {
 		for ( auto const& ity : itx.second ) {
-			const XMVECTOR a = XMVectorSet( static_cast<float>(itx.first - s.x), static_cast<float>(ity.first - s.y), 0, 0 );
-			if ( Toolbox::XMVector2LengthFloat( a ) < 2 ) {
+            const XMVECTOR a = XMVectorSet( static_cast<float>(itx.first - s.x), static_cast<float>(ity.first - s.y), 0, 0 );
+            if ( Toolbox::XMVector2LengthFloat( a ) < 2 ) {
 				// Check all polys from all meshes
 				for ( auto const& it : ity.second.WorldMeshes ) {
 					WorldMeshInfo* m;
@@ -1639,7 +1639,7 @@ void WorldConverter::GenerateVertexNormals( std::vector<ExVertexStruct>& vertice
 		for ( int j = 0; j < 3; ++j ) {
 			XMVECTOR a = XMLoadFloat3( &v[(j + 1) % 3] ) - XMLoadFloat3( &v[j] );
 			XMVECTOR b = XMLoadFloat3( &v[(j + 2) % 3] ) - XMLoadFloat3( &v[j] );
-			XMVECTOR weight = XMVectorACos( XMVector3Dot( a, b ) / (XMVector3LengthEst( a ) * XMVector3LengthEst( b )) );
+			XMVECTOR weight = XMVectorACosEst( XMVector3Dot( a, b ) / (XMVector3LengthEst( a ) * XMVector3LengthEst( b )) );
 			XMVECTOR XMV_normals_indices = XMLoadFloat3( &normals[indices[(i + j)]] );
 			XMV_normals_indices += weight * normal;
 			XMStoreFloat3( &normals[indices[(i + j)]], XMV_normals_indices );
@@ -1647,8 +1647,8 @@ void WorldConverter::GenerateVertexNormals( std::vector<ExVertexStruct>& vertice
 	}
 
 	// Normalize everything and store it into the vertices
+	XMFLOAT3 Normal;
 	for ( unsigned int i = 0; i < normals.size(); i++ ) {
-		XMFLOAT3 Normal;
 		XMStoreFloat3( &Normal, XMVector3NormalizeEst( XMLoadFloat3( &normals[i] ) ) );
 		vertices[i].Normal = Normal;
 	}

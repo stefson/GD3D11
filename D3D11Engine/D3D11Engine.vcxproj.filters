@@ -67,7 +67,7 @@
     <Filter Include="Librarys\Assimp">
       <UniqueIdentifier>{9bec2d0d-0bea-4659-aeef-99300438c197}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\D3D11\Engine">
+   <Filter Include="Engine\D3D11\Engine">
       <UniqueIdentifier>{ec0d93fb-3577-4853-a58f-8654d872352e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -713,9 +713,6 @@
     <ClInclude Include="D3D11GraphicsEngine.h">
       <Filter>Engine\D3D11\Engine</Filter>
     </ClInclude>
-    <ClInclude Include="D3D11_Helpers.h">
-      <Filter>Tools\D3D11</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -724,6 +721,9 @@
     </ClCompile>
     <ClCompile Include="D3D7\MyDirectDrawSurface7.cpp">
       <Filter>D3D7</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseGraphicsEngine.cpp">
+      <Filter>Engine</Filter>
     </ClCompile>
     <ClCompile Include="Toolbox.cpp">
       <Filter>Tools</Filter>

@@ -26,20 +26,20 @@
 typedef struct CSFFT_512x512_Data_t
 {
 	// D3D11 objects
-	ID3D11DeviceContext* pd3dImmediateContext;
-	ID3D11ComputeShader* pRadix008A_CS;
-	ID3D11ComputeShader* pRadix008A_CS2;
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext> pd3dImmediateContext;
+	Microsoft::WRL::ComPtr<ID3D11ComputeShader> pRadix008A_CS;
+	Microsoft::WRL::ComPtr<ID3D11ComputeShader> pRadix008A_CS2;
 
 	// More than one array can be transformed at same time
 	UINT slices;
 
 	// For 512x512 config, we need 6 constant buffers
-	ID3D11Buffer* pRadix008A_CB[6];
+	Microsoft::WRL::ComPtr<ID3D11Buffer> pRadix008A_CB[6];
 
 	// Temporary buffers
-	ID3D11Buffer* pBuffer_Tmp;
-	ID3D11UnorderedAccessView* pUAV_Tmp;
-	ID3D11ShaderResourceView * pSRV_Tmp;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> pBuffer_Tmp;
+	Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> pUAV_Tmp;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pSRV_Tmp;
 } CSFFT512x512_Plan;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -54,7 +54,7 @@ typedef struct CSFFT_512x512_Data_t
 #define FFT_INVERSE 1
 
 
-void fft512x512_create_plan(CSFFT512x512_Plan* plan, ID3D11Device* pd3dDevice, UINT slices);
+void fft512x512_create_plan(CSFFT512x512_Plan* plan, ID3D11Device1* pd3dDevice, UINT slices);
 void fft512x512_destroy_plan(CSFFT512x512_Plan* plan);
 
 void fft_512x512_c2c(CSFFT512x512_Plan* fft_plan, 

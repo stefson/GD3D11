@@ -175,7 +175,6 @@ public:
 
 	/** Returns the sun position in world coords */
 	DirectX::XMFLOAT3 GetSunWorldPosition( float timeScale = 1.0f ) {
-		using namespace DirectX;
 		/*if (!GetSun())
 		{
 			return XMFLOAT3(0, 0, 0);
@@ -185,7 +184,7 @@ public:
 		//angle += XM_PIDIV2; // 12 is now in the sky, 18 horizon
 		float angle = ((GetMasterTime() * timeScale - 0.3f) * 1.25f + 0.5f) * XM_2PI;
 
-		XMVECTOR sunPos = XMVector3Normalize(XMVectorSet(-60, 0, 100, 0));
+		XMVECTOR sunPos = XMVector3NormalizeEst(XMVectorSet(-60, 0, 100, 0));
 		XMFLOAT3 rotAxis = XMFLOAT3( 1, 0, 0 );
 
 		XMMATRIX r = XMLoadFloat4x4( &(HookedFunctions::OriginalFunctions.original_Alg_Rotation3DNRad( rotAxis, -angle )) );

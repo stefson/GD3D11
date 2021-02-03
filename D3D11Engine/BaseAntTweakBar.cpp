@@ -41,7 +41,7 @@ XRESULT BaseAntTweakBar::Init() {
     TwAddVarRW( Bar_Sky, "GodRayColorMod", TW_TYPE_COLOR3F, &Engine::GAPI->GetRendererState().RendererSettings.GodRayColorMod, nullptr );
 
     TwAddVarRW( Bar_Sky, "GodRayDensity", TW_TYPE_FLOAT, &Engine::GAPI->GetRendererState().RendererSettings.GodRayDensity, nullptr );
-    TwDefine( " Sky/GodRayWeight  step=0.01 " );
+    TwDefine( " Sky/GodRayDensity  step=0.01 " );
 
     TwAddSeparator( Bar_Sky, "SkySettings", nullptr );
 
@@ -149,10 +149,10 @@ XRESULT BaseAntTweakBar::Init() {
     TwAddVarRW( Bar_General, "WireframeWorld", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState().RendererSettings.WireframeWorld, nullptr );
     TwAddVarRW( Bar_General, "WireframeVobs", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState().RendererSettings.WireframeVobs, nullptr );
 
-    TwAddVarRW( Bar_General, "OldTesselationFactor", TW_TYPE_FLOAT, &Engine::GAPI->GetRendererState().RendererSettings.TesselationFactor, nullptr );
+    TwAddVarRW( Bar_General, "TesselationFactor", TW_TYPE_FLOAT, &Engine::GAPI->GetRendererState().RendererSettings.TesselationFactor, nullptr );
     TwDefine( " General/TesselationFactor  step=0.1 min=1" );
 
-    TwAddVarRW( Bar_General, "TesselationEdgeLength", TW_TYPE_FLOAT, &Engine::GAPI->GetRendererState().RendererSettings.TesselationRange, nullptr );
+    TwAddVarRW( Bar_General, "TesselationRange", TW_TYPE_FLOAT, &Engine::GAPI->GetRendererState().RendererSettings.TesselationRange, nullptr );
     TwDefine( " General/TesselationRange  step=0.1 min=1" );
 
     //TwAddVarRW(Bar_General, "Grass AlphaToCoverage", TW_TYPE_BOOLCPP, &Engine::GAPI->GetRendererState().RendererSettings.VegetationAlphaToCoverage, nullptr);	
@@ -164,7 +164,7 @@ XRESULT BaseAntTweakBar::Init() {
     TwDefine( " General/OutdoorVobDrawRadius  help='Draw distance for the static outdoor vobs' " );
 
     TwAddVarRW( Bar_General, "IndoorVobDrawRadius", TW_TYPE_FLOAT, &Engine::GAPI->GetRendererState().RendererSettings.IndoorVobDrawRadius, nullptr );
-    TwDefine( " General/OutdoorVobDrawRadius  help='Draw distance for the static indoor vobs' " );
+    TwDefine( " General/IndoorVobDrawRadius  help='Draw distance for the static indoor vobs' " );
 
     TwAddVarRW( Bar_General, "OutdoorSmallVobRadius", TW_TYPE_FLOAT, &Engine::GAPI->GetRendererState().RendererSettings.OutdoorSmallVobDrawRadius, nullptr );
 

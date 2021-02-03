@@ -1,6 +1,6 @@
 #pragma once
 #include <unordered_map>
-#include <d3d11.h>
+#include <d3d11_1.h>
 #include "D3D11VShader.h"
 #include "D3D11PShader.h"
 #include "D3D11HDShader.h"

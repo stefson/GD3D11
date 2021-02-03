@@ -24,9 +24,9 @@ XRESULT D3D11PFX_Blur::RenderBlur( RenderToTextureBuffer* fxbuffer, bool leaveRe
     D3D11GraphicsEngine* engine = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
 
     // Save old rendertargets
-    ID3D11RenderTargetView* oldRTV = nullptr;
-    ID3D11DepthStencilView* oldDSV = nullptr;
-    engine->GetContext()->OMGetRenderTargets( 1, &oldRTV, &oldDSV );
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> oldRTV;
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilView> oldDSV;
+    engine->GetContext()->OMGetRenderTargets( 1, oldRTV.GetAddressOf(), oldDSV.GetAddressOf() );
 
     INT2 dsRes = INT2( fxbuffer->GetSizeX() / 4, fxbuffer->GetSizeY() / 4 );
 
@@ -73,9 +73,7 @@ XRESULT D3D11PFX_Blur::RenderBlur( RenderToTextureBuffer* fxbuffer, bool leaveRe
         FxRenderer->CopyTextureToRTV( FxRenderer->GetTempBufferDS4_2().GetShaderResView().Get(), fxbuffer->GetRenderTargetView().Get(), INT2( 0, 0 ), true );
     }
 
-    engine->GetContext()->OMSetRenderTargets( 1, &oldRTV, oldDSV );
-    if ( oldRTV )oldRTV->Release();
-    if ( oldDSV )oldDSV->Release();
+    engine->GetContext()->OMSetRenderTargets( 1, oldRTV.GetAddressOf(), oldDSV.Get() );
 
     return XR_SUCCESS;
 }

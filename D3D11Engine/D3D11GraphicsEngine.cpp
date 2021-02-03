@@ -94,8 +94,7 @@ D3D11GraphicsEngine::~D3D11GraphicsEngine() {
     SAFE_DELETE( QuadIndexBuffer );
 
     ID3D11Debug* d3dDebug;
-    Device->QueryInterface( __uuidof(ID3D11Debug),
-        reinterpret_cast<void**>(&d3dDebug) );
+    Device->QueryInterface( __uuidof(ID3D11Debug), reinterpret_cast<void**>(&d3dDebug) );
 
     if ( d3dDebug ) {
         d3dDebug->ReportLiveDeviceObjects( D3D11_RLDO_DETAIL );
@@ -112,12 +111,19 @@ XRESULT D3D11GraphicsEngine::Init() {
     LogInfo() << "Initializing Device...";
 
     // Create DXGI factory
-    LE( CreateDXGIFactory( __uuidof(IDXGIFactory), &DXGIFactory ) );
-    LE( DXGIFactory->EnumAdapters( 0, &DXGIAdapter ) );  // Get first adapter
-
+    LE( CreateDXGIFactory1( __uuidof(IDXGIFactory2), &DXGIFactory2 ) );
+    /*UINT i = 0;
+    std::vector <IDXGIAdapter1*> vAdapters;
+    while (DXGIFactory2->EnumAdapters1(i, &DXGIAdapter1) != DXGI_ERROR_NOT_FOUND)
+    {
+        vAdapters.push_back(DXGIAdapter1);
+        ++i;
+    }*/
+    LE( DXGIFactory2->EnumAdapters1( 0, &DXGIAdapter1 ) );  // Get first adapter
+    DXGIAdapter1.As( &DXGIAdapter2 );
     // Find out what we are rendering on to write it into the logfile
-    DXGI_ADAPTER_DESC adpDesc;
-    DXGIAdapter->GetDesc( &adpDesc );
+    DXGI_ADAPTER_DESC2 adpDesc;
+    DXGIAdapter2->GetDesc2( &adpDesc );
 
     std::wstring wDeviceDescription( adpDesc.Description );
     std::string deviceDescription( wDeviceDescription.begin(), wDeviceDescription.end() );
@@ -130,18 +136,17 @@ XRESULT D3D11GraphicsEngine::Init() {
 
     // Create D3D11-Device
 #ifndef DEBUG_D3D11
-    LE( D3D11CreateDevice( DXGIAdapter.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags,
-        &featurelevel, 1, D3D11_SDK_VERSION, &Device, nullptr, &Context ) );
+    LE( D3D11CreateDevice( DXGIAdapter2.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags, &featurelevel, 1, D3D11_SDK_VERSION, &Device11, nullptr, &Context11 ) );
 #else
-    LE( D3D11CreateDevice( DXGIAdapter.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr,
-        flags | D3D11_CREATE_DEVICE_DEBUG, &featurelevel, 1,
-        D3D11_SDK_VERSION, &Device, nullptr, &Context ) );
+    LE( D3D11CreateDevice( DXGIAdapter2.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags | D3D11_CREATE_DEVICE_DEBUG, &featurelevel, 1, D3D11_SDK_VERSION, &Device11, nullptr, &Context11 ) );
 #endif
+    Device11.As( &Device );
+    Context11.As( &Context );
 
     if ( hr == DXGI_ERROR_UNSUPPORTED ) {
         LogErrorBox() << "Your GPU (" << deviceDescription.c_str()
             << ") does not support Direct3D 11, so it can't run GD3D11!\n"
-            "It has to be at least Featurelevel 11_0 compatible, "
+            "It has to be at least Featurelevel 11.0 compatible, "
             "which requires at least:\n"
             " *	Nvidia GeForce GTX4xx or higher\n"
             " *	AMD Radeon 5xxx or higher\n\n"
@@ -149,7 +154,7 @@ XRESULT D3D11GraphicsEngine::Init() {
         exit( 0 );
     }
 
-    LE( GetDevice()->CreateDeferredContext( 0, &DeferredContext ) );  // Used for multithreaded texture loading
+    LE( GetDevice()->CreateDeferredContext1( 0, &DeferredContext ) );  // Used for multithreaded texture loading
 
     LogInfo() << "Creating ShaderManager";
 
@@ -167,15 +172,15 @@ XRESULT D3D11GraphicsEngine::Init() {
     TempVertexBuffer->Init(
         nullptr, DRAWVERTEXARRAY_BUFFER_SIZE, D3D11VertexBuffer::B_VERTEXBUFFER,
         D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE );
-    SetDebugName( TempVertexBuffer->GetShaderResourceView(), "TempVertexBuffer->ShaderResourceView" );
-    SetDebugName( TempVertexBuffer->GetVertexBuffer(), "TempVertexBuffer->VertexBuffer" );
+    SetDebugName( TempVertexBuffer->GetShaderResourceView().Get(), "TempVertexBuffer->ShaderResourceView" );
+    SetDebugName( TempVertexBuffer->GetVertexBuffer().Get(), "TempVertexBuffer->VertexBuffer" );
 
     DynamicInstancingBuffer = std::make_unique<D3D11VertexBuffer>();
     DynamicInstancingBuffer->Init(
         nullptr, INSTANCING_BUFFER_SIZE, D3D11VertexBuffer::B_VERTEXBUFFER,
         D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE );
-    SetDebugName( DynamicInstancingBuffer->GetShaderResourceView(), "DynamicInstancingBuffer->ShaderResourceView" );
-    SetDebugName( DynamicInstancingBuffer->GetVertexBuffer(), "DynamicInstancingBuffer->VertexBuffer" );
+    SetDebugName( DynamicInstancingBuffer->GetShaderResourceView().Get(), "DynamicInstancingBuffer->ShaderResourceView" );
+    SetDebugName( DynamicInstancingBuffer->GetVertexBuffer().Get(), "DynamicInstancingBuffer->VertexBuffer" );
 
     D3D11_SAMPLER_DESC samplerDesc;
     samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
@@ -293,9 +298,9 @@ XRESULT D3D11GraphicsEngine::Init() {
 
     // Init inf-buffer now
     InfiniteRangeConstantBuffer->UpdateBuffer( &float4( FLT_MAX, 0, 0, 0 ) );
-    SetDebugName( InfiniteRangeConstantBuffer->Get(), "InfiniteRangeConstantBuffer" );
-    SetDebugName( OutdoorSmallVobsConstantBuffer->Get(), "OutdoorSmallVobsConstantBuffer" );
-    SetDebugName( OutdoorVobsConstantBuffer->Get(), "OutdoorVobsConstantBuffer" );
+    SetDebugName( InfiniteRangeConstantBuffer->Get().Get(), "InfiniteRangeConstantBuffer" );
+    SetDebugName( OutdoorSmallVobsConstantBuffer->Get().Get(), "OutdoorSmallVobsConstantBuffer" );
+    SetDebugName( OutdoorVobsConstantBuffer->Get().Get(), "OutdoorVobsConstantBuffer" );
     // Load reflectioncube
 
     if ( S_OK != CreateDDSTextureFromFile(
@@ -438,28 +443,30 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
 
         Microsoft::WRL::ComPtr<IDXGIDevice2> pDXGIDevice;
         LE( Device.As<IDXGIDevice2>( &pDXGIDevice ) );
-        Microsoft::WRL::ComPtr<IDXGIAdapter> adapter;
-        Microsoft::WRL::ComPtr<IDXGIFactory> factory;
+        Microsoft::WRL::ComPtr<IDXGIAdapter> adapter11;
+        Microsoft::WRL::ComPtr<IDXGIAdapter2> adapter;
+        Microsoft::WRL::ComPtr<IDXGIFactory2> factory2;
 
         LE( Device.As( &pDXGIDevice ) );
-        LE( pDXGIDevice->GetAdapter( &adapter ) );
-        LE( adapter->GetParent( IID_PPV_ARGS( &factory ) ) );
+        LE( pDXGIDevice->GetAdapter( &adapter11 ) );
+        adapter11.As( &adapter );
+        LE( adapter->GetParent( IID_PPV_ARGS( &factory2 ) ) );
 
         DXGI_SWAP_EFFECT swapEffect = DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_DISCARD;
 
-        DXGI_SWAP_CHAIN_DESC scd = {};
+        DXGI_SWAP_CHAIN_DESC1 scd = {};
         if ( m_swapchainflip ) {
             Microsoft::WRL::ComPtr<IDXGIFactory4> factory4;
             Microsoft::WRL::ComPtr<IDXGIFactory5> factory5;
 
-            if ( SUCCEEDED( factory.As( &factory5 ) ) ) {
+            if ( SUCCEEDED( factory2.As( &factory5 ) ) ) {
                 BOOL allowTearing = FALSE;
                 if ( factory5.Get() && SUCCEEDED( factory5->CheckFeatureSupport( DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof( allowTearing ) ) ) ) {
                     m_flipWithTearing = allowTearing != 0;
                     m_swapchainflip = m_flipWithTearing;
                 }
             }
-            if ( SUCCEEDED( factory.As( &factory4 ) ) ) {
+            if ( SUCCEEDED( factory2.As( &factory4 ) ) ) {
                 swapEffect = DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_FLIP_DISCARD;
             } else {
                 swapEffect = DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
@@ -482,29 +489,30 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
         }
         scd.SwapEffect = swapEffect;
         scd.Flags = scflags;
-        scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        scd.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
         scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_SHADER_INPUT;
-        scd.OutputWindow = OutputWindow;
         scd.SampleDesc.Count = 1;
         scd.SampleDesc.Quality = 0;
-        scd.BufferDesc.Height = bbres.y;
-        scd.BufferDesc.Width = bbres.x;
+        scd.Height = bbres.y;
+        scd.Width = bbres.x;
+
+        DXGI_SWAP_CHAIN_FULLSCREEN_DESC swapChainFSDesc = {};
 
         if ( m_swapchainflip ) {
-            scd.Windowed = true;
+            swapChainFSDesc.Windowed = true;
         } else {
             bool windowed = Engine::GAPI->HasCommandlineParameter( "ZWINDOW" ) ||
                 Engine::GAPI->GetIntParamFromConfig( "zStartupWindowed" );
-            scd.Windowed = windowed;
+            swapChainFSDesc.Windowed = windowed;
         }
 
-        LE( factory->CreateSwapChain( GetDevice().Get(), &scd, &SwapChain ) );
+        LE( factory2->CreateSwapChainForHwnd( GetDevice().Get(), OutputWindow, &scd, &swapChainFSDesc, nullptr, &SwapChain ) );
         if ( !SwapChain ) {
             LogError() << "Failed to create Swapchain! Program will now exit!";
             exit( 0 );
         }
         if ( m_swapchainflip ) {
-            LE( factory->MakeWindowAssociation( OutputWindow, DXGI_MWA_NO_WINDOW_CHANGES ) );
+            LE( factory2->MakeWindowAssociation( OutputWindow, DXGI_MWA_NO_WINDOW_CHANGES ) );
         }
 
         // Need to init AntTweakBar now that we have a working swapchain
@@ -607,7 +615,7 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
     Engine::GAPI->EnterResourceCriticalSection();
     ID3D11CommandList* dc_cl = nullptr;
 
-    GetDeferredMediaContext()->FinishCommandList( true, &dc_cl );
+    GetDeferredMediaContext1()->FinishCommandList( true, &dc_cl );
 
     // Copy list of textures we are operating on
     Engine::GAPI->MoveLoadedTexturesToProcessedList();
@@ -725,27 +733,29 @@ XRESULT D3D11GraphicsEngine::CreateConstantBuffer( D3D11ConstantBuffer** outCB,
 XRESULT
 D3D11GraphicsEngine::GetDisplayModeList( std::vector<DisplayModeInfo>* modeList,
     bool includeSuperSampling ) {
+    HRESULT hr;
     UINT numModes = 0;
-    std::unique_ptr<DXGI_MODE_DESC[]> displayModes = nullptr;
+    std::unique_ptr<DXGI_MODE_DESC1[]> displayModes = nullptr;
     const DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    IDXGIOutput* output = nullptr;
+    IDXGIOutput* output11 = nullptr;
+    IDXGIOutput1* output = nullptr;
 
     // Get desktop rect
     RECT desktop;
     GetClientRect( GetDesktopWindow(), &desktop );
 
-    if ( !DXGIAdapter ) return XR_FAILED;
+    if ( !DXGIAdapter2 ) return XR_FAILED;
 
-    DXGIAdapter->EnumOutputs( 0, &output );
-
+    DXGIAdapter2->EnumOutputs( 0, &output11 );
+    hr = output11->QueryInterface( __uuidof(IDXGIOutput1), (void**)&output );
     if ( !output ) return XR_FAILED;
 
-    HRESULT hr = output->GetDisplayModeList( format, 0, &numModes, nullptr );
+    hr = output->GetDisplayModeList1( format, 0, &numModes, nullptr );
 
-    displayModes = std::make_unique<DXGI_MODE_DESC[]>( numModes );
+    displayModes = std::make_unique<DXGI_MODE_DESC1[]>( numModes );
 
     // Get the list
-    hr = output->GetDisplayModeList( format, 0, &numModes, displayModes.get() );
+    hr = output->GetDisplayModeList1( format, 0, &numModes, displayModes.get() );
     for ( unsigned int i = 0; i < numModes; i++ ) {
         if ( displayModes[i].Format != format ) continue;
 
@@ -919,8 +929,8 @@ XRESULT D3D11GraphicsEngine::DrawVertexBuffer( D3D11VertexBuffer* vb,
 
     UINT offset = 0;
     UINT uStride = stride;
-    ID3D11Buffer* buffer = vb->GetVertexBuffer();
-    GetContext()->IASetVertexBuffers( 0, 1, &buffer, &uStride, &offset );
+    Microsoft::WRL::ComPtr<ID3D11Buffer> buffer = vb->GetVertexBuffer().Get();
+    GetContext()->IASetVertexBuffers( 0, 1, buffer.GetAddressOf(), &uStride, &offset );
 
     // Draw the mesh
     GetContext()->Draw( numVertices, 0 );
@@ -947,14 +957,14 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferIndexed( D3D11VertexBuffer* vb,
     if ( vb ) {
         UINT offset = 0;
         UINT uStride = sizeof( ExVertexStruct );
-        ID3D11Buffer* buffer = vb->GetVertexBuffer();
-        GetContext()->IASetVertexBuffers( 0, 1, &buffer, &uStride, &offset );
+        Microsoft::WRL::ComPtr<ID3D11Buffer> buffer = vb->GetVertexBuffer().Get();
+        GetContext()->IASetVertexBuffers( 0, 1, buffer.GetAddressOf(), &uStride, &offset );
 
         if ( sizeof( VERTEX_INDEX ) == sizeof( unsigned short ) ) {
-            GetContext()->IASetIndexBuffer( ib->GetVertexBuffer(),
+            GetContext()->IASetIndexBuffer( ib->GetVertexBuffer().Get(),
                 DXGI_FORMAT_R16_UINT, 0 );
         } else {
-            GetContext()->IASetIndexBuffer( ib->GetVertexBuffer(),
+            GetContext()->IASetIndexBuffer( ib->GetVertexBuffer().Get(),
                 DXGI_FORMAT_R32_UINT, 0 );
         }
     }
@@ -983,9 +993,9 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferIndexedUINT(
     if ( vb ) {
         UINT offset = 0;
         UINT uStride = sizeof( ExVertexStruct );
-        ID3D11Buffer* buffer = ((D3D11VertexBuffer*)vb)->GetVertexBuffer();
-        GetContext()->IASetVertexBuffers( 0, 1, &buffer, &uStride, &offset );
-        GetContext()->IASetIndexBuffer( ((D3D11VertexBuffer*)ib)->GetVertexBuffer(),
+        Microsoft::WRL::ComPtr<ID3D11Buffer> buffer = vb->GetVertexBuffer().Get();
+        GetContext()->IASetVertexBuffers( 0, 1, buffer.GetAddressOf(), &uStride, &offset );
+        GetContext()->IASetIndexBuffer( ((D3D11VertexBuffer*)ib)->GetVertexBuffer().Get(),
             DXGI_FORMAT_R32_UINT, 0 );
     }
 
@@ -1052,8 +1062,8 @@ XRESULT D3D11GraphicsEngine::DrawVertexArray( ExVertexStruct* vertices,
 
     UINT offset = 0;
     UINT uStride = stride;
-    ID3D11Buffer* buffer = TempVertexBuffer->GetVertexBuffer();
-    GetContext()->IASetVertexBuffers( 0, 1, &buffer, &uStride, &offset );
+    Microsoft::WRL::ComPtr<ID3D11Buffer> buffer = TempVertexBuffer->GetVertexBuffer().Get();
+    GetContext()->IASetVertexBuffers( 0, 1, buffer.GetAddressOf(), &uStride, &offset );
 
     // Draw the mesh
     GetContext()->Draw( numVertices, startVertex );
@@ -1083,18 +1093,18 @@ XRESULT D3D11GraphicsEngine::DrawIndexedVertexArray( ExVertexStruct* vertices,
     SetupVS_ExMeshDrawCall();
 
     D3D11_BUFFER_DESC desc;
-    TempVertexBuffer->GetVertexBuffer()->GetDesc( &desc );
+    TempVertexBuffer->GetVertexBuffer().Get()->GetDesc( &desc );
 
     EnsureTempVertexBufferSize( stride * numVertices );
     TempVertexBuffer->UpdateBuffer( vertices, stride * numVertices );
 
     UINT offset = 0;
     UINT uStride = stride;
-    ID3D11Buffer* buffers[] = {
-        TempVertexBuffer->GetVertexBuffer(),
-        ib->GetVertexBuffer()
+    Microsoft::WRL::ComPtr<ID3D11Buffer> buffers[] = {
+        TempVertexBuffer->GetVertexBuffer().Get(),
+        ib->GetVertexBuffer().Get()
     };
-    GetContext()->IASetVertexBuffers( 0, 2, buffers, &uStride, &offset );
+    GetContext()->IASetVertexBuffers( 0, 2, buffers->GetAddressOf(), &uStride, &offset );
 
     // Draw the mesh
     GetContext()->DrawIndexed( numIndices, 0, 0 );
@@ -1119,8 +1129,8 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferFF( D3D11VertexBuffer* vb,
 
     UINT offset = 0;
     UINT uStride = stride;
-    ID3D11Buffer* buffer = vb->GetVertexBuffer();
-    GetContext()->IASetVertexBuffers( 0, 1, &buffer, &uStride, &offset );
+    Microsoft::WRL::ComPtr<ID3D11Buffer> buffer = vb->GetVertexBuffer().Get();
+    GetContext()->IASetVertexBuffers( 0, 1, buffer.GetAddressOf(), &uStride, &offset );
 
     // Draw the mesh
     GetContext()->Draw( numVertices, startVertex );
@@ -1227,14 +1237,14 @@ XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh(
 
     UINT offset = 0;
     UINT uStride = sizeof( ExSkelVertexStruct );
-    ID3D11Buffer* buffer = vb->GetVertexBuffer();
-    GetContext()->IASetVertexBuffers( 0, 1, &buffer, &uStride, &offset );
+    Microsoft::WRL::ComPtr<ID3D11Buffer> buffer = vb->GetVertexBuffer().Get();
+    GetContext()->IASetVertexBuffers( 0, 1, buffer.GetAddressOf(), &uStride, &offset );
 
     if ( sizeof( VERTEX_INDEX ) == sizeof( unsigned short ) ) {
-        GetContext()->IASetIndexBuffer( ib->GetVertexBuffer(),
+        GetContext()->IASetIndexBuffer( ib->GetVertexBuffer().Get(),
             DXGI_FORMAT_R16_UINT, 0 );
     } else {
-        GetContext()->IASetIndexBuffer( ib->GetVertexBuffer(),
+        GetContext()->IASetIndexBuffer( ib->GetVertexBuffer().Get(),
             DXGI_FORMAT_R32_UINT, 0 );
     }
 
@@ -1272,7 +1282,7 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
 
     // Check buffersize
     D3D11_BUFFER_DESC desc;
-    DynamicInstancingBuffer->GetVertexBuffer()->GetDesc( &desc );
+    DynamicInstancingBuffer->GetVertexBuffer().Get()->GetDesc( &desc );
 
     if ( desc.ByteWidth < instanceDataStride * numInstances ) {
         if ( Engine::GAPI->GetRendererState().RendererSettings.EnableDebugLog )
@@ -1290,8 +1300,8 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
             D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC,
             D3D11VertexBuffer::CA_WRITE );
 
-        SetDebugName( DynamicInstancingBuffer->GetShaderResourceView(), "DynamicInstancingBuffer->ShaderResourceView" );
-        SetDebugName( DynamicInstancingBuffer->GetVertexBuffer(), "DynamicInstancingBuffer->VertexBuffer" );
+        SetDebugName( DynamicInstancingBuffer->GetShaderResourceView().Get(), "DynamicInstancingBuffer->ShaderResourceView" );
+        SetDebugName( DynamicInstancingBuffer->GetVertexBuffer().Get(), "DynamicInstancingBuffer->VertexBuffer" );
     }
 
     // Update the vertexbuffer
@@ -1322,16 +1332,16 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
     GetContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
     UINT offset[] = { 0, 0 };
     UINT uStride[] = { vertexStride, instanceDataStride };
-    ID3D11Buffer* buffers[] = {
-        ((D3D11VertexBuffer*)vb)->GetVertexBuffer(),
-        DynamicInstancingBuffer->GetVertexBuffer() };
-    GetContext()->IASetVertexBuffers( 0, 2, buffers, uStride, offset );
+    Microsoft::WRL::ComPtr<ID3D11Buffer> buffers[] = {
+        ((D3D11VertexBuffer*)vb)->GetVertexBuffer().Get(),
+        DynamicInstancingBuffer->GetVertexBuffer().Get() };
+    GetContext()->IASetVertexBuffers( 0, 2, buffers->GetAddressOf(), uStride, offset );
 
     if ( sizeof( VERTEX_INDEX ) == sizeof( unsigned short ) ) {
-        GetContext()->IASetIndexBuffer( ((D3D11VertexBuffer*)ib)->GetVertexBuffer(),
+        GetContext()->IASetIndexBuffer( ((D3D11VertexBuffer*)ib)->GetVertexBuffer().Get(),
             DXGI_FORMAT_R16_UINT, 0 );
     } else {
-        GetContext()->IASetIndexBuffer( ((D3D11VertexBuffer*)ib)->GetVertexBuffer(),
+        GetContext()->IASetIndexBuffer( ((D3D11VertexBuffer*)ib)->GetVertexBuffer().Get(),
             DXGI_FORMAT_R32_UINT, 0 );
     }
 
@@ -1350,16 +1360,16 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
     // Bind shader and pipeline flags
     UINT offset[] = { 0, 0 };
     UINT uStride[] = { vertexStride, instanceDataStride };
-    ID3D11Buffer* buffers[] = {
-        ((D3D11VertexBuffer*)vb)->GetVertexBuffer(),
-        ((D3D11VertexBuffer*)instanceData)->GetVertexBuffer() };
-    GetContext()->IASetVertexBuffers( 0, 2, buffers, uStride, offset );
+    Microsoft::WRL::ComPtr<ID3D11Buffer> buffers[] = {
+        ((D3D11VertexBuffer*)vb)->GetVertexBuffer().Get(),
+        ((D3D11VertexBuffer*)instanceData)->GetVertexBuffer().Get() };
+    GetContext()->IASetVertexBuffers( 0, 2, buffers->GetAddressOf(), uStride, offset );
 
     if ( sizeof( VERTEX_INDEX ) == sizeof( unsigned short ) ) {
-        GetContext()->IASetIndexBuffer( ((D3D11VertexBuffer*)ib)->GetVertexBuffer(),
+        GetContext()->IASetIndexBuffer( ((D3D11VertexBuffer*)ib)->GetVertexBuffer().Get(),
             DXGI_FORMAT_R16_UINT, 0 );
     } else {
-        GetContext()->IASetIndexBuffer( ((D3D11VertexBuffer*)ib)->GetVertexBuffer(),
+        GetContext()->IASetIndexBuffer( ((D3D11VertexBuffer*)ib)->GetVertexBuffer().Get(),
             DXGI_FORMAT_R32_UINT, 0 );
     }
 
@@ -1408,9 +1418,9 @@ XRESULT D3D11GraphicsEngine::BindActiveVertexShader() {
 
 /** Unbinds the texture at the given slot */
 XRESULT D3D11GraphicsEngine::UnbindTexture( int slot ) {
-    ID3D11ShaderResourceView* srv = nullptr;
-    GetContext()->PSSetShaderResources( slot, 1, &srv );
-    GetContext()->VSSetShaderResources( slot, 1, &srv );
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
+    GetContext()->PSSetShaderResources( slot, 1, srv.GetAddressOf() );
+    GetContext()->VSSetShaderResources( slot, 1, srv.GetAddressOf() );
 
     return XR_SUCCESS;
 }
@@ -2041,7 +2051,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
     // Now draw the actual pixels
     zCTexture* bound = nullptr;
     MaterialInfo* boundInfo = nullptr;
-    ID3D11ShaderResourceView* boundNormalmap = nullptr;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> boundNormalmap;
     for ( auto const& mesh : meshList ) {
         int indicesNumMod = 1;
         if ( mesh.first.Texture != bound &&
@@ -2066,9 +2076,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
             // none
             if ( !srv[1] ) {
                 // Modify the strength of that default normalmap for the material info
-                if ( info &&
-                    info->buffer
-                    .NormalmapStrength /* * Engine::GAPI->GetSceneWetness()*/
+                if ( info && info->buffer.NormalmapStrength /* * Engine::GAPI->GetSceneWetness()*/
                     != DEFAULT_NORMALMAP_STRENGTH ) {
                     info->buffer.NormalmapStrength = DEFAULT_NORMALMAP_STRENGTH;
                     info->UpdateConstantbuffer();
@@ -2118,15 +2126,15 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
 
                 info->Constantbuffer->BindToPixelShader( 2 );
 
-                // Don't let the game unload the texture after some timep
+                // Don't let the game unload the texture after some time
                 mesh.first.Material->GetAniTexture()->CacheIn( 0.6f );
                 boundInfo = info;
             }
             bound = mesh.first.Material->GetAniTexture();
             // Bind normalmap to HDS
             if ( !mesh.second->IndicesPNAEN.empty() ) {
-                GetContext()->DSSetShaderResources( 0, 1, &boundNormalmap );
-                GetContext()->HSSetShaderResources( 0, 1, &boundNormalmap );
+                GetContext()->DSSetShaderResources( 0, 1, boundNormalmap.GetAddressOf() );
+                GetContext()->HSSetShaderResources( 0, 1, boundNormalmap.GetAddressOf() );
             }
         }
 
@@ -2135,8 +2143,8 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
             boundInfo->TextureTesselationSettings.buffer.VT_TesselationFactor >
             0.0f ) {
             // Set normal/displacement map
-            GetContext()->DSSetShaderResources( 0, 1, &boundNormalmap );
-            GetContext()->HSSetShaderResources( 0, 1, &boundNormalmap );
+            GetContext()->DSSetShaderResources( 0, 1, boundNormalmap.GetAddressOf() );
+            GetContext()->HSSetShaderResources( 0, 1, boundNormalmap.GetAddressOf() );
             Setup_PNAEN( PNAEN_Default );
         }
 
@@ -2670,7 +2678,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround(
         } else {
             for ( auto&& itx : Engine::GAPI->GetWorldSections() ) {
                 for ( auto&& ity : itx.second ) {
-                    float vLen; XMStoreFloat( &vLen, XMVector3Length( XMVectorSet( itx.first - s.x, ity.first - s.y, 0, 0 ) ) );
+                    float vLen; XMStoreFloat( &vLen, XMVector3LengthEst( XMVectorSet( itx.first - s.x, ity.first - s.y, 0, 0 ) ) );
 
                     if ( vLen < 2 ) {
                         WorldMeshSectionInfo& section = ity.second;
@@ -2740,7 +2748,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround(
                     // Check vob range
 
                     float dist;
-                    XMStoreFloat( &dist, XMVector3Length( position - XMLoadFloat3( &it->LastRenderPosition ) ) );
+                    XMStoreFloat( &dist, XMVector3LengthEst( position - XMLoadFloat3( &it->LastRenderPosition ) ) );
                     if ( dist > range ) {
                         continue;
                     }
@@ -2817,7 +2825,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround(
 
                 // Check vob range
                 float dist;
-                XMStoreFloat( &dist, XMVector3Length( position - it->Vob->GetPositionWorldXM() ) );
+                XMStoreFloat( &dist, XMVector3LengthEst( position - it->Vob->GetPositionWorldXM() ) );
 
                 if ( dist > range ) {
                     continue;
@@ -2861,7 +2869,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround(
                 }
                 // Check vob range
                 float dist;
-                XMStoreFloat( &dist, XMVector3Length( position - skeletalMeshVob->Vob->GetPositionWorldXM() ) );
+                XMStoreFloat( &dist, XMVector3LengthEst( position - skeletalMeshVob->Vob->GetPositionWorldXM() ) );
 
                 if ( dist > range ) {
                     // Not in range
@@ -3053,7 +3061,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround( FXMVECTOR position,
         }
 
         D3D11_BUFFER_DESC desc;
-        DynamicInstancingBuffer->GetVertexBuffer()->GetDesc( &desc );
+        DynamicInstancingBuffer->GetVertexBuffer().Get()->GetDesc( &desc );
 
         byte* data;
         UINT size;
@@ -3137,7 +3145,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround( FXMVECTOR position,
 
             INT2 s = WorldConverter::GetSectionOfPos( skeletalMeshVob->Vob->GetPositionWorld() );
 
-            float dist; XMStoreFloat( &dist, XMVector3Length( skeletalMeshVob->Vob->GetPositionWorldXM() - position ) );
+            float dist; XMStoreFloat( &dist, XMVector3LengthEst( skeletalMeshVob->Vob->GetPositionWorldXM() - position ) );
             if ( dist > Engine::GAPI->GetRendererState().RendererSettings.IndoorVobDrawRadius )
                 continue;  // Skip out of range
 
@@ -3229,7 +3237,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
     if ( Engine::GAPI->GetRendererState().RendererSettings.DrawVOBs ) {
         // Create instancebuffer for this frame
         D3D11_BUFFER_DESC desc;
-        DynamicInstancingBuffer->GetVertexBuffer()->GetDesc( &desc );
+        DynamicInstancingBuffer->GetVertexBuffer().Get()->GetDesc( &desc );
 
         if ( desc.ByteWidth < sizeof( VobInstanceInfo ) * vobs.size() ) {
             if ( Engine::GAPI->GetRendererState().RendererSettings.EnableDebugLog )
@@ -3244,8 +3252,8 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
                 D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC,
                 D3D11VertexBuffer::CA_WRITE );
 
-            SetDebugName( DynamicInstancingBuffer->GetShaderResourceView(), "DynamicInstancingBuffer->ShaderResourceView" );
-            SetDebugName( DynamicInstancingBuffer->GetVertexBuffer(), "DynamicInstancingBuffer->VertexBuffer" );
+            SetDebugName( DynamicInstancingBuffer->GetShaderResourceView().Get(), "DynamicInstancingBuffer->ShaderResourceView" );
+            SetDebugName( DynamicInstancingBuffer->GetVertexBuffer().Get(), "DynamicInstancingBuffer->VertexBuffer" );
         }
 
         byte* data;
@@ -4130,9 +4138,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
         plcb.PL_Outdoor = light->IsIndoorVob ? 0.0f : 1.0f;
 
         float dist;
-        XMStoreFloat( &dist,
-            XMVector3Length(
-                XMLoadFloat3( plcb.Pl_PositionWorld.toXMFLOAT3() ) - Engine::GAPI->GetCameraPositionXM() ) );
+        XMStoreFloat( &dist, XMVector3LengthEst( XMLoadFloat3( plcb.Pl_PositionWorld.toXMFLOAT3() ) - Engine::GAPI->GetCameraPositionXM() ) );
 
         // Gradually fade in the lights
         if ( dist + plcb.PL_Range <
@@ -4317,8 +4323,8 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
     Engine::GAPI->GetRendererState().RendererSettings.EnableSMAA = oldState;
 
     // Reset state
-    ID3D11ShaderResourceView* srv = nullptr;
-    GetContext()->PSSetShaderResources( 2, 1, &srv );
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
+    GetContext()->PSSetShaderResources( 2, 1, srv.GetAddressOf() );
     GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
         DepthStencilBuffer->GetDepthStencilView().Get() );
 
@@ -4376,8 +4382,8 @@ void XM_CALLCONV D3D11GraphicsEngine::RenderShadowCube(
     D3D11ENGINE_RENDER_STAGE oldStage = RenderingStage;
     SetRenderingStage( DES_SHADOWMAP_CUBE );
 
-    ID3D11ShaderResourceView* srv = nullptr;
-    GetContext()->PSSetShaderResources( 3, 1, &srv );
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
+    GetContext()->PSSetShaderResources( 3, 1, srv.GetAddressOf() );
 
     if ( !debugRTV ) {
         GetContext()->OMSetRenderTargets( 0, nullptr, face );
@@ -4456,8 +4462,8 @@ void XM_CALLCONV D3D11GraphicsEngine::RenderShadowmaps( FXMVECTOR cameraPosition
 
     // Clear and Bind the shadowmap
 
-    ID3D11ShaderResourceView* srv = nullptr;
-    GetContext()->PSSetShaderResources( 3, 1, &srv );
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
+    GetContext()->PSSetShaderResources( 3, 1, srv.GetAddressOf() );
 
     if ( !debugRTV ) {
         GetContext()->OMSetRenderTargets( 0, nullptr, dsvOverwrite );
@@ -4716,22 +4722,22 @@ XRESULT D3D11GraphicsEngine::DrawOcean( GOcean* ocean ) {
     hd->GetConstantBuffer()[0]->UpdateBuffer( &hscb );
     hd->GetConstantBuffer()[0]->BindToHullShader( 1 );
 
-    ID3D11ShaderResourceView* tex_displacement;
-    ID3D11ShaderResourceView* tex_gradient;
-    ID3D11ShaderResourceView* tex_fresnel;
-    ID3D11ShaderResourceView* cube_reflect = ReflectionCube.Get();
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> tex_displacement;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> tex_gradient;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> tex_fresnel;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cube_reflect = ReflectionCube.Get();
     OceanSettingsConstantBuffer ocb = {};
-    ocean->GetFFTResources( &tex_displacement, &tex_gradient, &tex_fresnel, &ocb );
+    ocean->GetFFTResources( tex_displacement.GetAddressOf(), tex_gradient.GetAddressOf(), tex_fresnel.GetAddressOf(), &ocb );
     ocb.OS_SunColor = Engine::GAPI->GetSky()->GetSunColor();
 
-    if ( tex_gradient ) GetContext()->PSSetShaderResources( 0, 1, &tex_gradient );
+    if ( tex_gradient.Get() ) GetContext()->PSSetShaderResources( 0, 1, tex_gradient.GetAddressOf() );
 
-    if ( tex_displacement ) {
-        GetContext()->DSSetShaderResources( 0, 1, &tex_displacement );
+    if ( tex_displacement.Get() ) {
+        GetContext()->DSSetShaderResources( 0, 1, tex_displacement.GetAddressOf() );
     }
 
-    GetContext()->PSSetShaderResources( 1, 1, &tex_fresnel );
-    GetContext()->PSSetShaderResources( 3, 1, &cube_reflect );
+    GetContext()->PSSetShaderResources( 1, 1, tex_fresnel.GetAddressOf() );
+    GetContext()->PSSetShaderResources( 3, 1, cube_reflect.GetAddressOf() );
 
     // Scene information is still bound from rendering water surfaces
 
@@ -4780,7 +4786,7 @@ XRESULT D3D11GraphicsEngine::DrawOcean( GOcean* ocean ) {
         ActiveVS->GetConstantBuffer()[1]->UpdateBuffer( &world );
         ActiveVS->GetConstantBuffer()[1]->BindToVertexShader( 1 );
 
-        XMVECTOR localEye = XMVectorSet( 0, 0, 0, 0 );
+        XMVECTOR localEye = XMVectorZero();
         world = XMMatrixTranspose( world );
 
         localEye = XMVector3TransformCoord( localEye, XMMatrixInverse( nullptr, world * viewMatrix ) );
@@ -5135,7 +5141,7 @@ void D3D11GraphicsEngine::DrawQuadMarks() {
     for ( auto const& it : quadMarks ) {
         if ( !it.first->GetConnectedVob() ) continue;
 
-        float len; XMStoreFloat( &len, XMVector3Length( camPos - XMLoadFloat3( it.second.Position.toXMFLOAT3() ) ) );
+        float len; XMStoreFloat( &len, XMVector3LengthEst( camPos - XMLoadFloat3( it.second.Position.toXMFLOAT3() ) ) );
         if ( len > Engine::GAPI->GetRendererState().RendererSettings.VisualFXDrawRadius )
             continue;
 
@@ -5224,7 +5230,7 @@ void D3D11GraphicsEngine::CreateMainUIView() {
 
 void D3D11GraphicsEngine::EnsureTempVertexBufferSize( UINT size ) {
     D3D11_BUFFER_DESC desc;
-    TempVertexBuffer->GetVertexBuffer()->GetDesc( &desc );
+    TempVertexBuffer->GetVertexBuffer().Get()->GetDesc( &desc );
     if ( desc.ByteWidth < size ) {
         if ( Engine::GAPI->GetRendererState().RendererSettings.EnableDebugLog )
             LogInfo() << "(EnsureTempVertexBufferSize) TempVertexBuffer too small (" << desc.ByteWidth << "), need " << size << " bytes. Recreating buffer.";
@@ -5232,9 +5238,9 @@ void D3D11GraphicsEngine::EnsureTempVertexBufferSize( UINT size ) {
         // Buffer too small, recreate it
         TempVertexBuffer.reset( new D3D11VertexBuffer() );
         // Reinit with a bit of a margin, so it will not be reinit each time new vertex is added
-        TempVertexBuffer->Init( NULL, size * 1.1, D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE );
-        SetDebugName( TempVertexBuffer->GetShaderResourceView(), "TempVertexBuffer->ShaderResourceView" );
-        SetDebugName( TempVertexBuffer->GetVertexBuffer(), "TempVertexBuffer->VertexBuffer" );
+        TempVertexBuffer->Init( NULL, size * 2, D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE );
+        SetDebugName( TempVertexBuffer->GetShaderResourceView().Get(), "TempVertexBuffer->ShaderResourceView" );
+        SetDebugName( TempVertexBuffer->GetVertexBuffer().Get(), "TempVertexBuffer->VertexBuffer" );
     }
 }
 
@@ -5459,8 +5465,7 @@ XRESULT D3D11GraphicsEngine::OnVobRemovedFromWorld( zCVob* vob ) {
     if ( UIView ) UIView->GetEditorPanel()->OnVobRemovedFromWorld( vob );
 
     // Take out of shadowupdate queue
-    for ( auto it = FrameShadowUpdateLights.begin();
-        it != FrameShadowUpdateLights.end(); ++it ) {
+    for ( auto&& it = FrameShadowUpdateLights.begin(); it != FrameShadowUpdateLights.end(); ++it ) {
         if ( (*it)->Vob == vob ) {
             FrameShadowUpdateLights.erase( it );
             break;

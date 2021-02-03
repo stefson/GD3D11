@@ -73,8 +73,8 @@ void BaseWidget::CreateArrowCone( int Detail, int Axis, const float4& Color, Edi
     float Step = XM_2PI / ((float)Detail - 1);
     float s = 0;
 
-    float Length = BASEWIDGET_CONE_LENGTH;
     float Radius = BASEWIDGET_CONE_RADIUS;
+    float Length = BASEWIDGET_TRANS_LENGTH + 0.125;
 
     UINT i = 0;
     while ( i < NumVerts ) {
@@ -99,17 +99,20 @@ void BaseWidget::CreateArrowCone( int Detail, int Axis, const float4& Color, Edi
 
         // Connector tri
 
+        float sinf_s_r = sinf( s ) * Radius;
+        float cosf_s_r = cosf( s ) * Radius;
+
         switch ( Axis ) {
         case 0:
-            vx[i].Position = float3( BASEWIDGET_TRANS_LENGTH + 0.125, 0, 0 );
+            vx[i].Position = float3( Length, 0, 0 );
             break;
 
         case 1:
-            vx[i].Position = float3( 0, BASEWIDGET_TRANS_LENGTH + 0.125, 0 );
+            vx[i].Position = float3( 0, Length, 0 );
             break;
 
         case 2:
-            vx[i].Position = float3( 0, 0, BASEWIDGET_TRANS_LENGTH + 0.125 );
+            vx[i].Position = float3( 0, 0, Length );
             break;
         }
         EditorLinePrimitive::EncodeColor( &vx[i], Color );
@@ -118,15 +121,15 @@ void BaseWidget::CreateArrowCone( int Detail, int Axis, const float4& Color, Edi
         // Second vertex of the circle-line
         switch ( Axis ) {
         case 0:
-            vx[i].Position = float3( Length, (sinf( s ) * Radius), cosf( s ) * Radius );
+            vx[i].Position = float3( Length, sinf_s_r, cosf_s_r );
             break;
 
         case 1:
-            vx[i].Position = float3( (sinf( s ) * Radius), Length, cosf( s ) * Radius );
+            vx[i].Position = float3( sinf_s_r, Length, cosf_s_r );
             break;
 
         case 2:
-            vx[i].Position = float3( (sinf( s ) * Radius), cosf( s ) * Radius, Length );
+            vx[i].Position = float3( sinf_s_r, cosf_s_r, Length );
             break;
         }
         EditorLinePrimitive::EncodeColor( &vx[i], Color );
@@ -136,51 +139,51 @@ void BaseWidget::CreateArrowCone( int Detail, int Axis, const float4& Color, Edi
         switch ( Axis ) {
         case 0:
             // inner circle
-            vx[i].Position = float3( Length, (sinf( s - Step ) * Radius), cosf( s - Step ) * Radius );
+            vx[i].Position = float3( Length, sinf( s - Step ) * Radius, cosf( s - Step ) * Radius );
             EditorLinePrimitive::EncodeColor( &vx[i], Color );
             i++;
 
             // inner circle #2
-            vx[i].Position = float3( Length, (sinf( s ) * Radius), cosf( s ) * Radius );
+            vx[i].Position = float3( Length, sinf_s_r, cosf_s_r );
             EditorLinePrimitive::EncodeColor( &vx[i], Color );
             i++;
 
             // inner circle #3
-            vx[i].Position = float3( BASEWIDGET_TRANS_LENGTH + 0.125, 0, 0 );
+            vx[i].Position = float3( Length, 0, 0 );
             EditorLinePrimitive::EncodeColor( &vx[i], Color );
             i++;
             break;
 
         case 1:
             // inner circle
-            vx[i].Position = float3( (sinf( s - Step ) * Radius), Length, cosf( s - Step ) * Radius );
+            vx[i].Position = float3( sinf( s - Step ) * Radius, Length, cosf( s - Step ) * Radius );
             EditorLinePrimitive::EncodeColor( &vx[i], Color );
             i++;
 
             // inner circle #2
-            vx[i].Position = float3( (sinf( s ) * Radius), Length, cosf( s ) * Radius );
+            vx[i].Position = float3( sinf_s_r, Length, cosf_s_r );
             EditorLinePrimitive::EncodeColor( &vx[i], Color );
             i++;
 
             // inner circle #3
-            vx[i].Position = float3( 0, BASEWIDGET_TRANS_LENGTH + 0.125, 0 );
+            vx[i].Position = float3( 0, Length, 0 );
             EditorLinePrimitive::EncodeColor( &vx[i], Color );
             i++;
             break;
 
         case 2:
             // inner circle
-            vx[i].Position = float3( (sinf( s - Step ) * Radius), cosf( s - Step ) * Radius, Length );
+            vx[i].Position = float3( sinf( s - Step ) * Radius, cosf( s - Step ) * Radius, Length );
             EditorLinePrimitive::EncodeColor( &vx[i], Color );
             i++;
 
             // inner circle #2
-            vx[i].Position = float3( (sinf( s ) * Radius), cosf( s ) * Radius, Length );
+            vx[i].Position = float3( sinf_s_r, cosf_s_r, Length );
             EditorLinePrimitive::EncodeColor( &vx[i], Color );
             i++;
 
             // inner circle #3
-            vx[i].Position = float3( 0, 0, BASEWIDGET_TRANS_LENGTH + 0.125 );
+            vx[i].Position = float3( 0, 0, Length );
             EditorLinePrimitive::EncodeColor( &vx[i], Color );
             i++;
             break;

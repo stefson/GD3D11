@@ -33,7 +33,7 @@ D3D11Effect::~D3D11Effect() {
 }
 
 /** Loads a texturearray. Use like the following: Put path and prefix as parameter. The files must then be called name_xxxx.dds */
-HRESULT LoadTextureArray( ID3D11Device* pd3dDevice, ID3D11DeviceContext* context, char* sTexturePrefix, int iNumTextures, ID3D11Texture2D** ppTex2D, ID3D11ShaderResourceView** ppSRV );
+HRESULT LoadTextureArray( ID3D11Device1* pd3dDevice, ID3D11DeviceContext1* context, char* sTexturePrefix, int iNumTextures, ID3D11Texture2D** ppTex2D, ID3D11ShaderResourceView** ppSRV );
 
 /** Fills a vector of random raindrop data */
 void D3D11Effect::FillRandomRaindropData( std::vector<ParticleInstanceInfo>& data ) {
@@ -162,16 +162,16 @@ XRESULT D3D11Effect::DrawRain() {
 
 	firstFrame = false;
 
-	ID3D11Buffer* bobjDraw = b->GetVertexBuffer();
-	ID3D11Buffer* bobjStream = ((D3D11VertexBuffer*)RainBufferStreamTo)->GetVertexBuffer();
+	Microsoft::WRL::ComPtr<ID3D11Buffer> bobjDraw = b->GetVertexBuffer().Get();
+	Microsoft::WRL::ComPtr<ID3D11Buffer> bobjStream = ((D3D11VertexBuffer*)RainBufferStreamTo)->GetVertexBuffer().Get();
 	UINT stride = sizeof( ParticleInstanceInfo );
 	UINT offset = 0;
 
 	// Bind buffer to draw from last frame
-	e->GetContext()->IASetVertexBuffers( 0, 1, &bobjDraw, &stride, &offset );
+	e->GetContext()->IASetVertexBuffers( 0, 1, bobjDraw.GetAddressOf(), &stride, &offset );
 
 	// Set stream target
-	e->GetContext()->SOSetTargets( 1, &bobjStream, &offset );
+	e->GetContext()->SOSetTargets( 1, bobjStream.GetAddressOf(), &offset );
 
 	// Apply shaders
 	particleAdvanceVS->Apply();
@@ -278,7 +278,7 @@ XRESULT D3D11Effect::DrawRainShadowmap() {
 
 	// Get the section we are currently in
 	XMVECTOR p = Engine::GAPI->GetCameraPositionXM();
-	XMVECTOR dir = XMVector3Normalize( XMLoadFloat3( &Engine::GAPI->GetRendererState().RendererSettings.RainGlobalVelocity ) * -1 );
+	XMVECTOR dir = XMVector3NormalizeEst( XMLoadFloat3( &Engine::GAPI->GetRendererState().RendererSettings.RainGlobalVelocity ) * -1 );
 	// Set the camera height to the highest point in this section
 	//p.y = 0;
 	p += dir * 6000.0f;
@@ -343,7 +343,7 @@ XRESULT D3D11Effect::DrawRainShadowmap() {
 // LoadTextureArray loads a texture array and associated view from a series
 // of textures on disk.
 //--------------------------------------------------------------------------------------
-HRESULT LoadTextureArray( ID3D11Device* pd3dDevice, ID3D11DeviceContext* context, char* sTexturePrefix, int iNumTextures, ID3D11Texture2D** ppTex2D, ID3D11ShaderResourceView** ppSRV ) {
+HRESULT LoadTextureArray( ID3D11Device1* pd3dDevice, ID3D11DeviceContext1* context, char* sTexturePrefix, int iNumTextures, ID3D11Texture2D** ppTex2D, ID3D11ShaderResourceView** ppSRV ) {
 	if ( !ppTex2D ) {
 		LogError() << "invalid argument: ppTex2D. should not be null";
 		return E_FAIL;

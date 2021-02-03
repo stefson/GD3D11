@@ -20,7 +20,7 @@ D3D11PShader::~D3D11PShader() {
 	// Remove from state map
 	D3D11ObjectIdManager::ErasePShader( this );
 
-	if ( PixelShader )PixelShader->Release();
+	SAFE_RELEASE( PixelShader );
 
 	for ( unsigned int i = 0; i < ConstantBuffers.size(); i++ ) {
 		delete ConstantBuffers[i];
@@ -78,14 +78,14 @@ XRESULT D3D11PShader::LoadShader( const char* pixelShader, const std::vector<D3D
 	HRESULT hr;
 	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase*)Engine::GraphicsEngine;
 
-	ID3DBlob* psBlob;
+	Microsoft::WRL::ComPtr<ID3DBlob> psBlob;
 
 	if ( Engine::GAPI->GetRendererState().RendererSettings.EnableDebugLog )
 		LogInfo() << "Compilling pixel shader: " << pixelShader;
 	File = pixelShader;
 
 	// Compile shaders
-	if ( FAILED( CompileShaderFromFile( pixelShader, "PSMain", "ps_5_0", &psBlob, makros ) ) ) {
+	if ( FAILED( CompileShaderFromFile( pixelShader, "PSMain", "ps_5_0", psBlob.GetAddressOf(), makros ) ) ) {
 		return XR_FAILED;
 	}
 
@@ -93,8 +93,6 @@ XRESULT D3D11PShader::LoadShader( const char* pixelShader, const std::vector<D3D
 	LE( engine->GetDevice()->CreatePixelShader( psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &PixelShader ) );
 
 	SetDebugName( PixelShader, pixelShader );
-
-	psBlob->Release();
 
 	return XR_SUCCESS;
 }

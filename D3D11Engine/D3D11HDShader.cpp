@@ -28,8 +28,8 @@ D3D11HDShader::~D3D11HDShader() {
 	// Remove from state map
 	D3D11ObjectIdManager::EraseHDShader( this );
 
-	if ( HullShader )HullShader->Release();
-	if ( DomainShader )DomainShader->Release();
+	SAFE_RELEASE( HullShader );
+	SAFE_RELEASE( DomainShader );
 
 	for ( unsigned int i = 0; i < ConstantBuffers.size(); i++ ) {
 		delete ConstantBuffers[i];
@@ -79,19 +79,19 @@ XRESULT D3D11HDShader::LoadShader( const char* hullShader, const char* domainSha
 	HRESULT hr;
 	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase*)Engine::GraphicsEngine;
 
-	ID3DBlob* hsBlob;
-	ID3DBlob* dsBlob;
+	Microsoft::WRL::ComPtr<ID3DBlob> hsBlob;
+	Microsoft::WRL::ComPtr<ID3DBlob> dsBlob;
 
 	if ( Engine::GAPI->GetRendererState().RendererSettings.EnableDebugLog )
 		LogInfo() << "Compilling hull shader: " << hullShader;
 	File = hullShader;
 
 	// Compile shaders
-	if ( FAILED( CompileShaderFromFile( hullShader, "HSMain", "hs_5_0", &hsBlob ) ) ) {
+	if ( FAILED( CompileShaderFromFile( hullShader, "HSMain", "hs_5_0", hsBlob.GetAddressOf() ) ) ) {
 		return XR_FAILED;
 	}
 
-	if ( FAILED( CompileShaderFromFile( domainShader, "DSMain", "ds_5_0", &dsBlob ) ) ) {
+	if ( FAILED( CompileShaderFromFile( domainShader, "DSMain", "ds_5_0", dsBlob.GetAddressOf() ) ) ) {
 		return XR_FAILED;
 	}
 
@@ -101,9 +101,6 @@ XRESULT D3D11HDShader::LoadShader( const char* hullShader, const char* domainSha
 
 	SetDebugName( HullShader, hullShader );
 	SetDebugName( DomainShader, domainShader );
-
-	hsBlob->Release();
-	dsBlob->Release();
 
 	return XR_SUCCESS;
 }

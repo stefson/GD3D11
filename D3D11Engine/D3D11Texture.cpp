@@ -112,7 +112,7 @@ XRESULT D3D11Texture::UpdateDataDeferred( void* data, int mip, bool noLock ) {
 	if ( !noLock )
 		Engine::GAPI->EnterResourceCriticalSection();
 
-	engine->GetDeferredMediaContext()->UpdateSubresource( Texture.Get(), mip, nullptr, data, GetRowPitchBytes( mip ), GetSizeInBytes( mip ) );
+	engine->GetDeferredMediaContext1()->UpdateSubresource( Texture.Get(), mip, nullptr, data, GetRowPitchBytes( mip ), GetSizeInBytes( mip ) );
 
 	if ( !noLock )
 		Engine::GAPI->LeaveResourceCriticalSection();
@@ -123,7 +123,7 @@ XRESULT D3D11Texture::UpdateDataDeferred( void* data, int mip, bool noLock ) {
 /** Returns the RowPitch-Bytes */
 UINT D3D11Texture::GetRowPitchBytes( int mip ) {
 	int px = (int)std::max( 1.0, floor( TextureSize.x / pow( 2.0f, mip ) ) );
-	int py = (int)std::max( 1.0, floor( TextureSize.y / pow( 2.0f, mip ) ) );
+	//int py = (int)std::max( 1.0, floor( TextureSize.y / pow( 2.0f, mip ) ) );
 	//int px = TextureSize.x;
 	//int py = TextureSize.y;
 
@@ -198,31 +198,29 @@ XRESULT D3D11Texture::CreateThumbnail() {
 	LE( engine->GetDevice()->CreateTexture2D( &textureDesc, nullptr, &Thumbnail ) );
 
 	// Create temporary RTV
-	ID3D11RenderTargetView* tempRTV;
-	LE( engine->GetDevice()->CreateRenderTargetView( Thumbnail.Get(), nullptr, &tempRTV ) );
-	if ( !tempRTV )
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> tempRTV;
+	LE( engine->GetDevice()->CreateRenderTargetView( Thumbnail.Get(), nullptr, tempRTV.GetAddressOf() ) );
+	if ( !tempRTV.Get() )
 		return XR_FAILED;
 
-	engine->GetContext()->ClearRenderTargetView( tempRTV, (float*)&float4( 1, 0, 0, 1 ) );
+	engine->GetContext()->ClearRenderTargetView( tempRTV.Get(), (float*)&float4( 1, 0, 0, 1 ) );
 
 	// Copy main texture to it
 	engine->GetContext()->PSSetShaderResources( 0, 1, ShaderResourceView.GetAddressOf() );
 
 	ID3D11RenderTargetView* oldRTV[2];
-	ID3D11DepthStencilView* oldDSV;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> oldDSV;
 
-	engine->GetContext()->OMGetRenderTargets( 2, oldRTV, &oldDSV );
+	engine->GetContext()->OMGetRenderTargets( 2, oldRTV, oldDSV.GetAddressOf() );
 
-	engine->GetContext()->OMSetRenderTargets( 1, &tempRTV, nullptr );
+	engine->GetContext()->OMSetRenderTargets( 1, tempRTV.GetAddressOf(), nullptr );
 	engine->DrawQuad( INT2( 0, 0 ), INT2( 256, 256 ) );
 
-	engine->GetContext()->OMSetRenderTargets( 2, oldRTV, oldDSV );
+	engine->GetContext()->OMSetRenderTargets( 2, oldRTV, oldDSV.Get() );
 
-	if ( oldRTV[0] )oldRTV[0]->Release();
-	if ( oldRTV[1] )oldRTV[1]->Release();
-	if ( oldDSV )oldDSV->Release();
+	SAFE_RELEASE( oldRTV[0] );
+	SAFE_RELEASE( oldRTV[1] );
 
-	tempRTV->Release();
 	return XR_SUCCESS;
 }
 
@@ -242,13 +240,13 @@ XRESULT D3D11Texture::GenerateMipMaps() {
 
 	RenderToTextureBuffer* b = new RenderToTextureBuffer( engine->GetDevice().Get(), TextureSize.x, TextureSize.y, DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, DXGI_FORMAT_UNKNOWN, DXGI_FORMAT_UNKNOWN, MipMapCount );
 
-	engine->GetDeferredMediaContext()->CopySubresourceRegion( b->GetTexture().Get(), 0, 0, 0, 0, Texture.Get(), 0, nullptr );
+	engine->GetDeferredMediaContext1()->CopySubresourceRegion( b->GetTexture().Get(), 0, 0, 0, 0, Texture.Get(), 0, nullptr );
 
 	// Generate mips
-	engine->GetDeferredMediaContext()->GenerateMips( b->GetShaderResView().Get() );
+	engine->GetDeferredMediaContext1()->GenerateMips( b->GetShaderResView().Get() );
 
 	// Copy the full chain back
-	engine->GetDeferredMediaContext()->CopyResource( Texture.Get(), b->GetTexture().Get() );
+	engine->GetDeferredMediaContext1()->CopyResource( Texture.Get(), b->GetTexture().Get() );
 	delete b;
 
 	Engine::GAPI->LeaveResourceCriticalSection();

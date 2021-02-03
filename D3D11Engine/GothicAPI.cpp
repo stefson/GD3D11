@@ -800,7 +800,7 @@ void GothicAPI::DrawWorldMeshNaive() {
 
 	START_TIMING();
 	if ( RendererState.RendererSettings.DrawSkeletalMeshes ) {
-		XMVECTOR xmCamPos = GetCameraPositionXM();
+		FXMVECTOR xmCamPos = GetCameraPositionXM();
 
 		Engine::GraphicsEngine->SetActivePixelShader( "PS_World" );
 		// Set up frustum for the camera
@@ -811,7 +811,7 @@ void GothicAPI::DrawWorldMeshNaive() {
 			if ( !vobInfo->VisualInfo ) continue;
 
 			float dist;
-			XMStoreFloat( &dist, XMVector3Length( XMVectorSubtract( vobInfo->Vob->GetPositionWorldXM(), xmCamPos ) ) );
+			XMStoreFloat( &dist, XMVector3LengthEst( XMVectorSubtract( vobInfo->Vob->GetPositionWorldXM(), xmCamPos ) ) );
 
 			if ( dist > RendererState.RendererSettings.SkeletalMeshDrawRadius )
 				continue; // Skip out of range
@@ -984,7 +984,7 @@ void GothicAPI::CalcPolyStripMeshes() {
 /** Returns a list of visible particle-effects */
 void GothicAPI::GetVisibleParticleEffectsList( std::vector<zCVob*>& pfxList ) {
 	if ( RendererState.RendererSettings.DrawParticleEffects ) {
-		XMVECTOR camPos = GetCameraPositionXM();
+		FXMVECTOR camPos = GetCameraPositionXM();
 
 		// now it is save to render
 		for ( auto const& it : ParticleEffectVobs ) {
@@ -1008,7 +1008,7 @@ static bool DecalSortcmpFunc( const std::pair<zCVob*, float>& a, const std::pair
 
 /** Gets a list of visible decals */
 void GothicAPI::GetVisibleDecalList( std::vector<zCVob*>& decals ) {
-	XMVECTOR camPos = GetCameraPositionXM();
+	FXMVECTOR camPos = GetCameraPositionXM();
 	static std::vector<std::pair<zCVob*, float>> decalDistances; // Static to get around reallocations
 
 	for ( auto const& it : DecalVobs ) {
@@ -1268,8 +1268,7 @@ void GothicAPI::OnRemovedVob( zCVob* vob, zCWorld* world ) {
 
 	// Erase the vob from visual-vob map
 	std::list<BaseVobInfo*>& list = VobsByVisual[vob->GetVisual()];
-	const auto&& listEnd = list.end();
-	for ( auto&& it = list.begin(); it != listEnd; ++it ) {
+	for ( auto& it = list.begin(); it != list.end(); ++it ) {
 		if ( (*it)->Vob == vob ) {
 			list.erase( it );
 			break; // Can (should!) only be in here once
@@ -1375,26 +1374,24 @@ void GothicAPI::OnRemovedVob( zCVob* vob, zCWorld* world ) {
 		vi->VobSection->Vobs.remove( vi );
 	}
 	// Erase it from the skeletal vob-list
-	for ( auto it = SkeletalMeshVobs.begin(); it != SkeletalMeshVobs.end(); ++it ) {
+	for ( auto& it = SkeletalMeshVobs.begin(); it != SkeletalMeshVobs.end(); ++it ) {
 		if ( (*it)->Vob == vob ) {
-			SkeletalVobInfo* vi = *it;
-			it = SkeletalMeshVobs.erase( it );
-
-			delete vi;
+			//SkeletalVobInfo* vi = *it;
+			SkeletalMeshVobs.erase( it );
 			break;
 		}
 	}
 
-	for ( auto it = AnimatedSkeletalVobs.begin(); it != AnimatedSkeletalVobs.end(); ++it ) {
+	for ( auto& it = AnimatedSkeletalVobs.begin(); it != AnimatedSkeletalVobs.end(); ++it ) {
 		if ( (*it)->Vob == vob ) {
-			SkeletalVobInfo* vi = *it;
-			it = AnimatedSkeletalVobs.erase( it );
+			//SkeletalVobInfo* vi = *it;
+			AnimatedSkeletalVobs.erase( it );
 			break;
 		}
 	}
 
 	// Erase it from dynamically loaded vobs
-	for ( auto it = DynamicallyAddedVobs.begin(); it != DynamicallyAddedVobs.end(); ++it ) {
+	for ( auto& it = DynamicallyAddedVobs.begin(); it != DynamicallyAddedVobs.end(); ++it ) {
 		if ( (*it)->Vob == vob ) {
 			DynamicallyAddedVobs.erase( it );
 			break;
@@ -1419,7 +1416,7 @@ void GothicAPI::OnSetVisual( zCVob* vob ) {
 
 	// Add the vob to the set
 	if ( RegisteredVobs.find( vob ) != RegisteredVobs.end() ) {
-		for ( const auto& it : SkeletalMeshVobs ) {
+		for ( auto const& it : SkeletalMeshVobs ) {
 			if ( it->VisualInfo && it->Vob == vob && it->VisualInfo->Visual == (zCModel*)vob->GetVisual() ) {
 				return; // No change, skip this.
 			}
@@ -1616,7 +1613,7 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
 		return; // Not supported yet
 
 	XMMATRIX world = vi->Vob->GetWorldMatrixXM();
-	XMVECTOR modelScale = model->GetModelScaleXM();
+	FXMVECTOR modelScale = model->GetModelScaleXM();
 	XMMATRIX scale = XMMatrixScalingFromVector( modelScale );
 
 	world = world * scale;
@@ -1999,7 +1996,7 @@ void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameDa
 		// Do something I dont exactly know what it does :)
 		// TODO: Figure out why this crashes sometimes! (G1)
 #ifdef BUILD_GOTHIC_1_08k
-		 //fx->GetStaticPFXList()->TouchPfx(fx);
+	// fx->GetStaticPFXList()->TouchPfx(fx);
 #else
 		fx->GetStaticPFXList()->TouchPfx( fx );
 #endif
@@ -2046,10 +2043,6 @@ void GothicAPI::DrawTriangle( float3 pos = { 0.0f,0.0f,0.0f } ) {
 }
 
 /** Sets the Projection matrix */
-void GothicAPI::SetProjTransformDX( const DirectX::XMFLOAT4X4& proj ) {
-	RendererState.TransformState.TransformProj = proj;
-}
-/** Sets the Projection matrix */
 void XM_CALLCONV GothicAPI::SetProjTransformXM( const DirectX::XMMATRIX proj ) {
 	XMStoreFloat4x4( &RendererState.TransformState.TransformProj, proj );
 }
@@ -2066,13 +2059,6 @@ void XM_CALLCONV GothicAPI::SetWorldTransformXM( XMMATRIX world, bool transpose 
 		XMStoreFloat4x4( &RendererState.TransformState.TransformWorld, XMMatrixTranspose( world ) );
 	else
 		XMStoreFloat4x4( &RendererState.TransformState.TransformWorld, world );
-}
-/** Sets the world matrix */
-void GothicAPI::SetWorldTransformDX( const XMFLOAT4X4& world, bool transpose ) {
-	if ( transpose )
-		XMStoreFloat4x4( &RendererState.TransformState.TransformWorld, XMMatrixTranspose( XMLoadFloat4x4( &world ) ) );
-	else
-		RendererState.TransformState.TransformWorld = world;
 }
 /** Sets the world matrix */
 void XM_CALLCONV GothicAPI::SetViewTransformXM( XMMATRIX view, bool transpose ) {
@@ -2184,8 +2170,8 @@ SkeletalVobInfo* GothicAPI::TraceSkeletalMeshVobsBB( const DirectX::XMFLOAT3& or
 		float t = 0;
 		XMFLOAT3 BBoxlocal_min;
 		XMFLOAT3 BBoxlocal_max;
-		XMVECTOR GetBBoxLocal_min = XMVectorSet( it->Vob->GetBBoxLocal().Min.x, it->Vob->GetBBoxLocal().Min.y, it->Vob->GetBBoxLocal().Min.z, 0 );
-		XMVECTOR GetBBoxLocal_max = XMVectorSet( it->Vob->GetBBoxLocal().Max.x, it->Vob->GetBBoxLocal().Max.y, it->Vob->GetBBoxLocal().Max.z, 0 );
+		FXMVECTOR GetBBoxLocal_min = XMVectorSet( it->Vob->GetBBoxLocal().Min.x, it->Vob->GetBBoxLocal().Min.y, it->Vob->GetBBoxLocal().Min.z, 0 );
+		FXMVECTOR GetBBoxLocal_max = XMVectorSet( it->Vob->GetBBoxLocal().Max.x, it->Vob->GetBBoxLocal().Max.y, it->Vob->GetBBoxLocal().Max.z, 0 );
 		XMStoreFloat3( &BBoxlocal_min, GetBBoxLocal_min + it->Vob->GetPositionWorldXM() );
 		XMStoreFloat3( &BBoxlocal_max, GetBBoxLocal_max + it->Vob->GetPositionWorldXM() );
 		if ( Toolbox::IntersectBox( BBoxlocal_min, BBoxlocal_max, origin, dir, t ) ) {
@@ -2323,7 +2309,7 @@ void XM_CALLCONV GothicAPI::UnprojectXM( FXMVECTOR p, XMVECTOR& worldPos, XMVECT
 
 	// Transform and output
 	worldPos = XMVector3TransformCoord( u, invView );
-	u = XMVector3Normalize( u );
+	u = XMVector3NormalizeEst( u );
 	worldDir = XMVector3TransformCoord( u, invView );
 }
 
@@ -2627,7 +2613,7 @@ void GothicAPI::CollectVisibleVobs( std::vector<VobInfo*>& vobs, std::vector<Vob
 	// Recursively go through the tree and draw all nodes
 	CollectVisibleVobsHelper( root, root->OriginalNode->BBox3D, 63, vobs, lights, mobs );
 
-	XMVECTOR camPos = GetCameraPositionXM();
+	FXMVECTOR camPos = GetCameraPositionXM();
 	const float vobIndoorDist = Engine::GAPI->GetRendererState().RendererSettings.IndoorVobDrawRadius;
 	const float vobOutdoorDist = Engine::GAPI->GetRendererState().RendererSettings.OutdoorVobDrawRadius;
 	const float vobOutdoorSmallDist = Engine::GAPI->GetRendererState().RendererSettings.OutdoorSmallVobDrawRadius;
@@ -2637,8 +2623,7 @@ void GothicAPI::CollectVisibleVobs( std::vector<VobInfo*>& vobs, std::vector<Vob
 
 	// Add visible dynamically added vobs
 	if ( Engine::GAPI->GetRendererState().RendererSettings.DrawVOBs ) {
-		auto const& dynAllocatedVobs = DynamicallyAddedVobs;
-		for ( auto const& it : dynAllocatedVobs ) {
+		for ( auto const& it : DynamicallyAddedVobs ) {
 			// Get distance to this vob
 			float dist;
 			XMStoreFloat( &dist, DirectX::XMVector3LengthEst( camPos - it->Vob->GetPositionWorldXM() ) );
@@ -2804,7 +2789,7 @@ static void CVVH_AddNotDrawnVobToList( std::vector<VobInfo*>& target, std::vecto
 	for ( auto const& it : source ) {
 		if ( !it->VisibleInRenderPass ) {
 			float vd;
-			XMStoreFloat( &vd, XMVector3Length( XMVectorSubtract( Engine::GAPI->GetCameraPositionXM(), XMLoadFloat3( &it->LastRenderPosition ) ) ) );
+			XMStoreFloat( &vd, XMVector3LengthEst( XMVectorSubtract( Engine::GAPI->GetCameraPositionXM(), XMLoadFloat3( &it->LastRenderPosition ) ) ) );
 			if ( vd < dist && it->Vob->GetShowVisual() ) {
 				VobInstanceInfo vii;
 				vii.world = it->WorldMatrix;

@@ -100,7 +100,7 @@ namespace Toolbox {
 
 	FORCEINLINE
 		float XMVector3LengthFloat( DirectX::FXMVECTOR vector ) {
-		float len; DirectX::XMStoreFloat( &len, DirectX::XMVector3Length( vector ) );
+		float len; DirectX::XMStoreFloat( &len, DirectX::XMVector3LengthEst( vector ) );
 		return len;
 	}
 	FORCEINLINE
@@ -110,7 +110,7 @@ namespace Toolbox {
 	}
 	FORCEINLINE
 		float XMVector2LengthFloat( DirectX::FXMVECTOR vector ) {
-		float len; DirectX::XMStoreFloat( &len, DirectX::XMVector2Length( vector ) );
+		float len; DirectX::XMStoreFloat( &len, DirectX::XMVector2LengthEst( vector ) );
 		return len;
 	}
 	FORCEINLINE

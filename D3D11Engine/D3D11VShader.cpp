@@ -21,8 +21,8 @@ D3D11VShader::~D3D11VShader() {
 	// Remove from state map
 	D3D11ObjectIdManager::EraseVShader( this );
 
-	if ( VertexShader )VertexShader->Release();
-	if ( InputLayout )InputLayout->Release();
+	SAFE_RELEASE( VertexShader );
+	SAFE_RELEASE( InputLayout );
 
 	for ( unsigned int i = 0; i < ConstantBuffers.size(); i++ ) {
 		delete ConstantBuffers[i];
@@ -79,7 +79,7 @@ XRESULT D3D11VShader::LoadShader( const char* vertexShader, int layout, const st
 	HRESULT hr;
 	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase*)Engine::GraphicsEngine;
 
-	ID3DBlob* vsBlob;
+	Microsoft::WRL::ComPtr<ID3DBlob> vsBlob;
 
 	if ( Engine::GAPI->GetRendererState().RendererSettings.EnableDebugLog )
 		LogInfo() << "Compilling vertex shader: " << vertexShader;
@@ -87,7 +87,7 @@ XRESULT D3D11VShader::LoadShader( const char* vertexShader, int layout, const st
 
 
 	// Compile shader
-	if ( FAILED( CompileShaderFromFile( vertexShader, "VSMain", "vs_5_0", &vsBlob, makros ) ) ) {
+	if ( FAILED( CompileShaderFromFile( vertexShader, "VSMain", "vs_5_0", vsBlob.GetAddressOf(), makros ) ) ) {
 		return XR_FAILED;
 	}
 
@@ -274,8 +274,6 @@ XRESULT D3D11VShader::LoadShader( const char* vertexShader, int layout, const st
 			vsBlob->GetBufferSize(), &InputLayout ) );
 		break;
 	}
-
-	vsBlob->Release();
 
 	return XR_SUCCESS;
 }
