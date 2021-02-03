@@ -130,7 +130,7 @@ XRESULT D3D11GraphicsEngine::Init() {
 
 	// Create D3D11-Device
 #ifndef DEBUG_D3D11
-	LE( D3D11CreateDevice( DXGIAdapter1.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags,
+	LE( D3D11CreateDevice( DXGIAdapter.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags,
 		&featurelevel, 1, D3D11_SDK_VERSION, &Device, nullptr, &Context ) );
 #else
 	LE( D3D11CreateDevice( DXGIAdapter.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr,
