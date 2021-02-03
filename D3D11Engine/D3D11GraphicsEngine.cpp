@@ -5670,8 +5670,12 @@ void D3D11GraphicsEngine::DrawString( const std::string& str, float x, float y, 
 	if (str.empty()) return;
 	if (!font) return;
 	if (!font->tex) return;
+	float UIScale = 1.0f;
 
-	const float UIScale = Engine::GAPI->GetRendererState().RendererSettings.FontScaling;
+	if (oCGame::GetGame()) {
+		UIScale = (float)oCGame::GetGame()->hpBar->psizex / 180;
+	}
+
 	constexpr float FONT_CACHE_PRIO = -1;
 	zCTexture* tx = font->tex;
 
