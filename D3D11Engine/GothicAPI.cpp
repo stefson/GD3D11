@@ -3640,7 +3640,6 @@ XRESULT GothicAPI::SaveMenuSettings( const std::string& file ) {
 	WritePrivateProfileStringA( "Tesselation", "AllowWorldMeshTesselation", std::to_string( s.AllowWorldMeshTesselation ? TRUE : FALSE ).c_str(), ini.c_str() );
 
 	WritePrivateProfileStringA("FontRendering", "Enable", std::to_string(s.EnableCustomFontRendering ? TRUE : FALSE).c_str(), ini.c_str());
-	WritePrivateProfileStringA("FontRendering", "Scale", std::to_string( s.FontScaling ).c_str(), ini.c_str() );
 
 
 	return XR_SUCCESS;
@@ -3734,7 +3733,6 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
 	s.HbaoSettings.SsaoStepCount = GetPrivateProfileIntA( "HBAO", "SsaoStepCount", defaultHBAOSettings.SsaoStepCount, ini.c_str() );
 
 	s.EnableCustomFontRendering = GetPrivateProfileBoolA( "FontRendering", "Enable", defaultRendererSettings.EnableCustomFontRendering, ini );
-	s.FontScaling = GetPrivateProfileFloatA("FontRendering", "Scale", defaultRendererSettings.FontScaling, ini);
 
 	// Fix the shadow range
 	s.WorldShadowRangeScale = Toolbox::GetRecommendedWorldShadowRangeScaleForSize( s.ShadowMapSize );
