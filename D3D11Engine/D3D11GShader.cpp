@@ -107,7 +107,7 @@ XRESULT D3D11GShader::LoadShader( const char* geometryShader, const std::vector<
 			int type;
 		};
 
-		D3D11_SO_DECLARATION_ENTRY layout11 [] =
+		D3D11_SO_DECLARATION_ENTRY layout11[] =
 		{
 			{ 0, "POSITION", 0, 0, 3, 0},
 			{ 0, "DIFFUSE", 0, 0, 4, 0},
@@ -130,7 +130,7 @@ XRESULT D3D11GShader::LoadShader( const char* geometryShader, const std::vector<
 		engine->GetDevice()->CreateGeometryShaderWithStreamOutput( gsBlob->GetBufferPointer(), gsBlob->GetBufferSize(), soDec, numSoDecElements, &stride, 1, D3D11_SO_NO_RASTERIZED_STREAM, nullptr, &GeometryShader );
 	}
 
-	SetDebugName(GeometryShader, geometryShader );
+	SetDebugName( GeometryShader, geometryShader );
 
 	gsBlob->Release();
 

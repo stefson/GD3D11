@@ -592,7 +592,7 @@ void GothicAPI::OnWorldLoaded() {
 		GetSky()->SetSkyTexture( ESkyTexture::ST_NewWorld ); // Make newworld default
 		RendererState.RendererSettings.SetupNewWorldSpecificValues();
 	}
-	
+
 	LoadRendererWorldSettings( RendererState.RendererSettings );
 	SaveRendererWorldSettings( RendererState.RendererSettings );
 	// Reset wetness
@@ -611,7 +611,7 @@ void GothicAPI::OnWorldLoaded() {
 	_canClearVobsByVisual = false;
 }
 
-void GothicAPI::LoadRendererWorldSettings(GothicRendererSettings& s) {
+void GothicAPI::LoadRendererWorldSettings( GothicRendererSettings& s ) {
 	if ( !LoadedWorldInfo || LoadedWorldInfo->WorldName.empty() ) {
 		return;
 	}
@@ -657,7 +657,7 @@ void GothicAPI::LoadRendererWorldSettings(GothicRendererSettings& s) {
 	}
 
 	s.ReplaceSunDirection = GetPrivateProfileBoolA( "Atmoshpere", "ReplaceSunDirection", s.ReplaceSunDirection, ini );
-		
+
 	AtmosphereSettings& aS = GetSky()->GetAtmoshpereSettings();
 
 	aS.LightDirection = DirectX::XMFLOAT3(
@@ -667,7 +667,7 @@ void GothicAPI::LoadRendererWorldSettings(GothicRendererSettings& s) {
 	);
 }
 
-void GothicAPI::SaveRendererWorldSettings( const GothicRendererSettings & s) {
+void GothicAPI::SaveRendererWorldSettings( const GothicRendererSettings& s ) {
 	if ( !LoadedWorldInfo || LoadedWorldInfo->WorldName.empty() ) {
 		return;
 	}
@@ -705,7 +705,7 @@ void GothicAPI::SaveRendererWorldSettings( const GothicRendererSettings & s) {
 	WritePrivateProfileStringA( "General", "SectionDrawRadius", std::to_string( s.SectionDrawRadius ).c_str(), ini.c_str() );
 
 	WritePrivateProfileStringA( "Atmoshpere", "ReplaceSunDirection", std::to_string( s.ReplaceSunDirection ? TRUE : FALSE ).c_str(), ini.c_str() );
-		
+
 	AtmosphereSettings& aS = GetSky()->GetAtmoshpereSettings();
 
 	WritePrivateProfileStringA( "Atmoshpere", "LightDirectionX", std::to_string( aS.LightDirection.x ).c_str(), ini.c_str() );
@@ -760,7 +760,7 @@ void GothicAPI::DrawWorldMeshNaive() {
 		zCCamera::GetCamera()->SetFOV( RendererState.RendererSettings.FOVHoriz, (Engine::GraphicsEngine->GetResolution().y / (float)Engine::GraphicsEngine->GetResolution().x) * RendererState.RendererSettings.FOVVert );
 
 		CurrentCamera = zCCamera::GetCamera();
-}
+	}
 #else
 	if ( RendererState.RendererSettings.ForceFOV ) {
 		float fovH = 90.0f, fovV = 90.0f;
@@ -878,7 +878,7 @@ void GothicAPI::CalcPolyStripMeshes() {
 
 	PolyStripInfos.clear();
 
-	for ( const auto& pStrip : PolyStripVisuals) {
+	for ( const auto& pStrip : PolyStripVisuals ) {
 
 		if ( !pStrip ) return;
 
@@ -1070,7 +1070,7 @@ void GothicAPI::OnVobMoved( zCVob* vob ) {
 		if ( memcmp( &vob->GetWorldMatrixXM(), &XMLoadFloat4x4( &it->second->WorldMatrix ), sizeof( XMMATRIX ) ) == 0 ) {
 			// No actual change
 			return;
-}
+		}
 #endif
 
 		if ( !it->second->ParentBSPNodes.empty() ) {
@@ -1981,7 +1981,7 @@ void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameDa
 		FrameParticleInfo[texture] = inf;
 	}
 	/*
-		Liker@WoG:	
+		Liker@WoG:
 11.12.2020 14:58	https://forum.worldofplayers.de/forum/threads/1546222-Yet-Another-D3D11-Renderer?p=26626374&viewfull=1#post26626374
 11.12.2020 16:19	https://forum.worldofplayers.de/forum/threads/1546222-Yet-Another-D3D11-Renderer?p=26626530&viewfull=1#post26626530
 14.12.2020 20:25	https://forum.worldofplayers.de/forum/threads/1546222-Yet-Another-D3D11-Renderer?p=26628056&viewfull=1#post26628056
@@ -1990,11 +1990,10 @@ void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameDa
 	// Create new particles?
 	fx->CreateParticlesUpdateDependencies();
 
-	if (fx->GetVisualDied()) {
-		if (fx->GetConnectedVob())
-		{
+	if ( fx->GetVisualDied() ) {
+		if ( fx->GetConnectedVob() ) {
 			// delete FX, it will be invalid after this call!
-			fx->GetConnectedVob()->GetHomeWorld()->RemoveVob(fx->GetConnectedVob());
+			fx->GetConnectedVob()->GetHomeWorld()->RemoveVob( fx->GetConnectedVob() );
 		}
 	} else {
 		// Do something I dont exactly know what it does :)
@@ -2002,7 +2001,7 @@ void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameDa
 #ifdef BUILD_GOTHIC_1_08k
 		 //fx->GetStaticPFXList()->TouchPfx(fx);
 #else
-		fx->GetStaticPFXList()->TouchPfx(fx);
+		fx->GetStaticPFXList()->TouchPfx( fx );
 #endif
 	}
 }
@@ -2051,8 +2050,8 @@ void GothicAPI::SetProjTransformDX( const DirectX::XMFLOAT4X4& proj ) {
 	RendererState.TransformState.TransformProj = proj;
 }
 /** Sets the Projection matrix */
-void XM_CALLCONV GothicAPI::SetProjTransformXM(const DirectX::XMMATRIX proj) {
-	XMStoreFloat4x4(&RendererState.TransformState.TransformProj, proj);
+void XM_CALLCONV GothicAPI::SetProjTransformXM( const DirectX::XMMATRIX proj ) {
+	XMStoreFloat4x4( &RendererState.TransformState.TransformProj, proj );
 }
 
 /** Sets the Projection matrix */
@@ -2344,7 +2343,7 @@ DirectX::XMFLOAT3 GothicAPI::GetCameraPosition() {
 		return DirectX::XMFLOAT3( 0, 0, 0 );
 
 	if ( CameraReplacementPtr )
-		return *(DirectX::XMFLOAT3*) & CameraReplacementPtr->PositionReplacement;
+		return *(DirectX::XMFLOAT3*)&CameraReplacementPtr->PositionReplacement;
 
 	return oCGame::GetGame()->_zCSession_camVob->GetPositionWorld();
 }
@@ -2363,7 +2362,7 @@ XMVECTOR GothicAPI::GetCameraPositionXM() {
 /** Returns the view matrix */
 void GothicAPI::GetViewMatrix( DirectX::XMFLOAT4X4* view ) {
 	if ( CameraReplacementPtr ) {
-		*view = *(DirectX::XMFLOAT4X4*) & CameraReplacementPtr->ViewReplacement;
+		*view = *(DirectX::XMFLOAT4X4*)&CameraReplacementPtr->ViewReplacement;
 		return;
 	}
 
@@ -2650,7 +2649,7 @@ void GothicAPI::CollectVisibleVobs( std::vector<VobInfo*>& vobs, std::vector<Vob
 				if ( !it->VobConstantBuffer ) {
 					removeList.push_back( it );
 					continue;
-		}
+				}
 #endif
 				if ( !it->Vob->GetShowVisual() ) {
 					continue;
@@ -2664,8 +2663,8 @@ void GothicAPI::CollectVisibleVobs( std::vector<VobInfo*>& vobs, std::vector<Vob
 
 				vobs.push_back( it );
 				it->VisibleInRenderPass = true;
-	}
-}
+			}
+		}
 	}
 
 #ifdef BUILD_GOTHIC_1_08k
@@ -3115,12 +3114,12 @@ void GothicAPI::BuildBspVobMapCacheHelper( zCBspBase* base ) {
 					//if (v)
 					//	MoveVobFromBspToDynamic(v);
 #endif
-					}
 				}
+			}
 
 			bvi.NumStaticLights = leaf->LightVobList.NumInArray;
-			}
-		} else {
+		}
+	} else {
 		zCBspNode* node = (zCBspNode*)base;
 
 		bvi.OriginalNode = base;
@@ -3132,7 +3131,7 @@ void GothicAPI::BuildBspVobMapCacheHelper( zCBspBase* base ) {
 		bvi.Front = &BspLeafVobLists[node->Front];
 		bvi.Back = &BspLeafVobLists[node->Back];
 	}
-	}
+}
 
 /** Builds our BspTreeVobMap */
 void GothicAPI::BuildBspVobMapCache() {
@@ -3620,7 +3619,7 @@ XRESULT GothicAPI::SaveMenuSettings( const std::string& file ) {
 	WritePrivateProfileStringA( "Shadows", "ShadowMapSize", std::to_string( s.ShadowMapSize ).c_str(), ini.c_str() );
 	WritePrivateProfileStringA( "Shadows", "WorldShadowRangeScale", std::to_string( s.WorldShadowRangeScale ).c_str(), ini.c_str() );
 	WritePrivateProfileStringA( "Shadows", "PointlightShadows", std::to_string( s.EnablePointlightShadows ).c_str(), ini.c_str() );
-	WritePrivateProfileStringA( "Shadows", "EnableDynamicLighting", std::to_string(s.EnableDynamicLighting ? TRUE : FALSE).c_str(), ini.c_str());
+	WritePrivateProfileStringA( "Shadows", "EnableDynamicLighting", std::to_string( s.EnableDynamicLighting ? TRUE : FALSE ).c_str(), ini.c_str() );
 	WritePrivateProfileStringA( "Shadows", "SmoothCameraUpdate", std::to_string( s.SmoothShadowCameraUpdate ? TRUE : FALSE ).c_str(), ini.c_str() );
 
 	WritePrivateProfileStringA( "SMAA", "Enabled", std::to_string( s.EnableSMAA ? TRUE : FALSE ).c_str(), ini.c_str() );
@@ -3639,7 +3638,7 @@ XRESULT GothicAPI::SaveMenuSettings( const std::string& file ) {
 	WritePrivateProfileStringA( "Tesselation", "EnableTesselation", std::to_string( s.EnableTesselation ? TRUE : FALSE ).c_str(), ini.c_str() );
 	WritePrivateProfileStringA( "Tesselation", "AllowWorldMeshTesselation", std::to_string( s.AllowWorldMeshTesselation ? TRUE : FALSE ).c_str(), ini.c_str() );
 
-	WritePrivateProfileStringA("FontRendering", "Enable", std::to_string(s.EnableCustomFontRendering ? TRUE : FALSE).c_str(), ini.c_str());
+	WritePrivateProfileStringA( "FontRendering", "Enable", std::to_string( s.EnableCustomFontRendering ? TRUE : FALSE ).c_str(), ini.c_str() );
 
 
 	return XR_SUCCESS;
@@ -3736,7 +3735,7 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
 
 	// Fix the shadow range
 	s.WorldShadowRangeScale = Toolbox::GetRecommendedWorldShadowRangeScaleForSize( s.ShadowMapSize );
-	
+
 	// Fix the resolution if the players maximum resolution got lower
 	RECT r;
 	GetClientRect( GetDesktopWindow(), &r );

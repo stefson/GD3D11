@@ -46,7 +46,7 @@ D3D11PointLight::~D3D11PointLight() {
 	ViewMatricesCB.reset();
 
 	for ( auto it = WorldMeshCache.begin(); it != WorldMeshCache.end(); it++ ) {
-		SAFE_DELETE(it->second);
+		SAFE_DELETE( it->second );
 	}
 }
 

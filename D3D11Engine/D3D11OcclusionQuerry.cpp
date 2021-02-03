@@ -198,7 +198,7 @@ void D3D11OcclusionQuerry::CreateOcclusionNodeMeshFor( BspInfo* node ) {
 	{float3( bbmax.x, bbmax.y, bbmax.z ), n3, n2, n2, 0},	// back top right 6
 	{float3( bbmax.x, bbmax.y, bbmin.z ), n3, n2, n2, 0} };// front top right 7
 
-	VERTEX_INDEX idx [] = {
+	VERTEX_INDEX idx[] = {
 		// bottom
 		0, 1, 2,
 		0, 2, 3,

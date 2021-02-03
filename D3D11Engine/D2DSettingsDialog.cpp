@@ -118,15 +118,15 @@ XRESULT D2DSettingsDialog::InitControls() {
 	tesselationCheckbox->SetPosition(D2D1::Point2F(5, tesselationCheckbox->GetPosition().y));
 	tesselationCheckbox->SetChecked(Engine::GAPI->GetRendererState().RendererSettings.EnableTesselation);*/
 
-	SV_Checkbox* hdrCheckbox = new SV_Checkbox(MainView, MainPanel);
-	hdrCheckbox->SetSize(D2D1::SizeF(160, 20));
-	hdrCheckbox->SetCaption("Enable HDR");
-	hdrCheckbox->SetDataToUpdate(&Engine::GAPI->GetRendererState().RendererSettings.EnableHDR);
+	SV_Checkbox* hdrCheckbox = new SV_Checkbox( MainView, MainPanel );
+	hdrCheckbox->SetSize( D2D1::SizeF( 160, 20 ) );
+	hdrCheckbox->SetCaption( "Enable HDR" );
+	hdrCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.EnableHDR );
 	hdrCheckbox->AlignUnder( smaaCheckbox, 5 );
-	hdrCheckbox->SetPosition(D2D1::Point2F(5, hdrCheckbox->GetPosition().y));
-	hdrCheckbox->SetChecked(Engine::GAPI->GetRendererState().RendererSettings.EnableHDR);
-	if (GMPModeActive) {
-		hdrCheckbox->SetHidden(true);
+	hdrCheckbox->SetPosition( D2D1::Point2F( 5, hdrCheckbox->GetPosition().y ) );
+	hdrCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.EnableHDR );
+	if ( GMPModeActive ) {
+		hdrCheckbox->SetHidden( true );
 	}
 
 	SV_Checkbox* shadowsCheckbox = new SV_Checkbox( MainView, MainPanel );
@@ -271,7 +271,7 @@ XRESULT D2DSettingsDialog::InitControls() {
 	dynShadowSlider->SetIsIntegralSlider( true );
 	dynShadowSlider->SetMinMax( 0.0f, GothicRendererSettings::_PLS_NUM_SETTINGS - 1 );
 
-	static char* dsValues [] = { "Disabled", "Static only", "Update dynamic", "Update all" };
+	static char* dsValues[] = { "Disabled", "Static only", "Update dynamic", "Update all" };
 	std::vector<std::string> dsStrings = std::vector<std::string>( dsValues, dsValues + sizeof( dsValues ) / sizeof( dsValues[0] ) );
 	dynShadowSlider->SetDisplayValues( dsStrings );
 

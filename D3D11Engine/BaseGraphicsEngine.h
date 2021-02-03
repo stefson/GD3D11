@@ -200,7 +200,7 @@ public:
 	/** Draws particle effects */
 	virtual void DrawFrameParticles( std::map<zCTexture*, std::vector<ParticleInstanceInfo>>& particles, std::map<zCTexture*, ParticleRenderInfo>& info ) {}
 
-	virtual void DrawString(const std::string& str, float x, float y, const zFont* font, zColor& fontColor) {};
+	virtual void DrawString( const std::string& str, float x, float y, const zFont* font, zColor& fontColor ) {};
 
 	virtual XRESULT UpdateRenderStates() { return XR_SUCCESS; };
 };

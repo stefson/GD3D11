@@ -542,7 +542,7 @@ float D2DView::GetLabelTextWidth( IDWriteTextLayout* layout, const std::string& 
 	for ( size_t i = 0; i < text.length(); i++ ) {
 		width += m[i].width;
 	}
-	delete [] m;
+	delete[] m;
 
 	return width;
 }

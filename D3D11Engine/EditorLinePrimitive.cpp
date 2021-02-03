@@ -38,16 +38,16 @@ EditorLinePrimitive::EditorLinePrimitive() {
 
 
 EditorLinePrimitive::~EditorLinePrimitive() {
-	delete [] Vertices;
-	delete [] SolidVertices;
+	delete[] Vertices;
+	delete[] SolidVertices;
 	if ( PrimVB )PrimVB->Release();
 	if ( SolidPrimVB )SolidPrimVB->Release();
 }
 
 /** Deletes all content */
 void EditorLinePrimitive::DeleteContent() {
-	delete [] Vertices;
-	delete [] SolidVertices;
+	delete[] Vertices;
+	delete[] SolidVertices;
 	if ( PrimVB )PrimVB->Release();
 	if ( SolidPrimVB )SolidPrimVB->Release();
 }
@@ -89,7 +89,7 @@ HRESULT EditorLinePrimitive::CreateLineGrid( int LinesX, int LinesY, XMFLOAT2* M
 
 	LE( CreatePrimitive( vx, (LinesX + 1) * (LinesY + 1) * 4 ) );
 
-	delete [] vx;
+	delete[] vx;
 	return hr;
 }
 
@@ -298,7 +298,7 @@ HRESULT EditorLinePrimitive::CreateSolidPrimitive( LineVertex* PrimVerts, UINT N
 	HRESULT hr = S_OK;
 
 	// Clean up previous data
-	delete [] SolidVertices;
+	delete[] SolidVertices;
 	if ( SolidPrimVB )SolidPrimVB->Release();
 
 	// Copy over the new data
@@ -388,7 +388,7 @@ HRESULT EditorLinePrimitive::CreateFilledCirclePrimitive( float Radius, UINT Det
 
 	HRESULT hr = CreatePrimitive( vx, NumVerts, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 
-	delete [] vx;
+	delete[] vx;
 	return hr;
 }
 
@@ -424,7 +424,7 @@ HRESULT EditorLinePrimitive::CreateCirclePrimitive( float Radius, UINT Detail, c
 
 	HRESULT hr = CreatePrimitive( vx, Detail, D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP );
 
-	delete [] vx;
+	delete[] vx;
 	return hr;
 }
 
@@ -471,7 +471,7 @@ HRESULT EditorLinePrimitive::CreateLineBallPrimitive( UINT Detail, const float4&
 	//vx[(Detail*3)].Position = XMFLOAT3(sinf(s), cosf(s), 0);
 
 	HRESULT hr = CreatePrimitive( vx, (Detail * 3), D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP );
-	delete [] vx;
+	delete[] vx;
 
 	return hr;
 }
@@ -550,7 +550,7 @@ HRESULT EditorLinePrimitive::CreateSimpleConePrimitive( float Length, float Radi
 
 	HRESULT hr = CreatePrimitive( vx, NumVerts );
 
-	delete [] vx;
+	delete[] vx;
 
 	return hr;
 }

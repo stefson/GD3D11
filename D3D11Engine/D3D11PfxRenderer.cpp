@@ -101,7 +101,7 @@ XRESULT D3D11PfxRenderer::UnbindPSResources( int num ) {
 	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
 	engine->GetContext()->PSSetShaderResources( 0, num, srv );
 
-	delete [] srv;
+	delete[] srv;
 
 	return XR_SUCCESS;
 }

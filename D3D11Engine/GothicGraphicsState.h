@@ -201,8 +201,8 @@ struct GothicDepthBufferStateInfo : public GothicPipelineState {
 
 	GothicDepthBufferStateInfo Clone() {
 		GothicDepthBufferStateInfo c;
-		c.DepthBufferEnabled     = DepthBufferEnabled;
-		c.DepthWriteEnabled      = DepthWriteEnabled;
+		c.DepthBufferEnabled = DepthBufferEnabled;
+		c.DepthWriteEnabled = DepthWriteEnabled;
 		c.DepthBufferCompareFunc = DepthBufferCompareFunc;
 
 		c.StateDirty = StateDirty;
@@ -211,7 +211,7 @@ struct GothicDepthBufferStateInfo : public GothicPipelineState {
 		return c;
 	}
 
-	void ApplyTo(GothicDepthBufferStateInfo& c) {
+	void ApplyTo( GothicDepthBufferStateInfo& c ) {
 		c.DepthBufferEnabled = DepthBufferEnabled;
 		c.DepthWriteEnabled = DepthWriteEnabled;
 		c.DepthBufferCompareFunc = DepthBufferCompareFunc;
@@ -330,23 +330,23 @@ struct GothicBlendStateInfo : public GothicPipelineState {
 
 	GothicBlendStateInfo Clone() {
 		GothicBlendStateInfo c;
-		c.SrcBlend           = SrcBlend;
-		c.DestBlend          = DestBlend;
-		c.BlendOp            = BlendOp;
-		c.SrcBlendAlpha      = SrcBlendAlpha;
-		c.DestBlendAlpha     = DestBlendAlpha;
-		c.BlendOpAlpha       = BlendOpAlpha;
-		c.BlendEnabled       = BlendEnabled;
-		c.AlphaToCoverage    = AlphaToCoverage;
+		c.SrcBlend = SrcBlend;
+		c.DestBlend = DestBlend;
+		c.BlendOp = BlendOp;
+		c.SrcBlendAlpha = SrcBlendAlpha;
+		c.DestBlendAlpha = DestBlendAlpha;
+		c.BlendOpAlpha = BlendOpAlpha;
+		c.BlendEnabled = BlendEnabled;
+		c.AlphaToCoverage = AlphaToCoverage;
 		c.ColorWritesEnabled = ColorWritesEnabled;
 
 		c.StateDirty = StateDirty;
-		c.Hash       = Hash;
+		c.Hash = Hash;
 		c.StructSize = StructSize;
 		return c;
 	}
 
-	void ApplyTo(GothicBlendStateInfo& c) {
+	void ApplyTo( GothicBlendStateInfo& c ) {
 		c.SrcBlend = SrcBlend;
 		c.DestBlend = DestBlend;
 		c.BlendOp = BlendOp;

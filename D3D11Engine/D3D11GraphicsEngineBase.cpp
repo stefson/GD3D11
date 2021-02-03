@@ -332,7 +332,7 @@ XRESULT D3D11GraphicsEngineBase::CreateConstantBuffer( D3D11ConstantBuffer** out
 XRESULT D3D11GraphicsEngineBase::GetDisplayModeList( std::vector<DisplayModeInfo>* modeList, bool includeSuperSampling ) {
 	HRESULT hr;
 	UINT numModes = 0;
-	std::unique_ptr<DXGI_MODE_DESC []> displayModes = nullptr;
+	std::unique_ptr<DXGI_MODE_DESC[]> displayModes = nullptr;
 	DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	IDXGIOutput* output = nullptr;
 
@@ -350,7 +350,7 @@ XRESULT D3D11GraphicsEngineBase::GetDisplayModeList( std::vector<DisplayModeInfo
 
 	hr = output->GetDisplayModeList( format, 0, &numModes, nullptr );
 
-	displayModes = std::make_unique<DXGI_MODE_DESC []>( numModes );
+	displayModes = std::make_unique<DXGI_MODE_DESC[]>( numModes );
 
 	// Get the list
 	hr = output->GetDisplayModeList( format, 0, &numModes, displayModes.get() );

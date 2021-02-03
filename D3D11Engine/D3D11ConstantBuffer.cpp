@@ -24,7 +24,7 @@ D3D11ConstantBuffer::D3D11ConstantBuffer( int size, void* data ) {
 	LE( engine->GetDevice()->CreateBuffer( &CD3D11_BUFFER_DESC( size, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE ), &d, &Buffer ) );
 
 	if ( !data )
-		delete [] dd;
+		delete[] dd;
 
 	BufferDirty = false;
 }

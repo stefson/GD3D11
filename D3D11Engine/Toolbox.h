@@ -18,7 +18,7 @@ struct zTPlane;
 namespace Toolbox {
 	FORCEINLINE float GetRecommendedWorldShadowRangeScaleForSize( int size ) {
 		constexpr int MAX_SHADOWMAP_SIZE = 16384;
-		return static_cast<float>( MAX_SHADOWMAP_SIZE / size );
+		return static_cast<float>(MAX_SHADOWMAP_SIZE / size);
 
 		/* // Equivalent to
 		switch ( size ) {

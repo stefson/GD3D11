@@ -329,7 +329,7 @@ namespace Toolbox {
 
 		std::string str = c;
 
-		delete [] c;
+		delete[] c;
 
 		return str;
 	}

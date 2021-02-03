@@ -147,7 +147,7 @@ XRESULT GSky::LoadSkyResources() {
 
 	XLE( NightTexture->Init( "system\\GD3D11\\Textures\\starsh.dds" ) );
 
-	VERTEX_INDEX indices [] = { 0, 1,2,3,4,5 };
+	VERTEX_INDEX indices[] = { 0, 1,2,3,4,5 };
 	SkyPlane = std::make_unique<MeshInfo>();
 	SkyPlane->Create( SkyPlaneVertices, 6, indices, 6 );
 

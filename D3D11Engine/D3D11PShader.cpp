@@ -92,7 +92,7 @@ XRESULT D3D11PShader::LoadShader( const char* pixelShader, const std::vector<D3D
 	// Create the shader
 	LE( engine->GetDevice()->CreatePixelShader( psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &PixelShader ) );
 
-	SetDebugName(PixelShader, pixelShader );
+	SetDebugName( PixelShader, pixelShader );
 
 	psBlob->Release();
 

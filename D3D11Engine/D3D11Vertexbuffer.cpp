@@ -57,7 +57,7 @@ XRESULT D3D11VertexBuffer::Init( void* initData, unsigned int sizeInBytes, EBind
 
 	LE( engine->GetDevice()->CreateBuffer( &bufferDesc, &InitData, &VertexBuffer ) );
 	if ( !VertexBuffer ) {
-		delete [] data;
+		delete[] data;
 		return XR_SUCCESS;
 	}
 	// Check for structured buffer again to create the SRV
@@ -72,7 +72,7 @@ XRESULT D3D11VertexBuffer::Init( void* initData, unsigned int sizeInBytes, EBind
 
 	SetDebugName( VertexBuffer, fileName );
 
-	delete [] data;
+	delete[] data;
 
 	return XR_SUCCESS;
 }
@@ -158,7 +158,7 @@ XRESULT D3D11VertexBuffer::OptimizeVertices( VERTEX_INDEX* indices, byte* vertic
 	uint32_t* remap = new uint32_t[numVertices];
 	// TODO: Check if this works, was previously D3DXOptimizeVertices
 	if ( FAILED( DirectX::OptimizeVertices( indices, numIndices / 3, numVertices, (uint32_t*)remap ) ) ) {
-		delete [] remap;
+		delete[] remap;
 		return XR_FAILED;
 	}
 
@@ -176,8 +176,8 @@ XRESULT D3D11VertexBuffer::OptimizeVertices( VERTEX_INDEX* indices, byte* vertic
 		indices[i] = (VERTEX_INDEX)remap[indices[i]];
 	}
 
-	delete [] vxCopy;
-	delete [] remap;
+	delete[] vxCopy;
+	delete[] remap;
 
 	return XR_SUCCESS;
 }
@@ -190,7 +190,7 @@ XRESULT D3D11VertexBuffer::OptimizeFaces( VERTEX_INDEX* indices, byte* vertices,
 
 	// TODO: Check if this works, was previously D3DXOptimizeFaces
 	if ( FAILED( DirectX::OptimizeFaces( indices, numFaces, &numVertices, (uint32_t*)remap ) ) ) {
-		delete [] remap;
+		delete[] remap;
 		return XR_FAILED;
 	}
 	// Remap vertices
@@ -202,8 +202,8 @@ XRESULT D3D11VertexBuffer::OptimizeFaces( VERTEX_INDEX* indices, byte* vertices,
 		memcpy( &indices[i * 3], &ibCopy[remap[i] * 3], 3 * sizeof( VERTEX_INDEX ) );
 	}
 
-	delete [] ibCopy;
-	delete [] remap;
+	delete[] ibCopy;
+	delete[] remap;
 
 	return XR_SUCCESS;
 }

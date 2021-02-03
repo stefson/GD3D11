@@ -121,7 +121,7 @@ bool D2DSubView::OnWindowMessage( HWND hWnd, unsigned int msg, WPARAM wParam, LP
 		cr.right = clientRectAbs.left + (*it)->GetRect().right;
 		cr.bottom = clientRectAbs.top + (*it)->GetRect().bottom;
 
-		if ( !(*it)->IsHidden()  && !(*it)->IsDisabled())
+		if ( !(*it)->IsHidden() && !(*it)->IsDisabled() )
 			if ( !(*it)->OnWindowMessage( hWnd, msg, wParam, lParam, cr ) )
 				return false;
 	}

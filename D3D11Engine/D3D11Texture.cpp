@@ -46,7 +46,7 @@ XRESULT D3D11Texture::Init( INT2 size, ETextureFormat format, UINT mipMapCount, 
 		D3D11_BIND_SHADER_RESOURCE, D3D11_USAGE_DEFAULT, 0, 1, 0, 0 );
 
 	LE( engine->GetDevice()->CreateTexture2D( &textureDesc, nullptr, Texture.ReleaseAndGetAddressOf() ) );
-	SetDebugName( Texture.Get(), "D3D11Texture(\""+fileName + "\")->Texture");
+	SetDebugName( Texture.Get(), "D3D11Texture(\"" + fileName + "\")->Texture" );
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC descRV = {};
 	descRV.Format = DXGI_FORMAT_UNKNOWN;

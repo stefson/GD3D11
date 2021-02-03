@@ -160,7 +160,7 @@ void GOcean::CreateFresnelMap( ID3D11Device* pd3dDevice ) {
 	pd3dDevice->CreateTexture1D( &tex_desc, &init_data, &FresnelMap );
 	assert( g_pFresnelMap );
 
-	delete [] buffer; buffer = nullptr;
+	delete[] buffer; buffer = nullptr;
 
 	// Create shader resource
 	D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc = {};

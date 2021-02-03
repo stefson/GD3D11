@@ -39,7 +39,7 @@ XRESULT D3D11NVHBAO::Render( ID3D11RenderTargetView* pOutputColorRTV ) {
 
 	D3D11_VIEWPORT vp;
 	UINT num = 1;
-	engine->GetContext()->RSGetViewports(&num, &vp);
+	engine->GetContext()->RSGetViewports( &num, &vp );
 
 	HBAOSettings& settings = Engine::GAPI->GetRendererState().RendererSettings.HbaoSettings;
 

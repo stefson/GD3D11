@@ -4,22 +4,22 @@
 #include <DirectXMath.h>
 
 struct SimpleVertexStruct {
-	DirectX::XMFLOAT3 Position;
-	DirectX::XMFLOAT2 TexCoord;
+    DirectX::XMFLOAT3 Position;
+    DirectX::XMFLOAT2 TexCoord;
 };
 
 //This can draw a full screen quad
 class D3D11FullscreenQuad {
 public:
-	D3D11FullscreenQuad();
-	virtual ~D3D11FullscreenQuad();
+    D3D11FullscreenQuad();
+    virtual ~D3D11FullscreenQuad();
 
-	//Fills the VertexBuffer
-	HRESULT CreateQuad( ID3D11Device* device );
+    //Fills the VertexBuffer
+    HRESULT CreateQuad( ID3D11Device* device );
 
-	ID3D11Buffer* GetBuffer() { return QuadVB; }
+    ID3D11Buffer* GetBuffer() { return QuadVB; }
 
 private:
-	ID3D11Buffer* QuadVB; //Vertex buffer for the quad
+    ID3D11Buffer* QuadVB; //Vertex buffer for the quad
 };
 
