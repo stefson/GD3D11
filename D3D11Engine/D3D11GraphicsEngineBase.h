@@ -231,8 +231,8 @@ protected:
 	void UpdateTransformsCB();
 
 	/** Device-objects */
-	Microsoft::WRL::ComPtr<IDXGIFactory2> DXGIFactory2;
-	Microsoft::WRL::ComPtr<IDXGIAdapter1> DXGIAdapter1;
+	Microsoft::WRL::ComPtr<IDXGIFactory> DXGIFactory;
+	Microsoft::WRL::ComPtr<IDXGIAdapter> DXGIAdapter;
 	std::string DeviceDescription;
 
 	Microsoft::WRL::ComPtr<ID3D11Device> Device;
@@ -246,7 +246,7 @@ protected:
 	std::mutex DeferredContextsByThreadMutex;
 
 	/** Swapchain and resources */
-	Microsoft::WRL::ComPtr<IDXGISwapChain1> SwapChain;
+	Microsoft::WRL::ComPtr<IDXGISwapChain> SwapChain;
 	std::unique_ptr<RenderToTextureBuffer> Backbuffer;
 	std::unique_ptr<RenderToDepthStencilBuffer> DepthStencilBuffer;
 	std::unique_ptr<RenderToTextureBuffer> HDRBackBuffer;

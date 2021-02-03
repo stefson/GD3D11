@@ -112,12 +112,12 @@ XRESULT D3D11GraphicsEngine::Init() {
 	LogInfo() << "Initializing Device...";
 
 	// Create DXGI factory
-	LE( CreateDXGIFactory1( __uuidof(IDXGIFactory2), &DXGIFactory2 ) );
-	LE( DXGIFactory2->EnumAdapters1( 0, &DXGIAdapter1 ) );  // Get first adapter
+	LE( CreateDXGIFactory( __uuidof(IDXGIFactory), &DXGIFactory ) );
+	LE( DXGIFactory->EnumAdapters( 0, &DXGIAdapter ) );  // Get first adapter
 
 	// Find out what we are rendering on to write it into the logfile
-	DXGI_ADAPTER_DESC1 adpDesc;
-	DXGIAdapter1->GetDesc1( &adpDesc );
+	DXGI_ADAPTER_DESC adpDesc;
+	DXGIAdapter->GetDesc( &adpDesc );
 
 	std::wstring wDeviceDescription( adpDesc.Description );
 	std::string deviceDescription( wDeviceDescription.begin(), wDeviceDescription.end() );
@@ -133,7 +133,7 @@ XRESULT D3D11GraphicsEngine::Init() {
 	LE( D3D11CreateDevice( DXGIAdapter1.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags,
 		&featurelevel, 1, D3D11_SDK_VERSION, &Device, nullptr, &Context ) );
 #else
-	LE( D3D11CreateDevice( DXGIAdapter1.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr,
+	LE( D3D11CreateDevice( DXGIAdapter.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr,
 		flags | D3D11_CREATE_DEVICE_DEBUG, &featurelevel, 1,
 		D3D11_SDK_VERSION, &Device, nullptr, &Context ) );
 #endif
@@ -439,27 +439,27 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
 		Microsoft::WRL::ComPtr<IDXGIDevice2> pDXGIDevice;
 		LE( Device.As<IDXGIDevice2>( &pDXGIDevice ) );
 		Microsoft::WRL::ComPtr<IDXGIAdapter> adapter;
-		Microsoft::WRL::ComPtr<IDXGIFactory2> factory2;
+		Microsoft::WRL::ComPtr<IDXGIFactory> factory;
 
 		LE( Device.As( &pDXGIDevice ) );
 		LE( pDXGIDevice->GetAdapter( &adapter ) );
-		LE( adapter->GetParent( IID_PPV_ARGS( &factory2 ) ) );
+		LE( adapter->GetParent( IID_PPV_ARGS( &factory ) ) );
 
 		DXGI_SWAP_EFFECT swapEffect = DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_DISCARD;
 
-		DXGI_SWAP_CHAIN_DESC1 scd = {};
+		DXGI_SWAP_CHAIN_DESC scd = {};
 		if ( m_swapchainflip ) {
 			Microsoft::WRL::ComPtr<IDXGIFactory4> factory4;
 			Microsoft::WRL::ComPtr<IDXGIFactory5> factory5;
 
-			if ( SUCCEEDED( factory2.As( &factory5 ) ) ) {
+			if ( SUCCEEDED( factory.As( &factory5 ) ) ) {
 				BOOL allowTearing = FALSE;
 				if ( factory5.Get() && SUCCEEDED( factory5->CheckFeatureSupport( DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof( allowTearing ) ) ) ) {
 					m_flipWithTearing = allowTearing != 0;
 					m_swapchainflip = m_flipWithTearing;
 				}
 			}
-			if ( SUCCEEDED( factory2.As( &factory4 ) ) ) {
+			if ( SUCCEEDED( factory.As( &factory4 ) ) ) {
 				swapEffect = DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_FLIP_DISCARD;
 			} else {
 				swapEffect = DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
@@ -482,30 +482,29 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
 		}
 		scd.SwapEffect = swapEffect;
 		scd.Flags = scflags;
-		scd.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_SHADER_INPUT;
+		scd.OutputWindow = OutputWindow;
 		scd.SampleDesc.Count = 1;
 		scd.SampleDesc.Quality = 0;
-		scd.Height = bbres.y;
-		scd.Width = bbres.x;
-
-		DXGI_SWAP_CHAIN_FULLSCREEN_DESC swapChainFSDesc = {};
+		scd.BufferDesc.Height = bbres.y;
+		scd.BufferDesc.Width = bbres.x;
 
 		if ( m_swapchainflip ) {
-			swapChainFSDesc.Windowed = true;
+			scd.Windowed = true;
 		} else {
 			bool windowed = Engine::GAPI->HasCommandlineParameter( "ZWINDOW" ) ||
 				Engine::GAPI->GetIntParamFromConfig( "zStartupWindowed" );
-			swapChainFSDesc.Windowed = windowed;
+			scd.Windowed = windowed;
 		}
 
-		LE( factory2->CreateSwapChainForHwnd( GetDevice().Get(), OutputWindow, &scd, &swapChainFSDesc, nullptr, &SwapChain ) );
+		LE( factory->CreateSwapChain( GetDevice().Get(), &scd, &SwapChain ) );
 		if ( !SwapChain ) {
 			LogError() << "Failed to create Swapchain! Program will now exit!";
 			exit( 0 );
 		}
 		if ( m_swapchainflip ) {
-			LE( factory2->MakeWindowAssociation( OutputWindow, DXGI_MWA_NO_WINDOW_CHANGES ) );
+			LE( factory->MakeWindowAssociation( OutputWindow, DXGI_MWA_NO_WINDOW_CHANGES ) );
 		}
 
 		// Need to init AntTweakBar now that we have a working swapchain
@@ -735,9 +734,9 @@ D3D11GraphicsEngine::GetDisplayModeList( std::vector<DisplayModeInfo>* modeList,
 	RECT desktop;
 	GetClientRect( GetDesktopWindow(), &desktop );
 
-	if ( !DXGIAdapter1 ) return XR_FAILED;
+	if ( !DXGIAdapter ) return XR_FAILED;
 
-	DXGIAdapter1->EnumOutputs( 0, &output );
+	DXGIAdapter->EnumOutputs( 0, &output );
 
 	if ( !output ) return XR_FAILED;
 
