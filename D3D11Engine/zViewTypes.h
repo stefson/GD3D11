@@ -9,7 +9,6 @@ class zFont;
 struct zColor;
 class _zCView;
 
-#ifdef BUILD_GOTHIC_2_6_fix
 
 class zCViewFont {
 public:
@@ -227,6 +226,3 @@ public:
 	int m_numLines;
 	int m_unformated;
 };
-
-
-#endif

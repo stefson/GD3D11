@@ -355,6 +355,9 @@ struct GothicMemoryLocations {
 		static const unsigned int REPL_SetMode_ModechangeStart = 0x007021A9;
 		static const unsigned int REPL_SetMode_ModechangeEnd = 0x0007021B8;
 		static const unsigned int PrintTimed = 0x006FE1A0;
+
+        static const unsigned int PrintChars = 0x006fff80;
+        static const unsigned int CreateText = 0x007006e0;
 	};
 
 	struct zCVobLight {
