@@ -22,7 +22,7 @@ struct RenderToTextureBuffer {
 	}
 
 	/** Creates the render-to-texture buffers */
-	RenderToTextureBuffer( const Microsoft::WRL::ComPtr<ID3D11Device1>& device, UINT SizeX, UINT SizeY, DXGI_FORMAT Format, HRESULT* Result = nullptr, DXGI_FORMAT RTVFormat = DXGI_FORMAT_UNKNOWN, DXGI_FORMAT SRVFormat = DXGI_FORMAT_UNKNOWN, int MipLevels = 1, UINT arraySize = 1 ) {
+	RenderToTextureBuffer( const Microsoft::WRL::ComPtr<ID3D11Device>& device, UINT SizeX, UINT SizeY, DXGI_FORMAT Format, HRESULT* Result = nullptr, DXGI_FORMAT RTVFormat = DXGI_FORMAT_UNKNOWN, DXGI_FORMAT SRVFormat = DXGI_FORMAT_UNKNOWN, int MipLevels = 1, UINT arraySize = 1 ) {
 		HRESULT hr = S_OK;
 
 		Texture = nullptr;
@@ -122,7 +122,7 @@ struct RenderToTextureBuffer {
 	}
 
 	/** Binds the texture to the pixel shader */
-	void BindToPixelShader( const Microsoft::WRL::ComPtr<ID3D11DeviceContext1>& context, int slot ) {
+	void BindToPixelShader( const Microsoft::WRL::ComPtr<ID3D11DeviceContext>& context, int slot ) {
 		context->PSSetShaderResources( slot, 1, ShaderResView.GetAddressOf() );
 	};
 
@@ -180,7 +180,7 @@ struct RenderToDepthStencilBuffer {
 	}
 
 	/** Creates the render-to-texture buffers */
-	RenderToDepthStencilBuffer( const Microsoft::WRL::ComPtr<ID3D11Device1>& device, UINT SizeX, UINT SizeY, DXGI_FORMAT Format, HRESULT* Result = nullptr, DXGI_FORMAT DSVFormat = DXGI_FORMAT_UNKNOWN, DXGI_FORMAT SRVFormat = DXGI_FORMAT_UNKNOWN, UINT arraySize = 1 ) {
+	RenderToDepthStencilBuffer( const Microsoft::WRL::ComPtr<ID3D11Device>& device, UINT SizeX, UINT SizeY, DXGI_FORMAT Format, HRESULT* Result = nullptr, DXGI_FORMAT DSVFormat = DXGI_FORMAT_UNKNOWN, DXGI_FORMAT SRVFormat = DXGI_FORMAT_UNKNOWN, UINT arraySize = 1 ) {
 		HRESULT hr = S_OK;
 
 		if ( arraySize != 1 && arraySize != 6 ) {
@@ -287,11 +287,11 @@ struct RenderToDepthStencilBuffer {
 		if ( Result )*Result = hr;
 	}
 
-	void BindToVertexShader( const Microsoft::WRL::ComPtr<ID3D11DeviceContext1>& context, int slot ) {
+	void BindToVertexShader( const Microsoft::WRL::ComPtr<ID3D11DeviceContext>& context, int slot ) {
 		context->VSSetShaderResources( slot, 1, ShaderResView.GetAddressOf() );
 	}
 
-	void BindToPixelShader( const Microsoft::WRL::ComPtr<ID3D11DeviceContext1>& context, int slot ) {
+	void BindToPixelShader( const Microsoft::WRL::ComPtr<ID3D11DeviceContext>& context, int slot ) {
 		context->PSSetShaderResources( slot, 1, ShaderResView.GetAddressOf() );
 	}
 

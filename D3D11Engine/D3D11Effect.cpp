@@ -33,7 +33,7 @@ D3D11Effect::~D3D11Effect() {
 }
 
 /** Loads a texturearray. Use like the following: Put path and prefix as parameter. The files must then be called name_xxxx.dds */
-HRESULT LoadTextureArray( ID3D11Device1* pd3dDevice, ID3D11DeviceContext1* context, char* sTexturePrefix, int iNumTextures, ID3D11Texture2D** ppTex2D, ID3D11ShaderResourceView** ppSRV );
+HRESULT LoadTextureArray( ID3D11Device* pd3dDevice, ID3D11DeviceContext* context, char* sTexturePrefix, int iNumTextures, ID3D11Texture2D** ppTex2D, ID3D11ShaderResourceView** ppSRV );
 
 /** Fills a vector of random raindrop data */
 void D3D11Effect::FillRandomRaindropData( std::vector<ParticleInstanceInfo>& data ) {
@@ -343,7 +343,7 @@ XRESULT D3D11Effect::DrawRainShadowmap() {
 // LoadTextureArray loads a texture array and associated view from a series
 // of textures on disk.
 //--------------------------------------------------------------------------------------
-HRESULT LoadTextureArray( ID3D11Device1* pd3dDevice, ID3D11DeviceContext1* context, char* sTexturePrefix, int iNumTextures, ID3D11Texture2D** ppTex2D, ID3D11ShaderResourceView** ppSRV ) {
+HRESULT LoadTextureArray( ID3D11Device* pd3dDevice, ID3D11DeviceContext* context, char* sTexturePrefix, int iNumTextures, ID3D11Texture2D** ppTex2D, ID3D11ShaderResourceView** ppSRV ) {
 	if ( !ppTex2D ) {
 		LogError() << "invalid argument: ppTex2D. should not be null";
 		return E_FAIL;

@@ -54,7 +54,7 @@ typedef struct CSFFT_512x512_Data_t
 #define FFT_INVERSE 1
 
 
-void fft512x512_create_plan(CSFFT512x512_Plan* plan, ID3D11Device1* pd3dDevice, UINT slices);
+void fft512x512_create_plan(CSFFT512x512_Plan* plan, ID3D11Device* pd3dDevice, UINT slices);
 void fft512x512_destroy_plan(CSFFT512x512_Plan* plan);
 
 void fft_512x512_c2c(CSFFT512x512_Plan* fft_plan, 

@@ -3,11 +3,11 @@
 #include <list>
 
 #include <Windows.h>
-#include <d3d11_1.h>
+#include <d3d11.h>
 
 #include "Types.h"
 
-#include <d2d1_1.h>
+#include <d2d1.h>
 
 class D2DView;
 

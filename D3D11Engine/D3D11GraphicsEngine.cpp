@@ -111,7 +111,7 @@ XRESULT D3D11GraphicsEngine::Init() {
     LogInfo() << "Initializing Device...";
 
     // Create DXGI factory
-    LE( CreateDXGIFactory1( __uuidof(IDXGIFactory2), &DXGIFactory2 ) );
+    LE( CreateDXGIFactory( __uuidof(IDXGIFactory), &DXGIFactory ) );
     /*UINT i = 0;
     std::vector <IDXGIAdapter1*> vAdapters;
     while (DXGIFactory2->EnumAdapters1(i, &DXGIAdapter1) != DXGI_ERROR_NOT_FOUND)
@@ -119,11 +119,10 @@ XRESULT D3D11GraphicsEngine::Init() {
         vAdapters.push_back(DXGIAdapter1);
         ++i;
     }*/
-    LE( DXGIFactory2->EnumAdapters1( 0, &DXGIAdapter1 ) );  // Get first adapter
-    DXGIAdapter1.As( &DXGIAdapter2 );
+    LE( DXGIFactory->EnumAdapters( 0, &DXGIAdapter ) );  // Get first adapter
     // Find out what we are rendering on to write it into the logfile
-    DXGI_ADAPTER_DESC2 adpDesc;
-    DXGIAdapter2->GetDesc2( &adpDesc );
+    DXGI_ADAPTER_DESC adpDesc;
+    DXGIAdapter->GetDesc( &adpDesc );
 
     std::wstring wDeviceDescription( adpDesc.Description );
     std::string deviceDescription( wDeviceDescription.begin(), wDeviceDescription.end() );
@@ -136,9 +135,9 @@ XRESULT D3D11GraphicsEngine::Init() {
 
     // Create D3D11-Device
 #ifndef DEBUG_D3D11
-    LE( D3D11CreateDevice( DXGIAdapter2.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags, &featurelevel, 1, D3D11_SDK_VERSION, &Device11, nullptr, &Context11 ) );
+    LE( D3D11CreateDevice( DXGIAdapter.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags, &featurelevel, 1, D3D11_SDK_VERSION, &Device11, nullptr, &Context11 ) );
 #else
-    LE( D3D11CreateDevice( DXGIAdapter2.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags | D3D11_CREATE_DEVICE_DEBUG, &featurelevel, 1, D3D11_SDK_VERSION, &Device11, nullptr, &Context11 ) );
+    LE( D3D11CreateDevice( DXGIAdapter.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags | D3D11_CREATE_DEVICE_DEBUG, &featurelevel, 1, D3D11_SDK_VERSION, &Device11, nullptr, &Context11 ) );
 #endif
     Device11.As( &Device );
     Context11.As( &Context );
@@ -154,7 +153,7 @@ XRESULT D3D11GraphicsEngine::Init() {
         exit( 0 );
     }
 
-    LE( GetDevice()->CreateDeferredContext1( 0, &DeferredContext ) );  // Used for multithreaded texture loading
+    LE( GetDevice()->CreateDeferredContext( 0, &DeferredContext ) );  // Used for multithreaded texture loading
 
     LogInfo() << "Creating ShaderManager";
 
@@ -298,9 +297,9 @@ XRESULT D3D11GraphicsEngine::Init() {
 
     // Init inf-buffer now
     InfiniteRangeConstantBuffer->UpdateBuffer( &float4( FLT_MAX, 0, 0, 0 ) );
-    SetDebugName( InfiniteRangeConstantBuffer->Get().Get(), "InfiniteRangeConstantBuffer" );
-    SetDebugName( OutdoorSmallVobsConstantBuffer->Get().Get(), "OutdoorSmallVobsConstantBuffer" );
-    SetDebugName( OutdoorVobsConstantBuffer->Get().Get(), "OutdoorVobsConstantBuffer" );
+    SetDebugName( InfiniteRangeConstantBuffer->Get(), "InfiniteRangeConstantBuffer" );
+    SetDebugName( OutdoorSmallVobsConstantBuffer->Get(), "OutdoorSmallVobsConstantBuffer" );
+    SetDebugName( OutdoorVobsConstantBuffer->Get(), "OutdoorVobsConstantBuffer" );
     // Load reflectioncube
 
     if ( S_OK != CreateDDSTextureFromFile(
@@ -454,7 +453,7 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
 
         DXGI_SWAP_EFFECT swapEffect = DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_DISCARD;
 
-        DXGI_SWAP_CHAIN_DESC1 scd = {};
+        DXGI_SWAP_CHAIN_DESC scd = {};
         if ( m_swapchainflip ) {
             Microsoft::WRL::ComPtr<IDXGIFactory4> factory4;
             Microsoft::WRL::ComPtr<IDXGIFactory5> factory5;
@@ -489,24 +488,23 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
         }
         scd.SwapEffect = swapEffect;
         scd.Flags = scflags;
-        scd.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
         scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_SHADER_INPUT;
+        scd.OutputWindow = OutputWindow;
         scd.SampleDesc.Count = 1;
         scd.SampleDesc.Quality = 0;
-        scd.Height = bbres.y;
-        scd.Width = bbres.x;
-
-        DXGI_SWAP_CHAIN_FULLSCREEN_DESC swapChainFSDesc = {};
+        scd.BufferDesc.Height = bbres.y;
+        scd.BufferDesc.Width = bbres.x;
 
         if ( m_swapchainflip ) {
-            swapChainFSDesc.Windowed = true;
+            scd.Windowed = true;
         } else {
             bool windowed = Engine::GAPI->HasCommandlineParameter( "ZWINDOW" ) ||
                 Engine::GAPI->GetIntParamFromConfig( "zStartupWindowed" );
-            swapChainFSDesc.Windowed = windowed;
+            scd.Windowed = windowed;
         }
 
-        LE( factory2->CreateSwapChainForHwnd( GetDevice().Get(), OutputWindow, &scd, &swapChainFSDesc, nullptr, &SwapChain ) );
+        LE( DXGIFactory->CreateSwapChain( GetDevice().Get(), &scd, &SwapChain ) );
         if ( !SwapChain ) {
             LogError() << "Failed to create Swapchain! Program will now exit!";
             exit( 0 );
@@ -735,27 +733,25 @@ D3D11GraphicsEngine::GetDisplayModeList( std::vector<DisplayModeInfo>* modeList,
     bool includeSuperSampling ) {
     HRESULT hr;
     UINT numModes = 0;
-    std::unique_ptr<DXGI_MODE_DESC1[]> displayModes = nullptr;
+    std::unique_ptr<DXGI_MODE_DESC[]> displayModes = nullptr;
     const DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    IDXGIOutput* output11 = nullptr;
-    IDXGIOutput1* output = nullptr;
+    wrl::ComPtr<IDXGIOutput> output;
 
     // Get desktop rect
     RECT desktop;
     GetClientRect( GetDesktopWindow(), &desktop );
 
-    if ( !DXGIAdapter2 ) return XR_FAILED;
+    if ( !DXGIAdapter ) return XR_FAILED;
 
-    DXGIAdapter2->EnumOutputs( 0, &output11 );
-    hr = output11->QueryInterface( __uuidof(IDXGIOutput1), (void**)&output );
+    DXGIAdapter->EnumOutputs( 0, output.ReleaseAndGetAddressOf() );
     if ( !output ) return XR_FAILED;
 
-    hr = output->GetDisplayModeList1( format, 0, &numModes, nullptr );
+    hr = output->GetDisplayModeList( format, 0, &numModes, nullptr );
 
-    displayModes = std::make_unique<DXGI_MODE_DESC1[]>( numModes );
+    displayModes = std::make_unique<DXGI_MODE_DESC[]>( numModes );
 
     // Get the list
-    hr = output->GetDisplayModeList1( format, 0, &numModes, displayModes.get() );
+    hr = output->GetDisplayModeList( format, 0, &numModes, displayModes.get() );
     for ( unsigned int i = 0; i < numModes; i++ ) {
         if ( displayModes[i].Format != format ) continue;
 
@@ -790,8 +786,6 @@ D3D11GraphicsEngine::GetDisplayModeList( std::vector<DisplayModeInfo>* modeList,
             i++;
         }
     }
-
-    output->Release();
 
     return XR_SUCCESS;
 }
@@ -2597,9 +2591,11 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround(
     SetupVS_ExMeshDrawCall();
     SetupVS_ExConstantBuffer();
 
-    XMFLOAT4X4 id; XMStoreFloat4x4( &id, XMMatrixIdentity() );
-    ActiveVS->GetConstantBuffer()[1]->UpdateBuffer( &id );
-    ActiveVS->GetConstantBuffer()[1]->BindToVertexShader( 1 );
+    {
+        XMMATRIX id = XMMatrixIdentity();
+        ActiveVS->GetConstantBuffer()[1]->UpdateBuffer( &id );
+        ActiveVS->GetConstantBuffer()[1]->BindToVertexShader( 1 );
+    }
 
     // Update and bind buffer of PS
     PerObjectState ocb = {};
@@ -2634,8 +2630,8 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround(
             Engine::GAPI->GetWrappedWorldMesh()->MeshVertexBuffer,
             Engine::GAPI->GetWrappedWorldMesh()->MeshIndexBuffer, 0, 0 );
 
-        XMFLOAT4X4 id; XMStoreFloat4x4( &id, XMMatrixIdentity() );
-        ActiveVS->GetConstantBuffer()[1]->UpdateBuffer( &id );
+        XMMATRIX idActiveVS = XMMatrixIdentity();
+        ActiveVS->GetConstantBuffer()[1]->UpdateBuffer( &idActiveVS );
         ActiveVS->GetConstantBuffer()[1]->BindToVertexShader( 1 );
 
         // Only use cache if we haven't already collected the vobs
@@ -2939,9 +2935,11 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround( FXMVECTOR position,
     SetupVS_ExMeshDrawCall();
     SetupVS_ExConstantBuffer();
 
-    XMMATRIX id = XMMatrixIdentity();
-    ActiveVS->GetConstantBuffer()[1]->UpdateBuffer( &id );
-    ActiveVS->GetConstantBuffer()[1]->BindToVertexShader( 1 );
+    {
+        XMMATRIX id = XMMatrixIdentity();
+        ActiveVS->GetConstantBuffer()[1]->UpdateBuffer( &id );
+        ActiveVS->GetConstantBuffer()[1]->BindToVertexShader( 1 );
+    }
 
     // Update and bind buffer of PS
     PerObjectState ocb = {};
@@ -3143,7 +3141,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround( FXMVECTOR position,
         for ( auto const& skeletalMeshVob : Engine::GAPI->GetSkeletalMeshVobs() ) {
             if ( !skeletalMeshVob->VisualInfo ) continue;
 
-            INT2 s = WorldConverter::GetSectionOfPos( skeletalMeshVob->Vob->GetPositionWorld() );
+            //INT2 s = WorldConverter::GetSectionOfPos( skeletalMeshVob->Vob->GetPositionWorld() );
 
             float dist; XMStoreFloat( &dist, XMVector3LengthEst( skeletalMeshVob->Vob->GetPositionWorldXM() - position ) );
             if ( dist > Engine::GAPI->GetRendererState().RendererSettings.IndoorVobDrawRadius )
@@ -5379,7 +5377,7 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 
     for ( auto const& textureParticleRenderInfo : pvec ) {
         zCTexture* tx = std::get<0>( textureParticleRenderInfo );
-        ParticleRenderInfo& info = *std::get<1>( textureParticleRenderInfo );
+        ParticleRenderInfo& partInfo = *std::get<1>( textureParticleRenderInfo );
         std::vector<ParticleInstanceInfo>& instances = *std::get<2>( textureParticleRenderInfo );
 
         if ( instances.empty() ) continue;
@@ -5392,17 +5390,17 @@ void D3D11GraphicsEngine::DrawFrameParticles(
                 continue;
         }
 
-        GothicBlendStateInfo& blendState = info.BlendState;
+        GothicBlendStateInfo& blendState = partInfo.BlendState;
 
         // This only happens once or twice, since the input list is sorted
-        if ( info.BlendMode != lastBlendMode ) {
+        if ( partInfo.BlendMode != lastBlendMode ) {
             // Setup blend state
             state.BlendState = blendState;
             state.BlendState.SetDirty();
 
-            lastBlendMode = info.BlendMode;
+            lastBlendMode = partInfo.BlendMode;
 
-            if ( info.BlendMode == zRND_ALPHA_FUNC_ADD ) {
+            if ( partInfo.BlendMode == zRND_ALPHA_FUNC_ADD ) {
                 // Set Distortion-Rendering for additive blending
                 SetActivePixelShader( "PS_ParticleDistortion" );
                 ActivePS->Apply();
@@ -5625,11 +5623,11 @@ namespace UI::zFont {
 
             vertex[0] = vertex[1] = vertex[2] = vertex[3] = vertex[4] = vertex[5] = {};
 
-            for ( size_t i = 0; i < 6; i++ ) {
-                vertex[i].Normal = { 1,0,0 };
-                vertex[i].TexCoord2 = { 0, 1 };
-                vertex[i].Position.z = farZ;
-                vertex[i].Color = fontColor.dword;
+            for ( size_t j = 0; j < 6; j++ ) {
+                vertex[j].Normal = { 1,0,0 };
+                vertex[j].TexCoord2 = { 0, 1 };
+                vertex[j].Position.z = farZ;
+                vertex[j].Color = fontColor.dword;
             }
 
             vertex[0].Position.x = minx;

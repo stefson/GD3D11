@@ -23,7 +23,7 @@ public:
 		// .text:007A62A0; void __thiscall zCView::BlitText(zCView * __hidden this)
 		XHook( HookedFunctions::OriginalFunctions.original_zCViewBlitText, GothicMemoryLocations::zCView::BlitText, hooked_BlitText );
 		XHook( HookedFunctions::OriginalFunctions.original_zCViewPrint, GothicMemoryLocations::zCView::Print, hooked_Print );
-		XHook( HookedFunctions::OriginalFunctions.original_zCViewBlit, GothicMemoryLocations::zCView::Blit, hooked_Blit );
+		//XHook( HookedFunctions::OriginalFunctions.original_zCViewBlit, GothicMemoryLocations::zCView::Blit, hooked_Blit );
 #endif
 	}
 
@@ -34,14 +34,15 @@ public:
 	}
 
 #if BUILD_GOTHIC_2_6_fix
-	static void __fastcall hooked_Blit(_zCView* thisptr, void* unknwn) {
+    /*
+    static void __fastcall hooked_Blit(_zCView* thisptr, void* unknwn) {
 
 		if (true || !Engine::GAPI->GetRendererState().RendererSettings.EnableCustomFontRendering) {
 			HookedFunctions::OriginalFunctions.original_zCViewBlit(thisptr);
 			return;
 		}
 
-		if (thisptr->viewID == 1 /* VIEW_VIEWPORT */) return;
+		if (thisptr->viewID == 1 /* VIEW_VIEWPORT *\/) return;
 		if (thisptr == GetScreen()) return;
 		hook_infunc
 			auto oldDepthState = Engine::GAPI->GetRendererState().DepthState.Clone();
@@ -60,6 +61,7 @@ public:
 			Engine::GraphicsEngine->UpdateRenderStates();
 		hook_outfunc
 	}
+    */
 
 	static void __fastcall hooked_Print( _zCView* thisptr, void* unknwn, int x, int y, const zSTRING& s ) {
 		if ( !Engine::GAPI->GetRendererState().RendererSettings.EnableCustomFontRendering ) {

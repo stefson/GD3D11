@@ -15,7 +15,7 @@
 #ifndef _OCEAN_WAVE_H
 #define _OCEAN_WAVE_H
 
-#include <d3d11_1.h>
+#include <d3d11.h>
 
 #include "CSFFT/fft_512x512.h"
 
@@ -48,7 +48,7 @@ struct OceanParameter
 class OceanSimulator
 {
 public:
-	OceanSimulator(OceanParameter& params, ID3D11Device1* pd3dDevice);
+	OceanSimulator(OceanParameter& params, ID3D11Device* pd3dDevice);
 	~OceanSimulator();
 
 	// -------------------------- Initialization & simulation routines ------------------------
@@ -69,8 +69,8 @@ protected:
 	// ---------------------------------- GPU shading asset -----------------------------------
 
 	// D3D objects
-	ID3D11Device1* m_pd3dDevice;
-	ID3D11DeviceContext1* m_pd3dImmediateContext;
+	ID3D11Device* m_pd3dDevice;
+	ID3D11DeviceContext* m_pd3dImmediateContext;
 	
 	// Displacement map
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> m_pDisplacementMap;		// (RGBA32F)

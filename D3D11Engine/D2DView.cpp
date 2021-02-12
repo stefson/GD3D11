@@ -117,7 +117,7 @@ XRESULT D2DView::Init( const INT2& initialResolution, ID3D11Texture2D* rendertar
 		return XR_FAILED;
 	}
     // TODO: ComPtr<T> HERE
-	IDXGISurface2* dxgiBackbuffer = nullptr;
+	IDXGISurface* dxgiBackbuffer = nullptr;
 	rendertarget->QueryInterface( &dxgiBackbuffer );
 
 	D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(
@@ -374,7 +374,7 @@ XRESULT D2DView::PrepareResize() {
 /** Resizes this d2d-view */
 XRESULT D2DView::Resize( const INT2& initialResolution, ID3D11Texture2D* rendertarget ) {
 
-	IDXGISurface2* dxgiBackbuffer;
+	IDXGISurface* dxgiBackbuffer;
 	rendertarget->QueryInterface( &dxgiBackbuffer );
 
 	D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties( D2D1_RENDER_TARGET_TYPE_DEFAULT, D2D1::PixelFormat( DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED ) );

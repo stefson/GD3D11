@@ -172,8 +172,6 @@ typedef float GFSDK_SSAO_FLOAT;
 typedef size_t GFSDK_SSAO_SIZE_T;
 typedef uint64_t GFSDK_SSAO_UINT64;
 
-struct ID3D11Device1;
-struct ID3D11DeviceContext1;
 struct ID3D11ShaderResourceView;
 struct ID3D11BlendState;
 struct ID3D11DepthStencilState;
@@ -826,7 +824,7 @@ public:
     //     GFSDK_SSAO_OK                                   - Success
     //---------------------------------------------------------------------------------------------------
     virtual GFSDK_SSAO_Status RenderAO(
-        ID3D11DeviceContext1* pDeviceContext,
+        ID3D11DeviceContext* pDeviceContext,
         const GFSDK_SSAO_InputData_D3D11& InputData,
         const GFSDK_SSAO_Parameters& Parameters,
         const GFSDK_SSAO_Output_D3D11& Output,
@@ -889,7 +887,7 @@ public:
 //     GFSDK_SSAO_OK                                   - Success
 //---------------------------------------------------------------------------------------------------
 GFSDK_SSAO_DECL(GFSDK_SSAO_Status, GFSDK_SSAO_CreateContext_D3D11,
-    ID3D11Device1* pD3DDevice,
+    ID3D11Device* pD3DDevice,
     GFSDK_SSAO_Context_D3D11** ppContext,
     GFSDK_SSAO_CUSTOM_HEAP_ARGUMENT,
     GFSDK_SSAO_VERSION_ARGUMENT);

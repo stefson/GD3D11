@@ -20,7 +20,7 @@ SV_GMeshInfoView::SV_GMeshInfoView( D2DView* view, D2DSubView* parent ) : D2DSub
 
 	IsDraggingView = false;
 
-	ObjectPosition = XMVectorZero();
+	ObjectPosition = XMFLOAT3( 0, 0, 0 );
 	SetObjectOrientation( 0, 0, 10.0f );
 	RT = nullptr;
 	DS = nullptr;
@@ -67,7 +67,7 @@ void SV_GMeshInfoView::SetMeshes( const std::map<zCTexture*, MeshInfo*>& meshes,
 	XMVECTOR XMV_bbmin = XMLoadFloat3( &bbmin );
 	XMVECTOR XMV_bbmax = XMLoadFloat3( &bbmax );
 
-	ObjectPosition = (XMV_bbmin + XMV_bbmax) * -0.5f;
+	XMStoreFloat3( &ObjectPosition, (XMV_bbmin + XMV_bbmax) * -0.5f );
 	float distance;
 	XMStoreFloat( &distance, XMVector3LengthEst( XMV_bbmin - XMV_bbmin ) * 0.5f );
 	SetObjectOrientation( 0, 0, distance );
@@ -82,17 +82,24 @@ void SV_GMeshInfoView::SetObjectOrientation( float yaw, float pitch, float dista
 	ObjectPitch = pitch;
 	ObjectDistance = distance;
 
-	ObjectWorldMatrix = XMMatrixTranslation( XMVectorGetX( ObjectPosition ), XMVectorGetY( ObjectPosition ), XMVectorGetZ( ObjectPosition ) );
+	XMMATRIX xmObjectWorldMatrix = XMLoadFloat4x4( &ObjectWorldMatrix );
+
+	xmObjectWorldMatrix = XMMatrixTranslation( ObjectPosition.x, ObjectPosition.y, ObjectPosition.z );
 
 	XMMATRIX rotY = XMMatrixRotationY( yaw );
 	XMMATRIX rotZ = XMMatrixRotationZ( pitch );
 
-	ObjectWorldMatrix *= rotY * rotZ;
-	ObjectWorldMatrix = XMMatrixTranspose( ObjectWorldMatrix );
+	xmObjectWorldMatrix *= rotY * rotZ;
+	xmObjectWorldMatrix = XMMatrixTranspose( xmObjectWorldMatrix );
+
+	XMMATRIX xmObjectViewMatrix = XMLoadFloat4x4( &ObjectViewMatrix );
 
 	constexpr XMVECTORF32 c_XM_0100 = { { { 0.0f, 1.0f, 0.0f, 0.0f } } };
-	ObjectViewMatrix = XMMatrixLookAtLH( XMVectorSet( -distance, 0, 0, 0 ), g_XMZero, c_XM_0100 );
-	ObjectViewMatrix = XMMatrixTranspose( ObjectViewMatrix );
+	xmObjectViewMatrix = XMMatrixLookAtLH( XMVectorSet( -distance, 0, 0, 0 ), DirectX::g_XMZero, c_XM_0100 );
+	xmObjectViewMatrix = XMMatrixTranspose( xmObjectViewMatrix );
+
+	XMStoreFloat4x4( &ObjectWorldMatrix, xmObjectWorldMatrix );
+	XMStoreFloat4x4( &ObjectViewMatrix, xmObjectViewMatrix );
 }
 
 /** Updates the view */
@@ -102,19 +109,23 @@ void SV_GMeshInfoView::UpdateView() {
 
 	D3D11GraphicsEngine* g = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
 
-	ObjectProjMatrix = XMMatrixPerspectiveFovLH( XMConvertToRadians( FOV ), GetSize().height / GetSize().width, 0.01f, 10000.0f );
-	ObjectProjMatrix = XMMatrixTranspose( ObjectProjMatrix );
+	XMMATRIX xmObjectProjMatrix = XMLoadFloat4x4( &ObjectProjMatrix );
+
+	xmObjectProjMatrix = XMMatrixPerspectiveFovLH( XMConvertToRadians( FOV ), GetSize().height / GetSize().width, 0.01f, 10000.0f );
+	xmObjectProjMatrix = XMMatrixTranspose( xmObjectProjMatrix );
+
+	XMStoreFloat4x4( &ObjectProjMatrix, xmObjectProjMatrix );
 
 	g->SetDefaultStates();
 	Engine::GAPI->GetRendererState().RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
 	Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
 
-	XMMATRIX oldProj = XMLoadFloat4x4( &Engine::GAPI->GetProjTransformDx() );
+	XMFLOAT4X4 oldProj = Engine::GAPI->GetProjTransformDx();
 
 	// Set transforms
-	Engine::GAPI->SetWorldTransformXM( ObjectWorldMatrix );
-	Engine::GAPI->SetViewTransformXM( ObjectViewMatrix );
-	Engine::GAPI->SetProjTransformXM( ObjectProjMatrix );
+	Engine::GAPI->SetWorldTransformDX( ObjectWorldMatrix );
+	Engine::GAPI->SetViewTransformDX( ObjectViewMatrix );
+	Engine::GAPI->SetProjTransformDX( ObjectProjMatrix );
 
 	// Set Viewport
 	D3D11_VIEWPORT oldVP;
@@ -169,7 +180,7 @@ void SV_GMeshInfoView::UpdateView() {
 	}
 	// Reset viewport
 	g->GetContext()->RSSetViewports( 1, &oldVP );
-	Engine::GAPI->SetProjTransformXM( oldProj );
+	Engine::GAPI->SetProjTransformDX( oldProj );
 
 	// Update panel
 	Panel->SetD3D11TextureAsImage( RT->GetTexture().Get(), INT2( RT->GetSizeX(), RT->GetSizeY() ) );

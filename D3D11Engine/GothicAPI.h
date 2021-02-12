@@ -281,6 +281,9 @@ public:
 	/** Returns a list of visible particle-effects */
 	void GetVisibleParticleEffectsList( std::vector<zCVob*>& pfxList );
 
+    /** Sets the Projection matrix */
+    void SetProjTransformDX( const DirectX::XMFLOAT4X4& proj );
+
 	/** Sets the Projection matrix */
 	void XM_CALLCONV SetProjTransformXM( const XMMATRIX proj );
 
@@ -290,6 +293,8 @@ public:
 	/** Sets the world matrix */
 	void XM_CALLCONV  SetWorldTransformXM( DirectX::XMMATRIX world, bool transpose = false );
 
+    /** Sets the world matrix */
+    void SetWorldTransformDX( const DirectX::XMFLOAT4X4& world, bool transpose = false );
 
 	/** Sets the world matrix */
 	void XM_CALLCONV SetViewTransformXM( DirectX::XMMATRIX view, bool transpose = false );

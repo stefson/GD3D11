@@ -98,7 +98,7 @@ void fft_512x512_c2c(CSFFT512x512_Plan* fft_plan,
 	radix008A(fft_plan, pUAV_Dst, pSRV_Tmp.Get(), thread_count, istride);
 }
 
-void create_cbuffers_512x512(CSFFT512x512_Plan* plan, ID3D11Device1* pd3dDevice, UINT slices)
+void create_cbuffers_512x512(CSFFT512x512_Plan* plan, ID3D11Device* pd3dDevice, UINT slices)
 {
 	// Create 6 cbuffers for 512x512 transform.
 
@@ -187,7 +187,7 @@ void create_cbuffers_512x512(CSFFT512x512_Plan* plan, ID3D11Device1* pd3dDevice,
 	assert(plan->pRadix008A_CB[5].Get());
 }
 
-void fft512x512_create_plan(CSFFT512x512_Plan* plan, ID3D11Device1* pd3dDevice, UINT slices)
+void fft512x512_create_plan(CSFFT512x512_Plan* plan, ID3D11Device* pd3dDevice, UINT slices)
 {
 	plan->slices = slices;
 

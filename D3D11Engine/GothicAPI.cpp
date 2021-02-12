@@ -1268,9 +1268,9 @@ void GothicAPI::OnRemovedVob( zCVob* vob, zCWorld* world ) {
 
 	// Erase the vob from visual-vob map
 	std::list<BaseVobInfo*>& list = VobsByVisual[vob->GetVisual()];
-	for ( auto& it = list.begin(); it != list.end(); ++it ) {
-		if ( (*it)->Vob == vob ) {
-			list.erase( it );
+	for ( auto& vit = list.begin(); vit != list.end(); ++vit ) {
+		if ( (*vit)->Vob == vob ) {
+			list.erase( vit );
 			break; // Can (should!) only be in here once
 		}
 	}
@@ -1289,12 +1289,12 @@ void GothicAPI::OnRemovedVob( zCVob* vob, zCWorld* world ) {
 	SkeletalVobInfo* svi = SkeletalVobMap[vob];
 
 	// Tell all dynamic lights that we removed a vob they could have cached
-	for ( auto& it : VobLightMap ) {
-		if ( vi && it.second->LightShadowBuffers )
-			it.second->LightShadowBuffers->OnVobRemovedFromWorld( vi );
+	for ( auto& vlit : VobLightMap ) {
+		if ( vi && vlit.second->LightShadowBuffers )
+            vlit.second->LightShadowBuffers->OnVobRemovedFromWorld( vi );
 
-		if ( svi && it.second->LightShadowBuffers )
-			it.second->LightShadowBuffers->OnVobRemovedFromWorld( svi );
+		if ( svi && vlit.second->LightShadowBuffers )
+            vlit.second->LightShadowBuffers->OnVobRemovedFromWorld( svi );
 	}
 
 	VobLightInfo* li = VobLightMap[(zCVobLight*)vob];
@@ -1374,26 +1374,26 @@ void GothicAPI::OnRemovedVob( zCVob* vob, zCWorld* world ) {
 		vi->VobSection->Vobs.remove( vi );
 	}
 	// Erase it from the skeletal vob-list
-	for ( auto& it = SkeletalMeshVobs.begin(); it != SkeletalMeshVobs.end(); ++it ) {
-		if ( (*it)->Vob == vob ) {
+	for ( auto& vit = SkeletalMeshVobs.begin(); vit != SkeletalMeshVobs.end(); ++vit ) {
+		if ( (*vit)->Vob == vob ) {
 			//SkeletalVobInfo* vi = *it;
-			SkeletalMeshVobs.erase( it );
+			SkeletalMeshVobs.erase( vit );
 			break;
 		}
 	}
 
-	for ( auto& it = AnimatedSkeletalVobs.begin(); it != AnimatedSkeletalVobs.end(); ++it ) {
-		if ( (*it)->Vob == vob ) {
+	for ( auto& vit = AnimatedSkeletalVobs.begin(); vit != AnimatedSkeletalVobs.end(); ++vit ) {
+		if ( (*vit)->Vob == vob ) {
 			//SkeletalVobInfo* vi = *it;
-			AnimatedSkeletalVobs.erase( it );
+			AnimatedSkeletalVobs.erase( vit );
 			break;
 		}
 	}
 
 	// Erase it from dynamically loaded vobs
-	for ( auto& it = DynamicallyAddedVobs.begin(); it != DynamicallyAddedVobs.end(); ++it ) {
-		if ( (*it)->Vob == vob ) {
-			DynamicallyAddedVobs.erase( it );
+	for ( auto& vit = DynamicallyAddedVobs.begin(); vit != DynamicallyAddedVobs.end(); ++vit ) {
+		if ( (*vit)->Vob == vob ) {
+			DynamicallyAddedVobs.erase( vit );
 			break;
 		}
 	}
@@ -2043,16 +2043,24 @@ void GothicAPI::DrawTriangle( float3 pos = { 0.0f,0.0f,0.0f } ) {
 }
 
 /** Sets the Projection matrix */
+void GothicAPI::SetProjTransformDX( const DirectX::XMFLOAT4X4& proj ) {
+    RendererState.TransformState.TransformProj = proj;
+}
+/** Sets the Projection matrix */
 void XM_CALLCONV GothicAPI::SetProjTransformXM( const DirectX::XMMATRIX proj ) {
 	XMStoreFloat4x4( &RendererState.TransformState.TransformProj, proj );
 }
-
 /** Sets the Projection matrix */
 DirectX::XMFLOAT4X4 GothicAPI::GetProjTransformDx() {
 	return RendererState.TransformState.TransformProj;
 }
-
-
+/** Sets the world matrix */
+void GothicAPI::SetWorldTransformDX( const XMFLOAT4X4& world, bool transpose ) {
+    if ( transpose )
+        XMStoreFloat4x4( &RendererState.TransformState.TransformWorld, XMMatrixTranspose( XMLoadFloat4x4( &world ) ) );
+    else
+        RendererState.TransformState.TransformWorld = world;
+}
 /** Sets the world matrix */
 void XM_CALLCONV GothicAPI::SetWorldTransformXM( XMMATRIX world, bool transpose ) {
 	if ( transpose )
@@ -3053,14 +3061,14 @@ void GothicAPI::BuildBspVobMapCacheHelper( zCBspBase* base ) {
 				}
 			}
 
-			for ( int i = 0; i < leaf->LightVobList.NumInArray; i++ ) {
+			for ( int j = 0; j < leaf->LightVobList.NumInArray; j++ ) {
 				// Add the light to the map if not already done
-				std::unordered_map<zCVobLight*, VobLightInfo*>::iterator vit = VobLightMap.find( leaf->LightVobList.Array[i] );
+				std::unordered_map<zCVobLight*, VobLightInfo*>::iterator vit = VobLightMap.find( leaf->LightVobList.Array[j] );
 
 				if ( vit == VobLightMap.end() ) {
 					VobLightInfo* vi = new VobLightInfo;
-					vi->Vob = leaf->LightVobList.Array[i];
-					VobLightMap[leaf->LightVobList.Array[i]] = vi;
+					vi->Vob = leaf->LightVobList.Array[j];
+					VobLightMap[leaf->LightVobList.Array[j]] = vi;
 
 					float minDynamicUpdateLightRange = Engine::GAPI->GetRendererState().RendererSettings.MinLightShadowUpdateRange;
 					if ( RendererState.RendererSettings.EnablePointlightShadows >= GothicRendererSettings::PLS_STATIC_ONLY
@@ -3075,7 +3083,7 @@ void GothicAPI::BuildBspVobMapCacheHelper( zCBspBase* base ) {
 				}
 
 
-				VobLightInfo* vi = VobLightMap[leaf->LightVobList.Array[i]];
+				VobLightInfo* vi = VobLightMap[leaf->LightVobList.Array[j]];
 
 				if ( vi ) {
 					if ( !vi->IsIndoorVob ) {

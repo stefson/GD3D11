@@ -61,7 +61,7 @@ float Phillips(DirectX::XMFLOAT2 K, DirectX::XMFLOAT2 W, float v, float a, float
 	return phillips * expf(-Ksqr * w * w);
 }
 
-void createBufferAndUAV(ID3D11Device1* pd3dDevice, void * data, UINT byte_width, UINT byte_stride,
+void createBufferAndUAV(ID3D11Device* pd3dDevice, void * data, UINT byte_width, UINT byte_stride,
 						ID3D11Buffer** ppBuffer, ID3D11UnorderedAccessView** ppUAV, ID3D11ShaderResourceView ** ppSRV)
 {
 	// Create buffer
@@ -100,7 +100,7 @@ void createBufferAndUAV(ID3D11Device1* pd3dDevice, void * data, UINT byte_width,
 	assert(*ppSRV);
 }
 
-void createTextureAndViews(ID3D11Device1* pd3dDevice, UINT width, UINT height, DXGI_FORMAT format,
+void createTextureAndViews(ID3D11Device* pd3dDevice, UINT width, UINT height, DXGI_FORMAT format,
 						   ID3D11Texture2D ** ppTex, ID3D11ShaderResourceView ** ppSRV, ID3D11RenderTargetView** ppRTV)
 {
 	// Create 2D texture
@@ -147,12 +147,12 @@ void createTextureAndViews(ID3D11Device1* pd3dDevice, UINT width, UINT height, D
 	}
 }
 
-OceanSimulator::OceanSimulator(OceanParameter& params, ID3D11Device1* pd3dDevice)
+OceanSimulator::OceanSimulator(OceanParameter& params, ID3D11Device* pd3dDevice)
 {
 	// If the device becomes invalid at some point, delete current instance and generate a new one.
 	m_pd3dDevice = pd3dDevice;
 	assert(m_pd3dDevice);
-	m_pd3dDevice->CreateDeferredContext1(0, &m_pd3dImmediateContext); //was previously GetImmediateContext1
+	m_pd3dDevice->CreateDeferredContext(0, &m_pd3dImmediateContext); //was previously GetImmediateContext1
 	assert(m_pd3dImmediateContext);
 
 	// Height map H(0)

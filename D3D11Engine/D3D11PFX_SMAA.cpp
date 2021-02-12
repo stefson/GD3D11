@@ -36,7 +36,7 @@ HRESULT D3DX11CreateEffectFromFile_RES(
 	LPCSTR pProfile,
 	UINT HLSLFlags,
 	UINT FXFlags,
-	ID3D11Device1* pDevice,
+	ID3D11Device* pDevice,
 	void* pPump,
 	ID3DX11Effect** ppEffect,
 	HRESULT* pHResult

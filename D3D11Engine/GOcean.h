@@ -52,7 +52,7 @@ public:
 
 protected:
 	/** Creates the fresnel map */
-	void CreateFresnelMap( ID3D11Device1* pd3dDevice );
+	void CreateFresnelMap( ID3D11Device* pd3dDevice );
 
 	/** Subdivided plane mesh for the ocean */
 	GMesh* PlaneMesh;
