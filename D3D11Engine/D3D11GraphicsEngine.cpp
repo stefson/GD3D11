@@ -3984,7 +3984,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
         {
             oldDir = dir;
             smoothDir = dir;
-        } 
+        }
         //else if ( fabs( dotDir ) < 0.99973f ) {
         //    // flickers
         //    smoothDir = XMVectorLerp( oldDir, target, 0.5f );

@@ -3,27 +3,27 @@
 
 class D3D11VertexBuffer;
 class D3D11LineRenderer :
-	public BaseLineRenderer {
+    public BaseLineRenderer {
 public:
-	D3D11LineRenderer();
-	~D3D11LineRenderer();
+    D3D11LineRenderer();
+    ~D3D11LineRenderer();
 
-	/** Adds a line to the list */
-	virtual XRESULT AddLine( const LineVertex& v1, const LineVertex& v2 );
+    /** Adds a line to the list */
+    virtual XRESULT AddLine( const LineVertex& v1, const LineVertex& v2 );
 
-	/** Flushes the cached lines */
-	virtual XRESULT Flush();
+    /** Flushes the cached lines */
+    virtual XRESULT Flush();
 
-	/** Clears the line cache */
-	virtual XRESULT ClearCache();
+    /** Clears the line cache */
+    virtual XRESULT ClearCache();
 
 
 private:
-	/** Line cache */
-	std::vector<LineVertex> LineCache;
+    /** Line cache */
+    std::vector<LineVertex> LineCache;
 
-	/** Buffer to hold the lines on the GPU */
-	D3D11VertexBuffer* LineBuffer;
-	unsigned int LineBufferSize; // Size in elements the line buffer can hold
+    /** Buffer to hold the lines on the GPU */
+    D3D11VertexBuffer* LineBuffer;
+    unsigned int LineBufferSize; // Size in elements the line buffer can hold
 };
 

@@ -11,66 +11,66 @@ class SV_Panel;
 
 class SV_GMeshInfoView : public D2DSubView {
 public:
-	SV_GMeshInfoView( D2DView* view, D2DSubView* parent );
-	~SV_GMeshInfoView();
+    SV_GMeshInfoView( D2DView* view, D2DSubView* parent );
+    ~SV_GMeshInfoView();
 
-	enum ERenderMode {
-		RM_Wireframe = 0,
-		RM_TexturedWireFrame = 1,
-		RM_Textured = 2,
-		RM_Lit = 3
-	};
+    enum ERenderMode {
+        RM_Wireframe = 0,
+        RM_TexturedWireFrame = 1,
+        RM_Textured = 2,
+        RM_Lit = 3
+    };
 
-	/** Sets the current render mode */
-	void SetRenderMode( ERenderMode mode );
+    /** Sets the current render mode */
+    void SetRenderMode( ERenderMode mode );
 
-	/** Sets the mesh infos for this view */
-	void SetMeshes( const std::map<zCTexture*, MeshInfo*>& meshes, BaseVisualInfo* visInfo = nullptr );
+    /** Sets the mesh infos for this view */
+    void SetMeshes( const std::map<zCTexture*, MeshInfo*>& meshes, BaseVisualInfo* visInfo = nullptr );
 
-	/** Sets the name of this view */
-	void SetName( const std::string& name );
+    /** Sets the name of this view */
+    void SetName( const std::string& name );
 
-	/** Sets the rotation of this object in the view */
-	void SetObjectOrientation( float yaw, float pitch, float distance );
+    /** Sets the rotation of this object in the view */
+    void SetObjectOrientation( float yaw, float pitch, float distance );
 
-	/** Updates the view */
-	void UpdateView();
+    /** Updates the view */
+    void UpdateView();
 
-	/** Sets the position and size of this sub-view */
-	virtual void SetRect( const D2D1_RECT_F& rect );
+    /** Sets the position and size of this sub-view */
+    virtual void SetRect( const D2D1_RECT_F& rect );
 
-	/** Processes a window-message. Return false to stop the message from going to children */
-	bool OnWindowMessage( HWND hWnd, unsigned int msg, WPARAM wParam, LPARAM lParam, const D2D1_RECT_F& clientRectAbs );
+    /** Processes a window-message. Return false to stop the message from going to children */
+    bool OnWindowMessage( HWND hWnd, unsigned int msg, WPARAM wParam, LPARAM lParam, const D2D1_RECT_F& clientRectAbs );
 
-	/** Returns the view-properties */
-	void GetObjectOrientation( float& yaw, float& pitch, float& distance );
+    /** Returns the view-properties */
+    void GetObjectOrientation( float& yaw, float& pitch, float& distance );
 
 protected:
-	/** Draws the meshes to the buffer */
-	void DrawMeshes();
+    /** Draws the meshes to the buffer */
+    void DrawMeshes();
 
-	std::map<zCTexture*, MeshInfo*> Meshes;
-	BaseVisualInfo* VisualInfo;
-	ERenderMode RenderMode;
+    std::map<zCTexture*, MeshInfo*> Meshes;
+    BaseVisualInfo* VisualInfo;
+    ERenderMode RenderMode;
 
-	/** Orientation */
-	float ObjectYaw;
-	float ObjectPitch;
-	float ObjectDistance;
-	DirectX::XMFLOAT3 ObjectPosition;
-	float FOV;
-	DirectX::XMFLOAT4X4 ObjectWorldMatrix;
-	DirectX::XMFLOAT4X4 ObjectViewMatrix;
-	DirectX::XMFLOAT4X4 ObjectProjMatrix;
+    /** Orientation */
+    float ObjectYaw;
+    float ObjectPitch;
+    float ObjectDistance;
+    DirectX::XMFLOAT3 ObjectPosition;
+    float FOV;
+    DirectX::XMFLOAT4X4 ObjectWorldMatrix;
+    DirectX::XMFLOAT4X4 ObjectViewMatrix;
+    DirectX::XMFLOAT4X4 ObjectProjMatrix;
 
-	/** Props */
-	bool IsDraggingView;
-	POINT LastDragPosition;
+    /** Props */
+    bool IsDraggingView;
+    POINT LastDragPosition;
 
-	/** Rendertarget */
-	RenderToTextureBuffer* RT;
-	RenderToDepthStencilBuffer* DS;
+    /** Rendertarget */
+    RenderToTextureBuffer* RT;
+    RenderToDepthStencilBuffer* DS;
 
-	/** Image panel */
-	SV_Panel* Panel;
+    /** Image panel */
+    SV_Panel* Panel;
 };
