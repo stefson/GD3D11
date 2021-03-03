@@ -15,7 +15,7 @@ public:
 	virtual ~D3D11FullscreenQuad();
 
 	//Fills the VertexBuffer
-	HRESULT CreateQuad( ID3D11Device* device );
+    HRESULT CreateQuad( ID3D11Device* device );
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> GetBuffer() { return QuadVB.Get(); }
 

@@ -10,8 +10,6 @@
 using namespace DirectX;
 
 D3D11VShader::D3D11VShader() {
-	VertexShader = nullptr;
-	InputLayout = nullptr;
 
 	// Insert into state-map
 	ID = D3D11ObjectIdManager::AddVShader( this );
@@ -20,9 +18,6 @@ D3D11VShader::D3D11VShader() {
 D3D11VShader::~D3D11VShader() {
 	// Remove from state map
 	D3D11ObjectIdManager::EraseVShader( this );
-
-	SAFE_RELEASE( VertexShader );
-	SAFE_RELEASE( InputLayout );
 
 	for ( unsigned int i = 0; i < ConstantBuffers.size(); i++ ) {
 		delete ConstantBuffers[i];
@@ -93,9 +88,9 @@ XRESULT D3D11VShader::LoadShader( const char* vertexShader, int layout, const st
 
 	// Create the shader
 	LE( engine->GetDevice()->CreateVertexShader( vsBlob->GetBufferPointer(),
-		vsBlob->GetBufferSize(), nullptr, &VertexShader ) );
+		vsBlob->GetBufferSize(), nullptr, VertexShader.ReleaseAndGetAddressOf() ) );
 
-	SetDebugName( VertexShader, vertexShader );
+	SetDebugName( VertexShader.Get(), vertexShader );
 
 
 	const D3D11_INPUT_ELEMENT_DESC layout1[] =
@@ -216,62 +211,62 @@ XRESULT D3D11VShader::LoadShader( const char* vertexShader, int layout, const st
 	switch ( layout ) {
 	case 1:
 		LE( engine->GetDevice()->CreateInputLayout( layout1, ARRAYSIZE( layout1 ), vsBlob->GetBufferPointer(),
-			vsBlob->GetBufferSize(), &InputLayout ) );
+			vsBlob->GetBufferSize(), InputLayout.ReleaseAndGetAddressOf() ) );
 		break;
 
 	case 2:
 		LE( engine->GetDevice()->CreateInputLayout( layout2, ARRAYSIZE( layout2 ), vsBlob->GetBufferPointer(),
-			vsBlob->GetBufferSize(), &InputLayout ) );
+			vsBlob->GetBufferSize(), InputLayout.ReleaseAndGetAddressOf() ) );
 		break;
 
 	case 3:
 		LE( engine->GetDevice()->CreateInputLayout( layout3, ARRAYSIZE( layout3 ), vsBlob->GetBufferPointer(),
-			vsBlob->GetBufferSize(), &InputLayout ) );
+			vsBlob->GetBufferSize(), InputLayout.ReleaseAndGetAddressOf() ) );
 		break;
 
 	case 4:
 		LE( engine->GetDevice()->CreateInputLayout( layout4, ARRAYSIZE( layout4 ), vsBlob->GetBufferPointer(),
-			vsBlob->GetBufferSize(), &InputLayout ) );
+			vsBlob->GetBufferSize(), InputLayout.ReleaseAndGetAddressOf() ) );
 		break;
 
 	case 5:
 		LE( engine->GetDevice()->CreateInputLayout( layout5, ARRAYSIZE( layout5 ), vsBlob->GetBufferPointer(),
-			vsBlob->GetBufferSize(), &InputLayout ) );
+			vsBlob->GetBufferSize(), InputLayout.ReleaseAndGetAddressOf() ) );
 		break;
 
 	case 6:
 		LE( engine->GetDevice()->CreateInputLayout( layout6, ARRAYSIZE( layout6 ), vsBlob->GetBufferPointer(),
-			vsBlob->GetBufferSize(), &InputLayout ) );
+			vsBlob->GetBufferSize(), InputLayout.ReleaseAndGetAddressOf() ) );
 		break;
 
 	case 7:
 		LE( engine->GetDevice()->CreateInputLayout( layout7, ARRAYSIZE( layout7 ), vsBlob->GetBufferPointer(),
-			vsBlob->GetBufferSize(), &InputLayout ) );
+			vsBlob->GetBufferSize(), InputLayout.ReleaseAndGetAddressOf() ) );
 		break;
 
 	case 8:
 		LE( engine->GetDevice()->CreateInputLayout( layout8, ARRAYSIZE( layout8 ), vsBlob->GetBufferPointer(),
-			vsBlob->GetBufferSize(), &InputLayout ) );
+			vsBlob->GetBufferSize(), InputLayout.ReleaseAndGetAddressOf() ) );
 		break;
 
 	case 9:
 		LE( engine->GetDevice()->CreateInputLayout( layout9, ARRAYSIZE( layout9 ), vsBlob->GetBufferPointer(),
-			vsBlob->GetBufferSize(), &InputLayout ) );
+			vsBlob->GetBufferSize(), InputLayout.ReleaseAndGetAddressOf() ) );
 		break;
 
 	case 10:
 		LE( engine->GetDevice()->CreateInputLayout( layout10, ARRAYSIZE( layout10 ), vsBlob->GetBufferPointer(),
-			vsBlob->GetBufferSize(), &InputLayout ) );
+			vsBlob->GetBufferSize(), InputLayout.ReleaseAndGetAddressOf() ) );
 		break;
 
 	case 11:
 		LE( engine->GetDevice()->CreateInputLayout( layout11, ARRAYSIZE( layout11 ), vsBlob->GetBufferPointer(),
-			vsBlob->GetBufferSize(), &InputLayout ) );
+			vsBlob->GetBufferSize(), InputLayout.ReleaseAndGetAddressOf() ) );
 		break;
 
 	case 12:
 		LE( engine->GetDevice()->CreateInputLayout( layout12, ARRAYSIZE( layout12 ), vsBlob->GetBufferPointer(),
-			vsBlob->GetBufferSize(), &InputLayout ) );
+			vsBlob->GetBufferSize(), InputLayout.ReleaseAndGetAddressOf() ) );
 		break;
 	}
 
@@ -282,8 +277,8 @@ XRESULT D3D11VShader::LoadShader( const char* vertexShader, int layout, const st
 XRESULT D3D11VShader::Apply() {
 	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase*)Engine::GraphicsEngine;
 
-	engine->GetContext()->IASetInputLayout( InputLayout );
-	engine->GetContext()->VSSetShader( VertexShader, nullptr, 0 );
+	engine->GetContext()->IASetInputLayout( InputLayout.Get() );
+	engine->GetContext()->VSSetShader( VertexShader.Get(), nullptr, 0 );
 
 	return XR_SUCCESS;
 }

@@ -116,7 +116,7 @@ XRESULT D2DView::Init( const INT2& initialResolution, ID3D11Texture2D* rendertar
 		LogError() << "Failed to create ID2D1Factory!";
 		return XR_FAILED;
 	}
-    // TODO: ComPtr<T> HERE
+	// TODO: ComPtr<T> HERE
 	IDXGISurface* dxgiBackbuffer = nullptr;
 	rendertarget->QueryInterface( &dxgiBackbuffer );
 

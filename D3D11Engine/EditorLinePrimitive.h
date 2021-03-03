@@ -109,7 +109,7 @@ private:
 
 
 	/** Renders a vertexbuffer with the given shader */
-	void RenderVertexBuffer( ID3D11Buffer* VB, UINT NumVertices, D3D11PShader* Shader, D3D11_PRIMITIVE_TOPOLOGY Topology, int Pass = -1 );
+	void RenderVertexBuffer( const Microsoft::WRL::ComPtr<ID3D11Buffer>& VB, UINT NumVertices, D3D11PShader* Shader, D3D11_PRIMITIVE_TOPOLOGY Topology, int Pass = -1 );
 
 	/** The bunch of vertices we have */
 	LineVertex* Vertices;

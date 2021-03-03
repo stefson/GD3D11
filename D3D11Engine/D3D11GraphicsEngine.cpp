@@ -297,9 +297,9 @@ XRESULT D3D11GraphicsEngine::Init() {
 
     // Init inf-buffer now
     InfiniteRangeConstantBuffer->UpdateBuffer( &float4( FLT_MAX, 0, 0, 0 ) );
-    SetDebugName( InfiniteRangeConstantBuffer->Get(), "InfiniteRangeConstantBuffer" );
-    SetDebugName( OutdoorSmallVobsConstantBuffer->Get(), "OutdoorSmallVobsConstantBuffer" );
-    SetDebugName( OutdoorVobsConstantBuffer->Get(), "OutdoorVobsConstantBuffer" );
+    SetDebugName( InfiniteRangeConstantBuffer->Get().Get(), "InfiniteRangeConstantBuffer" );
+    SetDebugName( OutdoorSmallVobsConstantBuffer->Get().Get(), "OutdoorSmallVobsConstantBuffer" );
+    SetDebugName( OutdoorVobsConstantBuffer->Get().Get(), "OutdoorVobsConstantBuffer" );
     // Load reflectioncube
 
     if ( S_OK != CreateDDSTextureFromFile(

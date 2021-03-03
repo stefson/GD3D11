@@ -142,8 +142,8 @@ XRESULT D3D11Effect::DrawRain() {
 
 		if ( !RainShadowmap.get() ) {
 			const int s = 2048;
-			RainShadowmap = std::make_unique<RenderToDepthStencilBuffer>( e->GetDevice(), s, s, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_R32_FLOAT );
-			SetDebugName( RainShadowmap->GetDepthStencilView().Get(), "RainShadowmap->DepthStencilView" );
+            RainShadowmap = std::make_unique<RenderToDepthStencilBuffer>( e->GetDevice(), s, s, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_R32_FLOAT );
+            SetDebugName( RainShadowmap->GetDepthStencilView().Get(), "RainShadowmap->DepthStencilView" );
 			SetDebugName( RainShadowmap->GetShaderResView().Get(), "RainShadowmap->ShaderResView" );
 			SetDebugName( RainShadowmap->GetTexture().Get(), "RainShadowmap->Texture" );
 		}
@@ -202,8 +202,8 @@ XRESULT D3D11Effect::DrawRain() {
 	e->GetContext()->Draw( numParticles, 0 );
 
 	// Unset streamout target
-	bobjStream = nullptr;
-	e->GetContext()->SOSetTargets( 1, &bobjStream, 0 );
+    bobjStream = nullptr;
+    e->GetContext()->SOSetTargets( 1, &bobjStream, 0 );
 
 	// Swap buffers
 	std::swap( RainBufferDrawFrom, RainBufferStreamTo );
@@ -272,13 +272,14 @@ XRESULT D3D11Effect::DrawRainShadowmap() {
 		return XR_SUCCESS;
 
 	D3D11GraphicsEngine* e = (D3D11GraphicsEngine*)Engine::GraphicsEngine; // TODO: This has to be a cast to D3D11GraphicsEngineBase!
+	//D3D11GraphicsEngineBase* e = (D3D11GraphicsEngineBase*)Engine::GraphicsEngine; //RenderShadowmaps to be moved then to D3D11GraphicsEngineBase
 	GothicRendererState& state = Engine::GAPI->GetRendererState();
 
 	CameraReplacement& cr = RainShadowmapCameraRepl;
 
 	// Get the section we are currently in
 	XMVECTOR p = Engine::GAPI->GetCameraPositionXM();
-	XMVECTOR dir = XMVector3NormalizeEst( XMLoadFloat3( &Engine::GAPI->GetRendererState().RendererSettings.RainGlobalVelocity ) * -1 );
+	XMVECTOR dir = XMVector3Normalize( XMLoadFloat3( &Engine::GAPI->GetRendererState().RendererSettings.RainGlobalVelocity ) * -1 ); //check was previous XMVector3NormalizeEst
 	// Set the camera height to the highest point in this section
 	//p.y = 0;
 	p += dir * 6000.0f;
@@ -344,7 +345,7 @@ XRESULT D3D11Effect::DrawRainShadowmap() {
 // of textures on disk.
 //--------------------------------------------------------------------------------------
 HRESULT LoadTextureArray( ID3D11Device* pd3dDevice, ID3D11DeviceContext* context, char* sTexturePrefix, int iNumTextures, ID3D11Texture2D** ppTex2D, ID3D11ShaderResourceView** ppSRV ) {
-	if ( !ppTex2D ) {
+    if ( !ppTex2D ) {
 		LogError() << "invalid argument: ppTex2D. should not be null";
 		return E_FAIL;
 	}

@@ -23,10 +23,10 @@ public:
 	std::vector<D3D11ConstantBuffer*>& GetConstantBuffer();
 
 	/** Returns the shader */
-	ID3D11HullShader* GetHShader() { return HullShader; }
+    Microsoft::WRL::ComPtr<ID3D11HullShader> GetHShader() { return HullShader; }
 
 	/** Returns the shader */
-	ID3D11DomainShader* GetDShader() { return DomainShader; }
+	Microsoft::WRL::ComPtr<ID3D11DomainShader> GetDShader() { return DomainShader; }
 
 	/** Returns this textures ID */
 	UINT16 GetID() { return ID; };
@@ -35,8 +35,8 @@ private:
 	/** Compiles the shader from file and outputs error messages if needed */
 	HRESULT CompileShaderFromFile( const CHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut );
 
-	ID3D11HullShader* HullShader;
-	ID3D11DomainShader* DomainShader;
+	Microsoft::WRL::ComPtr<ID3D11HullShader> HullShader;
+	Microsoft::WRL::ComPtr<ID3D11DomainShader> DomainShader;
 	std::vector<D3D11ConstantBuffer*> ConstantBuffers;
 
 	std::string File;

@@ -184,14 +184,12 @@ public:
 		//angle += XM_PIDIV2; // 12 is now in the sky, 18 horizon
 		float angle = ((GetMasterTime() * timeScale - 0.3f) * 1.25f + 0.5f) * XM_2PI;
 
-		XMVECTOR sunPos = XMVector3Normalize(XMVectorSet(-60, 0, 100, 0));
+		constexpr XMVECTORF32 sunPos = { -60, 0, 100, 0 };
 		XMFLOAT3 rotAxis = XMFLOAT3( 1, 0, 0 );
 
-		XMMATRIX r = XMLoadFloat4x4( &(HookedFunctions::OriginalFunctions.original_Alg_Rotation3DNRad( rotAxis, -angle )) );
-		r = XMMatrixTranspose( r );
-
 		XMFLOAT3 pos;
-		XMStoreFloat3( &pos, XMVector3TransformNormal( sunPos, r ) );
+		//XMVector3NormalizeEst leads to jumping shadows dueto reduced accuracy in combination with XMStoreFloat3( &LightDir, DirectX::XMVector3NormalizeEst( XMLoadFloat3( &LightDir ) ) ); but setting this mentioned code line in this comment to non Est does not influence if this active code line before the comment is Est or not
+		XMStoreFloat3( &pos, XMVector3TransformNormal( XMVector3Normalize( sunPos ), XMMatrixTranspose( XMLoadFloat4x4( &(HookedFunctions::OriginalFunctions.original_Alg_Rotation3DNRad( rotAxis, -angle )) ) ) ) );
 
 		return pos;
 	}
@@ -282,12 +280,12 @@ public:
 		DirectX::XMFLOAT3 c;
 
 		if (IsNight())
-			c = DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f);
-		else
+            c = DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f);
+        else
 			c = sky->GetMasterState()->DomeColor1;
 
 		if ((sky->GetMasterTime() >= 0.35f) && (sky->GetMasterTime() <= 0.65f) && GetLayerChannel() == 1)
-			c = 0.5f * (c + DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f));
+            c = 0.5f * (c + DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f));
 
 		return float3(c);
 	}*/

@@ -18,7 +18,7 @@ public:
 	void OnResize( const INT2& size );
 
 	/** Renders the PostFX */
-	void RenderPostFX( ID3D11ShaderResourceView* renderTargetSRV );
+	void RenderPostFX(const Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& renderTargetSRV );
 
 	/** Draws this effect to the given buffer */
 	XRESULT Render( RenderToTextureBuffer* fxbuffer ) { return XR_SUCCESS; };
@@ -30,7 +30,7 @@ private:
 	RenderToTextureBuffer* EdgesTex;
 	RenderToTextureBuffer* BlendTex;
 
-	ID3DX11Effect* SMAAShader;
+	Microsoft::WRL::ComPtr<ID3DX11Effect> SMAAShader;
 	ID3DX11EffectTechnique* LumaEdgeDetection;
 	ID3DX11EffectTechnique* BlendingWeightCalculation;
 	ID3DX11EffectTechnique* NeighborhoodBlending;

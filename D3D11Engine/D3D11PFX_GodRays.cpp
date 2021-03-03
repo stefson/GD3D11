@@ -34,9 +34,7 @@ XRESULT D3D11PFX_GodRays::Render( RenderToTextureBuffer* fxbuffer ) {
 	XMMATRIX view = XMLoadFloat4x4( &Engine::GAPI->GetRendererState().TransformState.TransformView );
 	XMMATRIX proj = XMLoadFloat4x4( &Engine::GAPI->GetProjectionMatrix() );
 
-	XMMATRIX viewProj = XMMatrixMultiply( proj, view );
-
-	viewProj = XMMatrixTranspose( viewProj );
+	XMMATRIX viewProj = XMMatrixTranspose( XMMatrixMultiply(proj, view) );
 	view = XMMatrixTranspose( view );
 
 	XMFLOAT3 sunViewPosition; XMStoreFloat3( &sunViewPosition, XMVector3TransformCoord( xmSunPosition, view ) ); // This is for checking if the light is behind the camera

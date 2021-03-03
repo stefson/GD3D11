@@ -19,10 +19,10 @@ public:
 	std::vector<D3D11ConstantBuffer*>& GetConstantBuffer();
 
 	/** Returns the shader */
-	ID3D11VertexShader* GetShader() { return VertexShader; }
+	Microsoft::WRL::ComPtr<ID3D11VertexShader> GetShader() { return VertexShader; }
 
 	/** Returns the inputlayout */
-	ID3D11InputLayout* GetInputLayout() { return InputLayout; }
+	Microsoft::WRL::ComPtr<ID3D11InputLayout> GetInputLayout() { return InputLayout; }
 
 	/** Returns this textures ID */
 	UINT16 GetID() { return ID; };
@@ -31,8 +31,8 @@ private:
 	/** Compiles a shader from file and outputs error messages if needed */
 	HRESULT CompileShaderFromFile( const CHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut, const std::vector<D3D_SHADER_MACRO>& makros );
 
-	ID3D11VertexShader* VertexShader;
-	ID3D11InputLayout* InputLayout;
+	Microsoft::WRL::ComPtr<ID3D11VertexShader> VertexShader;
+	Microsoft::WRL::ComPtr<ID3D11InputLayout> InputLayout;
 	std::vector<D3D11ConstantBuffer*> ConstantBuffers;
 
 	std::string File;

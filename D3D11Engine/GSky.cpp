@@ -81,9 +81,7 @@ XRESULT GSky::InitSky() {
 	// ---
 
 	// 1
-	XMFLOAT2 SkyPlaneVertices3;
-	XMStoreFloat2( &SkyPlaneVertices3, (XMVectorSet( scale, 0, 0, 0 ) + xm_displacement) );
-	SkyPlaneVertices[3].TexCoord = SkyPlaneVertices3;
+	SkyPlaneVertices[3].TexCoord = SkyPlaneVertices1;
 	SkyPlaneVertices[3].Color = color.ToDWORD();
 
 	// 3
@@ -93,9 +91,7 @@ XRESULT GSky::InitSky() {
 	SkyPlaneVertices[4].Color = color.ToDWORD();
 
 	// 2
-	XMFLOAT2 SkyPlaneVertices5;
-	XMStoreFloat2( &SkyPlaneVertices5, (XMVectorSet( 0, scale, 0, 0 ) + xm_displacement) );
-	SkyPlaneVertices[5].TexCoord = SkyPlaneVertices5;
+	SkyPlaneVertices[5].TexCoord = SkyPlaneVertices2;
 	SkyPlaneVertices[5].Color = color.ToDWORD();
 
 	return XR_SUCCESS;
@@ -194,7 +190,6 @@ void GSky::GetTextureOfDaytime( float time, D3D11Texture** t1, D3D11Texture** t2
 	*t1 = SkyTextures[i0];
 	*t2 = SkyTextures[i1];
 	*factor = weight;
-
 }
 
 /** Renders the sky */
@@ -217,6 +212,7 @@ XRESULT GSky::RenderSky() {
 			Atmosphere.LightDirection = LightDir;
 		}
 	}
+    //XMVector3NormalizeEst leads to a flickering sun but smother moving shadows
 	XMStoreFloat3( &LightDir, DirectX::XMVector3Normalize( XMLoadFloat3( &LightDir ) ) );
 	//Atmosphere.SpherePosition.y = -Atmosphere.InnerRadius;
 
@@ -348,7 +344,7 @@ float3 GSky::GetSunColor() {
 	XMVECTOR vRay = vPos - camPos;
 
 	float fFar;
-	XMStoreFloat( &fFar, XMVector3Length( vRay ) );
+	XMStoreFloat( &fFar, XMVector3LengthEst( vRay ) );
 	vRay /= fFar;
 
 	//return float4(abs(AC_SpherePosition), 1);
@@ -357,25 +353,22 @@ float3 GSky::GetSunColor() {
 	//	return float4(1, 0, 0, 1);
 
 	// Calculate the closest intersection of the ray with the outer atmosphere (which is the near point of the ray passing through the atmosphere)
-	float fNear = AC_getNearIntersection( camPos, vRay, AtmosphereCB.AC_CameraHeight * AtmosphereCB.AC_CameraHeight, AtmosphereCB.AC_OuterRadius * AtmosphereCB.AC_OuterRadius );
+	//float fNear = AC_getNearIntersection( camPos, vRay, AtmosphereCB.AC_CameraHeight * AtmosphereCB.AC_CameraHeight, AtmosphereCB.AC_OuterRadius * AtmosphereCB.AC_OuterRadius ); //never used
 
 	// Calculate the ray's starting position, then calculate its scattering offset
-	FXMVECTOR vStart = camPos;
-
-	FXMVECTOR fHeight = XMVector3Length( vStart );
 	float fDepth = exp( AtmosphereCB.AC_RayleighOverScaleDepth * (AtmosphereCB.AC_InnerRadius - AtmosphereCB.AC_CameraHeight) );
 	float fStartAngle;
-	XMStoreFloat( &fStartAngle, XMVector3Dot( vRay, vStart ) / fHeight );
+	XMStoreFloat( &fStartAngle, XMVector3Dot( vRay, camPos ) / XMVector3Length( camPos ) );
 	float fStartOffset = fDepth * AC_Escale( fStartAngle, AtmosphereCB.AC_RayleighScaleDepth );
 
 	// Initialize the scattering loop variables
 	float fSampleLength = fFar / AtmosphereCB.AC_fSamples;
 	float fScaledLength = fSampleLength * AtmosphereCB.AC_Scale;
 	FXMVECTOR vSampleRay = vRay * fSampleLength;
-	XMVECTOR vSamplePoint = vStart + vSampleRay * 0.5f;
+	XMVECTOR vSamplePoint = camPos + vSampleRay * 0.5f;
 
 	FXMVECTOR AC_Wavelenght_XMV = XMVectorSet( AtmosphereCB.AC_Wavelength.x, AtmosphereCB.AC_Wavelength.y, AtmosphereCB.AC_Wavelength.z, 0 );
-	XMVECTORF32 Four_XMV = { 4, 4, 4, 0 };
+	constexpr XMVECTORF32 Four_XMV = { 4, 4, 4, 0 };
 	FXMVECTOR vInvWavelength = XMQuaternionInverse( XMVectorPow( AC_Wavelenght_XMV, Four_XMV ) );
 	//return retF(AC_InnerRadius - length(vSamplePoint));
 
@@ -383,12 +376,12 @@ float3 GSky::GetSunColor() {
 	XMVECTOR vFrontColor = XMVectorZero();
 	float fHeight_float;
 	float fLightAngle;
+	float fCameraAngle;
 	for ( int i = 0; i < AtmosphereCB.AC_nSamples; i++ ) {
 		FXMVECTOR fHeight = XMVector3Length( vSamplePoint );
 		XMStoreFloat( &fHeight_float, fHeight );
 		float fDepth = exp( AtmosphereCB.AC_RayleighOverScaleDepth * (AtmosphereCB.AC_InnerRadius - fHeight_float) );
 		XMStoreFloat( &fLightAngle, XMVector3Dot( XMLoadFloat3( &LightPos ), vSamplePoint ) / fHeight );
-		float fCameraAngle;
 		XMStoreFloat( &fCameraAngle, XMVector3Dot( vRay, vSamplePoint ) / fHeight );
 		float fScatter = (fStartOffset + fDepth * (AC_Escale( fLightAngle, AtmosphereCB.AC_RayleighScaleDepth ) - AC_Escale( fCameraAngle, AtmosphereCB.AC_RayleighScaleDepth )));
 
@@ -400,19 +393,16 @@ float3 GSky::GetSunColor() {
 
 	// Finally, scale the Mie and Rayleigh colors and set up the varying variables for the pixel shader
 	FXMVECTOR c0 = vFrontColor * vInvWavelength * AtmosphereCB.AC_KrESun;
-
 	FXMVECTOR c1 = vFrontColor * AtmosphereCB.AC_KmESun;
 	FXMVECTOR vDirection = camPos - vPos;
 
 	float fCos;
-	XMStoreFloat( &fCos, XMVector3Dot( XMLoadFloat3( AtmosphereCB.AC_LightPos.toXMFLOAT3() ), vDirection ) / XMVector3Length( vDirection ) );
+	XMStoreFloat( &fCos, XMVector3Dot( XMLoadFloat3( &LightPos ), vDirection ) / XMVector3LengthEst( vDirection ) );
 
 	XMFLOAT3 suncolor_convert;
 	float fCos2 = fCos * fCos;
-	XMStoreFloat3( &suncolor_convert, AC_getRayleighPhase( fCos2 ) * c0 + AC_getMiePhase( fCos, fCos2, AtmosphereCB.AC_g, AtmosphereCB.AC_g * AtmosphereCB.AC_g ) * c1 );
+	XMStoreFloat3( &suncolor_convert, AC_getRayleighPhase(fCos2) * c0 + AC_getMiePhase( fCos, fCos2, AtmosphereCB.AC_g, AtmosphereCB.AC_g * AtmosphereCB.AC_g ) * c1 );
 	float3 suncolor_return;
-	suncolor_return.x = suncolor_convert.x;
-	suncolor_return.y = suncolor_convert.y;
-	suncolor_return.z = suncolor_convert.z;
+	suncolor_return = suncolor_convert;
 	return suncolor_return;
 }

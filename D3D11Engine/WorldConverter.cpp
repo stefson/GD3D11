@@ -1731,8 +1731,8 @@ void WorldConverter::WrapVertexBuffers( const std::list<std::vector<ExVertexStru
 	outOffsets.emplace_back( 0 );
 	int off = 0;
 	for ( auto const& iti : indexBuffers ) {
-		auto const& end = iti->end();
-		for ( auto& vi = iti->begin(); vi != end; ++vi ) {
+        auto const& end = iti->end();
+        for ( auto& vi = iti->begin(); vi != end; ++vi ) {
 			outIndices.emplace_back( *vi + vxOffsets[off] );
 		}
 		off++;

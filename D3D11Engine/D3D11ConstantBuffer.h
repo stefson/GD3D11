@@ -16,7 +16,7 @@ public:
 	void BindToGeometryShader( int slot );
 
 	/** Binds the constantbuffer */
-	ID3D11Buffer* Get() { return Buffer.Get(); }
+	Microsoft::WRL::ComPtr<ID3D11Buffer> Get() { return Buffer; }
 
 	/** Returns whether this buffer has been updated since the last bind */
 	bool IsDirty();

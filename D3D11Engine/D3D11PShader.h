@@ -18,7 +18,7 @@ public:
 	std::vector<D3D11ConstantBuffer*>& GetConstantBuffer();
 
 	/** Returns the shader */
-	ID3D11PixelShader* GetShader() { return PixelShader; }
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> GetShader() { return PixelShader; }
 
 	/** Returns this textures ID */
 	UINT16 GetID() { return ID; };
@@ -28,7 +28,7 @@ private:
 	/** Compiles the shader from file and outputs error messages if needed */
 	HRESULT CompileShaderFromFile( const CHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut, const std::vector<D3D_SHADER_MACRO>& makros );
 
-	ID3D11PixelShader* PixelShader;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> PixelShader;
 	std::vector<D3D11ConstantBuffer*> ConstantBuffers;
 
 	std::string File;

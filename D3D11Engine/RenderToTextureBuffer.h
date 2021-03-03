@@ -6,28 +6,12 @@
 /** Struct for a texture that can be used as shader resource AND rendertarget */
 struct RenderToTextureBuffer {
 	~RenderToTextureBuffer() {
-		ReleaseAll();
-	}
-
-	RenderToTextureBuffer( Microsoft::WRL::ComPtr<ID3D11Texture2D> texture,
-		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderResView,
-		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> renderTargetView,
-		UINT sizeX,
-		UINT sizeY ) {
-		Texture = texture;
-		ShaderResView = shaderResView;
-		RenderTargetView = renderTargetView;
-		SizeX = sizeX;
-		SizeY = sizeY;
 	}
 
 	/** Creates the render-to-texture buffers */
 	RenderToTextureBuffer( const Microsoft::WRL::ComPtr<ID3D11Device>& device, UINT SizeX, UINT SizeY, DXGI_FORMAT Format, HRESULT* Result = nullptr, DXGI_FORMAT RTVFormat = DXGI_FORMAT_UNKNOWN, DXGI_FORMAT SRVFormat = DXGI_FORMAT_UNKNOWN, int MipLevels = 1, UINT arraySize = 1 ) {
 		HRESULT hr = S_OK;
 
-		Texture = nullptr;
-		ShaderResView = nullptr;
-		RenderTargetView = nullptr;
 		ZeroMemory( CubeMapRTVs, sizeof( CubeMapRTVs ) );
 		ZeroMemory( CubeMapSRVs, sizeof( CubeMapSRVs ) );
 
@@ -57,7 +41,7 @@ struct RenderToTextureBuffer {
 		if ( MipLevels != 1 )
 			Desc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
 
-		LE( device->CreateTexture2D( &Desc, nullptr, &Texture ) );
+		LE( device->CreateTexture2D( &Desc, nullptr, Texture.GetAddressOf() ) );
 
 		// Can't do further work if texture is null.
 		if ( !Texture.Get() ) return;
@@ -76,14 +60,14 @@ struct RenderToTextureBuffer {
 			DescRT.Texture2DArray.FirstArraySlice = 0;
 		}
 
-		LE( device->CreateRenderTargetView( (ID3D11Resource*)Texture.Get(), &DescRT, &RenderTargetView ) );
+		LE( device->CreateRenderTargetView( Texture.Get(), &DescRT, RenderTargetView.GetAddressOf() ) );
 
 		if ( arraySize > 1 ) {
 			// Create the one-face render target views
 			DescRT.Texture2DArray.ArraySize = 1;
 			for ( int i = 0; i < 6; ++i ) {
 				DescRT.Texture2DArray.FirstArraySlice = i;
-				LE( device->CreateRenderTargetView( Texture.Get(), &DescRT, &CubeMapRTVs[i] ) );
+				LE( device->CreateRenderTargetView( Texture.Get(), &DescRT, CubeMapRTVs[i].GetAddressOf() ) );
 			}
 		}
 
@@ -98,7 +82,7 @@ struct RenderToTextureBuffer {
 
 		DescRV.Texture2D.MipLevels = MipLevels;
 		DescRV.Texture2D.MostDetailedMip = 0;
-		LE( device->CreateShaderResourceView( (ID3D11Resource*)Texture.Get(), &DescRV, &ShaderResView ) );
+		LE( device->CreateShaderResourceView( Texture.Get(), &DescRV, ShaderResView.GetAddressOf() ) );
 
 		if ( arraySize > 1 ) {
 			// Create the one-face render target views
@@ -106,7 +90,7 @@ struct RenderToTextureBuffer {
 			DescRV.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
 			for ( int i = 0; i < 6; ++i ) {
 				DescRV.Texture2DArray.FirstArraySlice = i;
-				LE( device->CreateShaderResourceView( Texture.Get(), &DescRV, &CubeMapSRVs[i] ) );
+				LE( device->CreateShaderResourceView( Texture.Get(), &DescRV, CubeMapSRVs[i].GetAddressOf() ) );
 			}
 		}
 
@@ -131,11 +115,11 @@ struct RenderToTextureBuffer {
 	const Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& GetRenderTargetView() { return RenderTargetView; }
 
 	//void SetTexture( ID3D11Texture2D* tx ) { Texture = tx; }
-	//void SetShaderResView( ID3D11ShaderResourceView* srv ) { ShaderResView = srv; }
-	//void SetRenderTargetView( ID3D11RenderTargetView* rtv ) { RenderTargetView = rtv; }
+	//void SetShaderResView( Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv ) { ShaderResView = srv.Get(); }
+	//void SetRenderTargetView( Microsoft::WRL::ComPtr<ID3D11RenderTargetView> rtv ) { RenderTargetView = rtv.Get(); }
 
-	ID3D11RenderTargetView* GetRTVCubemapFace( UINT i ) { return CubeMapRTVs[i]; }
-	ID3D11ShaderResourceView* GetSRVCubemapFace( UINT i ) { return CubeMapSRVs[i]; }
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> GetRTVCubemapFace( UINT i ) { return CubeMapRTVs[i]; }
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetSRVCubemapFace( UINT i ) { return CubeMapSRVs[i]; }
 
 	UINT GetSizeX() { return SizeX; }
 	UINT GetSizeY() { return SizeY; }
@@ -149,34 +133,22 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> RenderTargetView;
 
 	// Rendertargets for the cubemap-faces, if this is a cubemap
-	ID3D11RenderTargetView* CubeMapRTVs[6];
-	ID3D11ShaderResourceView* CubeMapSRVs[6];
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> CubeMapRTVs[6];
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> CubeMapSRVs[6];
 
 	UINT SizeX;
 	UINT SizeY;
-
-
 
 	void ReleaseAll() {
 		Texture.Reset();
 		ShaderResView.Reset();
 		RenderTargetView.Reset();
-
-		// TODO: Test if this is ok.
-		//for ( int i = 0; i < 6; i++ )
-		//	SAFE_RELEASE(CubeMapRTVs[i]);
-
-		//for ( int i = 0; i < 6; i++ )
-		//	SAFE_RELEASE(CubeMapSRVs[i]);
 	}
 };
-
-
 
 /** Struct for a texture that can be used as shader resource AND depth stencil target */
 struct RenderToDepthStencilBuffer {
 	~RenderToDepthStencilBuffer() {
-		ReleaseAll();
 	}
 
 	/** Creates the render-to-texture buffers */
@@ -188,9 +160,6 @@ struct RenderToDepthStencilBuffer {
 			return;
 		}
 
-		Texture = nullptr;
-		ShaderResView = nullptr;
-		DepthStencilView = nullptr;
 		ZeroMemory( CubeMapDSVs, sizeof( CubeMapDSVs ) );
 		ZeroMemory( CubeMapSRVs, sizeof( CubeMapSRVs ) );
 
@@ -219,11 +188,11 @@ struct RenderToDepthStencilBuffer {
 			Desc.MiscFlags |= D3D11_RESOURCE_MISC_TEXTURECUBE;
 
 
-		LE( device->CreateTexture2D( &Desc, nullptr, &Texture ) );
+		LE( device->CreateTexture2D( &Desc, nullptr, Texture.GetAddressOf() ) );
 
 		if ( !Texture.Get() ) {
 			LogError() << "Could not create Texture!";
-			return;
+			return; 
 		}
 
 		//Create a render target view
@@ -242,14 +211,14 @@ struct RenderToDepthStencilBuffer {
 		DescDSV.Texture2D.MipSlice = 0;
 		DescDSV.Flags = 0;
 
-		LE( device->CreateDepthStencilView( (ID3D11Resource*)Texture.Get(), &DescDSV, &DepthStencilView ) );
+		LE( device->CreateDepthStencilView( Texture.Get(), &DescDSV, DepthStencilView.GetAddressOf() ) );
 
 		if ( arraySize > 1 ) {
 			// Create the one-face render target views
 			DescDSV.Texture2DArray.ArraySize = 1;
 			for ( int i = 0; i < 6; ++i ) {
 				DescDSV.Texture2DArray.FirstArraySlice = i;
-				LE( device->CreateDepthStencilView( Texture.Get(), &DescDSV, &CubeMapDSVs[i] ) );
+				LE( device->CreateDepthStencilView( Texture.Get(), &DescDSV, CubeMapDSVs[i].GetAddressOf() ) );
 			}
 		}
 
@@ -263,7 +232,7 @@ struct RenderToDepthStencilBuffer {
 
 		DescRV.Texture2D.MipLevels = 1;
 		DescRV.Texture2D.MostDetailedMip = 0;
-		LE( device->CreateShaderResourceView( (ID3D11Resource*)Texture.Get(), &DescRV, &ShaderResView ) );
+		LE( device->CreateShaderResourceView( Texture.Get(), &DescRV, ShaderResView.GetAddressOf() ) );
 
 		if ( arraySize > 1 ) {
 			// Create the one-face render target views
@@ -271,13 +240,12 @@ struct RenderToDepthStencilBuffer {
 			DescRV.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
 			for ( int i = 0; i < 6; ++i ) {
 				DescRV.Texture2DArray.FirstArraySlice = i;
-				LE( device->CreateShaderResourceView( Texture.Get(), &DescRV, &CubeMapSRVs[i] ) );
+				LE( device->CreateShaderResourceView( Texture.Get(), &DescRV, CubeMapSRVs[i].GetAddressOf() ) );
 			}
 		}
 
 		if ( FAILED( hr ) ) {
 			LogError() << L"Could not create ID3D11Texture2D, ID3D11ShaderResourceView, or ID3D11DepthStencilView. Killing created resources (If any).";
-			ReleaseAll();
 			if ( Result )*Result = hr;
 			return;
 		}
@@ -301,12 +269,12 @@ struct RenderToDepthStencilBuffer {
 	UINT GetSizeX() const { return SizeX; }
 	UINT GetSizeY() const { return SizeY; }
 
-	ID3D11DepthStencilView* GetDSVCubemapFace( UINT i ) { return CubeMapDSVs[i]; }
-	ID3D11ShaderResourceView* GetSRVCubemapFace( UINT i ) { return CubeMapSRVs[i]; }
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> GetDSVCubemapFace( UINT i ) { return CubeMapDSVs[i]; }
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetSRVCubemapFace( UINT i ) { return CubeMapSRVs[i]; }
 
-	//void SetTexture( ID3D11Texture2D* tx ) { Texture = tx; }
-	//void SetShaderResView( ID3D11ShaderResourceView* srv ) { ShaderResView = srv; }
-	//void SetDepthStencilView( ID3D11DepthStencilView* dsv ) { DepthStencilView = dsv; }
+    //void SetTexture( ID3D11Texture2D* tx ) { Texture = tx; }
+    //void SetShaderResView( ID3D11ShaderResourceView* srv ) { ShaderResView = srv; }
+    //void SetDepthStencilView( ID3D11DepthStencilView* dsv ) { DepthStencilView = dsv; }
 
 private:
 
@@ -321,18 +289,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> DepthStencilView;
 
 	// Rendertargets for the cubemap-faces, if this is a cubemap
-	ID3D11DepthStencilView* CubeMapDSVs[6];
-	ID3D11ShaderResourceView* CubeMapSRVs[6];
-
-	void ReleaseAll() {
-		Texture.Reset();
-		ShaderResView.Reset();
-		DepthStencilView.Reset();
-
-		for ( int i = 0; i < 6; i++ )
-			if ( CubeMapDSVs[i] )CubeMapDSVs[i]->Release();
-
-		for ( int i = 0; i < 6; i++ )
-			if ( CubeMapSRVs[i] )CubeMapSRVs[i]->Release();
-	}
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> CubeMapDSVs[6];
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> CubeMapSRVs[6];
 };

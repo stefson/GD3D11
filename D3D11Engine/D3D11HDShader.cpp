@@ -15,8 +15,6 @@ using namespace DirectX;
 #endif
 
 D3D11HDShader::D3D11HDShader() {
-	HullShader = nullptr;
-	DomainShader = nullptr;
 	ConstantBuffers = std::vector<D3D11ConstantBuffer*>();
 
 	// Insert into state-map
@@ -27,9 +25,6 @@ D3D11HDShader::D3D11HDShader() {
 D3D11HDShader::~D3D11HDShader() {
 	// Remove from state map
 	D3D11ObjectIdManager::EraseHDShader( this );
-
-	SAFE_RELEASE( HullShader );
-	SAFE_RELEASE( DomainShader );
 
 	for ( unsigned int i = 0; i < ConstantBuffers.size(); i++ ) {
 		delete ConstantBuffers[i];
@@ -59,7 +54,7 @@ HRESULT D3D11HDShader::CompileShaderFromFile( const CHAR* szFileName, LPCSTR szE
 #endif
 
 	Microsoft::WRL::ComPtr<ID3DBlob> pErrorBlob;
-	hr = D3DCompileFromFile( Toolbox::ToWideChar( szFileName ).c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, szEntryPoint, szShaderModel, dwShaderFlags, 0, ppBlobOut, &pErrorBlob );
+	hr = D3DCompileFromFile( Toolbox::ToWideChar( szFileName ).c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, szEntryPoint, szShaderModel, dwShaderFlags, 0, ppBlobOut, pErrorBlob.GetAddressOf() );
 	if ( FAILED( hr ) ) {
 		LogInfo() << "Shader compilation failed!";
 		if ( pErrorBlob.Get() ) {
@@ -96,11 +91,11 @@ XRESULT D3D11HDShader::LoadShader( const char* hullShader, const char* domainSha
 	}
 
 	// Create the shaders
-	LE( engine->GetDevice()->CreateHullShader( hsBlob->GetBufferPointer(), hsBlob->GetBufferSize(), nullptr, &HullShader ) );
-	LE( engine->GetDevice()->CreateDomainShader( dsBlob->GetBufferPointer(), dsBlob->GetBufferSize(), nullptr, &DomainShader ) );
+	LE( engine->GetDevice()->CreateHullShader( hsBlob->GetBufferPointer(), hsBlob->GetBufferSize(), nullptr, HullShader.GetAddressOf() ) );
+	LE( engine->GetDevice()->CreateDomainShader( dsBlob->GetBufferPointer(), dsBlob->GetBufferSize(), nullptr, DomainShader.GetAddressOf() ) );
 
-	SetDebugName( HullShader, hullShader );
-	SetDebugName( DomainShader, domainShader );
+	SetDebugName( HullShader.Get(), hullShader );
+	SetDebugName( DomainShader.Get(), domainShader );
 
 	return XR_SUCCESS;
 }
@@ -109,8 +104,8 @@ XRESULT D3D11HDShader::LoadShader( const char* hullShader, const char* domainSha
 XRESULT D3D11HDShader::Apply() {
 	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase*)Engine::GraphicsEngine;
 
-	engine->GetContext()->HSSetShader( HullShader, nullptr, 0 );
-	engine->GetContext()->DSSetShader( DomainShader, nullptr, 0 );
+	engine->GetContext()->HSSetShader( HullShader.Get(), nullptr, 0 );
+	engine->GetContext()->DSSetShader( DomainShader.Get(), nullptr, 0 );
 
 	return XR_SUCCESS;
 }

@@ -14,7 +14,6 @@ SV_Panel::SV_Panel( D2DView* view, D2DSubView* parent ) : D2DSubView( view, pare
 	Image = nullptr;
 	HasDarkOverlay = false;
 	HasGlossyOutline = false;
-	ImageSource = nullptr;
 }
 
 SV_Panel::~SV_Panel() {
@@ -98,7 +97,7 @@ D2D1_COLOR_F SV_Panel::GetPanelColor() const {
 }
 
 /** Sets the image of this panel from d3d11 */
-HRESULT SV_Panel::SetD3D11TextureAsImage( ID3D11Texture2D* texture, INT2 size ) {
+HRESULT SV_Panel::SetD3D11TextureAsImage(ID3D11Texture2D* texture, INT2 size ) {
 	SAFE_RELEASE( Image );
 
 	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase*)Engine::GraphicsEngine;
@@ -109,7 +108,7 @@ HRESULT SV_Panel::SetD3D11TextureAsImage( ID3D11Texture2D* texture, INT2 size ) 
 	CD3D11_TEXTURE2D_DESC textureDesc( (DXGI_FORMAT)DXGI_FORMAT_R8G8B8A8_UNORM, size.x, size.y, 1, 1, 0, D3D11_USAGE_STAGING, D3D11_CPU_ACCESS_READ, 1, 0, 0 );
 
 	ComPtr<ID3D11Texture2D> staging;
-	LE( engine->GetDevice()->CreateTexture2D( &textureDesc, nullptr, &staging ) );
+	LE( engine->GetDevice()->CreateTexture2D( &textureDesc, nullptr, staging.ReleaseAndGetAddressOf() ) );
 
 	engine->GetContext()->CopyResource( staging.Get(), texture );
 

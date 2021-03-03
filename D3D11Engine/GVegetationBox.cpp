@@ -247,7 +247,7 @@ void GVegetationBox::InitSpotsRandom( const std::vector<DirectX::XMFLOAT3>& tris
 				if ( shape == S_Circle ) // Restrict to smalles circle inside our AABB
 				{
 					float dist;
-					XMStoreFloat( &dist, DirectX::XMVector2LengthEst( XMVectorSet( rnd.x, rnd.z, 0, 0 ) - XMVectorSet( mid.x, mid.z, 0, 0 ) ) );
+					XMStoreFloat( &dist, DirectX::XMVector2Length( XMVectorSet( rnd.x, rnd.z, 0, 0 ) - XMVectorSet( mid.x, mid.z, 0, 0 ) ) );
 
 					if ( dist >= rad )
 						continue;
@@ -266,12 +266,8 @@ void GVegetationBox::InitSpotsRandom( const std::vector<DirectX::XMFLOAT3>& tris
 		XMMATRIX s = DirectX::XMMatrixScaling( scale, scale, scale );
 		XMMATRIX r = DirectX::XMMatrixRotationY( Toolbox::frand() * DirectX::XM_2PI );
 
-		w = r * s * w;
-
-		w = DirectX::XMMatrixTranspose( w );
-
 		DirectX::XMFLOAT4X4 w_float4x4;
-		XMStoreFloat4x4( &w_float4x4, w );
+		XMStoreFloat4x4( &w_float4x4, DirectX::XMMatrixTranspose(r * s * w) );
 		VegetationSpots.push_back( w_float4x4 );
 	}
 
@@ -303,8 +299,6 @@ void GVegetationBox::RenderVegetation( const DirectX::XMFLOAT3& eye ) {
 	if ( VegetationSpots.empty() ) {
 		return;
 	}
-
-
 
 	if ( MeshTexture ) {
 		if ( MeshTexture->CacheIn( 0.6f ) == zRES_CACHED_IN )
@@ -340,11 +334,10 @@ void GVegetationBox::RenderVegetation( const DirectX::XMFLOAT3& eye ) {
 
 	DirectX::XMFLOAT4X4 view;
 	Engine::GAPI->GetViewMatrix( &view );
-	XMMATRIX XMM_view = DirectX::XMMatrixTranspose( XMLoadFloat4x4( &view ) );
 
 	GrassConstantBuffer gcb;
 	XMFLOAT3 G_NormalVS;
-	XMStoreFloat3( &G_NormalVS, DirectX::XMVector3TransformNormal( XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f ), XMM_view ) );
+	XMStoreFloat3( &G_NormalVS, DirectX::XMVector3TransformNormal( XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f ), XMMatrixTranspose(XMLoadFloat4x4(&view)) ) );
 	gcb.G_NormalVS = G_NormalVS;
 	gcb.G_Time = Engine::GAPI->GetTimeSeconds();
 	gcb.G_WindStrength = Engine::GAPI->GetRendererState().RendererSettings.GlobalWindStrength;
@@ -391,14 +384,11 @@ void GVegetationBox::VisualizeGrass( const DirectX::XMFLOAT4& color ) {
 
 		DirectX::XMFLOAT3 spot = DirectX::XMFLOAT3( VegetationSpots[i]._14, VegetationSpots[i]._24, VegetationSpots[i]._34 );
 		DirectX::XMFLOAT3 scale;
-		//XMVECTOR m0 = XMVectorSet(VegetationSpots[i]._11, VegetationSpots[i]._21, VegetationSpots[i]._31, 0);
-		XMVECTOR m1 = XMVectorSet( VegetationSpots[i]._12, VegetationSpots[i]._22, VegetationSpots[i]._32, 0 );
-		//XMVECTOR m2 = XMVectorSet(VegetationSpots[i]._13, VegetationSpots[i]._23, VegetationSpots[i]._33, 0);
 
 		// Compute scale
-		//XMStoreFloat(&scale.x, DirectX::XMVector3LengthEst(m0));
-		XMStoreFloat( &scale.y, DirectX::XMVector3LengthEst( m1 ) );
-		//XMStoreFloat(&scale.z, DirectX::XMVector3LengthEst(m2));
+        //XMStoreFloat(&scale.x, DirectX::XMVector3LengthEst(m0));
+        XMStoreFloat( &scale.y, DirectX::XMVector3Length( XMVectorSet(VegetationSpots[i]._12, VegetationSpots[i]._22, VegetationSpots[i]._32, 0) ) );
+        //XMStoreFloat(&scale.z, DirectX::XMVector3LengthEst(m2));
 
 		XMFLOAT3 spot_scale;
 		XMStoreFloat3( &spot_scale, XMLoadFloat3( &spot ) + XMLoadFloat3( &scale ) * 2.0f );
@@ -427,7 +417,7 @@ void GVegetationBox::RemoveVegetationAt( const DirectX::XMFLOAT3& position, floa
 		XMVECTOR spot = XMVectorSet( it->_14, it->_24, it->_34, 0 );
 
 		float d;
-		XMStoreFloat( &d, DirectX::XMVector3LengthEst( spot - XMLoadFloat3( &position ) ) );
+		XMStoreFloat( &d, DirectX::XMVector3Length( spot - XMLoadFloat3( &position ) ) );
 
 		if ( d < range ) {
 			it = s.erase( it );
@@ -512,7 +502,7 @@ void GVegetationBox::SaveToFILE( FILE* f, int version ) {
 		//XMVECTOR m0 = XMVectorSet(VegetationSpots[i]._11, VegetationSpots[i]._21, VegetationSpots[i]._31, 0);
 		XMVECTOR m1 = XMVectorSet( VegetationSpots[i]._12, VegetationSpots[i]._22, VegetationSpots[i]._32, 0 );
 		//XMVECTOR m2 = XMVectorSet(VegetationSpots[i]._13, VegetationSpots[i]._23, VegetationSpots[i]._33, 0);
-		DirectX::XMFLOAT4 spot = DirectX::XMFLOAT4( VegetationSpots[i]._14, VegetationSpots[i]._24, VegetationSpots[i]._34, XMVectorGetX( DirectX::XMVector3LengthEst( m1 ) ) );
+		DirectX::XMFLOAT4 spot = DirectX::XMFLOAT4( VegetationSpots[i]._14, VegetationSpots[i]._24, VegetationSpots[i]._34, XMVectorGetX( DirectX::XMVector3Length( m1 ) ) );
 
 		spots.push_back( spot );
 	}
@@ -546,10 +536,8 @@ void GVegetationBox::LoadFromFILE( FILE* f, int version ) {
 		XMMATRIX s = DirectX::XMMatrixScaling( scale, scale, scale );
 		XMMATRIX r = DirectX::XMMatrixRotationY( Toolbox::frand() * DirectX::XM_2PI );
 
-		w = r * s * w;
-
 		XMFLOAT4X4 w_XMFLOAT4X4;
-		XMStoreFloat4x4( &w_XMFLOAT4X4, DirectX::XMMatrixTranspose( w ) );
+		XMStoreFloat4x4( &w_XMFLOAT4X4, DirectX::XMMatrixTranspose( r * s * w ) );
 		VegetationSpots.push_back( w_XMFLOAT4X4 );
 	}
 

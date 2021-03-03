@@ -10,7 +10,6 @@
 using namespace DirectX;
 
 D3D11PShader::D3D11PShader() {
-	PixelShader = nullptr;
 
 	// Insert into state-map
 	ID = D3D11ObjectIdManager::AddPShader( this );
@@ -19,8 +18,6 @@ D3D11PShader::D3D11PShader() {
 D3D11PShader::~D3D11PShader() {
 	// Remove from state map
 	D3D11ObjectIdManager::ErasePShader( this );
-
-	SAFE_RELEASE( PixelShader );
 
 	for ( unsigned int i = 0; i < ConstantBuffers.size(); i++ ) {
 		delete ConstantBuffers[i];
@@ -90,9 +87,9 @@ XRESULT D3D11PShader::LoadShader( const char* pixelShader, const std::vector<D3D
 	}
 
 	// Create the shader
-	LE( engine->GetDevice()->CreatePixelShader( psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &PixelShader ) );
+	LE( engine->GetDevice()->CreatePixelShader( psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, PixelShader.GetAddressOf() ) );
 
-	SetDebugName( PixelShader, pixelShader );
+	SetDebugName( PixelShader.Get(), pixelShader );
 
 	return XR_SUCCESS;
 }
@@ -101,7 +98,7 @@ XRESULT D3D11PShader::LoadShader( const char* pixelShader, const std::vector<D3D
 XRESULT D3D11PShader::Apply() {
 	D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase*)Engine::GraphicsEngine;
 
-	engine->GetContext()->PSSetShader( PixelShader, nullptr, 0 );
+	engine->GetContext()->PSSetShader( PixelShader.Get(), nullptr, 0 );
 
 	return XR_SUCCESS;
 }

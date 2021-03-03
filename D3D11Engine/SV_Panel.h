@@ -54,5 +54,4 @@ protected:
 
 	/** Image */
 	ID2D1Bitmap* Image;
-	ID3D11Texture2D* ImageSource;
 };
