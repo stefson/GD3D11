@@ -14,5 +14,12 @@ public:
 		XCALL( GothicMemoryLocations::zSTRING::ToChar );
 	}
 
-	char data[20];
+    int   allocater;
+    char* vector;
+    int   length;
+    int   reserved;
+
+    FORCEINLINE const char& operator[]( unsigned int index ) const {
+        return vector[index];
+    }
 };
