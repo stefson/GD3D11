@@ -21,7 +21,6 @@ struct GothicMemoryLocations {
     };
 
     struct zCPolyStrip {
-        // TODO: this one is wrong, need to boot up union, hook on to some zCPolyStrip function and check mem location of this
         static const unsigned int Offset_Material = 0x34;
 
         static const unsigned int SetVisibleSegments = 0x0059BE80;
