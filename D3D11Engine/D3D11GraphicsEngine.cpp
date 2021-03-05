@@ -613,7 +613,7 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
     Engine::GAPI->EnterResourceCriticalSection();
     ID3D11CommandList* dc_cl = nullptr;
 
-    GetDeferredMediaContext1()->FinishCommandList( true, &dc_cl );
+    GetDeferredMediaContext()->FinishCommandList( true, &dc_cl );
 
     // Copy list of textures we are operating on
     Engine::GAPI->MoveLoadedTexturesToProcessedList();
@@ -819,8 +819,8 @@ XRESULT D3D11GraphicsEngine::Present() {
     ActivePS->GetConstantBuffer()[0]->UpdateBuffer( &gcb );
     ActivePS->GetConstantBuffer()[0]->BindToPixelShader( 0 );
 
-    PfxRenderer->CopyTextureToRTV( HDRBackBuffer->GetShaderResView().Get(),
-        BackbufferRTV.Get(), INT2( 0, 0 ), true );
+    PfxRenderer->CopyTextureToRTV( HDRBackBuffer->GetShaderResView(),
+        BackbufferRTV, INT2( 0, 0 ), true );
 
     // GetContext()->ClearState();
 
@@ -923,8 +923,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexBuffer( D3D11VertexBuffer* vb,
 
     UINT offset = 0;
     UINT uStride = stride;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> buffer = vb->GetVertexBuffer().Get();
-    GetContext()->IASetVertexBuffers( 0, 1, buffer.GetAddressOf(), &uStride, &offset );
+    GetContext()->IASetVertexBuffers( 0, 1, vb->GetVertexBuffer().GetAddressOf(), &uStride, &offset );
 
     // Draw the mesh
     GetContext()->Draw( numVertices, 0 );
@@ -951,8 +950,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferIndexed( D3D11VertexBuffer* vb,
     if ( vb ) {
         UINT offset = 0;
         UINT uStride = sizeof( ExVertexStruct );
-        Microsoft::WRL::ComPtr<ID3D11Buffer> buffer = vb->GetVertexBuffer().Get();
-        GetContext()->IASetVertexBuffers( 0, 1, buffer.GetAddressOf(), &uStride, &offset );
+        GetContext()->IASetVertexBuffers( 0, 1, vb->GetVertexBuffer().GetAddressOf(), &uStride, &offset );
 
         if ( sizeof( VERTEX_INDEX ) == sizeof( unsigned short ) ) {
             GetContext()->IASetIndexBuffer( ib->GetVertexBuffer().Get(),
@@ -987,8 +985,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferIndexedUINT(
     if ( vb ) {
         UINT offset = 0;
         UINT uStride = sizeof( ExVertexStruct );
-        Microsoft::WRL::ComPtr<ID3D11Buffer> buffer = vb->GetVertexBuffer().Get();
-        GetContext()->IASetVertexBuffers( 0, 1, buffer.GetAddressOf(), &uStride, &offset );
+        GetContext()->IASetVertexBuffers( 0, 1, vb->GetVertexBuffer().GetAddressOf(), &uStride, &offset );
         GetContext()->IASetIndexBuffer( ((D3D11VertexBuffer*)ib)->GetVertexBuffer().Get(),
             DXGI_FORMAT_R32_UINT, 0 );
     }
@@ -1056,8 +1053,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexArray( ExVertexStruct* vertices,
 
     UINT offset = 0;
     UINT uStride = stride;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> buffer = TempVertexBuffer->GetVertexBuffer().Get();
-    GetContext()->IASetVertexBuffers( 0, 1, buffer.GetAddressOf(), &uStride, &offset );
+    GetContext()->IASetVertexBuffers( 0, 1, TempVertexBuffer->GetVertexBuffer().GetAddressOf(), &uStride, &offset );
 
     // Draw the mesh
     GetContext()->Draw( numVertices, startVertex );
@@ -1087,18 +1083,18 @@ XRESULT D3D11GraphicsEngine::DrawIndexedVertexArray( ExVertexStruct* vertices,
     SetupVS_ExMeshDrawCall();
 
     D3D11_BUFFER_DESC desc;
-    TempVertexBuffer->GetVertexBuffer().Get()->GetDesc( &desc );
+    TempVertexBuffer->GetVertexBuffer()->GetDesc( &desc );
 
     EnsureTempVertexBufferSize( stride * numVertices );
     TempVertexBuffer->UpdateBuffer( vertices, stride * numVertices );
 
     UINT offset = 0;
     UINT uStride = stride;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> buffers[] = {
+    ID3D11Buffer* buffers[2] = {
         TempVertexBuffer->GetVertexBuffer().Get(),
-        ib->GetVertexBuffer().Get()
+        ib->GetVertexBuffer().Get(),
     };
-    GetContext()->IASetVertexBuffers( 0, 2, buffers->GetAddressOf(), &uStride, &offset );
+    GetContext()->IASetVertexBuffers( 0, 2, buffers, &uStride, &offset );
 
     // Draw the mesh
     GetContext()->DrawIndexed( numIndices, 0, 0 );
@@ -1123,8 +1119,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferFF( D3D11VertexBuffer* vb,
 
     UINT offset = 0;
     UINT uStride = stride;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> buffer = vb->GetVertexBuffer().Get();
-    GetContext()->IASetVertexBuffers( 0, 1, buffer.GetAddressOf(), &uStride, &offset );
+    GetContext()->IASetVertexBuffers( 0, 1, vb->GetVertexBuffer().GetAddressOf(), &uStride, &offset );
 
     // Draw the mesh
     GetContext()->Draw( numVertices, startVertex );
@@ -1231,8 +1226,7 @@ XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh(
 
     UINT offset = 0;
     UINT uStride = sizeof( ExSkelVertexStruct );
-    Microsoft::WRL::ComPtr<ID3D11Buffer> buffer = vb->GetVertexBuffer().Get();
-    GetContext()->IASetVertexBuffers( 0, 1, buffer.GetAddressOf(), &uStride, &offset );
+    GetContext()->IASetVertexBuffers( 0, 1, vb->GetVertexBuffer().GetAddressOf(), &uStride, &offset );
 
     if ( sizeof( VERTEX_INDEX ) == sizeof( unsigned short ) ) {
         GetContext()->IASetIndexBuffer( ib->GetVertexBuffer().Get(),
@@ -1276,7 +1270,7 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
 
     // Check buffersize
     D3D11_BUFFER_DESC desc;
-    DynamicInstancingBuffer->GetVertexBuffer().Get()->GetDesc( &desc );
+    DynamicInstancingBuffer->GetVertexBuffer()->GetDesc( &desc );
 
     if ( desc.ByteWidth < instanceDataStride * numInstances ) {
         if ( Engine::GAPI->GetRendererState().RendererSettings.EnableDebugLog )
@@ -1326,10 +1320,11 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
     GetContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
     UINT offset[] = { 0, 0 };
     UINT uStride[] = { vertexStride, instanceDataStride };
-    Microsoft::WRL::ComPtr<ID3D11Buffer> buffers[] = {
+    ID3D11Buffer* buffers[2] = {
         ((D3D11VertexBuffer*)vb)->GetVertexBuffer().Get(),
-        DynamicInstancingBuffer->GetVertexBuffer().Get() };
-    GetContext()->IASetVertexBuffers( 0, 2, buffers->GetAddressOf(), uStride, offset );
+        DynamicInstancingBuffer->GetVertexBuffer().Get(),
+    };
+    GetContext()->IASetVertexBuffers( 0, 2, buffers, uStride, offset );
 
     if ( sizeof( VERTEX_INDEX ) == sizeof( unsigned short ) ) {
         GetContext()->IASetIndexBuffer( ((D3D11VertexBuffer*)ib)->GetVertexBuffer().Get(),
@@ -1354,10 +1349,11 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
     // Bind shader and pipeline flags
     UINT offset[] = { 0, 0 };
     UINT uStride[] = { vertexStride, instanceDataStride };
-    Microsoft::WRL::ComPtr<ID3D11Buffer> buffers[] = {
+    ID3D11Buffer* buffers[2] = {
         ((D3D11VertexBuffer*)vb)->GetVertexBuffer().Get(),
-        ((D3D11VertexBuffer*)instanceData)->GetVertexBuffer().Get() };
-    GetContext()->IASetVertexBuffers( 0, 2, buffers->GetAddressOf(), uStride, offset );
+        ((D3D11VertexBuffer*)instanceData)->GetVertexBuffer().Get()
+    };
+    GetContext()->IASetVertexBuffers( 0, 2, buffers, uStride, offset );
 
     if ( sizeof( VERTEX_INDEX ) == sizeof( unsigned short ) ) {
         GetContext()->IASetIndexBuffer( ((D3D11VertexBuffer*)ib)->GetVertexBuffer().Get(),
@@ -1560,7 +1556,7 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 
     // Draw HBAO
     if ( Engine::GAPI->GetRendererState().RendererSettings.HbaoSettings.Enabled )
-        PfxRenderer->DrawHBAO( HDRBackBuffer->GetRenderTargetView().Get() );
+        PfxRenderer->DrawHBAO( HDRBackBuffer->GetRenderTargetView() );
 
     SetDefaultStates();
 
@@ -2288,7 +2284,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMeshW( bool noTextures ) {
             (*itr)->WorldMeshes.begin();
             it != (*itr)->WorldMeshes.end(); ++it ) {
             if ( it->first.Material ) {
-                auto p = meshesByMaterial[it->first.Material->GetTexture()];
+                auto& p = meshesByMaterial[it->first.Material->GetTexture()];
                 p.second.emplace_back( it->second );
 
                 if ( !p.first ) {
@@ -2461,8 +2457,8 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 
     // Copy backbuffer
     PfxRenderer->CopyTextureToRTV(
-        HDRBackBuffer->GetShaderResView().Get(),
-        PfxRenderer->GetTempBuffer().GetRenderTargetView().Get() );
+        HDRBackBuffer->GetShaderResView(),
+        PfxRenderer->GetTempBuffer().GetRenderTargetView() );
     CopyDepthStencil();
 
     // Pre-Draw the surfaces to fix overlaying polygons causing a huge performance
@@ -3059,7 +3055,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround( FXMVECTOR position,
         }
 
         D3D11_BUFFER_DESC desc;
-        DynamicInstancingBuffer->GetVertexBuffer().Get()->GetDesc( &desc );
+        DynamicInstancingBuffer->GetVertexBuffer()->GetDesc( &desc );
 
         byte* data;
         UINT size;
@@ -3235,7 +3231,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
     if ( Engine::GAPI->GetRendererState().RendererSettings.DrawVOBs ) {
         // Create instancebuffer for this frame
         D3D11_BUFFER_DESC desc;
-        DynamicInstancingBuffer->GetVertexBuffer().Get()->GetDesc( &desc );
+        DynamicInstancingBuffer->GetVertexBuffer()->GetDesc( &desc );
 
         if ( desc.ByteWidth < sizeof( VobInstanceInfo ) * vobs.size() ) {
             if ( Engine::GAPI->GetRendererState().RendererSettings.EnableDebugLog )
@@ -3980,7 +3976,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
         float dotDir;
         XMStoreFloat( &dotDir, XMVector3Dot( dir, oldDir ) );
         // Smoothly transition to the next state and wait there
-        if ( fabs( dotDir ) < 0.99974f )  // but cut it off somewhere or the pixels will flicker
+        if ( fabs( dotDir ) < 0.99994f )  // but cut it off somewhere or the pixels will flicker
         {
             oldDir = dir;
             smoothDir = dir;
@@ -4512,7 +4508,7 @@ void D3D11GraphicsEngine::DrawQuad( INT2 position, INT2 size ) {
 
     if ( srv.Get() ) {
         if ( rtv.Get() ) {
-            PfxRenderer->CopyTextureToRTV( srv.Get(), rtv.Get(), size, false, position );
+            PfxRenderer->CopyTextureToRTV( srv, rtv, size, false, position );
         }
     }
 }
@@ -4719,10 +4715,10 @@ XRESULT D3D11GraphicsEngine::DrawOcean( GOcean* ocean ) {
     hd->GetConstantBuffer()[0]->UpdateBuffer( &hscb );
     hd->GetConstantBuffer()[0]->BindToHullShader( 1 );
 
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> tex_displacement;
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> tex_gradient;
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> tex_fresnel;
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cube_reflect = ReflectionCube.Get();
+    wrl::ComPtr<ID3D11ShaderResourceView> tex_displacement;
+    wrl::ComPtr<ID3D11ShaderResourceView> tex_gradient;
+    wrl::ComPtr<ID3D11ShaderResourceView> tex_fresnel;
+    wrl::ComPtr<ID3D11ShaderResourceView> cube_reflect = ReflectionCube;
     OceanSettingsConstantBuffer ocb = {};
     ocean->GetFFTResources( tex_displacement.GetAddressOf(), tex_gradient.GetAddressOf(), tex_fresnel.GetAddressOf(), &ocb );
     ocb.OS_SunColor = Engine::GAPI->GetSky()->GetSunColor();
@@ -4897,8 +4893,8 @@ void D3D11GraphicsEngine::GetBackbufferData( byte** data, int& pixelsize ) {
         GetDevice(), width, width, DXGI_FORMAT_R8G8B8A8_UNORM );
 
     // Downscale to 256x256
-    PfxRenderer->CopyTextureToRTV( HDRBackBuffer->GetShaderResView().Get(),
-        rt->GetRenderTargetView().Get(), INT2( width, width ),
+    PfxRenderer->CopyTextureToRTV( HDRBackBuffer->GetShaderResView(),
+        rt->GetRenderTargetView(), INT2( width, width ),
         true );
 
     D3D11_TEXTURE2D_DESC texDesc;
@@ -4921,6 +4917,7 @@ void D3D11GraphicsEngine::GetBackbufferData( byte** data, int& pixelsize ) {
         LogInfo() << "Thumbnail failed. Texture could not be created";
         return;
     }
+    
     GetContext()->CopyResource( texture.Get(), rt->GetTexture().Get() );
 
     // Get data
@@ -5227,7 +5224,7 @@ void D3D11GraphicsEngine::CreateMainUIView() {
 
 void D3D11GraphicsEngine::EnsureTempVertexBufferSize( UINT size ) {
     D3D11_BUFFER_DESC desc;
-    TempVertexBuffer->GetVertexBuffer().Get()->GetDesc( &desc );
+    TempVertexBuffer->GetVertexBuffer()->GetDesc( &desc );
     if ( desc.ByteWidth < size ) {
         if ( Engine::GAPI->GetRendererState().RendererSettings.EnableDebugLog )
             LogInfo() << "(EnsureTempVertexBufferSize) TempVertexBuffer too small (" << desc.ByteWidth << "), need " << size << " bytes. Recreating buffer.";
@@ -5443,16 +5440,16 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 
     // Copy scene behind the particle systems
     PfxRenderer->CopyTextureToRTV(
-        HDRBackBuffer->GetShaderResView().Get(),
-        PfxRenderer->GetTempBuffer().GetRenderTargetView().Get() );
+        HDRBackBuffer->GetShaderResView(),
+        PfxRenderer->GetTempBuffer().GetRenderTargetView() );
 
     SetActivePixelShader( "PS_PFX_ApplyParticleDistortion" );
     ActivePS->Apply();
 
     // Copy it back, putting distortion behind it
     PfxRenderer->CopyTextureToRTV(
-        PfxRenderer->GetTempBuffer().GetShaderResView().Get(),
-        HDRBackBuffer->GetRenderTargetView().Get(), INT2( 0, 0 ), true );
+        PfxRenderer->GetTempBuffer().GetShaderResView(),
+        HDRBackBuffer->GetRenderTargetView(), INT2( 0, 0 ), true );
 
     SetDefaultStates();
 }
@@ -5516,8 +5513,8 @@ void D3D11GraphicsEngine::SaveScreenshot() {
         GetDevice(), Resolution.x, Resolution.y, DXGI_FORMAT_R8G8B8A8_UNORM );
 
     // Downscale to 256x256
-    PfxRenderer->CopyTextureToRTV( HDRBackBuffer->GetShaderResView().Get(),
-        rt->GetRenderTargetView().Get() );
+    PfxRenderer->CopyTextureToRTV( HDRBackBuffer->GetShaderResView(),
+        rt->GetRenderTargetView() );
 
     D3D11_TEXTURE2D_DESC texDesc = {};
     texDesc.ArraySize = 1;

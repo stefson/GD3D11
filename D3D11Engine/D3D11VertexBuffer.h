@@ -67,13 +67,13 @@ public:
     XRESULT OptimizeFaces( VERTEX_INDEX* indices, byte* vertices, unsigned int numIndices, unsigned int numVertices, unsigned int stride );
 
     /** Returns the D3D11-Buffer object */
-    Microsoft::WRL::ComPtr <ID3D11Buffer> GetVertexBuffer() const;
+    Microsoft::WRL::ComPtr <ID3D11Buffer>& GetVertexBuffer();
 
     /** Returns the size in bytes of this buffer */
     unsigned int GetSizeInBytes() const;
 
     /** Returns the SRV of this buffer, if it represents a structured buffer */
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetShaderResourceView() const;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetShaderResourceView();
 
 private:
     /** Vertex buffer object */

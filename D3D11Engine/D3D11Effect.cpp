@@ -162,16 +162,14 @@ XRESULT D3D11Effect::DrawRain() {
 
     firstFrame = false;
 
-    Microsoft::WRL::ComPtr<ID3D11Buffer> bobjDraw = b->GetVertexBuffer().Get();
-    Microsoft::WRL::ComPtr<ID3D11Buffer> bobjStream = ((D3D11VertexBuffer*)RainBufferStreamTo)->GetVertexBuffer().Get();
     UINT stride = sizeof( ParticleInstanceInfo );
     UINT offset = 0;
 
     // Bind buffer to draw from last frame
-    e->GetContext()->IASetVertexBuffers( 0, 1, bobjDraw.GetAddressOf(), &stride, &offset );
+    e->GetContext()->IASetVertexBuffers( 0, 1, b->GetVertexBuffer().GetAddressOf(), &stride, &offset );
 
     // Set stream target
-    e->GetContext()->SOSetTargets( 1, bobjStream.GetAddressOf(), &offset );
+    e->GetContext()->SOSetTargets( 1, RainBufferStreamTo->GetVertexBuffer().GetAddressOf(), &offset );
 
     // Apply shaders
     particleAdvanceVS->Apply();
@@ -202,7 +200,7 @@ XRESULT D3D11Effect::DrawRain() {
     e->GetContext()->Draw( numParticles, 0 );
 
     // Unset streamout target
-    bobjStream = nullptr;
+    ID3D11Buffer* bobjStream = nullptr;
     e->GetContext()->SOSetTargets( 1, &bobjStream, 0 );
 
     // Swap buffers

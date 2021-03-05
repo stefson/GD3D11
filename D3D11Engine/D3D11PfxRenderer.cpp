@@ -67,7 +67,7 @@ XRESULT D3D11PfxRenderer::RenderHDR() {
 /** Renders the SMAA-Effect */
 XRESULT D3D11PfxRenderer::RenderSMAA() {
     D3D11GraphicsEngine* engine = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
-    FX_SMAA->RenderPostFX( engine->GetHDRBackBuffer().GetShaderResView().Get() );
+    FX_SMAA->RenderPostFX( engine->GetHDRBackBuffer().GetShaderResView() );
 
     return XR_SUCCESS;
 }
@@ -81,8 +81,7 @@ XRESULT D3D11PfxRenderer::DrawFullScreenQuad() {
 
     UINT offset = 0;
     UINT uStride = sizeof( SimpleVertexStruct );
-    Microsoft::WRL::ComPtr<ID3D11Buffer> buffers = ScreenQuad->GetBuffer().Get();
-    engine->GetContext()->IASetVertexBuffers( 0, 1, buffers.GetAddressOf(), &uStride, &offset );
+    engine->GetContext()->IASetVertexBuffers( 0, 1, ScreenQuad->GetBuffer().GetAddressOf(), &uStride, &offset );
 
     //Microsoft::WRL::ComPtr<ID3D11Buffer> cb;
     //engine->GetContext()->VSSetConstantBuffers(0, 1, cb.GetAddressOf());
@@ -107,7 +106,7 @@ XRESULT D3D11PfxRenderer::UnbindPSResources( int num ) {
 }
 
 /** Copies the given texture to the given RTV */
-XRESULT D3D11PfxRenderer::CopyTextureToRTV( const Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& texture, Microsoft::WRL::ComPtr<ID3D11RenderTargetView> rtv, INT2 targetResolution, bool useCustomPS, INT2 offset ) {
+XRESULT D3D11PfxRenderer::CopyTextureToRTV( const Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& texture, const Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& rtv, INT2 targetResolution, bool useCustomPS, INT2 offset ) {
     D3D11GraphicsEngine* engine = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
 
     D3D11_VIEWPORT oldVP;
@@ -164,9 +163,9 @@ XRESULT D3D11PfxRenderer::OnResize( const INT2& newResolution ) {
     D3D11GraphicsEngine* engine = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
 
     // Create temp-buffer
-    TempBuffer.reset( new RenderToTextureBuffer( engine->GetDevice().Get(), newResolution.x, newResolution.y, DXGI_FORMAT_R16G16B16A16_FLOAT, nullptr ) );
-    TempBufferDS4_1.reset( new RenderToTextureBuffer( engine->GetDevice().Get(), newResolution.x / 4, newResolution.y / 4, DXGI_FORMAT_R16G16B16A16_FLOAT, nullptr ) );
-    TempBufferDS4_2.reset( new RenderToTextureBuffer( engine->GetDevice().Get(), newResolution.x / 4, newResolution.y / 4, DXGI_FORMAT_R16G16B16A16_FLOAT, nullptr ) );
+    TempBuffer.reset( new RenderToTextureBuffer( engine->GetDevice(), newResolution.x, newResolution.y, DXGI_FORMAT_R16G16B16A16_FLOAT, nullptr ) );
+    TempBufferDS4_1.reset( new RenderToTextureBuffer( engine->GetDevice(), newResolution.x / 4, newResolution.y / 4, DXGI_FORMAT_R16G16B16A16_FLOAT, nullptr ) );
+    TempBufferDS4_2.reset( new RenderToTextureBuffer( engine->GetDevice(), newResolution.x / 4, newResolution.y / 4, DXGI_FORMAT_R16G16B16A16_FLOAT, nullptr ) );
 
     FX_SMAA->OnResize( newResolution );
 

@@ -244,8 +244,7 @@ XRESULT D3D11GraphicsEngineBase::DrawVertexArray( ExVertexStruct* vertices, unsi
 
     UINT offset = 0;
     UINT uStride = stride;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> buffer = TempVertexBuffer->GetVertexBuffer().Get();
-    GetContext()->IASetVertexBuffers( 0, 1, buffer.GetAddressOf(), &uStride, &offset );
+    GetContext()->IASetVertexBuffers( 0, 1, TempVertexBuffer->GetVertexBuffer().GetAddressOf(), &uStride, &offset );
 
     //Draw the mesh
     GetContext()->Draw( numVertices, startVertex );
@@ -435,8 +434,7 @@ XRESULT D3D11GraphicsEngineBase::DrawVertexBufferFF( D3D11VertexBuffer* vb, unsi
 
     UINT offset = 0;
     UINT uStride = stride;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> buffer = vb->GetVertexBuffer().Get();
-    GetContext()->IASetVertexBuffers( 0, 1, buffer.GetAddressOf(), &uStride, &offset );
+    GetContext()->IASetVertexBuffers( 0, 1, vb->GetVertexBuffer().GetAddressOf(), &uStride, &offset );
 
     //Draw the mesh
     GetContext()->Draw( numVertices, startVertex );

@@ -197,7 +197,7 @@ public:
     /** Returns the Device/Context */
     const Microsoft::WRL::ComPtr<ID3D11Device>& GetDevice() { return Device; }
     const Microsoft::WRL::ComPtr<ID3D11DeviceContext>& GetContext() { return Context; }
-    const Microsoft::WRL::ComPtr<ID3D11DeviceContext>& GetDeferredMediaContext1() { return DeferredContext; }
+    const Microsoft::WRL::ComPtr<ID3D11DeviceContext>& GetDeferredMediaContext() { return DeferredContext; }
 
     /** Returns the current resolution */
     virtual INT2 GetResolution() { return Resolution; }

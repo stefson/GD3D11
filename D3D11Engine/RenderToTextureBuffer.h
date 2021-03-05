@@ -118,8 +118,8 @@ struct RenderToTextureBuffer {
     //void SetShaderResView( Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv ) { ShaderResView = srv.Get(); }
     //void SetRenderTargetView( Microsoft::WRL::ComPtr<ID3D11RenderTargetView> rtv ) { RenderTargetView = rtv.Get(); }
 
-    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> GetRTVCubemapFace( UINT i ) { return CubeMapRTVs[i]; }
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetSRVCubemapFace( UINT i ) { return CubeMapSRVs[i]; }
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& GetRTVCubemapFace( UINT i ) { return CubeMapRTVs[i]; }
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetSRVCubemapFace( UINT i ) { return CubeMapSRVs[i]; }
 
     UINT GetSizeX() { return SizeX; }
     UINT GetSizeY() { return SizeY; }
@@ -159,10 +159,6 @@ struct RenderToDepthStencilBuffer {
             LogError() << "Only supporting single render targets and cubemaps ATM. Unsupported Arraysize: " << arraySize;
             return;
         }
-
-        ZeroMemory( CubeMapDSVs, sizeof( CubeMapDSVs ) );
-        ZeroMemory( CubeMapSRVs, sizeof( CubeMapSRVs ) );
-
 
         if ( SizeX == 0 || SizeY == 0 ) {
             LogError() << L"SizeX or SizeY can't be 0";

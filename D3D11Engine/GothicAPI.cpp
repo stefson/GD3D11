@@ -2921,16 +2921,17 @@ void GothicAPI::CollectVisibleVobsHelper( BspInfo* base, zTBBox3D boxCell, int c
             if ( RendererState.RendererSettings.EnableDynamicLighting && insideFrustum ) {
                 // Add dynamic lights
                 float minDynamicUpdateLightRange = Engine::GAPI->GetRendererState().RendererSettings.MinLightShadowUpdateRange;
-                DirectX::XMFLOAT3 playerPosition = Engine::GAPI->GetPlayerVob() != nullptr ? Engine::GAPI->GetPlayerVob()->GetPositionWorld() : DirectX::XMFLOAT3( FLT_MAX, FLT_MAX, FLT_MAX );
-
+                DirectX::XMVECTOR playerPosition = Engine::GAPI->GetPlayerVob() != nullptr ? Engine::GAPI->GetPlayerVob()->GetPositionWorldXM() : DirectX::XMVectorSet( FLT_MAX, FLT_MAX, FLT_MAX, 0);
+                DirectX::FXMVECTOR cameraPosition = Engine::GAPI->GetCameraPositionXM();
                 // Take cameraposition if we are freelooking
-                if ( zCCamera::IsFreeLookActive() ) {
-                    playerPosition = Engine::GAPI->GetCameraPosition();
+                if ( zCCamera::IsFreeLookActive() ) 
+                {
+                    playerPosition = cameraPosition;
                 }
 
                 for ( int i = 0; i < leaf->LightVobList.NumInArray; i++ ) {
                     float lightCameraDist;
-                    XMStoreFloat( &lightCameraDist, DirectX::XMVector3LengthEst( Engine::GAPI->GetCameraPositionXM() - leaf->LightVobList.Array[i]->GetPositionWorldXM() ) );
+                    XMStoreFloat( &lightCameraDist, DirectX::XMVector3Length( cameraPosition - leaf->LightVobList.Array[i]->GetPositionWorldXM() ) );
                     if ( lightCameraDist + leaf->LightVobList.Array[i]->GetLightRange() < visualFXDrawRadius ) {
                         zCVobLight* v = leaf->LightVobList.Array[i];
                         VobLightInfo** vi = &VobLightMap[leaf->LightVobList.Array[i]];
@@ -2950,7 +2951,7 @@ void GothicAPI::CollectVisibleVobsHelper( BspInfo* base, zTBBox3D boxCell, int c
                             (*vi)->VisibleInRenderPass = true;
 
                             float lightPlayerDist;
-                            XMStoreFloat( &lightPlayerDist, DirectX::XMVector3LengthEst( XMLoadFloat3( &playerPosition ) - leaf->LightVobList.Array[i]->GetPositionWorldXM() ) );
+                            XMStoreFloat( &lightPlayerDist, DirectX::XMVector3Length( playerPosition - leaf->LightVobList.Array[i]->GetPositionWorldXM() ) );
 
                             // Update the lights shadows if: Light is dynamic or full shadow-updates are set
                             if ( RendererState.RendererSettings.EnablePointlightShadows >= GothicRendererSettings::PLS_FULL

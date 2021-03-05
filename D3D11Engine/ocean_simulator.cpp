@@ -294,9 +294,9 @@ OceanSimulator::OceanSimulator( OceanParameter& params, ID3D11Device* pd3dDevice
     m_pd3dDevice->CreateBuffer( &cb_desc, &init_cb0, m_pImmutableCB.GetAddressOf() );
     assert( m_pImmutableCB );
 
-    Microsoft::WRL::ComPtr<ID3D11Buffer> cbs[1] = { m_pImmutableCB.Get() };
-    m_pd3dImmediateContext->CSSetConstantBuffers( 0, 1, cbs->GetAddressOf() );
-    m_pd3dImmediateContext->PSSetConstantBuffers( 0, 1, cbs->GetAddressOf() );
+    ID3D11Buffer* cbs[1] = { m_pImmutableCB.Get() };
+    m_pd3dImmediateContext->CSSetConstantBuffers( 0, 1, cbs );
+    m_pd3dImmediateContext->PSSetConstantBuffers( 0, 1, cbs );
 
     cb_desc.Usage = D3D11_USAGE_DYNAMIC;
     cb_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -394,8 +394,8 @@ void OceanSimulator::updateDisplacementMap( float time )
     m_pd3dImmediateContext->CSSetShader( m_pUpdateSpectrumCS, nullptr, 0 );
 
     // Buffers
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cs0_srvs[2] = { m_pSRV_H0.Get(), m_pSRV_Omega.Get() };
-    m_pd3dImmediateContext->CSSetShaderResources( 0, 2, cs0_srvs->GetAddressOf() );
+    ID3D11ShaderResourceView* cs0_srvs[2] = { m_pSRV_H0.Get(), m_pSRV_Omega.Get() };
+    m_pd3dImmediateContext->CSSetShaderResources( 0, 2, cs0_srvs );
 
     ID3D11UnorderedAccessView* cs0_uavs[1] = { m_pUAV_Ht.Get() };
     m_pd3dImmediateContext->CSSetUnorderedAccessViews( 0, 1, cs0_uavs, (UINT*)(&cs0_uavs[0]) );
@@ -413,8 +413,8 @@ void OceanSimulator::updateDisplacementMap( float time )
     per_frame_data[2] = m_param.dmap_dim / m_param.patch_length;
     m_pd3dImmediateContext->Unmap( m_pPerFrameCB.Get(), 0 );
 
-    Microsoft::WRL::ComPtr<ID3D11Buffer> cs_cbs[2] = { m_pImmutableCB.Get(), m_pPerFrameCB.Get() };
-    m_pd3dImmediateContext->CSSetConstantBuffers( 0, 2, cs_cbs->GetAddressOf() );
+    ID3D11Buffer* cs_cbs[2] = { m_pImmutableCB.Get(), m_pPerFrameCB.Get() };
+    m_pd3dImmediateContext->CSSetConstantBuffers( 0, 2, cs_cbs );
 
     // Run the CS
     UINT group_count_x = (m_param.dmap_dim + BLOCK_SIZE_X - 1) / BLOCK_SIZE_X;
@@ -426,7 +426,7 @@ void OceanSimulator::updateDisplacementMap( float time )
     m_pd3dImmediateContext->CSSetUnorderedAccessViews( 0, 1, cs0_uavs, (UINT*)(&cs0_uavs[0]) );
     cs0_srvs[0] = nullptr;
     cs0_srvs[1] = nullptr;
-    m_pd3dImmediateContext->CSSetShaderResources( 0, 2, cs0_srvs->GetAddressOf() );
+    m_pd3dImmediateContext->CSSetShaderResources( 0, 2, cs0_srvs );
 
 
     // ------------------------------------ Perform FFT -------------------------------------------
@@ -453,18 +453,18 @@ void OceanSimulator::updateDisplacementMap( float time )
     m_pd3dImmediateContext->PSSetShader( m_pUpdateDisplacementPS, nullptr, 0 );
 
     // Constants
-    Microsoft::WRL::ComPtr<ID3D11Buffer> ps_cbs[2] = { m_pImmutableCB.Get(), m_pPerFrameCB.Get() };
-    m_pd3dImmediateContext->PSSetConstantBuffers( 0, 2, ps_cbs->GetAddressOf() );
+    ID3D11Buffer* ps_cbs[2] = { m_pImmutableCB.Get(), m_pPerFrameCB.Get() };
+    m_pd3dImmediateContext->PSSetConstantBuffers( 0, 2, ps_cbs );
 
     // Buffer resources
-    Microsoft::WRL::ComPtr <ID3D11ShaderResourceView> ps_srvs[1] = { m_pSRV_Dxyz.Get() };
-    m_pd3dImmediateContext->PSSetShaderResources( 0, 1, ps_srvs->GetAddressOf() );
+    ID3D11ShaderResourceView* ps_srvs[1] = { m_pSRV_Dxyz.Get() };
+    m_pd3dImmediateContext->PSSetShaderResources( 0, 1, ps_srvs );
 
     // IA setup
-    Microsoft::WRL::ComPtr<ID3D11Buffer> vbs[1] = { m_pQuadVB.Get() };
+    ID3D11Buffer* vbs[1] = { m_pQuadVB.Get() };
     UINT strides[1] = { sizeof( DirectX::XMFLOAT4 ) };
     UINT offsets[1] = { 0 };
-    m_pd3dImmediateContext->IASetVertexBuffers( 0, 1, vbs[0].GetAddressOf(), &strides[0], &offsets[0] );
+    m_pd3dImmediateContext->IASetVertexBuffers( 0, 1, vbs, &strides[0], &offsets[0] );
 
     m_pd3dImmediateContext->IASetInputLayout( m_pQuadLayout );
     m_pd3dImmediateContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP );
@@ -474,7 +474,7 @@ void OceanSimulator::updateDisplacementMap( float time )
 
     // Unbind
     ps_srvs[0] = nullptr;
-    m_pd3dImmediateContext->PSSetShaderResources( 0, 1, ps_srvs->GetAddressOf() );
+    m_pd3dImmediateContext->PSSetShaderResources( 0, 1, ps_srvs );
 
 
     // ----------------------------------- Generate Normal ----------------------------------------
@@ -488,17 +488,17 @@ void OceanSimulator::updateDisplacementMap( float time )
 
     // Texture resource and sampler
     ps_srvs[0] = m_pDisplacementSRV.Get();
-    m_pd3dImmediateContext->PSSetShaderResources( 0, 1, ps_srvs->GetAddressOf() );
+    m_pd3dImmediateContext->PSSetShaderResources( 0, 1, ps_srvs );
 
-    Microsoft::WRL::ComPtr <ID3D11SamplerState> samplers[1] = { m_pPointSamplerState.Get() };
-    m_pd3dImmediateContext->PSSetSamplers( 0, 1, samplers[0].GetAddressOf() );
+    ID3D11SamplerState* samplers[1] = { m_pPointSamplerState.Get() };
+    m_pd3dImmediateContext->PSSetSamplers( 0, 1, samplers );
 
     // Perform draw call
     m_pd3dImmediateContext->Draw( 4, 0 );
 
     // Unbind
     ps_srvs[0] = nullptr;
-    m_pd3dImmediateContext->PSSetShaderResources( 0, 1, ps_srvs->GetAddressOf() );
+    m_pd3dImmediateContext->PSSetShaderResources( 0, 1, ps_srvs );
 
     // Pop RT
     m_pd3dImmediateContext->RSSetViewports( 1, &old_viewport );

@@ -143,8 +143,8 @@ XRESULT D3D11VertexBuffer::Unmap() {
 }
 
 /** Returns the D3D11-Buffer object */
-Microsoft::WRL::ComPtr <ID3D11Buffer> D3D11VertexBuffer::GetVertexBuffer() const {
-    return VertexBuffer.Get();
+Microsoft::WRL::ComPtr <ID3D11Buffer>& D3D11VertexBuffer::GetVertexBuffer() {
+    return VertexBuffer;
 }
 
 /** Optimizes the given set of vertices */
@@ -208,6 +208,6 @@ unsigned int D3D11VertexBuffer::GetSizeInBytes() const {
 }
 
 /** Returns the SRV of this buffer, if it represents a structured buffer */
-Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> D3D11VertexBuffer::GetShaderResourceView() const {
-    return ShaderResourceView.Get();
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& D3D11VertexBuffer::GetShaderResourceView() {
+    return ShaderResourceView;
 }

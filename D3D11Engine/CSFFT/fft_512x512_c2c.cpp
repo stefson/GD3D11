@@ -30,7 +30,7 @@ void radix008A( CSFFT512x512_Plan* fft_plan,
 {
     // Setup execution configuration
     UINT grid = thread_count / COHERENCY_GRANULARITY;
-    Microsoft::WRL::ComPtr<ID3D11DeviceContext> pd3dImmediateContext = fft_plan->pd3dImmediateContext.Get();
+    auto& pd3dImmediateContext = fft_plan->pd3dImmediateContext;
 
     // Buffers
     ID3D11ShaderResourceView* cs_srvs[1] = { pSRV_Src };
@@ -62,39 +62,39 @@ void fft_512x512_c2c( CSFFT512x512_Plan* fft_plan,
                      ID3D11ShaderResourceView* pSRV_Src )
 {
     const UINT thread_count = fft_plan->slices * (512 * 512) / 8;
-    Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> pUAV_Tmp = fft_plan->pUAV_Tmp.Get();
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pSRV_Tmp = fft_plan->pSRV_Tmp.Get();
-    Microsoft::WRL::ComPtr<ID3D11DeviceContext> pd3dContext = fft_plan->pd3dImmediateContext.Get();
-    Microsoft::WRL::ComPtr<ID3D11Buffer> cs_cbs[1];
+    auto& pUAV_Tmp = fft_plan->pUAV_Tmp;
+    auto& pSRV_Tmp = fft_plan->pSRV_Tmp;
+    auto& pd3dContext = fft_plan->pd3dImmediateContext;
+    ID3D11Buffer* cs_cbs[1] = { nullptr };
 
     UINT istride = 512 * 512 / 8;
     cs_cbs[0] = fft_plan->pRadix008A_CB[0].Get();
-    pd3dContext->CSSetConstantBuffers( 0, 1, cs_cbs[0].GetAddressOf() );
+    pd3dContext->CSSetConstantBuffers( 0, 1, cs_cbs );
     radix008A( fft_plan, pUAV_Tmp.Get(), pSRV_Src, thread_count, istride );
 
     istride /= 8;
     cs_cbs[0] = fft_plan->pRadix008A_CB[1].Get();
-    pd3dContext->CSSetConstantBuffers( 0, 1, cs_cbs[0].GetAddressOf() );
+    pd3dContext->CSSetConstantBuffers( 0, 1, cs_cbs );
     radix008A( fft_plan, pUAV_Dst, pSRV_Tmp.Get(), thread_count, istride );
 
     istride /= 8;
     cs_cbs[0] = fft_plan->pRadix008A_CB[2].Get();
-    pd3dContext->CSSetConstantBuffers( 0, 1, cs_cbs[0].GetAddressOf() );
+    pd3dContext->CSSetConstantBuffers( 0, 1, cs_cbs );
     radix008A( fft_plan, pUAV_Tmp.Get(), pSRV_Dst, thread_count, istride );
 
     istride /= 8;
     cs_cbs[0] = fft_plan->pRadix008A_CB[3].Get();
-    pd3dContext->CSSetConstantBuffers( 0, 1, cs_cbs[0].GetAddressOf() );
+    pd3dContext->CSSetConstantBuffers( 0, 1, cs_cbs );
     radix008A( fft_plan, pUAV_Dst, pSRV_Tmp.Get(), thread_count, istride );
 
     istride /= 8;
     cs_cbs[0] = fft_plan->pRadix008A_CB[4].Get();
-    pd3dContext->CSSetConstantBuffers( 0, 1, cs_cbs[0].GetAddressOf() );
+    pd3dContext->CSSetConstantBuffers( 0, 1, cs_cbs );
     radix008A( fft_plan, pUAV_Tmp.Get(), pSRV_Dst, thread_count, istride );
 
     istride /= 8;
     cs_cbs[0] = fft_plan->pRadix008A_CB[5].Get();
-    pd3dContext->CSSetConstantBuffers( 0, 1, cs_cbs[0].GetAddressOf() );
+    pd3dContext->CSSetConstantBuffers( 0, 1, cs_cbs );
     radix008A( fft_plan, pUAV_Dst, pSRV_Tmp.Get(), thread_count, istride );
 }
 

@@ -98,13 +98,13 @@ XRESULT D3D11PFX_GodRays::Render( RenderToTextureBuffer* fxbuffer ) {
     zoomPS->GetConstantBuffer()[0]->UpdateBuffer( &gcb );
     zoomPS->GetConstantBuffer()[0]->BindToPixelShader( 0 );
 
-    FxRenderer->CopyTextureToRTV( FxRenderer->GetTempBufferDS4_1().GetShaderResView().Get(), FxRenderer->GetTempBufferDS4_2().GetRenderTargetView().Get(), INT2( 0, 0 ), true );
+    FxRenderer->CopyTextureToRTV( FxRenderer->GetTempBufferDS4_1().GetShaderResView(), FxRenderer->GetTempBufferDS4_2().GetRenderTargetView(), INT2( 0, 0 ), true );
 
     // Upscale and blend
     Engine::GAPI->GetRendererState().BlendState.SetAdditiveBlending();
     Engine::GAPI->GetRendererState().BlendState.SetDirty();
 
-    FxRenderer->CopyTextureToRTV( FxRenderer->GetTempBufferDS4_2().GetShaderResView().Get(), oldRTV.Get(), INT2( engine->GetResolution().x, engine->GetResolution().y ) );
+    FxRenderer->CopyTextureToRTV( FxRenderer->GetTempBufferDS4_2().GetShaderResView(), oldRTV, INT2( engine->GetResolution().x, engine->GetResolution().y ) );
 
     vp.Width = (float)engine->GetResolution().x;
     vp.Height = (float)engine->GetResolution().y;

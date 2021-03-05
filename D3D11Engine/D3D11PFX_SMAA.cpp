@@ -179,8 +179,7 @@ void D3D11PFX_SMAA::RenderPostFX( const Microsoft::WRL::ComPtr<ID3D11ShaderResou
     engine->DrawSRVToBackbuffer(TempRTV->GetShaderResView());
     goto end;*/
 
-    Microsoft::WRL::ComPtr <ID3D11ShaderResourceView> srv = TempRTV.GetShaderResView().Get();
-    engine->GetContext()->PSSetShaderResources( 0, 1, srv.GetAddressOf() );
+    engine->GetContext()->PSSetShaderResources( 0, 1, TempRTV.GetShaderResView().GetAddressOf() );
 
 
     if ( Engine::GAPI->GetRendererState().RendererSettings.SharpenFactor > 0.0f ) {
@@ -196,9 +195,9 @@ void D3D11PFX_SMAA::RenderPostFX( const Microsoft::WRL::ComPtr<ID3D11ShaderResou
         sharpenPS->GetConstantBuffer()[0]->UpdateBuffer( &gcb );
         sharpenPS->GetConstantBuffer()[0]->BindToPixelShader( 0 );
 
-        FxRenderer->CopyTextureToRTV( TempRTV.GetShaderResView().Get(), OldRTV.Get(), INT2( 0, 0 ), true );
+        FxRenderer->CopyTextureToRTV( TempRTV.GetShaderResView(), OldRTV, INT2( 0, 0 ), true );
     } else {
-        FxRenderer->CopyTextureToRTV( TempRTV.GetShaderResView().Get(), OldRTV.Get() );
+        FxRenderer->CopyTextureToRTV( TempRTV.GetShaderResView(), OldRTV );
     }
 
     engine->GetContext()->PSSetShaderResources( 0, 3, NoSRV );
