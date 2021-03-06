@@ -56,12 +56,14 @@ public:
 
     /** Deletes all shaders */
     XRESULT DeleteShaders();
+    ShaderInfo GetShaderInfo( const std::string& shader, bool& ok );
+    void UpdateShaderInfo( ShaderInfo& shader );
 
     /** Return a specific shader */
-    std::shared_ptr<D3D11VShader> GetVShader( std::string shader );
-    std::shared_ptr<D3D11PShader> GetPShader( std::string shader );
-    std::shared_ptr<D3D11HDShader> GetHDShader( std::string shader );
-    std::shared_ptr<D3D11GShader> GetGShader( std::string shader );
+    std::shared_ptr<D3D11VShader> GetVShader( const std::string& shader );
+    std::shared_ptr<D3D11PShader> GetPShader( const std::string& shader );
+    std::shared_ptr<D3D11HDShader> GetHDShader( const std::string& shader );
+    std::shared_ptr<D3D11GShader> GetGShader( const std::string& shader );
 private:
     XRESULT CompileShader( const ShaderInfo& si );
 

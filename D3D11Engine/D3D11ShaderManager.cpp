@@ -195,15 +195,29 @@ XRESULT D3D11ShaderManager::Init() {
     Shaders.push_back( ShaderInfo( "PS_PFX_LumConvert", "PS_PFX_LumConvert.hlsl", "p" ) );
     Shaders.push_back( ShaderInfo( "PS_PFX_LumAdapt", "PS_PFX_LumAdapt.hlsl", "p" ) );
     Shaders.back().cBufferSizes.push_back( sizeof( LumAdaptConstantBuffer ) );
-    Shaders.push_back( ShaderInfo( "PS_PFX_HDR", "PS_PFX_HDR.hlsl", "p" ) );
+
+    D3D_SHADER_MACRO m;
+    std::vector<D3D_SHADER_MACRO> makros;
+
+    m.Name = "USE_TONEMAP";
+    m.Definition = "4";
+    makros.push_back( m );
+
+    Shaders.push_back( ShaderInfo( "PS_PFX_HDR", "PS_PFX_HDR.hlsl", "p", makros ) );
     Shaders.back().cBufferSizes.push_back( sizeof( HDRSettingsConstantBuffer ) );
+    makros.clear();
 
     Shaders.push_back( ShaderInfo( "PS_PFX_GodRayMask", "PS_PFX_GodRayMask.hlsl", "p" ) );
     Shaders.push_back( ShaderInfo( "PS_PFX_GodRayZoom", "PS_PFX_GodRayZoom.hlsl", "p" ) );
     Shaders.back().cBufferSizes.push_back( sizeof( GodRayZoomConstantBuffer ) );
 
-    Shaders.push_back( ShaderInfo( "PS_PFX_Tonemap", "PS_PFX_Tonemap.hlsl", "p" ) );
+    m.Name = "USE_TONEMAP";
+    m.Definition = "4";
+    makros.push_back( m );
+
+    Shaders.push_back( ShaderInfo( "PS_PFX_Tonemap", "PS_PFX_Tonemap.hlsl", "p", makros ) );
     Shaders.back().cBufferSizes.push_back( sizeof( HDRSettingsConstantBuffer ) );
+    makros.clear();
 
     Shaders.push_back( ShaderInfo( "PS_SkyPlane", "PS_SkyPlane.hlsl", "p" ) );
     Shaders.back().cBufferSizes.push_back( sizeof( ViewportInfoConstantBuffer ) );
@@ -265,9 +279,6 @@ XRESULT D3D11ShaderManager::Init() {
 
     Shaders.push_back( ShaderInfo( "GS_ParticleStreamOut", "VS_AdvanceRain.hlsl", "g", 11 ) );
     Shaders.back().cBufferSizes.push_back( sizeof( ParticleGSInfoConstantBuffer ) );
-
-    D3D_SHADER_MACRO m;
-    std::vector<D3D_SHADER_MACRO> makros;
 
     m.Name = "NORMALMAPPING";
     m.Definition = "0";
@@ -608,16 +619,38 @@ XRESULT D3D11ShaderManager::DeleteShaders() {
     return XR_SUCCESS;
 }
 
+ShaderInfo D3D11ShaderManager::GetShaderInfo( const std::string& shader, bool& ok ) {
+    for ( size_t i = 0; i < Shaders.size(); i++ ) {
+        if ( Shaders[i].name == shader ) {
+            ok = true;
+            return Shaders[i];
+        }
+    }
+    ok = false;
+    return ShaderInfo( "", "", "" );
+}
+void D3D11ShaderManager::UpdateShaderInfo( ShaderInfo& shader ) {
+    for ( size_t i = 0; i < Shaders.size(); i++ ) {
+        if ( Shaders[i].name == shader.name ) {
+            Shaders[i] = shader;
+            CompileShader( shader );
+            return;
+        }
+    }
+    Shaders.push_back( shader );
+    CompileShader( shader );
+}
+
 /** Return a specific shader */
-std::shared_ptr<D3D11VShader> D3D11ShaderManager::GetVShader( std::string shader ) {
+std::shared_ptr<D3D11VShader> D3D11ShaderManager::GetVShader( const std::string& shader ) {
     return VShaders[shader];
 }
-std::shared_ptr<D3D11PShader> D3D11ShaderManager::GetPShader( std::string shader ) {
+std::shared_ptr<D3D11PShader> D3D11ShaderManager::GetPShader( const std::string& shader ) {
     return PShaders[shader];
 }
-std::shared_ptr<D3D11HDShader> D3D11ShaderManager::GetHDShader( std::string shader ) {
+std::shared_ptr<D3D11HDShader> D3D11ShaderManager::GetHDShader( const std::string& shader ) {
     return HDShaders[shader];
 }
-std::shared_ptr<D3D11GShader> D3D11ShaderManager::GetGShader( std::string shader ) {
+std::shared_ptr<D3D11GShader> D3D11ShaderManager::GetGShader( const std::string& shader ) {
     return GShaders[shader];
 }

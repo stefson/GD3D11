@@ -483,7 +483,14 @@ struct GothicRendererSettings {
         PLS_FULL = 3,
         _PLS_NUM_SETTINGS
     };
-
+    enum E_HDRToneMap {
+        ToneMap_jafEq4,
+        Uncharted2Tonemap,
+        ACESFilmTonemap,
+        PerceptualQuantizerTonemap,
+        ToneMap_Simple,
+        ACESFittedTonemap,
+    };
 
     /** Sets the default values for this struct */
     void SetDefault() {
@@ -501,6 +508,7 @@ struct GothicRendererSettings {
         DrawSky = true;
         DrawFog = true;
         EnableHDR = false;
+        HDRToneMap = E_HDRToneMap::ToneMap_Simple;
         ReplaceSunDirection = false;
         AtmosphericScattering = true; // Use original sky
         EnableDynamicLighting = true;
@@ -656,6 +664,7 @@ struct GothicRendererSettings {
     bool DrawSky;
     bool DrawFog;
     bool EnableHDR;
+    E_HDRToneMap HDRToneMap;
     bool EnableVSync;
     bool EnableSMAA;
     bool EnableTesselation;

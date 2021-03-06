@@ -589,8 +589,11 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
     return XR_SUCCESS;
 }
 
+
 /** Called when the game wants to render a new frame */
 XRESULT D3D11GraphicsEngine::OnBeginFrame() {
+    Engine::GAPI->GetRendererState().RendererInfo.Timing.StartTotal();
+
     if ( Engine::GAPI->GetRendererState().RendererSettings.FpsLimit != 0 ) {
         if ( m_LastFrameLimit != Engine::GAPI->GetRendererState().RendererSettings.FpsLimit ) {
             m_LastFrameLimit = Engine::GAPI->GetRendererState().RendererSettings.FpsLimit;
@@ -600,7 +603,37 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
     } else {
         m_FrameLimiter->Reset();
     }
-    Engine::GAPI->GetRendererState().RendererInfo.Timing.StartTotal();
+    static int oldToneMap = -1;
+    if ( Engine::GAPI->GetRendererState().RendererSettings.HDRToneMap != oldToneMap ) {
+        oldToneMap = Engine::GAPI->GetRendererState().RendererSettings.HDRToneMap;
+        std::vector<D3D_SHADER_MACRO> makros;
+
+        D3D_SHADER_MACRO m;
+        m.Name = "USE_TONEMAP";
+        if ( oldToneMap == GothicRendererSettings::E_HDRToneMap::ToneMap_jafEq4 ) {
+            m.Definition = "0";
+        } else if ( oldToneMap == GothicRendererSettings::E_HDRToneMap::Uncharted2Tonemap ) {
+            m.Definition = "1";
+        } else if ( oldToneMap == GothicRendererSettings::E_HDRToneMap::ACESFilmTonemap ) {
+            m.Definition = "2";
+        } else if ( oldToneMap == GothicRendererSettings::E_HDRToneMap::PerceptualQuantizerTonemap ) {
+            m.Definition = "3";
+        } else if ( oldToneMap == GothicRendererSettings::E_HDRToneMap::ACESFittedTonemap ) {
+            m.Definition = "5";
+        } else {
+            m.Definition = "4";
+            oldToneMap = 4;
+            Engine::GAPI->GetRendererState().RendererSettings.HDRToneMap = GothicRendererSettings::E_HDRToneMap::ToneMap_Simple;
+        }
+        makros.push_back( m );
+
+        ShaderInfo si = ShaderInfo( "PS_PFX_HDR", "PS_PFX_HDR.hlsl", "p", makros );
+        si.cBufferSizes.push_back( sizeof( HDRSettingsConstantBuffer ) );
+        ShaderManager->UpdateShaderInfo( si );
+        si = ShaderInfo( "PS_PFX_Tonemap", "PS_PFX_Tonemap.hlsl", "p", makros );
+        si.cBufferSizes.push_back( sizeof( HDRSettingsConstantBuffer ) );
+        ShaderManager->UpdateShaderInfo( si );
+    }
 
     static bool s_firstFrame = true;
     if ( s_firstFrame ) {
@@ -3316,7 +3349,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
                         PS_Diffuse->GetConstantBuffer()[2]->UpdateBuffer(&b);
                         PS_Diffuse->GetConstantBuffer()[2]->BindToPixelShader(2);*/
 #endif
-                    } else {
+                } else {
                         // Check for alphablending on world mesh
                         bool blendAdd = itt.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_ADD;
                         bool blendBlend = itt.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_BLEND;
@@ -3411,16 +3444,16 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
                             sizeof( VobInstanceInfo ), staticMeshVisual.second->Instances.size(),
                             sizeof( ExVertexStruct ), staticMeshVisual.second->StartInstanceNum );
                     }
-                }
             }
+        }
 
             // Reset visual
             if ( doReset &&
                 !Engine::GAPI->GetRendererState().RendererSettings.FixViewFrustum ) {
                 staticMeshVisual.second->StartNewFrame();
             }
-        }
     }
+}
 
     // Draw mobs
     if ( Engine::GAPI->GetRendererState().RendererSettings.DrawMobs ) {
@@ -3844,7 +3877,7 @@ XRESULT D3D11GraphicsEngine::OnKeyDown( unsigned int key ) {
         break;
     default:
         break;
-    }
+}
 
     return XR_SUCCESS;
 }
@@ -4917,7 +4950,7 @@ void D3D11GraphicsEngine::GetBackbufferData( byte** data, int& pixelsize ) {
         LogInfo() << "Thumbnail failed. Texture could not be created";
         return;
     }
-    
+
     GetContext()->CopyResource( texture.Get(), rt->GetTexture().Get() );
 
     // Get data
