@@ -405,7 +405,7 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
     if ( dxgi_1_3 ) {
         if ( memcmp( &Resolution, &newSize, sizeof( newSize ) ) == 0 && SwapChain2.Get() )
             return XR_SUCCESS;  // Don't resize if we don't have to
-    } 	else {
+    } else {
         if ( memcmp( &Resolution, &newSize, sizeof( newSize ) ) == 0 && SwapChain.Get() )
             return XR_SUCCESS;  // Don't resize if we don't have to
     }
@@ -417,18 +417,18 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
     BOOL isFullscreen = 0;
     if ( dxgi_1_3 ) {
         if ( SwapChain2.Get() ) LE( SwapChain2->GetFullscreenState( &isFullscreen, nullptr ) );
-    } 	else {
+    } else {
         if ( SwapChain.Get() ) LE( SwapChain->GetFullscreenState( &isFullscreen, nullptr ) );
     }
     if ( isFullscreen || Engine::GAPI->GetRendererState().RendererSettings.StretchWindow ) {
         RECT desktopRect;
         GetClientRect( GetDesktopWindow(), &desktopRect );
         SetWindowPos( OutputWindow, nullptr, 0, 0, desktopRect.right, desktopRect.bottom, 0 );
-    } 	else {
+    } else {
         RECT rect;
         if ( GetWindowRect( OutputWindow, &rect ) ) {
             SetWindowPos( OutputWindow, nullptr, rect.left, rect.top, bbres.x, bbres.y, 0 );
-        } 		else {
+        } else {
             SetWindowPos( OutputWindow, nullptr, 0, 0, bbres.x, bbres.y, 0 );
         }
     }
@@ -465,7 +465,7 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
         if ( dxgi_1_3 ) {
             LE( pDXGIDevice3->GetAdapter( &adapter11 ) );
             LogInfo() << "Device: DXGI 1.3";
-        } 		else LE( pDXGIDevice->GetAdapter( &adapter11 ) );
+        } else LE( pDXGIDevice->GetAdapter( &adapter11 ) );
 
         LE( adapter11.As( &adapter ) );
         LE( adapter->GetParent( IID_PPV_ARGS( &factory2 ) ) );
@@ -543,7 +543,7 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
                 LogError() << "Failed to resize swapchain!";
                 return XR_FAILED;
             }
-        } 		else if ( FAILED( SwapChain->ResizeBuffers( 0, bbres.x, bbres.y, DXGI_FORMAT_R8G8B8A8_UNORM, scflags ) ) ) {
+        } else if ( FAILED( SwapChain->ResizeBuffers( 0, bbres.x, bbres.y, DXGI_FORMAT_R8G8B8A8_UNORM, scflags ) ) ) {
             LogError() << "Failed to resize swapchain!";
             return XR_FAILED;
         }
@@ -561,7 +561,7 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
             LogInfo() << "SwapChain Mode: DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT";
         }
         SwapChain2->GetBuffer( 0, __uuidof(ID3D11Texture2D), &backbuffer );
-    } 	else {
+    } else {
         SwapChain->GetBuffer( 0, __uuidof(ID3D11Texture2D), &backbuffer );
         LogInfo() << "SwapChain: DXGI 1.2";
     }
@@ -915,84 +915,49 @@ XRESULT D3D11GraphicsEngine::Present() {
     if ( dxgi_1_3 ) {
         if ( m_flipWithTearing ) {
             hr = SwapChain2->Present( vsync ? 1 : 0, vsync ? 0 : DXGI_PRESENT_ALLOW_TEARING );
-        } 		else {
+        } else {
             hr = SwapChain2->Present( vsync ? 1 : 0, 0 );
         }
-        if ( hr == DXGI_ERROR_DEVICE_REMOVED ) {
-            switch ( GetDevice()->GetDeviceRemovedReason() ) {
-            case DXGI_ERROR_DEVICE_HUNG:
-                LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_HUNG)";
-                exit( 0 );
-                break;
-
-            case DXGI_ERROR_DEVICE_REMOVED:
-                LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_REMOVED)";
-                exit( 0 );
-                break;
-
-            case DXGI_ERROR_DEVICE_RESET:
-                LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_RESET)";
-                exit( 0 );
-                break;
-
-            case DXGI_ERROR_DRIVER_INTERNAL_ERROR:
-                LogErrorBox() << "Device Removed! (DXGI_ERROR_DRIVER_INTERNAL_ERROR)";
-                exit( 0 );
-                break;
-
-            case DXGI_ERROR_INVALID_CALL:
-                LogErrorBox() << "Device Removed! (DXGI_ERROR_INVALID_CALL)";
-                exit( 0 );
-                break;
-
-            case S_OK:
-                LogInfo() << "Device removed, but we're fine!";
-                break;
-
-            default:
-                LogWarnBox() << "Device Removed! (Unknown reason)";
-            }
-        }
-    } 	else {
+    } else {
         if ( m_flipWithTearing ) {
             hr = SwapChain->Present( vsync ? 1 : 0, vsync ? 0 : DXGI_PRESENT_ALLOW_TEARING );
-        } 			else {
+        } else {
             hr = SwapChain->Present( vsync ? 1 : 0, 0 );
         }
-        if ( hr == DXGI_ERROR_DEVICE_REMOVED ) {
-            switch ( GetDevice()->GetDeviceRemovedReason() ) {
-            case DXGI_ERROR_DEVICE_HUNG:
-                LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_HUNG)";
-                exit( 0 );
-                break;
+    }
+    if ( hr == DXGI_ERROR_DEVICE_REMOVED ) {
+        switch ( GetDevice()->GetDeviceRemovedReason() ) {
+        case DXGI_ERROR_DEVICE_HUNG:
+            LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_HUNG)";
+            exit( 0 );
+            break;
 
-            case DXGI_ERROR_DEVICE_REMOVED:
-                LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_REMOVED)";
-                exit( 0 );
-                break;
+        case DXGI_ERROR_DEVICE_REMOVED:
+            LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_REMOVED)";
+            exit( 0 );
+            break;
 
-            case DXGI_ERROR_DEVICE_RESET:
-                LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_RESET)";
-                exit( 0 );
-                break;
+        case DXGI_ERROR_DEVICE_RESET:
+            LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_RESET)";
+            exit( 0 );
+            break;
 
-            case DXGI_ERROR_DRIVER_INTERNAL_ERROR:
-                LogErrorBox() << "Device Removed! (DXGI_ERROR_DRIVER_INTERNAL_ERROR)";
-                exit( 0 );
-                break;
+        case DXGI_ERROR_DRIVER_INTERNAL_ERROR:
+            LogErrorBox() << "Device Removed! (DXGI_ERROR_DRIVER_INTERNAL_ERROR)";
+            exit( 0 );
+            break;
 
-            case DXGI_ERROR_INVALID_CALL:
-                LogErrorBox() << "Device Removed! (DXGI_ERROR_INVALID_CALL)";
-                exit( 0 );
-                break;
+        case DXGI_ERROR_INVALID_CALL:
+            LogErrorBox() << "Device Removed! (DXGI_ERROR_INVALID_CALL)";
+            exit( 0 );
+            break;
 
-            case S_OK:
-                LogInfo() << "Device removed, but we're fine!";
-                break;
+        case S_OK:
+            LogInfo() << "Device removed, but we're fine!";
+            break;
 
-            default:
-                LogWarnBox() << "Device Removed! (Unknown reason)";
-            }
+        default:
+            LogWarnBox() << "Device Removed! (Unknown reason)";
         }
     }
     Engine::GAPI->LeaveResourceCriticalSection();
@@ -1063,11 +1028,11 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferIndexed( D3D11VertexBuffer* vb,
         if ( sizeof( VERTEX_INDEX ) == sizeof( unsigned short ) ) {
             GetContext()->IASetIndexBuffer( ib->GetVertexBuffer().Get(),
                 DXGI_FORMAT_R16_UINT, 0 );
-        } else {
+    } else {
             GetContext()->IASetIndexBuffer( ib->GetVertexBuffer().Get(),
                 DXGI_FORMAT_R32_UINT, 0 );
         }
-    }
+}
 
     if ( numIndices ) {
         // Draw the mesh
@@ -5625,7 +5590,7 @@ namespace UI::zFont {
             const float miny = float( ypos );
 
             // prepare for next glyph
-            if ( c == '\n' ) { ypos += heightf; xpos = x; } 			else if ( c == ' ' ) { xpos += widthPx; continue; } 			else { xpos += widthPx + SpaceBetweenChars; }
+            if ( c == '\n' ) { ypos += heightf; xpos = x; } else if ( c == ' ' ) { xpos += widthPx; continue; } else { xpos += widthPx + SpaceBetweenChars; }
 
             const float maxx = (minx + widthf);
             const float maxy = (miny + heightf);
