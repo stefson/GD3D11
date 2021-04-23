@@ -157,30 +157,27 @@ namespace Toolbox {
     }
 
     /** Computes the Normal of a triangle */
-    DirectX::XMFLOAT3 ComputeNormal( const DirectX::XMFLOAT3& v0, const DirectX::XMFLOAT3& v1, const DirectX::XMFLOAT3& v2 ) {
-        XMVECTOR Normal = XMVector3Cross( (XMLoadFloat3( &v1 ) - XMLoadFloat3( &v0 )), (XMLoadFloat3( &v2 ) - XMLoadFloat3( &v0 )) );
-        Normal = XMVector3NormalizeEst( Normal );
+    DirectX::FXMVECTOR ComputeNormal( const DirectX::XMFLOAT3& v0, const DirectX::XMFLOAT3& v1, const DirectX::XMFLOAT3& v2 ) {
+        FXMVECTOR Normal = XMVector3Normalize( XMVector3Cross( (XMLoadFloat3( &v1 ) - XMLoadFloat3( &v0 )), (XMLoadFloat3( &v2 ) - XMLoadFloat3( &v0 )) ) );
 
-        XMFLOAT3 Normal_XMFLOAT3;
-        XMStoreFloat3( &Normal_XMFLOAT3, Normal );
-        return Normal_XMFLOAT3;
+        return Normal;
     }
 
     /** Does a ray vs aabb test */
     bool IntersectTri( const DirectX::XMFLOAT3& v0, const DirectX::XMFLOAT3& v1, const DirectX::XMFLOAT3& v2, const DirectX::XMFLOAT3& origin, const DirectX::XMFLOAT3& direction, float& u, float& v, float& t ) {
         const float EPSILON = 0.00001f;
-        XMVECTOR edge1 = XMLoadFloat3( &v1 ) - XMLoadFloat3( &v0 );
-        XMVECTOR edge2 = XMLoadFloat3( &v2 ) - XMLoadFloat3( &v0 );
-        XMVECTOR pvec = DirectX::XMVector3Cross( XMLoadFloat3( &direction ), edge2 );
+        FXMVECTOR edge1 = XMLoadFloat3( &v1 ) - XMLoadFloat3( &v0 );
+        FXMVECTOR edge2 = XMLoadFloat3( &v2 ) - XMLoadFloat3( &v0 );
+        FXMVECTOR pvec = DirectX::XMVector3Cross( XMLoadFloat3( &direction ), edge2 );
         float det;
         XMStoreFloat( &det, DirectX::XMVector3Dot( edge1, pvec ) );
         if ( det > -EPSILON && det < EPSILON ) return false;
 
         float invDet = 1 / det;
-        XMVECTOR tvec = XMLoadFloat3( &origin ) - XMLoadFloat3( &v0 );
+        FXMVECTOR tvec = XMLoadFloat3( &origin ) - XMLoadFloat3( &v0 );
         XMStoreFloat( &u, DirectX::XMVector3Dot( tvec, pvec ) * invDet );
         if ( u < 0 || u > 1 ) return false;
-        XMVECTOR qvec = DirectX::XMVector3Cross( tvec, edge1 );
+        FXMVECTOR qvec = DirectX::XMVector3Cross( tvec, edge1 );
 
         XMStoreFloat( &v, DirectX::XMVector3Dot( XMLoadFloat3( &direction ), qvec ) * invDet );
         if ( v < 0 || u + v > 1 ) return false;

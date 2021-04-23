@@ -19,10 +19,10 @@ public:
     std::vector<D3D11ConstantBuffer*>& GetConstantBuffer();
 
     /** Returns the shader */
-    Microsoft::WRL::ComPtr<ID3D11VertexShader> GetShader() { return VertexShader; }
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> GetShader() { return VertexShader.Get(); }
 
     /** Returns the inputlayout */
-    Microsoft::WRL::ComPtr<ID3D11InputLayout> GetInputLayout() { return InputLayout; }
+    Microsoft::WRL::ComPtr<ID3D11InputLayout> GetInputLayout() { return InputLayout.Get(); }
 
     /** Returns this textures ID */
     UINT16 GetID() { return ID; };

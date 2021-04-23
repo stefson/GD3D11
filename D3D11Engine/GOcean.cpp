@@ -83,8 +83,8 @@ void GOcean::Draw() {
 
 /** Gets the oceans fft resources. Does not do addref() */
 void GOcean::GetFFTResources( ID3D11ShaderResourceView** tex_displacement, ID3D11ShaderResourceView** tex_gradient, ID3D11ShaderResourceView** fresnelMap, OceanSettingsConstantBuffer* settingsCB ) {
-    *tex_displacement = FFTOceanSimulator->getD3D11DisplacementMap();
-    *tex_gradient = FFTOceanSimulator->getD3D11GradientMap();
+    *tex_displacement = FFTOceanSimulator->getD3D11DisplacementMap().Get();
+    *tex_gradient = FFTOceanSimulator->getD3D11GradientMap().Get();
     *fresnelMap = FresnelMapSRV.Get();
 
     float patchLength = 2048.0f;
@@ -117,7 +117,7 @@ void GOcean::GetFFTResources( ID3D11ShaderResourceView** tex_displacement, ID3D1
     settingsCB->OS_CameraPosition = Engine::GAPI->GetCameraPosition();
 }
 
-void GOcean::CreateFresnelMap( ID3D11Device* pd3dDevice ) {
+void GOcean::CreateFresnelMap( Microsoft::WRL::ComPtr<ID3D11Device1> pd3dDevice ) {
     float SkyBlending = 16.0f;
 
     DWORD* buffer = new DWORD[FRESNEL_TEX_SIZE];

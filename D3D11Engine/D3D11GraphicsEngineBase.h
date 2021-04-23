@@ -195,9 +195,9 @@ public:
     XRESULT D3D11GraphicsEngineBase::BindViewportInformation( const std::string& shader, int slot );
 
     /** Returns the Device/Context */
-    const Microsoft::WRL::ComPtr<ID3D11Device>& GetDevice() { return Device; }
-    const Microsoft::WRL::ComPtr<ID3D11DeviceContext>& GetContext() { return Context; }
-    const Microsoft::WRL::ComPtr<ID3D11DeviceContext>& GetDeferredMediaContext() { return DeferredContext; }
+    const Microsoft::WRL::ComPtr<ID3D11Device1>& GetDevice() { return Device; }
+    const Microsoft::WRL::ComPtr<ID3D11DeviceContext1>& GetContext() { return Context; }
+    const Microsoft::WRL::ComPtr<ID3D11DeviceContext1>& GetDeferredMediaContext1() { return DeferredContext; }
 
     /** Returns the current resolution */
     virtual INT2 GetResolution() { return Resolution; }
@@ -231,24 +231,21 @@ protected:
     void UpdateTransformsCB();
 
     /** Device-objects */
-    Microsoft::WRL::ComPtr<IDXGIFactory> DXGIFactory;
-    Microsoft::WRL::ComPtr<IDXGIAdapter> DXGIAdapter;
+    Microsoft::WRL::ComPtr<IDXGIFactory2> DXGIFactory2;
+    Microsoft::WRL::ComPtr<IDXGIAdapter2> DXGIAdapter2;
+    Microsoft::WRL::ComPtr<IDXGIAdapter1> DXGIAdapter1;
     std::string DeviceDescription;
 
     Microsoft::WRL::ComPtr<ID3D11Device> Device11;
     Microsoft::WRL::ComPtr<ID3D11DeviceContext> Context11;
-    Microsoft::WRL::ComPtr<ID3D11Device> Device;
-    Microsoft::WRL::ComPtr<ID3D11DeviceContext> Context;
-    Microsoft::WRL::ComPtr<ID3D11DeviceContext> DeferredContext;
-
-    /** Deferred contexts for threadpool */
-    std::map<int, ID3D11DeviceContext*> DeferredContextsByThread;
-    std::vector<ID3D11DeviceContext*> DeferredContextCache;
-    std::vector<ID3D11DeviceContext*> DeferredContextsAll;
-    std::mutex DeferredContextsByThreadMutex;
+    Microsoft::WRL::ComPtr<ID3D11Device1> Device;
+    Microsoft::WRL::ComPtr<ID3D11DeviceContext1> Context;
+    Microsoft::WRL::ComPtr<ID3D11DeviceContext1> DeferredContext;
 
     /** Swapchain and resources */
-    Microsoft::WRL::ComPtr<IDXGISwapChain> SwapChain;
+    Microsoft::WRL::ComPtr<IDXGISwapChain1> SwapChain;
+    Microsoft::WRL::ComPtr<IDXGISwapChain2> SwapChain2;
+    bool dxgi_1_3 = false;
     std::unique_ptr<RenderToTextureBuffer> Backbuffer;
     std::unique_ptr<RenderToDepthStencilBuffer> DepthStencilBuffer;
     std::unique_ptr<RenderToTextureBuffer> HDRBackBuffer;

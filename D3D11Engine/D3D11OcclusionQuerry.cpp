@@ -65,8 +65,7 @@ void D3D11OcclusionQuerry::DoOcclusionForBSP( BspInfo* root ) {
     // If this node wasn't inside the frustum last frame, but got inside it this frame, just draw it
     // to reduce the popping in dialogs where the camera switches heavily between targets
     // This may introduce a little framedrop when the camera switches targets, but it has to be ok.
-    if ( root->OcclusionInfo.LastCameraClipType == ZTCAM_CLIPTYPE_OUT &&
-        fstate != ZTCAM_CLIPTYPE_OUT ) {
+    if ( root->OcclusionInfo.LastCameraClipType == ZTCAM_CLIPTYPE_OUT && fstate != ZTCAM_CLIPTYPE_OUT ) {
         // Mark entire subtree visible
         MarkTreeVisible( root->Front, true );
         MarkTreeVisible( root->Back, true );
@@ -150,8 +149,7 @@ void D3D11OcclusionQuerry::DoOcclusionForBSP( BspInfo* root ) {
     if ( !Engine::GAPI->GetRendererState().RendererSettings.DisableWatermark && root->OriginalNode->IsLeaf() ) {
         if ( !root->OcclusionInfo.VisibleLastFrame ) {
             //DebugVisualizeNodeMesh(root->OcclusionInfo.NodeMesh, c);
-            Engine::GraphicsEngine->GetLineRenderer()->AddAABBMinMax( root->OriginalNode->BBox3D.Min,
-                root->OriginalNode->BBox3D.Max, c );
+            Engine::GraphicsEngine->GetLineRenderer()->AddAABBMinMax( root->OriginalNode->BBox3D.Min, root->OriginalNode->BBox3D.Max, c );
         }
     }
 }

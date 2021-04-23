@@ -282,25 +282,20 @@ public:
     void GetVisibleParticleEffectsList( std::vector<zCVob*>& pfxList );
 
     /** Sets the Projection matrix */
-    void SetProjTransformDX( const DirectX::XMFLOAT4X4& proj );
-
-    /** Sets the Projection matrix */
     void XM_CALLCONV SetProjTransformXM( const XMMATRIX proj );
 
     /** Gets the Projection matrix */
-    DirectX::XMFLOAT4X4 GetProjTransformDx();
+    DirectX::XMFLOAT4X4 GetProjTransform();
 
     /** Sets the world matrix */
     void XM_CALLCONV  SetWorldTransformXM( DirectX::XMMATRIX world, bool transpose = false );
 
-    /** Sets the world matrix */
-    void SetWorldTransformDX( const DirectX::XMFLOAT4X4& world, bool transpose = false );
 
     /** Sets the world matrix */
     void XM_CALLCONV SetViewTransformXM( DirectX::XMMATRIX view, bool transpose = false );
 
     /** Sets the world matrix */
-    void SetViewTransformDX( const DirectX::XMFLOAT4X4& view, bool transpose = false );
+    void SetViewTransform( const DirectX::XMFLOAT4X4& view, bool transpose = false );
 
     /** Sets the world matrix */
     void SetWorldViewTransform( const DirectX::XMFLOAT4X4& world, const DirectX::XMFLOAT4X4& view );
@@ -347,14 +342,14 @@ public:
 
     /** Returns the current cameraposition */
     DirectX::XMFLOAT3 GetCameraPosition();
-    DirectX::XMVECTOR XM_CALLCONV GetCameraPositionXM();
+    DirectX::FXMVECTOR XM_CALLCONV GetCameraPositionXM();
 
     /** Returns the view matrix */
     void GetViewMatrix( DirectX::XMFLOAT4X4* view );
     DirectX::XMMATRIX XM_CALLCONV GetViewMatrixXM();
 
     /** Returns the view matrix */
-    void GetInverseViewMatrixDX( DirectX::XMFLOAT4X4* invView );
+    void GetInverseViewMatrixXM( DirectX::XMFLOAT4X4* invView );
 
     /** Returns the projection-matrix */
     DirectX::XMFLOAT4X4& GetProjectionMatrix();
@@ -382,7 +377,7 @@ public:
     GSky* GetSky() const;
 
     /** Returns the fog-color */
-    DirectX::XMFLOAT3 GetFogColor();
+    FXMVECTOR GetFogColor();
 
     /** Returns true if the game is overwriting the fog color with a fog-zone */
     float GetFogOverride();

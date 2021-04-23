@@ -43,15 +43,14 @@ void BaseLineRenderer::AddPointLocator( const DirectX::XMFLOAT3& location, float
 
 /** Adds a plane to the renderlist */
 void BaseLineRenderer::AddPlane( const DirectX::XMFLOAT4& plane, const DirectX::XMFLOAT3& origin, float size, const DirectX::XMFLOAT4& color ) {
-    XMVECTOR DebugPlaneP1 = DirectX::XMVectorSet( 1, 1, ((-plane.x - plane.y) / plane.z), 0.0f );
 
-    DebugPlaneP1 = DirectX::XMVector3NormalizeEst( DebugPlaneP1 );
+    FXMVECTOR DebugPlaneP1 = XMVector3Normalize( XMVectorSet( 1, 1, ((-plane.x - plane.y) / plane.z), 0 ) );
 
-    XMVECTOR pNormal = XMLoadFloat4( &plane );
-    XMVECTOR DebugPlaneP2 = DirectX::XMVector3Cross( pNormal, DebugPlaneP1 );
+    FXMVECTOR pNormal = XMLoadFloat4( &plane ); //w component of plane will not be used in XMVectorCross3 therefore upfront usage of FXMVECTOR is concenient
+    FXMVECTOR DebugPlaneP2 = DirectX::XMVector3Cross( pNormal, DebugPlaneP1 );
 
     //DebugPlaneP2 += SlidingPlaneOrigin;
-    XMVECTOR O = XMLoadFloat3( &origin );
+    FXMVECTOR O = XMLoadFloat3( &origin );
 
     DirectX::XMFLOAT3 from;  DirectX::XMFLOAT3 to;
     XMStoreFloat3( &from, (O - DebugPlaneP1) - DebugPlaneP2 );

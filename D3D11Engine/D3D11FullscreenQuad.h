@@ -1,6 +1,6 @@
 #pragma once
 #include "pch.h"
-#include <d3d11.h>
+#include <d3d11_1.h>
 #include <DirectXMath.h>
 
 struct SimpleVertexStruct {
@@ -15,7 +15,7 @@ public:
     virtual ~D3D11FullscreenQuad();
 
     //Fills the VertexBuffer
-    HRESULT CreateQuad( ID3D11Device* device );
+    HRESULT CreateQuad( Microsoft::WRL::ComPtr<ID3D11Device1> device );
 
     Microsoft::WRL::ComPtr<ID3D11Buffer>& GetBuffer() { return QuadVB; }
 

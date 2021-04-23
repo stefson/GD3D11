@@ -31,10 +31,6 @@ D3D11GraphicsEngineBase::~D3D11GraphicsEngineBase() {
     GothicDepthBufferStateInfo::DeleteCachedObjects();
     GothicBlendStateInfo::DeleteCachedObjects();
     GothicRasterizerStateInfo::DeleteCachedObjects();
-
-    for ( size_t i = 0; i < DeferredContextsAll.size(); i++ ) {
-        SAFE_RELEASE( DeferredContextsAll[i] );
-    }
 }
 
 /** Called when the game created its window */
@@ -113,39 +109,75 @@ XRESULT D3D11GraphicsEngineBase::Present() {
     Engine::AntTweakBar->Draw();
 
     bool vsync = Engine::GAPI->GetRendererState().RendererSettings.EnableVSync;
-    if ( SwapChain->Present( vsync ? 1 : 0, 0 ) == DXGI_ERROR_DEVICE_REMOVED ) {
-        switch ( GetDevice()->GetDeviceRemovedReason() ) {
-        case DXGI_ERROR_DEVICE_HUNG:
-            LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_HUNG)";
-            exit( 0 );
-            break;
+    if ( dxgi_1_3 ) {
+        if ( SwapChain2->Present( vsync ? 1 : 0, 0 ) == DXGI_ERROR_DEVICE_REMOVED ) {
+            switch ( GetDevice()->GetDeviceRemovedReason() ) {
+            case DXGI_ERROR_DEVICE_HUNG:
+                LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_HUNG)";
+                exit( 0 );
+                break;
 
-        case DXGI_ERROR_DEVICE_REMOVED:
-            LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_REMOVED)";
-            exit( 0 );
-            break;
+            case DXGI_ERROR_DEVICE_REMOVED:
+                LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_REMOVED)";
+                exit( 0 );
+                break;
 
-        case DXGI_ERROR_DEVICE_RESET:
-            LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_RESET)";
-            exit( 0 );
-            break;
+            case DXGI_ERROR_DEVICE_RESET:
+                LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_RESET)";
+                exit( 0 );
+                break;
 
-        case DXGI_ERROR_DRIVER_INTERNAL_ERROR:
-            LogErrorBox() << "Device Removed! (DXGI_ERROR_DRIVER_INTERNAL_ERROR)";
-            exit( 0 );
-            break;
+            case DXGI_ERROR_DRIVER_INTERNAL_ERROR:
+                LogErrorBox() << "Device Removed! (DXGI_ERROR_DRIVER_INTERNAL_ERROR)";
+                exit( 0 );
+                break;
 
-        case DXGI_ERROR_INVALID_CALL:
-            LogErrorBox() << "Device Removed! (DXGI_ERROR_INVALID_CALL)";
-            exit( 0 );
-            break;
+            case DXGI_ERROR_INVALID_CALL:
+                LogErrorBox() << "Device Removed! (DXGI_ERROR_INVALID_CALL)";
+                exit( 0 );
+                break;
 
-        case S_OK:
-            LogInfo() << "Device removed, but we're fine!";
-            break;
+            case S_OK:
+                LogInfo() << "Device removed, but we're fine!";
+                break;
 
-        default:
-            LogWarnBox() << "Device Removed! (Unknown reason)";
+            default:
+                LogWarnBox() << "Device Removed! (Unknown reason)";
+            }
+        } 		else if ( SwapChain->Present( vsync ? 1 : 0, 0 ) == DXGI_ERROR_DEVICE_REMOVED ) {
+            switch ( GetDevice()->GetDeviceRemovedReason() ) {
+            case DXGI_ERROR_DEVICE_HUNG:
+                LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_HUNG)";
+                exit( 0 );
+                break;
+
+            case DXGI_ERROR_DEVICE_REMOVED:
+                LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_REMOVED)";
+                exit( 0 );
+                break;
+
+            case DXGI_ERROR_DEVICE_RESET:
+                LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_RESET)";
+                exit( 0 );
+                break;
+
+            case DXGI_ERROR_DRIVER_INTERNAL_ERROR:
+                LogErrorBox() << "Device Removed! (DXGI_ERROR_DRIVER_INTERNAL_ERROR)";
+                exit( 0 );
+                break;
+
+            case DXGI_ERROR_INVALID_CALL:
+                LogErrorBox() << "Device Removed! (DXGI_ERROR_INVALID_CALL)";
+                exit( 0 );
+                break;
+
+            case S_OK:
+                LogInfo() << "Device removed, but we're fine!";
+                break;
+
+            default:
+                LogWarnBox() << "Device Removed! (Unknown reason)";
+            }
         }
     }
 
@@ -264,7 +296,7 @@ XRESULT D3D11GraphicsEngineBase::UpdateRenderStates() {
             GothicStateCache::s_BlendStateMap[Engine::GAPI->GetRendererState().BlendState] = state;
         }
 
-        FFBlendState = state->State;
+        FFBlendState = state->State.Get();
 
         Engine::GAPI->GetRendererState().BlendState.StateDirty = false;
         GetContext()->OMSetBlendState( FFBlendState.Get(), (float*)&float4( 0, 0, 0, 0 ), 0xFFFFFFFF );
@@ -280,7 +312,7 @@ XRESULT D3D11GraphicsEngineBase::UpdateRenderStates() {
             GothicStateCache::s_RasterizerStateMap[Engine::GAPI->GetRendererState().RasterizerState] = state;
         }
 
-        FFRasterizerState = state->State;
+        FFRasterizerState = state->State.Get();
 
         Engine::GAPI->GetRendererState().RasterizerState.StateDirty = false;
         GetContext()->RSSetState( FFRasterizerState.Get() );
@@ -296,7 +328,7 @@ XRESULT D3D11GraphicsEngineBase::UpdateRenderStates() {
             GothicStateCache::s_DepthBufferMap[Engine::GAPI->GetRendererState().DepthState] = state;
         }
 
-        FFDepthStencilState = state->State;
+        FFDepthStencilState = state->State.Get();
 
         Engine::GAPI->GetRendererState().DepthState.StateDirty = false;
         GetContext()->OMSetDepthStencilState( FFDepthStencilState.Get(), 0 );

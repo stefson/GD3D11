@@ -36,7 +36,7 @@ D3D11ConstantBuffer::~D3D11ConstantBuffer() {
 /** Updates the buffer */
 void D3D11ConstantBuffer::UpdateBuffer( const void* data ) {
     D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase*)Engine::GraphicsEngine;
-    //engine->GetContext()->UpdateSubresource(Buffer, 0, nullptr, data, 0, 0);
+    //engine->GetContext()->UpdateSubresource(Buffer.Get(), 0, nullptr, data, 0, 0);
 
 #ifndef PUBLIC_RELEASE
     if ( GetCurrentThreadId() != Engine::GAPI->GetMainThreadID() )

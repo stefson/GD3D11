@@ -89,8 +89,7 @@ XRESULT D2DView::Init( HWND hwnd ) {
         D2D1::HwndRenderTargetProperties( hwnd, D2D1::SizeU( windowSize.right - windowSize.left, windowSize.bottom - windowSize.top ),
             D2D1_PRESENT_OPTIONS_IMMEDIATELY ),
         (ID2D1HwndRenderTarget**)&RenderTarget ) ) ) {
-        Factory->Release();
-        Factory = nullptr;
+        SAFE_RELEASE( Factory );
 
         LogError() << "Failed to create D2D-Device!";
 
@@ -116,14 +115,14 @@ XRESULT D2DView::Init( const INT2& initialResolution, ID3D11Texture2D* rendertar
         LogError() << "Failed to create ID2D1Factory!";
         return XR_FAILED;
     }
-    // TODO: ComPtr<T> HERE
-    IDXGISurface* dxgiBackbuffer = nullptr;
-    rendertarget->QueryInterface( &dxgiBackbuffer );
+
+    Microsoft::WRL::ComPtr<IDXGISurface2> dxgiBackbuffer;
+    rendertarget->QueryInterface( dxgiBackbuffer.GetAddressOf() );
 
     D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(
         D2D1_RENDER_TARGET_TYPE_DEFAULT,
         D2D1::PixelFormat( DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED ) );
-    if ( !dxgiBackbuffer || FAILED( Factory->CreateDxgiSurfaceRenderTarget( dxgiBackbuffer, props, &RenderTarget ) ) ) {
+    if ( !dxgiBackbuffer || FAILED( Factory->CreateDxgiSurfaceRenderTarget( dxgiBackbuffer.Get(), props, &RenderTarget ) ) ) {
         // Copy downloadlink of the platform update to clipboard
         clipput( "https://www.microsoft.com/en-us/download/details.aspx?id=36805" );
 
@@ -137,7 +136,6 @@ XRESULT D2DView::Init( const INT2& initialResolution, ID3D11Texture2D* rendertar
         Factory = nullptr;
         return XR_FAILED;
     }
-    dxgiBackbuffer->Release();
 
     return InitResources() == S_OK ? XR_SUCCESS : XR_FAILED;
 }
@@ -374,15 +372,14 @@ XRESULT D2DView::PrepareResize() {
 /** Resizes this d2d-view */
 XRESULT D2DView::Resize( const INT2& initialResolution, ID3D11Texture2D* rendertarget ) {
 
-    IDXGISurface* dxgiBackbuffer;
-    rendertarget->QueryInterface( &dxgiBackbuffer );
+    Microsoft::WRL::ComPtr<IDXGISurface2> dxgiBackbuffer;
+    rendertarget->QueryInterface( dxgiBackbuffer.GetAddressOf() );
 
     D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties( D2D1_RENDER_TARGET_TYPE_DEFAULT, D2D1::PixelFormat( DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED ) );
-    if ( !dxgiBackbuffer ) {
+    if ( !dxgiBackbuffer.Get() ) {
         return XR_FAILED;
     }
-    Factory->CreateDxgiSurfaceRenderTarget( dxgiBackbuffer, props, &RenderTarget );
-    dxgiBackbuffer->Release();
+    Factory->CreateDxgiSurfaceRenderTarget( dxgiBackbuffer.Get(), props, &RenderTarget );
 
     MainSubView->SetRect( D2D1::RectF( 0, 0, RenderTarget->GetSize().width, RenderTarget->GetSize().height ) );
     EditorView->SetRect( D2D1::RectF( 0, 0, RenderTarget->GetSize().width, RenderTarget->GetSize().height ) );

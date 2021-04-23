@@ -33,7 +33,7 @@ D3D11Effect::~D3D11Effect() {
 }
 
 /** Loads a texturearray. Use like the following: Put path and prefix as parameter. The files must then be called name_xxxx.dds */
-HRESULT LoadTextureArray( ID3D11Device* pd3dDevice, ID3D11DeviceContext* context, char* sTexturePrefix, int iNumTextures, ID3D11Texture2D** ppTex2D, ID3D11ShaderResourceView** ppSRV );
+HRESULT LoadTextureArray( Microsoft::WRL::ComPtr<ID3D11Device1> pd3dDevice, Microsoft::WRL::ComPtr<ID3D11DeviceContext1> context, char* sTexturePrefix, int iNumTextures, ID3D11Texture2D** ppTex2D, ID3D11ShaderResourceView** ppSRV );
 
 /** Fills a vector of random raindrop data */
 void D3D11Effect::FillRandomRaindropData( std::vector<ParticleInstanceInfo>& data ) {
@@ -142,7 +142,7 @@ XRESULT D3D11Effect::DrawRain() {
 
         if ( !RainShadowmap.get() ) {
             const int s = 2048;
-            RainShadowmap = std::make_unique<RenderToDepthStencilBuffer>( e->GetDevice(), s, s, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_R32_FLOAT );
+            RainShadowmap = std::make_unique<RenderToDepthStencilBuffer>( e->GetDevice().Get(), s, s, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_R32_FLOAT );
             SetDebugName( RainShadowmap->GetDepthStencilView().Get(), "RainShadowmap->DepthStencilView" );
             SetDebugName( RainShadowmap->GetShaderResView().Get(), "RainShadowmap->ShaderResView" );
             SetDebugName( RainShadowmap->GetTexture().Get(), "RainShadowmap->Texture" );
@@ -182,9 +182,7 @@ XRESULT D3D11Effect::DrawRain() {
     AdvanceRainConstantBuffer acb;
     XMFLOAT3 LightPosition_XMFloat3;
     XMStoreFloat3( &LightPosition_XMFloat3, XMLoadFloat3( &Engine::GAPI->GetSky()->GetAtmoshpereSettings().LightDirection ) * Engine::GAPI->GetSky()->GetAtmoshpereSettings().OuterRadius + Engine::GAPI->GetCameraPositionXM() );
-    acb.AR_LightPosition.x = LightPosition_XMFloat3.x;
-    acb.AR_LightPosition.y = LightPosition_XMFloat3.y;
-    acb.AR_LightPosition.z = LightPosition_XMFloat3.z;
+    acb.AR_LightPosition = LightPosition_XMFloat3;
     acb.AR_FPS = state.RendererInfo.FPS;
     acb.AR_Radius = state.RendererSettings.RainRadiusRange;
     acb.AR_Height = state.RendererSettings.RainHeightRange;
@@ -200,8 +198,8 @@ XRESULT D3D11Effect::DrawRain() {
     e->GetContext()->Draw( numParticles, 0 );
 
     // Unset streamout target
-    ID3D11Buffer* bobjStream = nullptr;
-    e->GetContext()->SOSetTargets( 1, &bobjStream, 0 );
+    Microsoft::WRL::ComPtr<ID3D11Buffer> bobjStream;
+    e->GetContext()->SOSetTargets( 1, bobjStream.ReleaseAndGetAddressOf(), 0 );
 
     // Swap buffers
     std::swap( RainBufferDrawFrom, RainBufferStreamTo );
@@ -245,7 +243,7 @@ XRESULT D3D11Effect::DrawRain() {
     particleVS->GetConstantBuffer()[1]->UpdateBuffer( &scb );
     particleVS->GetConstantBuffer()[1]->BindToVertexShader( 1 );
 
-    RainShadowmap->BindToVertexShader( e->GetContext(), 0 );
+    RainShadowmap->BindToVertexShader( e->GetContext().Get(), 0 );
 
     // Bind view/proj
     e->SetupVS_ExConstantBuffer();
@@ -277,12 +275,12 @@ XRESULT D3D11Effect::DrawRainShadowmap() {
 
     // Get the section we are currently in
     XMVECTOR p = Engine::GAPI->GetCameraPositionXM();
-    XMVECTOR dir = XMVector3Normalize( XMLoadFloat3( &Engine::GAPI->GetRendererState().RendererSettings.RainGlobalVelocity ) * -1 ); //check was previous XMVector3NormalizeEst
+    FXMVECTOR dir = XMVector3Normalize( XMLoadFloat3( &Engine::GAPI->GetRendererState().RendererSettings.RainGlobalVelocity ) * -1 ); //check was previous XMVector3NormalizeEst
     // Set the camera height to the highest point in this section
     //p.y = 0;
     p += dir * 6000.0f;
 
-    XMVECTOR lookAt = p - dir;
+    FXMVECTOR lookAt = p - dir;
 
     // Create shadowmap view-matrix
     XMMATRIX crViewReplacement = XMMatrixLookAtLH( p, lookAt, XMVectorSet( 0, 1, 0, 0 ) );
@@ -342,7 +340,7 @@ XRESULT D3D11Effect::DrawRainShadowmap() {
 // LoadTextureArray loads a texture array and associated view from a series
 // of textures on disk.
 //--------------------------------------------------------------------------------------
-HRESULT LoadTextureArray( ID3D11Device* pd3dDevice, ID3D11DeviceContext* context, char* sTexturePrefix, int iNumTextures, ID3D11Texture2D** ppTex2D, ID3D11ShaderResourceView** ppSRV ) {
+HRESULT LoadTextureArray( Microsoft::WRL::ComPtr<ID3D11Device1> pd3dDevice, Microsoft::WRL::ComPtr<ID3D11DeviceContext1> context, char* sTexturePrefix, int iNumTextures, ID3D11Texture2D** ppTex2D, ID3D11ShaderResourceView** ppSRV ) {
     if ( !ppTex2D ) {
         LogError() << "invalid argument: ppTex2D. should not be null";
         return E_FAIL;
@@ -356,7 +354,7 @@ HRESULT LoadTextureArray( ID3D11Device* pd3dDevice, ID3D11DeviceContext* context
         sprintf( str, "%s%.4d.dds", sTexturePrefix, i );
 
         Microsoft::WRL::ComPtr<ID3D11Resource> pRes;
-        LE( CreateDDSTextureFromFileEx( pd3dDevice, Toolbox::ToWideChar( str ).c_str(), 0, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE, 0, false, &pRes, nullptr ) );
+        LE( CreateDDSTextureFromFileEx( pd3dDevice.Get(), Toolbox::ToWideChar( str ).c_str(), 0, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE, 0, false, pRes.GetAddressOf(), nullptr ) );
         if ( pRes.Get() ) {
             Microsoft::WRL::ComPtr<ID3D11Texture2D> pTemp;
             pRes.As( &pTemp );

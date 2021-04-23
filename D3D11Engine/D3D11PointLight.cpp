@@ -62,7 +62,7 @@ void D3D11PointLight::InitResources() {
     Engine::GAPI->EnterResourceCriticalSection();
 
     // Create texture-cube for this light
-    DepthCubemap = std::make_unique<RenderToDepthStencilBuffer>( engine->GetDevice(),
+    DepthCubemap = std::make_unique<RenderToDepthStencilBuffer>( engine->GetDevice().Get(),
         POINTLIGHT_SHADOWMAP_SIZE,
         POINTLIGHT_SHADOWMAP_SIZE,
         DXGI_FORMAT_R32_TYPELESS,
@@ -265,7 +265,7 @@ void D3D11PointLight::OnRenderLight() {
     if ( !InitDone )
         return;
 
-    DepthCubemap->BindToPixelShader( ((D3D11GraphicsEngineBase*)Engine::GraphicsEngine)->GetContext(), 3 );
+    DepthCubemap->BindToPixelShader( ((D3D11GraphicsEngineBase*)Engine::GraphicsEngine)->GetContext().Get(), 3 );
 }
 
 /** Debug-draws the cubemap to the screen */
@@ -312,7 +312,7 @@ void D3D11PointLight::DebugDrawCubeMap() {
 
         INT2 pSize = INT2( previewSize / previewDownscale, previewSize / previewDownscale );
 
-        Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv = engine->GetDummyCubeRT()->GetSRVCubemapFace( i );
+        Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv = engine->GetDummyCubeRT()->GetSRVCubemapFace( i ).Get();
         engine->GetContext()->PSSetShaderResources( 0, 1, srv.GetAddressOf() );
         Engine::GraphicsEngine->DrawQuad( pPosition, pSize );
     }

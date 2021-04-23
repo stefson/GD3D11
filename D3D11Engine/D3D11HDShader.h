@@ -23,10 +23,10 @@ public:
     std::vector<D3D11ConstantBuffer*>& GetConstantBuffer();
 
     /** Returns the shader */
-    Microsoft::WRL::ComPtr<ID3D11HullShader> GetHShader() { return HullShader; }
+    Microsoft::WRL::ComPtr<ID3D11HullShader> GetHShader() { return HullShader.Get(); }
 
     /** Returns the shader */
-    Microsoft::WRL::ComPtr<ID3D11DomainShader> GetDShader() { return DomainShader; }
+    Microsoft::WRL::ComPtr<ID3D11DomainShader> GetDShader() { return DomainShader.Get(); }
 
     /** Returns this textures ID */
     UINT16 GetID() { return ID; };

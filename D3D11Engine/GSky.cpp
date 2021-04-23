@@ -66,7 +66,7 @@ XRESULT GSky::InitSky() {
     SkyPlaneVertices[0].Color = color.ToDWORD();
 
     // 1
-    XMVECTOR xm_displacement = XMLoadFloat2( &displacement );
+    FXMVECTOR xm_displacement = XMLoadFloat2( &displacement );
     XMFLOAT2 SkyPlaneVertices1;
     XMStoreFloat2( &SkyPlaneVertices1, (XMVectorSet( scale, 0, 0, 0 ) + xm_displacement) );
     SkyPlaneVertices[1].TexCoord = SkyPlaneVertices1;
@@ -212,8 +212,7 @@ XRESULT GSky::RenderSky() {
             Atmosphere.LightDirection = LightDir;
         }
     }
-    //XMVector3NormalizeEst leads to a flickering sun but smother moving shadows
-    XMStoreFloat3( &LightDir, DirectX::XMVector3Normalize( XMLoadFloat3( &LightDir ) ) );
+    XMStoreFloat3( &LightDir, XMVector3Normalize( XMLoadFloat3( &LightDir ) ) ); //XMVector3NormalizeEst leads to a flickering sun but smother moving shadows
     //Atmosphere.SpherePosition.y = -Atmosphere.InnerRadius;
 
     Atmosphere.SpherePosition.x = 0;//Engine::GAPI->GetLoadedWorldInfo()->MidPoint.x;
@@ -344,7 +343,7 @@ float3 GSky::GetSunColor() {
     XMVECTOR vRay = vPos - camPos;
 
     float fFar;
-    XMStoreFloat( &fFar, XMVector3LengthEst( vRay ) );
+    XMStoreFloat( &fFar, XMVector3Length( vRay ) );
     vRay /= fFar;
 
     //return float4(abs(AC_SpherePosition), 1);
@@ -397,7 +396,7 @@ float3 GSky::GetSunColor() {
     FXMVECTOR vDirection = camPos - vPos;
 
     float fCos;
-    XMStoreFloat( &fCos, XMVector3Dot( XMLoadFloat3( &LightPos ), vDirection ) / XMVector3LengthEst( vDirection ) );
+    XMStoreFloat( &fCos, XMVector3Dot( XMLoadFloat3( &LightPos ), vDirection ) / XMVector3Length( vDirection ) );
 
     XMFLOAT3 suncolor_convert;
     float fCos2 = fCos * fCos;

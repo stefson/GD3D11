@@ -20,7 +20,7 @@ public:
     std::vector<D3D11ConstantBuffer*>& GetConstantBuffer();
 
     /** Returns the shader */
-    Microsoft::WRL::ComPtr<ID3D11GeometryShader> GetShader() { return GeometryShader; }
+    Microsoft::WRL::ComPtr<ID3D11GeometryShader> GetShader() { return GeometryShader.Get(); }
 
     /** Returns this textures ID */
     UINT16 GetID() { return ID; };

@@ -224,7 +224,7 @@ void GothicAPI::OnWorldUpdate() {
         RendererState.RendererInfo.NearPlane = zCCamera::GetCamera()->GetNearPlane();
 
         //zCCamera::GetCamera()->Activate();
-        SetViewTransformDX( zCCamera::GetCamera()->GetTransformDX( zCCamera::ETransformType::TT_VIEW ), false );
+        SetViewTransform( zCCamera::GetCamera()->GetTransformDX( zCCamera::ETransformType::TT_VIEW ), false );
     }
 
     // Apply the hints for the sound system to fix voices in indoor locations being quiet
@@ -792,15 +792,12 @@ void GothicAPI::DrawWorldMeshNaive() {
     Engine::GraphicsEngine->DrawWorldMesh();
     STOP_TIMING( GothicRendererTiming::TT_WorldMesh );
 
-    DirectX::XMFLOAT3 camPos = GetCameraPosition();
-
     for ( auto const& vegetationBox : VegetationBoxes ) {
-        vegetationBox->RenderVegetation( camPos );
+        vegetationBox->RenderVegetation( GetCameraPosition() );
     }
 
     START_TIMING();
     if ( RendererState.RendererSettings.DrawSkeletalMeshes ) {
-        FXMVECTOR xmCamPos = GetCameraPositionXM();
 
         Engine::GraphicsEngine->SetActivePixelShader( "PS_World" );
         // Set up frustum for the camera
@@ -811,7 +808,7 @@ void GothicAPI::DrawWorldMeshNaive() {
             if ( !vobInfo->VisualInfo ) continue;
 
             float dist;
-            XMStoreFloat( &dist, XMVector3LengthEst( XMVectorSubtract( vobInfo->Vob->GetPositionWorldXM(), xmCamPos ) ) );
+            XMStoreFloat( &dist, XMVector3LengthEst( vobInfo->Vob->GetPositionWorldXM() - GetCameraPositionXM() ) );
 
             if ( dist > RendererState.RendererSettings.SkeletalMeshDrawRadius )
                 continue; // Skip out of range
@@ -987,8 +984,8 @@ void GothicAPI::GetVisibleParticleEffectsList( std::vector<zCVob*>& pfxList ) {
         FXMVECTOR camPos = GetCameraPositionXM();
 
         // now it is save to render
+        float dist;
         for ( auto const& it : ParticleEffectVobs ) {
-            float dist;
             XMStoreFloat( &dist, DirectX::XMVector3LengthEst( it->GetPositionWorldXM() - camPos ) );
             if ( dist > RendererState.RendererSettings.OutdoorSmallVobDrawRadius )
                 continue;
@@ -1011,8 +1008,8 @@ void GothicAPI::GetVisibleDecalList( std::vector<zCVob*>& decals ) {
     FXMVECTOR camPos = GetCameraPositionXM();
     static std::vector<std::pair<zCVob*, float>> decalDistances; // Static to get around reallocations
 
+    float dist;
     for ( auto const& it : DecalVobs ) {
-        float dist;
         XMStoreFloat( &dist, DirectX::XMVector3LengthEst( it->GetPositionWorldXM() - camPos ) );
         if ( dist > RendererState.RendererSettings.VisualFXDrawRadius )
             continue;
@@ -1376,7 +1373,7 @@ void GothicAPI::OnRemovedVob( zCVob* vob, zCWorld* world ) {
     // Erase it from the skeletal vob-list
     for ( auto& vit = SkeletalMeshVobs.begin(); vit != SkeletalMeshVobs.end(); ++vit ) {
         if ( (*vit)->Vob == vob ) {
-            //SkeletalVobInfo* vi = *it;
+            //SkeletalVobInfo* vi = *vit;
             SkeletalMeshVobs.erase( vit );
             break;
         }
@@ -1612,11 +1609,9 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
     if ( model->GetDrawHandVisualsOnly() )
         return; // Not supported yet
 
-    XMMATRIX world = vi->Vob->GetWorldMatrixXM();
-    FXMVECTOR modelScale = model->GetModelScaleXM();
-    XMMATRIX scale = XMMatrixScalingFromVector( modelScale );
+    XMMATRIX scale = XMMatrixScalingFromVector( model->GetModelScaleXM() );
 
-    world = world * scale;
+    XMMATRIX world = vi->Vob->GetWorldMatrixXM() * scale;
 
     zCCamera::GetCamera()->SetTransformXM( zCCamera::TT_WORLD, world );
 
@@ -1776,7 +1771,7 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
                         const float fs = (fatness + 1.0f) * 0.02f; // This is what gothic seems to be doing for heads, and it even looks right...
 
                         // Calculate "patched" scale according to fatness
-                        XMMATRIX fatnessScale = XMMatrixScaling( fs, fs, fs );
+                        //XMMATRIX fatnessScale = XMMatrixScaling( fs, fs, fs ); //never used
                         const XMMATRIX w = world * scale;
 
                         // Set new "fat" worldmatrix
@@ -1852,8 +1847,8 @@ void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameDa
     // Maybe create more emitters?
     fx->CheckDependentEmitter();
 
-    DirectX::XMFLOAT4X4 sw; source->GetWorldMatrix( &sw );
-    XMStoreFloat4x4( &sw, DirectX::XMMatrixTranspose( XMLoadFloat4x4( &sw ) ) );
+    DirectX::XMFLOAT4X4 sw;
+    source->GetWorldMatrix( &sw );
 
     zTParticle* pfx = fx->GetFirstParticle();
     if ( pfx ) {
@@ -1942,7 +1937,7 @@ void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameDa
                 // Rotate velocity so it fits with the vob
 
                 XMFLOAT3 velocity;
-                XMStoreFloat3( &velocity, DirectX::XMVector3TransformNormal( XMVector3NormalizeEst( XMLoadFloat3( &p->Vel ) ), XMLoadFloat4x4( &sw ) ) );
+                XMStoreFloat3( &velocity, DirectX::XMVector3TransformNormal( XMVector3Normalize( XMLoadFloat3( &p->Vel ) ), XMMatrixTranspose( XMLoadFloat4x4( &sw ) ) ) );
                 ii.velocity = velocity;
 
                 ii.drawMode = 3;
@@ -1988,7 +1983,7 @@ void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameDa
     fx->CreateParticlesUpdateDependencies();
 
     if ( fx->GetVisualDied() ) {
-        if ( fx->GetConnectedVob() ) {
+        if ( fx->GetConnectedVob() ) 		{
             // delete FX, it will be invalid after this call!
             fx->GetConnectedVob()->GetHomeWorld()->RemoveVob( fx->GetConnectedVob() );
         }
@@ -2021,13 +2016,13 @@ void GothicAPI::DrawTriangle( float3 pos = { 0.0f,0.0f,0.0f } ) {
     vx[1].Color = float4( 0, 1, 0, 1 ).ToDWORD();
     vx[2].Color = float4( 0, 0, 1, 1 ).ToDWORD();
 
-    vx[3].Position = float3( 0.0f, 0.5f * scale, 0.0f );
-    vx[5].Position = float3( 0.45f * scale, -0.5f * scale, 0.0f );
-    vx[4].Position = float3( -0.45f * scale, -0.5f * scale, 0.0f );
+    vx[3].Position = vx[0].Position;
+    vx[5].Position = vx[1].Position;
+    vx[4].Position = vx[2].Position;
 
-    vx[3].Color = float4( 1, 0, 0, 1 ).ToDWORD();
-    vx[5].Color = float4( 0, 1, 0, 1 ).ToDWORD();
-    vx[4].Color = float4( 0, 0, 1, 1 ).ToDWORD();
+    vx[3].Color = vx[0].Color;
+    vx[5].Color = vx[1].Color;
+    vx[4].Color = vx[2].Color;
 
     for ( int i = 0; i < 6; i++ ) {
         vx[i].Position.x += pos.x;
@@ -2043,24 +2038,16 @@ void GothicAPI::DrawTriangle( float3 pos = { 0.0f,0.0f,0.0f } ) {
 }
 
 /** Sets the Projection matrix */
-void GothicAPI::SetProjTransformDX( const DirectX::XMFLOAT4X4& proj ) {
-    RendererState.TransformState.TransformProj = proj;
-}
-/** Sets the Projection matrix */
 void XM_CALLCONV GothicAPI::SetProjTransformXM( const DirectX::XMMATRIX proj ) {
     XMStoreFloat4x4( &RendererState.TransformState.TransformProj, proj );
 }
+
 /** Sets the Projection matrix */
-DirectX::XMFLOAT4X4 GothicAPI::GetProjTransformDx() {
+DirectX::XMFLOAT4X4 GothicAPI::GetProjTransform() {
     return RendererState.TransformState.TransformProj;
 }
-/** Sets the world matrix */
-void GothicAPI::SetWorldTransformDX( const XMFLOAT4X4& world, bool transpose ) {
-    if ( transpose )
-        XMStoreFloat4x4( &RendererState.TransformState.TransformWorld, XMMatrixTranspose( XMLoadFloat4x4( &world ) ) );
-    else
-        RendererState.TransformState.TransformWorld = world;
-}
+
+
 /** Sets the world matrix */
 void XM_CALLCONV GothicAPI::SetWorldTransformXM( XMMATRIX world, bool transpose ) {
     if ( transpose )
@@ -2076,7 +2063,7 @@ void XM_CALLCONV GothicAPI::SetViewTransformXM( XMMATRIX view, bool transpose ) 
         XMStoreFloat4x4( &RendererState.TransformState.TransformView, view );
 }
 /** Sets the world matrix */
-void GothicAPI::SetViewTransformDX( const XMFLOAT4X4& view, bool transpose ) {
+void GothicAPI::SetViewTransform( const XMFLOAT4X4& view, bool transpose ) {
     if ( transpose )
         XMStoreFloat4x4( &RendererState.TransformState.TransformView, XMMatrixTranspose( XMLoadFloat4x4( &view ) ) );
     else
@@ -2122,10 +2109,11 @@ VobInfo* GothicAPI::TraceStaticMeshVobsBB( const DirectX::XMFLOAT3& origin, cons
 
     std::list<VobInfo*> hitBBs;
 
+    DirectX::XMFLOAT3 min;
+    DirectX::XMFLOAT3 max;
+
     for ( auto it = VobMap.begin(); it != VobMap.end(); ++it ) {
         XMMATRIX world = XMMatrixTranspose( XMLoadFloat4x4( it->first->GetWorldMatrixPtr() ) );
-        DirectX::XMFLOAT3 min;
-        DirectX::XMFLOAT3 max;
         XMStoreFloat3( &min, XMVector3TransformCoord( XMLoadFloat3( &it->second->VisualInfo->BBox.Min ), world ) );
         XMStoreFloat3( &max, XMVector3TransformCoord( XMLoadFloat3( &it->second->VisualInfo->BBox.Max ), world ) );
 
@@ -2143,10 +2131,11 @@ VobInfo* GothicAPI::TraceStaticMeshVobsBB( const DirectX::XMFLOAT3& origin, cons
     closest = FLT_MAX;
     zCMaterial* closestMaterial = nullptr;
     VobInfo* closestVob = nullptr;
+    DirectX::XMFLOAT3 localOrigin;
+    DirectX::XMFLOAT3 localDir;
+
     for ( auto it = hitBBs.begin(); it != hitBBs.end(); ++it ) {
         XMMATRIX invWorld = DirectX::XMMatrixInverse( nullptr, DirectX::XMMatrixTranspose( XMLoadFloat4x4( (*it)->Vob->GetWorldMatrixPtr() ) ) );
-        DirectX::XMFLOAT3 localOrigin;
-        DirectX::XMFLOAT3 localDir;
         XMStoreFloat3( &localOrigin, DirectX::XMVector3TransformCoord( XMLoadFloat3( &origin ), invWorld ) );
         XMStoreFloat3( &localDir, DirectX::XMVector3TransformNormal( XMLoadFloat3( &dir ), invWorld ) );
 
@@ -2173,15 +2162,13 @@ VobInfo* GothicAPI::TraceStaticMeshVobsBB( const DirectX::XMFLOAT3& origin, cons
 SkeletalVobInfo* GothicAPI::TraceSkeletalMeshVobsBB( const DirectX::XMFLOAT3& origin, const DirectX::XMFLOAT3& dir, DirectX::XMFLOAT3& hit ) {
     float closest = FLT_MAX;
     SkeletalVobInfo* vob = nullptr;
+    XMFLOAT3 BBoxlocal_min;
+    XMFLOAT3 BBoxlocal_max;
 
     for ( auto const& it : SkeletalMeshVobs ) {
         float t = 0;
-        XMFLOAT3 BBoxlocal_min;
-        XMFLOAT3 BBoxlocal_max;
-        FXMVECTOR GetBBoxLocal_min = XMVectorSet( it->Vob->GetBBoxLocal().Min.x, it->Vob->GetBBoxLocal().Min.y, it->Vob->GetBBoxLocal().Min.z, 0 );
-        FXMVECTOR GetBBoxLocal_max = XMVectorSet( it->Vob->GetBBoxLocal().Max.x, it->Vob->GetBBoxLocal().Max.y, it->Vob->GetBBoxLocal().Max.z, 0 );
-        XMStoreFloat3( &BBoxlocal_min, GetBBoxLocal_min + it->Vob->GetPositionWorldXM() );
-        XMStoreFloat3( &BBoxlocal_max, GetBBoxLocal_max + it->Vob->GetPositionWorldXM() );
+        XMStoreFloat3( &BBoxlocal_min, XMVectorSet( it->Vob->GetBBoxLocal().Min.x, it->Vob->GetBBoxLocal().Min.y, it->Vob->GetBBoxLocal().Min.z, 0 ) + it->Vob->GetPositionWorldXM() );
+        XMStoreFloat3( &BBoxlocal_max, XMVectorSet( it->Vob->GetBBoxLocal().Max.x, it->Vob->GetBBoxLocal().Max.y, it->Vob->GetBBoxLocal().Max.z, 0 ) + it->Vob->GetPositionWorldXM() );
         if ( Toolbox::IntersectBox( BBoxlocal_min, BBoxlocal_max, origin, dir, t ) ) {
             if ( t < closest ) {
                 closest = t;
@@ -2299,16 +2286,14 @@ bool GothicAPI::TraceWorldMesh( const DirectX::XMFLOAT3& origin, const DirectX::
 
 /** Unprojects a pixel-position on the screen */
 void XM_CALLCONV GothicAPI::UnprojectXM( FXMVECTOR p, XMVECTOR& worldPos, XMVECTOR& worldDir ) {
-    XMMATRIX proj = XMLoadFloat4x4( &GetProjectionMatrix() );
+    XMMATRIX proj = XMMatrixTranspose( XMLoadFloat4x4( &GetProjectionMatrix() ) );
     XMFLOAT4X4 fInvView;
-    GetInverseViewMatrixDX( &fInvView );
-    XMMATRIX invView = XMLoadFloat4x4( &fInvView );
-    invView = XMMatrixTranspose( invView );
-    proj = XMMatrixTranspose( proj );
+    GetInverseViewMatrixXM( &fInvView );
+    XMMATRIX invView = XMMatrixTranspose( XMLoadFloat4x4( &fInvView ) );
 
     // Convert to screenspace
     XMFLOAT2 fP; XMStoreFloat2( &fP, p );
-    XMVECTOR u = XMVectorSet(
+    FXMVECTOR u = XMVectorSet(
         (((2 * fP.x) / Engine::GraphicsEngine->GetResolution().x) - 1) / proj.r[0].m128_f32[0],
         -(((2 * fP.y) / Engine::GraphicsEngine->GetResolution().y) - 1) / proj.r[1].m128_f32[1],
         1,
@@ -2317,8 +2302,7 @@ void XM_CALLCONV GothicAPI::UnprojectXM( FXMVECTOR p, XMVECTOR& worldPos, XMVECT
 
     // Transform and output
     worldPos = XMVector3TransformCoord( u, invView );
-    u = XMVector3NormalizeEst( u );
-    worldDir = XMVector3TransformCoord( u, invView );
+    worldDir = XMVector3TransformCoord( XMVector3Normalize( u ), invView );
 }
 
 /** Unprojects the current cursor */
@@ -2342,7 +2326,7 @@ DirectX::XMFLOAT3 GothicAPI::GetCameraPosition() {
     return oCGame::GetGame()->_zCSession_camVob->GetPositionWorld();
 }
 /** Returns the current cameraposition */
-XMVECTOR GothicAPI::GetCameraPositionXM() {
+FXMVECTOR GothicAPI::GetCameraPositionXM() {
     if ( !oCGame::GetGame()->_zCSession_camVob )
         return DirectX::g_XMZero;
 
@@ -2372,7 +2356,7 @@ DirectX::XMMATRIX GothicAPI::GetViewMatrixXM() {
 }
 
 /** Returns the view matrix */
-void GothicAPI::GetInverseViewMatrixDX( DirectX::XMFLOAT4X4* invView ) {
+void GothicAPI::GetInverseViewMatrixXM( DirectX::XMFLOAT4X4* invView ) {
     if ( CameraReplacementPtr ) {
         DirectX::XMStoreFloat4x4( invView, DirectX::XMMatrixInverse( nullptr, DirectX::XMLoadFloat4x4( &CameraReplacementPtr->ViewReplacement ) ) );
         return;
@@ -2401,31 +2385,30 @@ GInventory* GothicAPI::GetInventory() {
 }
 
 /** Returns the fog-color */
-DirectX::XMFLOAT3 GothicAPI::GetFogColor() {
+FXMVECTOR GothicAPI::GetFogColor() {
     zCSkyController_Outdoor* sc = oCGame::GetGame()->_zCSession_world->GetSkyControllerOutdoor();
+
+    FXMVECTOR FogColorMod = XMLoadFloat3( RendererState.RendererSettings.FogColorMod.toXMFLOAT3() );
 
     // Only give the overridden color out if the flag is set
     if ( !sc || !sc->GetOverrideFlag() )
-        return *RendererState.RendererSettings.FogColorMod.toXMFLOAT3();
+
+        return FogColorMod;
 
     XMVECTOR color = XMLoadFloat3( &sc->GetOverrideColor() );
 
     // Clamp to length of 0.5f. Gothic does it at an intensity of 120 / 255.
     float len;
-    XMStoreFloat( &len, DirectX::XMVector3LengthEst( color ) );
+    XMStoreFloat( &len, XMVector3Length( color ) );
     if ( len > 0.5f ) {
-        color = DirectX::XMVector3NormalizeEst( color );
-
-        color *= 0.5f;
+        color = XMVector3Normalize( color ) * 0.5f;
         len = 0.5f;
     }
 
     // Mix these, so the fog won't get black at transitions
-    color = DirectX::XMVectorLerpV( XMLoadFloat3( RendererState.RendererSettings.FogColorMod.toXMFLOAT3() ), color, XMVectorSet( len * 2.0f, len * 2.0f, len * 2.0f, 0 ) );
+    color = XMVectorLerpV( FogColorMod, color, XMVectorSet( len * 2.0f, len * 2.0f, len * 2.0f, 0 ) );
 
-    XMFLOAT3 color_XMFLOAT3;
-    XMStoreFloat3( &color_XMFLOAT3, color );
-    return color_XMFLOAT3;
+    return color;
 }
 
 /** Returns true, if the game was paused */
@@ -2444,7 +2427,7 @@ float GothicAPI::GetFogOverride() {
     if ( !sc )
         return 0.0f;
     float veclenght;
-    XMStoreFloat( &veclenght, DirectX::XMVector3LengthEst( XMLoadFloat3( &sc->GetOverrideColor() ) ) );
+    XMStoreFloat( &veclenght, XMVector3Length( XMLoadFloat3( &sc->GetOverrideColor() ) ) );
     return sc->GetOverrideFlag() ? std::min( veclenght, 0.5f ) * 2.0f : 0.0f;
 }
 
@@ -2631,10 +2614,10 @@ void GothicAPI::CollectVisibleVobs( std::vector<VobInfo*>& vobs, std::vector<Vob
 
     // Add visible dynamically added vobs
     if ( Engine::GAPI->GetRendererState().RendererSettings.DrawVOBs ) {
+        float dist;
         for ( auto const& it : DynamicallyAddedVobs ) {
             // Get distance to this vob
-            float dist;
-            XMStoreFloat( &dist, DirectX::XMVector3LengthEst( camPos - it->Vob->GetPositionWorldXM() ) );
+            XMStoreFloat( &dist, DirectX::XMVector3Length( camPos - it->Vob->GetPositionWorldXM() ) );
             // Draw, if in range
             if ( it->VisualInfo && ((dist < vobIndoorDist && it->IsIndoorVob) || (dist < vobOutdoorSmallDist && it->VisualInfo->MeshSize < vobSmallSize) || (dist < vobOutdoorDist)) ) {
 #ifdef BUILD_GOTHIC_1_08k
@@ -2797,7 +2780,7 @@ static void CVVH_AddNotDrawnVobToList( std::vector<VobInfo*>& target, std::vecto
     for ( auto const& it : source ) {
         if ( !it->VisibleInRenderPass ) {
             float vd;
-            XMStoreFloat( &vd, XMVector3LengthEst( XMVectorSubtract( Engine::GAPI->GetCameraPositionXM(), XMLoadFloat3( &it->LastRenderPosition ) ) ) );
+            XMStoreFloat( &vd, XMVector3LengthEst( Engine::GAPI->GetCameraPositionXM() - XMLoadFloat3( &it->LastRenderPosition ) ) );
             if ( vd < dist && it->Vob->GetShowVisual() ) {
                 VobInstanceInfo vii;
                 vii.world = it->WorldMatrix;
@@ -2812,12 +2795,11 @@ static void CVVH_AddNotDrawnVobToList( std::vector<VobInfo*>& target, std::vecto
 }
 
 static void CVVH_AddNotDrawnVobToList( std::vector<VobLightInfo*>& target, std::vector<VobLightInfo*>& source, float dist ) {
+    float veclength;
     for ( auto const& it : source ) {
         if ( !it->VisibleInRenderPass ) {
-            float d = dist;
-            float veclength;
-            XMStoreFloat( &veclength, DirectX::XMVector3LengthEst( Engine::GAPI->GetCameraPositionXM() - it->Vob->GetPositionWorldXM() ) );
-            if ( veclength - it->Vob->GetLightRange() < d ) {
+            XMStoreFloat( &veclength, XMVector3LengthEst( Engine::GAPI->GetCameraPositionXM() - it->Vob->GetPositionWorldXM() ) );
+            if ( veclength - it->Vob->GetLightRange() < dist ) {
                 target.push_back( it );
                 it->VisibleInRenderPass = true;
             }
@@ -2826,10 +2808,10 @@ static void CVVH_AddNotDrawnVobToList( std::vector<VobLightInfo*>& target, std::
 }
 
 static void CVVH_AddNotDrawnVobToList( std::vector<SkeletalVobInfo*>& target, std::vector<SkeletalVobInfo*>& source, float dist ) {
+    float vd;
     for ( auto const& it : source ) {
         if ( !it->VisibleInRenderPass ) {
-            float vd;
-            XMStoreFloat( &vd, DirectX::XMVector3LengthEst( Engine::GAPI->GetCameraPositionXM() - it->Vob->GetPositionWorldXM() ) );
+            XMStoreFloat( &vd, XMVector3LengthEst( Engine::GAPI->GetCameraPositionXM() - it->Vob->GetPositionWorldXM() ) );
             if ( vd < dist && it->Vob->GetShowVisual() ) {
                 target.push_back( it );
                 it->VisibleInRenderPass = true;
@@ -2894,7 +2876,7 @@ void GothicAPI::CollectVisibleVobsHelper( BspInfo* base, zTBBox3D boxCell, int c
 
             // Concat the lists
             const float dist = Toolbox::ComputePointAABBDistance( camPos, base->OriginalNode->BBox3D.Min, base->OriginalNode->BBox3D.Max );
-            // float dist = DirectX::XMVector3LengthEst(XMLoadFloat3(&base->BBox3D.Min) - XMLoadFloat3(&camPos));
+            // float dist = DirectX::XMVector3Length(XMLoadFloat3(&base->BBox3D.Min) - XMLoadFloat3(&camPos));
 
             if ( insideFrustum ) {
                 if ( Engine::GAPI->GetRendererState().RendererSettings.DrawVOBs ) {
@@ -2921,11 +2903,11 @@ void GothicAPI::CollectVisibleVobsHelper( BspInfo* base, zTBBox3D boxCell, int c
             if ( RendererState.RendererSettings.EnableDynamicLighting && insideFrustum ) {
                 // Add dynamic lights
                 float minDynamicUpdateLightRange = Engine::GAPI->GetRendererState().RendererSettings.MinLightShadowUpdateRange;
-                DirectX::XMVECTOR playerPosition = Engine::GAPI->GetPlayerVob() != nullptr ? Engine::GAPI->GetPlayerVob()->GetPositionWorldXM() : DirectX::XMVectorSet( FLT_MAX, FLT_MAX, FLT_MAX, 0);
-                DirectX::FXMVECTOR cameraPosition = Engine::GAPI->GetCameraPositionXM();
+                XMVECTOR playerPosition = Engine::GAPI->GetPlayerVob() != nullptr ? Engine::GAPI->GetPlayerVob()->GetPositionWorldXM() : XMVectorSet( FLT_MAX, FLT_MAX, FLT_MAX, 0 );
+                FXMVECTOR cameraPosition = Engine::GAPI->GetCameraPositionXM();
+
                 // Take cameraposition if we are freelooking
-                if ( zCCamera::IsFreeLookActive() ) 
-                {
+                if ( zCCamera::IsFreeLookActive() )                 {
                     playerPosition = cameraPosition;
                 }
 
@@ -3178,7 +3160,6 @@ float GothicAPI::GetFarPlane() {
 /** Sets/Gets the far-plane */
 void GothicAPI::SetNearPlane( float value ) {
     LogWarn() << "SetNearPlane not implemented yet!";
-
 }
 
 float GothicAPI::GetNearPlane() {
@@ -3606,6 +3587,8 @@ XRESULT GothicAPI::SaveMenuSettings( const std::string& file ) {
     WritePrivateProfileStringA( "Display", "Gamma", std::to_string( s.GammaValue ).c_str(), ini.c_str() );
     WritePrivateProfileStringA( "Display", "Brightness", std::to_string( s.BrightnessValue ).c_str(), ini.c_str() );
     WritePrivateProfileStringA( "Display", "DisplayFlip", std::to_string( s.DisplayFlip ? TRUE : FALSE ).c_str(), ini.c_str() );
+    WritePrivateProfileStringA( "Display", "LowLatency", std::to_string( s.LowLatency ? TRUE : FALSE ).c_str(), ini.c_str() );
+
     WritePrivateProfileStringA( "Display", "StretchWindow", std::to_string( s.StretchWindow ? TRUE : FALSE ).c_str(), ini.c_str() );
     WritePrivateProfileStringA( "Display", "UIScale", std::to_string( s.GothicUIScale ).c_str(), ini.c_str() );
 
@@ -3635,7 +3618,6 @@ XRESULT GothicAPI::SaveMenuSettings( const std::string& file ) {
 
     WritePrivateProfileStringA( "FontRendering", "Enable", std::to_string( s.EnableCustomFontRendering ? TRUE : FALSE ).c_str(), ini.c_str() );
 
-
     return XR_SUCCESS;
 }
 
@@ -3663,7 +3645,7 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
     s.DrawFog = GetPrivateProfileBoolA( "General", "EnableFog", true, ini.c_str() );
     s.AtmosphericScattering = GetPrivateProfileBoolA( "General", "AtmosphericScattering", true, ini.c_str() );
     s.EnableHDR = GetPrivateProfileBoolA( "General", "EnableHDR", false, ini.c_str() );
-    s.HDRToneMap = GothicRendererSettings::E_HDRToneMap(GetPrivateProfileIntA( "General", "HDRToneMap", 4, ini.c_str() ));
+    s.HDRToneMap = GothicRendererSettings::E_HDRToneMap( GetPrivateProfileIntA( "General", "HDRToneMap", 4, ini.c_str() ) );
     s.EnableDebugLog = GetPrivateProfileBoolA( "General", "EnableDebugLog", defaultRendererSettings.EnableDebugLog, ini );
     s.EnableAutoupdates = GetPrivateProfileBoolA( "General", "EnableAutoupdates", defaultRendererSettings.EnableAutoupdates, ini );
     s.EnableGodRays = GetPrivateProfileBoolA( "General", "EnableGodRays", defaultRendererSettings.EnableGodRays, ini );
@@ -3707,6 +3689,7 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
     s.GammaValue = GetPrivateProfileFloatA( "Display", "Gamma", 1.0f, ini.c_str() );
     s.BrightnessValue = GetPrivateProfileFloatA( "Display", "Brightness", 1.0f, ini.c_str() );
     s.DisplayFlip = GetPrivateProfileBoolA( "Display", "DisplayFlip", false, ini.c_str() );
+    s.LowLatency = GetPrivateProfileBoolA( "Display", "LowLatency", false, ini.c_str() );
     s.StretchWindow = GetPrivateProfileBoolA( "Display", "StretchWindow", false, ini.c_str() );
     s.GothicUIScale = GetPrivateProfileFloatA( "Display", "UIScale", 1.0f, ini.c_str() );
 

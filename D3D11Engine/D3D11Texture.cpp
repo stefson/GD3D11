@@ -112,7 +112,7 @@ XRESULT D3D11Texture::UpdateDataDeferred( void* data, int mip, bool noLock ) {
     if ( !noLock )
         Engine::GAPI->EnterResourceCriticalSection();
 
-    engine->GetDeferredMediaContext()->UpdateSubresource( Texture.Get(), mip, nullptr, data, GetRowPitchBytes( mip ), GetSizeInBytes( mip ) );
+    engine->GetDeferredMediaContext1()->UpdateSubresource( Texture.Get(), mip, nullptr, data, GetRowPitchBytes( mip ), GetSizeInBytes( mip ) );
 
     if ( !noLock )
         Engine::GAPI->LeaveResourceCriticalSection();
@@ -218,9 +218,6 @@ XRESULT D3D11Texture::CreateThumbnail() {
 
     engine->GetContext()->OMSetRenderTargets( 2, oldRTV, oldDSV.Get() );
 
-    SAFE_RELEASE( oldRTV[0] );
-    SAFE_RELEASE( oldRTV[1] );
-
     return XR_SUCCESS;
 }
 
@@ -240,13 +237,13 @@ XRESULT D3D11Texture::GenerateMipMaps() {
 
     RenderToTextureBuffer* b = new RenderToTextureBuffer( engine->GetDevice().Get(), TextureSize.x, TextureSize.y, DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, DXGI_FORMAT_UNKNOWN, DXGI_FORMAT_UNKNOWN, MipMapCount );
 
-    engine->GetDeferredMediaContext()->CopySubresourceRegion( b->GetTexture().Get(), 0, 0, 0, 0, Texture.Get(), 0, nullptr );
+    engine->GetDeferredMediaContext1()->CopySubresourceRegion( b->GetTexture().Get(), 0, 0, 0, 0, Texture.Get(), 0, nullptr );
 
     // Generate mips
-    engine->GetDeferredMediaContext()->GenerateMips( b->GetShaderResView().Get() );
+    engine->GetDeferredMediaContext1()->GenerateMips( b->GetShaderResView().Get() );
 
     // Copy the full chain back
-    engine->GetDeferredMediaContext()->CopyResource( Texture.Get(), b->GetTexture().Get() );
+    engine->GetDeferredMediaContext1()->CopyResource( Texture.Get(), b->GetTexture().Get() );
     delete b;
 
     Engine::GAPI->LeaveResourceCriticalSection();

@@ -1,5 +1,5 @@
 #pragma once
-#include <d3d11.h>
+#include <d3d11_1.h>
 #include <string>
 
 #if !PUBLIC_RELEASE
@@ -39,7 +39,7 @@ inline void SetDebugName( _In_  IDXGIObject* resource, const std::string& debugN
 #endif
 }
 
-inline void SetDebugName( _In_  ID3D11Device* resource, const std::string& debugName ) {
+inline void SetDebugName( _In_  ID3D11Device1* resource, const std::string& debugName ) {
 #if defined(_DEBUG) || defined(PROFILE)|| defined(DEBUG_D3D11)
     if ( !resource ) return;
     HRESULT nameSet = resource->SetPrivateData( WKPDID_D3DDebugObjectName, debugName.size(), debugName.c_str() );

@@ -169,7 +169,7 @@ namespace Toolbox {
     bool IntersectTri( const DirectX::XMFLOAT3& v0, const DirectX::XMFLOAT3& v1, const DirectX::XMFLOAT3& v2, const DirectX::XMFLOAT3& origin, const DirectX::XMFLOAT3& direction, float& u, float& v, float& t );
 
     /** Computes the normal of a triangle */
-    DirectX::XMFLOAT3 ComputeNormal( const DirectX::XMFLOAT3& v0, const DirectX::XMFLOAT3& v1, const DirectX::XMFLOAT3& v2 );
+    DirectX::FXMVECTOR ComputeNormal( const DirectX::XMFLOAT3& v0, const DirectX::XMFLOAT3& v1, const DirectX::XMFLOAT3& v2 );
 
     /** Computes the distance of a point to an AABB */
     float ComputePointAABBDistance( const DirectX::XMFLOAT3& p, const DirectX::XMFLOAT3& min, const DirectX::XMFLOAT3& max );

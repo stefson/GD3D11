@@ -563,8 +563,8 @@ float XM_CALLCONV EditorLinePrimitive::IntersectPrimitive( FXMVECTOR RayOrigin, 
     XMMATRIX wld = XMLoadFloat4x4( &WorldMatrix );
     XMMATRIX invWorld = XMMatrixInverse( nullptr, wld );
 
-    XMVECTOR Origin = XMVector3TransformCoord( RayOrigin, invWorld );
-    XMVECTOR Dir = XMVector3TransformCoord( RayDirection, invWorld );
+    FXMVECTOR Origin = XMVector3TransformCoord( RayOrigin, invWorld );
+    FXMVECTOR Dir = XMVector3TransformCoord( RayDirection, invWorld );
 
     // Go through all line segments and intersect them
     for ( i = 0; i < NumVertices; i += 2 ) {
@@ -585,9 +585,9 @@ float XM_CALLCONV EditorLinePrimitive::IntersectPrimitive( FXMVECTOR RayOrigin, 
         Shortest = FLT_MAX;
 
         for ( DWORD i = 0; i < NumSolidVertices; i += 3 ) {
-            XMVECTOR v0 = XMLoadFloat3( SolidVertices[i + 0].Position.toXMFLOAT3() );
-            XMVECTOR v1 = XMLoadFloat3( SolidVertices[i + 1].Position.toXMFLOAT3() );
-            XMVECTOR v2 = XMLoadFloat3( SolidVertices[i + 2].Position.toXMFLOAT3() );
+            FXMVECTOR v0 = XMLoadFloat3( SolidVertices[i + 0].Position.toXMFLOAT3() );
+            FXMVECTOR v1 = XMLoadFloat3( SolidVertices[i + 1].Position.toXMFLOAT3() );
+            FXMVECTOR v2 = XMLoadFloat3( SolidVertices[i + 2].Position.toXMFLOAT3() );
 
             // Check if the pick ray passes through this point
             if ( IntersectTriangle( Origin, Dir, v0, v1, v2, &fDist, &fBary1, &fBary2 ) ) {
@@ -609,11 +609,11 @@ bool XM_CALLCONV EditorLinePrimitive::IntersectTriangle( FXMVECTOR orig, FXMVECT
     FXMVECTOR v0, GXMVECTOR v1, HXMVECTOR v2,
     FLOAT* t, FLOAT* u, FLOAT* v ) {
     // Find vectors for two edges sharing vert0
-    XMVECTOR edge1 = v1 - v0;
-    XMVECTOR edge2 = v2 - v0;
+    FXMVECTOR edge1 = v1 - v0;
+    FXMVECTOR edge2 = v2 - v0;
 
     // Begin calculating determinant - also used to calculate U parameter
-    XMVECTOR pvec = XMVector3Cross( dir, edge2 );
+    FXMVECTOR pvec = XMVector3Cross( dir, edge2 );
 
     // If determinant is near zero, ray lies in plane of triangle
     float det; XMStoreFloat( &det, XMVector3Dot( edge1, pvec ) );
@@ -658,9 +658,9 @@ bool XM_CALLCONV EditorLinePrimitive::IntersectTriangle( FXMVECTOR orig, FXMVECT
 
 float EditorLinePrimitive::IntersectLineSegment( FXMVECTOR rayOrigin, FXMVECTOR rayVec, FXMVECTOR lineStart, GXMVECTOR lineEnd, float Epsilon ) {
 
-    XMVECTOR u = rayVec;
-    XMVECTOR v = (lineEnd)-(lineStart);
-    XMVECTOR w = (rayOrigin)-(lineStart);
+    FXMVECTOR u = rayVec;
+    FXMVECTOR v = (lineEnd)-(lineStart);
+    FXMVECTOR w = (rayOrigin)-(lineStart);
 
 
     float a; XMStoreFloat( &a, XMVector3Dot( u, u ) ); // always >= 0
@@ -747,12 +747,9 @@ void EditorLinePrimitive::RecalcTransforms() {
     XMMATRIX matWorld, matScale, MatRot, MatTemp;
 
     //Temporary translation
-    XMVECTOR Trans;
-
-
     //Copy from the original location, 
     //so we can modify it without hurting anything
-    Trans = XMLoadFloat3( &Location );
+    FXMVECTOR Trans = XMLoadFloat3( &Location );
 
     //Devide Trans through Scale
     /*Trans.x/=Scale.x;
@@ -780,11 +777,10 @@ void EditorLinePrimitive::RecalcTransforms() {
         XMVECTOR Up = XMVectorSet( 0, 1, 0, 0 );
         XMVECTOR Front = XMVectorSet( 1, 0, 0, 0 );
         if ( bLocalRotation ) {
-            XMVECTOR Right;
 
             Up = XMVector3TransformNormal( Up, xmRotationMatrix );
             Front = XMVector3TransformNormal( Front, xmRotationMatrix );
-            Right = XMVector3Cross( Up, Front );
+            FXMVECTOR Right = XMVector3Cross( Up, Front );
 
             XMMATRIX X = XMMatrixRotationAxis( Front, DeltaRot.x );
             XMMATRIX Y = XMMatrixRotationAxis( Up, DeltaRot.y );

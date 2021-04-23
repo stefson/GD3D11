@@ -155,7 +155,7 @@ public:
     RenderToDepthStencilBuffer* GetDepthBuffer() { return DepthStencilBuffer.get(); }
 
     /** Returns the Backbuffers shader resource view */
-    ID3D11ShaderResourceView* GetBackbufferSRV() { return BackbufferSRV.Get(); }
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetBackbufferSRV() { return BackbufferSRV.Get(); }
 
     /** Returns the first GBuffer */
     RenderToTextureBuffer& GetGBuffer0() { return *GBuffer0_Diffuse; }
@@ -228,14 +228,14 @@ public:
     virtual XRESULT DrawSky();
 
     /** Renders the shadowmaps for the sun */
-    void XM_CALLCONV RenderShadowmaps( DirectX::FXMVECTOR cameraPosition, RenderToDepthStencilBuffer* target = nullptr, bool cullFront = true, bool dontCull = false, ID3D11DepthStencilView* dsvOverwrite = nullptr, ID3D11RenderTargetView* debugRTV = nullptr );
+    void XM_CALLCONV RenderShadowmaps( DirectX::FXMVECTOR cameraPosition, RenderToDepthStencilBuffer* target = nullptr, bool cullFront = true, bool dontCull = false, Microsoft::WRL::ComPtr<ID3D11DepthStencilView> dsvOverwrite = nullptr, Microsoft::WRL::ComPtr<ID3D11RenderTargetView> debugRTV = nullptr );
 
     /** Renders the shadowmaps for a pointlight */
     void XM_CALLCONV RenderShadowCube( DirectX::FXMVECTOR position,
         float range,
         const RenderToDepthStencilBuffer& targetCube,
-        ID3D11DepthStencilView* face,
-        ID3D11RenderTargetView* debugRTV = nullptr,
+        Microsoft::WRL::ComPtr<ID3D11DepthStencilView> face,
+        Microsoft::WRL::ComPtr<ID3D11RenderTargetView> debugRTV,
         bool cullFront = true,
         bool indoor = false,
         bool noNPCs = false,
@@ -390,5 +390,6 @@ protected:
 
     bool m_flipWithTearing;
     bool m_swapchainflip;
+    bool m_lowlatency;
     int m_previousFpsLimit;
 };

@@ -40,13 +40,14 @@ void WorldConverter::WorldMeshCollectPolyRange( const float3& position, float ra
     WorldMeshInfo* opaqueMesh = new WorldMeshInfo;
     outMeshes[opaqueKey] = opaqueMesh;
 
-    XMVECTOR xmPosition = XMLoadFloat3( position.toXMFLOAT3() );
+    FXMVECTOR xmPosition = XMLoadFloat3( position.toXMFLOAT3() );
 
     // Generate the meshes
     for ( auto const& itx : Engine::GAPI->GetWorldSections() ) {
         for ( auto const& ity : itx.second ) {
-            const XMVECTOR a = XMVectorSet( static_cast<float>(itx.first - s.x), static_cast<float>(ity.first - s.y), 0, 0 );
-            if ( Toolbox::XMVector2LengthFloat( a ) < 2 ) {
+            float len;
+            XMStoreFloat( &len, XMVector2Length( XMVectorSet( static_cast<float> (itx.first - s.x), static_cast<float> (ity.first - s.y), 0, 0 ) ) );
+            if ( len < 2 ) {
                 // Check all polys from all meshes
                 for ( auto const& it : ity.second.WorldMeshes ) {
                     WorldMeshInfo* m;
@@ -1334,7 +1335,7 @@ void WorldConverter::Extract3DSMeshFromVisual2PNAEN( zCProgMeshProto* visual, Me
 
     meshInfo->BBox.Min = bbmin;
     meshInfo->BBox.Max = bbmax;
-    XMStoreFloat( &meshInfo->MeshSize, XMVector3LengthEst( XMLoadFloat3( &bbmin ) - XMLoadFloat3( &bbmax ) ) );
+    XMStoreFloat( &meshInfo->MeshSize, XMVector3Length( XMLoadFloat3( &bbmin ) - XMLoadFloat3( &bbmax ) ) );
     XMStoreFloat3( &meshInfo->MidPoint, 0.5f * (XMLoadFloat3( &bbmin ) + XMLoadFloat3( &bbmax )) );
 
     meshInfo->Visual = visual;
@@ -1473,7 +1474,7 @@ void WorldConverter::Extract3DSMeshFromVisual2( zCProgMeshProto* visual, MeshVis
 
     meshInfo->BBox.Min = bbmin;
     meshInfo->BBox.Max = bbmax;
-    XMStoreFloat( &meshInfo->MeshSize, DirectX::XMVector3LengthEst( (XMLoadFloat3( &bbmin ) - XMLoadFloat3( &bbmax )) ) );
+    XMStoreFloat( &meshInfo->MeshSize, DirectX::XMVector3Length( (XMLoadFloat3( &bbmin ) - XMLoadFloat3( &bbmax )) ) );
     XMStoreFloat3( &meshInfo->MidPoint, 0.5f * (XMLoadFloat3( &bbmin ) + XMLoadFloat3( &bbmax )) );
 
     meshInfo->Visual = visual;
@@ -1634,12 +1635,12 @@ void WorldConverter::GenerateVertexNormals( std::vector<ExVertexStruct>& vertice
 
     for ( unsigned int i = 0; i < indices.size(); i += 3 ) {
         XMFLOAT3 v[3] = { *vertices[indices[i]].Position.toXMFLOAT3(), *vertices[indices[i + 1]].Position.toXMFLOAT3(), *vertices[indices[i + 2]].Position.toXMFLOAT3() };
-        XMVECTOR normal = XMVector3Cross( (XMLoadFloat3( &v[1] ) - XMLoadFloat3( &v[0] )), (XMLoadFloat3( &v[2] ) - XMLoadFloat3( &v[0] )) );
+        FXMVECTOR normal = XMVector3Cross( (XMLoadFloat3( &v[1] ) - XMLoadFloat3( &v[0] )), (XMLoadFloat3( &v[2] ) - XMLoadFloat3( &v[0] )) );
 
         for ( int j = 0; j < 3; ++j ) {
-            XMVECTOR a = XMLoadFloat3( &v[(j + 1) % 3] ) - XMLoadFloat3( &v[j] );
-            XMVECTOR b = XMLoadFloat3( &v[(j + 2) % 3] ) - XMLoadFloat3( &v[j] );
-            XMVECTOR weight = XMVectorACosEst( XMVector3Dot( a, b ) / (XMVector3LengthEst( a ) * XMVector3LengthEst( b )) );
+            FXMVECTOR a = XMLoadFloat3( &v[(j + 1) % 3] ) - XMLoadFloat3( &v[j] );
+            FXMVECTOR b = XMLoadFloat3( &v[(j + 2) % 3] ) - XMLoadFloat3( &v[j] );
+            FXMVECTOR weight = XMVectorACos( XMVector3Dot( a, b ) / (XMVector3Length( a ) * XMVector3Length( b )) );
             XMVECTOR XMV_normals_indices = XMLoadFloat3( &normals[indices[(i + j)]] );
             XMV_normals_indices += weight * normal;
             XMStoreFloat3( &normals[indices[(i + j)]], XMV_normals_indices );
@@ -1649,14 +1650,14 @@ void WorldConverter::GenerateVertexNormals( std::vector<ExVertexStruct>& vertice
     // Normalize everything and store it into the vertices
     XMFLOAT3 Normal;
     for ( unsigned int i = 0; i < normals.size(); i++ ) {
-        XMStoreFloat3( &Normal, XMVector3NormalizeEst( XMLoadFloat3( &normals[i] ) ) );
+        XMStoreFloat3( &Normal, XMVector3Normalize( XMLoadFloat3( &normals[i] ) ) );
         vertices[i].Normal = Normal;
     }
 }
 
 ExVertexStruct TessTriLerpVertex( ExVertexStruct& a, ExVertexStruct& b, float w ) {
     ExVertexStruct v;
-    XMVECTOR XMV_w = XMVectorSet( w, w, w, 0 );
+    FXMVECTOR XMV_w = XMVectorSet( w, w, w, 0 );
     XMStoreFloat3( v.Position.toXMFLOAT3(), XMVectorLerpV( XMLoadFloat3( a.Position.toXMFLOAT3() ), XMLoadFloat3( b.Position.toXMFLOAT3() ), XMV_w ) );
     XMStoreFloat3( v.Normal.toXMFLOAT3(), XMVectorLerpV( XMLoadFloat3( a.Normal.toXMFLOAT3() ), XMLoadFloat3( b.Normal.toXMFLOAT3() ), XMV_w ) );
     XMStoreFloat2( v.TexCoord.toXMFLOAT2(), XMVectorLerpV( XMLoadFloat2( a.TexCoord.toXMFLOAT2() ), XMLoadFloat2( b.TexCoord.toXMFLOAT2() ), XMV_w ) );
@@ -1731,8 +1732,7 @@ void WorldConverter::WrapVertexBuffers( const std::list<std::vector<ExVertexStru
     outOffsets.emplace_back( 0 );
     int off = 0;
     for ( auto const& iti : indexBuffers ) {
-        auto const& end = iti->end();
-        for ( auto& vi = iti->begin(); vi != end; ++vi ) {
+        for ( auto& vi = iti->begin(); vi != iti->end(); ++vi ) {
             outIndices.emplace_back( *vi + vxOffsets[off] );
         }
         off++;

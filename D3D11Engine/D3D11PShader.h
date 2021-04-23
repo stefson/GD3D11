@@ -18,7 +18,7 @@ public:
     std::vector<D3D11ConstantBuffer*>& GetConstantBuffer();
 
     /** Returns the shader */
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> GetShader() { return PixelShader; }
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> GetShader() { return PixelShader.Get(); }
 
     /** Returns this textures ID */
     UINT16 GetID() { return ID; };

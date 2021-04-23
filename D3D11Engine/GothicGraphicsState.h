@@ -431,7 +431,7 @@ struct GothicSamplerStateInfo : public GothicPipelineState {
 struct GothicTransformInfo {
     /** Sets the default values for this struct */
     void SetDefault() {
-        auto const& idMatrix = DirectX::XMMatrixIdentity();
+        XMMATRIX const& idMatrix = DirectX::XMMatrixIdentity();
         XMStoreFloat4x4( &TransformWorld, idMatrix );
         XMStoreFloat4x4( &TransformView, idMatrix );
         XMStoreFloat4x4( &TransformProj, idMatrix );
@@ -491,6 +491,7 @@ struct GothicRendererSettings {
         ToneMap_Simple,
         ACESFittedTonemap,
     };
+
 
     /** Sets the default values for this struct */
     void SetDefault() {
@@ -762,6 +763,7 @@ struct GothicRendererSettings {
     bool EnableCustomFontRendering;
     bool ForceFOV;
     bool DisplayFlip;
+    bool LowLatency;
     bool StretchWindow;
     bool SmoothShadowCameraUpdate;
 };
