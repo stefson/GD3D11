@@ -626,9 +626,11 @@ struct GothicRendererSettings {
 #else
         ForceFOV = true;
 #endif
-
-        StretchWindow = false;
+        
+        StretchWindow = true;
         SmoothShadowCameraUpdate = true;
+        DisplayFlip = false;
+        LowLatency = false;
     }
 
     void SetupOldWorldSpecificValues() {
