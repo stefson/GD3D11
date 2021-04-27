@@ -714,6 +714,9 @@
       <Filter>Engine\D3D11\Engine</Filter>
     </ClInclude>
     <ClInclude Include="D3D11_Helpers.h" />
+    <ClInclude Include="InstructionSet.h">
+      <Filter>DLLMain</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

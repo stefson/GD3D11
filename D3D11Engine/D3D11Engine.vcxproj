@@ -581,6 +581,7 @@ copy "$(OutDir)$(TargetName).pdb" "$(G1_SYSTEM_PATH)\ddraw.pdb"</Command>
     <ClInclude Include="include\assimp\Vertex.h" />
     <ClInclude Include="include\assimp\XMLTools.h" />
     <ClInclude Include="include\assimp\ZipArchiveIOSystem.h" />
+    <ClInclude Include="InstructionSet.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="MemoryTracker.h" />
     <ClInclude Include="MeshModifier.h" />
