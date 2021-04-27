@@ -2785,7 +2785,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround(
                     // Check vob range
 
                     float dist;
-                    XMStoreFloat( &dist, XMVector3LengthEst( position - XMLoadFloat3( &it->LastRenderPosition ) ) );
+                    XMStoreFloat( &dist, XMVector3Length( position - XMLoadFloat3( &it->LastRenderPosition ) ) );
                     if ( dist > range ) {
                         continue;
                     }
@@ -2862,7 +2862,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround(
 
                 // Check vob range
                 float dist;
-                XMStoreFloat( &dist, XMVector3LengthEst( position - it->Vob->GetPositionWorldXM() ) );
+                XMStoreFloat( &dist, XMVector3Length( position - it->Vob->GetPositionWorldXM() ) );
 
                 if ( dist > range ) {
                     continue;
@@ -2906,7 +2906,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround(
                 }
                 // Check vob range
                 float dist;
-                XMStoreFloat( &dist, XMVector3LengthEst( position - skeletalMeshVob->Vob->GetPositionWorldXM() ) );
+                XMStoreFloat( &dist, XMVector3Length( position - skeletalMeshVob->Vob->GetPositionWorldXM() ) );
 
                 if ( dist > range ) {
                     // Not in range
@@ -3180,7 +3180,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround( FXMVECTOR position,
 
             //INT2 s = WorldConverter::GetSectionOfPos( skeletalMeshVob->Vob->GetPositionWorld() );
 
-            float dist; XMStoreFloat( &dist, XMVector3LengthEst( skeletalMeshVob->Vob->GetPositionWorldXM() - position ) );
+            float dist; XMStoreFloat( &dist, XMVector3Length( skeletalMeshVob->Vob->GetPositionWorldXM() - position ) );
             if ( dist > Engine::GAPI->GetRendererState().RendererSettings.IndoorVobDrawRadius )
                 continue;  // Skip out of range
 
@@ -5129,7 +5129,7 @@ void D3D11GraphicsEngine::DrawQuadMarks() {
     for ( auto const& it : quadMarks ) {
         if ( !it.first->GetConnectedVob() ) continue;
 
-        float len; XMStoreFloat( &len, XMVector3LengthEst( camPos - XMLoadFloat3( it.second.Position.toXMFLOAT3() ) ) );
+        float len; XMStoreFloat( &len, XMVector3Length( camPos - XMLoadFloat3( it.second.Position.toXMFLOAT3() ) ) );
         if ( len > Engine::GAPI->GetRendererState().RendererSettings.VisualFXDrawRadius )
             continue;
 

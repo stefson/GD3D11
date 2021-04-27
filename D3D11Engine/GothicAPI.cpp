@@ -808,7 +808,7 @@ void GothicAPI::DrawWorldMeshNaive() {
             if ( !vobInfo->VisualInfo ) continue;
 
             float dist;
-            XMStoreFloat( &dist, XMVector3LengthEst( vobInfo->Vob->GetPositionWorldXM() - GetCameraPositionXM() ) );
+            XMStoreFloat( &dist, XMVector3Length( vobInfo->Vob->GetPositionWorldXM() - GetCameraPositionXM() ) );
 
             if ( dist > RendererState.RendererSettings.SkeletalMeshDrawRadius )
                 continue; // Skip out of range
@@ -986,7 +986,7 @@ void GothicAPI::GetVisibleParticleEffectsList( std::vector<zCVob*>& pfxList ) {
         // now it is save to render
         float dist;
         for ( auto const& it : ParticleEffectVobs ) {
-            XMStoreFloat( &dist, DirectX::XMVector3LengthEst( it->GetPositionWorldXM() - camPos ) );
+            XMStoreFloat( &dist, DirectX::XMVector3Length( it->GetPositionWorldXM() - camPos ) );
             if ( dist > RendererState.RendererSettings.OutdoorSmallVobDrawRadius )
                 continue;
             if ( dist > RendererState.RendererSettings.VisualFXDrawRadius )
@@ -1010,7 +1010,7 @@ void GothicAPI::GetVisibleDecalList( std::vector<zCVob*>& decals ) {
 
     float dist;
     for ( auto const& it : DecalVobs ) {
-        XMStoreFloat( &dist, DirectX::XMVector3LengthEst( it->GetPositionWorldXM() - camPos ) );
+        XMStoreFloat( &dist, DirectX::XMVector3Length( it->GetPositionWorldXM() - camPos ) );
         if ( dist > RendererState.RendererSettings.VisualFXDrawRadius )
             continue;
 
@@ -2803,7 +2803,7 @@ static void CVVH_AddNotDrawnVobToList( std::vector<VobInfo*>& target, std::vecto
     for ( auto const& it : source ) {
         if ( !it->VisibleInRenderPass ) {
             float vd;
-            XMStoreFloat( &vd, XMVector3LengthEst( Engine::GAPI->GetCameraPositionXM() - XMLoadFloat3( &it->LastRenderPosition ) ) );
+            XMStoreFloat( &vd, XMVector3Length( Engine::GAPI->GetCameraPositionXM() - XMLoadFloat3( &it->LastRenderPosition ) ) );
             if ( vd < dist && it->Vob->GetShowVisual() ) {
                 VobInstanceInfo vii;
                 vii.world = it->WorldMatrix;
@@ -2821,7 +2821,7 @@ static void CVVH_AddNotDrawnVobToList( std::vector<VobLightInfo*>& target, std::
     float veclength;
     for ( auto const& it : source ) {
         if ( !it->VisibleInRenderPass ) {
-            XMStoreFloat( &veclength, XMVector3LengthEst( Engine::GAPI->GetCameraPositionXM() - it->Vob->GetPositionWorldXM() ) );
+            XMStoreFloat( &veclength, XMVector3Length( Engine::GAPI->GetCameraPositionXM() - it->Vob->GetPositionWorldXM() ) );
             if ( veclength - it->Vob->GetLightRange() < dist ) {
                 target.push_back( it );
                 it->VisibleInRenderPass = true;
@@ -2834,7 +2834,7 @@ static void CVVH_AddNotDrawnVobToList( std::vector<SkeletalVobInfo*>& target, st
     float vd;
     for ( auto const& it : source ) {
         if ( !it->VisibleInRenderPass ) {
-            XMStoreFloat( &vd, XMVector3LengthEst( Engine::GAPI->GetCameraPositionXM() - it->Vob->GetPositionWorldXM() ) );
+            XMStoreFloat( &vd, XMVector3Length( Engine::GAPI->GetCameraPositionXM() - it->Vob->GetPositionWorldXM() ) );
             if ( vd < dist && it->Vob->GetShowVisual() ) {
                 target.push_back( it );
                 it->VisibleInRenderPass = true;
