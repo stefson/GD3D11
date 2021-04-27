@@ -24,7 +24,7 @@ public:
 
         auto lineRenderer = Engine::GraphicsEngine->GetLineRenderer();
         if ( lineRenderer ) {
-            lineRenderer->AddLineDeferred( DeferredLine( XMFLOAT3(x1, y1, z1), color.dword ), DeferredLine( XMFLOAT3( x2, y2, z2 ), color.dword ) );
+            lineRenderer->AddLineDeferred( ScreenSpaceLine( XMFLOAT3(x1, y1, z1), color.dword ), ScreenSpaceLine( XMFLOAT3( x2, y2, z2 ), color.dword ) );
         }
     }
 
@@ -36,7 +36,7 @@ public:
         }
         auto lineRenderer = Engine::GraphicsEngine->GetLineRenderer();
         if ( lineRenderer ) {
-            lineRenderer->AddLineDeferred( DeferredLine( XMFLOAT3( x1, y1, 0 ), color.dword ), DeferredLine( XMFLOAT3( x2, y2, 0 ), color.dword ) );
+            lineRenderer->AddLineDeferred( ScreenSpaceLine( XMFLOAT3( x1, y1, 0 ), color.dword ), ScreenSpaceLine( XMFLOAT3( x2, y2, 0 ), color.dword ) );
         }
     }
 

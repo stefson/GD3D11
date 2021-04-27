@@ -2304,7 +2304,7 @@ void XM_CALLCONV GothicAPI::UnprojectXM( FXMVECTOR p, XMVECTOR& worldPos, XMVECT
     worldDir = XMVector3TransformCoord( XMVector3Normalize( u ), invView );
 }
 
-void XM_CALLCONV GothicAPI::UnprojectLinesIntoLineVerticies( const std::vector<DeferredLine>& lines, std::vector<LineVertex>& lineVerticies )
+void XM_CALLCONV GothicAPI::UnprojectLinesIntoLineVerticies( const std::vector<ScreenSpaceLine>& lines, std::vector<LineVertex>& lineVerticies )
 {
     auto cam = zCCamera::GetCamera();
     XMMATRIX proj = XMMatrixTranspose( XMLoadFloat4x4( &cam->trafoProjection ) );

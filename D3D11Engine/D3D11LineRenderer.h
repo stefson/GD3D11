@@ -10,7 +10,7 @@ public:
 
     /** Adds a line to the list */
     virtual XRESULT AddLine( const LineVertex& v1, const LineVertex& v2 );
-    virtual XRESULT AddLineDeferred( const DeferredLine& v1, const DeferredLine& v2 ) {
+    virtual XRESULT AddLineDeferred( const ScreenSpaceLine& v1, const ScreenSpaceLine& v2 ) {
         if ( DeferredLineCache.size() >= 0xFFFFFFFF ) {
             return XR_FAILED;
         }
@@ -31,7 +31,7 @@ public:
 private:
     /** Line cache */
     std::vector<LineVertex> LineCache;
-    std::vector<DeferredLine> DeferredLineCache;
+    std::vector<ScreenSpaceLine> DeferredLineCache;
 
     /** Buffer to hold the lines on the GPU */
     D3D11VertexBuffer* LineBuffer;
