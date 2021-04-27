@@ -2321,7 +2321,8 @@ void XM_CALLCONV GothicAPI::UnprojectLinesIntoLineVerticies( const std::vector<S
             0 );
 
         // Transform and output
-        auto worldPos = XMVector3TransformCoord( u, invView );
+        //auto worldPos = XMVector3TransformCoord( u, invView );
+        auto worldPos = XMVector3TransformCoord( XMVector3Normalize( u ), invView );
         XMStoreFloat3( &pos, worldPos );
         lineVerticies.push_back( LineVertex( pos, l.Color ) );
     }
