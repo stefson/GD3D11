@@ -26,6 +26,16 @@ struct LineVertex {
 };
 #pragma pack (pop)	
 
+struct DeferredLine {
+    DeferredLine() {}
+    DeferredLine( const DirectX::XMFLOAT3& position, DWORD color = 0xFFFFFFFF ) {
+        Position = position;
+        Color = color;
+    }
+    DirectX::XMFLOAT3 Position;
+    DWORD Color;
+};
+
 class BaseLineRenderer {
 public:
     BaseLineRenderer();
@@ -33,9 +43,13 @@ public:
 
     /** Adds a line to the list */
     virtual XRESULT AddLine( const LineVertex& v1, const LineVertex& v2 ) = 0;
+    virtual XRESULT AddLineDeferred( const DeferredLine& v1, const DeferredLine& v2 ) = 0;
 
     /** Flushes the cached lines */
     virtual XRESULT Flush() = 0;
+
+    /** Calculates the world-position from screen position and draws the lines */
+    virtual XRESULT FlushDeferredLines() = 0;
 
     /** Clears the line cache */
     virtual XRESULT ClearCache() = 0;

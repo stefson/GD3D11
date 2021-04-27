@@ -14,6 +14,8 @@ const float INDOOR_LIGHT_DISTANCE_SCALE_FACTOR = 0.5f;
 
 class zCBspBase;
 class zCModelPrototype;
+struct DeferredLine;
+struct LineVertex;
 
 struct BspInfo {
     BspInfo() {
@@ -356,6 +358,9 @@ public:
 
     /** Unprojects a pixel-position on the screen */
     void XM_CALLCONV UnprojectXM( DirectX::FXMVECTOR p, DirectX::XMVECTOR& worldPos, DirectX::XMVECTOR& worldDir );
+
+    /** Unprojects a pixel-position on the screen */
+    void XM_CALLCONV GothicAPI::UnprojectLinesIntoLineVerticies( const std::vector<DeferredLine>& lines, std::vector<LineVertex>& lineVerticies );
 
     /** Unprojects the current cursor, returns it's direction in world-space */
     DirectX::XMVECTOR XM_CALLCONV UnprojectCursorXM();

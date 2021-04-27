@@ -80,6 +80,65 @@ XRESULT D3D11LineRenderer::Flush() {
     return XR_SUCCESS;
 }
 
+/** Flushes the cached lines */
+XRESULT D3D11LineRenderer::FlushDeferredLines() {
+    D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase*)Engine::GraphicsEngine;
+
+    if ( DeferredLineCache.size() == 0 )
+        return XR_SUCCESS;
+
+    static std::vector<LineVertex> verticies;
+
+    verticies.clear();
+
+    Engine::GAPI->UnprojectLinesIntoLineVerticies( DeferredLineCache, verticies );
+
+    // Check buffersize and create a new one if needed
+    if ( !LineBuffer || verticies.size() > LineBufferSize ) {
+        // Create a new buffer
+        delete LineBuffer;
+
+        XLE( engine->CreateVertexBuffer( &LineBuffer ) );
+        XLE( LineBuffer->Init( &verticies[0], verticies.size() * sizeof( LineVertex ), D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE ) );
+        LineBufferSize = verticies.size();
+    } else {
+        // Just update our buffer
+        XLE( LineBuffer->UpdateBuffer( &verticies[0], verticies.size() * sizeof( LineVertex ) ) );
+    }
+
+    Engine::GAPI->SetWorldTransformXM( XMMatrixIdentity() );
+    Engine::GAPI->SetViewTransformXM( Engine::GAPI->GetViewMatrixXM() );
+
+    engine->SetActivePixelShader( "PS_Lines" );
+    engine->SetActiveVertexShader( "VS_Lines" );
+
+    engine->SetupVS_ExMeshDrawCall();
+    engine->SetupVS_ExConstantBuffer();
+    engine->SetupVS_ExPerInstanceConstantBuffer();
+    engine->GetContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_LINELIST );
+
+    engine->SetDefaultStates();
+    Engine::GAPI->GetRendererState().BlendState.SetAlphaBlending();
+    Engine::GAPI->GetRendererState().BlendState.SetDirty();
+    engine->UpdateRenderStates();
+
+    // Draw the lines
+    UINT offset = 0;
+    UINT uStride = sizeof( LineVertex );
+    engine->GetContext()->IASetVertexBuffers( 0, 1, LineBuffer->GetVertexBuffer().GetAddressOf(), &uStride, &offset );
+
+    //Draw the mesh
+    engine->GetContext()->Draw( verticies.size(), 0 );
+
+    //engine->DrawVertexBuffer(LineBuffer, LineCache.size(), sizeof(LineVertex));
+
+    // Clear for the next frame
+    DeferredLineCache.clear();
+    verticies.clear();
+    return XR_SUCCESS;
+}
+
+
 /** Clears the line cache */
 XRESULT D3D11LineRenderer::ClearCache() {
     LineCache.clear();

@@ -1679,6 +1679,7 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 
     // Draw debug lines
     LineRenderer->Flush();
+    LineRenderer->FlushDeferredLines();
 
     if ( Engine::GAPI->GetRendererState().RendererSettings.EnableHDR )
         PfxRenderer->RenderHDR();
