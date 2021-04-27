@@ -126,9 +126,11 @@ public:
     }
 
     void _zCView::CheckAutoScroll() {
+        // TODO: G1 addresses!
         XCALL( 0x007A5F60 );
     }
     void _zCView::CheckTimedText() {
+        // TODO: G1 addresses!
         XCALL( 0x007A7C50 );
     }
 
@@ -206,6 +208,7 @@ public:
     }
 private:
     int zCMenuItem::GetIsDisabledInternal() {
+        // TODO: G1 Addresses
         XCALL( 0x004E1DE0 );
     }
 };

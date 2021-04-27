@@ -11,7 +11,8 @@ public:
     /** Hooks the functions of this Class */
     static void Hook() {
         XHook( GothicMemoryLocations::zCRndD3D::DrawLineZ, hooked_zCRndD3DDrawLineZ );
-
+        XHook( GothicMemoryLocations::zCRndD3D::DrawLine, hooked_zCRndD3DDrawLine );
+        
         XHook( HookedFunctions::OriginalFunctions.original_zCRnd_D3D_DrawPoly, GothicMemoryLocations::zCRndD3D::DrawPoly, hooked_zCRndD3DDrawPoly );
         XHook( HookedFunctions::OriginalFunctions.original_zCRnd_D3D_DrawPolySimple, GothicMemoryLocations::zCRndD3D::DrawPolySimple, hooked_zCRndD3DDrawPolySimple );
     }
@@ -19,16 +20,36 @@ public:
     /** Draws a straight line from xyz1 to xyz2 */
     static void __fastcall hooked_zCRndD3DDrawLineZ( void* thisptr, void* unknwn, float x1, float y1, float z1, float x2, float y2, float z2, zColor color ) {
         // TODO: Implement occlusion culling for the lines.
-
+        // TODO: Check if we need a separate AddLine for proper evaluation of Engine::GAPI->UnprojectXM
         auto lineRenderer = Engine::GraphicsEngine->GetLineRenderer();
         if ( lineRenderer ) {
-            static XMVECTOR pos1 = {}, pos2 = {}, discard = {};
+            XMVECTOR uPos = {}, discard = {};
             // Coordinates are screen space. Unproject to Worldspace neccessery.
-            Engine::GAPI->UnprojectXM( XMVectorSet( x1, y1, z1, 0 ), pos1, discard );
-            Engine::GAPI->UnprojectXM( XMVectorSet( x2, y2, z2, 0 ), pos2, discard );
+            Engine::GAPI->UnprojectXM( XMVectorSet( x1, y1, z1, 0 ), uPos, discard );
+            XMFLOAT3 fPos1; XMStoreFloat3( &fPos1, uPos );
 
-            static XMFLOAT3 fPos1; XMStoreFloat3( &fPos1, pos1 );
-            static XMFLOAT3 fPos2; XMStoreFloat3( &fPos2, pos2 );
+            Engine::GAPI->UnprojectXM( XMVectorSet( x2, y2, z2, 0 ), uPos, discard );
+            XMFLOAT3 fPos2; XMStoreFloat3( &fPos2, uPos );
+
+            lineRenderer->AddLine( LineVertex( fPos1, color.dword ), LineVertex( fPos2, color.dword ) );
+        }
+    }
+
+    static void __fastcall hooked_zCRndD3DDrawLine( void* thisptr, void* unknwn, float x1, float y1, float x2, float y2, zColor color ) {
+        // TODO: Check if we need a separate AddLine for proper evaluation of Engine::GAPI->UnprojectXM
+        if ( color.bgra.alpha == 0 ) {
+            color.bgra.alpha = 255;
+        }
+        auto lineRenderer = Engine::GraphicsEngine->GetLineRenderer();
+        if ( lineRenderer ) {
+
+            XMVECTOR uPos = {}, discard = {};
+            // Coordinates are screen space. Unproject to Worldspace neccessery.
+            Engine::GAPI->UnprojectXM( XMVectorSet( x1, y1, 0, 0 ), uPos, discard );
+            XMFLOAT3 fPos1; XMStoreFloat3( &fPos1, uPos );
+
+            Engine::GAPI->UnprojectXM( XMVectorSet( x2, y2, 0, 0 ), uPos, discard );
+            XMFLOAT3 fPos2; XMStoreFloat3( &fPos2, uPos );
 
             lineRenderer->AddLine( LineVertex( fPos1, color.dword ), LineVertex( fPos2, color.dword ) );
         }

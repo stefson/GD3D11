@@ -148,3 +148,30 @@ public:
     T* last;
     T* root;
 };
+
+
+struct zTViewportData {
+    int			xMin;
+    int			yMin;
+    int			xDim;
+    int			yDim;
+    float		xMinF;
+    float		yMinF;
+    float		xMaxF;
+    float		yMaxF;
+    float		xDimF;
+    float		yDimF;
+    float		xDimFloatMinus1;
+    float		yDimFloatMinus1;
+    float		xCenter;
+    float		yCenter;
+};
+
+template <class T, int S> class zCMatrixStack {
+    int		pos;
+    T		stack[S];
+public:
+    zCMatrixStack() : pos( 0 ) {};
+    void Push( const T& m ) { stack[pos++] = m; };
+    T Pop( void ) { return stack[--pos]; };
+};

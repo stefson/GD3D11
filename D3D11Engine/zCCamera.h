@@ -26,11 +26,20 @@ public:
 #endif
     }
 
-    DirectX::XMFLOAT4X4 const& GetTransform( const ETransformType type ) {
+    const DirectX::XMFLOAT4X4& GetTransformDX( const ETransformType type ) {
+#ifdef BUILD_GOTHIC_2_6_fix
+        switch ( type ) {
+        case ETransformType::TT_WORLD:			return trafoWorld;		break;
+        case ETransformType::TT_VIEW:			return trafoView;		break;
+        case ETransformType::TT_WORLDVIEW:		return camMatrix;		break;
+        case ETransformType::TT_WORLDVIEW_INV:	return camMatrixInv;	break;
+        case ETransformType::TT_VIEW_INV:		return trafoViewInv;	break;
+        default:						        return camMatrix;		break;
+        };
+#else
+        // TODO: Check if zCCamera is same with G1
         XCALL( GothicMemoryLocations::zCCamera::GetTransform );
-    }
-    DirectX::XMFLOAT4X4 const& GetTransformDX( const ETransformType type ) {
-        XCALL( GothicMemoryLocations::zCCamera::GetTransform );
+#endif
     }
 
     void SetTransform( const ETransformType type, const DirectX::XMFLOAT4X4& mat ) {
@@ -107,5 +116,25 @@ public:
     zTPlane FrustumPlanes[6];
     byte SignBits[6];
 
+    zTViewportData vpdata;
+
+    void* targetView;
+    XMFLOAT4X4 camMatrix;
+    XMFLOAT4X4 camMatrixInv;
+
+    int tremorToggle;
+    float tremorScale;
+    float3 tremorAmplitude;
+    float3 tremorOrigin;
+    float tremorVelo;
+
+    // Transformation matrices
+    XMFLOAT4X4 trafoView;
+    XMFLOAT4X4 trafoViewInv;
+    XMFLOAT4X4 trafoWorld;
+    zCMatrixStack<XMFLOAT4X4, 8> trafoViewStack;
+    zCMatrixStack<XMFLOAT4X4, 8> trafoWorldStack;
+    zCMatrixStack<XMFLOAT4X4, 8> trafoWorldViewStack;
+    XMFLOAT4X4 trafoProjection;
 private:
 };

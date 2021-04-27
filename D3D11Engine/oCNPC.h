@@ -65,12 +65,13 @@ public:
     }
 
     int IsAPlayer() {
-        XCALL( GothicMemoryLocations::oCNPC::IsAPlayer );
+        return (this == oCGame::GetPlayer());
     }
     zSTRING GetName( int i = 0 ) {
         XCALL( GothicMemoryLocations::oCNPC::GetName );
     }
 #ifndef BUILD_GOTHIC_1_08k 
+    // TODO: G1 Addresses
     int HasFlag( int ) { XCALL( 0x007309E0 ); }
 #endif
 };

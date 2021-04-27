@@ -1983,7 +1983,7 @@ void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameDa
     fx->CreateParticlesUpdateDependencies();
 
     if ( fx->GetVisualDied() ) {
-        if ( fx->GetConnectedVob() ) 		{
+        if ( fx->GetConnectedVob() ) {
             // delete FX, it will be invalid after this call!
             fx->GetConnectedVob()->GetHomeWorld()->RemoveVob( fx->GetConnectedVob() );
         }
@@ -2286,9 +2286,10 @@ bool GothicAPI::TraceWorldMesh( const DirectX::XMFLOAT3& origin, const DirectX::
 
 /** Unprojects a pixel-position on the screen */
 void XM_CALLCONV GothicAPI::UnprojectXM( FXMVECTOR p, XMVECTOR& worldPos, XMVECTOR& worldDir ) {
-    XMMATRIX proj = XMMatrixTranspose( XMLoadFloat4x4( &GetProjectionMatrix() ) );
-    XMFLOAT4X4 fInvView;
-    GetInverseViewMatrixXM( &fInvView );
+    //XMMATRIX proj = XMMatrixTranspose( XMLoadFloat4x4( Engine::GAPI->CurrentCamera->GetTransform( zCCamera::ETransformType::TT_VIEW );
+    XMMATRIX proj = XMMatrixTranspose( XMLoadFloat4x4( &zCCamera::GetCamera()->trafoProjection ) );
+    //XMMATRIX proj = XMMatrixTranspose( XMLoadFloat4x4(  &GetProjectionMatrix() ) );
+    XMFLOAT4X4 fInvView; GetInverseViewMatrixXM( &fInvView );
     XMMATRIX invView = XMMatrixTranspose( XMLoadFloat4x4( &fInvView ) );
 
     // Convert to screenspace
@@ -2344,7 +2345,7 @@ void GothicAPI::GetViewMatrix( DirectX::XMFLOAT4X4* view ) {
         return;
     }
 
-    *view = zCCamera::GetCamera()->GetTransform( zCCamera::ETransformType::TT_VIEW );
+    *view = zCCamera::GetCamera()->GetTransformDX( zCCamera::ETransformType::TT_VIEW );
 }
 
 /** Returns the view matrix */
@@ -2907,7 +2908,7 @@ void GothicAPI::CollectVisibleVobsHelper( BspInfo* base, zTBBox3D boxCell, int c
                 FXMVECTOR cameraPosition = Engine::GAPI->GetCameraPositionXM();
 
                 // Take cameraposition if we are freelooking
-                if ( zCCamera::IsFreeLookActive() )                 {
+                if ( zCCamera::IsFreeLookActive() ) {
                     playerPosition = cameraPosition;
                 }
 
