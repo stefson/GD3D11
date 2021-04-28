@@ -413,6 +413,12 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
     Resolution = newSize;
     INT2 bbres = GetBackbufferResolution();
 
+    zCView::SetMode(
+        static_cast<int>((float)Resolution.x / Engine::GAPI->GetRendererState().RendererSettings.GothicUIScale),
+        static_cast<int>((float)Resolution.y / Engine::GAPI->GetRendererState().RendererSettings.GothicUIScale),
+        32 );
+    zCViewDraw::GetScreen().SetVirtualSize( POINT{ 8192, 8192 } );
+
 #ifndef BUILD_SPACER
     BOOL isFullscreen = 0;
     if ( dxgi_1_3 ) {
@@ -716,7 +722,7 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
         Engine::GAPI->GetRendererState().RendererSettings.WorldShadowRangeScale =
             Toolbox::GetRecommendedWorldShadowRangeScaleForSize( s );
     }
-
+    
     // Force the mode
     zCView::SetMode(
         static_cast<int>(Resolution.x / Engine::GAPI->GetRendererState().RendererSettings.GothicUIScale),
@@ -1028,11 +1034,11 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferIndexed( D3D11VertexBuffer* vb,
         if ( sizeof( VERTEX_INDEX ) == sizeof( unsigned short ) ) {
             GetContext()->IASetIndexBuffer( ib->GetVertexBuffer().Get(),
                 DXGI_FORMAT_R16_UINT, 0 );
-    } else {
+        } else {
             GetContext()->IASetIndexBuffer( ib->GetVertexBuffer().Get(),
                 DXGI_FORMAT_R32_UINT, 0 );
         }
-}
+    }
 
     if ( numIndices ) {
         // Draw the mesh

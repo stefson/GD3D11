@@ -88,6 +88,11 @@ struct GothicMemoryLocations {
         static const unsigned int IsAPlayer = 0x007425A0;
         static const unsigned int GetName = 0x0072F820;
     };
+    
+    struct zCViewDraw {
+        static const unsigned int GetScreen = 0x006905c0;
+        static const unsigned int SetVirtualSize = 0x00691f60;
+    };
 
     struct zCView {
         static const unsigned int Vtbl_ViewText = 0x0083E344;

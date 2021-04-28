@@ -416,11 +416,9 @@ void D2DSettingsDialog::ApplyButtonPressed( SV_Button* sender, void* userdata ) 
 	// Check for resolution change
 	if ( d->Resolutions[d->ResolutionSetting].Width != Engine::GraphicsEngine->GetResolution().x || d->Resolutions[d->ResolutionSetting].Height != Engine::GraphicsEngine->GetResolution().y ) {
 		Engine::GraphicsEngine->OnResize( INT2(d->Resolutions[d->ResolutionSetting].Width, d->Resolutions[d->ResolutionSetting].Height) );
-		/*TODO change position of SettingsDialog proportional on screen with the changed resolution
-		Pseudo code int SettingsDialog.x *= (Engine::GraphicsEngine->GetResolution().x / d->Resolutions[d->ResolutionSetting].Width);
-		SettingsDialog.y *= (Engine::GraphicsEngine->GetResolution().y / d->Resolutions[d->ResolutionSetting].Height);
-
-		SetPosition(D2D1::Point2F(Engine::GraphicsEngine->GetResolution().x / d->Resolutions[d->ResolutionSetting].Width, Engine::GraphicsEngine->GetResolution().y / d->Resolutions[d->ResolutionSetting].Height));*/
+        // reposition the window at the center, 
+        // or we might not be able to see it 
+        d->SetPositionCentered( D2D1::Point2F( d->MainView->GetRenderTarget()->GetSize().width / 2, d->MainView->GetRenderTarget()->GetSize().height / 2 ), D2D1::SizeF( 500, 340 ) );
 	}
 	Engine::GAPI->SaveRendererWorldSettings( settings );
 	Engine::GAPI->SaveMenuSettings( MENU_SETTINGS_FILE );

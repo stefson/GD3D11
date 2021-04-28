@@ -354,6 +354,11 @@ struct GothicMemoryLocations {
         static const unsigned int Offset_SingleStep = 0x118;
     };
 
+    struct zCViewDraw {
+        static const unsigned int GetScreen = 0x00753A60;
+        static const unsigned int SetVirtualSize = 0x00755410;
+    };
+
     struct zCView {
         static const unsigned int SetMode = 0x00702180;
         static const unsigned int REPL_SetMode_ModechangeStart = 0x007021A9;

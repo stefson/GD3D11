@@ -5,11 +5,31 @@
 #include "oCGame.h"
 #include "zViewTypes.h"
 
+
+class zCViewDraw {
+public:
+    static void Hook() {
+        XHook( HookedFunctions::OriginalFunctions.original_zCViewDrawGetScreen, GothicMemoryLocations::zCViewDraw::GetScreen, GetScreen );
+    }
+    
+    static zCViewDraw& GetScreen() {
+        hook_infunc
+            zCViewDraw& viewDraw = HookedFunctions::OriginalFunctions.original_zCViewDrawGetScreen();
+            return viewDraw;
+        hook_outfunc
+    }
+
+    void __fastcall SetVirtualSize(POINT& pt) {
+        XCALL( GothicMemoryLocations::zCViewDraw::SetVirtualSize );
+    }
+};
+
 class zCView {
 public:
 
     /** Hooks the functions of this Class */
     static void Hook() {
+        zCViewDraw::Hook();
         DWORD dwProtect;
 
         HookedFunctions::OriginalFunctions.original_zCViewSetMode = (zCViewSetMode)GothicMemoryLocations::zCView::SetMode;
