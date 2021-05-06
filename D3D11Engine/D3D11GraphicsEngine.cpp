@@ -77,6 +77,7 @@ D3D11GraphicsEngine::D3D11GraphicsEngine() {
     m_FrameLimiter = std::make_unique<FpsLimiter>();
     m_LastFrameLimit = 0;
     m_flipWithTearing = false;
+    m_isWindowActive = true;
 
     // Match the resolution with the current desktop resolution
     Resolution =
@@ -373,13 +374,13 @@ XRESULT D3D11GraphicsEngine::Init() {
         << "Failed to load file: system\\GD3D11\\Textures\\SkyCubemap2.dds";
 
     // Init quad buffers
-    Engine::GraphicsEngine->CreateVertexBuffer( &QuadVertexBuffer );
+    CreateVertexBuffer( &QuadVertexBuffer );
     QuadVertexBuffer->Init( nullptr, 6 * sizeof( ExVertexStruct ),
         D3D11VertexBuffer::EBindFlags::B_VERTEXBUFFER,
         D3D11VertexBuffer::EUsageFlags::U_DYNAMIC,
         D3D11VertexBuffer::CA_WRITE );
 
-    Engine::GraphicsEngine->CreateVertexBuffer( &QuadIndexBuffer );
+    CreateVertexBuffer( &QuadIndexBuffer );
     QuadIndexBuffer->Init( nullptr, 6 * sizeof( VERTEX_INDEX ),
         D3D11VertexBuffer::EBindFlags::B_INDEXBUFFER,
         D3D11VertexBuffer::EUsageFlags::U_DYNAMIC,
@@ -683,15 +684,19 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
 /** Called when the game wants to render a new frame */
 XRESULT D3D11GraphicsEngine::OnBeginFrame() {
     Engine::GAPI->GetRendererState().RendererInfo.Timing.StartTotal();
-
-    if ( Engine::GAPI->GetRendererState().RendererSettings.FpsLimit != 0 ) {
-        if ( m_LastFrameLimit != Engine::GAPI->GetRendererState().RendererSettings.FpsLimit ) {
-            m_LastFrameLimit = Engine::GAPI->GetRendererState().RendererSettings.FpsLimit;
-            m_FrameLimiter->SetLimit( m_LastFrameLimit );
-        }
+    if ( !m_isWindowActive ) {
+        m_FrameLimiter->SetLimit( 20 );
         m_FrameLimiter->Start();
     } else {
-        m_FrameLimiter->Reset();
+        if ( Engine::GAPI->GetRendererState().RendererSettings.FpsLimit != 0 ) {
+            if ( m_LastFrameLimit != Engine::GAPI->GetRendererState().RendererSettings.FpsLimit ) {
+                m_LastFrameLimit = Engine::GAPI->GetRendererState().RendererSettings.FpsLimit;
+                m_FrameLimiter->SetLimit( m_LastFrameLimit );
+            }
+            m_FrameLimiter->Start();
+        } else {
+            m_FrameLimiter->Reset();
+        }
     }
     static int oldToneMap = -1;
     if ( Engine::GAPI->GetRendererState().RendererSettings.HDRToneMap != oldToneMap ) {
@@ -825,26 +830,9 @@ XRESULT D3D11GraphicsEngine::Clear( const float4& color ) {
     GetContext()->ClearRenderTargetView( GBuffer0_Diffuse->GetRenderTargetView().Get(), (float*)&color );
     GetContext()->ClearRenderTargetView( GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView().Get(), (float*)&float4( 0, 0, 0, 0 ) );
     GetContext()->ClearRenderTargetView( HDRBackBuffer->GetRenderTargetView().Get(), (float*)&float4( 0, 0, 0, 0 ) );
+    // UNUSED
+    // GetContext()->ClearRenderTargetView( Backbuffer->GetRenderTargetView().Get(), (float*)&color );
 
-    return XR_SUCCESS;
-}
-
-/** Creates a vertexbuffer object (Not registered inside) */
-XRESULT D3D11GraphicsEngine::CreateVertexBuffer( D3D11VertexBuffer** outBuffer ) {
-    *outBuffer = new D3D11VertexBuffer;
-    return XR_SUCCESS;
-}
-
-/** Creates a texture object (Not registered inside) */
-XRESULT D3D11GraphicsEngine::CreateTexture( D3D11Texture** outTexture ) {
-    *outTexture = new D3D11Texture;
-    return XR_SUCCESS;
-}
-
-/** Creates a constantbuffer object (Not registered inside) */
-XRESULT D3D11GraphicsEngine::CreateConstantBuffer( D3D11ConstantBuffer** outCB,
-    void* data, int size ) {
-    *outCB = new D3D11ConstantBuffer( size, data );
     return XR_SUCCESS;
 }
 
@@ -2857,7 +2845,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround(
                     }
                 }
                 for ( auto const& meshInfo : materialMesh.second ) {
-                    Engine::GraphicsEngine->DrawVertexBufferIndexed(
+                    DrawVertexBufferIndexed(
                         meshInfo->MeshVertexBuffer,
                         meshInfo->MeshIndexBuffer,
                         meshInfo->Indices.size() );
@@ -3910,7 +3898,7 @@ XRESULT D3D11GraphicsEngine::OnKeyDown( unsigned int key ) {
         break;
     default:
         break;
-}
+    }
 
     return XR_SUCCESS;
 }
@@ -3920,11 +3908,6 @@ XRESULT D3D11GraphicsEngine::ReloadShaders() {
     XRESULT xr = ShaderManager->ReloadShaders();
 
     return xr;
-}
-
-/** Returns the line renderer object */
-BaseLineRenderer* D3D11GraphicsEngine::GetLineRenderer() {
-    return LineRenderer.get();
 }
 
 /** Applys the lighting to the scene */
@@ -3952,7 +3935,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
         for ( auto const& light : lights ) {
             // Create shadowmap in case we should have one but haven't got it yet
             if ( !light->LightShadowBuffers && light->UpdateShadows ) {
-                Engine::GraphicsEngine->CreateShadowedPointLight( &light->LightShadowBuffers, light );
+                CreateShadowedPointLight( &light->LightShadowBuffers, light );
             }
 
             if ( light->LightShadowBuffers ) {
@@ -4620,7 +4603,7 @@ void D3D11GraphicsEngine::DrawVobSingle( VobInfo* vob ) {
                 }
             }
             // Draw instances
-            Engine::GraphicsEngine->DrawVertexBufferIndexed(
+            DrawVertexBufferIndexed(
                 itm.second[i]->MeshVertexBuffer, itm.second[i]->MeshIndexBuffer,
                 itm.second[i]->Indices.size() );
         }
@@ -4677,7 +4660,7 @@ void D3D11GraphicsEngine::DrawVobsList( const std::list<VobInfo*>& vobs, zCCamer
                     }
                 }
                 // Draw instances
-                Engine::GraphicsEngine->DrawVertexBufferIndexed(
+                DrawVertexBufferIndexed(
                     itm2nd->MeshVertexBuffer, itm2nd->MeshIndexBuffer,
                     itm2nd->Indices.size() );
             }
@@ -4691,20 +4674,14 @@ void D3D11GraphicsEngine::DrawVobsList( const std::list<VobInfo*>& vobs, zCCamer
 LRESULT D3D11GraphicsEngine::OnWindowMessage( HWND hWnd, UINT msg, WPARAM wParam,
     LPARAM lParam ) {
     switch ( msg ) {
+    case WM_ACTIVATE:
     case WM_ACTIVATEAPP:
-        break; // Does not work with Union. Will have to find a different way.
-        //if (wParam) {
-        //	if (m_previousFpsLimit > 0) {
-        //		m_FrameLimiter->SetLimit(m_previousFpsLimit);
-        //	} else {
-        //		Engine::GAPI->GetRendererState().RendererSettings.FpsLimit = 0;
-        //		m_FrameLimiter->Reset();
-        //	}
-        //} else if (UIView->GetSettingsDialog()->IsHidden()) {
-        //	m_previousFpsLimit = Engine::GAPI->GetRendererState().RendererSettings.FpsLimit;
-        //	Engine::GAPI->GetRendererState().RendererSettings.FpsLimit = 30;
-        //}
-        //break;
+        if ( wParam == 0 ) {
+            m_isWindowActive = false;
+        } else {
+            m_isWindowActive = true;
+        }
+        break;
     }
     if ( UIView ) {
         UIView->OnWindowMessage( hWnd, msg, wParam, lParam );
@@ -5205,7 +5182,7 @@ void D3D11GraphicsEngine::DrawQuadMarks() {
         Engine::GAPI->SetWorldTransformXM( it.first->GetConnectedVob()->GetWorldMatrixXM() );
         SetupVS_ExPerInstanceConstantBuffer();
 
-        Engine::GraphicsEngine->DrawVertexBuffer( it.second.Mesh, it.second.NumVertices );
+        DrawVertexBuffer( it.second.Mesh, it.second.NumVertices );
     }
 }
 
