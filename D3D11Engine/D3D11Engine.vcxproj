@@ -604,6 +604,7 @@ copy "$(OutDir)$(TargetName).pdb" "$(G1_SYSTEM_PATH)\ddraw.pdb"</Command>
     <ClInclude Include="SV_Slider.h" />
     <ClInclude Include="SV_TabControl.h" />
     <ClInclude Include="ThreadPool.h" />
+    <ClInclude Include="Toolbox_fs.h" />
     <ClInclude Include="VersionCheck.h" />
     <ClInclude Include="WidgetContainer.h" />
     <ClInclude Include="Widget_TransRot.h" />
@@ -780,6 +781,7 @@ copy "$(OutDir)$(TargetName).pdb" "$(G1_SYSTEM_PATH)\ddraw.pdb"</Command>
     <ClCompile Include="SV_Slider.cpp" />
     <ClCompile Include="SV_TabControl.cpp" />
     <ClCompile Include="Toolbox.cpp" />
+    <ClCompile Include="Toolbox_fs.cpp" />
     <ClCompile Include="VersionCheck.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt_Spacer|Win32'">NotUsing</PrecompiledHeader>

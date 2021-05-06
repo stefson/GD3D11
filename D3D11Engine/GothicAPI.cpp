@@ -498,7 +498,7 @@ void GothicAPI::OnGeometryLoaded( zCPolygon** polys, unsigned int numPolygons ) 
 #ifdef BUILD_GOTHIC_2_6_fix
     WorldConverter::ConvertWorldMesh( polys, numPolygons, &WorldSections, LoadedWorldInfo.get(), &WrappedWorldMesh );
 #else
-    if ( Toolbox::FileExists( worldStr ) ) {
+    if ( Toolbox::fs::FileExists( worldStr ) ) {
         WorldConverter::LoadWorldMeshFromFile( worldStr, &WorldSections, LoadedWorldInfo.get(), &WrappedWorldMesh );
         LoadedWorldInfo->CustomWorldLoaded = true;
     } else {
@@ -627,13 +627,13 @@ void GothicAPI::LoadRendererWorldSettings( GothicRendererSettings& s ) {
     } else {
         zenFolder = "system\\GD3D11\\ZENResources\\" + gameName + "\\";
     }
-    if ( !Toolbox::FolderExists( zenFolder ) ) {
+    if ( !Toolbox::fs::FolderExists( zenFolder ) ) {
         LogInfo() << "Custom ZEN-Resources. Directory not found: " << zenFolder;
         return;
     }
 
     auto const ini = zenFolder + LoadedWorldInfo->WorldName + ".INI";
-    if ( !Toolbox::FileExists( ini ) ) {
+    if ( !Toolbox::fs::FileExists( ini ) ) {
         return;
     }
 
@@ -682,8 +682,8 @@ void GothicAPI::SaveRendererWorldSettings( const GothicRendererSettings& s ) {
     } else {
         zenFolder = "system\\GD3D11\\ZENResources\\" + gameName + "\\";
     }
-    if ( !Toolbox::FolderExists( zenFolder ) ) {
-        if ( !Toolbox::CreateDirectoryRecursive( zenFolder ) ) {
+    if ( !Toolbox::fs::FolderExists( zenFolder ) ) {
+        if ( !Toolbox::fs::CreateDirectoryRecursive( zenFolder ) ) {
             LogError() << "Could not save custom ZEN-Resources. Could not create directory: " << zenFolder;
             return;
         }
@@ -3323,7 +3323,7 @@ void GothicAPI::LoadCustomZENResources() {
     } else {
         zenFolder = "system\\GD3D11\\ZENResources\\" + gameName + "\\";
     }
-    if ( !Toolbox::FolderExists( zenFolder ) ) {
+    if ( !Toolbox::fs::FolderExists( zenFolder ) ) {
         LogInfo() << "Custom ZEN-Resources. Directory not found: " << zenFolder;
         return;
     }
@@ -3353,8 +3353,8 @@ void GothicAPI::SaveCustomZENResources() {
     }
 
     bool mkDirErr = false;
-    if ( !Toolbox::FolderExists( zenFolder ) ) {
-        mkDirErr = !Toolbox::CreateDirectoryRecursive( zenFolder );
+    if ( !Toolbox::fs::FolderExists( zenFolder ) ) {
+        mkDirErr = !Toolbox::fs::CreateDirectoryRecursive( zenFolder );
     }
 
     if ( mkDirErr ) {
@@ -3652,7 +3652,7 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
     auto ini = std::string( NPath, len ).append( "\\" + file );
 
 
-    if ( !Toolbox::FileExists( ini ) ) {
+    if ( !Toolbox::fs::FileExists( ini ) ) {
         LogWarn() << "Settings file not found: " << ini;
         return XR_FAILED;
     }

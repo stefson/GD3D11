@@ -110,7 +110,7 @@ XRESULT WorldConverter::LoadWorldMeshFromFile( const std::string& file, std::map
     const float worldScale = 100.0f;
 
     // Check if we have this file cached
-    if ( Toolbox::FileExists( (file + ".mcache").c_str() ) ) {
+    if ( Toolbox::fs::FileExists( (file + ".mcache").c_str() ) ) {
         // Load the meshfile, cached
         mesh->LoadMesh( (file + ".mcache").c_str(), worldScale );
     } else {

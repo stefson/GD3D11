@@ -720,6 +720,9 @@
     <ClInclude Include="D3DShaderCompiler.h">
       <Filter>Engine\D3D11</Filter>
     </ClInclude>
+    <ClInclude Include="Toolbox_fs.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -951,6 +954,9 @@
     <ClCompile Include="BaseShadowedPointLight.cpp" />
     <ClCompile Include="D3D11GraphicsEngine.cpp">
       <Filter>Engine\D3D11\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Toolbox_fs.cpp">
+      <Filter>Tools</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
