@@ -97,17 +97,14 @@ public:
 
         Microsoft::WRL::ComPtr<ID3DBlob> pErrorBlob;
 
-        if ( makros.empty() ) {
-            hr = D3DCompileFromFile( szFileName, nullptr, &include, szEntryPoint, szShaderModel, dwShaderFlags, 0, ppBlobOut, pErrorBlob.GetAddressOf() );
-        } else {
-            // Construct makros
-            std::vector<D3D_SHADER_MACRO> m;
-            D3D11GraphicsEngineBase::ConstructShaderMakroList( m );
+        std::vector<D3D_SHADER_MACRO> m;
+        // Construct makros
+        D3D11GraphicsEngineBase::ConstructShaderMakroList( m );
+        if ( !makros.empty() ) {
             // Push these to the front
             m.insert( m.begin(), makros.begin(), makros.end() );
-
-            hr = D3DCompileFromFile( szFileName, &m[0], &include, szEntryPoint, szShaderModel, dwShaderFlags, 0, ppBlobOut, pErrorBlob.GetAddressOf() );
         }
+        hr = D3DCompileFromFile( szFileName, &m[0], &include, szEntryPoint, szShaderModel, dwShaderFlags, 0, ppBlobOut, pErrorBlob.GetAddressOf() );
         if ( FAILED( hr ) ) {
             LogInfo() << "Shader compilation failed";
             if ( pErrorBlob.Get() ) {
