@@ -16,6 +16,7 @@
 #include "ocean_simulator.h"
 #include <assert.h>
 #include <d3dcompiler.h>
+#include "D3DShaderCompiler.h"
 
 // Disable warning "conditional expression is constant"
 #pragma warning(disable:4127)
@@ -27,8 +28,6 @@
 
 #define BLOCK_SIZE_X 16
 #define BLOCK_SIZE_Y 16
-
-HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut);
 
 // Generating gaussian random number with mean 0 and standard deviation 1.
 float Gauss()
@@ -218,7 +217,7 @@ OceanSimulator::OceanSimulator(OceanParameter& params, Microsoft::WRL::ComPtr<ID
 	// Compute shaders
 	Microsoft::WRL::ComPtr<ID3DBlob> pBlobUpdateSpectrumCS;
 
-    CompileShaderFromFile(L"ocean_simulator_cs.hlsl", "UpdateSpectrumCS", "cs_5_0", pBlobUpdateSpectrumCS.GetAddressOf());
+    CShaderCompiler::CompileFromFile( L"system\\GD3D11\\Shaders\\ocean_simulator_cs.hlsl", "UpdateSpectrumCS", "cs_5_0", pBlobUpdateSpectrumCS.GetAddressOf());
 	assert(pBlobUpdateSpectrumCS.Get());
 
     m_pd3dDevice->CreateComputeShader(pBlobUpdateSpectrumCS->GetBufferPointer(), pBlobUpdateSpectrumCS->GetBufferSize(), nullptr, m_pUpdateSpectrumCS.GetAddressOf());
@@ -229,9 +228,9 @@ OceanSimulator::OceanSimulator(OceanParameter& params, Microsoft::WRL::ComPtr<ID
 	Microsoft::WRL::ComPtr<ID3DBlob> pBlobUpdateDisplacementPS;
 	Microsoft::WRL::ComPtr<ID3DBlob> pBlobGenGradientFoldingPS;
 
-    CompileShaderFromFile(L"ocean_simulator_vs_ps.hlsl", "QuadVS", "vs_5_0", pBlobQuadVS.GetAddressOf());
-    CompileShaderFromFile(L"ocean_simulator_vs_ps.hlsl", "UpdateDisplacementPS", "ps_5_0", pBlobUpdateDisplacementPS.GetAddressOf());
-    CompileShaderFromFile(L"ocean_simulator_vs_ps.hlsl", "GenGradientFoldingPS", "ps_5_0", pBlobGenGradientFoldingPS.GetAddressOf());
+    CShaderCompiler::CompileFromFile( L"system\\GD3D11\\Shaders\\ocean_simulator_vs_ps.hlsl", "QuadVS", "vs_5_0", pBlobQuadVS.GetAddressOf());
+    CShaderCompiler::CompileFromFile( L"system\\GD3D11\\Shaders\\ocean_simulator_vs_ps.hlsl", "UpdateDisplacementPS", "ps_5_0", pBlobUpdateDisplacementPS.GetAddressOf());
+    CShaderCompiler::CompileFromFile( L"system\\GD3D11\\Shaders\\ocean_simulator_vs_ps.hlsl", "GenGradientFoldingPS", "ps_5_0", pBlobGenGradientFoldingPS.GetAddressOf());
 	assert(pBlobQuadVS.Get());
 	assert(pBlobUpdateDisplacementPS.Get());
 	assert(pBlobGenGradientFoldingPS.Get());
@@ -530,52 +529,4 @@ Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> OceanSimulator::getD3D11Gradien
 const OceanParameter& OceanSimulator::getParameters()
 {
 	return m_param;
-}
-
-HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut)
-{
-    HRESULT hr = S_OK;
-
-    // find the file
-    WCHAR str[MAX_PATH];
-	wcscpy(str,(std::wstring(L"system\\GD3D11\\Shaders\\") + szFileName).c_str());
-	//V_RETURN(DXUTFindDXSDKMediaFileCch(str, MAX_PATH, szFileName));
-
-    // open the file
-    HANDLE hFile = CreateFileW(str, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
-        FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
-    if (INVALID_HANDLE_VALUE == hFile)
-        return E_FAIL;
-
-    // Get the file size
-    LARGE_INTEGER FileSize;
-    GetFileSizeEx(hFile, &FileSize);
-
-    // create enough space for the file data
-    BYTE* pFileData = new BYTE[ FileSize.LowPart ];
-    if (!pFileData)
-        return E_OUTOFMEMORY;
-
-    // read the data in
-    DWORD BytesRead;
-    if (!ReadFile(hFile, pFileData, FileSize.LowPart, &BytesRead, nullptr))
-        return E_FAIL; 
-
-    CloseHandle(hFile);
-
-    // Compile the shader
-    char pFilePathName[MAX_PATH];        
-    WideCharToMultiByte(CP_ACP, 0, str, -1, pFilePathName, MAX_PATH, nullptr, nullptr);
-	Microsoft::WRL::ComPtr<ID3DBlob> pErrorBlob;
-    hr = D3DCompile(pFileData, FileSize.LowPart, pFilePathName, nullptr, nullptr, szEntryPoint, szShaderModel, D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_OPTIMIZATION_LEVEL3, 0, ppBlobOut, pErrorBlob.GetAddressOf());
-
-    delete []pFileData;
-
-    if (FAILED(hr)) {
-        OutputDebugStringA((char*)pErrorBlob->GetBufferPointer());
-		LogError() << "(char*)pErrorBlob->GetBufferPointer()";
-        return hr;
-    }
-
-    return S_OK;
 }

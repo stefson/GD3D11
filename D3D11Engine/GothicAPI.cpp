@@ -197,6 +197,10 @@ void GothicAPI::OnGameStart() {
     GetCurrentDirectoryA( MAX_PATH, dir );
     StartDirectory = dir;
 
+    wchar_t dirW[MAX_PATH];
+    GetCurrentDirectoryW( MAX_PATH, dirW );
+    StartDirectoryW = dirW;
+
     InitializeCriticalSection( &ResourceCriticalSection );
 
     SkyRenderer = std::make_unique<GSky>();
@@ -729,11 +733,6 @@ void GothicAPI::TraverseVobTree( zCTree<zCVob>* tree ) {
         if ( tree->Data->GetVisual() )
             OnAddVob( tree->Data, oCGame::GetGame()->_zCSession_world );
     }
-}
-
-/** Returns in which directory we started in */
-const std::string& GothicAPI::GetStartDirectory() {
-    return StartDirectory;
 }
 
 /** Builds the static mesh instancing cache */

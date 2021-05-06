@@ -488,6 +488,7 @@ copy "$(OutDir)$(TargetName).pdb" "$(G1_SYSTEM_PATH)\ddraw.pdb"</Command>
     <ClInclude Include="D3D7\MyDirect3DVertexBuffer7.h" />
     <ClInclude Include="D3D7\MyDirectDraw.h" />
     <ClInclude Include="D3D7\MyDirectDrawSurface7.h" />
+    <ClInclude Include="D3DShaderCompiler.h" />
     <ClInclude Include="EditorLinePrimitive.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="GFSDK_SSAO.h" />

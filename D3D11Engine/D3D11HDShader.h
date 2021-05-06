@@ -31,10 +31,6 @@ public:
     /** Returns this textures ID */
     UINT16 GetID() { return ID; };
 private:
-
-    /** Compiles the shader from file and outputs error messages if needed */
-    HRESULT CompileShaderFromFile( const CHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut );
-
     Microsoft::WRL::ComPtr<ID3D11HullShader> HullShader;
     Microsoft::WRL::ComPtr<ID3D11DomainShader> DomainShader;
     std::vector<D3D11ConstantBuffer*> ConstantBuffers;

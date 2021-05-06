@@ -717,6 +717,9 @@
     <ClInclude Include="InstructionSet.h">
       <Filter>DLLMain</Filter>
     </ClInclude>
+    <ClInclude Include="D3DShaderCompiler.h">
+      <Filter>Engine\D3D11</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

@@ -242,7 +242,8 @@ public:
     GothicRendererState& GetRendererState();
 
     /** Returns in which directory we started in */
-    const std::string& GetStartDirectory();
+    const std::string& GothicAPI::GetStartDirectory() { return StartDirectory; }
+    const std::wstring& GothicAPI::GetStartDirectoryW() { return StartDirectoryW; }
 
     /** Draws the world-mesh */
     void DrawWorldMeshNaive();
@@ -736,6 +737,7 @@ private:
 
     /** Directory we started in */
     std::string StartDirectory;
+    std::wstring StartDirectoryW;
 
     /** Resource critical section */
     CRITICAL_SECTION ResourceCriticalSection;

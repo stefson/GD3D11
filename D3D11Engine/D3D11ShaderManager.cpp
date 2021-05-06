@@ -570,6 +570,9 @@ XRESULT D3D11ShaderManager::LoadShaders() {
     if ( numThreads > 1 ) {
         numThreads = numThreads - 1;
     }
+#if defined(DEBUG) || defined(_DEBUG) || !defined(PUBLIC_RELEASE)
+    numThreads = 1;
+#endif
     auto compilationTP = std::make_unique<ThreadPool>( numThreads );
     LogInfo() << "Compiling/Reloading shaders with " << compilationTP->getNumThreads() << " threads";
     for ( const ShaderInfo& si : Shaders ) {
