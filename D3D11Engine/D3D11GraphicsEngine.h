@@ -65,15 +65,6 @@ public:
     /** Called when the game wants to clear the bound rendertarget */
     virtual XRESULT Clear( const float4& color );
 
-    /** Creates a vertexbuffer object (Not registered inside) */
-    virtual XRESULT CreateVertexBuffer( D3D11VertexBuffer** outBuffer );
-
-    /** Creates a texture object (Not registered inside) */
-    virtual XRESULT CreateTexture( D3D11Texture** outTexture );
-
-    /** Creates a constantbuffer object (Not registered inside) */
-    virtual XRESULT CreateConstantBuffer( D3D11ConstantBuffer** outCB, void* data, int size );
-
     /** Returns a list of available display modes */
     virtual XRESULT GetDisplayModeList( std::vector<DisplayModeInfo>* modeList, bool includeSuperSampling = false );
 
@@ -175,9 +166,6 @@ public:
 
     /** Returns the data of the backbuffer */
     void GetBackbufferData( byte** data, int& pixelsize );
-
-    /** Returns the line renderer object */
-    BaseLineRenderer* GetLineRenderer();
 
     /** ---------------- Gothic rendering functions -------------------- */
 

@@ -167,12 +167,6 @@ public:
     /** Returns a list of available display modes */
     virtual XRESULT GetDisplayModeList( std::vector<DisplayModeInfo>* modeList, bool includeSuperSampling = false ) PURE;
 
-    /** Presents the current frame to the screen */
-    virtual XRESULT Present();
-
-    /** Called when we started to render the world */
-    virtual XRESULT OnStartWorldRendering();
-
     /** Returns the line renderer object */
     virtual BaseLineRenderer* GetLineRenderer();
 
