@@ -251,19 +251,19 @@ namespace Toolbox {
     }
 
     /** Converts an errorcode into a string */
-    std::string MakeErrorString( XRESULT code ) {
+    std::wstring MakeErrorString( XRESULT code ) {
         switch ( code ) {
         case XRESULT::XR_FAILED:
-            return "General fail";
+            return L"General fail";
 
         case XRESULT::XR_SUCCESS:
-            return "Success";
+            return L"Success";
 
         case XRESULT::XR_INVALID_ARG:
-            return "Invalid argument";
+            return L"Invalid argument";
 
         default:
-            return "Other error";
+            return L"Other error";
         }
     }
 

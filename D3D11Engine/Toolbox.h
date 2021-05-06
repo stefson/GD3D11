@@ -133,7 +133,7 @@ namespace Toolbox {
     bool PositionInsideBox( const DirectX::XMFLOAT3& p, const DirectX::XMFLOAT3& min, const DirectX::XMFLOAT3& max );
 
     /** Converts an errorcode into a string */
-    std::string MakeErrorString( XRESULT code );
+    std::wstring MakeErrorString( XRESULT code );
 
     /** Returns the number of bits inside a bitmask */
     WORD GetNumberOfBits( DWORD dwMask );

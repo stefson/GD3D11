@@ -39,4 +39,11 @@ namespace Toolbox::fs {
         buf.resize( nLen );
         return buf;
     }
+    std::wstring GetExecutableDirectoryW() {
+        std::wstring buf( MAX_PATH, L'\0' );
+        DWORD nLen = ::GetModuleFileNameW( NULL, &buf[0], MAX_PATH );
+        buf.resize( nLen );
+        buf = buf.substr( 0, buf.find_last_of( '\\' ) + 1 );
+        return buf;
+    }
 }

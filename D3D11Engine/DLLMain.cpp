@@ -164,20 +164,20 @@ void EnableCrashingOnCrashes() {
 
 void CheckPlatformSupport() {
     LogInstructionSet();
-    auto support_message = []( std::string isa_feature, bool is_supported ) {
+    auto support_message = []( std::wstring isa_feature, bool is_supported ) {
         if ( !is_supported ) {
-            ErrorBox( (std::string( "Incompatible System, wrong DLL?\n\n" + isa_feature + " required, but not supported on:\n" ) + InstructionSet::Brand()).c_str() );
+            ErrorBox( (std::wstring( L"Incompatible System, wrong DLL?\n\n" + isa_feature + L" required, but not supported on:\n" ) + Toolbox::ToWideChar( InstructionSet::Brand()) ).c_str());
             exit( 1 );
         }
     };
 #if __AVX2__
-    support_message( "AVX2", InstructionSet::AVX2() );
+    support_message( L"AVX2", InstructionSet::AVX2() );
 #elif __AVX__
-    support_message( "AVX", InstructionSet::AVX() );
+    support_message( L"AVX", InstructionSet::AVX() );
 #elif __SSE2__
-    support_message( "SSE2", InstructionSet::SSE2() );
+    support_message( L"SSE2", InstructionSet::SSE2() );
 #elif __SSE__
-    support_message( "SSE", InstructionSet::SSE() );
+    support_message( L"SSE", InstructionSet::SSE() );
 #endif
 }
 

@@ -11,5 +11,6 @@ namespace Toolbox::fs {
     bool CreateDirectoryRecursive( const std::string& dirName );
 
     std::wstring GetExecutablePathW();
+    std::wstring GetExecutableDirectoryW();
 }
 

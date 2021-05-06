@@ -12,7 +12,7 @@ class MyStackWalker : public StackWalker {
 public:
     MyStackWalker() : StackWalker() { LoadModules(); }
     MyStackWalker( DWORD dwProcessId, HANDLE hProcess ) : StackWalker( dwProcessId, hProcess ) {}
-    virtual void OnOutput( LPCSTR szText ) { Log( "STACK", __FILE__, __LINE__, __FUNCSIG__ ) << szText; StackWalker::OnOutput( szText ); }
+    virtual void OnOutput( LPCSTR szText ) { Log( L"STACK", __FILEW__, __LINE__, WIDE1( __FUNCSIG__ ) ) << szText; StackWalker::OnOutput( szText ); }
 
     static MyStackWalker& GetSingleton() { static MyStackWalker singleton; return singleton; }
 };
