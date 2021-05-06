@@ -133,27 +133,27 @@ void SV_GMeshInfoView::UpdateView() {
 	g->GetContext()->OMSetRenderTargets( 1, RT->GetRenderTargetView().GetAddressOf(), DS->GetDepthStencilView().Get() );
 
 	// Setup shaders
-	g->SetActiveVertexShader( "VS_Ex" );
-	g->SetActivePixelShader( "PS_DiffuseAlphaTest" );
+	g->SetActiveVertexShader( L"VS_Ex" );
+	g->SetActivePixelShader( L"PS_DiffuseAlphaTest" );
 
 	switch ( RenderMode ) {
 	case RM_Lit:
-		g->SetActivePixelShader( "PS_Preview_TexturedLit" );
+		g->SetActivePixelShader( L"PS_Preview_TexturedLit" );
 		DrawMeshes();
 		break;
 
 	case RM_Textured:
-		g->SetActivePixelShader( "PS_Preview_Textured" );
+		g->SetActivePixelShader( L"PS_Preview_Textured" );
 		DrawMeshes();
 		break;
 
 	case RM_TexturedWireFrame:
-		g->SetActivePixelShader( "PS_Preview_Textured" );
+		g->SetActivePixelShader( L"PS_Preview_Textured" );
 		DrawMeshes();
 		// No break here, render wireframe right after
 
 	case RM_Wireframe:
-		g->SetActivePixelShader( "PS_Preview_White" );
+		g->SetActivePixelShader( L"PS_Preview_White" );
 		Engine::GAPI->GetRendererState().RasterizerState.Wireframe = true;
 		Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
 		DrawMeshes();
@@ -198,8 +198,8 @@ void SV_GMeshInfoView::DrawMeshes() {
 			g->GetContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 			g->GetContext()->DSSetShader( nullptr, nullptr, 0 );
 			g->GetContext()->HSSetShader( nullptr, nullptr, 0 );
-			g->SetActiveHDShader( "" );
-			g->SetActiveVertexShader( "VS_Ex" );
+			g->SetActiveHDShader( L"" );
+			g->SetActiveVertexShader( L"VS_Ex" );
 
 			if ( it->first && it->first->CacheIn( -1 ) == zRES_CACHED_IN ) {
 				// Draw

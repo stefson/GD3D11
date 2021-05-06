@@ -26,7 +26,7 @@ D3D11VShader::~D3D11VShader() {
 }
 
 /** Loads shader */
-XRESULT D3D11VShader::LoadShader( const char* vertexShader, int layout, const std::vector<D3D_SHADER_MACRO>& makros ) {
+XRESULT D3D11VShader::LoadShader( const wchar_t* vertexShader, int layout, const std::vector<D3D_SHADER_MACRO>& makros ) {
     HRESULT hr;
     D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase*)Engine::GraphicsEngine;
 
@@ -37,7 +37,7 @@ XRESULT D3D11VShader::LoadShader( const char* vertexShader, int layout, const st
     File = vertexShader;
 
     // Compile shader
-    if ( FAILED( CShaderCompiler::CompileFromFile( Toolbox::ToWideChar( vertexShader ).c_str(), "VSMain", "vs_5_0", makros, vsBlob.GetAddressOf() ) ) ) {
+    if ( FAILED( CShaderCompiler::CompileFromFile( vertexShader, "VSMain", "vs_5_0", makros, vsBlob.GetAddressOf() ) ) ) {
         return XR_FAILED;
     }
 

@@ -7,7 +7,7 @@ public:
     ~D3D11PFX_Blur();
 
     /** Draws this effect to the given buffer */
-    virtual XRESULT RenderBlur( RenderToTextureBuffer* fxbuffer, bool leaveResultInD4_2 = false, float threshold = 0.0f, float scale = 1.0f, const DirectX::XMFLOAT4& colorMod = DirectX::XMFLOAT4( 1, 1, 1, 1 ), const std::string& finalCopyShader = "PS_PFX_Simple" );
+    virtual XRESULT RenderBlur( RenderToTextureBuffer* fxbuffer, bool leaveResultInD4_2 = false, float threshold = 0.0f, float scale = 1.0f, const DirectX::XMFLOAT4& colorMod = DirectX::XMFLOAT4( 1, 1, 1, 1 ), const std::wstring& finalCopyShader = L"PS_PFX_Simple" );
 
     /** Draws this effect to the given buffer */
     virtual XRESULT Render( RenderToTextureBuffer* fxbuffer );

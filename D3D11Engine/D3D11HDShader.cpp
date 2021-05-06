@@ -34,7 +34,7 @@ D3D11HDShader::~D3D11HDShader() {
 
 
 /** Loads both shaders at the same time */
-XRESULT D3D11HDShader::LoadShader( const char* hullShader, const char* domainShader ) {
+XRESULT D3D11HDShader::LoadShader( const wchar_t* hullShader, const wchar_t* domainShader ) {
     HRESULT hr;
     D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase*)Engine::GraphicsEngine;
 
@@ -47,11 +47,11 @@ XRESULT D3D11HDShader::LoadShader( const char* hullShader, const char* domainSha
 
     // Compile shaders
 
-    if ( FAILED( CShaderCompiler::CompileFromFile( Toolbox::ToWideChar( hullShader ).c_str(), "HSMain", "hs_5_0", hsBlob.GetAddressOf() ) ) ) {
+    if ( FAILED( CShaderCompiler::CompileFromFile( hullShader, "HSMain", "hs_5_0", hsBlob.GetAddressOf() ) ) ) {
         return XR_FAILED;
     }
 
-    if ( FAILED( CShaderCompiler::CompileFromFile( Toolbox::ToWideChar( domainShader ).c_str(), "DSMain", "ds_5_0", dsBlob.GetAddressOf() ) ) ) {
+    if ( FAILED( CShaderCompiler::CompileFromFile( domainShader, "DSMain", "ds_5_0", dsBlob.GetAddressOf() ) ) ) {
         return XR_FAILED;
     }
 

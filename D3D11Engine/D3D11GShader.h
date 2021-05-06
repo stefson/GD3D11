@@ -11,7 +11,7 @@ public:
 
 
     /** Loads shader */
-    XRESULT LoadShader( const char* geometryShader, const std::vector<D3D_SHADER_MACRO>& makros = std::vector<D3D_SHADER_MACRO>(), bool createStreamOutFromVS = false, int soLayout = 0 );
+    XRESULT LoadShader( const wchar_t* geometryShader, const std::vector<D3D_SHADER_MACRO>& makros = std::vector<D3D_SHADER_MACRO>(), bool createStreamOutFromVS = false, int soLayout = 0 );
 
     /** Applys the shader */
     XRESULT Apply();
@@ -29,7 +29,7 @@ private:
     Microsoft::WRL::ComPtr<ID3D11GeometryShader> GeometryShader;
     std::vector<D3D11ConstantBuffer*> ConstantBuffers;
 
-    std::string File;
+    std::wstring File;
 
     /** ID of this shader */
     UINT16 ID;

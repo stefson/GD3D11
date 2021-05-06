@@ -67,9 +67,9 @@ XRESULT D3D11PFX_GodRays::Render( RenderToTextureBuffer* fxbuffer ) {
 
 	engine->GetContext()->OMGetRenderTargets( 1, oldRTV.GetAddressOf(), oldDSV.GetAddressOf() );
 
-	auto vs = engine->GetShaderManager().GetVShader( "VS_PFX" );
-	auto maskPS = engine->GetShaderManager().GetPShader( "PS_PFX_GodRayMask" );
-	auto zoomPS = engine->GetShaderManager().GetPShader( "PS_PFX_GodRayZoom" );
+	auto vs = engine->GetShaderManager().GetVShader( L"VS_PFX" );
+	auto maskPS = engine->GetShaderManager().GetPShader( L"PS_PFX_GodRayMask" );
+	auto zoomPS = engine->GetShaderManager().GetPShader( L"PS_PFX_GodRayZoom" );
 
 	maskPS->Apply();
 	vs->Apply();

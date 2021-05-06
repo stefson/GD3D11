@@ -177,7 +177,7 @@ public:
     virtual BaseLineRenderer* GetLineRenderer();
 
     /** Returns the graphics-device this is running on */
-    virtual std::string GetGraphicsDeviceName();
+    virtual std::wstring GetGraphicsDeviceName();
 
     /** Saves a screenshot */
     virtual void SaveScreenshot() {}
@@ -192,7 +192,7 @@ public:
     virtual XRESULT DrawVertexBufferFF( D3D11VertexBuffer* vb, unsigned int numVertices, unsigned int startVertex, unsigned int stride = sizeof( ExVertexStruct ) );
 
     /** Binds viewport information to the given constantbuffer slot */
-    XRESULT D3D11GraphicsEngineBase::BindViewportInformation( const std::string& shader, int slot );
+    XRESULT D3D11GraphicsEngineBase::BindViewportInformation( const std::wstring& shader, int slot );
 
     /** Returns the Device/Context */
     const Microsoft::WRL::ComPtr<ID3D11Device1>& GetDevice() { return Device; }
@@ -220,10 +220,10 @@ public:
     void SetupPerInstanceConstantBuffer( int slot = 1 );
 
     /** Sets the active pixel shader object */
-    virtual XRESULT SetActivePixelShader( const std::string& shader );
-    virtual XRESULT SetActiveVertexShader( const std::string& shader );
-    virtual XRESULT SetActiveHDShader( const std::string& shader );
-    virtual XRESULT SetActiveGShader( const std::string& shader );
+    virtual XRESULT SetActivePixelShader( const std::wstring& shader );
+    virtual XRESULT SetActiveVertexShader( const std::wstring& shader );
+    virtual XRESULT SetActiveHDShader( const std::wstring& shader );
+    virtual XRESULT SetActiveGShader( const std::wstring& shader );
     //virtual int MeasureString(std::string str, zFont* zFont);
 
 protected:
@@ -234,7 +234,7 @@ protected:
     Microsoft::WRL::ComPtr<IDXGIFactory2> DXGIFactory2;
     Microsoft::WRL::ComPtr<IDXGIAdapter2> DXGIAdapter2;
     Microsoft::WRL::ComPtr<IDXGIAdapter1> DXGIAdapter1;
-    std::string DeviceDescription;
+    std::wstring DeviceDescription;
 
     Microsoft::WRL::ComPtr<ID3D11Device> Device11;
     Microsoft::WRL::ComPtr<ID3D11DeviceContext> Context11;

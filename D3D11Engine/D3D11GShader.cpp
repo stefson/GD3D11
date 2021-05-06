@@ -26,7 +26,7 @@ D3D11GShader::~D3D11GShader() {
 }
 
 /** Loads both shaders at the same time */
-XRESULT D3D11GShader::LoadShader( const char* geometryShader, const std::vector<D3D_SHADER_MACRO>& makros, bool createStreamOutFromVS, int soLayout ) {
+XRESULT D3D11GShader::LoadShader( const wchar_t* geometryShader, const std::vector<D3D_SHADER_MACRO>& makros, bool createStreamOutFromVS, int soLayout ) {
     HRESULT hr;
     D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase*)Engine::GraphicsEngine;
 
@@ -37,7 +37,7 @@ XRESULT D3D11GShader::LoadShader( const char* geometryShader, const std::vector<
 
     if ( !createStreamOutFromVS ) {
         // Compile shaders
-        if ( FAILED( CShaderCompiler::CompileFromFile( Toolbox::ToWideChar( geometryShader ).c_str(), "GSMain", "gs_5_0", makros, gsBlob.GetAddressOf() ) ) ) {
+        if ( FAILED( CShaderCompiler::CompileFromFile( geometryShader, "GSMain", "gs_5_0", makros, gsBlob.GetAddressOf() ) ) ) {
             return XR_FAILED;
         }
 
@@ -45,7 +45,7 @@ XRESULT D3D11GShader::LoadShader( const char* geometryShader, const std::vector<
         LE( engine->GetDevice()->CreateGeometryShader( gsBlob->GetBufferPointer(), gsBlob->GetBufferSize(), nullptr, GeometryShader.GetAddressOf() ) );
     } else {
         // Compile vertexshader
-        if ( FAILED( CShaderCompiler::CompileFromFile( Toolbox::ToWideChar( geometryShader ).c_str(), "VSMain", "vs_5_0", makros, gsBlob.GetAddressOf() ) ) ) {
+        if ( FAILED( CShaderCompiler::CompileFromFile( geometryShader, "VSMain", "vs_5_0", makros, gsBlob.GetAddressOf() ) ) ) {
             return XR_FAILED;
         }
 

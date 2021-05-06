@@ -98,8 +98,8 @@ struct MaterialInfo {
 
         MaterialType = MT_None;
 
-        VertexShader = "";
-        PixelShader = "";
+        VertexShader = L"";
+        PixelShader = L"";
     }
 
     ~MaterialInfo() {
@@ -107,10 +107,10 @@ struct MaterialInfo {
     }
 
     /** Writes this info to a file */
-    void WriteToFile( const std::string& name );
+    void WriteToFile( const std::wstring& name );
 
     /** Loads this info from a file */
-    void LoadFromFile( const std::string& name );
+    void LoadFromFile( const std::wstring& name );
 
     struct Buffer {
         float SpecularIntensity;
@@ -126,9 +126,9 @@ struct MaterialInfo {
 
     D3D11ConstantBuffer* Constantbuffer;
 
-    std::string VertexShader;
-    std::string TesselationShaderPair;
-    std::string PixelShader;
+    std::wstring VertexShader;
+    std::wstring TesselationShaderPair;
+    std::wstring PixelShader;
     EMaterialType MaterialType;
     Buffer buffer;
 
@@ -559,16 +559,16 @@ public:
     void ResetVegetation();
 
     /** Saves Suppressed textures to a file */
-    XRESULT SaveSuppressedTextures( const std::string& file );
+    XRESULT SaveSuppressedTextures( const std::wstring& file );
 
     /** Saves Suppressed textures to a file */
-    XRESULT LoadSuppressedTextures( const std::string& file );
+    XRESULT LoadSuppressedTextures( const std::wstring& file );
 
     /** Saves vegetation to a file */
-    XRESULT SaveVegetation( const std::string& file );
+    XRESULT SaveVegetation( const std::wstring& file );
 
     /** Saves vegetation to a file */
-    XRESULT LoadVegetation( const std::string& file );
+    XRESULT LoadVegetation( const std::wstring& file );
 
     /** Sets/Gets the pending movie frame */
     void SetPendingMovieFrame( D3D11Texture* frame );

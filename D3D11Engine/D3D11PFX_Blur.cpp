@@ -20,7 +20,7 @@ D3D11PFX_Blur::~D3D11PFX_Blur() {
 }
 
 /** Draws this effect to the given buffer */
-XRESULT D3D11PFX_Blur::RenderBlur( RenderToTextureBuffer* fxbuffer, bool leaveResultInD4_2, float threshold, float scale, const DirectX::XMFLOAT4& colorMod, const std::string& finalCopyShader ) {
+XRESULT D3D11PFX_Blur::RenderBlur( RenderToTextureBuffer* fxbuffer, bool leaveResultInD4_2, float threshold, float scale, const DirectX::XMFLOAT4& colorMod, const std::wstring& finalCopyShader ) {
 	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
 
 	// Save old rendertargets
@@ -32,8 +32,8 @@ XRESULT D3D11PFX_Blur::RenderBlur( RenderToTextureBuffer* fxbuffer, bool leaveRe
 
 	/** Pass 1: Downscale/Blur-H */
 	// Apply PFX-VS
-	engine->GetShaderManager().GetVShader( "VS_PFX" )->Apply();
-	auto gaussPS = engine->GetShaderManager().GetPShader( "PS_PFX_GaussBlur" );
+	engine->GetShaderManager().GetVShader( L"VS_PFX" )->Apply();
+	auto gaussPS = engine->GetShaderManager().GetPShader( L"PS_PFX_GaussBlur" );
 	auto simplePS = engine->GetShaderManager().GetPShader( finalCopyShader );
 
 	// Apply blur-H shader

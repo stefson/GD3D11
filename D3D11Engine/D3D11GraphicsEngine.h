@@ -98,7 +98,7 @@ public:
     virtual XRESULT DrawVertexBufferFF( D3D11VertexBuffer* vb, unsigned int numVertices, unsigned int startVertex, unsigned int stride = sizeof( ExVertexStruct ) ) override;
 
     /** Binds viewport information to the given constantbuffer slot */
-    virtual XRESULT BindViewportInformation( const std::string& shader, int slot ) override;
+    virtual XRESULT BindViewportInformation( const std::wstring& shader, int slot ) override;
 
     /** Sets up a draw call for a VS_Ex-Mesh */
     void SetupVS_ExMeshDrawCall();
@@ -135,11 +135,6 @@ public:
 
     /** Called when a key got pressed */
     virtual XRESULT OnKeyDown( unsigned int key ) override;
-
-    /** Sets the active pixel shader object */
-    virtual XRESULT SetActivePixelShader( const std::string& shader );
-    virtual XRESULT SetActiveVertexShader( const std::string& shader );
-    XRESULT SetActiveHDShader( const std::string& shader );
 
     /** Binds the active PixelShader */
     virtual XRESULT BindActivePixelShader();

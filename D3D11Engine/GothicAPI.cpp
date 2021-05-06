@@ -46,11 +46,11 @@ using namespace DirectX;
 const DWORD SCENE_WETNESS_DURATION_MS = 60 * 2 * 1000;
 
 /** Writes this info to a file */
-void MaterialInfo::WriteToFile( const std::string& name ) {
-    FILE* f = fopen( ("system\\GD3D11\\textures\\infos\\" + name + ".mi").c_str(), "wb" );
+void MaterialInfo::WriteToFile( const std::wstring& name ) {
+    FILE* f = _wfopen( (L"system\\GD3D11\\textures\\infos\\" + name + L".mi").c_str(), L"wb" );
 
     if ( !f ) {
-        LogError() << "Failed to open file '" << ("system\\GD3D11\\textures\\infos\\" + name + ".mi") << "' for writing! Make sure the game runs in Admin mode "
+        LogError() << "Failed to open file '" << (L"system\\GD3D11\\textures\\infos\\" + name + L".mi") << "' for writing! Make sure the game runs in Admin mode "
             " to get the rights to write to that directory!";
 
         return;
@@ -67,8 +67,8 @@ void MaterialInfo::WriteToFile( const std::string& name ) {
 }
 
 /** Loads this info from a file */
-void MaterialInfo::LoadFromFile( const std::string& name ) {
-    FILE* f = fopen( ("system\\GD3D11\\textures\\infos\\" + name + ".mi").c_str(), "rb" );
+void MaterialInfo::LoadFromFile( const std::wstring& name ) {
+    FILE* f = _wfopen( (L"system\\GD3D11\\textures\\infos\\" + name + L".mi").c_str(), L"rb" );
 
     if ( !f )
         return;
@@ -798,7 +798,7 @@ void GothicAPI::DrawWorldMeshNaive() {
     START_TIMING();
     if ( RendererState.RendererSettings.DrawSkeletalMeshes ) {
 
-        Engine::GraphicsEngine->SetActivePixelShader( "PS_World" );
+        Engine::GraphicsEngine->SetActivePixelShader( L"PS_World" );
         // Set up frustum for the camera
         zCCamera::GetCamera()->Activate();
 
@@ -1590,7 +1590,7 @@ SkeletalMeshVisualInfo* GothicAPI::LoadzCModelData( zCModel* model ) {
 void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
     // TODO: Put this into the renderer!!
     D3D11GraphicsEngine* g = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
-    g->SetActiveVertexShader( "VS_Ex" );
+    g->SetActiveVertexShader( L"VS_Ex" );
 
     zCModel* model = (zCModel*)vi->Vob->GetVisual();
     SkeletalMeshVisualInfo* visual = ((SkeletalMeshVisualInfo*)vi->VisualInfo);
@@ -1688,9 +1688,9 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
     }
 
     if ( g->GetRenderingStage() == DES_SHADOWMAP_CUBE )
-        g->SetActiveVertexShader( "VS_ExCube" );
+        g->SetActiveVertexShader( L"VS_ExCube" );
     else {
-        g->SetActiveVertexShader( "VS_Ex" );
+        g->SetActiveVertexShader( L"VS_Ex" );
 
         RendererState.RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_BACK;
         RendererState.RasterizerState.SetDirty();
@@ -1764,7 +1764,7 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
                     zCMorphMesh* mm = (zCMorphMesh*)node->NodeVisual;
                     mm->GetTexAniState()->UpdateTexList();
 
-                    g->SetActivePixelShader( "PS_DiffuseAlphaTest" );
+                    g->SetActivePixelShader( L"PS_DiffuseAlphaTest" );
 
                     if ( g->GetRenderingStage() == DES_MAIN ) {// Only draw this as a morphmesh when rendering the main scene
                         const float fs = (fatness + 1.0f) * 0.02f; // This is what gothic seems to be doing for heads, and it even looks right...
@@ -3245,7 +3245,7 @@ MaterialInfo* GothicAPI::GetMaterialInfoFrom( zCTexture* tex ) {
     std::unordered_map<zCTexture*, MaterialInfo>::iterator f = MaterialInfos.find( tex );
     if ( f == MaterialInfos.end() && tex ) {
         // Make a new one and try to load it
-        MaterialInfos[tex].LoadFromFile( tex->GetNameWithoutExt() );
+        MaterialInfos[tex].LoadFromFile( tex->GetNameWithoutExtW() );
     }
 
     return &MaterialInfos[tex];
@@ -3317,26 +3317,26 @@ zCVob* GothicAPI::GetPlayerVob() {
 /** Loads resources created for this .ZEN */
 void GothicAPI::LoadCustomZENResources() {
     auto gameName = GetGameName();
-    std::string zenFolder;
+    std::wstring zenFolder;
     if ( gameName == "Original" ) {
-        zenFolder = "system\\GD3D11\\ZENResources\\";
+        zenFolder = L"system\\GD3D11\\ZENResources\\";
     } else {
-        zenFolder = "system\\GD3D11\\ZENResources\\" + gameName + "\\";
+        zenFolder = L"system\\GD3D11\\ZENResources\\" + Toolbox::ToWideChar( gameName ) + L"\\";
     }
-    if ( !Toolbox::fs::FolderExists( zenFolder ) ) {
+    if ( !Toolbox::fs::FolderExistsW( zenFolder ) ) {
         LogInfo() << "Custom ZEN-Resources. Directory not found: " << zenFolder;
         return;
     }
 
-    std::string zen = zenFolder + LoadedWorldInfo->WorldName;
+    std::wstring zen = zenFolder + Toolbox::ToWideChar( LoadedWorldInfo->WorldName );
 
     LogInfo() << "Loading custom ZEN-Resources from: " << zen;
 
     // Suppressed Textures
-    LoadSuppressedTextures( zen + ".spt" );
+    LoadSuppressedTextures( zen + L".spt" );
 
     // Load vegetation
-    LoadVegetation( zen + ".veg" );
+    LoadVegetation( zen + L".veg" );
 
     // Load world mesh information
     LoadSectionInfos();
@@ -3345,16 +3345,16 @@ void GothicAPI::LoadCustomZENResources() {
 /** Saves resources created for this .ZEN */
 void GothicAPI::SaveCustomZENResources() {
     auto gameName = GetGameName();
-    std::string zenFolder;
+    std::wstring zenFolder;
     if ( gameName == "Original" ) {
-        zenFolder = "system\\GD3D11\\ZENResources\\";
+        zenFolder = L"system\\GD3D11\\ZENResources\\";
     } else {
-        zenFolder = "system\\GD3D11\\ZENResources\\" + gameName + "\\";
+        zenFolder = L"system\\GD3D11\\ZENResources\\" + Toolbox::ToWideChar( gameName ) + L"\\";
     }
 
     bool mkDirErr = false;
-    if ( !Toolbox::fs::FolderExists( zenFolder ) ) {
-        mkDirErr = !Toolbox::fs::CreateDirectoryRecursive( zenFolder );
+    if ( !Toolbox::fs::FolderExistsW( zenFolder ) ) {
+        mkDirErr = !Toolbox::fs::CreateDirectoryRecursiveW( zenFolder );
     }
 
     if ( mkDirErr ) {
@@ -3362,15 +3362,15 @@ void GothicAPI::SaveCustomZENResources() {
         return;
     }
 
-    std::string zen = zenFolder + LoadedWorldInfo->WorldName;
+    std::wstring zen = zenFolder + Toolbox::ToWideChar( LoadedWorldInfo->WorldName );
 
     LogInfo() << "Saving custom ZEN-Resources to: " << zen;
 
     // Suppressed Textures
-    SaveSuppressedTextures( zen + ".spt" );
+    SaveSuppressedTextures( zen + L".spt" );
 
     // Save vegetation
-    SaveVegetation( zen + ".veg" );
+    SaveVegetation( zen + L".veg" );
 
     // Save world mesh information
     SaveSectionInfos();
@@ -3427,8 +3427,8 @@ void GothicAPI::SupressTexture( WorldMeshSectionInfo* section, const std::string
 }
 
 /** Saves Suppressed textures to a file */
-XRESULT GothicAPI::SaveSuppressedTextures( const std::string& file ) {
-    FILE* f = fopen( file.c_str(), "wb" );
+XRESULT GothicAPI::SaveSuppressedTextures( const std::wstring& file ) {
+    FILE* f = _wfopen( file.c_str(), L"wb" );
 
     LogInfo() << "Saving suppressed textures";
 
@@ -3466,8 +3466,8 @@ XRESULT GothicAPI::SaveSuppressedTextures( const std::string& file ) {
 }
 
 /** Saves Suppressed textures to a file */
-XRESULT GothicAPI::LoadSuppressedTextures( const std::string& file ) {
-    FILE* f = fopen( file.c_str(), "rb" );
+XRESULT GothicAPI::LoadSuppressedTextures( const std::wstring& file ) {
+    FILE* f = _wfopen( file.c_str(), L"rb" );
 
     LogInfo() << "Loading Suppressed textures";
 
@@ -3518,8 +3518,8 @@ XRESULT GothicAPI::LoadSuppressedTextures( const std::string& file ) {
 }
 
 /** Saves vegetation to a file */
-XRESULT GothicAPI::SaveVegetation( const std::string& file ) {
-    FILE* f = fopen( file.c_str(), "wb" );
+XRESULT GothicAPI::SaveVegetation( const std::wstring& file ) {
+    FILE* f = _wfopen( file.c_str(), L"wb" );
 
     LogInfo() << "Saving vegetation";
 
@@ -3542,8 +3542,8 @@ XRESULT GothicAPI::SaveVegetation( const std::string& file ) {
 }
 
 /** Saves vegetation to a file */
-XRESULT GothicAPI::LoadVegetation( const std::string& file ) {
-    FILE* f = fopen( file.c_str(), "rb" );
+XRESULT GothicAPI::LoadVegetation( const std::wstring& file ) {
+    FILE* f = _wfopen( file.c_str(), L"rb" );
 
     LogInfo() << "Loading vegetation";
 
@@ -4168,9 +4168,9 @@ void GothicAPI::PrintMessageTimed( const INT2& position, const std::string& strM
 /** Prints information about the mod to the screen for a couple of seconds */
 void GothicAPI::PrintModInfo() {
     std::string version = std::string( VERSION_STRING );
-    std::string gpu = Engine::GraphicsEngine->GetGraphicsDeviceName();
+    std::wstring gpu = Engine::GraphicsEngine->GetGraphicsDeviceName();
     PrintMessageTimed( INT2( 5, 5 ), "GD3D11 - Version " + version );
-    PrintMessageTimed( INT2( 5, 180 ), "Device: " + gpu );
+    PrintMessageTimed( INT2( 5, 180 ), "Device: " + Toolbox::ToMultiByte( gpu ) );
 }
 
 /** Applies tesselation-settings for all mesh-parts using the given info */

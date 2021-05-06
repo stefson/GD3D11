@@ -26,7 +26,7 @@ D3D11PShader::~D3D11PShader() {
 }
 
 /** Loads both shaders at the same time */
-XRESULT D3D11PShader::LoadShader( const char* pixelShader, const std::vector<D3D_SHADER_MACRO>& makros ) {
+XRESULT D3D11PShader::LoadShader( const wchar_t* pixelShader, const std::vector<D3D_SHADER_MACRO>& makros ) {
     HRESULT hr;
     D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase*)Engine::GraphicsEngine;
 
@@ -37,7 +37,7 @@ XRESULT D3D11PShader::LoadShader( const char* pixelShader, const std::vector<D3D
     File = pixelShader;
 
     // Compile shaders
-    if ( FAILED( CShaderCompiler::CompileFromFile( Toolbox::ToWideChar( pixelShader ).c_str(), "PSMain", "ps_5_0", makros, psBlob.GetAddressOf() ) ) ) {
+    if ( FAILED( CShaderCompiler::CompileFromFile( pixelShader, "PSMain", "ps_5_0", makros, psBlob.GetAddressOf() ) ) ) {
         return XR_FAILED;
     }
 

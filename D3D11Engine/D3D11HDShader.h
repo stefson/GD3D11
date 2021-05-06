@@ -11,7 +11,7 @@ public:
     ~D3D11HDShader();
 
     /** Loads shader */
-    XRESULT LoadShader( const char* hullShader, const char* domainShader );
+    XRESULT LoadShader( const wchar_t* hullShader, const wchar_t* domainShader );
 
     /** Applys the shader */
     XRESULT Apply();
@@ -35,7 +35,7 @@ private:
     Microsoft::WRL::ComPtr<ID3D11DomainShader> DomainShader;
     std::vector<D3D11ConstantBuffer*> ConstantBuffers;
 
-    std::string File;
+    std::wstring File;
 
     /** ID of this shader */
     UINT16 ID;
