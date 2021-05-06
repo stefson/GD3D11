@@ -104,6 +104,50 @@ D3D11GraphicsEngine::~D3D11GraphicsEngine() {
     // MemTrackerFinalReport();
 }
 
+HRESULT CheckD3D11FeatureLevel( D3D_FEATURE_LEVEL* maxFeatureLevel ) {
+    D3D_FEATURE_LEVEL featureLevels[] = {
+        D3D_FEATURE_LEVEL_11_1,
+        D3D_FEATURE_LEVEL_11_0,
+        D3D_FEATURE_LEVEL_10_1,
+        D3D_FEATURE_LEVEL_10_0,
+        D3D_FEATURE_LEVEL_9_3,
+        D3D_FEATURE_LEVEL_9_2,
+        D3D_FEATURE_LEVEL_9_1
+    };
+
+    *maxFeatureLevel = D3D_FEATURE_LEVEL_9_1;
+
+    // Check featurelevel
+
+    HRESULT hr = D3D11CreateDevice( nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0,
+        featureLevels, ARRAYSIZE( featureLevels ), D3D11_SDK_VERSION, nullptr, maxFeatureLevel, nullptr );
+    // Assume E_INVALIDARG occurs because D3D_FEATURE_LEVEL_11_1 is not supported on current platform
+    // retry with just 9.1-11.0
+    if ( hr == E_INVALIDARG ) {
+        hr = D3D11CreateDevice( nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0,
+            &featureLevels[1], ARRAYSIZE( featureLevels ) - 1, D3D11_SDK_VERSION, nullptr, maxFeatureLevel, nullptr );
+    }
+
+    if ( FAILED( hr ) ) {
+        return hr;
+    }
+
+    return hr;
+}
+
+void PrintD3DFeatureLevel( D3D_FEATURE_LEVEL lvl ) {
+    std::map<D3D_FEATURE_LEVEL, std::string> dxFeatureLevelsMap = {
+        {D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_11_1, "D3D_FEATURE_LEVEL_11_1"},
+        {D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_11_0, "D3D_FEATURE_LEVEL_11_0"},
+        {D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_10_1, "D3D_FEATURE_LEVEL_10_1"},
+        {D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_10_0, "D3D_FEATURE_LEVEL_10_0"},
+        {D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_9_3 , "D3D_FEATURE_LEVEL_9_3" },
+        {D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_9_2 , "D3D_FEATURE_LEVEL_9_2" },
+        {D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_9_1 , "D3D_FEATURE_LEVEL_9_1" },
+    };
+    LogInfo() << "D3D_FEATURE_LEVEL: " << dxFeatureLevelsMap.at( lvl );
+}
+
 /** Called when the game created it's window */
 XRESULT D3D11GraphicsEngine::Init() {
     HRESULT hr;
@@ -145,13 +189,18 @@ XRESULT D3D11GraphicsEngine::Init() {
 
     int flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 
-    D3D_FEATURE_LEVEL featurelevel = D3D_FEATURE_LEVEL_11_0;
+    D3D_FEATURE_LEVEL maxFeatureLevel = D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_9_1;
+    if ( FAILED( hr = CheckD3D11FeatureLevel( &maxFeatureLevel ) ) ) {
+        LogInfo() << "Could not determine D3D_FEATURE_LEVEL";
+    } else {
+        PrintD3DFeatureLevel( maxFeatureLevel );
+    }
 
     // Create D3D11-Device
 #ifndef DEBUG_D3D11
-    LE( D3D11CreateDevice( DXGIAdapter2.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags, &featurelevel, 1, D3D11_SDK_VERSION, Device11.GetAddressOf(), nullptr, Context11.GetAddressOf() ) );
+    LE( D3D11CreateDevice( DXGIAdapter2.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags, &maxFeatureLevel, 1, D3D11_SDK_VERSION, Device11.GetAddressOf(), nullptr, Context11.GetAddressOf() ) );
 #else
-    LE( D3D11CreateDevice( DXGIAdapter2.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags | D3D11_CREATE_DEVICE_DEBUG, &featurelevel, 1, D3D11_SDK_VERSION, Device11.GetAddressOf(), nullptr, Context11.GetAddressOf() ) );
+    LE( D3D11CreateDevice( DXGIAdapter2.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags | D3D11_CREATE_DEVICE_DEBUG, &maxFeatureLevel, 1, D3D11_SDK_VERSION, Device11.GetAddressOf(), nullptr, Context11.GetAddressOf() ) );
 #endif
     Device11.As( &Device );
     Context11.As( &Context );
@@ -164,7 +213,7 @@ XRESULT D3D11GraphicsEngine::Init() {
             " *	Nvidia GeForce GTX4xx or higher\n"
             " *	AMD Radeon 5xxx or higher\n\n"
             "The game will now close.";
-        exit( 0 );
+        exit( 2 );
     }
 
     LE( GetDevice()->CreateDeferredContext1( 0, DeferredContext.GetAddressOf() ) );  // Used for multithreaded texture loading
@@ -722,7 +771,7 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
         Engine::GAPI->GetRendererState().RendererSettings.WorldShadowRangeScale =
             Toolbox::GetRecommendedWorldShadowRangeScaleForSize( s );
     }
-    
+
     // Force the mode
     zCView::SetMode(
         static_cast<int>(Resolution.x / Engine::GAPI->GetRendererState().RendererSettings.GothicUIScale),
@@ -3881,7 +3930,7 @@ XRESULT D3D11GraphicsEngine::OnKeyDown( unsigned int key ) {
         break;
     default:
         break;
-    }
+}
 
     return XR_SUCCESS;
 }
