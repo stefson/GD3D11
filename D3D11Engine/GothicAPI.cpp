@@ -653,12 +653,10 @@ void GothicAPI::LoadRendererWorldSettings( GothicRendererSettings& s ) {
         GetPrivateProfileIntA( "Atmoshpere", "FogColorModB", (int)(s.FogColorMod.z * 255.0f), ini.c_str() )
     );
 
-    if ( !GMPModeActive ) {
-        s.VisualFXDrawRadius = GetPrivateProfileFloatA( "General", "VisualFXDrawRadius", s.VisualFXDrawRadius, ini.c_str() );
-        s.OutdoorVobDrawRadius = GetPrivateProfileFloatA( "General", "OutdoorVobDrawRadius", s.OutdoorVobDrawRadius, ini.c_str() );
-        s.OutdoorSmallVobDrawRadius = GetPrivateProfileFloatA( "General", "OutdoorSmallVobDrawRadius", s.OutdoorSmallVobDrawRadius, ini.c_str() );
-        s.SectionDrawRadius = GetPrivateProfileFloatA( "General", "SectionDrawRadius", s.SectionDrawRadius, ini.c_str() );
-    }
+    s.VisualFXDrawRadius = GetPrivateProfileFloatA( "General", "VisualFXDrawRadius", s.VisualFXDrawRadius, ini.c_str() );
+    s.OutdoorVobDrawRadius = GetPrivateProfileFloatA( "General", "OutdoorVobDrawRadius", s.OutdoorVobDrawRadius, ini.c_str() );
+    s.OutdoorSmallVobDrawRadius = GetPrivateProfileFloatA( "General", "OutdoorSmallVobDrawRadius", s.OutdoorSmallVobDrawRadius, ini.c_str() );
+    s.SectionDrawRadius = GetPrivateProfileFloatA( "General", "SectionDrawRadius", s.SectionDrawRadius, ini.c_str() );
 
     s.ReplaceSunDirection = GetPrivateProfileBoolA( "Atmoshpere", "ReplaceSunDirection", s.ReplaceSunDirection, ini );
 
@@ -2481,7 +2479,7 @@ LRESULT GothicAPI::OnWindowMessage( HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
         Engine::GraphicsEngine->OnKeyDown( wParam );
         switch ( wParam ) {
         case VK_F11:
-            if ( GetAsyncKeyState( VK_CONTROL ) && !GMPModeActive ) {
+            if ( GetAsyncKeyState( VK_CONTROL ) & 0x8000 && !GMPModeActive ) {
                 Engine::AntTweakBar->SetActive( !Engine::AntTweakBar->GetActive() );
                 SetEnableGothicInput( !Engine::AntTweakBar->GetActive() );
             } else {
