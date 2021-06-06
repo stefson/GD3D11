@@ -27,11 +27,12 @@ static void PatchAddr( unsigned int adr, const T( &v )[n] ) {
 }
 
 // -- call macro from GothicX (thx, Zerxes!)
-#define XCALL(uAddr)                    \
-        __asm { mov esp, ebp    }       \
-        __asm { pop ebp                 }       \
-        __asm { mov eax, uAddr  }       \
-        __asm { jmp eax                 }
+#define XCALL(address)      \
+{                           \
+    __asm leave             \
+    __asm mov eax, address  \
+    __asm jmp eax           \
+}
 
 #define INST_NOP 0x90
 #define REPLACE_OP(addr, op) {unsigned char* a = (unsigned char*)addr; *a = op;}

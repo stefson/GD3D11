@@ -2738,7 +2738,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround(
         } else {
             for ( auto&& itx : Engine::GAPI->GetWorldSections() ) {
                 for ( auto&& ity : itx.second ) {
-                    float vLen; XMStoreFloat( &vLen, XMVector3Length( XMVectorSet( itx.first - s.x, ity.first - s.y, 0, 0 ) ) );
+                    float vLen; XMStoreFloat( &vLen, XMVector3Length( XMVectorSet( float(itx.first - s.x), float(ity.first - s.y), 0, 0 ) ) );
 
                     if ( vLen < 2 ) {
                         WorldMeshSectionInfo& section = ity.second;
@@ -3040,7 +3040,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround( FXMVECTOR position,
             for ( const auto& ity : itx.second ) {
 
                 float len;
-                XMStoreFloat( &len, XMVector2Length( XMVectorSet( itx.first - s.x, ity.first - s.y, 0, 0 ) ) );
+                XMStoreFloat( &len, XMVector2Length( XMVectorSet( float(itx.first - s.x), float(ity.first - s.y), 0, 0 ) ) );
                 if ( len < sectionRange ) {
                     const WorldMeshSectionInfo& section = ity.second;
 
