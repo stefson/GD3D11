@@ -1708,9 +1708,6 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 
     // PfxRenderer->RenderDistanceBlur();
 
-    SetActivePixelShader( "PS_Simple" );
-    SetActiveVertexShader( "VS_Ex" );
-
     // Draw water surfaces of current frame
     DrawWaterSurfaces();
 
@@ -2558,8 +2555,22 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
         PfxRenderer->GetTempBuffer().GetRenderTargetView() );
     CopyDepthStencil();
 
-    // Pre-Draw the surfaces to fix overlaying polygons causing a huge performance
-    // drop Unbind pixelshader
+    Engine::GAPI->GetRendererState().RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
+    Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
+
+    XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
+    Engine::GAPI->SetViewTransformXM( view );  // Update view transform
+
+    // Bind vertex water shader
+    ActivePS = nullptr;
+    SetActiveVertexShader( "VS_ExWater" );
+    SetupVS_ExMeshDrawCall();
+    SetupVS_ExConstantBuffer();
+
+    ActiveVS->GetConstantBuffer()[1]->UpdateBuffer( &XMMatrixIdentity() );
+    ActiveVS->GetConstantBuffer()[1]->BindToVertexShader( 1 );
+
+    // Do Z-prepass on the water to make sure only the visible pixels will get drawn instead of multiple layers of water
     GetContext()->PSSetShader( nullptr, nullptr, 0 );
     GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
         DepthStencilBuffer->GetDepthStencilView().Get() );
@@ -2573,22 +2584,11 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
         }
     }
 
-    // Setup depth state so we can't have multiple layers of water
-    Engine::GAPI->GetRendererState().DepthState.DepthBufferCompareFunc =
-        GothicDepthBufferStateInfo::CF_COMPARISON_LESS_EQUAL;
-    Engine::GAPI->GetRendererState().DepthState.SetDirty();
-
-    XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
-    Engine::GAPI->SetViewTransformXM( view );  // Update view transform
-
-    // Bind water shader
-    SetActiveVertexShader( "VS_ExWater" );
+    // Bind pixel water shader
     SetActivePixelShader( "PS_Water" );
-    SetupVS_ExMeshDrawCall();
-    SetupVS_ExConstantBuffer();
-
-    ActiveVS->GetConstantBuffer()[1]->UpdateBuffer( &XMMatrixIdentity() );
-    ActiveVS->GetConstantBuffer()[1]->BindToVertexShader( 1 );
+    if ( ActivePS ) {
+        ActivePS->Apply();
+    }
 
     // Bind distortion texture
     DistortionTexture->BindToPixelShader( 4 );
@@ -2612,7 +2612,6 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 
     // Bind reflection cube
     GetContext()->PSSetShaderResources( 3, 1, ReflectionCube.GetAddressOf() );
-
     for ( auto const& it : FrameWaterSurfaces ) {
         if ( it.first ) {
             // Bind diffuse
@@ -2636,9 +2635,7 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
     GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
         DepthStencilBuffer->GetDepthStencilView().Get() );
 
-    Engine::GAPI->GetRendererState().DepthState.DepthBufferCompareFunc =
-        GothicDepthBufferStateInfo::CF_COMPARISON_LESS_EQUAL;
-    Engine::GAPI->GetRendererState().DepthState.SetDirty();
+    SetDefaultStates();
 }
 
 /** Draws everything around the given position */
