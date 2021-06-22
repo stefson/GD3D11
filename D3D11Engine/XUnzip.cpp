@@ -4137,13 +4137,12 @@ ZRESULT TUnzip::Unzip(int index,void *dst,unsigned int len,DWORD flags)
 		return ZR_NOFILE;
 	
 	unzOpenCurrentFile(uf);
-    const unsigned bufsize = 16384;
-    BYTE *buf = new BYTE[bufsize];
+	BYTE buf[16384];  
 	bool haderr=false;
 	
 	for (;;)
 	{ 
-		int res = unzReadCurrentFile(uf,buf, bufsize);
+		int res = unzReadCurrentFile(uf,buf, 16384);
 		if (res<0) 
 		{
 			haderr=true; 
@@ -4159,7 +4158,6 @@ ZRESULT TUnzip::Unzip(int index,void *dst,unsigned int len,DWORD flags)
 			break;
 		}
 	}
-    delete[] buf;
 	bool settime=false;
 	DWORD type = GetFileType(h); 
 	if (type==FILE_TYPE_DISK && !haderr) 

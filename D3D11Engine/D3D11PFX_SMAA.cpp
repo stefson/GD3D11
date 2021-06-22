@@ -107,7 +107,7 @@ void D3D11PFX_SMAA::RenderPostFX(const Microsoft::WRL::ComPtr<ID3D11ShaderResour
 	vp.Width = (float)FxRenderer->GetTempBuffer().GetSizeX();
 	vp.Height = (float)FxRenderer->GetTempBuffer().GetSizeY();
 
-	engine->GetShaderManager().GetVShader( L"VS_PFX" )->Apply(); // Apply vertexlayout for PP-Effects
+	engine->GetShaderManager().GetVShader( "VS_PFX" )->Apply(); // Apply vertexlayout for PP-Effects
 
 	RenderToTextureBuffer& TempRTV = FxRenderer->GetTempBuffer();
 
@@ -180,7 +180,7 @@ void D3D11PFX_SMAA::RenderPostFX(const Microsoft::WRL::ComPtr<ID3D11ShaderResour
 
 
 	if ( Engine::GAPI->GetRendererState().RendererSettings.SharpenFactor > 0.0f ) {
-		auto sharpenPS = engine->GetShaderManager().GetPShader( L"PS_PFX_Sharpen" );
+		auto sharpenPS = engine->GetShaderManager().GetPShader( "PS_PFX_Sharpen" );
 		sharpenPS->Apply();
 
 		GammaCorrectConstantBuffer gcb;

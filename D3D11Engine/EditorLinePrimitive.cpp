@@ -30,8 +30,8 @@ EditorLinePrimitive::EditorLinePrimitive() {
 
     bJustUseRotationMatrix = false;
 
-    SetSolidShader( ((D3D11GraphicsEngineBase*)Engine::GraphicsEngine)->GetShaderManager().GetPShader( L"PS_Lines" ) );
-    SetShader( ((D3D11GraphicsEngineBase*)Engine::GraphicsEngine)->GetShaderManager().GetPShader( L"PS_Lines" ) );
+    SetSolidShader( ((D3D11GraphicsEngineBase*)Engine::GraphicsEngine)->GetShaderManager().GetPShader( "PS_Lines" ) );
+    SetShader( ((D3D11GraphicsEngineBase*)Engine::GraphicsEngine)->GetShaderManager().GetPShader( "PS_Lines" ) );
 }
 
 
@@ -864,8 +864,8 @@ void EditorLinePrimitive::RenderVertexBuffer( const Microsoft::WRL::ComPtr<ID3D1
     XMMATRIX tr = XMMatrixTranspose( XMLoadFloat4x4( &WorldMatrix ) );;
     Engine::GAPI->SetWorldTransformXM( tr );
 
-    engine->SetActiveVertexShader( L"VS_Lines" );
-    engine->SetActivePixelShader( L"PS_Lines" );
+    engine->SetActiveVertexShader( "VS_Lines" );
+    engine->SetActivePixelShader( "PS_Lines" );
 
     engine->SetupVS_ExMeshDrawCall();
     engine->SetupVS_ExConstantBuffer();

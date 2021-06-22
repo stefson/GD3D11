@@ -17,6 +17,11 @@ enum D3D11ENGINE_RENDER_STAGE {
 };
 
 const unsigned int DRAWVERTEXARRAY_BUFFER_SIZE = 4096 * sizeof( ExVertexStruct );
+const unsigned int POLYS_BUFFER_SIZE = 1024 * sizeof( ExVertexStruct );
+const unsigned int PARTICLES_BUFFER_SIZE = 3072 * sizeof( ParticleInstanceInfo );
+const unsigned int MORPHEDMESH_SMALL_BUFFER_SIZE = 3072 * sizeof( ExVertexStruct );
+const unsigned int MORPHEDMESH_HIGH_BUFFER_SIZE = 20480 * sizeof( ExVertexStruct );
+const unsigned int HUD_BUFFER_SIZE = 6 * sizeof( ExVertexStruct );
 const int NUM_MAX_BONES = 96;
 const int unsigned INSTANCING_BUFFER_SIZE = sizeof( VobInstanceInfo ) * 2048;
 
@@ -65,6 +70,15 @@ public:
     /** Called when the game wants to clear the bound rendertarget */
     virtual XRESULT Clear( const float4& color );
 
+    /** Creates a vertexbuffer object (Not registered inside) */
+    virtual XRESULT CreateVertexBuffer( D3D11VertexBuffer** outBuffer );
+
+    /** Creates a texture object (Not registered inside) */
+    virtual XRESULT CreateTexture( D3D11Texture** outTexture );
+
+    /** Creates a constantbuffer object (Not registered inside) */
+    virtual XRESULT CreateConstantBuffer( D3D11ConstantBuffer** outCB, void* data, int size );
+
     /** Returns a list of available display modes */
     virtual XRESULT GetDisplayModeList( std::vector<DisplayModeInfo>* modeList, bool includeSuperSampling = false );
 
@@ -89,7 +103,7 @@ public:
     virtual XRESULT DrawVertexBufferFF( D3D11VertexBuffer* vb, unsigned int numVertices, unsigned int startVertex, unsigned int stride = sizeof( ExVertexStruct ) ) override;
 
     /** Binds viewport information to the given constantbuffer slot */
-    virtual XRESULT BindViewportInformation( const std::wstring& shader, int slot ) override;
+    virtual XRESULT BindViewportInformation( const std::string& shader, int slot ) override;
 
     /** Sets up a draw call for a VS_Ex-Mesh */
     void SetupVS_ExMeshDrawCall();
@@ -113,6 +127,7 @@ public:
 
     /** Draws a vertexarray, non-indexed */
     virtual XRESULT DrawVertexArray( ExVertexStruct* vertices, unsigned int numVertices, unsigned int startVertex = 0, unsigned int stride = sizeof( ExVertexStruct ) ) override;
+    virtual XRESULT DrawVertexArrayMM( ExVertexStruct* vertices, unsigned int numVertices, unsigned int startVertex = 0, unsigned int stride = sizeof( ExVertexStruct ) ) override;
 
     /** Draws a vertexarray, indexed */
     virtual XRESULT DrawIndexedVertexArray( ExVertexStruct* vertices, unsigned int numVertices, D3D11VertexBuffer* ib, unsigned int numIndices, unsigned int stride = sizeof( ExVertexStruct ) ) override;
@@ -126,6 +141,11 @@ public:
 
     /** Called when a key got pressed */
     virtual XRESULT OnKeyDown( unsigned int key ) override;
+
+    /** Sets the active pixel shader object */
+    virtual XRESULT SetActivePixelShader( const std::string& shader );
+    virtual XRESULT SetActiveVertexShader( const std::string& shader );
+    XRESULT SetActiveHDShader( const std::string& shader );
 
     /** Binds the active PixelShader */
     virtual XRESULT BindActivePixelShader();
@@ -166,6 +186,9 @@ public:
 
     /** Returns the data of the backbuffer */
     void GetBackbufferData( byte** data, int& pixelsize );
+
+    /** Returns the line renderer object */
+    BaseLineRenderer* GetLineRenderer();
 
     /** ---------------- Gothic rendering functions -------------------- */
 
@@ -281,7 +304,7 @@ public:
     /** Returns a dummy cube-rendertarget used for pointlight shadowmaps */
     RenderToTextureBuffer* GetDummyCubeRT() { return DummyShadowCubemapTexture.get(); }
 
-    void EnsureTempVertexBufferSize( UINT size );
+    void EnsureTempVertexBufferSize( std::unique_ptr<D3D11VertexBuffer>& buffer, UINT size );
 protected:
     std::unique_ptr<FpsLimiter> m_FrameLimiter;
     int m_LastFrameLimit;
@@ -325,7 +348,6 @@ protected:
     std::unique_ptr<D3D11PfxRenderer> PfxRenderer;
 
     /** Sky */
-    std::unique_ptr<RenderToTextureBuffer> CloudBuffer;
     std::unique_ptr<D3D11Texture> DistortionTexture;
     std::unique_ptr<D3D11Texture> NoiseTexture;
     std::unique_ptr<D3D11Texture> WhiteTexture;
@@ -368,11 +390,18 @@ protected:
     /** Occlusion query manager */
     std::unique_ptr<D3D11OcclusionQuerry> Occlusion;
 
+    /** Temporary vertex buffers */
+    std::unique_ptr<D3D11VertexBuffer> TempPolysVertexBuffer;
+    std::unique_ptr<D3D11VertexBuffer> TempParticlesVertexBuffer;
+    std::unique_ptr<D3D11VertexBuffer> TempMorphedMeshSmallVertexBuffer;
+    std::unique_ptr<D3D11VertexBuffer> TempMorphedMeshBigVertexBuffer;
+    std::unique_ptr<D3D11VertexBuffer> TempHUDVertexBuffer;
+
     /** If true, we will save a screenshot after the next frame */
     bool SaveScreenshotNextFrame;
 
     bool m_flipWithTearing;
     bool m_swapchainflip;
     bool m_lowlatency;
-    bool m_isWindowActive;
+    int m_previousFpsLimit;
 };

@@ -110,7 +110,7 @@ XRESULT WorldConverter::LoadWorldMeshFromFile( const std::string& file, std::map
     const float worldScale = 100.0f;
 
     // Check if we have this file cached
-    if ( Toolbox::fs::FileExists( (file + ".mcache").c_str() ) ) {
+    if ( Toolbox::FileExists( (file + ".mcache").c_str() ) ) {
         // Load the meshfile, cached
         mesh->LoadMesh( (file + ".mcache").c_str(), worldScale );
     } else {
@@ -152,7 +152,7 @@ XRESULT WorldConverter::LoadWorldMeshFromFile( const std::string& file, std::map
                 // Give water surfaces a water-shader
                 MaterialInfo* info = Engine::GAPI->GetMaterialInfoFrom( mat->GetTexture() );
                 if ( info ) {
-                    info->PixelShader = L"PS_Water";
+                    info->PixelShader = "PS_Water";
                     info->MaterialType = MaterialInfo::MT_Water;
                 }
             }
@@ -414,7 +414,7 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN( zCPolygon** polys, unsigned int n
             // Give water surfaces a water-shader
             MaterialInfo* polyInfo = Engine::GAPI->GetMaterialInfoFrom( poly->GetMaterial()->GetTexture() );
             if ( polyInfo ) {
-                polyInfo->PixelShader = L"PS_Water";
+                polyInfo->PixelShader = "PS_Water";
                 polyInfo->MaterialType = MaterialInfo::MT_Water;
             }
         }
@@ -488,7 +488,7 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN( zCPolygon** polys, unsigned int n
         for ( auto const& ity : itx.second ) {
             for ( auto const& it : ity.second.WorldMeshes ) {
                 MaterialInfo* info = Engine::GAPI->GetMaterialInfoFrom( it.first.Texture );
-                info->TesselationShaderPair = L"PNAEN_Tesselation";
+                info->TesselationShaderPair = "PNAEN_Tesselation";
 
                 it.second->BaseIndexLocation = offsets[i];
 
@@ -628,7 +628,7 @@ HRESULT WorldConverter::ConvertWorldMesh( zCPolygon** polys, unsigned int numPol
             // Give water surfaces a water-shader
             MaterialInfo* info = Engine::GAPI->GetMaterialInfoFrom( poly->GetMaterial()->GetTexture() );
             if ( info ) {
-                info->PixelShader = L"PS_Water";
+                info->PixelShader = "PS_Water";
                 info->MaterialType = MaterialInfo::MT_Water;
             }
         }
@@ -1292,7 +1292,7 @@ void WorldConverter::Extract3DSMeshFromVisual2PNAEN( zCProgMeshProto* visual, Me
         key.Info = Engine::GAPI->GetMaterialInfoFrom( key.Texture );
 
         // ** PNAEN **
-        key.Info->TesselationShaderPair = L"PNAEN_Tesselation";
+        key.Info->TesselationShaderPair = "PNAEN_Tesselation";
 
         meshInfo->MeshesByTexture[key].emplace_back( mi );
 

@@ -6,7 +6,6 @@
 #include "D3D11ConstantBuffer.h"
 #include <d3dcompiler.h>
 #include "D3D11_Helpers.h"
-#include "D3DShaderCompiler.h"
 
 using namespace DirectX;
 
@@ -25,8 +24,52 @@ D3D11GShader::~D3D11GShader() {
     }
 }
 
+//--------------------------------------------------------------------------------------
+// Find and compile the specified shader
+//--------------------------------------------------------------------------------------
+HRESULT D3D11GShader::CompileShaderFromFile( const CHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut, const std::vector<D3D_SHADER_MACRO>& makros ) {
+    HRESULT hr = S_OK;
+
+    char dir[260];
+    GetCurrentDirectoryA( 260, dir );
+    SetCurrentDirectoryA( Engine::GAPI->GetStartDirectory().c_str() );
+
+    DWORD dwShaderFlags = 0;
+#if defined(DEBUG) || defined(_DEBUG)
+    // Set the D3DCOMPILE_DEBUG flag to embed debug information in the shaders.
+    // Setting this flag improves the shader debugging experience, but still allows 
+    // the shaders to be optimized and to run exactly the way they will run in 
+    // the release configuration of this program.
+    //dwShaderFlags |= D3DCOMPILE_DEBUG;
+#else
+    dwShaderFlags |= D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_OPTIMIZATION_LEVEL3;
+#endif
+
+    // Construct makros
+    std::vector<D3D_SHADER_MACRO> m;
+    D3D11GraphicsEngineBase::ConstructShaderMakroList( m );
+
+    // Push these to the front
+    m.insert( m.begin(), makros.begin(), makros.end() );
+
+    Microsoft::WRL::ComPtr<ID3DBlob> pErrorBlob;
+    hr = D3DCompileFromFile( Toolbox::ToWideChar( szFileName ).c_str(), &m[0], D3D_COMPILE_STANDARD_FILE_INCLUDE, szEntryPoint, szShaderModel, dwShaderFlags, 0, ppBlobOut, &pErrorBlob );
+    if ( FAILED( hr ) ) {
+        LogInfo() << "Shader compilation failed!";
+        if ( pErrorBlob.Get() ) {
+            LogErrorBox() << (char*)pErrorBlob->GetBufferPointer() << "\n\n (You can ignore the next error from Gothic about too small video memory!)";
+        }
+
+        SetCurrentDirectoryA( dir );
+        return hr;
+    }
+
+    SetCurrentDirectoryA( dir );
+    return S_OK;
+}
+
 /** Loads both shaders at the same time */
-XRESULT D3D11GShader::LoadShader( const wchar_t* geometryShader, const std::vector<D3D_SHADER_MACRO>& makros, bool createStreamOutFromVS, int soLayout ) {
+XRESULT D3D11GShader::LoadShader( const char* geometryShader, const std::vector<D3D_SHADER_MACRO>& makros, bool createStreamOutFromVS, int soLayout ) {
     HRESULT hr;
     D3D11GraphicsEngineBase* engine = (D3D11GraphicsEngineBase*)Engine::GraphicsEngine;
 
@@ -37,7 +80,7 @@ XRESULT D3D11GShader::LoadShader( const wchar_t* geometryShader, const std::vect
 
     if ( !createStreamOutFromVS ) {
         // Compile shaders
-        if ( FAILED( CShaderCompiler::CompileFromFile( geometryShader, "GSMain", "gs_5_0", makros, gsBlob.GetAddressOf() ) ) ) {
+        if ( FAILED( CompileShaderFromFile( geometryShader, "GSMain", "gs_5_0", gsBlob.GetAddressOf(), makros ) ) ) {
             return XR_FAILED;
         }
 
@@ -45,7 +88,7 @@ XRESULT D3D11GShader::LoadShader( const wchar_t* geometryShader, const std::vect
         LE( engine->GetDevice()->CreateGeometryShader( gsBlob->GetBufferPointer(), gsBlob->GetBufferSize(), nullptr, GeometryShader.GetAddressOf() ) );
     } else {
         // Compile vertexshader
-        if ( FAILED( CShaderCompiler::CompileFromFile( geometryShader, "VSMain", "vs_5_0", makros, gsBlob.GetAddressOf() ) ) ) {
+        if ( FAILED( CompileShaderFromFile( geometryShader, "VSMain", "vs_5_0", gsBlob.GetAddressOf(), makros ) ) ) {
             return XR_FAILED;
         }
 

@@ -2,8 +2,6 @@
 
 #pragma warning(disable: 4731) // Change of ebp from inline assembly
 #pragma warning(disable: 4244) // Loss of data during conversion
-
-#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <wrl/client.h>
 #include <chrono>

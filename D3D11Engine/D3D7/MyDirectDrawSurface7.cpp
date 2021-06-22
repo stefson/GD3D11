@@ -107,9 +107,9 @@ void MyDirectDrawSurface7::LoadAdditionalResources( zCTexture* ownedTexture ) {
     // Check for normalmap in our mods folder first, then in the original games
     int j = 0;
     std::string replacementsFolder = "system\\GD3D11\\textures\\replacements\\Normalmaps_" + std::to_string( j );
-    while ( Toolbox::fs::FolderExists( replacementsFolder ) ) {
+    while ( Toolbox::FolderExists( replacementsFolder ) ) {
         std::string normalmap = replacementsFolder + "\\" + TextureName + "_normal.dds";
-        if ( Toolbox::fs::FileExists( normalmap ) ) {
+        if ( Toolbox::FileExists( normalmap ) ) {
             // Create the texture object this is linked with
             Engine::GraphicsEngine->CreateTexture( &nrmmapTexture );
             if ( XR_SUCCESS != nrmmapTexture->Init( normalmap ) ) {
@@ -122,7 +122,7 @@ void MyDirectDrawSurface7::LoadAdditionalResources( zCTexture* ownedTexture ) {
         replacementsFolder = "system\\GD3D11\\textures\\replacements\\Normalmaps_" + std::to_string( j );
     }
     std::string normalmap = "system\\GD3D11\\textures\\replacements\\Normalmaps_" + Engine::GAPI->GetGameName() + "\\" + TextureName + "_normal.dds";
-    if ( !nrmmapTexture && Toolbox::fs::FileExists( normalmap ) ) {
+    if ( !nrmmapTexture && Toolbox::FileExists( normalmap ) ) {
         // Create the texture object this is linked with
         Engine::GraphicsEngine->CreateTexture( &nrmmapTexture );
         if ( XR_SUCCESS != nrmmapTexture->Init( normalmap ) ) {
@@ -133,9 +133,9 @@ void MyDirectDrawSurface7::LoadAdditionalResources( zCTexture* ownedTexture ) {
 
     j = 0;
     replacementsFolder = "system\\GD3D11\\textures\\replacements\\Normalmaps_" + std::to_string( j );
-    while ( Toolbox::fs::FolderExists( replacementsFolder ) ) {
+    while ( Toolbox::FolderExists( replacementsFolder ) ) {
         std::string fxMap = replacementsFolder + "\\" + TextureName + "_fx.dds";
-        if ( Toolbox::fs::FileExists( fxMap ) ) {
+        if ( Toolbox::FileExists( fxMap ) ) {
             // Create the texture object this is linked with
             Engine::GraphicsEngine->CreateTexture( &fxMapTexture );
             if ( XR_SUCCESS != fxMapTexture->Init( fxMap ) ) {
@@ -148,7 +148,7 @@ void MyDirectDrawSurface7::LoadAdditionalResources( zCTexture* ownedTexture ) {
         replacementsFolder = "system\\GD3D11\\textures\\replacements\\Normalmaps_" + std::to_string( j );
     }
     std::string fxMap = "system\\GD3D11\\textures\\replacements\\Normalmaps_" + Engine::GAPI->GetGameName() + "\\" + TextureName + "_fx.dds";
-    if ( !fxMapTexture && Toolbox::fs::FileExists( fxMap ) ) {
+    if ( !fxMapTexture && Toolbox::FileExists( fxMap ) ) {
         // Create the texture object this is linked with
         Engine::GraphicsEngine->CreateTexture( &fxMapTexture );
         if ( XR_SUCCESS != fxMapTexture->Init( fxMap ) ) {

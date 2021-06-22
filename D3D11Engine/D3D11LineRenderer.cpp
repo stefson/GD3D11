@@ -52,8 +52,8 @@ XRESULT D3D11LineRenderer::Flush() {
     Engine::GAPI->SetWorldTransformXM( XMMatrixIdentity() );
     Engine::GAPI->SetViewTransformXM( Engine::GAPI->GetViewMatrixXM() );
 
-    engine->SetActivePixelShader( L"PS_Lines" );
-    engine->SetActiveVertexShader( L"VS_Lines" );
+    engine->SetActivePixelShader( "PS_Lines" );
+    engine->SetActiveVertexShader( "VS_Lines" );
 
     engine->SetupVS_ExMeshDrawCall();
     engine->SetupVS_ExConstantBuffer();
@@ -109,8 +109,8 @@ XRESULT D3D11LineRenderer::FlushDeferredLines() {
     Engine::GAPI->SetWorldTransformXM( XMMatrixIdentity() );
     Engine::GAPI->SetViewTransformXM( Engine::GAPI->GetViewMatrixXM() );
 
-    engine->SetActivePixelShader( L"PS_Lines" );
-    engine->SetActiveVertexShader( L"VS_Lines" );
+    engine->SetActivePixelShader( "PS_Lines" );
+    engine->SetActiveVertexShader( "VS_Lines" );
 
     engine->SetupVS_ExMeshDrawCall();
     engine->SetupVS_ExConstantBuffer();

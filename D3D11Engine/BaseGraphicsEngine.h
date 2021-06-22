@@ -97,19 +97,20 @@ public:
     virtual XRESULT GetDisplayModeList( std::vector<DisplayModeInfo>* modeList, bool includeSuperSampling = false ) = 0;
 
     /** Presents the current frame to the screen */
-    virtual XRESULT Present() PURE;
+    virtual XRESULT Present() = 0;
 
     /** Called when we started to render the world */
-    virtual XRESULT OnStartWorldRendering() PURE;
+    virtual XRESULT OnStartWorldRendering() = 0;
 
     /** Returns the line renderer object */
-    virtual BaseLineRenderer* GetLineRenderer() PURE;
+    virtual BaseLineRenderer* GetLineRenderer() = 0;
 
     /** Returns the graphics-device this is running on */
-    virtual std::wstring GetGraphicsDeviceName() PURE;
+    virtual std::string GetGraphicsDeviceName() = 0;
 
     /** Draws a vertexarray, used for rendering gothics UI */
     virtual XRESULT DrawVertexArray( ExVertexStruct* vertices, unsigned int numVertices, unsigned int startVertex = 0, unsigned int stride = sizeof( ExVertexStruct ) ) = 0;
+    virtual XRESULT DrawVertexArrayMM( ExVertexStruct* vertices, unsigned int numVertices, unsigned int startVertex = 0, unsigned int stride = sizeof( ExVertexStruct ) ) = 0;
 
     /** Puts the current world matrix into a CB and binds it to the given slot */
     virtual void SetupPerInstanceConstantBuffer( int slot = 1 ) {};
@@ -135,15 +136,15 @@ public:
     virtual XRESULT DrawInstanced( D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices, D3D11VertexBuffer* instanceData, unsigned int instanceDataStride, unsigned int numInstances, unsigned int vertexStride = sizeof( ExVertexStruct ), unsigned int startInstanceNum = 0, unsigned int indexOffset = 0 ) { return XR_SUCCESS; };
 
     /** Sets the active pixel shader object */
-    virtual XRESULT SetActivePixelShader( const std::wstring& shader ) { return XR_SUCCESS; };
-    virtual XRESULT SetActiveVertexShader( const std::wstring& shader ) { return XR_SUCCESS; };
+    virtual XRESULT SetActivePixelShader( const std::string& shader ) { return XR_SUCCESS; };
+    virtual XRESULT SetActiveVertexShader( const std::string& shader ) { return XR_SUCCESS; };
 
     /** Binds the active PixelShader */
     virtual XRESULT BindActivePixelShader() { return XR_SUCCESS; };
     virtual XRESULT BindActiveVertexShader() { return XR_SUCCESS; };
 
     /** Binds viewport information to the given constantbuffer slot */
-    virtual XRESULT BindViewportInformation( const std::wstring& shader, int slot ) { return XR_SUCCESS; };
+    virtual XRESULT BindViewportInformation( const std::string& shader, int slot ) { return XR_SUCCESS; };
 
     /** Unbinds the texture at the given slot */
     virtual XRESULT UnbindTexture( int slot ) { return XR_SUCCESS; };

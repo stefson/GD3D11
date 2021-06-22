@@ -8,6 +8,13 @@
 
 #define THISPTR_OFFSET(x) (((char *)this) + (x))
 
+// -- call macro from GothicX (thx, Zerxes!)
+#define XCALL(uAddr)                    \
+        __asm { mov esp, ebp    }       \
+        __asm { pop ebp                 }       \
+        __asm { mov eax, uAddr  }       \
+        __asm { jmp eax                 }
+
 template<typename TOriginal, typename T>
 static void XHook( TOriginal& original, unsigned int adr, T& hookFn ) {
     original = (TOriginal)DetourFunction( (BYTE*)adr, (BYTE*)hookFn );
@@ -24,14 +31,6 @@ static void PatchAddr( unsigned int adr, const T( &v )[n] ) {
     VirtualProtect( (void*)adr, n - 1, PAGE_EXECUTE_READWRITE, &dwProtect );
     memcpy( (unsigned char*)adr, v, n - 1 );
     VirtualProtect( (void*)adr, n - 1, dwProtect, &dwProtect );
-}
-
-// -- call macro from GothicX (thx, Zerxes!)
-#define XCALL(address)      \
-{                           \
-    __asm leave             \
-    __asm mov eax, address  \
-    __asm jmp eax           \
 }
 
 #define INST_NOP 0x90

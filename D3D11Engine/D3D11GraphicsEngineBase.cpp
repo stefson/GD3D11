@@ -94,6 +94,115 @@ XRESULT D3D11GraphicsEngineBase::CreateConstantBuffer( D3D11ConstantBuffer** out
     return XR_SUCCESS;
 }
 
+/** Presents the current frame to the screen */
+XRESULT D3D11GraphicsEngineBase::Present() {
+    // Set default viewport
+    SetViewport( ViewportInfo( 0, 0, Resolution.x, Resolution.y ) );
+
+    // Reset State
+    SetDefaultStates();
+
+    // Draw debug-lines
+    LineRenderer->Flush();
+
+    // Draw ant tweak bar
+    Engine::AntTweakBar->Draw();
+
+    bool vsync = Engine::GAPI->GetRendererState().RendererSettings.EnableVSync;
+    if ( dxgi_1_3 ) {
+        if ( SwapChain2->Present( vsync ? 1 : 0, 0 ) == DXGI_ERROR_DEVICE_REMOVED ) {
+            switch ( GetDevice()->GetDeviceRemovedReason() ) {
+            case DXGI_ERROR_DEVICE_HUNG:
+                LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_HUNG)";
+                exit( 0 );
+                break;
+
+            case DXGI_ERROR_DEVICE_REMOVED:
+                LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_REMOVED)";
+                exit( 0 );
+                break;
+
+            case DXGI_ERROR_DEVICE_RESET:
+                LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_RESET)";
+                exit( 0 );
+                break;
+
+            case DXGI_ERROR_DRIVER_INTERNAL_ERROR:
+                LogErrorBox() << "Device Removed! (DXGI_ERROR_DRIVER_INTERNAL_ERROR)";
+                exit( 0 );
+                break;
+
+            case DXGI_ERROR_INVALID_CALL:
+                LogErrorBox() << "Device Removed! (DXGI_ERROR_INVALID_CALL)";
+                exit( 0 );
+                break;
+
+            case S_OK:
+                LogInfo() << "Device removed, but we're fine!";
+                break;
+
+            default:
+                LogWarnBox() << "Device Removed! (Unknown reason)";
+            }
+        } 		else if ( SwapChain->Present( vsync ? 1 : 0, 0 ) == DXGI_ERROR_DEVICE_REMOVED ) {
+            switch ( GetDevice()->GetDeviceRemovedReason() ) {
+            case DXGI_ERROR_DEVICE_HUNG:
+                LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_HUNG)";
+                exit( 0 );
+                break;
+
+            case DXGI_ERROR_DEVICE_REMOVED:
+                LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_REMOVED)";
+                exit( 0 );
+                break;
+
+            case DXGI_ERROR_DEVICE_RESET:
+                LogErrorBox() << "Device Removed! (DXGI_ERROR_DEVICE_RESET)";
+                exit( 0 );
+                break;
+
+            case DXGI_ERROR_DRIVER_INTERNAL_ERROR:
+                LogErrorBox() << "Device Removed! (DXGI_ERROR_DRIVER_INTERNAL_ERROR)";
+                exit( 0 );
+                break;
+
+            case DXGI_ERROR_INVALID_CALL:
+                LogErrorBox() << "Device Removed! (DXGI_ERROR_INVALID_CALL)";
+                exit( 0 );
+                break;
+
+            case S_OK:
+                LogInfo() << "Device removed, but we're fine!";
+                break;
+
+            default:
+                LogWarnBox() << "Device Removed! (Unknown reason)";
+            }
+        }
+    }
+
+    // We did our present, set the next frame ready
+    PresentPending = false;
+
+    return XR_SUCCESS;
+}
+
+/** Called when we started to render the world */
+XRESULT D3D11GraphicsEngineBase::OnStartWorldRendering() {
+    if ( PresentPending )
+        return XR_FAILED;
+
+    PresentPending = true;
+
+    // Update transforms
+    UpdateTransformsCB();
+
+    // Force farplane
+    Engine::GAPI->SetFarPlane( Engine::GAPI->GetRendererState().RendererSettings.SectionDrawRadius * WORLD_SECTION_SIZE );
+
+    return XR_SUCCESS;
+}
+
 /** Returns the line renderer object */
 BaseLineRenderer* D3D11GraphicsEngineBase::GetLineRenderer() {
     return LineRenderer.get();
@@ -119,8 +228,8 @@ void D3D11GraphicsEngineBase::SetDefaultStates() {
 /** Draws a vertexarray, used for rendering gothics UI */
 XRESULT D3D11GraphicsEngineBase::DrawVertexArray( ExVertexStruct* vertices, unsigned int numVertices, unsigned int startVertex, unsigned int stride ) {
     UpdateRenderStates();
-    auto vShader = ShaderManager->GetVShader( L"VS_TransformedEx" );
-    auto pShader = ShaderManager->GetPShader( L"PS_FixedFunctionPipe" );
+    auto vShader = ShaderManager->GetVShader( "VS_TransformedEx" );
+    auto pShader = ShaderManager->GetPShader( "PS_FixedFunctionPipe" );
 
     // Bind the FF-Info to the first PS slot
     pShader->GetConstantBuffer()[0]->UpdateBuffer( &Engine::GAPI->GetRendererState().GraphicsState );
@@ -282,23 +391,27 @@ void D3D11GraphicsEngineBase::SetupVS_ExPerInstanceConstantBuffer() {
 }
 
 /** Sets the active pixel shader object */
-XRESULT D3D11GraphicsEngineBase::SetActivePixelShader( const std::wstring& shader ) {
+XRESULT D3D11GraphicsEngineBase::SetActivePixelShader( const std::string& shader ) {
     ActivePS = ShaderManager->GetPShader( shader );
+
     return XR_SUCCESS;
 }
 
-XRESULT D3D11GraphicsEngineBase::SetActiveVertexShader( const std::wstring& shader ) {
+XRESULT D3D11GraphicsEngineBase::SetActiveVertexShader( const std::string& shader ) {
     ActiveVS = ShaderManager->GetVShader( shader );
+
     return XR_SUCCESS;
 }
 
-XRESULT D3D11GraphicsEngineBase::SetActiveHDShader( const std::wstring& shader ) {
+XRESULT D3D11GraphicsEngineBase::SetActiveHDShader( const std::string& shader ) {
     ActiveHDS = ShaderManager->GetHDShader( shader );
+
     return XR_SUCCESS;
 }
 
-XRESULT D3D11GraphicsEngineBase::SetActiveGShader( const std::wstring& shader ) {
+XRESULT D3D11GraphicsEngineBase::SetActiveGShader( const std::string& shader ) {
     ActiveGS = ShaderManager->GetGShader( shader );
+
     return XR_SUCCESS;
 }
 
@@ -365,7 +478,7 @@ XRESULT D3D11GraphicsEngineBase::DrawVertexBufferFF( D3D11VertexBuffer* vb, unsi
 
 
 /** Binds viewport information to the given constantbuffer slot */
-XRESULT D3D11GraphicsEngineBase::BindViewportInformation( const std::wstring& shader, int slot ) {
+XRESULT D3D11GraphicsEngineBase::BindViewportInformation( const std::string& shader, int slot ) {
     D3D11_VIEWPORT vp;
     UINT num = 1;
     GetContext()->RSGetViewports( &num, &vp );
@@ -395,6 +508,6 @@ XRESULT D3D11GraphicsEngineBase::BindViewportInformation( const std::wstring& sh
 }
 
 /** Returns the graphics-device this is running on */
-std::wstring D3D11GraphicsEngineBase::GetGraphicsDeviceName() {
+std::string D3D11GraphicsEngineBase::GetGraphicsDeviceName() {
     return DeviceDescription;
 }

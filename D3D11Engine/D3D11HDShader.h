@@ -11,7 +11,7 @@ public:
     ~D3D11HDShader();
 
     /** Loads shader */
-    XRESULT LoadShader( const wchar_t* hullShader, const wchar_t* domainShader );
+    XRESULT LoadShader( const char* hullShader, const char* domainShader );
 
     /** Applys the shader */
     XRESULT Apply();
@@ -31,11 +31,15 @@ public:
     /** Returns this textures ID */
     UINT16 GetID() { return ID; };
 private:
+
+    /** Compiles the shader from file and outputs error messages if needed */
+    HRESULT CompileShaderFromFile( const CHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut );
+
     Microsoft::WRL::ComPtr<ID3D11HullShader> HullShader;
     Microsoft::WRL::ComPtr<ID3D11DomainShader> DomainShader;
     std::vector<D3D11ConstantBuffer*> ConstantBuffers;
 
-    std::wstring File;
+    std::string File;
 
     /** ID of this shader */
     UINT16 ID;

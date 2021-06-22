@@ -1088,7 +1088,7 @@ bool D2DEditorView::OnWindowMessage( HWND hWnd, unsigned int msg, WPARAM wParam,
 						info->TextureTesselationSettings.buffer.VT_TesselationFactor = 2;
 
 						// Overwrite shader
-						info->TesselationShaderPair = L"PNAEN_Tesselation";
+						info->TesselationShaderPair = "PNAEN_Tesselation";
 					}
 				}
 			}
@@ -1368,7 +1368,7 @@ void D2DEditorView::TextureSettingsSliderChanged( SV_Slider* sender, void* userd
 		// Update and save the info
 		info->UpdateConstantbuffer();
 		info->TextureTesselationSettings.UpdateConstantbuffer();
-		info->WriteToFile( v->Selection.SelectedMaterial->GetTexture()->GetNameWithoutExtW() );
+		info->WriteToFile( v->Selection.SelectedMaterial->GetTexture()->GetNameWithoutExt() );
 	}
 }
 

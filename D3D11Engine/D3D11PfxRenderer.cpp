@@ -44,7 +44,7 @@ XRESULT D3D11PfxRenderer::RenderDistanceBlur() {
 }
 
 /** Blurs the given texture */
-XRESULT D3D11PfxRenderer::BlurTexture( RenderToTextureBuffer* texture, bool leaveResultInD4_2, float scale, const DirectX::XMFLOAT4& colorMod, const std::wstring& finalCopyShader ) {
+XRESULT D3D11PfxRenderer::BlurTexture( RenderToTextureBuffer* texture, bool leaveResultInD4_2, float scale, const DirectX::XMFLOAT4& colorMod, const std::string& finalCopyShader ) {
     FX_Blur->RenderBlur( texture, leaveResultInD4_2, 0.0f, scale, colorMod, finalCopyShader );
     return XR_SUCCESS;
 }
@@ -132,11 +132,11 @@ XRESULT D3D11PfxRenderer::CopyTextureToRTV( const Microsoft::WRL::ComPtr<ID3D11S
 
     // Bind shaders
     if ( !useCustomPS ) {
-        auto simplePS = engine->GetShaderManager().GetPShader( L"PS_PFX_Simple" );
+        auto simplePS = engine->GetShaderManager().GetPShader( "PS_PFX_Simple" );
         simplePS->Apply();
     }
 
-    engine->GetShaderManager().GetVShader( L"VS_PFX" )->Apply();
+    engine->GetShaderManager().GetVShader( "VS_PFX" )->Apply();
 
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
     engine->GetContext()->PSSetShaderResources( 0, 1, srv.GetAddressOf() );

@@ -94,6 +94,28 @@ namespace Toolbox {
         return (clipFlags > 0) ? ZTCAM_CLIPTYPE_CROSSING : ZTCAM_CLIPTYPE_IN;
     }
 
+    bool CreateDirectoryRecursive( const std::string& dirName ) {
+        unsigned int pos = 0;
+        do {
+            pos = dirName.find_first_of( "\\/", pos + 1 );
+            if ( CreateDirectory( dirName.substr( 0, pos ).c_str(), NULL ) == 0 && GetLastError() != ERROR_ALREADY_EXISTS ) {
+                return false;
+            }
+        } while ( pos != std::string::npos );
+        return true;
+    }
+
+    bool FolderExists( const std::string& dirName_in ) {
+        DWORD ftyp = GetFileAttributesA( dirName_in.c_str() );
+        if ( ftyp == INVALID_FILE_ATTRIBUTES )
+            return false;  //something is wrong with your path!
+
+        if ( ftyp & FILE_ATTRIBUTE_DIRECTORY )
+            return true;   // this is a directory!
+
+        return false;    // this is not a directory!
+    }
+
     static std::size_t hash_value( float value ) {
         stdext::hash<float> hasher;
         return hasher( value );
@@ -131,7 +153,8 @@ namespace Toolbox {
         float dx = std::max( std::max( min.x - p.x, 0.0f ), p.x - max.x );
         float dy = std::max( std::max( min.y - p.y, 0.0f ), p.y - max.y );
         float dz = std::max( std::max( min.z - p.z, 0.0f ), p.z - max.z );
-        return sqrtf( dx * dx + dy * dy );
+        //return sqrtf( dx * dx + dy * dy );
+        return _mm_cvtss_f32( _mm_rcp_ss( _mm_rsqrt_ss( _mm_set_ss( dx * dx + dy * dy ) ) ) );
     }
 
     /** Computes the Normal of a triangle */
@@ -213,31 +236,12 @@ namespace Toolbox {
 
     /** Converts a multi-byte-string to wide-char */
     std::wstring ToWideChar( const std::string& str ) {
-        std::wstring utf16; // Result
-        if ( str.empty() ) { return utf16; }
-
-        const int utf16Length = ::MultiByteToWideChar( CP_ACP, 0, str.data(), str.length(), nullptr, 0 );
-
-        if ( utf16Length == 0 ) {
-            return utf16;
-        }
-        utf16.resize( utf16Length );
-        int result = ::MultiByteToWideChar( CP_ACP, 0, str.data(), str.length(), &utf16[0], utf16Length );
-        return utf16;
+        return std::wstring( str.begin(), str.end() );
     }
 
     /** Converts a wide-char-string to  multi-byte*/
     std::string ToMultiByte( const std::wstring& str ) {
-        std::string ansi; // Result
-        if ( str.empty() ) { return ansi; }
-        BOOL usedDefaulChar = FALSE;
-        const int ansiLen = ::WideCharToMultiByte( CP_ACP, 0, str.data(), str.length(), nullptr, 0, "?", &usedDefaulChar );
-        if ( ansiLen == 0 ) {
-            return ansi;
-        }
-        ansi.resize( ansiLen );
-        int result = ::WideCharToMultiByte( CP_ACP, 0, str.data(), str.length(), &ansi[0], ansiLen, "?", &usedDefaulChar );
-        return ansi;
+        return std::string( str.begin(), str.end() );
     }
 
     /** Returns a random number between 0 and 1 */
@@ -251,19 +255,19 @@ namespace Toolbox {
     }
 
     /** Converts an errorcode into a string */
-    std::wstring MakeErrorString( XRESULT code ) {
+    std::string MakeErrorString( XRESULT code ) {
         switch ( code ) {
         case XRESULT::XR_FAILED:
-            return L"General fail";
+            return "General fail";
 
         case XRESULT::XR_SUCCESS:
-            return L"Success";
+            return "Success";
 
         case XRESULT::XR_INVALID_ARG:
-            return L"Invalid argument";
+            return "Invalid argument";
 
         default:
-            return L"Other error";
+            return "Other error";
         }
     }
 
@@ -291,6 +295,17 @@ namespace Toolbox {
             return std::max( (unsigned int)1, ((width + 3) / 4) ) * 8;
         else
             return std::max( (unsigned int)1, ((width + 3) / 4) ) * 16;
+    }
+
+    /** Returns whether the given file exists */
+    bool FileExists( const std::string& file ) {
+        FILE* f = fopen( file.c_str(), "rb" );
+
+        if ( f ) {
+            fclose( f );
+            return true;
+        }
+        return false;
     }
 
     /** Saves a std::string to a FILE* */
@@ -322,5 +337,49 @@ namespace Toolbox {
 
         // We dont expect anyone to play for 49 Days straight!
         return DWORD( std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - s_startPoint).count() );
+    }
+
+    /** sse2 memcpy implementation by William Chan and Google */
+    void X_aligned_memcpy_sse2( void* dest, const void* src, const unsigned long size_t ) {
+        __asm
+        {
+            mov esi, src;    //src pointer
+            mov edi, dest;   //dest pointer
+
+            mov ebx, size_t; //ebx is our counter 
+            shr ebx, 7;      //divide by 128 (8 * 128bit registers)
+
+
+        loop_copy:
+            prefetchnta 128[ESI]; //SSE2 prefetch
+            prefetchnta 160[ESI];
+            prefetchnta 192[ESI];
+            prefetchnta 224[ESI];
+
+            movdqa xmm0, 0[ESI]; //move data from src to registers
+            movdqa xmm1, 16[ESI];
+            movdqa xmm2, 32[ESI];
+            movdqa xmm3, 48[ESI];
+            movdqa xmm4, 64[ESI];
+            movdqa xmm5, 80[ESI];
+            movdqa xmm6, 96[ESI];
+            movdqa xmm7, 112[ESI];
+
+            movntdq 0[EDI], xmm0; //move data from registers to dest
+            movntdq 16[EDI], xmm1;
+            movntdq 32[EDI], xmm2;
+            movntdq 48[EDI], xmm3;
+            movntdq 64[EDI], xmm4;
+            movntdq 80[EDI], xmm5;
+            movntdq 96[EDI], xmm6;
+            movntdq 112[EDI], xmm7;
+
+            add esi, 128;
+            add edi, 128;
+            dec ebx;
+
+            jnz loop_copy; //loop please
+          //loop_copy_end:
+        }
     }
 }

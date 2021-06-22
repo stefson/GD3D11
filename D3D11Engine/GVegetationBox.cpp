@@ -322,8 +322,8 @@ void GVegetationBox::RenderVegetation( const DirectX::XMFLOAT3& eye ) {
 
     Engine::GAPI->GetRendererState().BlendState.SetDirty();
 
-    Engine::GraphicsEngine->SetActiveVertexShader( L"VS_GrassInstanced" );
-    Engine::GraphicsEngine->SetActivePixelShader( L"PS_Grass" );
+    Engine::GraphicsEngine->SetActiveVertexShader( "VS_GrassInstanced" );
+    Engine::GraphicsEngine->SetActivePixelShader( "PS_Grass" );
 
     ((D3D11GraphicsEngine*)Engine::GraphicsEngine)->SetupVS_ExMeshDrawCall();
     ((D3D11GraphicsEngine*)Engine::GraphicsEngine)->SetupVS_ExConstantBuffer();

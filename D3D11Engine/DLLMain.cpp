@@ -164,20 +164,20 @@ void EnableCrashingOnCrashes() {
 
 void CheckPlatformSupport() {
     LogInstructionSet();
-    auto support_message = []( std::wstring isa_feature, bool is_supported ) {
+    auto support_message = []( std::string isa_feature, bool is_supported ) {
         if ( !is_supported ) {
-            ErrorBox( (std::wstring( L"Incompatible System, wrong DLL?\n\n" + isa_feature + L" required, but not supported on:\n" ) + Toolbox::ToWideChar( InstructionSet::Brand()) ).c_str());
+            ErrorBox( (std::string( "Incompatible System, wrong DLL?\n\n" + isa_feature + " required, but not supported on:\n" ) + InstructionSet::Brand()).c_str() );
             exit( 1 );
         }
     };
 #if __AVX2__
-    support_message( L"AVX2", InstructionSet::AVX2() );
+    support_message( "AVX2", InstructionSet::AVX2() );
 #elif __AVX__
-    support_message( L"AVX", InstructionSet::AVX() );
+    support_message( "AVX", InstructionSet::AVX() );
 #elif __SSE2__
-    support_message( L"SSE2", InstructionSet::SSE2() );
+    support_message( "SSE2", InstructionSet::SSE2() );
 #elif __SSE__
-    support_message( L"SSE", InstructionSet::SSE() );
+    support_message( "SSE", InstructionSet::SSE() );
 #endif
 }
 
@@ -198,7 +198,7 @@ BOOL WINAPI DllMain( HINSTANCE hInst, DWORD reason, LPVOID ) {
                 LogInfo() << "COM initialized";
             }
 
-            if ( Toolbox::fs::FileExists( "gmp.dll" ) || Toolbox::fs::FileExists( "..\\gmp\\gmp.dll" ) ) {
+            if ( Toolbox::FileExists( "gmp.dll" ) || Toolbox::FileExists( "..\\gmp\\gmp.dll" ) ) {
                 GMPModeActive = true;
                 LogInfo() << "GMP Mode Enabled";
             } else {

@@ -107,6 +107,7 @@ XRESULT D3D11VertexBuffer::UpdateBufferAligned16( void* data, UINT size ) {
         }
 
         // Copy data
+        //Toolbox::X_aligned_memcpy_sse2(mappedData, data, bsize);
         memcpy( mappedData, data, bsize );
 
         Unmap();

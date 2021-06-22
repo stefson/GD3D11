@@ -12,7 +12,7 @@
 #define USE_LOG
 
 const int MAX_LOG_MESSAGES_TO_CACHE = 200;
-__declspec(selectany) std::wstring LOGFILE;
+__declspec(selectany) std::string LOGFILE;
 
 //#ifdef BUILD_DESKTOP
 #ifdef BLERGH__
@@ -38,23 +38,23 @@ __declspec(selectany) std::wstring LOGFILE;
 
 #else
 
-#define XLE(x) { XRESULT xr = (x); if (xr != XRESULT::XR_SUCCESS){ LogError() << ##x << L" failed with code: " << xr << L" (" << Toolbox::MakeErrorString(xr) << L")";}}
+#define XLE(x) { XRESULT xr = (x); if (xr != XRESULT::XR_SUCCESS){ LogError() << ##x << " failed with code: " << xr << " (" + Toolbox::MakeErrorString(xr) + ")";}}
 
 /** Checks for errors and logs them, HRESULT hr needs to be declared */
-#define LE(x) { hr = (x); if (FAILED(hr)){LogError() << L"failed with code: " << hr << L"!"; }/*else{ LogInfo() << L#x << L" Succeeded."; }*/ }
+#define LE(x) { hr = (x); if (FAILED(hr)){LogError() << "failed with code: " << hr << "!"; }/*else{ LogInfo() << L#x << L" Succeeded."; }*/ }
 
 /** Returns hr if failed (HRESULT-function, hr needs to be declared)*/
-#define LE_R(x) { hr = (x); if (FAILED(hr)){LogError() << L"failed with code: " << hr << L"!"; return hr;} }
+#define LE_R(x) { hr = (x); if (FAILED(hr)){LogError() << "failed with code: " << hr << "!"; return hr;} }
 
 /** Returns nothing if failed (void-function)*/
-#define LE_RV(x) { hr = (x); if (FAILED(hr)){LogError() << L"failed with code: " << hr << L"!"; return;} }
+#define LE_RV(x) { hr = (x); if (FAILED(hr)){LogError() << "failed with code: " << hr << "!"; return;} }
 
 /** Returns false if failed (bool-function) */
-#define LE_RB(x) { hr = (x); if (FAILED(hr)){LogError() << L"failed with code: " << hr << L"!"; return false;} }
+#define LE_RB(x) { hr = (x); if (FAILED(hr)){LogError() << "failed with code: " << hr << "!"; return false;} }
 
-#define ErrorBox(Msg) MessageBoxW(nullptr,Msg,L"GD3D11: Error!",MB_OK|MB_ICONERROR|MB_TOPMOST)
-#define InfoBox(Msg) MessageBoxW(nullptr,Msg,L"GD3D11: Info!",MB_OK|MB_ICONASTERISK|MB_TOPMOST)
-#define WarnBox(Msg) MessageBoxW(nullptr,Msg,L"GD3D11: Warning!",MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST)
+#define ErrorBox(Msg) MessageBoxA(nullptr,Msg,"GD3D11: Error!",MB_OK|MB_ICONERROR|MB_TOPMOST)
+#define InfoBox(Msg) MessageBoxA(nullptr,Msg,"GD3D11: Info!",MB_OK|MB_ICONASTERISK|MB_TOPMOST)
+#define WarnBox(Msg) MessageBoxA(nullptr,Msg,"GD3D11: Warning!",MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST)
 
 #endif
 
@@ -67,19 +67,16 @@ __declspec(selectany) std::wstring LOGFILE;
     Usage: LogInfo() << L"Loaded Texture: " << TextureName;
     */
 
-#define WIDE2(x) L##x
-#define WIDE1(x) WIDE2(x)
 
-
-#define LogInfo() Log(L"Info",__FILEW__, __LINE__, WIDE1(__FUNCSIG__))
-#define LogWarn() Log(L"Warning",__FILEW__, __LINE__, WIDE1(__FUNCSIG__), true)
-#define LogError() Log(L"Error",__FILEW__, __LINE__, WIDE1(__FUNCSIG__), true)
+#define LogInfo() Log("Info",__FILE__, __LINE__, __FUNCSIG__)
+#define LogWarn() Log("Warning",__FILE__, __LINE__, __FUNCSIG__, true)
+#define LogError() Log("Error",__FILE__, __LINE__, __FUNCSIG__, true)
 
 
     /** Displays a messagebox and loggs its content */
-#define LogInfoBox() Log(L"Info",__FILEW__, __LINE__, WIDE1(__FUNCSIG__), false, 1)
-#define LogWarnBox() Log(L"Warning",__FILEW__, __LINE__,WIDE1(__FUNCSIG__), true, 2)
-#define LogErrorBox() Log(L"Error",__FILEW__, __LINE__, WIDE1(__FUNCSIG__), true, 3)
+#define LogInfoBox() Log("Info",__FILE__, __LINE__, __FUNCSIG__, false, 1)
+#define LogWarnBox() Log("Warning",__FILE__, __LINE__, __FUNCSIG__, true, 2)
+#define LogErrorBox() Log("Error",__FILE__, __LINE__, __FUNCSIG__, true, 3)
 
 /** Stream logger */
 #ifdef USE_LOG
@@ -97,7 +94,7 @@ namespace LogCache {
 
         static void FlushData() {
             FILE* f;
-            f = _wfopen( LOGFILE.c_str(), L"a" );
+            f = fopen( LOGFILE.c_str(), "a" );
 
             //if (MAX_LOG_MESSAGES_TO_CACHE > 5)
             //	fputs(" --- Log-Cache flush! --- \n", f);
@@ -121,11 +118,11 @@ namespace LogCache {
 
 class Log {
 public:
-    Log( const wchar_t* Type, const  wchar_t* File, int Line, const  wchar_t* Function, bool bIncludeInfo = false, UINT MessageBox = 0 ) {
+    Log( const char* Type, const  char* File, int Line, const  char* Function, bool bIncludeInfo = false, UINT MessageBox = 0 ) {
         if ( bIncludeInfo ) {
-            Info << Type << L": [" << File << L"(" << Line << L"), " << Function << L"]: ";
+            Info << Type << ": [" << File << "(" << Line << "), " << Function << "]: ";
         } else {
-            Info << Type << L": ";
+            Info << Type << ": ";
         }
 
         MessageBoxStyle = MessageBox;
@@ -137,22 +134,15 @@ public:
 
     /** Clears the logfile */
     static void Clear() {
-        LOGFILE = Toolbox::fs::GetExecutableDirectoryW();
-        LOGFILE += L"Log.txt";
+        char path[MAX_PATH + 1];
+        GetModuleFileNameA( nullptr, path, MAX_PATH );
+        LOGFILE = std::string( path );
+        LOGFILE = LOGFILE.substr( 0, LOGFILE.find_last_of( '\\' ) + 1 );
+        LOGFILE += "Log.txt";
 
         FILE* f;
-        f = _wfopen( LOGFILE.c_str(), L"w" );
+        f = fopen( LOGFILE.c_str(), "w" );
         fclose( f );
-    }
-
-    inline Log& operator << ( const std::string& obj ) {
-        Message << Toolbox::ToWideChar( obj );
-        return *this;
-    }
-
-    inline Log& operator << ( const char* obj ) {
-        Message << Toolbox::ToWideChar( obj );
-        return *this;
     }
 
     /** STL stringstream feature */
@@ -172,14 +162,14 @@ public:
         FILE* f;
         std::unique_lock<std::mutex> lock( LogCache::LogMutex );
 
-        f = _wfopen( LOGFILE.c_str(), L"a" );
+        f = fopen( LOGFILE.c_str(), "a" );
 
         if ( f ) {
 
-            fputws( Info.str().c_str(), f );
+            fputs( Info.str().c_str(), f );
 
-            fputws( Message.str().c_str(), f );
-            fputws( L"\n", f );
+            fputs( Message.str().c_str(), f );
+            fputs( "\n", f );
 
             fclose( f );
         }
@@ -213,8 +203,8 @@ public:
 
 private:
 
-    std::wstringstream Info; // Contains an information like "Info", "Warning" or "Error"
-    std::wstringstream Message; // Text to write into the logfile
+    std::stringstream Info; // Contains an information like "Info", "Warning" or "Error"
+    std::stringstream Message; // Text to write into the logfile
     UINT MessageBoxStyle; // Style of the messagebox if needed
 
     //static std::string LastErrorMessage; // The last errormessage
@@ -249,7 +239,7 @@ public:
     /** Called when the object is getting destroyed, which happens immediately if simply calling the constructor of this class */
     inline void Flush() {
 
-}
+    }
 
 private:
 };

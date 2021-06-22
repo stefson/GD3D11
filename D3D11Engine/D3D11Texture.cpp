@@ -122,7 +122,7 @@ XRESULT D3D11Texture::UpdateDataDeferred( void* data, int mip, bool noLock ) {
 
 /** Returns the RowPitch-Bytes */
 UINT D3D11Texture::GetRowPitchBytes( int mip ) {
-    int px = (int)std::max( 1.0, floor( TextureSize.x / pow( 2.0f, mip ) ) );
+    int px = static_cast<int>( std::max<float>( 1.0f, floor( TextureSize.x / pow( 2.0f, mip ) ) ) );
     //int py = (int)std::max( 1.0, floor( TextureSize.y / pow( 2.0f, mip ) ) );
     //int px = TextureSize.x;
     //int py = TextureSize.y;
@@ -138,8 +138,8 @@ UINT D3D11Texture::GetRowPitchBytes( int mip ) {
 
 /** Returns the size of the texture in bytes */
 UINT D3D11Texture::GetSizeInBytes( int mip ) {
-    int px = (int)std::max( 1.0, floor( TextureSize.x / pow( 2.0f, mip ) ) );
-    int py = (int)std::max( 1.0, floor( TextureSize.y / pow( 2.0f, mip ) ) );
+    int px = static_cast<int>( std::max<float>( 1.0f, floor( TextureSize.x / pow( 2.0f, mip ) ) ) );
+    int py = static_cast<int>( std::max<float>( 1.0f, floor( TextureSize.y / pow( 2.0f, mip ) ) ) );
     //int px = TextureSize.x;
     //int py = TextureSize.y;
 

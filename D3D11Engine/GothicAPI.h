@@ -98,8 +98,8 @@ struct MaterialInfo {
 
         MaterialType = MT_None;
 
-        VertexShader = L"";
-        PixelShader = L"";
+        VertexShader = "";
+        PixelShader = "";
     }
 
     ~MaterialInfo() {
@@ -107,10 +107,10 @@ struct MaterialInfo {
     }
 
     /** Writes this info to a file */
-    void WriteToFile( const std::wstring& name );
+    void WriteToFile( const std::string& name );
 
     /** Loads this info from a file */
-    void LoadFromFile( const std::wstring& name );
+    void LoadFromFile( const std::string& name );
 
     struct Buffer {
         float SpecularIntensity;
@@ -126,9 +126,9 @@ struct MaterialInfo {
 
     D3D11ConstantBuffer* Constantbuffer;
 
-    std::wstring VertexShader;
-    std::wstring TesselationShaderPair;
-    std::wstring PixelShader;
+    std::string VertexShader;
+    std::string TesselationShaderPair;
+    std::string PixelShader;
     EMaterialType MaterialType;
     Buffer buffer;
 
@@ -242,8 +242,7 @@ public:
     GothicRendererState& GetRendererState();
 
     /** Returns in which directory we started in */
-    const std::string& GothicAPI::GetStartDirectory() { return StartDirectory; }
-    const std::wstring& GothicAPI::GetStartDirectoryW() { return StartDirectoryW; }
+    const std::string& GetStartDirectory();
 
     /** Draws the world-mesh */
     void DrawWorldMeshNaive();
@@ -440,7 +439,7 @@ public:
     void CollectVisibleVobs( std::vector<VobInfo*>& vobs, std::vector<VobLightInfo*>& lights, std::vector<SkeletalVobInfo*>& mobs );
 
     /** Collects visible sections from the current camera perspective */
-    void CollectVisibleSections( std::list<WorldMeshSectionInfo*>& sections );
+    void CollectVisibleSections( std::vector<WorldMeshSectionInfo*>& sections );
 
     /** Builds our BspTreeVobMap */
     void BuildBspVobMapCache();
@@ -499,6 +498,9 @@ public:
 
     /** Lets Gothic draw its sky */
     void DrawSkyGothicOriginal();
+
+    /** Reset's the material info that were previously gathered */
+    void ResetMaterialInfo();
 
     /** Returns the material info associated with the given material */
     MaterialInfo* GetMaterialInfoFrom( zCTexture* tex );
@@ -559,16 +561,16 @@ public:
     void ResetVegetation();
 
     /** Saves Suppressed textures to a file */
-    XRESULT SaveSuppressedTextures( const std::wstring& file );
+    XRESULT SaveSuppressedTextures( const std::string& file );
 
     /** Saves Suppressed textures to a file */
-    XRESULT LoadSuppressedTextures( const std::wstring& file );
+    XRESULT LoadSuppressedTextures( const std::string& file );
 
     /** Saves vegetation to a file */
-    XRESULT SaveVegetation( const std::wstring& file );
+    XRESULT SaveVegetation( const std::string& file );
 
     /** Saves vegetation to a file */
-    XRESULT LoadVegetation( const std::wstring& file );
+    XRESULT LoadVegetation( const std::string& file );
 
     /** Sets/Gets the pending movie frame */
     void SetPendingMovieFrame( D3D11Texture* frame );
@@ -737,7 +739,6 @@ private:
 
     /** Directory we started in */
     std::string StartDirectory;
-    std::wstring StartDirectoryW;
 
     /** Resource critical section */
     CRITICAL_SECTION ResourceCriticalSection;

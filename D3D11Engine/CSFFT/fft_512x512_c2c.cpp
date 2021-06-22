@@ -18,7 +18,9 @@
 #include <assert.h>
 
 #include "fft_512x512.h"
-#include "../D3DShaderCompiler.h"
+
+HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut);
+
 
 void radix008A(CSFFT512x512_Plan* fft_plan,
 	Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> pUAV_Dst,
@@ -196,8 +198,8 @@ void fft512x512_create_plan(CSFFT512x512_Plan* plan, Microsoft::WRL::ComPtr<ID3D
 	Microsoft::WRL::ComPtr<ID3DBlob> pBlobCS;
 	Microsoft::WRL::ComPtr<ID3DBlob> pBlobCS2;
 
-    CShaderCompiler::CompileFromFile(L"system\\GD3D11\\Shaders\\CSFFT\\fft_512x512_c2c.hlsl", "Radix008A_CS", "cs_5_0", pBlobCS.GetAddressOf());
-    CShaderCompiler::CompileFromFile(L"system\\GD3D11\\Shaders\\CSFFT\\fft_512x512_c2c.hlsl", "Radix008A_CS2", "cs_5_0", pBlobCS2.GetAddressOf());
+    CompileShaderFromFile(L"CSFFT\\fft_512x512_c2c.hlsl", "Radix008A_CS", "cs_5_0", pBlobCS.GetAddressOf());
+    CompileShaderFromFile(L"CSFFT\\fft_512x512_c2c.hlsl", "Radix008A_CS2", "cs_5_0", pBlobCS2.GetAddressOf());
 	assert(pBlobCS.Get());
 	assert(pBlobCS2.Get());
 

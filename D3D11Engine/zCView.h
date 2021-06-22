@@ -96,7 +96,7 @@ public:
             || (thisptr == GetScreen()) ) {
             Engine::GraphicsEngine->DrawString(
                 s.ToChar(),
-                float(thisptr->pposx + thisptr->nax( x )), float(thisptr->pposy + thisptr->nay( y )),
+                thisptr->pposx + thisptr->nax( x ), thisptr->pposy + thisptr->nay( y ),
                 thisptr->font, thisptr->fontColor );
         } else {
             // create a textview for later blitting
@@ -128,9 +128,9 @@ public:
             if ( text->colored ) { fontColor = text->color; }
             //else                 { fontColor = thisptr->fontColor;}
 
-            x = float(thisptr->pposx + thisptr->nax( text->posx ));
+            x = thisptr->pposx + thisptr->nax( text->posx );
             // TODO: Remove additional addition if we get the correct char positioning
-            y = float(thisptr->pposy + thisptr->nay( text->posy ));
+            y = thisptr->pposy + thisptr->nay( text->posy );
 
             if ( !thisptr->font ) continue;
 

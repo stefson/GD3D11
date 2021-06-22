@@ -46,11 +46,11 @@ using namespace DirectX;
 const DWORD SCENE_WETNESS_DURATION_MS = 60 * 2 * 1000;
 
 /** Writes this info to a file */
-void MaterialInfo::WriteToFile( const std::wstring& name ) {
-    FILE* f = _wfopen( (L"system\\GD3D11\\textures\\infos\\" + name + L".mi").c_str(), L"wb" );
+void MaterialInfo::WriteToFile( const std::string& name ) {
+    FILE* f = fopen( ("system\\GD3D11\\textures\\infos\\" + name + ".mi").c_str(), "wb" );
 
     if ( !f ) {
-        LogError() << "Failed to open file '" << (L"system\\GD3D11\\textures\\infos\\" + name + L".mi") << "' for writing! Make sure the game runs in Admin mode "
+        LogError() << "Failed to open file '" << ("system\\GD3D11\\textures\\infos\\" + name + ".mi") << "' for writing! Make sure the game runs in Admin mode "
             " to get the rights to write to that directory!";
 
         return;
@@ -67,8 +67,8 @@ void MaterialInfo::WriteToFile( const std::wstring& name ) {
 }
 
 /** Loads this info from a file */
-void MaterialInfo::LoadFromFile( const std::wstring& name ) {
-    FILE* f = _wfopen( (L"system\\GD3D11\\textures\\infos\\" + name + L".mi").c_str(), L"rb" );
+void MaterialInfo::LoadFromFile( const std::string& name ) {
+    FILE* f = fopen( ("system\\GD3D11\\textures\\infos\\" + name + ".mi").c_str(), "rb" );
 
     if ( !f )
         return;
@@ -196,10 +196,6 @@ void GothicAPI::OnGameStart() {
     char dir[MAX_PATH];
     GetCurrentDirectoryA( MAX_PATH, dir );
     StartDirectory = dir;
-
-    wchar_t dirW[MAX_PATH];
-    GetCurrentDirectoryW( MAX_PATH, dirW );
-    StartDirectoryW = dirW;
 
     InitializeCriticalSection( &ResourceCriticalSection );
 
@@ -492,13 +488,14 @@ void GothicAPI::OnGeometryLoaded( zCPolygon** polys, unsigned int numPolygons ) 
     LogInfo() << "Extracting world";
 
     ResetWorld();
+    ResetMaterialInfo();
 
     std::string worldStr = "system\\GD3D11\\meshes\\WLD_" + LoadedWorldInfo->WorldName + ".obj";
     // Convert world to our own format
 #ifdef BUILD_GOTHIC_2_6_fix
     WorldConverter::ConvertWorldMesh( polys, numPolygons, &WorldSections, LoadedWorldInfo.get(), &WrappedWorldMesh );
 #else
-    if ( Toolbox::fs::FileExists( worldStr ) ) {
+    if ( Toolbox::FileExists( worldStr ) ) {
         WorldConverter::LoadWorldMeshFromFile( worldStr, &WorldSections, LoadedWorldInfo.get(), &WrappedWorldMesh );
         LoadedWorldInfo->CustomWorldLoaded = true;
     } else {
@@ -627,13 +624,13 @@ void GothicAPI::LoadRendererWorldSettings( GothicRendererSettings& s ) {
     } else {
         zenFolder = "system\\GD3D11\\ZENResources\\" + gameName + "\\";
     }
-    if ( !Toolbox::fs::FolderExists( zenFolder ) ) {
+    if ( !Toolbox::FolderExists( zenFolder ) ) {
         LogInfo() << "Custom ZEN-Resources. Directory not found: " << zenFolder;
         return;
     }
 
     auto const ini = zenFolder + LoadedWorldInfo->WorldName + ".INI";
-    if ( !Toolbox::fs::FileExists( ini ) ) {
+    if ( !Toolbox::FileExists( ini ) ) {
         return;
     }
 
@@ -653,10 +650,12 @@ void GothicAPI::LoadRendererWorldSettings( GothicRendererSettings& s ) {
         GetPrivateProfileIntA( "Atmoshpere", "FogColorModB", (int)(s.FogColorMod.z * 255.0f), ini.c_str() )
     );
 
-    s.VisualFXDrawRadius = GetPrivateProfileFloatA( "General", "VisualFXDrawRadius", s.VisualFXDrawRadius, ini.c_str() );
-    s.OutdoorVobDrawRadius = GetPrivateProfileFloatA( "General", "OutdoorVobDrawRadius", s.OutdoorVobDrawRadius, ini.c_str() );
-    s.OutdoorSmallVobDrawRadius = GetPrivateProfileFloatA( "General", "OutdoorSmallVobDrawRadius", s.OutdoorSmallVobDrawRadius, ini.c_str() );
-    s.SectionDrawRadius = GetPrivateProfileFloatA( "General", "SectionDrawRadius", s.SectionDrawRadius, ini.c_str() );
+    if ( !GMPModeActive ) {
+        s.VisualFXDrawRadius = GetPrivateProfileFloatA( "General", "VisualFXDrawRadius", s.VisualFXDrawRadius, ini.c_str() );
+        s.OutdoorVobDrawRadius = GetPrivateProfileFloatA( "General", "OutdoorVobDrawRadius", s.OutdoorVobDrawRadius, ini.c_str() );
+        s.OutdoorSmallVobDrawRadius = GetPrivateProfileFloatA( "General", "OutdoorSmallVobDrawRadius", s.OutdoorSmallVobDrawRadius, ini.c_str() );
+        s.SectionDrawRadius = GetPrivateProfileFloatA( "General", "SectionDrawRadius", s.SectionDrawRadius, ini.c_str() );
+    }
 
     s.ReplaceSunDirection = GetPrivateProfileBoolA( "Atmoshpere", "ReplaceSunDirection", s.ReplaceSunDirection, ini );
 
@@ -680,8 +679,8 @@ void GothicAPI::SaveRendererWorldSettings( const GothicRendererSettings& s ) {
     } else {
         zenFolder = "system\\GD3D11\\ZENResources\\" + gameName + "\\";
     }
-    if ( !Toolbox::fs::FolderExists( zenFolder ) ) {
-        if ( !Toolbox::fs::CreateDirectoryRecursive( zenFolder ) ) {
+    if ( !Toolbox::FolderExists( zenFolder ) ) {
+        if ( !Toolbox::CreateDirectoryRecursive( zenFolder ) ) {
             LogError() << "Could not save custom ZEN-Resources. Could not create directory: " << zenFolder;
             return;
         }
@@ -731,6 +730,11 @@ void GothicAPI::TraverseVobTree( zCTree<zCVob>* tree ) {
         if ( tree->Data->GetVisual() )
             OnAddVob( tree->Data, oCGame::GetGame()->_zCSession_world );
     }
+}
+
+/** Returns in which directory we started in */
+const std::string& GothicAPI::GetStartDirectory() {
+    return StartDirectory;
 }
 
 /** Builds the static mesh instancing cache */
@@ -796,7 +800,7 @@ void GothicAPI::DrawWorldMeshNaive() {
     START_TIMING();
     if ( RendererState.RendererSettings.DrawSkeletalMeshes ) {
 
-        Engine::GraphicsEngine->SetActivePixelShader( L"PS_World" );
+        Engine::GraphicsEngine->SetActivePixelShader( "PS_World" );
         // Set up frustum for the camera
         zCCamera::GetCamera()->Activate();
 
@@ -841,7 +845,7 @@ void GothicAPI::DrawWorldMeshNaive() {
     // Draw vobs in view
     Engine::GraphicsEngine->DrawVOBs();
 
-    DebugDrawBSPTree();
+    //DebugDrawBSPTree();
 
     ResetWorldTransform();
     ResetViewTransform();
@@ -870,6 +874,7 @@ void GothicAPI::DrawParticlesSimple() {
 // Converts poly strip visuals to render ready geometry
 void GothicAPI::CalcPolyStripMeshes() {
 
+    ExVertexStruct polyFan[4];
     PolyStripInfos.clear();
 
     for ( const auto& pStrip : PolyStripVisuals ) {
@@ -883,8 +888,8 @@ void GothicAPI::CalcPolyStripMeshes() {
         pStrip->Render( pStrip );
         //////////////////////////////
 
-        zCPolyStripInstance pStripInst = pStrip->GetInstanceData();
-        zCMaterial* mat = pStripInst.material;
+        zCPolyStripInstance* pStripInst = pStrip->GetInstanceData();
+        zCMaterial* mat = pStripInst->material;
         zCTexture* tx = mat->GetAniTexture();
         if ( !tx ) {
             tx = mat->GetTextureSingle();
@@ -895,13 +900,13 @@ void GothicAPI::CalcPolyStripMeshes() {
             continue;
         }
         //These values go back to 0 after reaching maxSegAmount
-        int firstSeg = pStripInst.firstSeg;
-        int lastSeg = pStripInst.lastSeg;
-        int maxSegAmount = pStripInst.numVert / 2;
+        int firstSeg = pStripInst->firstSeg;
+        int lastSeg = pStripInst->lastSeg;
+        int maxSegAmount = pStripInst->numVert / 2;
 
-        float* alphaList = pStripInst.alphaList;
-        zCVertex* vertList = pStripInst.vertList;
-        zCPolygon* poly = &(pStripInst.polyList[0]);
+        float* alphaList = pStripInst->alphaList;
+        zCVertex* vertList = pStripInst->vertList;
+        zCPolygon* poly = &(pStripInst->polyList[0]);
 
         //order of vertex indeces that make up a single poly
         int vertOrder[4] = { 0, 1, 3, 2 };
@@ -915,25 +920,18 @@ void GothicAPI::CalcPolyStripMeshes() {
                 break;
             }
 
-            std::vector<ExVertexStruct> polyFan;
-
 #ifdef BUILD_GOTHIC_1_08k
             //For G1 vertices are taken from polygons in polyList
-            poly = &pStripInst.polyList[segIndex];
+            poly = &pStripInst->polyList[segIndex];
             zCVertex** polyVertices = poly->getVertices();
 
             for ( int n = 0; n < 4; n++ ) {
-                ExVertexStruct vert;
-
+                ExVertexStruct& vert = polyFan[n];
                 vert.Position = polyVertices[n]->Position;
                 vert.TexCoord = poly->getFeatures()[n]->texCoord;
                 vert.Normal = poly->getFeatures()[n]->normal;
                 vert.Color = poly->getFeatures()[n]->lightStatic;
-
-                polyFan.push_back( vert );
             }
-
-
 #endif
 #ifdef BUILD_GOTHIC_2_6_fix
             //For G2 polyList only contains a single polygon (supposed to be kind of a reference it seems) 
@@ -941,35 +939,26 @@ void GothicAPI::CalcPolyStripMeshes() {
             //properly winded polygon
             for ( int n = 0; n < 4; n++ ) {
                 //In similar fashion to segment index - vertex index should overflow numVert.
-                int vInd = (segIndex * 2 + vertOrder[n]) % pStripInst.numVert;
+                int vInd = ((segIndex << 1) + vertOrder[n]) % pStripInst->numVert;
                 //Segment index of the current vertex (it's not always equals `i` since we loop through next segment's vertices as well).
-                int vSegInd = ((segIndex * 2 + vertOrder[n]) / 2) % maxSegAmount;
+                int vSegInd = (((segIndex << 1) + vertOrder[n]) >> 1) % maxSegAmount;
 
-                ExVertexStruct vert;
-
+                ExVertexStruct& vert = polyFan[n];
                 vert.Position = vertList[vInd].Position;
                 //Vertex features are hooked up from reference polygon's vertices
                 vert.TexCoord = poly->getFeatures()[n]->texCoord;
                 vert.Normal = poly->getFeatures()[n]->normal;
                 vert.Color = poly->getFeatures()[n]->lightStatic;
 
-                //Applying current segment alpha values//				
-                uint8_t color[4];
-                memcpy( &color, &vert.Color, 4 );
                 float alpha = alphaList[vSegInd];
-                if ( alpha < 0 ) alpha = 0;
-                color[3] = alpha;
-                memcpy( &vert.Color, &color, 4 );
-                /////////////////////////////////////////
-                polyFan.push_back( vert );
+                if ( alpha < 0.f ) alpha = 0.f;
+                reinterpret_cast<uint8_t*>(&vert.Color)[3] = alpha;
             }
 #endif
 
-            if ( !polyFan.empty() ) {
-                //Convert list of quads to list of triangles
-                WorldConverter::TriangleFanToList( &polyFan[0], polyFan.size(), &PolyStripInfos[tx].vertices );
-                PolyStripInfos[tx].material = mat;
-            }
+            //Convert list of quads to list of triangles
+            WorldConverter::TriangleFanToList( &polyFan[0], 4, &PolyStripInfos[tx].vertices );
+            PolyStripInfos[tx].material = mat;
         }
 
     }
@@ -1588,7 +1577,7 @@ SkeletalMeshVisualInfo* GothicAPI::LoadzCModelData( zCModel* model ) {
 void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
     // TODO: Put this into the renderer!!
     D3D11GraphicsEngine* g = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
-    g->SetActiveVertexShader( L"VS_Ex" );
+    g->SetActiveVertexShader( "VS_Ex" );
 
     zCModel* model = (zCModel*)vi->Vob->GetVisual();
     SkeletalMeshVisualInfo* visual = ((SkeletalMeshVisualInfo*)vi->VisualInfo);
@@ -1686,9 +1675,9 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
     }
 
     if ( g->GetRenderingStage() == DES_SHADOWMAP_CUBE )
-        g->SetActiveVertexShader( L"VS_ExCube" );
+        g->SetActiveVertexShader( "VS_ExCube" );
     else {
-        g->SetActiveVertexShader( L"VS_Ex" );
+        g->SetActiveVertexShader( "VS_Ex" );
 
         RendererState.RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_BACK;
         RendererState.RasterizerState.SetDirty();
@@ -1757,23 +1746,14 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
                 // Update animated textures
                 node->TexAniState.UpdateTexList();
 
-                bool isMMS = std::string( node->NodeVisual->GetFileExtension( 0 ) ) == ".MMS";
-                if ( distance < 2000 && isMMS ) {
-                    zCMorphMesh* mm = (zCMorphMesh*)node->NodeVisual;
+                bool isMMS = std::string( nodeAttachments[i][n]->Visual->GetFileExtension( 0 ) ) == ".MMS";
+                if ( distance < 1000 && isMMS ) {
+                    zCMorphMesh* mm = (zCMorphMesh*)nodeAttachments[i][n]->Visual;
                     mm->GetTexAniState()->UpdateTexList();
 
-                    g->SetActivePixelShader( L"PS_DiffuseAlphaTest" );
+                    g->SetActivePixelShader( "PS_DiffuseAlphaTest" );
 
                     if ( g->GetRenderingStage() == DES_MAIN ) {// Only draw this as a morphmesh when rendering the main scene
-                        const float fs = (fatness + 1.0f) * 0.02f; // This is what gothic seems to be doing for heads, and it even looks right...
-
-                        // Calculate "patched" scale according to fatness
-                        //XMMATRIX fatnessScale = XMMatrixScaling( fs, fs, fs ); //never used
-                        const XMMATRIX w = world * scale;
-
-                        // Set new "fat" worldmatrix
-                        SetWorldViewTransform( w * curTransform, view );
-
                         // Update constantbuffer
                         instanceInfo.World = *(XMFLOAT4X4*)&RendererState.TransformState.TransformWorld;
                         vi->VobConstantBuffer->UpdateBuffer( &instanceInfo );
@@ -1784,11 +1764,8 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
                         DrawMorphMesh( mm, fatness * 0.35f );
                         continue;
                     }
-                }
-
-                // Update the head textures in case this is a morph-mesh
-                if ( isMMS ) {
-                    zCMorphMesh* mm = (zCMorphMesh*)node->NodeVisual;
+                } else if ( isMMS ) {
+                    zCMorphMesh* mm = (zCMorphMesh*)nodeAttachments[i][n]->Visual;
                     mm->GetTexAniState()->UpdateTexList();
                 }
 
@@ -1833,11 +1810,6 @@ void GothicAPI::OnParticleFXDeleted( zCParticleFX* pfx ) {
 
 /** Draws a zCParticleFX */
 void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameData& data ) {
-    // Get our view-matrix
-    SetWorldViewTransform( source->GetWorldMatrixXM(), GetViewMatrixXM() );
-
-    float effectBrightness = 1.0f;
-
     // Update effects time
     fx->UpdateTime();
 
@@ -1863,12 +1835,11 @@ void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameDa
         }
 
         // Set render states for this type
-        ParticleRenderInfo inf;
+        ParticleRenderInfo& inf = FrameParticleInfo[texture];
 
         switch ( fx->GetEmitter()->GetVisAlphaFunc() ) {
         case zRND_ALPHA_FUNC_ADD:
             inf.BlendState.SetAdditiveBlending();
-            effectBrightness = 5.0f;
             inf.BlendMode = zRND_ALPHA_FUNC_ADD;
             break;
 
@@ -1922,7 +1893,8 @@ void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameDa
             };
 
             // Generate instance info
-            ParticleInstanceInfo ii;
+            part.emplace_back();
+            ParticleInstanceInfo& ii = part.back();
             ii.scale = DirectX::XMFLOAT2( p->Size.x, p->Size.y );
             ii.drawMode = 0;
 
@@ -1960,14 +1932,11 @@ void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameDa
             ii.position = p->PositionWS;
             ii.color = color;
             ii.velocity = p->Vel;
-            part.push_back( ii );
 
             fx->UpdateParticle( p );
 
             i++;
         }
-
-        FrameParticleInfo[texture] = inf;
     }
     /*
         Liker@WoG:
@@ -2479,7 +2448,7 @@ LRESULT GothicAPI::OnWindowMessage( HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
         Engine::GraphicsEngine->OnKeyDown( wParam );
         switch ( wParam ) {
         case VK_F11:
-            if ( GetAsyncKeyState( VK_CONTROL ) & 0x8000 && !GMPModeActive ) {
+            if ( ( GetAsyncKeyState( VK_CONTROL ) & 0x8000 ) && !GMPModeActive ) {
                 Engine::AntTweakBar->SetActive( !Engine::AntTweakBar->GetActive() );
                 SetEnableGothicInput( !Engine::AntTweakBar->GetActive() );
             } else {
@@ -2673,18 +2642,22 @@ void GothicAPI::CollectVisibleVobs( std::vector<VobInfo*>& vobs, std::vector<Vob
 }
 
 /** Collects visible sections from the current camera perspective */
-void GothicAPI::CollectVisibleSections( std::list<WorldMeshSectionInfo*>& sections ) {
+void GothicAPI::CollectVisibleSections( std::vector<WorldMeshSectionInfo*>& sections ) {
     const DirectX::XMFLOAT3 camPos = Engine::GAPI->GetCameraPosition();
     const INT2 camSection = WorldConverter::GetSectionOfPos( camPos );
 
     // run through every section and check for range and frustum
     const int sectionViewDist = Engine::GAPI->GetRendererState().RendererSettings.SectionDrawRadius;
     for ( auto& itx : WorldSections ) {
+        if ( abs( itx.first - camSection.x ) >= sectionViewDist ) {
+            continue;
+        }
+
         for ( auto& ity : itx.second ) {
             WorldMeshSectionInfo& section = ity.second;
 
             // Simple range-check
-            if ( abs( itx.first - camSection.x ) < sectionViewDist && abs( ity.first - camSection.y ) < sectionViewDist ) {
+            if ( abs( ity.first - camSection.y ) < sectionViewDist ) {
                 int flags = 15; // Frustum check, no farplane
                 if ( zCCamera::GetCamera()->BBox3DInFrustum( section.BoundingBox, flags ) == ZTCAM_CLIPTYPE_OUT )
                     continue;
@@ -3238,12 +3211,17 @@ void GothicAPI::DrawSkyGothicOriginal() {
     HookedFunctions::OriginalFunctions.original_zCWorldRender( oCGame::GetGame()->_zCSession_world, *zCCamera::GetCamera() );
 }
 
+/** Reset's the material info that were previously gathered */
+void GothicAPI::ResetMaterialInfo() {
+    MaterialInfos.clear();
+}
+
 /** Returns the material info associated with the given material */
 MaterialInfo* GothicAPI::GetMaterialInfoFrom( zCTexture* tex ) {
     std::unordered_map<zCTexture*, MaterialInfo>::iterator f = MaterialInfos.find( tex );
     if ( f == MaterialInfos.end() && tex ) {
         // Make a new one and try to load it
-        MaterialInfos[tex].LoadFromFile( tex->GetNameWithoutExtW() );
+        MaterialInfos[tex].LoadFromFile( tex->GetNameWithoutExt() );
     }
 
     return &MaterialInfos[tex];
@@ -3315,26 +3293,26 @@ zCVob* GothicAPI::GetPlayerVob() {
 /** Loads resources created for this .ZEN */
 void GothicAPI::LoadCustomZENResources() {
     auto gameName = GetGameName();
-    std::wstring zenFolder;
+    std::string zenFolder;
     if ( gameName == "Original" ) {
-        zenFolder = L"system\\GD3D11\\ZENResources\\";
+        zenFolder = "system\\GD3D11\\ZENResources\\";
     } else {
-        zenFolder = L"system\\GD3D11\\ZENResources\\" + Toolbox::ToWideChar( gameName ) + L"\\";
+        zenFolder = "system\\GD3D11\\ZENResources\\" + gameName + "\\";
     }
-    if ( !Toolbox::fs::FolderExistsW( zenFolder ) ) {
+    if ( !Toolbox::FolderExists( zenFolder ) ) {
         LogInfo() << "Custom ZEN-Resources. Directory not found: " << zenFolder;
         return;
     }
 
-    std::wstring zen = zenFolder + Toolbox::ToWideChar( LoadedWorldInfo->WorldName );
+    std::string zen = zenFolder + LoadedWorldInfo->WorldName;
 
     LogInfo() << "Loading custom ZEN-Resources from: " << zen;
 
     // Suppressed Textures
-    LoadSuppressedTextures( zen + L".spt" );
+    LoadSuppressedTextures( zen + ".spt" );
 
     // Load vegetation
-    LoadVegetation( zen + L".veg" );
+    LoadVegetation( zen + ".veg" );
 
     // Load world mesh information
     LoadSectionInfos();
@@ -3343,16 +3321,16 @@ void GothicAPI::LoadCustomZENResources() {
 /** Saves resources created for this .ZEN */
 void GothicAPI::SaveCustomZENResources() {
     auto gameName = GetGameName();
-    std::wstring zenFolder;
+    std::string zenFolder;
     if ( gameName == "Original" ) {
-        zenFolder = L"system\\GD3D11\\ZENResources\\";
+        zenFolder = "system\\GD3D11\\ZENResources\\";
     } else {
-        zenFolder = L"system\\GD3D11\\ZENResources\\" + Toolbox::ToWideChar( gameName ) + L"\\";
+        zenFolder = "system\\GD3D11\\ZENResources\\" + gameName + "\\";
     }
 
     bool mkDirErr = false;
-    if ( !Toolbox::fs::FolderExistsW( zenFolder ) ) {
-        mkDirErr = !Toolbox::fs::CreateDirectoryRecursiveW( zenFolder );
+    if ( !Toolbox::FolderExists( zenFolder ) ) {
+        mkDirErr = !Toolbox::CreateDirectoryRecursive( zenFolder );
     }
 
     if ( mkDirErr ) {
@@ -3360,15 +3338,15 @@ void GothicAPI::SaveCustomZENResources() {
         return;
     }
 
-    std::wstring zen = zenFolder + Toolbox::ToWideChar( LoadedWorldInfo->WorldName );
+    std::string zen = zenFolder + LoadedWorldInfo->WorldName;
 
     LogInfo() << "Saving custom ZEN-Resources to: " << zen;
 
     // Suppressed Textures
-    SaveSuppressedTextures( zen + L".spt" );
+    SaveSuppressedTextures( zen + ".spt" );
 
     // Save vegetation
-    SaveVegetation( zen + L".veg" );
+    SaveVegetation( zen + ".veg" );
 
     // Save world mesh information
     SaveSectionInfos();
@@ -3425,8 +3403,8 @@ void GothicAPI::SupressTexture( WorldMeshSectionInfo* section, const std::string
 }
 
 /** Saves Suppressed textures to a file */
-XRESULT GothicAPI::SaveSuppressedTextures( const std::wstring& file ) {
-    FILE* f = _wfopen( file.c_str(), L"wb" );
+XRESULT GothicAPI::SaveSuppressedTextures( const std::string& file ) {
+    FILE* f = fopen( file.c_str(), "wb" );
 
     LogInfo() << "Saving suppressed textures";
 
@@ -3464,8 +3442,8 @@ XRESULT GothicAPI::SaveSuppressedTextures( const std::wstring& file ) {
 }
 
 /** Saves Suppressed textures to a file */
-XRESULT GothicAPI::LoadSuppressedTextures( const std::wstring& file ) {
-    FILE* f = _wfopen( file.c_str(), L"rb" );
+XRESULT GothicAPI::LoadSuppressedTextures( const std::string& file ) {
+    FILE* f = fopen( file.c_str(), "rb" );
 
     LogInfo() << "Loading Suppressed textures";
 
@@ -3516,8 +3494,8 @@ XRESULT GothicAPI::LoadSuppressedTextures( const std::wstring& file ) {
 }
 
 /** Saves vegetation to a file */
-XRESULT GothicAPI::SaveVegetation( const std::wstring& file ) {
-    FILE* f = _wfopen( file.c_str(), L"wb" );
+XRESULT GothicAPI::SaveVegetation( const std::string& file ) {
+    FILE* f = fopen( file.c_str(), "wb" );
 
     LogInfo() << "Saving vegetation";
 
@@ -3540,8 +3518,8 @@ XRESULT GothicAPI::SaveVegetation( const std::wstring& file ) {
 }
 
 /** Saves vegetation to a file */
-XRESULT GothicAPI::LoadVegetation( const std::wstring& file ) {
-    FILE* f = _wfopen( file.c_str(), L"rb" );
+XRESULT GothicAPI::LoadVegetation( const std::string& file ) {
+    FILE* f = fopen( file.c_str(), "rb" );
 
     LogInfo() << "Loading vegetation";
 
@@ -3650,7 +3628,7 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
     auto ini = std::string( NPath, len ).append( "\\" + file );
 
 
-    if ( !Toolbox::fs::FileExists( ini ) ) {
+    if ( !Toolbox::FileExists( ini ) ) {
         LogWarn() << "Settings file not found: " << ini;
         return XR_FAILED;
     }
@@ -3856,25 +3834,21 @@ void GothicAPI::DrawMorphMesh( zCMorphMesh* msh, float fatness ) {
 
         // Get vertices
         for ( int t = 0; t < sub.TriList.NumInArray; t++ ) {
-            for ( int v = 2; v >= 0; v-- ) {
-                ExVertexStruct vx;
-                vx.Position = posList[sub.WedgeList.Array[morphMesh->GetSubmeshes()[i].TriList.Array[t].wedge[v]].position];
-                vx.TexCoord = morphMesh->GetSubmeshes()[i].WedgeList.Array[sub.TriList.Array[t].wedge[v]].texUV;
+            for ( int v = 3; --v >= 0; ) {
+                vertices.emplace_back();
+                ExVertexStruct& vx = vertices.back();
+                vx.Position = posList[sub.WedgeList.Array[sub.TriList.Array[t].wedge[v]].position];
+                vx.TexCoord = sub.WedgeList.Array[sub.TriList.Array[t].wedge[v]].texUV;
                 vx.Color = 0xFFFFFFFF;
-                vx.Normal = morphMesh->GetSubmeshes()[i].WedgeList.Array[sub.TriList.Array[t].wedge[v]].normal;
+                vx.Normal = sub.WedgeList.Array[sub.TriList.Array[t].wedge[v]].normal;
 
                 // Do this on GPU probably?
-                XMFLOAT3 Normal;
-                XMStoreFloat3( &Normal, XMVectorSet( vx.Normal.x, vx.Normal.y, vx.Normal.z, 0 ) * fatness );
-                vx.Position.x += Normal.x;
-                vx.Position.y += Normal.y;
-                vx.Position.z += Normal.z;
-                vertices.push_back( vx );
+                XMStoreFloat3( reinterpret_cast<XMFLOAT3*>( &vx.Position ), XMVectorAdd( XMLoadFloat3( reinterpret_cast<const XMFLOAT3*>( &vx.Position ) ), XMLoadFloat3( reinterpret_cast<const XMFLOAT3*>(&vx.Normal) ) * XMVectorReplicate( fatness ) ) );
             }
         }
 
-        morphMesh->GetSubmeshes()[i].Material->BindTexture( 0 );
-        Engine::GraphicsEngine->DrawVertexArray( &vertices[0], vertices.size() );
+        sub.Material->BindTexture( 0 );
+        Engine::GraphicsEngine->DrawVertexArrayMM( &vertices[0], vertices.size() );
     }
 }
 
@@ -4166,9 +4140,9 @@ void GothicAPI::PrintMessageTimed( const INT2& position, const std::string& strM
 /** Prints information about the mod to the screen for a couple of seconds */
 void GothicAPI::PrintModInfo() {
     std::string version = std::string( VERSION_STRING );
-    std::wstring gpu = Engine::GraphicsEngine->GetGraphicsDeviceName();
+    std::string gpu = Engine::GraphicsEngine->GetGraphicsDeviceName();
     PrintMessageTimed( INT2( 5, 5 ), "GD3D11 - Version " + version );
-    PrintMessageTimed( INT2( 5, 180 ), "Device: " + Toolbox::ToMultiByte( gpu ) );
+    PrintMessageTimed( INT2( 5, 180 ), "Device: " + gpu );
 }
 
 /** Applies tesselation-settings for all mesh-parts using the given info */

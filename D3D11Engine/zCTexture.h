@@ -63,6 +63,7 @@ public:
     const char* GetName() {
         return __GetName().ToChar();
     }
+
     std::string GetNameWithoutExt() {
         std::string n = GetName();
 
@@ -72,16 +73,6 @@ public:
             n.resize( p );
 
         return n;
-    }
-    std::wstring GetNameWithoutExtW() {
-        std::string n = GetName();
-
-        int p = n.find_last_of( '.' );
-
-        if ( p != std::string::npos )
-            n.resize( p );
-
-        return Toolbox::ToWideChar( n );
     }
 
     MyDirectDrawSurface7* GetSurface() {
