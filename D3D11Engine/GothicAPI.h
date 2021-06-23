@@ -249,6 +249,7 @@ public:
 
     /** Draws a skeletal mesh-vob */
     void DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance );
+    void DrawSkeletalGhosts();
 
     /** Draws the inventory */
     void DrawInventory( zCWorld* world, zCCamera& camera );
@@ -687,6 +688,7 @@ private:
     /** List of vobs with skeletal meshes (Having a zCModel-Visual) */
     std::list<SkeletalVobInfo*> SkeletalMeshVobs;
     std::list<SkeletalVobInfo*> AnimatedSkeletalVobs;
+    std::vector<std::pair<float, SkeletalVobInfo*>> GhostSkeletalVobs;
 
     /** List of Vobs having a zCParticleFX-Visual */
     std::list<zCVob*> ParticleEffectVobs;

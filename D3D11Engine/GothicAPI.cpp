@@ -27,6 +27,7 @@
 #include "zCInput.h"
 #include "zCBspTree.h"
 #include "BaseLineRenderer.h"
+#include "D3D11PShader.h"
 #include "D3D7\MyDirect3DDevice7.h"
 #include "GVegetationBox.h"
 #include "oCNPC.h"
@@ -44,6 +45,9 @@ using namespace DirectX;
 
 // Duration how long the scene will stay wet, in MS
 const DWORD SCENE_WETNESS_DURATION_MS = 60 * 2 * 1000;
+
+// Draw ghost from back to front of our camera
+auto CompareGhostDistance = []( std::pair<float, SkeletalVobInfo*>& a, std::pair<float, SkeletalVobInfo*>& b ) -> bool { return a.first < b.first; };
 
 /** Writes this info to a file */
 void MaterialInfo::WriteToFile( const std::string& name ) {
@@ -810,7 +814,6 @@ void GothicAPI::DrawWorldMeshNaive() {
 
             float dist;
             XMStoreFloat( &dist, XMVector3Length( vobInfo->Vob->GetPositionWorldXM() - GetCameraPositionXM() ) );
-
             if ( dist > RendererState.RendererSettings.SkeletalMeshDrawRadius )
                 continue; // Skip out of range
 
@@ -827,12 +830,20 @@ void GothicAPI::DrawWorldMeshNaive() {
             vobInfo->IndoorVob = vobInfo->Vob->IsIndoorVob();
 
             zCModel* model = (zCModel*)vobInfo->Vob->GetVisual();
-
             if ( !model )
                 continue; // Gothic fortunately sets this to 0 when it throws the model out of the cache
 
             // This is important, because gothic only lerps between animation when this distance is set and below ~2000
             model->SetDistanceToCamera( dist );
+
+            // Schedule for drawing in later stage if this vob is ghost
+            if ( oCNPC* npc = vobInfo->Vob->AsNpc() ) {
+                if ( npc->HasFlag( NPC_FLAG_GHOST ) ) {
+                    GhostSkeletalVobs.emplace_back( dist, vobInfo );
+                    std::push_heap( GhostSkeletalVobs.begin(), GhostSkeletalVobs.end(), CompareGhostDistance );
+                    continue;
+                }
+            }
 
             DrawSkeletalMeshVob( vobInfo, dist );
         }
@@ -1556,7 +1567,6 @@ SkeletalMeshVisualInfo* GothicAPI::LoadzCModelData( zCModel* model ) {
 void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
     // TODO: Put this into the renderer!!
     D3D11GraphicsEngine* g = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
-    g->SetActiveVertexShader( "VS_Ex" );
 
     zCModel* model = (zCModel*)vi->Vob->GetVisual();
     SkeletalMeshVisualInfo* visual = ((SkeletalMeshVisualInfo*)vi->VisualInfo);
@@ -1593,60 +1603,8 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
     model->UpdateAttachedVobs();
     model->UpdateMeshLibTexAniState();
 
-    std::string visname = model->GetVisualName();
-    std::string vobname = vi->Vob->GetName();
-    DirectX::XMFLOAT3 vobPos = vi->Vob->GetPositionWorld();
-    int numSoftSkins = model->GetMeshSoftSkinList()->NumInArray;
-
-    struct fns {
-        // TODO: FIXME
-        // Ugly stuff to get the fucking corrupt visual in returning here
-        static void Draw( SkeletalVobInfo* vi, std::vector<XMFLOAT4X4>& transforms, float fatness ) {
-            Engine::GraphicsEngine->DrawSkeletalMesh( vi, transforms, fatness );
-        }
-
-        static bool CatchDraw( SkeletalVobInfo* vi, std::string* visName, std::string* vobName, DirectX::XMFLOAT3* pos, std::vector<XMFLOAT4X4>& transforms, float fatness ) {
-            bool success = true;
-            __try {
-                Draw( vi, transforms, fatness );
-            } __except ( EXCEPTION_EXECUTE_HANDLER ) {
-                Except( vi, visName, vobName, pos );
-                success = false;
-            }
-
-            return success;
-        }
-
-        static void Except( SkeletalVobInfo* vi, std::string* visName, std::string* vobName, DirectX::XMFLOAT3* pos ) {
-            // TODO: Make static again
-            /*static*/ bool done = false;
-
-            if ( !done ) {
-                LogError()
-                    << "Corrupted skeletal mesh error. m\n\nDraw Model: Visname: "
-                    << visName->c_str()
-                    << " Vobname: "
-                    << vobName->c_str()
-                    << "VobPos: "
-                    << float3( *pos ).toString();
-            }
-            // TODO: see if "Faulty Model" happens again
-
-            Engine::GraphicsEngine->GetLineRenderer()->AddPointLocator( *pos, 50.0f, DirectX::XMFLOAT4( 1, 0, 0, 1 ) );
-
-            done = true;
-        }
-    };
-
     if ( !((SkeletalMeshVisualInfo*)vi->VisualInfo)->SkeletalMeshes.empty() ) {
-        if ( !fns::CatchDraw( vi, &visname, &vobname, &vobPos, transforms, fatness ) ) {
-            // This vob is broken, quickly remove its stuff
-            // This will probably cause a memoryleak, but it will keep the game running until this is fixed
-            // Better than nothing...
-            // TODO: FIXME
-            vi->VisualInfo = nullptr;
-            LogError() << "Failed to draw a skeletal-mesh. Removing its visual to (hopefully) keep the game running.";
-        }
+        Engine::GraphicsEngine->DrawSkeletalMesh( vi, transforms, fatness );
     }
 
     if ( g->GetRenderingStage() == DES_SHADOWMAP_CUBE )
@@ -1726,9 +1684,13 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
                     zCMorphMesh* mm = (zCMorphMesh*)nodeAttachments[i][n]->Visual;
                     mm->GetTexAniState()->UpdateTexList();
 
-                    g->SetActivePixelShader( "PS_DiffuseAlphaTest" );
+                    // Only draw this as a morphmesh when rendering the main scene or when rendering as ghost
+                    if ( g->GetRenderingStage() == DES_MAIN || g->GetRenderingStage() == DES_GHOST ) {
+                        // Setup pixel shader for morphmesh
+                        if ( g->GetRenderingStage() != DES_GHOST ) {
+                            g->SetActivePixelShader( "PS_DiffuseAlphaTest" );
+                        }
 
-                    if ( g->GetRenderingStage() == DES_MAIN ) {// Only draw this as a morphmesh when rendering the main scene
                         // Update constantbuffer
                         instanceInfo.World = *(XMFLOAT4X4*)&RendererState.TransformState.TransformWorld;
                         vi->VobConstantBuffer->UpdateBuffer( &instanceInfo );
@@ -1753,7 +1715,9 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
                     if ( itm.first && itm.first->GetAniTexture() ) { // TODO: Crash here!
                         if ( itm.first->GetAniTexture()->CacheIn( 0.6f ) == zRES_CACHED_IN ) {
                             itm.first->GetAniTexture()->Bind( 0 );
-                            g->BindShaderForTexture( itm.first->GetAniTexture() );
+                            if ( g->GetRenderingStage() != DES_GHOST ) {
+                                g->BindShaderForTexture( itm.first->GetAniTexture() );
+                            }
                         } else
                             continue;
                     }
@@ -1768,6 +1732,41 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
     }
 
     RendererState.RendererInfo.FrameDrawnVobs++;
+}
+
+void GothicAPI::DrawSkeletalGhosts() {
+    D3D11GraphicsEngine* g = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
+    while ( !GhostSkeletalVobs.empty() ) {
+        auto const& GhostInfo = GhostSkeletalVobs.front();
+
+        // We need to do Z-prepass first
+        g->UnbindActivePS();
+        g->GetContext()->PSSetShader( nullptr, nullptr, 0 );
+        DrawSkeletalMeshVob( GhostInfo.second, GhostInfo.first );
+        RendererState.RendererInfo.FrameDrawnVobs--; // Don't calculate prepass as drawn vob
+
+        // Now actually draw mesh using ghost pixel shader
+        g->SetActivePixelShader( "PS_Ghost" );
+        g->BindActivePixelShader();
+
+        // Setup alpha blending
+        RendererState.BlendState.SetAlphaBlending();
+        RendererState.BlendState.SetDirty();
+
+        // Update ghost alpha information
+        GhostAlphaConstantBuffer gacb;
+        #ifdef BUILD_GOTHIC_2_6_fix
+        gacb.GA_Alpha = *reinterpret_cast<float*>(0xAB26A4); // Cached GhostAlpha value
+        #else
+        gacb.GA_Alpha = 0.3f;
+        #endif
+        g->GetActivePS()->GetConstantBuffer()[0]->UpdateBuffer( &gacb );
+        g->GetActivePS()->GetConstantBuffer()[0]->BindToPixelShader( 0 );
+        DrawSkeletalMeshVob( GhostInfo.second, GhostInfo.first );
+
+        std::pop_heap( GhostSkeletalVobs.begin(), GhostSkeletalVobs.end(), CompareGhostDistance );
+        GhostSkeletalVobs.pop_back();
+    }
 }
 
 /** Called when a particle system got removed */

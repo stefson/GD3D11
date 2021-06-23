@@ -131,7 +131,8 @@ XRESULT D3D11ShaderManager::Init() {
 
     Shaders.push_back( ShaderInfo( "PS_Rain", "PS_Rain.hlsl", "p" ) );
 
-
+    Shaders.push_back( ShaderInfo( "PS_Ghost", "PS_Ghost.hlsl", "p" ) );
+    Shaders.back().cBufferSizes.push_back( sizeof( GhostAlphaConstantBuffer ) );
 
     Shaders.push_back( ShaderInfo( "PS_World", "PS_World.hlsl", "p" ) );
     Shaders.back().cBufferSizes.push_back( sizeof( GothicGraphicsState ) );

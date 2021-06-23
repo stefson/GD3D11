@@ -203,6 +203,10 @@ public:
     const Microsoft::WRL::ComPtr<ID3D11DeviceContext1>& GetContext() { return Context; }
     const Microsoft::WRL::ComPtr<ID3D11DeviceContext1>& GetDeferredMediaContext1() { return DeferredContext; }
 
+    /** Pixel Shader functions */
+    void UnbindActivePS() { ActivePS = nullptr; }
+    std::shared_ptr<D3D11PShader>& GetActivePS() { return ActivePS; }
+
     /** Returns the current resolution */
     virtual INT2 GetResolution() { return Resolution; }
 

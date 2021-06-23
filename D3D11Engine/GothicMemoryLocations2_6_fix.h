@@ -87,6 +87,7 @@ struct GothicMemoryLocations {
         static const unsigned int Disable = 0x00745A20;
         static const unsigned int IsAPlayer = 0x007425A0;
         static const unsigned int GetName = 0x0072F820;
+        static const unsigned int HasFlag = 0x007309E0;
     };
     
     struct zCViewDraw {

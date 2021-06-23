@@ -7,6 +7,13 @@
 #include "zCVob.h"
 #include "zViewTypes.h"
 
+enum oCNPCFlags : int
+{
+    NPC_FLAG_FRIEND = (1 << 0),
+    NPC_FLAG_IMMORTAL = (1 << 1),
+    NPC_FLAG_GHOST = (1 << 2)
+};
+
 class oCNPC : public zCVob {
 public:
     oCNPC();
@@ -70,9 +77,14 @@ public:
     zSTRING GetName( int i = 0 ) {
         XCALL( GothicMemoryLocations::oCNPC::GetName );
     }
-#ifndef BUILD_GOTHIC_1_08k 
-    // TODO: G1 Addresses
-    int HasFlag( int ) { XCALL( 0x007309E0 ); }
+#ifndef BUILD_SPACER
+    bool HasFlag( oCNPCFlags flag ) {
+        XCALL( GothicMemoryLocations::oCNPC::HasFlag );
+    }
+#else
+    bool HasFlag( oCNPCFlags ) {
+        return false;
+    }
 #endif
 };
 

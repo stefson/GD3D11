@@ -25,7 +25,7 @@
 #include "zCTexture.h"
 #include "zCView.h"
 #include "zCVobLight.h"
-//#include "oCNPC.h"
+#include "oCNPC.h"
 #include <DDSTextureLoader.h>
 #include <ScreenGrab.h>
 #include <wincodec.h>
@@ -1181,16 +1181,6 @@ XRESULT D3D11GraphicsEngine::DrawVertexArrayMM( ExVertexStruct* vertices,
     unsigned int numVertices,
     unsigned int startVertex,
     unsigned int stride ) {
-    UpdateRenderStates();
-    auto vShader = ActiveVS;
-    // ShaderManager->GetVShader("VS_TransformedEx");
-
-    // Bind the FF-Info to the first PS slot
-    ActivePS->GetConstantBuffer()[0]->UpdateBuffer(
-        &Engine::GAPI->GetRendererState().GraphicsState );
-    ActivePS->GetConstantBuffer()[0]->BindToPixelShader( 0 );
-
-    SetupVS_ExMeshDrawCall();
 
     // Most morphed heads can fit into <= 3072 vertices buffer but some requires larger so let's have 2 different buffers and choose the appropriate one
     if ( numVertices > 3072 ) {
@@ -1294,9 +1284,6 @@ XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh( SkeletalVobInfo* vi,
     } else {
         SetActiveVertexShader( "VS_ExSkeletal" );
     }
-    // It is only to indicate that we want pixel shader(to populate gbuffer)
-    // the actual shader will be activated before drawing
-    ActivePS = PS_LinDepth;
 
     InfiniteRangeConstantBuffer->BindToPixelShader( 3 );
 
@@ -1328,14 +1315,20 @@ XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh( SkeletalVobInfo* vi,
 
     ActiveVS->Apply();
 
-    bool linearDepth = (Engine::GAPI->GetRendererState().GraphicsState.FF_GSwitches & GSWITCH_LINEAR_DEPTH) != 0;
-    if ( linearDepth ) {
-        ActivePS = PS_LinDepth;
-        ActivePS->Apply();
-    } else if ( RenderingStage == DES_SHADOWMAP ) {
-        // Unbind PixelShader in this case
-        GetContext()->PSSetShader( nullptr, nullptr, 0 );
-        ActivePS = nullptr;
+    if ( RenderingStage != DES_GHOST ) {
+        bool linearDepth = (Engine::GAPI->GetRendererState().GraphicsState.FF_GSwitches & GSWITCH_LINEAR_DEPTH) != 0;
+        if ( linearDepth ) {
+            ActivePS = PS_LinDepth;
+            ActivePS->Apply();
+        } else if ( RenderingStage == DES_SHADOWMAP ) {
+            // Unbind PixelShader in this case
+            GetContext()->PSSetShader( nullptr, nullptr, 0 );
+            ActivePS = nullptr;
+        } else {
+            // It is only to indicate that we want pixel shader(to populate gbuffer)
+            // the actual shader will be activated before drawing
+            ActivePS = PS_LinDepth;
+        }
     }
 
     const bool tesselationEnabled = Engine::GAPI->GetRendererState().RendererSettings.EnableTesselation;
@@ -1381,8 +1374,10 @@ XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh( SkeletalVobInfo* vi,
                         DistortionTexture->BindToPixelShader( 1 );
                     }
 
-                    // Select shader
-                    BindShaderForTexture( tex );
+                    // Select shader - ghosts have their own pixel shader
+                    if ( RenderingStage != DES_GHOST ) {
+                        BindShaderForTexture( tex );
+                    }
                 }
             }
 
@@ -1718,6 +1713,12 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 
     // Draw light-shafts
     DrawMeshInfoListAlphablended( FrameTransparencyMeshes );
+
+    // Draw ghosts
+    D3D11ENGINE_RENDER_STAGE oldStage = RenderingStage;
+    SetRenderingStage( DES_GHOST );
+    Engine::GAPI->DrawSkeletalGhosts();
+    SetRenderingStage( oldStage );
 
     if ( Engine::GAPI->GetRendererState().RendererSettings.DrawFog &&
         Engine::GAPI->GetLoadedWorldInfo()->BspTree->GetBspTreeMode() ==
@@ -2949,6 +2950,14 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround(
                     // Seems to happen in Gothic 1
                     continue;
                 }
+
+                // Ghosts shouldn't have shadows
+                if ( oCNPC* npc = skeletalMeshVob->Vob->AsNpc() ) {
+                    if ( npc->HasFlag( NPC_FLAG_GHOST ) ) {
+                        continue;
+                    }
+                }
+
                 // Check vob range
                 float dist;
                 XMStoreFloat( &dist, XMVector3Length( position - skeletalMeshVob->Vob->GetPositionWorldXM() ) );
@@ -3223,20 +3232,16 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround( FXMVECTOR position,
         for ( auto const& skeletalMeshVob : Engine::GAPI->GetSkeletalMeshVobs() ) {
             if ( !skeletalMeshVob->VisualInfo ) continue;
 
-            //INT2 s = WorldConverter::GetSectionOfPos( skeletalMeshVob->Vob->GetPositionWorld() );
+            // Ghosts shouldn't have shadows
+            if ( oCNPC* npc = skeletalMeshVob->Vob->AsNpc() ) {
+                if ( npc->HasFlag( NPC_FLAG_GHOST ) ) {
+                    continue;
+                }
+            }
 
             float dist; XMStoreFloat( &dist, XMVector3Length( skeletalMeshVob->Vob->GetPositionWorldXM() - position ) );
             if ( dist > Engine::GAPI->GetRendererState().RendererSettings.IndoorVobDrawRadius )
                 continue;  // Skip out of range
-
-            // TODO: Handle transparent NPCs
-            //if (skeletalMeshVob->Vob->AsNpc()) {
-            //	oCNPC* npc = skeletalMeshVob->Vob->AsNpc();
-            //	if (npc->HasFlag(4)) {
-            //		// GHOST
-            //		skeletalMeshVob->VisualInfo->Visual->SetAlphaTestingEnabled(1);
-            //	}
-            //}
 
             Engine::GAPI->DrawSkeletalMeshVob( skeletalMeshVob, FLT_MAX );
         }
