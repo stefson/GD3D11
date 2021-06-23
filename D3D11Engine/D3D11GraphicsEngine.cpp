@@ -1284,8 +1284,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferFF( D3D11VertexBuffer* vb,
 }
 
 /** Draws a skeletal mesh */
-XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh(
-    D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices,
+XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh( SkeletalVobInfo* vi,
     const std::vector<XMFLOAT4X4>& transforms, float fatness ) {
     GetContext()->RSSetState( WorldRasterizerState.Get() );
     GetContext()->OMSetDepthStencilState( DefaultDepthStencilState.Get(), 0 );
@@ -1295,10 +1294,9 @@ XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh(
     } else {
         SetActiveVertexShader( "VS_ExSkeletal" );
     }
-    SetActivePixelShader( "PS_AtmosphereGround" );
-    const auto nrmPS = ActivePS;
-    SetActivePixelShader( "PS_World" );
-    const auto defaultPS = ActivePS;
+    // It is only to indicate that we want pixel shader(to populate gbuffer)
+    // the actual shader will be activated before drawing
+    ActivePS = PS_LinDepth;
 
     InfiniteRangeConstantBuffer->BindToPixelShader( 3 );
 
@@ -1309,53 +1307,7 @@ XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh(
 
     GetContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 
-    // Get currently bound texture name
-    zCTexture* tex = Engine::GAPI->GetBoundTexture( 0 );
-
-    const bool tesselationEnabled = Engine::GAPI->GetRendererState().RendererSettings.EnableTesselation;
-
-    if ( tex ) {
-        MaterialInfo* info = Engine::GAPI->GetMaterialInfoFrom( tex );
-        if ( !info->Constantbuffer )
-            info->UpdateConstantbuffer();
-        // TODO: Slow, save this somewhere!
-
-        // TODO: TODO: Currently bodies and faces look really glossy.
-        //		  This is only a temporary fix!
-        if ( info->buffer.SpecularIntensity != 0.05f ) {
-            info->buffer.SpecularIntensity = 0.05f;
-            info->UpdateConstantbuffer();
-        }
-
-        info->Constantbuffer->BindToPixelShader( 2 );
-
-        // Bind a default normalmap in case the scene is wet and we currently have
-        // none
-        if ( !tex->GetSurface()->GetNormalmap() ) {
-            // Modify the strength of that default normalmap for the material info
-            if ( info->buffer.NormalmapStrength /* * Engine::GAPI->GetSceneWetness()*/
-                != DEFAULT_NORMALMAP_STRENGTH ) {
-                info->buffer.NormalmapStrength = DEFAULT_NORMALMAP_STRENGTH;
-                info->UpdateConstantbuffer();
-            }
-
-            DistortionTexture->BindToPixelShader( 1 );
-        }
-
-        // Select shader
-        BindShaderForTexture( tex );
-
-        if ( RenderingStage == DES_MAIN ) {
-            if ( ActiveHDS ) {
-                GetContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
-                GetContext()->DSSetShader( nullptr, nullptr, 0 );
-                GetContext()->HSSetShader( nullptr, nullptr, 0 );
-                ActiveHDS = nullptr;
-            }
-        }
-    }
-
-    VS_ExConstantBuffer_PerInstanceSkeletal cb2 = {};
+    VS_ExConstantBuffer_PerInstanceSkeletal cb2;
     cb2.World = world;
     cb2.PI_ModelFatness = fatness;
 
@@ -1375,40 +1327,93 @@ XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh(
     }
 
     ActiveVS->Apply();
-    ActivePS->Apply();
-
-    UINT offset = 0;
-    UINT uStride = sizeof( ExSkelVertexStruct );
-    GetContext()->IASetVertexBuffers( 0, 1, vb->GetVertexBuffer().GetAddressOf(), &uStride, &offset );
-
-    if ( sizeof( VERTEX_INDEX ) == sizeof( unsigned short ) ) {
-        GetContext()->IASetIndexBuffer( ib->GetVertexBuffer().Get(),
-            DXGI_FORMAT_R16_UINT, 0 );
-    } else {
-        GetContext()->IASetIndexBuffer( ib->GetVertexBuffer().Get(),
-            DXGI_FORMAT_R32_UINT, 0 );
-    }
-
-    if ( RenderingStage == DES_SHADOWMAP ) {
-        // Unbind PixelShader in this case
-        GetContext()->PSSetShader( nullptr, nullptr, 0 );
-        ActivePS = nullptr;
-    }
 
     bool linearDepth = (Engine::GAPI->GetRendererState().GraphicsState.FF_GSwitches & GSWITCH_LINEAR_DEPTH) != 0;
     if ( linearDepth ) {
         ActivePS = PS_LinDepth;
         ActivePS->Apply();
+    } else if ( RenderingStage == DES_SHADOWMAP ) {
+        // Unbind PixelShader in this case
+        GetContext()->PSSetShader( nullptr, nullptr, 0 );
+        ActivePS = nullptr;
     }
 
-    // Draw the mesh
-    GetContext()->DrawIndexed( numIndices, 0, 0 );
+    const bool tesselationEnabled = Engine::GAPI->GetRendererState().RendererSettings.EnableTesselation;
 
-    if ( ActiveHDS ) {
-        GetContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
-        GetContext()->DSSetShader( nullptr, nullptr, 0 );
-        GetContext()->HSSetShader( nullptr, nullptr, 0 );
-        ActiveHDS = nullptr;
+    if ( RenderingStage == DES_MAIN ) {
+        if ( ActiveHDS ) {
+            GetContext()->DSSetShader( nullptr, nullptr, 0 );
+            GetContext()->HSSetShader( nullptr, nullptr, 0 );
+            ActiveHDS = nullptr;
+        }
+    }
+
+    for ( auto const& itm : dynamic_cast<SkeletalMeshVisualInfo*>(vi->VisualInfo)->SkeletalMeshes ) {
+        for ( auto& mesh : itm.second ) {
+            if ( zCMaterial* mat = itm.first ) {
+                if ( ActivePS && mat->GetTexture() ) {
+                    zCTexture* tex = mat->GetAniTexture();
+                    if ( tex->CacheIn( 0.6f ) == zRES_CACHED_IN )
+                        tex->Bind( 0 );
+                    else
+                        return XR_SUCCESS;
+
+                    MaterialInfo* info = Engine::GAPI->GetMaterialInfoFrom( tex );
+                    if ( !info->Constantbuffer )
+                        info->UpdateConstantbuffer();
+
+                    if ( info->buffer.SpecularIntensity != 0.05f ) {
+                        info->buffer.SpecularIntensity = 0.05f;
+                        info->UpdateConstantbuffer();
+                    }
+
+                    info->Constantbuffer->BindToPixelShader( 2 );
+
+                    // Bind a default normalmap in case the scene is wet and we currently have none
+                    if ( !tex->GetSurface()->GetNormalmap() ) {
+                        // Modify the strength of that default normalmap for the material info
+                        if ( info->buffer.NormalmapStrength /* * Engine::GAPI->GetSceneWetness()*/
+                            != DEFAULT_NORMALMAP_STRENGTH ) {
+                            info->buffer.NormalmapStrength = DEFAULT_NORMALMAP_STRENGTH;
+                            info->UpdateConstantbuffer();
+                        }
+
+                        DistortionTexture->BindToPixelShader( 1 );
+                    }
+
+                    // Select shader
+                    BindShaderForTexture( tex );
+                }
+            }
+
+            D3D11VertexBuffer* vb;
+            D3D11VertexBuffer* ib;
+            unsigned int numIndices;
+            if ( tesselationEnabled && !mesh->IndicesPNAEN.empty() ) {
+                vb = mesh->MeshVertexBuffer;
+                ib = mesh->MeshIndexBufferPNAEN;
+                numIndices = mesh->IndicesPNAEN.size();
+            } else {
+                vb = mesh->MeshVertexBuffer;
+                ib = mesh->MeshIndexBuffer;
+                numIndices = mesh->Indices.size();
+            }
+
+            UINT offset = 0;
+            UINT uStride = sizeof( ExSkelVertexStruct );
+            GetContext()->IASetVertexBuffers( 0, 1, vb->GetVertexBuffer().GetAddressOf(), &uStride, &offset );
+
+            if ( sizeof( VERTEX_INDEX ) == sizeof( unsigned short ) ) {
+                GetContext()->IASetIndexBuffer( ib->GetVertexBuffer().Get(),
+                    DXGI_FORMAT_R16_UINT, 0 );
+            } else {
+                GetContext()->IASetIndexBuffer( ib->GetVertexBuffer().Get(),
+                    DXGI_FORMAT_R32_UINT, 0 );
+            }
+
+            // Draw the mesh
+            GetContext()->DrawIndexed( numIndices, 0, 0 );
+        }
     }
 
     return XR_SUCCESS;
@@ -4654,11 +4659,7 @@ void D3D11GraphicsEngine::DrawVobsList( const std::list<VobInfo*>& vobs, zCCamer
     SetupVS_ExMeshDrawCall();
     SetupVS_ExConstantBuffer();
 
-    view = XMLoadFloat4x4( &camera.GetTransformDX( zCCamera::TT_VIEW ) );
-
     for ( auto const& vob : vobs ) {
-        Engine::GAPI->SetWorldViewTransform( vob->Vob->GetWorldMatrixXM(), view );
-
         ActiveVS->GetConstantBuffer()[1]->UpdateBuffer( vob->Vob->GetWorldMatrixPtr() );
         ActiveVS->GetConstantBuffer()[1]->BindToVertexShader( 1 );
 

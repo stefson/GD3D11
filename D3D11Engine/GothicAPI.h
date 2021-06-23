@@ -271,9 +271,6 @@ public:
     /** Draws a MeshInfo */
     void DrawMeshInfo( zCMaterial* mat, MeshInfo* msh );
 
-    /** Draws a SkeletalMeshInfo */
-    void DrawSkeletalMeshInfo( zCMaterial* mat, SkeletalMeshInfo* msh, std::vector<DirectX::XMFLOAT4X4>& transforms, float fatness = 1.0f );
-
     /** Draws a zCParticleFX */
     void DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameData& data );
 

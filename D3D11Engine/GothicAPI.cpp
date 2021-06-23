@@ -1194,27 +1194,6 @@ void GothicAPI::DrawMeshInfo( zCMaterial* mat, MeshInfo* msh ) {
     }
 }
 
-/** Draws a SkeletalMeshInfo */
-void GothicAPI::DrawSkeletalMeshInfo( zCMaterial* mat, SkeletalMeshInfo* msh, std::vector<XMFLOAT4X4>& transforms, float fatness ) {
-    // Check for material and bind the texture if it exists
-    if ( mat ) {
-        if ( mat->GetTexture() ) {
-            if ( mat->GetAniTexture()->CacheIn( 0.6f ) == zRES_CACHED_IN )
-                mat->GetAniTexture()->Bind( 0 );
-            else
-                return;
-        } else {
-            Engine::GraphicsEngine->UnbindTexture( 0 );
-        }
-    }
-
-    if ( RendererState.RendererSettings.EnableTesselation && !msh->IndicesPNAEN.empty() ) {
-        Engine::GraphicsEngine->DrawSkeletalMesh( msh->MeshVertexBuffer, msh->MeshIndexBufferPNAEN, msh->IndicesPNAEN.size(), transforms, fatness );
-    } else {
-        Engine::GraphicsEngine->DrawSkeletalMesh( msh->MeshVertexBuffer, msh->MeshIndexBuffer, msh->Indices.size(), transforms, fatness );
-    }
-}
-
 /** Locks the resource CriticalSection */
 void GothicAPI::EnterResourceCriticalSection() {
 
@@ -1623,11 +1602,7 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
         // TODO: FIXME
         // Ugly stuff to get the fucking corrupt visual in returning here
         static void Draw( SkeletalVobInfo* vi, std::vector<XMFLOAT4X4>& transforms, float fatness ) {
-            for ( auto const& itm : dynamic_cast<SkeletalMeshVisualInfo*>(vi->VisualInfo)->SkeletalMeshes ) {
-                for ( auto& i : itm.second ) {
-                    Engine::GAPI->DrawSkeletalMeshInfo( itm.first, i, transforms, fatness );
-                }
-            }
+            Engine::GraphicsEngine->DrawSkeletalMesh( vi, transforms, fatness );
         }
 
         static bool CatchDraw( SkeletalVobInfo* vi, std::string* visName, std::string* vobName, DirectX::XMFLOAT3* pos, std::vector<XMFLOAT4X4>& transforms, float fatness ) {
@@ -2557,7 +2532,6 @@ void GothicAPI::DebugDrawTreeNode( zCBspBase* base, zTBBox3D boxCell, int clipFl
 
                 ((float*)&boxCell.Max)[planeAxis] = node->Plane.Distance;
                 base = node->Back;
-
             } else {
                 if ( node->Back ) {
                     ((float*)&tmpbox.Max)[planeAxis] = node->Plane.Distance;
@@ -2832,7 +2806,7 @@ void GothicAPI::CollectVisibleVobsHelper( BspInfo* base, zTBBox3D boxCell, int c
             float yMaxWorld = Engine::GAPI->GetLoadedWorldInfo()->BspTree->GetRootNode()->BBox3D.Max.y;
 
             zTBBox3D nodeBox = base->OriginalNode->BBox3D;
-            float nodeYMax = std::min( yMaxWorld, Engine::GAPI->GetCameraPosition().y );
+            float nodeYMax = std::min( yMaxWorld, camPos.y );
             nodeYMax = std::max( nodeYMax, base->OriginalNode->BBox3D.Max.y );
             nodeBox.Max.y = nodeYMax;
 
@@ -2855,7 +2829,6 @@ void GothicAPI::CollectVisibleVobsHelper( BspInfo* base, zTBBox3D boxCell, int c
         }
 
         if ( base->OriginalNode->IsLeaf() ) {
-
             // Check if this leaf is inside the frustum
             bool insideFrustum = true;
 
@@ -2962,7 +2935,6 @@ void GothicAPI::CollectVisibleVobsHelper( BspInfo* base, zTBBox3D boxCell, int c
 
                 ((float*)&boxCell.Max)[planeAxis] = node->Plane.Distance;
                 base = base->Back;
-
             } else {
                 if ( node->Back ) {
                     ((float*)&tmpbox.Max)[planeAxis] = node->Plane.Distance;
@@ -2988,10 +2960,8 @@ void GothicAPI::BuildBspVobMapCacheHelper( zCBspBase* base ) {
     if ( base->IsLeaf() ) {
         zCBspLeaf* leaf = (zCBspLeaf*)base;
 
-
         bvi.Front = nullptr;
         bvi.Back = nullptr;
-
 
         for ( int i = 0; i < leaf->LeafVobList.NumInArray; i++ ) {
             // Get the vob info for this one
@@ -3001,7 +2971,7 @@ void GothicAPI::BuildBspVobMapCacheHelper( zCBspBase* base ) {
                 if ( v ) {
                     float vobSmallSize = Engine::GAPI->GetRendererState().RendererSettings.SmallVobSize;
 
-                    if ( v->Vob->GetGroundPoly() && v->Vob->GetGroundPoly()->GetLightmap() ) {
+                    if ( v->Vob->IsIndoorVob() ) {
                         // Only add once
                         if ( std::find( bvi.IndoorVobs.begin(), bvi.IndoorVobs.end(), v ) == bvi.IndoorVobs.end() ) {
                             v->ParentBSPNodes.push_back( &bvi );
@@ -3036,58 +3006,56 @@ void GothicAPI::BuildBspVobMapCacheHelper( zCBspBase* base ) {
                     }
                 }
             }
+        }
 
-            for ( int j = 0; j < leaf->LightVobList.NumInArray; j++ ) {
-                // Add the light to the map if not already done
-                std::unordered_map<zCVobLight*, VobLightInfo*>::iterator vit = VobLightMap.find( leaf->LightVobList.Array[j] );
+        for ( int i = 0; i < leaf->LightVobList.NumInArray; i++ ) {
+            // Add the light to the map if not already done
+            std::unordered_map<zCVobLight*, VobLightInfo*>::iterator vit = VobLightMap.find( leaf->LightVobList.Array[i] );
 
-                if ( vit == VobLightMap.end() ) {
-                    VobLightInfo* vi = new VobLightInfo;
-                    vi->Vob = leaf->LightVobList.Array[j];
-                    VobLightMap[leaf->LightVobList.Array[j]] = vi;
+            if ( vit == VobLightMap.end() ) {
+                VobLightInfo* vi = new VobLightInfo;
+                vi->Vob = leaf->LightVobList.Array[i];
+                VobLightMap[leaf->LightVobList.Array[i]] = vi;
 
-                    float minDynamicUpdateLightRange = Engine::GAPI->GetRendererState().RendererSettings.MinLightShadowUpdateRange;
-                    if ( RendererState.RendererSettings.EnablePointlightShadows >= GothicRendererSettings::PLS_STATIC_ONLY
-                        && vi->Vob->GetLightRange() > minDynamicUpdateLightRange ) {
-                        // Create shadowcubemap, if wanted
-                        Engine::GraphicsEngine->CreateShadowedPointLight( &vi->LightShadowBuffers, vi );
-                    }
-
-                    if ( (zCVob*)vi->Vob->IsIndoorVob() ) {
-                        vi->IsIndoorVob = true;
-                    }
+                float minDynamicUpdateLightRange = Engine::GAPI->GetRendererState().RendererSettings.MinLightShadowUpdateRange;
+                if ( RendererState.RendererSettings.EnablePointlightShadows >= GothicRendererSettings::PLS_STATIC_ONLY
+                    && vi->Vob->GetLightRange() > minDynamicUpdateLightRange ) {
+                    // Create shadowcubemap, if wanted
+                    Engine::GraphicsEngine->CreateShadowedPointLight( &vi->LightShadowBuffers, vi );
                 }
 
-
-                VobLightInfo* vi = VobLightMap[leaf->LightVobList.Array[j]];
-
-                if ( vi ) {
-                    if ( !vi->IsIndoorVob ) {
-                        // Only add once
-                        if ( std::find( bvi.Lights.begin(), bvi.Lights.end(), vi ) == bvi.Lights.end() ) {
-                            vi->ParentBSPNodes.push_back( &bvi );
-                            bvi.Lights.push_back( vi );
-                        }
-                    } else {
-                        // Only add once
-                        if ( std::find( bvi.IndoorLights.begin(), bvi.IndoorLights.end(), vi ) == bvi.IndoorLights.end() ) {
-                            vi->ParentBSPNodes.push_back( &bvi );
-                            bvi.IndoorLights.push_back( vi );
-                        }
-                    }
-
-#ifdef BUILD_SPACER
-                    // Add lights to drawable voblist, so we can draw their helper-visuals when wanted
-                    // Also, make sure they end up in the dynamic list, so their visuals don't stay in place
-                    //VobInfo * v = VobMap[leaf->LightVobList.Array[i]];
-                    //if (v)
-                    //	MoveVobFromBspToDynamic(v);
-#endif
+                if ( (zCVob*)vi->Vob->IsIndoorVob() ) {
+                    vi->IsIndoorVob = true;
                 }
             }
 
-            bvi.NumStaticLights = leaf->LightVobList.NumInArray;
+            VobLightInfo* vi = VobLightMap[leaf->LightVobList.Array[i]];
+            if ( vi ) {
+                if ( !vi->IsIndoorVob ) {
+                    // Only add once
+                    if ( std::find( bvi.Lights.begin(), bvi.Lights.end(), vi ) == bvi.Lights.end() ) {
+                        vi->ParentBSPNodes.push_back( &bvi );
+                        bvi.Lights.push_back( vi );
+                    }
+                } else {
+                    // Only add once
+                    if ( std::find( bvi.IndoorLights.begin(), bvi.IndoorLights.end(), vi ) == bvi.IndoorLights.end() ) {
+                        vi->ParentBSPNodes.push_back( &bvi );
+                        bvi.IndoorLights.push_back( vi );
+                    }
+                }
+
+#ifdef BUILD_SPACER
+                // Add lights to drawable voblist, so we can draw their helper-visuals when wanted
+                // Also, make sure they end up in the dynamic list, so their visuals don't stay in place
+                //VobInfo * v = VobMap[leaf->LightVobList.Array[i]];
+                //if (v)
+                //	MoveVobFromBspToDynamic(v);
+#endif
+            }
         }
+
+        bvi.NumStaticLights = leaf->LightVobList.NumInArray;
     } else {
         zCBspNode* node = (zCBspNode*)base;
 

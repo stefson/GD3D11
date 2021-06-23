@@ -317,13 +317,10 @@ public:
         if ( !GetNodeList() )
             return;
 
-        // Make this static so we don't reallocate the memory every time
-        static VectorA16<DirectX::XMFLOAT4X4*> tptr;
-        tptr.resize( GetNodeList()->NumInArray, nullptr );
+        transforms->reserve( GetNodeList()->NumInArray );
         for ( int i = 0; i < GetNodeList()->NumInArray; i++ ) {
             zCModelNodeInst* node = GetNodeList()->Array[i];
             zCModelNodeInst* parent = node->ParentNode;
-            tptr[i] = &node->TrafoObjToCam;
 
             // Calculate transform for this node
             if ( parent ) {
@@ -332,11 +329,7 @@ public:
                 node->TrafoObjToCam = node->Trafo;
             }
 
-        }
-        // Put them into our vector
-        for ( unsigned int i = 0; i < tptr.size(); i++ ) {
-            DirectX::XMFLOAT4X4 m = *tptr[i];
-            transforms->push_back( m );
+            transforms->push_back( node->TrafoObjToCam );
         }
     }
 

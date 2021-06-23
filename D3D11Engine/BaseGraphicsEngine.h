@@ -126,7 +126,7 @@ public:
     virtual XRESULT DrawVertexBufferIndexedUINT( D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices, unsigned int indexOffset ) { return XR_SUCCESS; };
 
     /** Draws a skeletal mesh */
-    virtual XRESULT DrawSkeletalMesh( D3D11VertexBuffer* vb, D3D11VertexBuffer* ib, unsigned int numIndices, const std::vector<DirectX::XMFLOAT4X4>& transforms, float fatness = 1.0f ) { return XR_SUCCESS; };
+    virtual XRESULT DrawSkeletalMesh( SkeletalVobInfo* vi, const std::vector<DirectX::XMFLOAT4X4>& transforms, float fatness = 1.0f ) { return XR_SUCCESS; };
 
     /** Draws a vertexarray, non-indexed */
     virtual XRESULT DrawIndexedVertexArray( ExVertexStruct* vertices, unsigned int numVertices, D3D11VertexBuffer* ib, unsigned int numIndices, unsigned int stride = sizeof( ExVertexStruct ) ) { return XR_SUCCESS; };
