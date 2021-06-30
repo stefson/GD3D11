@@ -803,8 +803,6 @@ void GothicAPI::DrawWorldMeshNaive() {
 
     START_TIMING();
     if ( RendererState.RendererSettings.DrawSkeletalMeshes ) {
-
-        Engine::GraphicsEngine->SetActivePixelShader( "PS_World" );
         // Set up frustum for the camera
         zCCamera::GetCamera()->Activate();
 
@@ -849,9 +847,6 @@ void GothicAPI::DrawWorldMeshNaive() {
         }
     }
     STOP_TIMING( GothicRendererTiming::TT_SkeletalMeshes );
-
-    RendererState.RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_FRONT;
-    RendererState.RasterizerState.SetDirty();
 
     // Draw vobs in view
     Engine::GraphicsEngine->DrawVOBs();
@@ -1568,6 +1563,11 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
     // TODO: Put this into the renderer!!
     D3D11GraphicsEngine* g = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
 
+    // Setup renderstate
+    RendererState.RasterizerState.SetDefault();
+    RendererState.RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_FRONT;
+    RendererState.RasterizerState.SetDirty();
+
     zCModel* model = (zCModel*)vi->Vob->GetVisual();
     SkeletalMeshVisualInfo* visual = ((SkeletalMeshVisualInfo*)vi->VisualInfo);
 
@@ -1614,7 +1614,6 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
 
         RendererState.RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_BACK;
         RendererState.RasterizerState.SetDirty();
-        g->UpdateRenderStates();
     }
 
     // Set up instance info
@@ -1736,6 +1735,13 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
 
 void GothicAPI::DrawSkeletalGhosts() {
     D3D11GraphicsEngine* g = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
+    if ( !GhostSkeletalVobs.empty() ) {
+        // Setup alpha blending
+        RendererState.BlendState.SetAlphaBlending();
+        RendererState.BlendState.SetDirty();
+        RendererState.DepthState.SetDefault();
+        RendererState.DepthState.SetDirty();
+    }
     while ( !GhostSkeletalVobs.empty() ) {
         auto const& GhostInfo = GhostSkeletalVobs.front();
 
@@ -1748,10 +1754,6 @@ void GothicAPI::DrawSkeletalGhosts() {
         // Now actually draw mesh using ghost pixel shader
         g->SetActivePixelShader( "PS_Ghost" );
         g->BindActivePixelShader();
-
-        // Setup alpha blending
-        RendererState.BlendState.SetAlphaBlending();
-        RendererState.BlendState.SetDirty();
 
         // Update ghost alpha information
         GhostAlphaConstantBuffer gacb;

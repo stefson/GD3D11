@@ -55,15 +55,14 @@ XRESULT D3D11LineRenderer::Flush() {
     engine->SetActivePixelShader( "PS_Lines" );
     engine->SetActiveVertexShader( "VS_Lines" );
 
+    engine->SetDefaultStates();
+    Engine::GAPI->GetRendererState().BlendState.SetAlphaBlending();
+    Engine::GAPI->GetRendererState().BlendState.SetDirty();
+
     engine->SetupVS_ExMeshDrawCall();
     engine->SetupVS_ExConstantBuffer();
     engine->SetupVS_ExPerInstanceConstantBuffer();
     engine->GetContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_LINELIST );
-
-    engine->SetDefaultStates();
-    Engine::GAPI->GetRendererState().BlendState.SetAlphaBlending();
-    Engine::GAPI->GetRendererState().BlendState.SetDirty();
-    engine->UpdateRenderStates();
 
     // Draw the lines
     UINT offset = 0;
@@ -112,15 +111,14 @@ XRESULT D3D11LineRenderer::FlushDeferredLines() {
     engine->SetActivePixelShader( "PS_Lines" );
     engine->SetActiveVertexShader( "VS_Lines" );
 
+    engine->SetDefaultStates();
+    Engine::GAPI->GetRendererState().BlendState.SetAlphaBlending();
+    Engine::GAPI->GetRendererState().BlendState.SetDirty();
+
     engine->SetupVS_ExMeshDrawCall();
     engine->SetupVS_ExConstantBuffer();
     engine->SetupVS_ExPerInstanceConstantBuffer();
     engine->GetContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_LINELIST );
-
-    engine->SetDefaultStates();
-    Engine::GAPI->GetRendererState().BlendState.SetAlphaBlending();
-    Engine::GAPI->GetRendererState().BlendState.SetDirty();
-    engine->UpdateRenderStates();
 
     // Draw the lines
     UINT offset = 0;

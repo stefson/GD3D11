@@ -723,6 +723,9 @@
     <ClInclude Include="zQuat.h">
       <Filter>ZenGin\Classes</Filter>
     </ClInclude>
+    <ClInclude Include="GothicMemoryLocations1_12f.h">
+      <Filter>ZenGin</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

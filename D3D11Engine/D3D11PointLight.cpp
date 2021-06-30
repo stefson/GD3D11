@@ -279,8 +279,6 @@ void D3D11PointLight::DebugDrawCubeMap() {
     const int previewSize = POINTLIGHT_SHADOWMAP_SIZE;
     const int previewDownscale = 4;
 
-
-
     for ( int i = 0; i < 6; i++ ) {
         INT2 pPosition;
         int stride = (previewSize / previewDownscale);

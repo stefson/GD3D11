@@ -274,51 +274,6 @@ XRESULT D3D11GraphicsEngine::Init() {
     GetDevice()->CreateSamplerState( &samplerDesc, CubeSamplerState.GetAddressOf() );
     SetDebugName( CubeSamplerState.Get(), "CubeSamplerState" );
 
-    D3D11_RASTERIZER_DESC rasterizerDesc;
-    rasterizerDesc.CullMode = D3D11_CULL_BACK;
-    rasterizerDesc.FillMode = D3D11_FILL_SOLID;
-    rasterizerDesc.FrontCounterClockwise =
-        true;  // Gothics world vertices are CCW. That get's set by the
-               // GAPI-Graphics-State as well but is hardcoded here
-    rasterizerDesc.DepthBias = 0;
-    rasterizerDesc.DepthBiasClamp = 0;
-    rasterizerDesc.SlopeScaledDepthBias = 0;
-    rasterizerDesc.DepthClipEnable = false;
-    rasterizerDesc.ScissorEnable = false;
-    rasterizerDesc.MultisampleEnable = false;
-    rasterizerDesc.AntialiasedLineEnable = true;
-
-    LE( GetDevice()->CreateRasterizerState( &rasterizerDesc, WorldRasterizerState.GetAddressOf() ) );
-    GetContext()->RSSetState( WorldRasterizerState.Get() );
-
-    rasterizerDesc.FrontCounterClockwise = false;
-    LE( GetDevice()->CreateRasterizerState( &rasterizerDesc, HUDRasterizerState.GetAddressOf() ) );
-
-    D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
-    // Depth test parameters
-    depthStencilDesc.DepthEnable = true;
-    depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-    depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-
-    // Stencil test parameters
-    depthStencilDesc.StencilEnable = false;
-    depthStencilDesc.StencilReadMask = 0xFF;
-    depthStencilDesc.StencilWriteMask = 0xFF;
-
-    // Stencil operations if pixel is front-facing
-    depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
-    depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
-    // Stencil operations if pixel is back-facing
-    depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
-    depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
-    LE( GetDevice()->CreateDepthStencilState( &depthStencilDesc, DefaultDepthStencilState.GetAddressOf() ) );
-
     SetActivePixelShader( "PS_Simple" );
     SetActiveVertexShader( "VS_Ex" );
 
@@ -716,6 +671,13 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
 
     s_firstFrame = false;
 
+#ifdef BUILD_1_12F
+    // Some shitty workaround for weird hidden window bug that happen on d3d11 renderer
+    if ( !(GetWindowLongA( OutputWindow, GWL_STYLE ) & WS_VISIBLE) ) {
+        ShowWindow( OutputWindow, SW_SHOW );
+    }
+#endif
+
     // Enter the critical section for safety while executing the deferred command
     // list
     Engine::GAPI->EnterResourceCriticalSection();
@@ -765,13 +727,7 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
     // Notify the shader manager
     ShaderManager->OnFrameStart();
 
-    // Enable blending, in case gothic want's to render its save-screen
-    Engine::GAPI->GetRendererState().BlendState.SetDefault();
-    Engine::GAPI->GetRendererState().BlendState.BlendEnabled = true;
-    Engine::GAPI->GetRendererState().BlendState.SetDirty();
-    UpdateRenderStates();
-
-    // Bind GBuffers
+    // Bind HDR Back Buffer
     GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(), DepthStencilBuffer->GetDepthStencilView().Get() );
 
     SetActivePixelShader( "PS_Simple" );
@@ -1276,9 +1232,6 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferFF( D3D11VertexBuffer* vb,
 /** Draws a skeletal mesh */
 XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh( SkeletalVobInfo* vi,
     const std::vector<XMFLOAT4X4>& transforms, float fatness ) {
-    GetContext()->RSSetState( WorldRasterizerState.Get() );
-    GetContext()->OMSetDepthStencilState( DefaultDepthStencilState.Get(), 0 );
-
     if ( GetRenderingStage() == DES_SHADOWMAP_CUBE ) {
         SetActiveVertexShader( "VS_ExSkeletalCube" );
     } else {
@@ -1581,7 +1534,7 @@ XRESULT D3D11GraphicsEngine::UpdateRenderStates() {
         }
 
         FFBlendState = state->State.Get();
-        FFRasterizerStateHash = Engine::GAPI->GetRendererState().BlendState.Hash;
+        FFBlendStateHash = Engine::GAPI->GetRendererState().BlendState.Hash;
 
         Engine::GAPI->GetRendererState().BlendState.StateDirty = false;
         GetContext()->OMSetBlendState( FFBlendState.Get(), float4( 0, 0, 0, 0 ).toPtr(),
@@ -1603,7 +1556,7 @@ XRESULT D3D11GraphicsEngine::UpdateRenderStates() {
         }
 
         FFRasterizerState = state->State.Get();
-        FFRasterizerStateHash = Engine::GAPI->GetRendererState().DepthState.Hash;
+        FFRasterizerStateHash = Engine::GAPI->GetRendererState().RasterizerState.Hash;
 
         Engine::GAPI->GetRendererState().RasterizerState.StateDirty = false;
         GetContext()->RSSetState( FFRasterizerState.Get() );
@@ -1664,8 +1617,7 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
     Clear( float4( Engine::GAPI->GetRendererState().GraphicsState.FF_FogColor, 0.0f ) );
 
     // Clear textures from the last frame
-    FrameTextures.clear();
-    RenderedVobs.resize( 0 );  // Keep memory allocated on this
+    RenderedVobs.clear();
     FrameWaterSurfaces.clear();
     FrameTransparencyMeshes.clear();
 
@@ -1701,11 +1653,11 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
     Engine::GAPI->DrawWorldMeshNaive();
 
     // Draw HBAO
-    if ( Engine::GAPI->GetRendererState().RendererSettings.HbaoSettings.Enabled )
+    if ( Engine::GAPI->GetRendererState().RendererSettings.HbaoSettings.Enabled ) {
         PfxRenderer->DrawHBAO( HDRBackBuffer->GetRenderTargetView() );
-
-    SetDefaultStates();
-
+        GetContext()->PSSetSamplers( 0, 1, DefaultSamplerState.GetAddressOf() );
+    }
+    
     // PfxRenderer->RenderDistanceBlur();
 
     // Draw water surfaces of current frame
@@ -1727,11 +1679,6 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 
     // Draw rain
     if ( Engine::GAPI->GetRainFXWeight() > 0.0f ) Effects->DrawRain();
-
-    SetActivePixelShader( "PS_Simple" );
-    SetActiveVertexShader( "VS_Ex" );
-
-    SetDefaultStates();
 
     GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
         DepthStencilBuffer->GetDepthStencilView().Get() );
@@ -1768,12 +1715,10 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
     if ( Engine::GAPI->GetRendererState().RendererSettings.EnableHDR )
         PfxRenderer->RenderHDR();
 
-    if ( Engine::GAPI->GetRendererState().RendererSettings.EnableSMAA )
+    if ( Engine::GAPI->GetRendererState().RendererSettings.EnableSMAA ) {
         PfxRenderer->RenderSMAA();
-
-    // Disable the depth-buffer
-    Engine::GAPI->GetRendererState().DepthState.DepthBufferEnabled = false;
-    Engine::GAPI->GetRendererState().DepthState.SetDirty();
+        GetContext()->PSSetSamplers( 0, 1, DefaultSamplerState.GetAddressOf() );
+    }
 
     PresentPending = true;
 
@@ -1798,6 +1743,7 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
         nullptr );
 
     SetDefaultStates();
+    UpdateRenderStates();
 
     // Save screenshot if wanted
     if ( SaveScreenshotNextFrame ) {
@@ -1910,10 +1856,13 @@ void D3D11GraphicsEngine::TestDrawWorldMesh() {
 /** Draws a list of mesh infos */
 XRESULT D3D11GraphicsEngine::DrawMeshInfoListAlphablended(
     const std::vector<std::pair<MeshKey, MeshInfo*>>& list ) {
+    if ( list.empty() ) {
+        return XR_SUCCESS;
+    }
+
     SetDefaultStates();
 
     // Setup renderstates
-
     Engine::GAPI->GetRendererState().RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
     Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
 
@@ -2022,8 +1971,6 @@ XRESULT D3D11GraphicsEngine::DrawMeshInfoListAlphablended(
         }
     }
 
-    SetDefaultStates();
-
     return XR_SUCCESS;
 }
 
@@ -2031,12 +1978,8 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
     if ( !Engine::GAPI->GetRendererState().RendererSettings.DrawWorldMesh )
         return XR_SUCCESS;
 
+    // Setup default renderstates
     SetDefaultStates();
-
-    // Setup renderstates
-    Engine::GAPI->GetRendererState().RasterizerState.CullMode =
-        GothicRasterizerStateInfo::CM_CULL_BACK;
-    Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
 
     XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
     Engine::GAPI->SetViewTransformXM( view );
@@ -2104,8 +2047,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
                 }
 
                 // Check for alphablending
-                if (worldMesh.first.Material->GetAlphaFunc() >
-                    zMAT_ALPHA_FUNC_FUNC_NONE &&
+                if (worldMesh.first.Material->GetAlphaFunc() > zMAT_ALPHA_FUNC_FUNC_NONE &&
                     worldMesh.first.Material->GetAlphaFunc() != zMAT_ALPHA_FUNC_TEST) {
                     FrameTransparencyMeshes.push_back(worldMesh);
                 } else {
@@ -2186,36 +2128,8 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
             GetContext()->PSSetShaderResources( 0, 3, srv );
 
             // Get the right shader for it
-
             BindShaderForTexture( mesh.first.Material->GetAniTexture(), false,
                 mesh.first.Material->GetAlphaFunc() );
-
-            // Check for alphablending on world mesh
-            if ( (mesh.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_BLEND ||
-                mesh.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_ADD) &&
-                !Engine::GAPI->GetRendererState().BlendState.BlendEnabled ) {
-                if ( mesh.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_BLEND )
-                    Engine::GAPI->GetRendererState().BlendState.SetAlphaBlending();
-
-                if ( mesh.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_ADD )
-                    Engine::GAPI->GetRendererState().BlendState.SetAdditiveBlending();
-
-                Engine::GAPI->GetRendererState().BlendState.SetDirty();
-
-                Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled = false;
-                Engine::GAPI->GetRendererState().DepthState.SetDirty();
-
-                UpdateRenderStates();
-            } else if ( Engine::GAPI->GetRendererState().BlendState.BlendEnabled &&
-                mesh.first.Material->GetAlphaFunc() != zMAT_ALPHA_FUNC_BLEND ) {
-                Engine::GAPI->GetRendererState().BlendState.SetDefault();
-                Engine::GAPI->GetRendererState().BlendState.SetDirty();
-
-                Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled = true;
-                Engine::GAPI->GetRendererState().DepthState.SetDirty();
-
-                UpdateRenderStates();
-            }
 
             if ( info ) {
                 if ( !info->Constantbuffer ) info->UpdateConstantbuffer();
@@ -2288,18 +2202,6 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
         std::pop_heap(meshList.begin(), meshList.end(), CompareMesh);
         meshList.pop_back();
     }
-
-    SetDefaultStates();
-
-    Engine::GAPI->GetRendererState().RasterizerState.CullMode =
-        GothicRasterizerStateInfo::CM_CULL_FRONT;
-    Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
-
-    Engine::GAPI->GetRendererState().BlendState.SetDefault();
-    Engine::GAPI->GetRendererState().BlendState.SetDirty();
-
-    Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled = true;
-    Engine::GAPI->GetRendererState().DepthState.SetDirty();
 
     // TODO: TODO: Remove DrawWorldMeshNaive finally and put this into a proper
     // location!
@@ -2416,8 +2318,6 @@ XRESULT D3D11GraphicsEngine::DrawWorldMeshW( bool noTextures ) {
         if ( !textureInfo.first ) {
             DistortionTexture->BindToPixelShader( 0 );
         } else {
-            // FrameTextures.insert(it->first);
-
             MaterialInfo* info = textureInfo.second.first;
             if ( !info->Constantbuffer ) info->UpdateConstantbuffer();
 
@@ -2553,6 +2453,10 @@ XRESULT D3D11GraphicsEngine::DrawWorldMeshW( bool noTextures ) {
 
 /** Draws the given mesh infos as water */
 void D3D11GraphicsEngine::DrawWaterSurfaces() {
+    if ( FrameWaterSurfaces.empty() ) {
+        return;
+    }
+
     SetDefaultStates();
 
     // Copy backbuffer
@@ -2580,13 +2484,16 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
     GetContext()->PSSetShader( nullptr, nullptr, 0 );
     GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
         DepthStencilBuffer->GetDepthStencilView().Get() );
+
+    // Bind wrapped mesh vertex buffers
+    DrawVertexBufferIndexedUINT(
+        Engine::GAPI->GetWrappedWorldMesh()->MeshVertexBuffer,
+        Engine::GAPI->GetWrappedWorldMesh()->MeshIndexBuffer, 0, 0 );
     for ( auto const& it : FrameWaterSurfaces ) {
         // Draw surfaces
         for ( auto const& mesh : it.second ) {
-            DrawVertexBufferIndexed(
-                mesh->MeshVertexBuffer,
-                mesh->MeshIndexBuffer,
-                mesh->Indices.size() );
+            DrawVertexBufferIndexedUINT( nullptr, nullptr,
+                mesh->Indices.size(), mesh->BaseIndexLocation );
         }
     }
 
@@ -2628,10 +2535,8 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
         }
         // Draw surfaces
         for ( auto const& mesh : it.second ) {
-            DrawVertexBufferIndexed(
-                mesh->MeshVertexBuffer,
-                mesh->MeshIndexBuffer,
-                mesh->Indices.size() );
+            DrawVertexBufferIndexedUINT( nullptr, nullptr,
+                mesh->Indices.size(), mesh->BaseIndexLocation );
         }
     }
 
@@ -2640,8 +2545,6 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 
     GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
         DepthStencilBuffer->GetDepthStencilView().Get() );
-
-    SetDefaultStates();
 }
 
 /** Draws everything around the given position */
@@ -3131,11 +3034,11 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround( FXMVECTOR position,
             Engine::GAPI->GetStaticMeshVisuals();
 
         for ( auto const& it : RenderedVobs ) {
-            VobInstanceInfo vii;
-            vii.world = it->WorldMatrix;
-
-            if ( !it->IsIndoorVob )
+            if ( !it->IsIndoorVob ) {
+                VobInstanceInfo vii;
+                vii.world = it->WorldMatrix;
                 ((MeshVisualInfo*)it->VisualInfo)->Instances.emplace_back( vii );
+            }
         }
 
         // Apply instancing shader
@@ -3260,10 +3163,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 
     SetDefaultStates();
 
-    SetActivePixelShader( "PS_AtmosphereGround" );
-    auto nrmPS = ActivePS;
     SetActivePixelShader( "PS_Diffuse" );
-    auto defaultPS = ActivePS;
     SetActiveVertexShader( "VS_ExInstancedObj" );
 
     // Set constant buffer
@@ -3357,7 +3257,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 
         for ( unsigned int i = 0; i < vobs.size(); i++ ) {
             vobs[i]->VisibleInRenderPass = false;  // Reset this for the next frame
-            RenderedVobs.emplace_back( vobs[i] );
+            RenderedVobs.push_back( vobs[i] );
         }
 
         for ( auto const& staticMeshVisual : staticMeshVisuals ) {
@@ -3638,8 +3538,6 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
         mobs.clear();
     }
 
-    SetDefaultStates();
-
     return XR_SUCCESS;
 }
 
@@ -3662,7 +3560,6 @@ XRESULT D3D11GraphicsEngine::DrawPolyStrips( bool noTextures ) {
     // Setup renderstates
     Engine::GAPI->GetRendererState().RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
     Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
-
 
     XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
     Engine::GAPI->SetViewTransformXM( view );
@@ -3753,8 +3650,6 @@ XRESULT D3D11GraphicsEngine::DrawPolyStrips( bool noTextures ) {
         DrawVertexBuffer( TempPolysVertexBuffer.get(), vertices.size(), sizeof( ExVertexStruct ) );
     }
 
-    SetDefaultStates();
-
     return XR_SUCCESS;
 }
 
@@ -3782,22 +3677,17 @@ void D3D11GraphicsEngine::SetDefaultStates( bool force ) {
     Engine::GAPI->GetRendererState().RasterizerState.SetDefault();
     Engine::GAPI->GetRendererState().BlendState.SetDefault();
     Engine::GAPI->GetRendererState().DepthState.SetDefault();
-    Engine::GAPI->GetRendererState().SamplerState.SetDefault();
 
     Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
     Engine::GAPI->GetRendererState().BlendState.SetDirty();
     Engine::GAPI->GetRendererState().DepthState.SetDirty();
-    Engine::GAPI->GetRendererState().SamplerState.SetDirty();
-
-    GetContext()->PSSetSamplers( 0, 1, DefaultSamplerState.GetAddressOf() );
 
     if ( force ) {
         FFRasterizerStateHash = 0;
         FFBlendStateHash = 0;
         FFDepthStencilStateHash = 0;
+        UpdateRenderStates();
     }
-
-    UpdateRenderStates();
 }
 
 /** Draws the sky using the GSky-Object */
@@ -3807,7 +3697,7 @@ XRESULT D3D11GraphicsEngine::DrawSky() {
 
     if ( !Engine::GAPI->GetRendererState().RendererSettings.AtmosphericScattering ) {
         Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled = false;
-        Engine::GAPI->GetRendererState().BlendState.SetDirty();
+        Engine::GAPI->GetRendererState().DepthState.SetDirty();
         UpdateRenderStates();
 
         Engine::GAPI->GetLoadedWorldInfo()
@@ -3886,15 +3776,6 @@ XRESULT D3D11GraphicsEngine::DrawSky() {
     }
 
     if ( sky->GetSkyDome() ) sky->GetSkyDome()->DrawMesh();
-
-    Engine::GAPI->GetRendererState().RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_FRONT;
-    Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
-
-    Engine::GAPI->GetRendererState().DepthState.DepthBufferEnabled = true;
-    Engine::GAPI->GetRendererState().DepthState.SetDirty();
-
-    Engine::GAPI->GetRendererState().BlendState.BlendEnabled = false;
-    Engine::GAPI->GetRendererState().BlendState.SetDirty();
 
     return XR_SUCCESS;
 }
@@ -4282,13 +4163,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
         Engine::GAPI->GetRendererState().RendererInfo.FrameDrawnLights++;
     }
 
-    // *cough cough* somehow this makes the worldmesh disappear in indoor
-    // locations
-    // TODO: Fixme
-    bool oldState = Engine::GAPI->GetRendererState().RendererSettings.EnableSMAA;
-    Engine::GAPI->GetRendererState().RendererSettings.EnableSMAA = false;
-
-    Engine::GAPI->GetRendererState().RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_BACK;
+    Engine::GAPI->GetRendererState().RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
     Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
 
     // Modify light when raining
@@ -4380,28 +4255,11 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
 
     PfxRenderer->DrawFullScreenQuad();
 
-    Engine::GAPI->GetRendererState().RendererSettings.EnableSMAA = oldState;
-
     // Reset state
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
     GetContext()->PSSetShaderResources( 2, 1, srv.GetAddressOf() );
     GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
         DepthStencilBuffer->GetDepthStencilView().Get() );
-
-    Engine::GAPI->GetRendererState().BlendState.SetDefault();
-    Engine::GAPI->GetRendererState().BlendState.SetDirty();
-
-    Engine::GAPI->GetRendererState().BlendState.SetDefault();
-    Engine::GAPI->GetRendererState().BlendState.SetDirty();
-
-    Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled = true;
-    Engine::GAPI->GetRendererState().DepthState.SetDirty();
-
-    Engine::GAPI->GetRendererState().RasterizerState.CullMode =
-        GothicRasterizerStateInfo::CM_CULL_FRONT;
-    Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
-
-    UpdateRenderStates();
 
     return XR_SUCCESS;
 }
@@ -4604,7 +4462,6 @@ void D3D11GraphicsEngine::DrawVobSingle( VobInfo* vob ) {
     SetDefaultStates();
     Engine::GAPI->GetRendererState().RasterizerState.CullMode =
         GothicRasterizerStateInfo::CM_CULL_NONE;
-    Engine::GAPI->GetRendererState().RasterizerState.DepthClipEnable = false;
     Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
 
     SetupVS_ExMeshDrawCall();
@@ -4658,7 +4515,6 @@ void D3D11GraphicsEngine::DrawVobsList( const std::list<VobInfo*>& vobs, zCCamer
     SetDefaultStates();
     Engine::GAPI->GetRendererState().RasterizerState.CullMode =
         GothicRasterizerStateInfo::CM_CULL_NONE;
-    Engine::GAPI->GetRendererState().RasterizerState.DepthClipEnable = false;
     Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
 
     SetupVS_ExMeshDrawCall();
@@ -4696,6 +4552,9 @@ void D3D11GraphicsEngine::DrawVobsList( const std::list<VobInfo*>& vobs, zCCamer
     }
 
     GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(), nullptr );
+
+    SetDefaultStates();
+    UpdateRenderStates();
 }
 
 /** Message-Callback for the main window */
@@ -5020,6 +4879,8 @@ void D3D11GraphicsEngine::BindShaderForTexture( zCTexture* texture,
 /** Draws the given list of decals */
 void D3D11GraphicsEngine::DrawDecalList( const std::vector<zCVob*>& decals,
     bool lighting ) {
+    SetDefaultStates();
+
     Engine::GAPI->GetRendererState().RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
     Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
 
@@ -5137,15 +4998,6 @@ void D3D11GraphicsEngine::DrawDecalList( const std::vector<zCVob*>& decals,
 
         DrawVertexBufferIndexed( QuadVertexBuffer, QuadIndexBuffer, 6 );
     }
-
-    Engine::GAPI->GetRendererState().RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_BACK;
-    Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
-
-    Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled = true;
-    Engine::GAPI->GetRendererState().DepthState.SetDirty();
-
-    Engine::GAPI->GetRendererState().BlendState.SetDefault();
-    Engine::GAPI->GetRendererState().BlendState.BlendEnabled = true;
 }
 
 /** Draws quadmarks in a simple way */
@@ -5228,6 +5080,7 @@ void D3D11GraphicsEngine::CopyDepthStencil() {
 /** Draws underwater effects */
 void D3D11GraphicsEngine::DrawUnderwaterEffects() {
     SetDefaultStates();
+    UpdateRenderStates();
 
     RefractionInfoConstantBuffer ricb = {};
     ricb.RI_Projection = Engine::GAPI->GetProjectionMatrix();
@@ -5342,7 +5195,6 @@ void D3D11GraphicsEngine::DrawFrameParticles(
     distPS->GetConstantBuffer()[0]->UpdateBuffer( &ricb );
     distPS->GetConstantBuffer()[0]->BindToPixelShader( 0 );
 
-    GothicBlendStateInfo bsi = Engine::GAPI->GetRendererState().BlendState;
     GothicRendererState& state = Engine::GAPI->GetRendererState();
 
     state.BlendState.SetAdditiveBlending();
@@ -5350,8 +5202,6 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 
     state.DepthState.DepthWriteEnabled = false;
     state.DepthState.SetDirty();
-    state.DepthState.DepthBufferCompareFunc =
-        GothicDepthBufferStateInfo::DEFAULT_DEPTH_COMP_STATE;
 
     state.RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
     state.RasterizerState.SetDirty();
@@ -5460,7 +5310,7 @@ void D3D11GraphicsEngine::DrawFrameParticles(
     }
 
     GetContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
-    GetContext()->GSSetShader( nullptr, 0, 0 );
+    GetContext()->GSSetShader( nullptr, nullptr, 0 );
 
     // Set usual rendertarget again
     GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
@@ -5484,8 +5334,6 @@ void D3D11GraphicsEngine::DrawFrameParticles(
     PfxRenderer->CopyTextureToRTV(
         PfxRenderer->GetTempBuffer().GetShaderResView(),
         HDRBackBuffer->GetRenderTargetView(), INT2( 0, 0 ), true );
-
-    SetDefaultStates();
 }
 
 /** Called when a vob was removed from the world */
@@ -5511,6 +5359,7 @@ void D3D11GraphicsEngine::UpdateOcclusion() {
         return;
 
     // Set up states
+    Engine::GAPI->GetRendererState().RasterizerState.SetDefault();
     Engine::GAPI->GetRendererState().RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
     Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
 
@@ -5519,6 +5368,7 @@ void D3D11GraphicsEngine::UpdateOcclusion() {
         false;  // Rasterization is faster without writes
     Engine::GAPI->GetRendererState().BlendState.SetDirty();
 
+    Engine::GAPI->GetRendererState().DepthState.SetDefault();
     Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled =
         false;  // Don't write the bsp-nodes to the depth buffer, also quicker
     Engine::GAPI->GetRendererState().DepthState.SetDirty();
@@ -5533,8 +5383,6 @@ void D3D11GraphicsEngine::UpdateOcclusion() {
     Occlusion->DoOcclusionForBSP( Engine::GAPI->GetNewRootNode() );
 
     Occlusion->EndOcclusionPass();
-
-    SetDefaultStates();
 }
 
 /** Saves a screenshot */

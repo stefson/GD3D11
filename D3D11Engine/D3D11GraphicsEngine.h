@@ -254,9 +254,6 @@ public:
     /** Recreates the renderstates */
     XRESULT UpdateRenderStates() override;
 
-    /** Returns the textures drawn this frame */
-    const std::set<zCTexture*>& GetFrameTextures() override { return FrameTextures; }
-
     /** Draws a fullscreenquad, copying the given texture to the viewport */
     void DrawQuad( INT2 position, INT2 size );
 
@@ -322,10 +319,6 @@ protected:
     Microsoft::WRL::ComPtr<ID3D11SamplerState> CubeSamplerState;
     Microsoft::WRL::ComPtr<ID3D11SamplerState> ShadowmapSamplerState;
 
-    Microsoft::WRL::ComPtr<ID3D11RasterizerState> WorldRasterizerState;
-    Microsoft::WRL::ComPtr<ID3D11RasterizerState> HUDRasterizerState;
-    Microsoft::WRL::ComPtr<ID3D11DepthStencilState> DefaultDepthStencilState;
-
     /** Effects wrapper */
     std::unique_ptr<D3D11Effect> Effects;
 
@@ -343,8 +336,6 @@ protected:
     float2 Temp2Float2[2];
     std::unique_ptr<D3D11VertexBuffer> DynamicInstancingBuffer;
 
-    std::set<zCTexture*> FrameTextures;
-
     /** Post processing */
     std::unique_ptr<D3D11PfxRenderer> PfxRenderer;
 
@@ -358,7 +349,7 @@ protected:
 
     /** Shadowing */
     std::unique_ptr<RenderToDepthStencilBuffer> WorldShadowmap1;
-    std::list<VobInfo*> RenderedVobs;
+    std::vector<VobInfo*> RenderedVobs;
 
     /** The current rendering stage */
     D3D11ENGINE_RENDER_STAGE RenderingStage;

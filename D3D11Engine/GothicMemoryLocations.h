@@ -44,7 +44,11 @@ static void PatchAddr( unsigned int adr, const T( &v )[n] ) {
 #define REPLACE_RANGE(start, end_incl, op) {for(int i=start; i<=end_incl;i++){REPLACE_OP(i, op);}}
 
 #ifdef BUILD_GOTHIC_1_08k
+#ifdef BUILD_1_12F
+#include "GothicMemoryLocations1_12f.h"
+#else
 #include "GothicMemoryLocations1_08k.h"
+#endif
 #endif
 
 #ifdef BUILD_GOTHIC_2_6_fix

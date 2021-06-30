@@ -447,7 +447,8 @@ void BaseAntTweakBar::InitTextureSettingsBar() {
 
     std::string enumDef = "";
 
-    const std::set<zCTexture*>& frameTextures = Engine::GraphicsEngine->GetFrameTextures();
+    static std::set<zCTexture*> emptyTextures;
+    const std::set<zCTexture*>& frameTextures = emptyTextures;
     if ( !frameTextures.size() ) {
         return;
     }
