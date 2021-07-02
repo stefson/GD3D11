@@ -320,6 +320,9 @@ void GothicAPI::SetEnableGothicInput( bool value ) {
             return; // Do nothing, we decremented the counter and it's still not 0
     }
 
+    if ( oCGame::GetPlayer() ) oCGame::GetPlayer()->SetSleeping( value ? 0 : 1 );
+    if ( oCGame::GetGame() && oCGame::GetGame()->_zCSession_camVob ) oCGame::GetGame()->_zCSession_camVob->SetSleeping( value ? 0 : 1 );
+
     if ( !value )
         disableCounter++;
 
@@ -3536,7 +3539,8 @@ XRESULT GothicAPI::SaveMenuSettings( const std::string& file ) {
     WritePrivateProfileStringA( "General", "EnableGodRays", std::to_string( s.EnableGodRays ? TRUE : FALSE ).c_str(), ini.c_str() );
     WritePrivateProfileStringA( "General", "AllowNormalmaps", std::to_string( s.AllowNormalmaps ? TRUE : FALSE ).c_str(), ini.c_str() );
     WritePrivateProfileStringA( "General", "AllowNumpadKeys", std::to_string( s.AllowNumpadKeys ? TRUE : FALSE ).c_str(), ini.c_str() );
-
+    WritePrivateProfileStringA( "General", "EnableInactiveFpsLock", std::to_string( s.EnableInactiveFpsLock ? TRUE : FALSE ).c_str(), ini.c_str() );
+    
     /*
     * Draw-distance is saved on a per World basis using SaveRendererWorldSettings
     */
@@ -3618,7 +3622,8 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
     s.EnableGodRays = GetPrivateProfileBoolA( "General", "EnableGodRays", defaultRendererSettings.EnableGodRays, ini );
     s.AllowNormalmaps = GetPrivateProfileBoolA( "General", "AllowNormalmaps", defaultRendererSettings.AllowNormalmaps, ini );
     s.AllowNumpadKeys = GetPrivateProfileBoolA( "General", "AllowNumpadKeys", defaultRendererSettings.AllowNumpadKeys, ini );
-
+    s.AllowNumpadKeys = GetPrivateProfileBoolA( "General", "EnableInactiveFpsLock", defaultRendererSettings.EnableInactiveFpsLock, ini );
+    
     /*
     * Draw-distance is Loaded on a per World basis using LoadRendererWorldSettings
     */

@@ -208,7 +208,9 @@ public:
 
         return (flags & GothicMemoryLocations::zCVob::MASK_SkeepingMode);
     }
-
+    void SetSleeping(int on) {
+        XCALL( GothicMemoryLocations::zCVob::SetSleeping );
+    }
     /** Returns whether the visual of this vob is visible */
     bool GetShowVisual() {
         //unsigned int flags = *(unsigned int*)THISPTR_OFFSET( GothicMemoryLocations::zCVob::Offset_Flags );
