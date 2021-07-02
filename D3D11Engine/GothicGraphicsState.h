@@ -114,10 +114,7 @@ __declspec(align(4)) struct GothicPipelineState {
         // Start hashing at the data of the other structs, skip the data of this one
         for ( int i = sizeof( GothicPipelineState ); i < size; i += 4 ) {
             DWORD d;
-            ((char*)&d)[0] = data[i];
-            ((char*)&d)[1] = data[i + 1];
-            ((char*)&d)[2] = data[i + 2];
-            ((char*)&d)[3] = data[i + 3];
+            memcpy( &d, data + i, 4 );
 
             Toolbox::hash_combine( Hash, d );
         }

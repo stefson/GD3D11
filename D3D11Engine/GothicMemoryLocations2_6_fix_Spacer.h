@@ -55,6 +55,8 @@ struct GothicMemoryLocations {
         static const unsigned int VidSetScreenMode = 0x007E1260;
         static const unsigned int DrawLineZ = 0x007D61C0;
         static const unsigned int Vid_GetGammaCorrection = 0x007E1CD0;
+
+        static const unsigned int Offset_RenderState = 0x38;
     };
 
     struct zERROR {
@@ -425,6 +427,8 @@ struct GothicMemoryLocations {
         static const unsigned int Offset_Surface = 0xD4;
         static const unsigned int XTEX_BuildSurfaces = 0x007DD960;
         //static const unsigned int Load = 0x005F4360;
+
+        static const unsigned int PrecacheTexAniFrames = 0x0077E350;
     };
 
     struct zCResourceManager {

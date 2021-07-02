@@ -1426,7 +1426,11 @@ void GothicAPI::OnAddVob( zCVob* vob, zCWorld* world ) {
         world = oCGame::GetGame()->_zCSession_world;
 
     if ( strcmp( className, "zCPolyStrip" ) == 0 ) {
-        PolyStripVisuals.insert( (zCPolyStrip*)(vob->GetVisual()) );
+        zCPolyStrip* polyStrip = (zCPolyStrip*)(vob->GetVisual());
+        PolyStripVisuals.insert( polyStrip );
+        if ( polyStrip ) {
+            polyStrip->GetInstanceData()->material->GetAniTexture()->PrecacheTexAniFrames( 0.3f );
+        }
     }
 
     for ( unsigned int i = 0; i < extv.size(); i++ ) {
@@ -1675,21 +1679,26 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
                     continue;
                 }
 
+                // Setup pixel shader here so that we get correct normals
+                // Somehow BindShaderForTexture make normals to be inversed
+                if ( g->GetRenderingStage() == DES_MAIN ) {
+                    g->SetActivePixelShader( "PS_DiffuseAlphaTest" );
+                    g->BindActivePixelShader();
+                }
+
                 // Update animated textures
                 node->TexAniState.UpdateTexList();
 
                 bool isMMS = std::string( nodeAttachments[i][n]->Visual->GetFileExtension( 0 ) ) == ".MMS";
-                if ( distance < 1000 && isMMS ) {
+                if ( isMMS ) {
                     zCMorphMesh* mm = (zCMorphMesh*)nodeAttachments[i][n]->Visual;
                     mm->GetTexAniState()->UpdateTexList();
+                }
 
+                if ( distance < 1000 && isMMS ) {
+                    zCMorphMesh* mm = (zCMorphMesh*)nodeAttachments[i][n]->Visual;
                     // Only draw this as a morphmesh when rendering the main scene or when rendering as ghost
                     if ( g->GetRenderingStage() == DES_MAIN || g->GetRenderingStage() == DES_GHOST ) {
-                        // Setup pixel shader for morphmesh
-                        if ( g->GetRenderingStage() != DES_GHOST ) {
-                            g->SetActivePixelShader( "PS_DiffuseAlphaTest" );
-                        }
-
                         // Update constantbuffer
                         instanceInfo.World = *(XMFLOAT4X4*)&RendererState.TransformState.TransformWorld;
                         vi->VobConstantBuffer->UpdateBuffer( &instanceInfo );
@@ -1700,9 +1709,6 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
                         DrawMorphMesh( mm, fatness * 0.35f );
                         continue;
                     }
-                } else if ( isMMS ) {
-                    zCMorphMesh* mm = (zCMorphMesh*)nodeAttachments[i][n]->Visual;
-                    mm->GetTexAniState()->UpdateTexList();
                 }
 
                 instanceInfo.World = *(XMFLOAT4X4*)&RendererState.TransformState.TransformWorld;
@@ -1714,9 +1720,6 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
                     if ( itm.first && itm.first->GetAniTexture() ) { // TODO: Crash here!
                         if ( itm.first->GetAniTexture()->CacheIn( 0.6f ) == zRES_CACHED_IN ) {
                             itm.first->GetAniTexture()->Bind( 0 );
-                            if ( g->GetRenderingStage() != DES_GHOST ) {
-                                g->BindShaderForTexture( itm.first->GetAniTexture() );
-                            }
                         } else
                             continue;
                     }
@@ -1799,12 +1802,13 @@ void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameDa
     if ( pfx ) {
         // Get texture
         zCTexture* texture = nullptr;
-        if ( fx->GetEmitter() ) {
-            texture = fx->GetEmitter()->GetVisTexture();
+        if ( zCParticleEmitter* emitter = fx->GetEmitter() ) {
+            texture = emitter->GetVisTexture();
             if ( texture ) {
                 // Check if it's loaded
-                if ( texture->CacheIn( 0.6f ) != zRES_CACHED_IN )
+                if ( texture->CacheIn( 0.6f ) != zRES_CACHED_IN ) {
                     return;
+                }
             } else {
                 return;
             }
@@ -1866,6 +1870,7 @@ void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameDa
 
             if ( p->PolyStrip ) {
                 PolyStripVisuals.insert( p->PolyStrip );
+                p->PolyStrip->GetInstanceData()->material->GetAniTexture()->PrecacheTexAniFrames( 0.3f );
             };
 
             // Generate instance info
@@ -1925,18 +1930,12 @@ void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameDa
     fx->CreateParticlesUpdateDependencies();
 
     if ( fx->GetVisualDied() ) {
-        if ( fx->GetConnectedVob() ) {
+        if ( zCVob* connectedVob = fx->GetConnectedVob() ) {
             // delete FX, it will be invalid after this call!
-            fx->GetConnectedVob()->GetHomeWorld()->RemoveVob( fx->GetConnectedVob() );
+            connectedVob->GetHomeWorld()->RemoveVob( connectedVob );
         }
     } else {
-        // Do something I dont exactly know what it does :)
-        // TODO: Figure out why this crashes sometimes! (G1)
-#ifdef BUILD_GOTHIC_1_08k
-    // fx->GetStaticPFXList()->TouchPfx(fx);
-#else
         fx->GetStaticPFXList()->TouchPfx( fx );
-#endif
     }
 }
 
@@ -4193,5 +4192,12 @@ void GothicAPI::CleanFutures() {
         } else {
             ++it;
         }
+    }
+}
+
+/** Reset gothic render states so the engine will set them anew */
+void GothicAPI::ResetRenderStates() {
+    if ( zCRndD3D* renderer = zCRndD3D::GetRenderer() ) {
+        renderer->ResetRenderState();
     }
 }

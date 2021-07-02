@@ -730,6 +730,9 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
     // Bind HDR Back Buffer
     GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(), DepthStencilBuffer->GetDepthStencilView().Get() );
 
+    // Reset Render States for HUD
+    Engine::GAPI->ResetRenderStates();
+
     SetActivePixelShader( "PS_Simple" );
     SetActiveVertexShader( "VS_Ex" );
 
@@ -1500,12 +1503,12 @@ XRESULT D3D11GraphicsEngine::SetActiveHDShader( const std::string& shader ) {
 
 /** Binds the active PixelShader */
 XRESULT D3D11GraphicsEngine::BindActivePixelShader() {
-    if ( ActiveVS ) ActiveVS->Apply();
+    if ( ActivePS ) ActivePS->Apply();
     return XR_SUCCESS;
 }
 
 XRESULT D3D11GraphicsEngine::BindActiveVertexShader() {
-    if ( ActivePS ) ActivePS->Apply();
+    if ( ActiveVS ) ActiveVS->Apply();
     return XR_SUCCESS;
 }
 
@@ -1751,6 +1754,8 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
         SaveScreenshotNextFrame = false;
     }
 
+    // Reset Render States for HUD
+    Engine::GAPI->ResetRenderStates();
     return XR_SUCCESS;
 }
 
@@ -3551,7 +3556,7 @@ XRESULT D3D11GraphicsEngine::DrawPolyStrips( bool noTextures ) {
     const std::map<zCTexture*, PolyStripInfo>& polyStripInfos = Engine::GAPI->GetPolyStripInfos();
 
     // No need to do a bunch of work for nothing!
-    if ( polyStripInfos.size() == 0 ) {
+    if ( polyStripInfos.empty() ) {
         return XR_SUCCESS;
     }
 
@@ -4985,10 +4990,9 @@ void D3D11GraphicsEngine::DrawDecalList( const std::vector<zCVob*>& decals,
         Engine::GAPI->SetWorldTransformXM( mat );
         SetupVS_ExPerInstanceConstantBuffer();
 
-        if ( d->GetDecalSettings()->DecalMaterial ) {
-            if ( d->GetDecalSettings()->DecalMaterial->GetTexture() ) {
-                if ( d->GetDecalSettings()->DecalMaterial->GetTexture()->CacheIn( 0.6f ) !=
-                    zRES_CACHED_IN ) {
+        if ( zCMaterial* material = d->GetDecalSettings()->DecalMaterial ) {
+            if ( zCTexture* texture = material->GetTexture() ) {
+                if ( texture->CacheIn( 0.6f ) != zRES_CACHED_IN ) {
                     continue;  // Don't render not cached surfaces
                 }
 

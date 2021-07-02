@@ -12,7 +12,7 @@ public:
     static void Hook() {
         XHook( GothicMemoryLocations::zCRndD3D::DrawLineZ, hooked_zCRndD3DDrawLineZ );
         XHook( GothicMemoryLocations::zCRndD3D::DrawLine, hooked_zCRndD3DDrawLine );
-        
+
         XHook( HookedFunctions::OriginalFunctions.original_zCRnd_D3D_DrawPoly, GothicMemoryLocations::zCRndD3D::DrawPoly, hooked_zCRndD3DDrawPoly );
         XHook( HookedFunctions::OriginalFunctions.original_zCRnd_D3D_DrawPolySimple, GothicMemoryLocations::zCRndD3D::DrawPolySimple, hooked_zCRndD3DDrawPolySimple );
     }
@@ -24,7 +24,7 @@ public:
 
         auto lineRenderer = Engine::GraphicsEngine->GetLineRenderer();
         if ( lineRenderer ) {
-            lineRenderer->AddLineDeferred( ScreenSpaceLine( XMFLOAT3(x1, y1, z1), color.dword ), ScreenSpaceLine( XMFLOAT3( x2, y2, z2 ), color.dword ) );
+            lineRenderer->AddLineDeferred( ScreenSpaceLine( XMFLOAT3( x1, y1, z1 ), color.dword ), ScreenSpaceLine( XMFLOAT3( x2, y2, z2 ), color.dword ) );
         }
     }
 
@@ -74,10 +74,19 @@ public:
         hook_outfunc
     }
 
+    void ResetRenderState() {
+        // Set render state values to some absurd high value so that they will be changed by engine for sure
+        *(DWORD*)THISPTR_OFFSET( GothicMemoryLocations::zCRndD3D::Offset_RenderState + ( /*D3DRENDERSTATE_ALPHABLENDENABLE*/27 * 4 ) ) = 0xFFFFFFFF;
+        *(DWORD*)THISPTR_OFFSET( GothicMemoryLocations::zCRndD3D::Offset_RenderState + ( /*D3DRENDERSTATE_SRCBLEND*/19 * 4 ) ) = 0xFFFFFFFF;
+        *(DWORD*)THISPTR_OFFSET( GothicMemoryLocations::zCRndD3D::Offset_RenderState + ( /*D3DRENDERSTATE_DESTBLEND*/20 * 4 ) ) = 0xFFFFFFFF;
+    }
+
     /*float GetGammaValue()
     {
         XCALL(GothicMemoryLocations::zCRndD3D::Vid_GetGammaCorrection);
     }*/
 
-    //static zCRndD3D* GetRenderer(){return *(zCRndD3D**)GothicMemoryLocations::GlobalObjects::zRenderer;}
+    static zCRndD3D* GetRenderer() {
+        return *(zCRndD3D**)GothicMemoryLocations::GlobalObjects::zRenderer;
+    }
 };
