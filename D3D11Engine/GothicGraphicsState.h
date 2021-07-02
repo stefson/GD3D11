@@ -631,6 +631,7 @@ struct GothicRendererSettings {
         SmoothShadowCameraUpdate = true;
         DisplayFlip = false;
         LowLatency = false;
+        EnableInactiveFpsLock = true;
     }
 
     void SetupOldWorldSpecificValues() {
@@ -768,6 +769,7 @@ struct GothicRendererSettings {
     bool LowLatency;
     bool StretchWindow;
     bool SmoothShadowCameraUpdate;
+    bool EnableInactiveFpsLock;
 };
 
 struct GothicRendererTiming {

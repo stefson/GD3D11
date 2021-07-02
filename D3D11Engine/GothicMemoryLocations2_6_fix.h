@@ -354,7 +354,7 @@ struct GothicMemoryLocations {
         static const unsigned int MASK_SkeepingMode = 3;
 
         static const unsigned int EndMovement = 0x0061E0D0;
-
+        static const unsigned int SetSleeping = 0x00602930;
     };
 
     struct zCVisual {

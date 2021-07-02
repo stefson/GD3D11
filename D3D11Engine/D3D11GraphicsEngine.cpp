@@ -4676,10 +4676,12 @@ LRESULT D3D11GraphicsEngine::OnWindowMessage( HWND hWnd, UINT msg, WPARAM wParam
     switch ( msg ) {
     case WM_ACTIVATE:
     case WM_ACTIVATEAPP:
-        if ( wParam == 0 ) {
-            m_isWindowActive = false;
-        } else {
-            m_isWindowActive = true;
+        if ( Engine::GAPI->GetRendererState().RendererSettings.EnableInactiveFpsLock ) {
+            if ( wParam == 0 ) {
+                m_isWindowActive = false;
+            } else {
+                m_isWindowActive = true;
+            }
         }
         break;
     }
@@ -5665,9 +5667,12 @@ void D3D11GraphicsEngine::DrawString( const std::string& str, float x, float y, 
     if ( !font ) return;
     if ( !font->tex ) return;
     float UIScale = 1.0f;
-
+    static int savedBarSize = -1;
     if ( oCGame::GetGame() ) {
-        UIScale = (float)oCGame::GetGame()->hpBar->psizex / 180;
+        if ( savedBarSize == -1 ) {
+            savedBarSize = oCGame::GetGame()->swimBar->psizex;
+        }
+        UIScale = (float)savedBarSize / 180;
     }
 
     constexpr float FONT_CACHE_PRIO = -1;
