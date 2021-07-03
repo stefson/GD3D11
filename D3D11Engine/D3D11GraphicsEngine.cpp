@@ -722,10 +722,7 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
         m_FrameLimiter->Start();
     } else {
         if ( Engine::GAPI->GetRendererState().RendererSettings.FpsLimit != 0 ) {
-            if ( m_LastFrameLimit != Engine::GAPI->GetRendererState().RendererSettings.FpsLimit ) {
-                m_LastFrameLimit = Engine::GAPI->GetRendererState().RendererSettings.FpsLimit;
-                m_FrameLimiter->SetLimit( m_LastFrameLimit );
-            }
+            m_FrameLimiter->SetLimit( Engine::GAPI->GetRendererState().RendererSettings.FpsLimit );
             m_FrameLimiter->Start();
         } else {
             m_FrameLimiter->Reset();
@@ -808,7 +805,7 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
         Engine::GAPI->GetRendererState().RendererSettings.WorldShadowRangeScale =
             Toolbox::GetRecommendedWorldShadowRangeScaleForSize( s );
     }
-    
+
     // Force the mode
     zCView::SetMode(
         static_cast<int>(Resolution.x / Engine::GAPI->GetRendererState().RendererSettings.GothicUIScale),
@@ -1124,7 +1121,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferIndexed( D3D11VertexBuffer* vb,
             GetContext()->IASetIndexBuffer( ib->GetVertexBuffer().Get(),
                 DXGI_FORMAT_R32_UINT, 0 );
         }
-    }
+}
 
     if ( numIndices ) {
         // Draw the mesh
@@ -1153,7 +1150,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferIndexedUINT(
         GetContext()->IASetVertexBuffers( 0, 1, vb->GetVertexBuffer().GetAddressOf(), &uStride, &offset );
         GetContext()->IASetIndexBuffer( ((D3D11VertexBuffer*)ib)->GetVertexBuffer().Get(),
             DXGI_FORMAT_R32_UINT, 0 );
-    }
+}
 
     if ( numIndices ) {
         // Draw the mesh
@@ -2152,19 +2149,19 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
                 // Check if the animated texture and the registered textures are the
                 // same
                 MeshKey key = worldMesh.first;
-                if (worldMesh.first.Texture != aniTex) {
+                if ( worldMesh.first.Texture != aniTex ) {
                     key.Texture = aniTex;
                 }
 
                 // Check for alphablending
-                if (worldMesh.first.Material->GetAlphaFunc() >
+                if ( worldMesh.first.Material->GetAlphaFunc() >
                     zMAT_ALPHA_FUNC_FUNC_NONE &&
-                    worldMesh.first.Material->GetAlphaFunc() != zMAT_ALPHA_FUNC_TEST) {
-                    FrameTransparencyMeshes.push_back(worldMesh);
+                    worldMesh.first.Material->GetAlphaFunc() != zMAT_ALPHA_FUNC_TEST ) {
+                    FrameTransparencyMeshes.push_back( worldMesh );
                 } else {
                     // Create a new pair using the animated texture
-                    meshList.emplace_back(key, worldMesh.second);
-                    std::push_heap(meshList.begin(), meshList.end(), CompareMesh);
+                    meshList.emplace_back( key, worldMesh.second );
+                    std::push_heap( meshList.begin(), meshList.end(), CompareMesh );
                 }
             }
         }
@@ -2175,19 +2172,19 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
         GetContext()->PSSetShader( nullptr, nullptr, 0 );
 
         for ( auto const& mesh : meshList ) {
-            if (!mesh.first.Material->GetAniTexture()) continue;
+            if ( !mesh.first.Material->GetAniTexture() ) continue;
 
-            if (mesh.first.Material->GetAniTexture()->HasAlphaChannel())
+            if ( mesh.first.Material->GetAniTexture()->HasAlphaChannel() )
                 continue;  // Don't pre-render stuff with alpha channel
 
-            if (mesh.first.Info->MaterialType == MaterialInfo::MT_Water)
+            if ( mesh.first.Info->MaterialType == MaterialInfo::MT_Water )
                 continue;  // Don't pre-render water
 
-            if (mesh.second->TesselationSettings.buffer.VT_TesselationFactor > 0.0f)
+            if ( mesh.second->TesselationSettings.buffer.VT_TesselationFactor > 0.0f )
                 continue;  // Don't pre-render tesselated surfaces
 
-            DrawVertexBufferIndexedUINT(nullptr, nullptr, mesh.second->Indices.size(),
-                mesh.second->BaseIndexLocation);
+            DrawVertexBufferIndexedUINT( nullptr, nullptr, mesh.second->Indices.size(),
+                mesh.second->BaseIndexLocation );
         }
     }
 
@@ -2338,7 +2335,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
             }
         }
 
-        std::pop_heap(meshList.begin(), meshList.end(), CompareMesh);
+        std::pop_heap( meshList.begin(), meshList.end(), CompareMesh );
         meshList.pop_back();
     }
 
@@ -4756,19 +4753,14 @@ LRESULT D3D11GraphicsEngine::OnWindowMessage( HWND hWnd, UINT msg, WPARAM wParam
     LPARAM lParam ) {
     switch ( msg ) {
     case WM_ACTIVATEAPP:
-        break; // Does not work with Union. Will have to find a different way.
-        //if (wParam) {
-        //	if (m_previousFpsLimit > 0) {
-        //		m_FrameLimiter->SetLimit(m_previousFpsLimit);
-        //	} else {
-        //		Engine::GAPI->GetRendererState().RendererSettings.FpsLimit = 0;
-        //		m_FrameLimiter->Reset();
-        //	}
-        //} else if (UIView->GetSettingsDialog()->IsHidden()) {
-        //	m_previousFpsLimit = Engine::GAPI->GetRendererState().RendererSettings.FpsLimit;
-        //	Engine::GAPI->GetRendererState().RendererSettings.FpsLimit = 30;
-        //}
-        //break;
+        if ( Engine::GAPI->GetRendererState().RendererSettings.EnableInactiveFpsLock ) {
+            if ( (wParam == 0) && (lParam != GetThreadId( GetCurrentThread() )) ) {
+                m_isWindowActive = false;
+            } else {
+                m_isWindowActive = true;
+            }
+        }
+        break;
     }
     if ( UIView ) {
         UIView->OnWindowMessage( hWnd, msg, wParam, lParam );

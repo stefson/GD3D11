@@ -3620,7 +3620,7 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
     s.EnableGodRays = GetPrivateProfileBoolA( "General", "EnableGodRays", defaultRendererSettings.EnableGodRays, ini );
     s.AllowNormalmaps = GetPrivateProfileBoolA( "General", "AllowNormalmaps", defaultRendererSettings.AllowNormalmaps, ini );
     s.AllowNumpadKeys = GetPrivateProfileBoolA( "General", "AllowNumpadKeys", defaultRendererSettings.AllowNumpadKeys, ini );
-    s.AllowNumpadKeys = GetPrivateProfileBoolA( "General", "EnableInactiveFpsLock", defaultRendererSettings.EnableInactiveFpsLock, ini );
+    s.EnableInactiveFpsLock = GetPrivateProfileBoolA( "General", "EnableInactiveFpsLock", defaultRendererSettings.EnableInactiveFpsLock, ini );
     
     /*
     * Draw-distance is Loaded on a per World basis using LoadRendererWorldSettings
