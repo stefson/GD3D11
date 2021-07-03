@@ -37,15 +37,15 @@ D3D11PFX_HDR::~D3D11PFX_HDR() {
 /** Draws this effect to the given buffer */
 XRESULT D3D11PFX_HDR::Render( RenderToTextureBuffer* fxbuffer ) {
 	D3D11GraphicsEngine* engine = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
-
+    engine->SetDefaultStates();
 	Engine::GAPI->GetRendererState().BlendState.BlendEnabled = false;
 	Engine::GAPI->GetRendererState().BlendState.SetDirty();
+    engine->UpdateRenderStates();
 
 	// Save old rendertargets
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> oldRTV;
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> oldDSV;
 	engine->GetContext()->OMGetRenderTargets( 1, oldRTV.GetAddressOf(), oldDSV.GetAddressOf() );
-
 
 	RenderToTextureBuffer* lum = CalcLuminance();
 	CreateBloom( lum );
