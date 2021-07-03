@@ -4893,6 +4893,7 @@ void D3D11GraphicsEngine::DrawDecalList( const std::vector<zCVob*>& decals,
     Engine::GAPI->GetRendererState().DepthState.SetDirty();
 
     XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
+    Engine::GAPI->SetViewTransformXM( view );  // Update view transform
 
     // Set up alpha
     if ( !lighting ) {
@@ -5015,14 +5016,14 @@ void D3D11GraphicsEngine::DrawQuadMarks() {
 
     SetDefaultStates();
 
+    XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
+    Engine::GAPI->SetViewTransformXM( view );  // Update view transform
+
     Engine::GAPI->GetRendererState().RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
     Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
 
     ActivePS->GetConstantBuffer()[0]->UpdateBuffer( &Engine::GAPI->GetRendererState().GraphicsState );
     ActivePS->GetConstantBuffer()[0]->BindToPixelShader( 0 );
-
-    XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
-    Engine::GAPI->SetViewTransformXM( view );
 
     SetupVS_ExMeshDrawCall();
     SetupVS_ExConstantBuffer();
@@ -5180,6 +5181,9 @@ void D3D11GraphicsEngine::DrawFrameParticles(
     std::map<zCTexture*, std::vector<ParticleInstanceInfo>>& particles,
     std::map<zCTexture*, ParticleRenderInfo>& info ) {
     SetDefaultStates();
+
+    XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
+    Engine::GAPI->SetViewTransformXM( view );  // Update view transform
 
     // TODO: Maybe make particles draw at a lower res and bilinear upsample the result.
 

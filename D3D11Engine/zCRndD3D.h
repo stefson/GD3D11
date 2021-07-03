@@ -76,6 +76,7 @@ public:
 
     void ResetRenderState() {
         // Set render state values to some absurd high value so that they will be changed by engine for sure
+        *(DWORD*)THISPTR_OFFSET( GothicMemoryLocations::zCRndD3D::Offset_BoundTexture + ( /*TEX0*/0 * 4) ) = 0x00000000;
         *(DWORD*)THISPTR_OFFSET( GothicMemoryLocations::zCRndD3D::Offset_RenderState + ( /*D3DRENDERSTATE_ALPHABLENDENABLE*/27 * 4 ) ) = 0xFFFFFFFF;
         *(DWORD*)THISPTR_OFFSET( GothicMemoryLocations::zCRndD3D::Offset_RenderState + ( /*D3DRENDERSTATE_SRCBLEND*/19 * 4 ) ) = 0xFFFFFFFF;
         *(DWORD*)THISPTR_OFFSET( GothicMemoryLocations::zCRndD3D::Offset_RenderState + ( /*D3DRENDERSTATE_DESTBLEND*/20 * 4 ) ) = 0xFFFFFFFF;

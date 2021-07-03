@@ -49,6 +49,7 @@ struct GothicMemoryLocations {
         static const unsigned int DrawPolySimple = 0x007143F0;
 
         static const unsigned int Offset_RenderState = 0x34;
+        static const unsigned int Offset_BoundTexture = 0x80E38;
     };
 
     struct zCOption {

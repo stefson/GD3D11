@@ -66,6 +66,7 @@ struct GothicMemoryLocations {
         static const unsigned int Vid_GetGammaCorrection = 0x00659610;
 
         static const unsigned int Offset_RenderState = 0x38;
+        static const unsigned int Offset_BoundTexture = 0x82E50;
     };
 
     struct zERROR {
