@@ -397,8 +397,8 @@ struct GothicMemoryLocations {
         static const unsigned int Offset_Emitters = 0x54;
         static const unsigned int Offset_ConnectedVob = 0x70;
 
-        static const unsigned int OBJ_s_pfxList = 0x00874360;
-        static const unsigned int OBJ_s_partMeshQuad = 0x0087437C;
+        static const unsigned int OBJ_s_pfxList = 0x0089B2A0;
+        static const unsigned int OBJ_s_partMeshQuad = 0x0089B2BC;
         static const unsigned int CheckDependentEmitter = 0x005913C0;
         static const unsigned int UpdateParticle = 0x0058F4C0;
 

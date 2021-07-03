@@ -215,6 +215,7 @@ XRESULT D3D11Effect::DrawRain() {
     // Disable depth-write
     state.DepthState.DepthWriteEnabled = false;
     state.DepthState.SetDirty();
+    state.DepthState.DepthBufferCompareFunc = GothicDepthBufferStateInfo::DEFAULT_DEPTH_COMP_STATE;
 
     // Disable culling
     state.RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
@@ -256,6 +257,8 @@ XRESULT D3D11Effect::DrawRain() {
     // Reset this
     e->GetContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
     e->GetContext()->GSSetShader( nullptr, 0, 0 );
+
+    e->SetDefaultStates();
     return XR_SUCCESS;
 }
 

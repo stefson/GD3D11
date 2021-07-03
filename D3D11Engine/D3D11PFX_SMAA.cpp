@@ -198,9 +198,10 @@ void D3D11PFX_SMAA::RenderPostFX(const Microsoft::WRL::ComPtr<ID3D11ShaderResour
 	}
 
 	engine->GetContext()->PSSetShaderResources( 0, 3, NoSRV );
+
 	engine->GetContext()->OMSetRenderTargets( 1, OldRTV.GetAddressOf(), OldDSV.Get() );
 
-    engine->SetDefaultStates( true );
+	engine->SetDefaultStates( true );
 }
 
 /** Called on resize */
