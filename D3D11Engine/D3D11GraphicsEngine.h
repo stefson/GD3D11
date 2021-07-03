@@ -396,4 +396,5 @@ protected:
     bool m_swapchainflip;
     bool m_lowlatency;
     int m_previousFpsLimit;
+    bool m_isWindowActive;
 };
