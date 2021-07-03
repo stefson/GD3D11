@@ -18,6 +18,7 @@ struct GothicMemoryLocations {
         static const unsigned int zCInput = 0x0086CCA0;
         static const unsigned int s_globFreePart = 0x00874374;
         static const unsigned int zCOption = 0x00869694;
+        static const unsigned int zRenderer = 0x008C5ED0;
     };
 
     struct zCPolyStrip {
@@ -46,6 +47,9 @@ struct GothicMemoryLocations {
         static const unsigned int DrawLine = 0x00716B00;
         static const unsigned int DrawPoly = 0x00714B60;
         static const unsigned int DrawPolySimple = 0x007143F0;
+
+        static const unsigned int Offset_RenderState = 0x34;
+        static const unsigned int Offset_BoundTexture = 0x80E38;
     };
 
     struct zCOption {
@@ -275,6 +279,8 @@ struct GothicMemoryLocations {
         static const unsigned int zCResourceTouchTimeStampLocal = 0x005B5580;
 
         static const unsigned int Offset_Surface = 0xD4;
+
+        static const unsigned int PrecacheTexAniFrames = 0x005C8AB0;
     };
 
     struct zCBinkPlayer {

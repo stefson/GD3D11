@@ -138,6 +138,10 @@ public:
         return GetCacheState();
     }
 
+    void PrecacheTexAniFrames( float priority ) {
+        XCALL( GothicMemoryLocations::zCTexture::PrecacheTexAniFrames );
+    }
+
     void TouchTimeStamp() {
         XCALL( GothicMemoryLocations::zCTexture::zCResourceTouchTimeStamp );
     }

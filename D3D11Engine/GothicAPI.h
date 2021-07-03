@@ -640,6 +640,9 @@ public:
     /** Prints information about the mod to the screen for a couple of seconds */
     void PrintModInfo();
 
+    /** Reset gothic render states so the engine will set them anew */
+    void ResetRenderStates();
+
     void SetCanClearVobsByVisual( bool enabled = true ) {
         _canClearVobsByVisual = enabled;
     }
