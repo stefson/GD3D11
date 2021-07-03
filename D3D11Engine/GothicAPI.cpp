@@ -804,6 +804,7 @@ void GothicAPI::DrawWorldMeshNaive() {
     START_TIMING();
     if ( RendererState.RendererSettings.DrawSkeletalMeshes ) {
         // Set up frustum for the camera
+        RendererState.RasterizerState.SetDefault();
         zCCamera::GetCamera()->Activate();
 
         for ( const auto& vobInfo : AnimatedSkeletalVobs ) {
@@ -1568,7 +1569,6 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
     D3D11GraphicsEngine* g = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
 
     // Setup renderstate
-    RendererState.RasterizerState.SetDefault();
     RendererState.RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_FRONT;
     RendererState.RasterizerState.SetDirty();
 
@@ -1740,6 +1740,7 @@ void GothicAPI::DrawSkeletalGhosts() {
     D3D11GraphicsEngine* g = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
     if ( !GhostSkeletalVobs.empty() ) {
         // Setup alpha blending
+        RendererState.RasterizerState.SetDefault();
         RendererState.BlendState.SetAlphaBlending();
         RendererState.BlendState.SetDirty();
         RendererState.DepthState.SetDefault();
