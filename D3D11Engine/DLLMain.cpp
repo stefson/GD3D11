@@ -30,6 +30,11 @@ static HRESULT( WINAPI* DirectDrawCreateEx_t )(GUID FAR* lpGuid, LPVOID* lplpDD,
 typedef void (WINAPI* DirectDrawSimple)();
 typedef HRESULT( WINAPI* DirectDrawCreateEx_type )(GUID FAR*, LPVOID*, REFIID, IUnknown FAR*);
 
+#if defined(BUILD_GOTHIC_2_6_fix)
+using WinMainFunc = decltype(&WinMain);
+WinMainFunc originalWinMain;
+#endif
+
 bool GMPModeActive = false;
 
 void SignalHandler( int signal ) {
@@ -181,12 +186,31 @@ void CheckPlatformSupport() {
 #endif
 }
 
+#if defined(BUILD_GOTHIC_2_6_fix)
+int WINAPI hooked_WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd ) {
+    if ( GetModuleHandleA( "gmp.dll" ) ) {
+        GMPModeActive = true;
+        LogInfo() << "GMP Mode Enabled";
+    }
+    // Remove automatic volume change of sounds regarding whether the camera is indoor or outdoor
+    // TODO: Implement!
+    if ( !GMPModeActive ) {
+        XHook( GothicMemoryLocations::zCActiveSnd::AutoCalcObstruction, HookedFunctionInfo::hooked_zCActiveSndAutoCalcObstruction );
+    }
+    return originalWinMain( hInstance, hPrevInstance, lpCmdLine, nShowCmd );
+}
+#endif
+
 BOOL WINAPI DllMain( HINSTANCE hInst, DWORD reason, LPVOID ) {
     if ( reason == DLL_PROCESS_ATTACH ) {
         //DebugWrite_i("DDRAW Proxy DLL starting.\n", 0);
         hLThis = hInst;
 
         Engine::PassThrough = false;
+
+#if defined(BUILD_GOTHIC_2_6_fix)
+        XHook( originalWinMain, GothicMemoryLocations::Functions::WinMain, hooked_WinMain );
+#endif
 
         //_CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
@@ -196,13 +220,6 @@ BOOL WINAPI DllMain( HINSTANCE hInst, DWORD reason, LPVOID ) {
 
             if ( CoInitializeEx( NULL, COINIT::COINIT_APARTMENTTHREADED ) == S_OK ) {
                 LogInfo() << "COM initialized";
-            }
-
-            if ( Toolbox::FileExists( "gmp.dll" ) || Toolbox::FileExists( "..\\gmp\\gmp.dll" ) ) {
-                GMPModeActive = true;
-                LogInfo() << "GMP Mode Enabled";
-            } else {
-                GMPModeActive = false;
             }
 
             // Check for right version

@@ -81,12 +81,6 @@ void HookedFunctionInfo::InitHooks() {
     original_Alg_Rotation3DNRad = (Alg_Rotation3DNRad)GothicMemoryLocations::Functions::Alg_Rotation3DNRad;
 
 #ifdef BUILD_GOTHIC_2_6_fix
-    // Remove automatic volume change of sounds regarding whether the camera is indoor or outdoor
-    // TODO: Implement!
-    if ( !GMPModeActive ) {
-        XHook( GothicMemoryLocations::zCActiveSnd::AutoCalcObstruction, HookedFunctionInfo::hooked_zCActiveSndAutoCalcObstruction );
-    }
-
     zQuat::Hook();
     zMat4::Hook();
 
