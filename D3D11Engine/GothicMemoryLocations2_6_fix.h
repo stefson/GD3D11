@@ -6,6 +6,7 @@ struct GothicMemoryLocations {
         static const unsigned int Alg_Rotation3DNRad = 0x00517E90;
         static const unsigned int vidGetFPSRate = 0x004FDCD0;
         static const unsigned int HandledWinMain = 0x00502ED0;
+        static const unsigned int WinMain = 0x00502D70;
         //static const unsigned int ExitGameFunc = 0x00425F30;
         static const unsigned int zCExceptionHandler_UnhandledExceptionFilter = 0x004C88C0;
     };
