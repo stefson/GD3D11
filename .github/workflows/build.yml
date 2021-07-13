@@ -1,0 +1,79 @@
+name: Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+       include:
+         - configuration: Release_AVX
+           target_dir: Gothic2-GD3D11-AVX
+         - configuration: Release_G1_AVX
+           target_dir: Gothic1-GD3D11-AVX
+         - configuration: Release
+           target_dir: Gothic2-GD3D11
+         - configuration: Release_G1
+           target_dir: Gothic1-GD3D11
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set tag name env
+      run: |
+        $tagName = $Env:GITHUB_REF -replace 'refs/tags/', ''
+        echo "Tag: ${tagName}"
+        echo "RELEASE_VERSION=${tagName}" >> $Env:GITHUB_ENV
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1
+
+    - name: Restore NuGet packages
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: nuget restore .
+
+    - name: Build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: msbuild /p:Configuration=${{matrix.configuration}} .
+
+    - name: Create distribution zip
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        mkdir "${{matrix.target_dir}}\GD3D11\shaders\CSFFT"
+        Xcopy "D3D11Engine\Shaders\*" "${{matrix.target_dir}}\GD3D11\shaders" /s
+        copy "D3D11Engine\CSFFT\*.hlsl" "${{matrix.target_dir}}\GD3D11\shaders\CSFFT"
+        Xcopy "blobs\data" "${{matrix.target_dir}}\GD3D11\data\" /s
+        Xcopy "blobs\Meshes" "${{matrix.target_dir}}\GD3D11\Meshes\" /s
+        Xcopy "blobs\Textures" "${{matrix.target_dir}}\GD3D11\Textures\" /s
+        Xcopy "blobs\libs\*" "${{matrix.target_dir}}\" /s
+        copy "${{matrix.configuration}}\ddraw.dll" "${{matrix.target_dir}}"
+        cd "${{matrix.target_dir}}"
+        7z a -tzip "..\${{matrix.target_dir}}-${{env.RELEASE_VERSION}}.zip" -r
+
+    - name: Calculate distribution zip hash
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        (Get-FileHash "${{matrix.target_dir}}-${{env.RELEASE_VERSION}}.zip" -Algorithm SHA256).hash | Out-File -FilePath "${{matrix.target_dir}}-${{env.RELEASE_VERSION}}.zip.sha256"
+        type "${{matrix.target_dir}}-${{env.RELEASE_VERSION}}.zip.sha256"
+
+    - name: Create github release
+      run: |
+        gh release create ${{env.RELEASE_VERSION}} -p -n "Generated release from GitHub Actions"
+        exit 0
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+    - name: Upload artifacts to github release
+      run: |
+        gh release upload ${{env.RELEASE_VERSION}} "${{matrix.target_dir}}-${{env.RELEASE_VERSION}}.zip"
+        gh release upload ${{env.RELEASE_VERSION}} "${{matrix.target_dir}}-${{env.RELEASE_VERSION}}.zip.sha256"
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
