@@ -244,35 +244,16 @@ public:
         return (EVisualCamAlignType)flags;
     }
 
-    /** returns the NPC pointer from the Vob, or nullptr if not an NPC */
-    oCNPC* AsNpc() {
-#if BUILD_GOTHIC_2_6_fix
+    /** Checks the inheritance chain and casts to T* if possible. Returns nullptr otherwise */
+    template<class T>
+    T* As() {
         zCClassDef* classDef = ((zCObject*)this)->_GetClassDef();
-        /* // Quickly check for classdef
-        if( CheckInheritanceByString( classDef , "OCNPC") ) { // all uppercase!
-            bool ok = 1;
-        }*/
-        if ( CheckInheritance( classDef, _ClassDef_oCNpc() ) ) {
-            return reinterpret_cast<oCNPC*>(this);
+        if ( CheckInheritance( classDef, T::GetStaticClassDef() ) ) {
+            return reinterpret_cast<T*>(this);
         }
-#else
-        int vtbl = ((int*)this)[0];
-        if ( vtbl == GothicMemoryLocations::VobTypes::Npc ) {
-            return reinterpret_cast<oCNPC*>(this);
-        }
-#endif
         return nullptr;
     }
 protected:
-    bool CheckInheritanceByString( zCClassDef* def, const char* target ) {
-        while ( def ) {
-            if ( strcmp( def->className.ToChar(), target ) ) {
-                return true;
-            }
-            def = def->baseClassDef;
-        }
-        return false;
-    }
 
     bool CheckInheritance( const zCClassDef* def, const zCClassDef* target ) {
         while ( def ) {
@@ -280,17 +261,8 @@ protected:
                 return true;
             }
             def = def->baseClassDef;
-    }
+        }
         return false;
-    }
-
-    const zCClassDef* _ClassDef_oCNpc() {
-#if BUILD_GOTHIC_2_6_fix
-        return reinterpret_cast<const zCClassDef*>(GothicMemoryLocations::zCClassDef::oCNpc);
-#else
-        // Find addres in G1
-        return nullptr;
-#endif
     }
 
     zSTRING& __GetObjectName() {

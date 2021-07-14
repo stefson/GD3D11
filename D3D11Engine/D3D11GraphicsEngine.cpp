@@ -2910,7 +2910,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround(
                 }
 
                 // Ghosts shouldn't have shadows
-                if ( oCNPC* npc = skeletalMeshVob->Vob->AsNpc() ) {
+                if ( oCNPC* npc = skeletalMeshVob->Vob->As<oCNPC>() ) {
                     if ( npc->HasFlag( NPC_FLAG_GHOST ) ) {
                         continue;
                     }
@@ -3191,7 +3191,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround( FXMVECTOR position,
             if ( !skeletalMeshVob->VisualInfo ) continue;
 
             // Ghosts shouldn't have shadows
-            if ( oCNPC* npc = skeletalMeshVob->Vob->AsNpc() ) {
+            if ( oCNPC* npc = skeletalMeshVob->Vob->As<oCNPC>() ) {
                 if ( npc->HasFlag( NPC_FLAG_GHOST ) ) {
                     continue;
                 }

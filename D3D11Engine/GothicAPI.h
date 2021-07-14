@@ -672,6 +672,9 @@ private:
     /** Goes through the given zCTree and registeres all found vobs */
     void TraverseVobTree( zCTree<zCVob>* tree );
 
+    /** Goes through the given zCTree and calls handler for each found vob */
+    void TraverseVobTree( zCTree<zCVob>* tree , std::function<void( zCVob* )> handler);
+
     /** Saved Graphics state */
     GothicRendererState RendererState;
 

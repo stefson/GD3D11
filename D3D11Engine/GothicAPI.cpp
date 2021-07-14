@@ -1,5 +1,6 @@
 #include <Windows.h>
 #include <string>
+#include <sstream>
 #include "pch.h"
 #include "GothicAPI.h"
 #include "Engine.h"
@@ -739,6 +740,20 @@ void GothicAPI::TraverseVobTree( zCTree<zCVob>* tree ) {
     }
 }
 
+void GothicAPI::TraverseVobTree( zCTree<zCVob>* tree, std::function<void( zCVob* )> handler ) {
+    if ( tree->FirstChild != nullptr ) {
+        TraverseVobTree( tree->FirstChild, handler );
+    }
+
+    if ( tree->Next != nullptr ) {
+        TraverseVobTree( tree->Next, handler );
+    }
+
+    if ( tree->Data ) {
+        handler( tree->Data );
+    }
+}
+
 /** Returns in which directory we started in */
 const std::string& GothicAPI::GetStartDirectory() {
     return StartDirectory;
@@ -839,7 +854,7 @@ void GothicAPI::DrawWorldMeshNaive() {
             model->SetDistanceToCamera( dist );
 
             // Schedule for drawing in later stage if this vob is ghost
-            if ( oCNPC* npc = vobInfo->Vob->AsNpc() ) {
+            if ( oCNPC* npc = vobInfo->Vob->As<oCNPC>() ) {
                 if ( npc->HasFlag( NPC_FLAG_GHOST ) ) {
                     GhostSkeletalVobs.emplace_back( dist, vobInfo );
                     std::push_heap( GhostSkeletalVobs.begin(), GhostSkeletalVobs.end(), CompareGhostDistance );
@@ -2426,6 +2441,34 @@ LRESULT GothicAPI::OnWindowMessage( HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
     case WM_KEYDOWN:
         Engine::GraphicsEngine->OnKeyDown( wParam );
         switch ( wParam ) {
+            //#define DUMP_CLASSDEF 1
+#if DUMP_CLASSDEF
+        case VK_NUMPAD9:
+        {
+            if ( !oCGame::GetGame()
+                || !oCGame::GetGame()->_zCSession_world
+                || !oCGame::GetGame()->_zCSession_world->GetGlobalVobTree() ) {
+                break;
+            }
+            zCTree<zCVob>* vobTree = oCGame::GetGame()->_zCSession_world->GetGlobalVobTree();
+            std::unordered_map<std::string, uint32_t> items = {};
+            TraverseVobTree( vobTree, [&]( zCVob* vob ) {
+                zCClassDef* classDef = ((zCObject*)vob)->_GetClassDef();
+                while ( classDef ) {
+                    items[classDef->className.ToChar()] = (uint32_t)classDef;
+                    classDef = classDef->baseClassDef;
+                }
+            } );
+
+            std::stringstream ss;
+            for ( auto& kvp : items ) {
+                ss.str( std::string{} );
+                ss << "static const unsigned int " << kvp.first << " = 0x00" << std::hex << kvp.second << ";";
+                LogInfo() << ss.str();
+            }
+            break;
+        }
+#endif
         case VK_F11:
             if ( ( GetAsyncKeyState( VK_CONTROL ) & 0x8000 ) && !GMPModeActive ) {
                 Engine::AntTweakBar->SetActive( !Engine::AntTweakBar->GetActive() );

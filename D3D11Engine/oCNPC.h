@@ -19,6 +19,10 @@ public:
     oCNPC();
     ~oCNPC();
 
+    static const zCClassDef* GetStaticClassDef() {
+        return reinterpret_cast<const zCClassDef*>(GothicMemoryLocations::zCClassDef::oCNpc);
+    }
+
     /** Hooks the functions of this Class */
     static void Hook() {
 #ifdef BUILD_GOTHIC_1_08k
