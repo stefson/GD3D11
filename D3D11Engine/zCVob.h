@@ -208,7 +208,7 @@ public:
 
         return (flags & GothicMemoryLocations::zCVob::MASK_SkeepingMode);
     }
-    void SetSleeping(int on) {
+    void SetSleeping( int on ) {
         XCALL( GothicMemoryLocations::zCVob::SetSleeping );
     }
     /** Returns whether the visual of this vob is visible */
@@ -246,13 +246,53 @@ public:
 
     /** returns the NPC pointer from the Vob, or nullptr if not an NPC */
     oCNPC* AsNpc() {
+#if BUILD_GOTHIC_2_6_fix
+        zCClassDef* classDef = ((zCObject*)this)->_GetClassDef();
+        /* // Quickly check for classdef
+        if( CheckInheritanceByString( classDef , "OCNPC") ) { // all uppercase!
+            bool ok = 1;
+        }*/
+        if ( CheckInheritance( classDef, _ClassDef_oCNpc() ) ) {
+            return reinterpret_cast<oCNPC*>(this);
+        }
+#else
         int vtbl = ((int*)this)[0];
         if ( vtbl == GothicMemoryLocations::VobTypes::Npc ) {
             return reinterpret_cast<oCNPC*>(this);
         }
+#endif
         return nullptr;
     }
 protected:
+    bool CheckInheritanceByString( zCClassDef* def, const char* target ) {
+        while ( def ) {
+            if ( strcmp( def->className.ToChar(), target ) ) {
+                return true;
+            }
+            def = def->baseClassDef;
+        }
+        return false;
+    }
+
+    bool CheckInheritance( const zCClassDef* def, const zCClassDef* target ) {
+        while ( def ) {
+            if ( def == target ) {
+                return true;
+            }
+            def = def->baseClassDef;
+    }
+        return false;
+    }
+
+    const zCClassDef* _ClassDef_oCNpc() {
+#if BUILD_GOTHIC_2_6_fix
+        return reinterpret_cast<const zCClassDef*>(GothicMemoryLocations::zCClassDef::oCNpc);
+#else
+        // Find addres in G1
+        return nullptr;
+#endif
+    }
+
     zSTRING& __GetObjectName() {
         XCALL( GothicMemoryLocations::zCObject::GetObjectName );
     }

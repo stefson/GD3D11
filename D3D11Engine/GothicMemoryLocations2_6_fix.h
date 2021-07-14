@@ -490,6 +490,10 @@ struct GothicMemoryLocations {
         static const unsigned int RemoveVob = 0x00624B70;
     };
 
+    struct zCClassDef {
+        static const unsigned int oCNpc = 0x00ab1e20;
+    };
+
     class VobTypes // vftables
     {
     public:
