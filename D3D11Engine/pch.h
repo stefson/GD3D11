@@ -26,7 +26,7 @@
 #define stdext std
 #endif
 
-#define VERSION_NUMBER "17.7-dev19-fix4"
+#define VERSION_NUMBER "17.7-dev20"
 __declspec(selectany) const char* VERSION_NUMBER_STR = VERSION_NUMBER;
 
 extern bool GMPModeActive;
@@ -40,7 +40,6 @@ extern bool GMPModeActive;
 #define SAFE_RELEASE(x) if (x) { x->Release(); x = nullptr; }
 #define SAFE_DELETE(x) delete x; x = nullptr;
 //#define V(x) x
-//#define BUILD_SPACER_NET 1
 
 /** Writes a string of the D3D7-Call log */
 void DebugWrite_i( LPCSTR lpDebugMessage, void* thisptr );

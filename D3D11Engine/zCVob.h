@@ -79,7 +79,7 @@ public:
         hook_outfunc
     }
 
-#if defined BUILD_SPACER || defined BUILD_SPACER_NET
+#if (defined BUILD_SPACER || defined BUILD_SPACER_NET)
     /** Returns the helper-visual for this class
         This actually uses a map to lookup the visual. Beware for performance-issues! */
     zCVisual* GetClassHelperVisual() {
@@ -89,8 +89,11 @@ public:
     /** Returns the visual saved in this vob */
     zCVisual* GetVisual() {
         zCVisual* visual = GetMainVisual();
-
+#if BUILD_SPACER_NET
+        if ( !visual && Engine::GAPI->GetRendererState().RendererSettings.RunInSpacerNet )
+#else
         if ( !visual )
+#endif
             visual = GetClassHelperVisual();
 
         return visual;

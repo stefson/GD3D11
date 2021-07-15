@@ -212,12 +212,21 @@ void GothicAPI::OnGameStart() {
 
 /** Called to update the world, before rendering */
 void GothicAPI::OnWorldUpdate() {
-#if defined BUILD_SPACER || defined BUILD_SPACER_NET
+#if BUILD_SPACER
     zCBspBase* rootBsp = oCGame::GetGame()->_zCSession_world->GetBspTree()->GetRootNode();
     BspInfo* root = &BspLeafVobLists[rootBsp];
 
     if ( !root->OriginalNode )
         Engine::GAPI->OnWorldLoaded();
+#endif
+#if BUILD_SPACER_NET
+    if ( RendererState.RendererSettings.RunInSpacerNet ) {
+        zCBspBase* rootBsp = oCGame::GetGame()->_zCSession_world->GetBspTree()->GetRootNode();
+        BspInfo* root = &BspLeafVobLists[rootBsp];
+
+        if ( !root->OriginalNode )
+            Engine::GAPI->OnWorldLoaded();
+    }
 #endif
 
     RendererState.RendererInfo.Reset();
@@ -3754,6 +3763,10 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
         if ( gameIni != "GOTHICGAME.INI" && nLastDot != std::string::npos ) {
             Engine::GAPI->SetGameName( gameIni.substr( 0, nLastDot ) );
             LogInfo() << "-> Game: " << Engine::GAPI->GetGameName();
+            if ( Engine::GAPI->GetGameName() == "SPACER_NET" ) {
+                LogInfo() << "-> Running in Spacer.NET";
+                s.RunInSpacerNet = true;
+            }
         } else {
             Engine::GAPI->SetGameName( "Original" );
             LogInfo() << "-> Game: Original";
