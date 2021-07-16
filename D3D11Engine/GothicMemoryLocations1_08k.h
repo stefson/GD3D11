@@ -434,6 +434,49 @@ struct GothicMemoryLocations {
         static const unsigned int GetVisualName = 0x00563EF0;
     };
 
+    struct zCClassDef {
+        static const unsigned int zCVobSound = 0x008d82a8;
+        static const unsigned int oCItem = 0x008daa80;
+        static const unsigned int zCZone = 0x008d8388;
+        static const unsigned int oCTriggerChangeLevel = 0x0085ed88;
+        static const unsigned int zCObject = 0x00873e70;
+        static const unsigned int zCVob = 0x008d72d8;
+        static const unsigned int oCCSTrigger = 0x0085e210;
+        static const unsigned int zCVobSoundDaytime = 0x008d8468;
+        static const unsigned int oCMobInter = 0x008db060;
+        static const unsigned int zCVobLensFlare = 0x008d79b8;
+        static const unsigned int zCVobStartpoint = 0x008de2c0;
+        static const unsigned int oCMobSwitch = 0x008daea0;
+        static const unsigned int zCVobLight = 0x008d7610;
+        static const unsigned int zCEffect = 0x008d7be8;
+        static const unsigned int oCVob = 0x008dc418;
+        static const unsigned int zCVobSpot = 0x008de3a0;
+        static const unsigned int zCPFXControler = 0x008d7948;
+        static const unsigned int oCMobContainer = 0x008daf80;
+        static const unsigned int oCMobLockable = 0x008dacb0;
+        static const unsigned int oCMOB = 0x008db0d0;
+        static const unsigned int zCVobAnimate = 0x008d7c58;
+        static const unsigned int oCMobFire = 0x008dada0;
+        static const unsigned int oCTriggerScript = 0x0085ed08;
+        static const unsigned int oCNpc = 0x008db408;
+        static const unsigned int oCMobLadder = 0x008daf10;
+        static const unsigned int zCTrigger = 0x008d7b78;
+        static const unsigned int zCTriggerBase = 0x008d7a98;
+        static const unsigned int oCZoneMusic = 0x008de498;
+        static const unsigned int zCMover = 0x008d7868;
+        static const unsigned int oCMobDoor = 0x008dac40;
+        static const unsigned int oCZoneMusicDefault = 0x008de420;
+        static const unsigned int zCVobScreenFX = 0x008d7d38;
+        static const unsigned int zCZoneZFogDefault = 0x008d83f8;
+        static const unsigned int oCMobBed = 0x008dabc8;
+        static const unsigned int zCZoneZFog = 0x008d8318;
+        static const unsigned int zCZoneVobFarPlaneDefault = 0x008d8548;
+        static const unsigned int oCMobWheel = 0x008dab58;
+        static const unsigned int zCZoneVobFarPlane = 0x008d8698;
+        static const unsigned int zCTriggerList = 0x008d7f68;
+        static const unsigned int zCVobStair = 0x008d7708;
+    };
+
     class VobTypes // vftables
     {
     public:

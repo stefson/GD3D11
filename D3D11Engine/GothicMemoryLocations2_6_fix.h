@@ -338,6 +338,11 @@ struct GothicMemoryLocations {
     struct zCVob {
         static const unsigned int Offset_WorldMatrixPtr = 0x3C;
         //static const unsigned int Offset_BoundingBoxWS = 0x40;
+
+        static const unsigned int SetCollDetStat = 0x0061CE50;
+        static const unsigned int s_ShowHelperVisuals = 0x009A37F4;
+        static const unsigned int GetClassHelperVisual = 0x006011E0;
+
         static const unsigned int GetVisual = 0x00616B20;
         static const unsigned int SetVisual = 0x006024F0;
         static const unsigned int GetPositionWorld = 0x0052DC90;
@@ -488,6 +493,54 @@ struct GothicMemoryLocations {
         static const unsigned int DisposeVobs = 0x00623960;
         static const unsigned int Offset_BspTree = 0x1AC;
         static const unsigned int RemoveVob = 0x00624B70;
+    };
+
+    struct zCClassDef {
+        static const unsigned int oCTouchDamage = 0x00ab3590;
+        static const unsigned int oCMobSwitch = 0x00ab17c0;
+        static const unsigned int zCVobStartpoint = 0x00ab6568;
+        static const unsigned int zCVobLight = 0x009a3810;
+        static const unsigned int oCTriggerChangeLevel = 0x008c2f40;
+        static const unsigned int zCObject = 0x008d8cd8;
+        static const unsigned int zCVob = 0x009a34d8;
+        static const unsigned int zCZone = 0x009a45a8;
+        static const unsigned int zCVobAnimate = 0x009a3e50;
+        static const unsigned int zCEffect = 0x009a3de0;
+        static const unsigned int oCItem = 0x00ab1168;
+        static const unsigned int zCVobSound = 0x009a44c8;
+        static const unsigned int zCTouchDamage = 0x009a3d00;
+        static const unsigned int zCMover = 0x009a3a60;
+        static const unsigned int zCTrigger = 0x009a3d70;
+        static const unsigned int zCTriggerBase = 0x009a3c90;
+        static const unsigned int oCMobDoor = 0x00ab1518;
+        static const unsigned int zCCamTrj_KeyFrame = 0x008d1028;
+        static const unsigned int oCMobLockable = 0x00ab1598;
+        static const unsigned int zCVobSoundDaytime = 0x009a4688;
+        static const unsigned int oCMobInter = 0x00ab19a0;
+        static const unsigned int oCMOB = 0x00ab1a10;
+        static const unsigned int oCVob = 0x00ab3510;
+        static const unsigned int zCMessageFilter = 0x009a3ec0;
+        static const unsigned int oCMobContainer = 0x00ab18b0;
+        static const unsigned int zCVobSpot = 0x00ab6648;
+        static const unsigned int oCNpc = 0x00ab1e20;
+        static const unsigned int oCTriggerScript = 0x008c2e48;
+        static const unsigned int zCPFXControler = 0x009a3b40;
+        static const unsigned int zCTriggerList = 0x009a4160;
+        static const unsigned int oCMobFire = 0x00ab1698;
+        static const unsigned int zCEarthquake = 0x009a3ad0;
+        static const unsigned int zCCSCamera = 0x008d0fb8;
+        static const unsigned int zCCodeMaster = 0x009a40f0;
+        static const unsigned int oCVisualFX = 0x008ce658;
+        static const unsigned int oCZoneMusic = 0x009a49b0;
+        static const unsigned int oCMobBed = 0x00ab14a0;
+        static const unsigned int zCZoneZFog = 0x009a4538;
+        static const unsigned int oCMobWheel = 0x00ab1430;
+        static const unsigned int zCZoneVobFarPlane = 0x009a48b8;
+        static const unsigned int zCTriggerUntouch = 0x009a4010;
+        static const unsigned int zCTriggerWorldStart = 0x009a4240;
+        static const unsigned int zCZoneVobFarPlaneDefault = 0x009a4768;
+        static const unsigned int zCZoneZFogDefault = 0x009a4618;
+        static const unsigned int oCZoneMusicDefault = 0x009a4938;
     };
 
     class VobTypes // vftables

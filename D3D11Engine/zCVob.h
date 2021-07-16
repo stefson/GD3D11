@@ -79,7 +79,7 @@ public:
         hook_outfunc
     }
 
-#ifdef BUILD_SPACER
+#if (defined BUILD_SPACER || defined BUILD_SPACER_NET)
     /** Returns the helper-visual for this class
         This actually uses a map to lookup the visual. Beware for performance-issues! */
     zCVisual* GetClassHelperVisual() {
@@ -89,8 +89,11 @@ public:
     /** Returns the visual saved in this vob */
     zCVisual* GetVisual() {
         zCVisual* visual = GetMainVisual();
-
+#if BUILD_SPACER_NET
+        if ( !visual && Engine::GAPI->GetRendererState().RendererSettings.RunInSpacerNet )
+#else
         if ( !visual )
+#endif
             visual = GetClassHelperVisual();
 
         return visual;
@@ -208,9 +211,11 @@ public:
 
         return (flags & GothicMemoryLocations::zCVob::MASK_SkeepingMode);
     }
-    void SetSleeping(int on) {
+    void SetSleeping( int on ) {
         XCALL( GothicMemoryLocations::zCVob::SetSleeping );
     }
+
+#ifndef BUILD_SPACER_NET
     /** Returns whether the visual of this vob is visible */
     bool GetShowVisual() {
         //unsigned int flags = *(unsigned int*)THISPTR_OFFSET( GothicMemoryLocations::zCVob::Offset_Flags );
@@ -223,6 +228,27 @@ public:
         return GetShowMainVisual() || showHelpers;
 #endif
     }
+
+
+#else
+    bool GetShowVisual() {
+        bool showHelpers = (*(int*)GothicMemoryLocations::zCVob::s_ShowHelperVisuals) != 0;
+
+        if ( !showHelpers ) {
+            zCVisual* visual = GetMainVisual();
+
+            if ( !visual ) {
+                visual = GetClassHelperVisual();
+
+                if ( visual ) {
+                    return false;
+                }
+            }
+        }
+
+        return GetShowMainVisual() || showHelpers;
+    }
+#endif
 
     /** Returns whether to show the main visual or not. Only used for the spacer */
     bool GetShowMainVisual() {
@@ -244,15 +270,27 @@ public:
         return (EVisualCamAlignType)flags;
     }
 
-    /** returns the NPC pointer from the Vob, or nullptr if not an NPC */
-    oCNPC* AsNpc() {
-        int vtbl = ((int*)this)[0];
-        if ( vtbl == GothicMemoryLocations::VobTypes::Npc ) {
-            return reinterpret_cast<oCNPC*>(this);
+    /** Checks the inheritance chain and casts to T* if possible. Returns nullptr otherwise */
+    template<class T>
+    T* As() {
+        zCClassDef* classDef = ((zCObject*)this)->_GetClassDef();
+        if ( CheckInheritance( classDef, T::GetStaticClassDef() ) ) {
+            return reinterpret_cast<T*>(this);
         }
         return nullptr;
     }
 protected:
+
+    bool CheckInheritance( const zCClassDef* def, const zCClassDef* target ) {
+        while ( def ) {
+            if ( def == target ) {
+                return true;
+            }
+            def = def->baseClassDef;
+        }
+        return false;
+    }
+
     zSTRING& __GetObjectName() {
         XCALL( GothicMemoryLocations::zCObject::GetObjectName );
     }
