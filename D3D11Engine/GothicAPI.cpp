@@ -3763,10 +3763,12 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
         if ( gameIni != "GOTHICGAME.INI" && nLastDot != std::string::npos ) {
             Engine::GAPI->SetGameName( gameIni.substr( 0, nLastDot ) );
             LogInfo() << "-> Game: " << Engine::GAPI->GetGameName();
+#if BUILD_SPACER_NET
             if ( Engine::GAPI->GetGameName() == "SPACER_NET" ) {
                 LogInfo() << "-> Running in Spacer.NET";
                 s.RunInSpacerNet = true;
             }
+#endif
         } else {
             Engine::GAPI->SetGameName( "Original" );
             LogInfo() << "-> Game: Original";

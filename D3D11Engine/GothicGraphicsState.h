@@ -629,11 +629,7 @@ struct GothicRendererSettings {
         DisplayFlip = false;
         LowLatency = false;
         EnableInactiveFpsLock = true;
-#if BUILD_SPACER_NET
         RunInSpacerNet = false;
-#else
-        RunInSpacerNet = false;
-#endif
     }
 
     void SetupOldWorldSpecificValues() {
