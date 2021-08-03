@@ -3,7 +3,6 @@
 #include "RenderToTextureBuffer.h"
 #include "Engine.h"
 #include "D3D11GraphicsEngine.h"
-#include "D3D11FullscreenQuad.h"
 #include "D3D11ShaderManager.h"
 #include "D3D11PShader.h"
 #include "D3D11VShader.h"
@@ -17,9 +16,6 @@
 
 D3D11PfxRenderer::D3D11PfxRenderer() {
     D3D11GraphicsEngine* engine = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
-    ScreenQuad = std::make_unique<D3D11FullscreenQuad>();
-    ScreenQuad->CreateQuad( engine->GetDevice().Get() );
-
     FX_Blur = std::make_unique<D3D11PFX_Blur>( this );
     FX_HeightFog = std::make_unique<D3D11PFX_HeightFog>( this );
     //FX_DistanceBlur = new D3D11PFX_DistanceBlur(this);
@@ -79,15 +75,16 @@ XRESULT D3D11PfxRenderer::DrawFullScreenQuad() {
 
     engine->GetContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 
-    UINT offset = 0;
-    UINT uStride = sizeof( SimpleVertexStruct );
-    engine->GetContext()->IASetVertexBuffers( 0, 1, ScreenQuad->GetBuffer().GetAddressOf(), &uStride, &offset );
+    /*UINT offset = 0;
+    UINT uStride = 0;
+    ID3D11Buffer* vertexBuffer = nullptr;
+    engine->GetContext()->IASetVertexBuffers( 0, 1, &vertexBuffer, &uStride, &offset );*/
 
     //Microsoft::WRL::ComPtr<ID3D11Buffer> cb;
     //engine->GetContext()->VSSetConstantBuffers(0, 1, cb.GetAddressOf());
 
     //Draw the mesh
-    engine->GetContext()->Draw( 6, 0 );
+    engine->GetContext()->Draw( 3, 0 );
 
     return XR_SUCCESS;
 }
@@ -163,9 +160,10 @@ XRESULT D3D11PfxRenderer::OnResize( const INT2& newResolution ) {
     D3D11GraphicsEngine* engine = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
 
     // Create temp-buffer
-    TempBuffer.reset( new RenderToTextureBuffer( engine->GetDevice(), newResolution.x, newResolution.y, DXGI_FORMAT_R16G16B16A16_FLOAT, nullptr ) );
-    TempBufferDS4_1.reset( new RenderToTextureBuffer( engine->GetDevice(), newResolution.x / 4, newResolution.y / 4, DXGI_FORMAT_R16G16B16A16_FLOAT, nullptr ) );
-    TempBufferDS4_2.reset( new RenderToTextureBuffer( engine->GetDevice(), newResolution.x / 4, newResolution.y / 4, DXGI_FORMAT_R16G16B16A16_FLOAT, nullptr ) );
+    DXGI_FORMAT bbufferFormat = engine->GetBackBufferFormat();
+    TempBuffer.reset( new RenderToTextureBuffer( engine->GetDevice(), newResolution.x, newResolution.y, bbufferFormat, nullptr ) );
+    TempBufferDS4_1.reset( new RenderToTextureBuffer( engine->GetDevice(), newResolution.x / 4, newResolution.y / 4, bbufferFormat, nullptr ) );
+    TempBufferDS4_2.reset( new RenderToTextureBuffer( engine->GetDevice(), newResolution.x / 4, newResolution.y / 4, bbufferFormat, nullptr ) );
 
     FX_SMAA->OnResize( newResolution );
 

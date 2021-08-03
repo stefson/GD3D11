@@ -141,33 +141,26 @@ XRESULT D2DSettingsDialog::InitControls() {
 	filterShadowsCheckbox->AlignUnder( shadowsCheckbox, 5 );
 	filterShadowsCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.EnableSoftShadows );
 
-	SV_Label* shadowmapSizeLabel = new SV_Label( MainView, MainPanel );
-	shadowmapSizeLabel->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 150, 12 ) );
-	shadowmapSizeLabel->AlignUnder( filterShadowsCheckbox, 10 );
-	shadowmapSizeLabel->SetCaption( "Shadow Quality:" );
+    //SV_Checkbox* multiThreadResourceManagerCheckbox = new SV_Checkbox( MainView, MainPanel );
+    //multiThreadResourceManagerCheckbox->SetSize( D2D1::SizeF( 160, 40 ) );
+    //multiThreadResourceManagerCheckbox->SetCaption( "Multi-Thread Resource Manager" );
+    //multiThreadResourceManagerCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.MTResoureceManager );
+    //multiThreadResourceManagerCheckbox->AlignUnder( filterShadowsCheckbox, 12 );
+    //multiThreadResourceManagerCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.MTResoureceManager );
+    //multiThreadResourceManagerCheckbox->SetCheckedChangedCallback( MTResourceManagerCheckedChanged, this );
 
-	SV_Slider* shadowmapSizeSlider = new SV_Slider( MainView, MainPanel );
-	shadowmapSizeSlider->SetPositionAndSize( D2D1::Point2F( 10, 22 ), D2D1::SizeF( 150, 15 ) );
-	shadowmapSizeSlider->AlignUnder( shadowmapSizeLabel, 5 );
-	shadowmapSizeSlider->SetSliderChangedCallback( ShadowQualitySliderChanged, this );
-	shadowmapSizeSlider->SetDisplayValues( { "0", "512", "1024", "2048", "4096", "8192", "16384" } );
-	shadowmapSizeSlider->SetIsIntegralSlider( true );
-	shadowmapSizeSlider->SetMinMax( 1.0f, 6.0f );
-
-	// Fix the shadow range
-	switch ( Engine::GAPI->GetRendererState().RendererSettings.ShadowMapSize ) {
-	case   512: shadowmapSizeSlider->SetValue( 1 ); break;
-	case  1024: shadowmapSizeSlider->SetValue( 2 ); break;
-	case  2048: shadowmapSizeSlider->SetValue( 3 ); break;
-	case  4096: shadowmapSizeSlider->SetValue( 4 ); break;
-	case  8192: shadowmapSizeSlider->SetValue( 5 ); break;
-	case 16384: shadowmapSizeSlider->SetValue( 6 ); break;
-	}
-
+    SV_Checkbox* compressBackBufferCheckbox = new SV_Checkbox( MainView, MainPanel );
+    compressBackBufferCheckbox->SetSize( D2D1::SizeF( 160, 20 ) );
+    compressBackBufferCheckbox->SetCaption( "Compress BackBuffer" );
+    compressBackBufferCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.CompressBackBuffer );
+    //compressBackBufferCheckbox->AlignUnder( multiThreadResourceManagerCheckbox, 12 );
+    compressBackBufferCheckbox->AlignUnder( filterShadowsCheckbox, 5 );
+    compressBackBufferCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.CompressBackBuffer );
+    compressBackBufferCheckbox->SetCheckedChangedCallback( CompressBackBufferCheckedChanged, this );
 
 	SV_Label* fpsLimitLabel = new SV_Label( MainView, MainPanel );
 	fpsLimitLabel->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 150, 12 ) );
-	fpsLimitLabel->AlignUnder( shadowmapSizeSlider, 10 );
+	fpsLimitLabel->AlignUnder( compressBackBufferCheckbox, 10 );
 	fpsLimitLabel->SetCaption( "Framerate Limit:" );
 
 	SV_Slider* fpsLimitSlider = new SV_Slider( MainView, MainPanel );
@@ -192,10 +185,33 @@ XRESULT D2DSettingsDialog::InitControls() {
 	fpsLimitSlider->SetValue( Engine::GAPI->GetRendererState().RendererSettings.FpsLimit );
 
 	// Next column
+    SV_Label* textureQualityLabel = new SV_Label( MainView, MainPanel );
+    textureQualityLabel->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 150, 12 ) );
+    textureQualityLabel->AlignUnder( Header, 5 );
+    textureQualityLabel->SetPosition( D2D1::Point2F( 170, textureQualityLabel->GetPosition().y ) );
+    textureQualityLabel->SetCaption( "Texture Quality:" );
+
+    SV_Slider* textureQualitySlider = new SV_Slider( MainView, MainPanel );
+    textureQualitySlider->SetPositionAndSize( D2D1::Point2F( 10, 22 ), D2D1::SizeF( 150, 15 ) );
+    textureQualitySlider->AlignUnder( textureQualityLabel, 5 );
+    textureQualitySlider->SetSliderChangedCallback( TextureQualitySliderChanged, this );
+    textureQualitySlider->SetDisplayValues( { "0", "Potato", "Ultra Low", "Low", "Medium", "High", "Ultra High" } );
+    textureQualitySlider->SetIsIntegralSlider( true );
+    textureQualitySlider->SetMinMax( 1.0f, 6.0f );
+
+    // Fix the texture quality range
+    switch ( Engine::GAPI->GetRendererState().RendererSettings.textureMaxSize ) {
+    case   32: textureQualitySlider->SetValue( 1 ); break;
+    case   64: textureQualitySlider->SetValue( 2 ); break;
+    case  128: textureQualitySlider->SetValue( 3 ); break;
+    case  256: textureQualitySlider->SetValue( 4 ); break;
+    case  512: textureQualitySlider->SetValue( 5 ); break;
+    case 16384: textureQualitySlider->SetValue( 6 ); break;
+    }
+
 	SV_Label* outdoorVobsDDLabel = new SV_Label( MainView, MainPanel );
 	outdoorVobsDDLabel->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 150, 12 ) );
-	outdoorVobsDDLabel->AlignUnder( Header, 5 );
-	outdoorVobsDDLabel->SetPosition( D2D1::Point2F( 170, outdoorVobsDDLabel->GetPosition().y ) );
+	outdoorVobsDDLabel->AlignUnder( textureQualitySlider, 10 );
 	outdoorVobsDDLabel->SetCaption( "Object draw distance:" );
 
 	SV_Slider* outdoorVobsDDSlider = new SV_Slider( MainView, MainPanel );
@@ -256,9 +272,32 @@ XRESULT D2DSettingsDialog::InitControls() {
 	worldDDSlider->SetMinMax( 1.0f, 10.0f );
 	worldDDSlider->SetValue( (float)Engine::GAPI->GetRendererState().RendererSettings.SectionDrawRadius );
 
+    SV_Label* shadowmapSizeLabel = new SV_Label( MainView, MainPanel );
+    shadowmapSizeLabel->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 150, 12 ) );
+    shadowmapSizeLabel->AlignUnder( worldDDSlider, 10 );
+    shadowmapSizeLabel->SetCaption( "Shadow Quality:" );
+
+    SV_Slider* shadowmapSizeSlider = new SV_Slider( MainView, MainPanel );
+    shadowmapSizeSlider->SetPositionAndSize( D2D1::Point2F( 10, 22 ), D2D1::SizeF( 150, 15 ) );
+    shadowmapSizeSlider->AlignUnder( shadowmapSizeLabel, 5 );
+    shadowmapSizeSlider->SetSliderChangedCallback( ShadowQualitySliderChanged, this );
+    shadowmapSizeSlider->SetDisplayValues( { "0", "512", "1024", "2048", "4096", "8192", "16384" } );
+    shadowmapSizeSlider->SetIsIntegralSlider( true );
+    shadowmapSizeSlider->SetMinMax( 1.0f, 6.0f );
+
+    // Fix the shadow range
+    switch ( Engine::GAPI->GetRendererState().RendererSettings.ShadowMapSize ) {
+    case   512: shadowmapSizeSlider->SetValue( 1 ); break;
+    case  1024: shadowmapSizeSlider->SetValue( 2 ); break;
+    case  2048: shadowmapSizeSlider->SetValue( 3 ); break;
+    case  4096: shadowmapSizeSlider->SetValue( 4 ); break;
+    case  8192: shadowmapSizeSlider->SetValue( 5 ); break;
+    case 16384: shadowmapSizeSlider->SetValue( 6 ); break;
+    }
+
 	SV_Label* dynShadowLabel = new SV_Label( MainView, MainPanel );
 	dynShadowLabel->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 150, 12 ) );
-	dynShadowLabel->AlignUnder( worldDDSlider, 8 );
+	dynShadowLabel->AlignUnder( shadowmapSizeSlider, 8 );
 	dynShadowLabel->SetCaption( "Dynamic shadows:" );
 
 	SV_Slider* dynShadowSlider = new SV_Slider( MainView, MainPanel );
@@ -368,7 +407,31 @@ void D2DSettingsDialog::FovOverrideCheckedChanged( SV_Checkbox* sender, void* us
 	state->vertFOVSlider->SetDisabled( !newValue );
 }
 
+void D2DSettingsDialog::MTResourceManagerCheckedChanged( SV_Checkbox*, void* ) {
+    Engine::GAPI->UpdateMTResourceManager();
+}
+
+void D2DSettingsDialog::CompressBackBufferCheckedChanged( SV_Checkbox*, void* ) {
+    Engine::GAPI->UpdateCompressBackBuffer();
+}
+
 /** Tab in main tab-control was switched */
+void D2DSettingsDialog::TextureQualitySliderChanged( SV_Slider* sender, void* userdata ) {
+    int lastTextureMaxSize = Engine::GAPI->GetRendererState().RendererSettings.textureMaxSize;
+    switch ( (int)(sender->GetValue() + 0.5f) ) {
+    case 1: Engine::GAPI->GetRendererState().RendererSettings.textureMaxSize = 32; break;
+    case 2: Engine::GAPI->GetRendererState().RendererSettings.textureMaxSize = 64; break;
+    case 3: Engine::GAPI->GetRendererState().RendererSettings.textureMaxSize = 128; break;
+    case 4: Engine::GAPI->GetRendererState().RendererSettings.textureMaxSize = 256; break;
+    case 5: Engine::GAPI->GetRendererState().RendererSettings.textureMaxSize = 512; break;
+    case 6: Engine::GAPI->GetRendererState().RendererSettings.textureMaxSize = 16384; break;
+    }
+
+    if ( lastTextureMaxSize != Engine::GAPI->GetRendererState().RendererSettings.textureMaxSize ) {
+        Engine::GAPI->UpdateTextureMaxSize();
+    }
+}
+
 void D2DSettingsDialog::ShadowQualitySliderChanged( SV_Slider* sender, void* userdata ) {
 	switch ( (int)(sender->GetValue() + 0.5f) ) {
 	case 1: Engine::GAPI->GetRendererState().RendererSettings.ShadowMapSize = 512; break;

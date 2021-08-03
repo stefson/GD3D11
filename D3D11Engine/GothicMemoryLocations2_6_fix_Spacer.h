@@ -436,6 +436,8 @@ struct GothicMemoryLocations {
         static const unsigned int CacheIn = 0x00767EF0;
         static const unsigned int CacheOut = 0x00768200;
         static const unsigned int PurgeCaches = 0x007678E0;
+        static const unsigned int RefreshTexMaxSize = 0x0077FBA0;
+        static const unsigned int SetThreadingEnabled = 0x00767AE0;
     };
 
     struct oCWorld {
@@ -458,5 +460,10 @@ struct GothicMemoryLocations {
         static const unsigned int DisposeWorld = 0x007AEC20;
         static const unsigned int DisposeVobs = 0x007AE850;
         static const unsigned int Offset_BspTree = 0x1AC;
+    };
+
+    struct zCClassDef {
+        static const unsigned int oCNpc = 0x009A7978;
+        static const unsigned int zCTexture = 0x00B18D18;
     };
 };

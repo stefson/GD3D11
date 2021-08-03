@@ -65,10 +65,10 @@ void D3D11PointLight::InitResources() {
     DepthCubemap = std::make_unique<RenderToDepthStencilBuffer>( engine->GetDevice().Get(),
         POINTLIGHT_SHADOWMAP_SIZE,
         POINTLIGHT_SHADOWMAP_SIZE,
-        DXGI_FORMAT_R32_TYPELESS,
+        DXGI_FORMAT_R16_TYPELESS,
         nullptr,
-        DXGI_FORMAT_D32_FLOAT,
-        DXGI_FORMAT_R32_FLOAT,
+        DXGI_FORMAT_D16_UNORM,
+        DXGI_FORMAT_R16_UNORM,
         6 );
 
     // Create constantbuffer for the view-matrices

@@ -205,6 +205,15 @@ public:
     /** Persists the per mod & per world renderersettings */
     void SaveRendererWorldSettings( const GothicRendererSettings& s );
 
+    /** Called to update the multi thread resource manager state */
+    void UpdateMTResourceManager();
+
+    /** Called to update the compress backbuffer state */
+    void UpdateCompressBackBuffer();
+
+    /** Called to update the texture quality */
+    void UpdateTextureMaxSize();
+
     /** Called to update the world, before rendering */
     void OnWorldUpdate();
 

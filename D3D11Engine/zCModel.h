@@ -248,18 +248,10 @@ public:
     }
 
     DirectX::XMFLOAT3 GetModelScale() {
-#ifdef BUILD_GOTHIC_1_08k
-        return DirectX::XMFLOAT3( 1, 1, 1 );
-#endif
-
         return *(DirectX::XMFLOAT3*)THISPTR_OFFSET( GothicMemoryLocations::zCModel::Offset_ModelScale );
     }
 
     DirectX::XMVECTOR GetModelScaleXM() {
-#ifdef BUILD_GOTHIC_1_08k
-        return XMVectorSplatOne();
-#endif
-
         return DirectX::XMLoadFloat3( (DirectX::XMFLOAT3*)THISPTR_OFFSET( GothicMemoryLocations::zCModel::Offset_ModelScale ) );
     }
 

@@ -36,6 +36,7 @@ public:
 
 protected:
     /** Tab in main tab-control was switched */
+    static void TextureQualitySliderChanged( SV_Slider* sender, void* userdata );
     static void ShadowQualitySliderChanged( SV_Slider* sender, void* userdata );
     static void ResolutionSliderChanged( SV_Slider* sender, void* userdata );
     static void FpsLimitSliderChanged( SV_Slider* sender, void* userdata );
@@ -45,6 +46,8 @@ protected:
     /** Apply button */
     static void ApplyButtonPressed( SV_Button* sender, void* userdata );
     static void FovOverrideCheckedChanged( SV_Checkbox* sender, void* userdata );
+    static void MTResourceManagerCheckedChanged( SV_Checkbox* sender, void* userdata );
+    static void CompressBackBufferCheckedChanged( SV_Checkbox* sender, void* userdata );
     /** Initial renderer settings, used to determine a change */
     GothicRendererSettings InitialSettings;
 

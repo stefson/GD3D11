@@ -469,6 +469,8 @@ struct GothicMemoryLocations {
         static const unsigned int CacheIn = 0x005DD040;
         static const unsigned int CacheOut = 0x005DD350;
         static const unsigned int PurgeCaches = 0x005DCA30;
+        static const unsigned int RefreshTexMaxSize = 0x005F4EA0;
+        static const unsigned int SetThreadingEnabled = 0x005DCC30;
     };
 
     struct oCWorld {
@@ -541,6 +543,7 @@ struct GothicMemoryLocations {
         static const unsigned int zCZoneVobFarPlaneDefault = 0x009a4768;
         static const unsigned int zCZoneZFogDefault = 0x009a4618;
         static const unsigned int oCZoneMusicDefault = 0x009a4938;
+        static const unsigned int zCTexture = 0x0099B2F8;
     };
 
     class VobTypes // vftables

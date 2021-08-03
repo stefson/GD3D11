@@ -170,7 +170,7 @@ XRESULT D3D11ShaderManager::Init() {
     Shaders.push_back( ShaderInfo( "PS_Sky", "PS_Sky.hlsl", "p" ) );
     Shaders.back().cBufferSizes.push_back( sizeof( SkyConstantBuffer ) );
 
-    Shaders.push_back( ShaderInfo( "VS_PFX", "VS_PFX.hlsl", "v", 5 ) );
+    Shaders.push_back( ShaderInfo( "VS_PFX", "VS_PFX.hlsl", "v" ) );
     Shaders.back().cBufferSizes.push_back( sizeof( PFXVS_ConstantBuffer ) );
 
     Shaders.push_back( ShaderInfo( "PS_PFX_Simple", "PS_PFX_Simple.hlsl", "p" ) );

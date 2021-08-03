@@ -140,7 +140,7 @@ public:
         } else if ( _stricmp( var, "zVidResFullscreenBPP" ) == 0 ) {
             return 32;
         } else if ( _stricmp( var, "zTexMaxSize" ) == 0 ) {
-            return 16384;
+            return Engine::GAPI->GetRendererState().RendererSettings.textureMaxSize;
         } else if ( _stricmp( var, "zTexCacheOutTimeMSec" ) == 0 ) // Following values are from Marcellos L'Hiver config
         {
             return 9120000;

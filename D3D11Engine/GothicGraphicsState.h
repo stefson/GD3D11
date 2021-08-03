@@ -174,7 +174,7 @@ struct GothicDepthBufferStateInfo : public GothicPipelineState {
         CF_COMPARISON_ALWAYS = 8
     };
 
-    static const ECompareFunc DEFAULT_DEPTH_COMP_STATE = CF_COMPARISON_LESS_EQUAL;
+    static const ECompareFunc DEFAULT_DEPTH_COMP_STATE = CF_COMPARISON_GREATER_EQUAL;
 
     /** Sets the default values for this struct */
     void SetDefault() {
@@ -551,6 +551,7 @@ struct GothicRendererSettings {
         TesselationFactor = 20.0f;
         TesselationRange = 8.0f;
 
+        textureMaxSize = 16384;
         ShadowMapSize = 2048;
         WorldShadowRangeScale = 8.0f;
 
@@ -629,6 +630,8 @@ struct GothicRendererSettings {
         DisplayFlip = false;
         LowLatency = false;
         EnableInactiveFpsLock = true;
+        MTResoureceManager = false;
+        CompressBackBuffer = false;
         RunInSpacerNet = false;
     }
 
@@ -710,6 +713,7 @@ struct GothicRendererSettings {
     float GammaValue;
     float BrightnessValue;
     int ShadowMapSize;
+    int textureMaxSize;
 
     float GlobalWindStrength;
     float FogGlobalDensity;
@@ -768,6 +772,8 @@ struct GothicRendererSettings {
     bool StretchWindow;
     bool SmoothShadowCameraUpdate;
     bool EnableInactiveFpsLock;
+    bool MTResoureceManager;
+    bool CompressBackBuffer;
     bool RunInSpacerNet;
 };
 

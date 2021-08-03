@@ -69,7 +69,7 @@ public:
 	HRESULT STDMETHODCALLTYPE GetDeviceIdentifier( LPDDDEVICEIDENTIFIER2 lpdddi, DWORD dwFlags ) {
 		DebugWrite( "MyDirectDraw::GetDeviceIdentifier\n" );
 
-		ZeroMemory( lpdddi, sizeof( LPDDDEVICEIDENTIFIER2 ) );
+		ZeroMemory( lpdddi, sizeof( DDDEVICEIDENTIFIER2 ) );
 		strcpy( lpdddi->szDescription, "D3D11-Renderer" );
 		strcpy( lpdddi->szDriver, "D3D11-Renderer" );
 

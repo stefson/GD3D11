@@ -208,6 +208,35 @@ void GothicAPI::OnGameStart() {
     SkyRenderer->InitSky();
 
     Inventory = std::make_unique<GInventory>();
+
+    UpdateMTResourceManager();
+}
+
+/** Called to update the multi thread resource manager state */
+void GothicAPI::UpdateMTResourceManager() {
+    // Show memory profiller
+/*#ifndef PUBLIC_RELEASE
+    #ifdef BUILD_GOTHIC_1_08k
+    PatchAddr( 0x005B61C0, "\x75" );
+    #endif
+    #ifdef BUILD_GOTHIC_2_6_fix
+    PatchAddr( 0x005DD560, "\x75" );
+    #endif
+#endif*/
+
+    // It can lead to dead-lock so it is force-disabled until it is investigated
+    if ( zCResourceManager* rsm = zCResourceManager::GetResourceManager() ) {
+        rsm->SetThreadingEnabled( false );
+        //rsm->SetThreadingEnabled( RendererState.RendererSettings.MTResoureceManager );
+    }
+}
+
+/** Called to update the texture quality */
+void GothicAPI::UpdateTextureMaxSize() {
+    reinterpret_cast<void( __cdecl* )(int)>(GothicMemoryLocations::zCResourceManager::RefreshTexMaxSize)(RendererState.RendererSettings.textureMaxSize);
+    if ( zCResourceManager* rsm = zCResourceManager::GetResourceManager() ) {
+        rsm->PurgeCaches( GothicMemoryLocations::zCClassDef::zCTexture );
+    }
 }
 
 /** Called to update the world, before rendering */
@@ -832,6 +861,7 @@ void GothicAPI::DrawWorldMeshNaive() {
     if ( RendererState.RendererSettings.DrawSkeletalMeshes ) {
         // Set up frustum for the camera
         RendererState.RasterizerState.SetDefault();
+        RendererState.RasterizerState.SetDirty();
         zCCamera::GetCamera()->Activate();
 
         for ( const auto& vobInfo : AnimatedSkeletalVobs ) {
@@ -882,7 +912,6 @@ void GothicAPI::DrawWorldMeshNaive() {
     //DebugDrawBSPTree();
 
     ResetWorldTransform();
-    ResetViewTransform();
 }
 
 /** Draws particles, in a simple way */
@@ -1590,14 +1619,16 @@ SkeletalMeshVisualInfo* GothicAPI::LoadzCModelData( zCModel* model ) {
 // TODO: REMOVE THIS!
 #include "D3D11GraphicsEngine.h"
 
+/** Called to update the compress backbuffer state */
+void GothicAPI::UpdateCompressBackBuffer() {
+    D3D11GraphicsEngine* engine = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
+    engine->OnResetBackBuffer();
+}
+
 /** Draws a skeletal mesh-vob */
 void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
     // TODO: Put this into the renderer!!
     D3D11GraphicsEngine* g = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
-
-    // Setup renderstate
-    RendererState.RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_FRONT;
-    RendererState.RasterizerState.SetDirty();
 
     zCModel* model = (zCModel*)vi->Vob->GetVisual();
     SkeletalMeshVisualInfo* visual = ((SkeletalMeshVisualInfo*)vi->VisualInfo);
@@ -1642,9 +1673,6 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
         g->SetActiveVertexShader( "VS_ExCube" );
     else {
         g->SetActiveVertexShader( "VS_Ex" );
-
-        RendererState.RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_BACK;
-        RendererState.RasterizerState.SetDirty();
     }
 
     // Set up instance info
@@ -1768,23 +1796,18 @@ void GothicAPI::DrawSkeletalGhosts() {
     if ( !GhostSkeletalVobs.empty() ) {
         // Setup alpha blending
         RendererState.RasterizerState.SetDefault();
+        RendererState.RasterizerState.SetDirty();
         RendererState.BlendState.SetAlphaBlending();
         RendererState.BlendState.SetDirty();
         RendererState.DepthState.SetDefault();
         RendererState.DepthState.SetDirty();
+
+        // Bind ghost pixel shader
+        g->SetActivePixelShader( "PS_Ghost" );
+        g->BindActivePixelShader();
     }
     while ( !GhostSkeletalVobs.empty() ) {
         auto const& GhostInfo = GhostSkeletalVobs.front();
-
-        // We need to do Z-prepass first
-        g->UnbindActivePS();
-        g->GetContext()->PSSetShader( nullptr, nullptr, 0 );
-        DrawSkeletalMeshVob( GhostInfo.second, GhostInfo.first );
-        RendererState.RendererInfo.FrameDrawnVobs--; // Don't calculate prepass as drawn vob
-
-        // Now actually draw mesh using ghost pixel shader
-        g->SetActivePixelShader( "PS_Ghost" );
-        g->BindActivePixelShader();
 
         // Update ghost alpha information
         GhostAlphaConstantBuffer gacb;
@@ -2363,6 +2386,12 @@ DirectX::XMFLOAT4X4& GothicAPI::GetProjectionMatrix() {
         return CameraReplacementPtr->ProjectionReplacement;
     }
 
+    // Reverse depth buffer
+    float NearZ = RendererState.RendererSettings.SectionDrawRadius * WORLD_SECTION_SIZE;
+    float FarZ = 0.001f;
+    float zRange = FarZ / (FarZ - NearZ);
+    RendererState.TransformState.TransformProj._33 = zRange;
+    RendererState.TransformState.TransformProj._34 = -zRange * NearZ;
     return RendererState.TransformState.TransformProj;
 }
 
@@ -2515,6 +2544,11 @@ LRESULT GothicAPI::OnWindowMessage( HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
             break;
         }
         break;
+
+    // Disable any painting that zengine might be doing
+    case WM_PAINT:
+    case WM_NCPAINT:
+        return DefWindowProc( hWnd, msg, wParam, lParam );
 
 #ifdef BUILD_SPACER
     case WM_SIZE:
@@ -3592,15 +3626,18 @@ XRESULT GothicAPI::SaveMenuSettings( const std::string& file ) {
     WritePrivateProfileStringA( "General", "AllowNormalmaps", std::to_string( s.AllowNormalmaps ? TRUE : FALSE ).c_str(), ini.c_str() );
     WritePrivateProfileStringA( "General", "AllowNumpadKeys", std::to_string( s.AllowNumpadKeys ? TRUE : FALSE ).c_str(), ini.c_str() );
     WritePrivateProfileStringA( "General", "EnableInactiveFpsLock", std::to_string( s.EnableInactiveFpsLock ? TRUE : FALSE ).c_str(), ini.c_str() );
-    
+    WritePrivateProfileStringA( "General", "MultiThreadResourceManager", std::to_string( s.MTResoureceManager ? TRUE : FALSE ).c_str(), ini.c_str() );
+    WritePrivateProfileStringA( "General", "CompressBackBuffer", std::to_string( s.CompressBackBuffer ? TRUE : FALSE ).c_str(), ini.c_str() );
+
     /*
     * Draw-distance is saved on a per World basis using SaveRendererWorldSettings
     */
 
     WritePrivateProfileStringA( "General", "EnableOcclusionCulling", std::to_string( s.EnableOcclusionCulling ).c_str(), ini.c_str() );
     WritePrivateProfileStringA( "General", "FpsLimit", std::to_string( s.FpsLimit ).c_str(), ini.c_str() );
-
+    
     auto res = Engine::GraphicsEngine->GetResolution();
+    WritePrivateProfileStringA( "Display", "TextureQuality", std::to_string( s.textureMaxSize ).c_str(), ini.c_str() );
     WritePrivateProfileStringA( "Display", "Width", std::to_string( res.x ).c_str(), ini.c_str() );
     WritePrivateProfileStringA( "Display", "Height", std::to_string( res.y ).c_str(), ini.c_str() );
     WritePrivateProfileStringA( "Display", "VSync", std::to_string( s.EnableVSync ? TRUE : FALSE ).c_str(), ini.c_str() );
@@ -3675,7 +3712,9 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
     s.AllowNormalmaps = GetPrivateProfileBoolA( "General", "AllowNormalmaps", defaultRendererSettings.AllowNormalmaps, ini );
     s.AllowNumpadKeys = GetPrivateProfileBoolA( "General", "AllowNumpadKeys", defaultRendererSettings.AllowNumpadKeys, ini );
     s.EnableInactiveFpsLock = GetPrivateProfileBoolA( "General", "EnableInactiveFpsLock", defaultRendererSettings.EnableInactiveFpsLock, ini );
-    
+    s.MTResoureceManager = GetPrivateProfileBoolA( "General", "MultiThreadResourceManager", defaultRendererSettings.MTResoureceManager, ini );
+    s.CompressBackBuffer = GetPrivateProfileBoolA( "General", "CompressBackBuffer", defaultRendererSettings.CompressBackBuffer, ini );
+
     /*
     * Draw-distance is Loaded on a per World basis using LoadRendererWorldSettings
     */
@@ -3704,6 +3743,7 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
     INT2 res = {};
     RECT desktopRect;
     GetClientRect( GetDesktopWindow(), &desktopRect );
+    s.textureMaxSize = std::max<int>( 32, GetPrivateProfileIntA( "Display", "TextureQuality", 16384, ini.c_str() ) );
     res.x = GetPrivateProfileIntA( "Display", "Width", desktopRect.right, ini.c_str() );
     res.y = GetPrivateProfileIntA( "Display", "Height", desktopRect.bottom, ini.c_str() );
     s.EnableVSync = GetPrivateProfileBoolA( "Display", "VSync", false, ini );
@@ -3952,7 +3992,7 @@ void GothicAPI::ReloadTextures() {
 
     // This throws all texture out of the cache
     if ( resman )
-        resman->PurgeCaches( nullptr );
+        resman->PurgeCaches( 0 );
 }
 
 /** Gets the int-param from the ini. String must be UPPERCASE. */

@@ -46,10 +46,12 @@ public:
         return mutex;
     }
 
-    void PurgeCaches( void* classDef ) {
-#ifndef BUILD_GOTHIC_1_08k
+    void PurgeCaches( unsigned int classDef ) {
         XCALL( GothicMemoryLocations::zCResourceManager::PurgeCaches );
-#endif
+    }
+
+    void SetThreadingEnabled( bool enabled ) {
+        XCALL( GothicMemoryLocations::zCResourceManager::SetThreadingEnabled );
     }
 
     static zCResourceManager* GetResourceManager() { return *(zCResourceManager**)GothicMemoryLocations::GlobalObjects::zCResourceManager; }

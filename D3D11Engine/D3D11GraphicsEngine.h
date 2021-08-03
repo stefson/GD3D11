@@ -56,6 +56,12 @@ public:
     /** Called when the game created its window */
     virtual XRESULT SetWindow( HWND hWnd ) override;
 
+    /** Reset BackBuffer */
+    void OnResetBackBuffer();
+
+    /** Get BackBuffer Format */
+    DXGI_FORMAT GetBackBufferFormat();
+
     /** Called on window resize/resolution change */
     virtual XRESULT OnResize( INT2 newSize ) override;
 

@@ -302,6 +302,9 @@ struct GothicMemoryLocations {
 
     struct zCResourceManager {
         static const unsigned int CacheIn = 0x005B5CB0;
+        static const unsigned int PurgeCaches = 0x005B5720;
+        static const unsigned int RefreshTexMaxSize = 0x005C9F70;
+        static const unsigned int SetThreadingEnabled = 0x005B58A0;
     };
 
     struct zCProgMeshProto {
@@ -475,6 +478,7 @@ struct GothicMemoryLocations {
         static const unsigned int zCZoneVobFarPlane = 0x008d8698;
         static const unsigned int zCTriggerList = 0x008d7f68;
         static const unsigned int zCVobStair = 0x008d7708;
+        static const unsigned int zCTexture = 0x008CF110;
     };
 
     class VobTypes // vftables

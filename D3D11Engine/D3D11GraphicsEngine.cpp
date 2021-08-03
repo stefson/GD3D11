@@ -40,6 +40,8 @@
 #define DEBUG_D3D11
 #endif
 
+#include <dxgi1_6.h>
+
 namespace wrl = Microsoft::WRL;
 using namespace DirectX;
 
@@ -157,28 +159,62 @@ XRESULT D3D11GraphicsEngine::Init() {
 
     // Create DXGI factory
     LE( CreateDXGIFactory1( __uuidof(IDXGIFactory2), &DXGIFactory2 ) );
-    /*UINT i = 0;
-    //Microsoft::WRL::ComPtr<IDXGIAdapter2> all_adapters;
-    //vector<IDXGIAdapter1> all_adapters;
-    DXGIAdapter1.As(&DXGIAdapter2);
-    while (DXGIFactory2->EnumAdapters1(i, &DXGIAdapter1) != DXGI_ERROR_NOT_FOUND)
-    {
-        DXGI_ADAPTER_DESC2 adpDesc;
-        DXGIAdapter2->GetDesc2( &adpDesc );
-        std::wstring wDeviceDescription( adpDesc.Description );
-        std::string deviceDescription( wDeviceDescription.begin(), wDeviceDescription.end() );
-        DeviceDescription = deviceDescription;
-        LogInfo() << "Found: " << deviceDescription.c_str();
-        if ((adpDesc.VendorId == 0x1414) && (adpDesc.DeviceId == 0x8c) || (adpDesc.VendorId == 0x8086) || (adpDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) ) // no add WARP // Don't select the Basic Render Driver adapter
-        {
-            DXGIAdapter1->Release();
-            continue;
-        }
-        //all_adapters.push_back(DXGIAdapter1);
-        ++i;
-    }*/
 
-    LE( DXGIFactory2->EnumAdapters1( 0, &DXGIAdapter1 ) );  // Get first adapter
+    bool haveAdapter = false;
+    Microsoft::WRL::ComPtr<IDXGIFactory6> DXGIFactory6;
+    hr = DXGIFactory2.As( &DXGIFactory6 );
+    if ( SUCCEEDED( hr ) ) {
+        // Windows 10, version 1803 - only
+        UINT adapterIndex = 0;
+        while ( DXGIFactory6->EnumAdapterByGpuPreference( adapterIndex++, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
+            IID_PPV_ARGS( DXGIAdapter1.ReleaseAndGetAddressOf() ) ) != DXGI_ERROR_NOT_FOUND ) {
+            DXGI_ADAPTER_DESC1 desc;
+            DXGIAdapter1->GetDesc1( &desc );
+
+            if ( desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE ) {
+                // Don't select the Basic Render Driver adapter.
+                continue;
+            }
+            haveAdapter = true;
+            break;
+        }
+    } else {
+        // Let's rate devices by their VRAM and vendors and hope we'll get atleast discrete GPU
+        std::map<uint64_t, UINT> candidates;
+        for ( UINT adapterIndex = 0; DXGIFactory2->EnumAdapters1( adapterIndex, DXGIAdapter1.ReleaseAndGetAddressOf() ) != DXGI_ERROR_NOT_FOUND; ++adapterIndex ) {
+            DXGI_ADAPTER_DESC1 desc;
+            DXGIAdapter1->GetDesc1( &desc );
+
+            if ( desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE ) {
+                // Don't select the Basic Render Driver adapter.
+                continue;
+            }
+            
+            uint64_t deviceRating = static_cast<uint64_t>(desc.DedicatedVideoMemory);
+            if ( desc.VendorId == 0x10DE ) { // Rate NVIDIA GPU's highest
+                deviceRating += 0x200000000;
+            } else if ( desc.VendorId == 0x1002 ) { // Rate AMD GPU's higher than Intel IGPU
+                deviceRating += 0x100000000;
+            }
+            candidates.emplace( deviceRating, adapterIndex );
+        }
+
+        if ( !candidates.empty() ) {
+            LE( DXGIFactory2->EnumAdapters1( candidates.rbegin()->second, DXGIAdapter1.ReleaseAndGetAddressOf() ) ); // Get first suitable adapter
+            haveAdapter = true;
+        }
+    }
+
+    if ( !haveAdapter ) {
+        LogErrorBox() << "Couldn't find any suitable GPU on your device, so it can't run GD3D11!\n"
+            "It has to be at least Featurelevel 11.0 compatible, "
+            "which requires at least:\n"
+            " *	Nvidia GeForce GTX4xx or higher\n"
+            " *	AMD Radeon 5xxx or higher\n\n"
+            "The game will now close.";
+        exit( 2 );
+    }
+
     DXGIAdapter1.As( &DXGIAdapter2 );
     // Find out what we are rendering on to write it into the logfile
     DXGI_ADAPTER_DESC2 adpDesc;
@@ -437,6 +473,18 @@ XRESULT D3D11GraphicsEngine::SetWindow( HWND hWnd ) {
     return XR_SUCCESS;
 }
 
+/** Reset BackBuffer */
+void D3D11GraphicsEngine::OnResetBackBuffer() {
+    PfxRenderer->OnResize( Resolution );
+    HDRBackBuffer = std::make_unique<RenderToTextureBuffer>( GetDevice().Get(), Resolution.x, Resolution.y,
+        (Engine::GAPI->GetRendererState().RendererSettings.CompressBackBuffer ? DXGI_FORMAT_R11G11B10_FLOAT : DXGI_FORMAT_R16G16B16A16_FLOAT) );
+}
+
+/** Get BackBuffer Format */
+DXGI_FORMAT D3D11GraphicsEngine::GetBackBufferFormat() {
+    return (Engine::GAPI->GetRendererState().RendererSettings.CompressBackBuffer ? DXGI_FORMAT_R11G11B10_FLOAT : DXGI_FORMAT_R16G16B16A16_FLOAT);
+}
+
 /** Called on window resize/resolution change */
 XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
     HRESULT hr;
@@ -654,12 +702,12 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
         GetDevice().Get(), Resolution.x, Resolution.y, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB );
 
     HDRBackBuffer = std::make_unique<RenderToTextureBuffer>( GetDevice().Get(), Resolution.x, Resolution.y,
-        DXGI_FORMAT_R16G16B16A16_FLOAT );
+        (Engine::GAPI->GetRendererState().RendererSettings.CompressBackBuffer ? DXGI_FORMAT_R11G11B10_FLOAT : DXGI_FORMAT_R16G16B16A16_FLOAT) );
 
     int s = Engine::GAPI->GetRendererState().RendererSettings.ShadowMapSize;
     WorldShadowmap1 = std::make_unique<RenderToDepthStencilBuffer>(
-        GetDevice().Get(), s, s, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT,
-        DXGI_FORMAT_R32_FLOAT );
+        GetDevice().Get(), s, s, DXGI_FORMAT_R16_TYPELESS, nullptr, DXGI_FORMAT_D16_UNORM,
+        DXGI_FORMAT_R16_UNORM );
     SetDebugName( WorldShadowmap1->GetTexture().Get(), "WorldShadowmap1->Texture" );
     SetDebugName( WorldShadowmap1->GetShaderResView().Get(), "WorldShadowmap1->ShaderResView" );
     SetDebugName( WorldShadowmap1->GetDepthStencilView().Get(), "WorldShadowmap1->DepthStencilView" );
@@ -759,7 +807,7 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
         int old = WorldShadowmap1->GetSizeX();
         LogInfo() << "Shadowmapresolution changed to: " << s << "x" << s;
         WorldShadowmap1 = std::make_unique<RenderToDepthStencilBuffer>(
-            GetDevice().Get(), s, s, DXGI_FORMAT_R32_TYPELESS, nullptr, DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_R32_FLOAT );
+            GetDevice().Get(), s, s, DXGI_FORMAT_R16_TYPELESS, nullptr, DXGI_FORMAT_D16_UNORM, DXGI_FORMAT_R16_UNORM );
         SetDebugName( WorldShadowmap1->GetTexture().Get(), "WorldShadowmap1->Texture" );
         SetDebugName( WorldShadowmap1->GetShaderResView().Get(), "WorldShadowmap1->ShaderResView" );
         SetDebugName( WorldShadowmap1->GetDepthStencilView().Get(), "WorldShadowmap1->DepthStencilView" );
@@ -814,7 +862,7 @@ XRESULT D3D11GraphicsEngine::OnEndFrame() {
 /** Called when the game wants to clear the bound rendertarget */
 XRESULT D3D11GraphicsEngine::Clear( const float4& color ) {
     GetContext()->ClearDepthStencilView( DepthStencilBuffer->GetDepthStencilView().Get(),
-        D3D11_CLEAR_DEPTH, 1.0f, 0 );
+        D3D11_CLEAR_DEPTH, 0, 0 );
 
     GetContext()->ClearRenderTargetView( GBuffer0_Diffuse->GetRenderTargetView().Get(), (float*)&color );
     GetContext()->ClearRenderTargetView( GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView().Get(), (float*)&float4( 0, 0, 0, 0 ) );
@@ -950,11 +998,14 @@ XRESULT D3D11GraphicsEngine::Present() {
     }
 
     SetDefaultStates();
-
+    UpdateRenderStates();
     Engine::AntTweakBar->Draw();
-    SetDefaultStates();
 
-    if ( UIView ) UIView->Render( Engine::GAPI->GetFrameTimeSec() );
+    if ( UIView ) {
+        SetDefaultStates();
+        UpdateRenderStates();
+        UIView->Render( Engine::GAPI->GetFrameTimeSec() );
+    }
 
     bool vsync = Engine::GAPI->GetRendererState().RendererSettings.EnableVSync;
 
@@ -1748,7 +1799,9 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
 
     // TODO: TODO: GodRays need the GBuffer1 from the scene, but Particles need to
     // clear it!
-    if ( Engine::GAPI->GetRendererState().RendererSettings.EnableGodRays )
+    if ( Engine::GAPI->GetRendererState().RendererSettings.EnableGodRays &&
+        Engine::GAPI->GetLoadedWorldInfo()->BspTree->GetBspTreeMode() ==
+        zBSP_MODE_OUTDOOR )
         PfxRenderer->RenderGodRays();
 
     // DrawParticleEffects();
@@ -1791,7 +1844,7 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
     // Clear here to get a working depthbuffer but no interferences with world
     // geometry for gothic UI-Rendering
     GetContext()->ClearDepthStencilView( DepthStencilBuffer->GetDepthStencilView().Get(),
-        D3D11_CLEAR_DEPTH, 1, 0 );
+        D3D11_CLEAR_DEPTH, 0, 0 );
     GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
         nullptr );
 
@@ -2618,6 +2671,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround(
     Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
 
     Engine::GAPI->GetRendererState().DepthState.SetDefault();
+    Engine::GAPI->GetRendererState().DepthState.DepthBufferCompareFunc = GothicDepthBufferStateInfo::ECompareFunc::CF_COMPARISON_LESS_EQUAL;
     Engine::GAPI->GetRendererState().DepthState.SetDirty();
 
     bool linearDepth =
@@ -2833,22 +2887,9 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround(
                 }
             }
         }
-
-        // Vobs have this differently
-        Engine::GAPI->GetRendererState().RasterizerState.FrontCounterClockwise =
-            !Engine::GAPI->GetRendererState().RasterizerState.FrontCounterClockwise;
-        Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
-        UpdateRenderStates();
     }
 
     bool renderNPCs = !noNPCs;
-
-    Engine::GAPI->GetRendererState().RasterizerState.CullMode =
-        GothicRasterizerStateInfo::CM_CULL_FRONT;
-    Engine::GAPI->GetRendererState().RasterizerState.FrontCounterClockwise =
-        true;
-    Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
-
     if ( Engine::GAPI->GetRendererState().RendererSettings.DrawMobs ) {
         // Draw visible vobs here
         std::list<SkeletalVobInfo*> rndVob;
@@ -2954,6 +2995,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround( FXMVECTOR position,
     Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
 
     Engine::GAPI->GetRendererState().DepthState.SetDefault();
+    Engine::GAPI->GetRendererState().DepthState.DepthBufferCompareFunc = GothicDepthBufferStateInfo::ECompareFunc::CF_COMPARISON_LESS_EQUAL;
     Engine::GAPI->GetRendererState().DepthState.SetDirty();
 
     XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
@@ -3078,12 +3120,6 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround( FXMVECTOR position,
     }
 
     if ( Engine::GAPI->GetRendererState().RendererSettings.DrawVOBs ) {
-        // Vobs have this differently
-        Engine::GAPI->GetRendererState().RasterizerState.FrontCounterClockwise =
-            !Engine::GAPI->GetRendererState().RasterizerState.FrontCounterClockwise;
-        Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
-        UpdateRenderStates();
-
         // Reset instances
         const std::unordered_map<zCProgMeshProto*, MeshVisualInfo*>& staticMeshVisuals =
             Engine::GAPI->GetStaticMeshVisuals();
@@ -4240,6 +4276,9 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
         Engine::GAPI->GetRendererState().RendererInfo.FrameDrawnLights++;
     }
 
+    Engine::GAPI->GetRendererState().DepthState.DepthBufferCompareFunc = GothicDepthBufferStateInfo::CF_COMPARISON_ALWAYS;
+    Engine::GAPI->GetRendererState().DepthState.SetDirty();
+
     Engine::GAPI->GetRendererState().RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
     Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
 
@@ -4536,42 +4575,29 @@ void D3D11GraphicsEngine::DrawVobSingle( VobInfo* vob ) {
     SetActivePixelShader( "PS_Preview_Textured" );
     SetActiveVertexShader( "VS_Ex" );
 
-    SetDefaultStates();
-    Engine::GAPI->GetRendererState().RasterizerState.CullMode =
-        GothicRasterizerStateInfo::CM_CULL_NONE;
-    Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
-
     SetupVS_ExMeshDrawCall();
     SetupVS_ExConstantBuffer();
-    // SetupVS_ExPerInstanceConstantBuffer();
-    // vob->VobConstantBuffer->BindToVertexShader(1);
 
     ActiveVS->GetConstantBuffer()[1]->UpdateBuffer( vob->Vob->GetWorldMatrixPtr() );
     ActiveVS->GetConstantBuffer()[1]->BindToVertexShader( 1 );
 
-    InfiniteRangeConstantBuffer->BindToPixelShader( 3 );
-
     for ( auto const& itm : vob->VisualInfo->Meshes ) {
-        for ( size_t i = 0; i < itm.second.size(); i++ ) {
-            // Cache texture
-            if ( itm.first ) {
-                if ( itm.first->GetTexture() ) {
-                    if ( itm.first->GetTexture()->CacheIn( 0.6f ) == zRES_CACHED_IN ) {
-                        itm.first->GetTexture()->Bind( 0 );
-
-                        MaterialInfo* info =
-                            Engine::GAPI->GetMaterialInfoFrom( itm.first->GetTexture() );
-                        if ( !info->Constantbuffer ) info->UpdateConstantbuffer();
-
-                        info->Constantbuffer->BindToPixelShader( 2 );
-                    } else
-                        continue;
-                }
+        // Cache & bind texture
+        zCTexture* texture;
+        if ( itm.first && (texture = itm.first->GetTexture()) != nullptr ) {
+            if ( texture->CacheIn( 0.6f ) == zRES_CACHED_IN ) {
+                texture->Bind( 0 );
+            } else {
+                continue;
             }
+        } else {
+            continue;
+        }
+        for ( auto const& itm2nd : itm.second ) {
             // Draw instances
             DrawVertexBufferIndexed(
-                itm.second[i]->MeshVertexBuffer, itm.second[i]->MeshIndexBuffer,
-                itm.second[i]->Indices.size() );
+                itm2nd->MeshVertexBuffer, itm2nd->MeshIndexBuffer,
+                itm2nd->Indices.size() );
         }
     }
 
@@ -4589,11 +4615,6 @@ void D3D11GraphicsEngine::DrawVobsList( const std::list<VobInfo*>& vobs, zCCamer
     SetActivePixelShader( "PS_Preview_Textured" );
     SetActiveVertexShader( "VS_Ex" );
 
-    SetDefaultStates();
-    Engine::GAPI->GetRendererState().RasterizerState.CullMode =
-        GothicRasterizerStateInfo::CM_CULL_NONE;
-    Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
-
     SetupVS_ExMeshDrawCall();
     SetupVS_ExConstantBuffer();
 
@@ -4601,25 +4622,19 @@ void D3D11GraphicsEngine::DrawVobsList( const std::list<VobInfo*>& vobs, zCCamer
         ActiveVS->GetConstantBuffer()[1]->UpdateBuffer( vob->Vob->GetWorldMatrixPtr() );
         ActiveVS->GetConstantBuffer()[1]->BindToVertexShader( 1 );
 
-        InfiniteRangeConstantBuffer->BindToPixelShader( 3 );
-
         for ( auto const& itm : vob->VisualInfo->Meshes ) {
-            for ( auto const& itm2nd : itm.second ) {
-                // Cache texture
-                if ( itm.first ) {
-                    if ( itm.first->GetTexture() ) {
-                        if ( itm.first->GetTexture()->CacheIn( 0.6f ) == zRES_CACHED_IN ) {
-                            itm.first->GetTexture()->Bind( 0 );
-
-                            MaterialInfo* info =
-                                Engine::GAPI->GetMaterialInfoFrom( itm.first->GetTexture() );
-                            if ( !info->Constantbuffer ) info->UpdateConstantbuffer();
-
-                            info->Constantbuffer->BindToPixelShader( 2 );
-                        } else
-                            continue;
-                    }
+            // Cache & bind texture
+            zCTexture* texture;
+            if ( itm.first && ( texture = itm.first->GetTexture() ) != nullptr ) {
+                if ( texture->CacheIn( 0.6f ) == zRES_CACHED_IN ) {
+                    texture->Bind( 0 );
+                } else {
+                    continue;
                 }
+            } else {
+                continue;
+            }
+            for ( auto const& itm2nd : itm.second ) {
                 // Draw instances
                 DrawVertexBufferIndexed(
                     itm2nd->MeshVertexBuffer, itm2nd->MeshIndexBuffer,
@@ -4629,9 +4644,6 @@ void D3D11GraphicsEngine::DrawVobsList( const std::list<VobInfo*>& vobs, zCCamer
     }
 
     GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(), nullptr );
-
-    SetDefaultStates();
-    UpdateRenderStates();
 }
 
 /** Message-Callback for the main window */

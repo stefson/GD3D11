@@ -383,6 +383,9 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN( zCPolygon** polys, unsigned int n
 
                 if ( poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER ) {
                     t.Normal = float3( 0, 1, 0 ); // Get rid of ugly shadows on water
+                    // Static light generated for water sucks and we can't use it to block the sun specular lighting
+                    // so we'll limit ourselves to only block it in indoor locations
+                    t.Color = 0xFFFFFFFF;
                 }
             }
 
@@ -581,6 +584,9 @@ HRESULT WorldConverter::ConvertWorldMesh( zCPolygon** polys, unsigned int numPol
 
                 if ( poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER ) {
                     t.Normal = float3( 0, 1, 0 ); // Get rid of ugly shadows on water
+                    // Static light generated for water sucks and we can't use it to block the sun specular lighting
+                    // so we'll limit ourselves to only block it in indoor locations
+                    t.Color = 0xFFFFFFFF;
                 }
             }
 
@@ -972,9 +978,9 @@ void WorldConverter::ExtractSkeletalMeshFromVob( zCModel* model, SkeletalMeshVis
 
             // Get indices
             for ( int t = 0; t < m->TriList.NumInArray; t++ ) {
-                for ( int v = 0; v < 3; v++ ) {
-                    indices.emplace_back( m->TriList.Array[t].wedge[v] );
-                }
+                indices.emplace_back( m->TriList.Array[t].wedge[2] );
+                indices.emplace_back( m->TriList.Array[t].wedge[1] );
+                indices.emplace_back( m->TriList.Array[t].wedge[0] );
             }
 
             // Get vertices
@@ -1085,8 +1091,6 @@ void WorldConverter::ExtractSkeletalMeshFromProto( zCModelMeshLib* model, Skelet
             posList.emplace_back( vx );
         }
 
-
-
         // The rest is the same as a zCProgMeshProto, but with a different vertex type
         for ( int i = 0; i < s->GetNumSubmeshes(); i++ ) {
             std::vector<ExSkelVertexStruct> vertices;
@@ -1097,9 +1101,9 @@ void WorldConverter::ExtractSkeletalMeshFromProto( zCModelMeshLib* model, Skelet
 
             // Get indices
             for ( int t = 0; t < m->TriList.NumInArray; t++ ) {
-                for ( int v = 2; v >= 0; v-- ) {
-                    indices.emplace_back( m->TriList.Array[t].wedge[v] );
-                }
+                indices.emplace_back( m->TriList.Array[t].wedge[2] );
+                indices.emplace_back( m->TriList.Array[t].wedge[1] );
+                indices.emplace_back( m->TriList.Array[t].wedge[0] );
             }
 
             // Get vertices
@@ -1233,9 +1237,9 @@ void WorldConverter::Extract3DSMeshFromVisual2PNAEN( zCProgMeshProto* visual, Me
 
         // Get vertices
         for ( int t = 0; t < visual->GetSubmeshes()[i].TriList.NumInArray; t++ ) {
-            for ( int v = 0; v < 3; v++ ) {
-                indices.emplace_back( visual->GetSubmeshes()[i].TriList.Array[t].wedge[v] );
-            }
+            indices.emplace_back( visual->GetSubmeshes()[i].TriList.Array[t].wedge[2] );
+            indices.emplace_back( visual->GetSubmeshes()[i].TriList.Array[t].wedge[1] );
+            indices.emplace_back( visual->GetSubmeshes()[i].TriList.Array[t].wedge[0] );
         }
 
         for ( int v = 0; v < visual->GetSubmeshes()[i].WedgeList.NumInArray; v++ ) {
@@ -1361,9 +1365,9 @@ void WorldConverter::Extract3DSMeshFromVisual2( zCProgMeshProto* visual, MeshVis
 
         // Get vertices
         for ( int t = 0; t < visual->GetSubmeshes()[i].TriList.NumInArray; t++ ) {
-            for ( int v = 2; v >= 0; v-- ) {
-                indices.emplace_back( visual->GetSubmeshes()[i].TriList.Array[t].wedge[v] );
-            }
+            indices.emplace_back( visual->GetSubmeshes()[i].TriList.Array[t].wedge[2] );
+            indices.emplace_back( visual->GetSubmeshes()[i].TriList.Array[t].wedge[1] );
+            indices.emplace_back( visual->GetSubmeshes()[i].TriList.Array[t].wedge[0] );
         }
 
         for ( int v = 0; v < visual->GetSubmeshes()[i].WedgeList.NumInArray; v++ ) {

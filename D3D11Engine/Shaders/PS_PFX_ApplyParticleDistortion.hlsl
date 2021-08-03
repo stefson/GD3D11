@@ -35,13 +35,7 @@ float4 PSMain( PS_INPUT Input ) : SV_TARGET
 	distortion = min(float2(maxDistortion, maxDistortion), distortion);
 	distortion = max(float2(-maxDistortion, -maxDistortion), distortion);
 	
-	float2 distUV = uv + distortion;
-	if(distUV.x <= 0.0f || distUV.x >= 1.0f ||
-	distUV.y <= 0.0f || distUV.y >= 1.0f)
-	{
-		distUV = uv;
-	}
-	
+	float2 distUV = clamp(uv + distortion, float2(0.0f, 0.0f), float2(1.0f, 1.0f));
 	float4 scene = TX_Scene.Sample(SS_Linear, distUV);
 	
 	// Alpha is just the luminance of the rendered particles

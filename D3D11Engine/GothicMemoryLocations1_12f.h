@@ -156,6 +156,7 @@ struct GothicMemoryLocations {
         static const unsigned int MASK_SkeepingMode = 3;
 
         static const unsigned int EndMovement = 0x00611840;
+        static const unsigned int SetSleeping = 0x005F68A0;
     };
 
     struct zCInput {
@@ -283,6 +284,9 @@ struct GothicMemoryLocations {
 
     struct zCResourceManager {
         static const unsigned int CacheIn = 0x005D3450;
+        static const unsigned int PurgeCaches = 0x005D2E70;
+        static const unsigned int RefreshTexMaxSize = 0x005E89A0;
+        static const unsigned int SetThreadingEnabled = 0x005D3000;
     };
 
     struct zCProgMeshProto {
@@ -409,6 +413,11 @@ struct GothicMemoryLocations {
         static const unsigned int Offset_DistanceModelToCamera = 0x114;
         static const unsigned int Offset_NumActiveAnis = 0x34;
         static const unsigned int GetVisualName = 0x0057C770;
+    };
+
+    struct zCClassDef {
+        static const unsigned int oCNpc = 0x00922830;
+        static const unsigned int zCTexture = 0x00914FE0;
     };
 
     class VobTypes // vftables
