@@ -257,7 +257,7 @@ public:
     void DrawWorldMeshNaive();
 
     /** Draws a skeletal mesh-vob */
-    void DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance );
+    void DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance, bool updateState = true );
     void DrawSkeletalGhosts();
 
     /** Draws the inventory */

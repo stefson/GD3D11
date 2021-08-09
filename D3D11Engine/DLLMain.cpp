@@ -11,9 +11,12 @@
 #include "VersionCheck.h"
 #include "InstructionSet.h"
 
+#include <shlwapi.h>
+
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "Imagehlp.lib") // Used in VersionCheck.cpp to get Gothic.exe Checksum.
+#pragma comment(lib, "shlwapi.lib")
 
 //#pragma pack(1)
 
@@ -148,6 +151,14 @@ __declspec(naked) void FakeGetSurfaceFromDC() { _asm { jmp[ddraw.GetSurfaceFromD
 __declspec(naked) void FakeRegisterSpecialCase() { _asm { jmp[ddraw.RegisterSpecialCase] } }
 __declspec(naked) void FakeReleaseDDThreadLock() { _asm { jmp[ddraw.ReleaseDDThreadLock] } }
 
+void SetupWorkingDirectory() {
+    // Set current working directory to the one with executable
+    char executablePath[MAX_PATH];
+    GetModuleFileNameA( GetModuleHandleA( nullptr ), executablePath, sizeof( executablePath ) );
+    PathRemoveFileSpecA( executablePath );
+    SetCurrentDirectoryA( executablePath );
+}
+
 void EnableCrashingOnCrashes() {
     typedef BOOL( WINAPI* tGetPolicy )(LPDWORD lpFlags);
     typedef BOOL( WINAPI* tSetPolicy )(DWORD dwFlags);
@@ -213,7 +224,7 @@ BOOL WINAPI DllMain( HINSTANCE hInst, DWORD reason, LPVOID ) {
 #endif
 
         //_CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-
+        SetupWorkingDirectory();
         if ( !Engine::PassThrough ) {
             Log::Clear();
             LogInfo() << "Starting DDRAW Proxy DLL.";

@@ -269,6 +269,9 @@ public:
     /** Returns the current rendering stage */
     D3D11ENGINE_RENDER_STAGE GetRenderingStage();
 
+    /** Update clipping cursor onto window */
+    void UpdateClipCursor( HWND hWnd );
+
     /** Message-Callback for the main window */
     virtual LRESULT OnWindowMessage( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam );
 

@@ -470,6 +470,10 @@ XRESULT D3D11GraphicsEngine::SetWindow( HWND hWnd ) {
 #endif
     if ( res.x != 0 && res.y != 0 ) OnResize( res );
 
+    // We need to update clip cursor here because we hook the window too late to receive proper window message
+    m_isWindowActive = (GetForegroundWindow() == hWnd);
+    UpdateClipCursor( hWnd );
+
     return XR_SUCCESS;
 }
 
@@ -499,7 +503,7 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
 
     Resolution = newSize;
     INT2 bbres = GetBackbufferResolution();
-
+    
     zCView::SetMode(
         static_cast<int>((float)Resolution.x / Engine::GAPI->GetRendererState().RendererSettings.GothicUIScale),
         static_cast<int>((float)Resolution.y / Engine::GAPI->GetRendererState().RendererSettings.GothicUIScale),
@@ -720,7 +724,7 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
 /** Called when the game wants to render a new frame */
 XRESULT D3D11GraphicsEngine::OnBeginFrame() {
     Engine::GAPI->GetRendererState().RendererInfo.Timing.StartTotal();
-    if ( !m_isWindowActive ) {
+    if ( !m_isWindowActive && Engine::GAPI->GetRendererState().RendererSettings.EnableInactiveFpsLock ) {
         m_FrameLimiter->SetLimit( 20 );
         m_FrameLimiter->Start();
     } else {
@@ -2572,9 +2576,6 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
         HDRBackBuffer->GetShaderResView(),
         PfxRenderer->GetTempBuffer().GetRenderTargetView() );
     CopyDepthStencil();
-
-    Engine::GAPI->GetRendererState().RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
-    Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
 
     XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
     Engine::GAPI->SetViewTransformXM( view );  // Update view transform
@@ -4646,19 +4647,48 @@ void D3D11GraphicsEngine::DrawVobsList( const std::list<VobInfo*>& vobs, zCCamer
     GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(), nullptr );
 }
 
+/** Update clipping cursor onto window */
+void D3D11GraphicsEngine::UpdateClipCursor( HWND hWnd )
+{
+    RECT rect;
+    static RECT last_clipped_rect;
+    if ( m_isWindowActive ) {
+        GetClientRect( hWnd, &rect );
+        ClientToScreen( hWnd, reinterpret_cast<LPPOINT*>(&rect)[0] );
+        ClientToScreen( hWnd, reinterpret_cast<LPPOINT*>(&rect)[1] );
+        if ( ClipCursor( &rect ) ) {
+            last_clipped_rect = rect;
+        }
+    } else {
+        if ( GetClipCursor( &rect ) && memcmp( &rect, &last_clipped_rect, sizeof( RECT ) ) == 0 ) {
+            ClipCursor( nullptr );
+            ZeroMemory( &last_clipped_rect, sizeof( RECT ) );
+        }
+    }
+}
+
 /** Message-Callback for the main window */
 LRESULT D3D11GraphicsEngine::OnWindowMessage( HWND hWnd, UINT msg, WPARAM wParam,
     LPARAM lParam ) {
     switch ( msg ) {
-    case WM_ACTIVATEAPP:
-        if ( Engine::GAPI->GetRendererState().RendererSettings.EnableInactiveFpsLock ) {
-            if ( (wParam == 0) && (lParam != GetThreadId( GetCurrentThread() )) ) {
-                m_isWindowActive = false;
-            } else {
-                m_isWindowActive = true;
+        case WM_ACTIVATE:
+        {
+            // Don't mark the window as active if it's activated before being shown
+            if ( !IsWindowVisible( hWnd ) ) {
+                break;
             }
+
+            BOOL minimized = HIWORD( wParam );
+            if ( !minimized && LOWORD( wParam ) != WA_INACTIVE ) {
+                m_isWindowActive = true;
+            } else {
+                m_isWindowActive = false;
+            }
+
+            UpdateClipCursor( hWnd );
         }
         break;
+        case WM_WINDOWPOSCHANGED: UpdateClipCursor( hWnd ); break;
     }
     if ( UIView ) {
         UIView->OnWindowMessage( hWnd, msg, wParam, lParam );

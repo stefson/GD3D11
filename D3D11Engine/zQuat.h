@@ -8,9 +8,9 @@ class zQuat
         /** Hooks the functions of this Class */
         static void Hook()
         {
-            XHook(0x518EF0, zQuatLerp);
-            XHook(0x518D10, zQuatSlerp);
-            XHook(0x518560, zQuatMat4ToQuat);
+            XHook(0x518EF0, zQuat::zQuatLerp);
+            XHook(0x518D10, zQuat::zQuatSlerp);
+            XHook(0x518560, zQuat::zQuatMat4ToQuat);
         }
 
 		static void __fastcall zQuatLerp(float4& output, int _EDX, float t, float4& q0, float4& q1)

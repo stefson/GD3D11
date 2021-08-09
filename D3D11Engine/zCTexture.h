@@ -100,12 +100,12 @@ public:
     }
 
     zTResourceCacheState CacheIn( float priority ) {
-        if ( GetCacheState() == zRES_CACHED_IN ) {
+        zTResourceCacheState cacheState = GetCacheState();
+        if ( cacheState == zRES_CACHED_IN ) {
             TouchTimeStamp();
-        } else if ( GetCacheState() == zRES_CACHED_OUT || zCTextureCacheHack::ForceCacheIn ) {
-
-            /*TouchTimeStampLocal();
-            zCTextureCacheHack::NumNotCachedTexturesInFrame++;
+        } else if ( cacheState == zRES_CACHED_OUT || zCTextureCacheHack::ForceCacheIn ) {
+            TouchTimeStampLocal();
+            /*zCTextureCacheHack::NumNotCachedTexturesInFrame++;
 
             if (zCTextureCacheHack::NumNotCachedTexturesInFrame >= zCTextureCacheHack::MAX_NOT_CACHED_TEXTURES_IN_FRAME)
             {

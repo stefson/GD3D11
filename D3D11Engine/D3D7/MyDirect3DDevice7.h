@@ -597,12 +597,12 @@ public:
 	HRESULT STDMETHODCALLTYPE Clear( DWORD dwCount, LPD3DRECT lpRects, DWORD dwFlags, D3DCOLOR dwColor, D3DVALUE dvZ, DWORD dwStencil ) {
 		DebugWrite( "MyDirect3DDevice7::Clear" );
 
-		BYTE a = dwColor >> 24;
-		BYTE r = (dwColor >> 16) & 0xFF;
-		BYTE g = (dwColor >> 8) & 0xFF;
-		BYTE b = dwColor & 0xFF;
+		//BYTE a = dwColor >> 24;
+		//BYTE r = (dwColor >> 16) & 0xFF;
+		//BYTE g = (dwColor >> 8) & 0xFF;
+		//BYTE b = dwColor & 0xFF;
 
-		Engine::GraphicsEngine->Clear( float4( r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f ) );
+		//Engine::GraphicsEngine->Clear( float4( r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f ) );
 		return S_OK;
 	}
 

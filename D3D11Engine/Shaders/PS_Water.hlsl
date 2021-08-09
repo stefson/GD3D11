@@ -137,7 +137,7 @@ float4 PSMain( PS_INPUT Input ) : SV_TARGET
 	
 	float cos_spec = clamp(dot(reflect_vecSmall, -AC_LightPos.xyz * float3(1,1,1)), 0, 1);
 	float sun_spot = pow(cos_spec, 500.0f) * 0.5f;
-	color.rgb += lerp(sunColor * sun_spot, float3(0.0f, 0.0f, 0.0f), step(Input.vDiffuse.y, 0.5f));
+	color.rgb += lerp(sunColor * sun_spot, float3(0.0f, 0.0f, 0.0f), step(step(0.0f, AC_LightPos.y) * Input.vDiffuse.y, 0.5f));
 	
 	return float4(color, 1);
 }

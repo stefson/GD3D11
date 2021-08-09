@@ -521,19 +521,19 @@ bool D2DView::OnWindowMessage( HWND hWnd, unsigned int msg, WPARAM wParam, LPARA
     return MainSubView->OnWindowMessage( hWnd, msg, wParam, lParam, D2D1::RectF( 0, 0, RenderTarget->GetSize().width, RenderTarget->GetSize().height ) );
 }
 
-float D2DView::GetLabelTextWidth( IDWriteTextLayout* layout, const std::string& text ) {
-    DWRITE_CLUSTER_METRICS* m = new DWRITE_CLUSTER_METRICS[text.length()];
+float D2DView::GetLabelTextWidth( IDWriteTextLayout* layout, size_t length ) {
+    DWRITE_CLUSTER_METRICS* m = new DWRITE_CLUSTER_METRICS[length];
     UINT32 lc;
 
     if ( !layout ) {
         return 0.0f;
     }
 
-    layout->GetClusterMetrics( m, text.length(), &lc );
+    layout->GetClusterMetrics( m, length, &lc );
 
     float width = 0.0f;
 
-    for ( size_t i = 0; i < text.length(); i++ ) {
+    for ( size_t i = 0; i < length; i++ ) {
         width += m[i].width;
     }
     delete[] m;
@@ -541,10 +541,10 @@ float D2DView::GetLabelTextWidth( IDWriteTextLayout* layout, const std::string& 
     return width;
 }
 
-float D2DView::GetTextHeight( IDWriteTextLayout* layout, const std::string& text ) {
+float D2DView::GetTextHeight( IDWriteTextLayout* layout, size_t length ) {
     unsigned int i = 0;
     float y = 0;
-    for ( i = 0; i < text.size(); i++ ) {
+    for ( i = 0; i < length; i++ ) {
         float ty;
 
         layout->GetFontSize( i, &ty );

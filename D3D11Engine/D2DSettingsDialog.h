@@ -9,6 +9,11 @@ class SV_Label;
 class SV_Checkbox;
 class D2DSettingsDialog;
 
+enum Languages {
+    LANGUAGE_POLISH = 0,
+    LANGUAGE_ENGLISH
+};
+
 struct FovOverrideCheckedChangedState {
     D2DSettingsDialog* SettingsDialog;
     SV_Label* horizFOVLabel;
@@ -52,6 +57,7 @@ protected:
     GothicRendererSettings InitialSettings;
 
     /** Current resolution setting */
+    int TextureQuality;
     int ResolutionSetting;
     std::vector<DisplayModeInfo> Resolutions;
     FovOverrideCheckedChangedState* CheckedChangedState;

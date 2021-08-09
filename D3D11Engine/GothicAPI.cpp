@@ -1626,7 +1626,7 @@ void GothicAPI::UpdateCompressBackBuffer() {
 }
 
 /** Draws a skeletal mesh-vob */
-void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
+void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance, bool updateState ) {
     // TODO: Put this into the renderer!!
     D3D11GraphicsEngine* g = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
 
@@ -1742,12 +1742,13 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
                 }
 
                 // Update animated textures
-                node->TexAniState.UpdateTexList();
-
                 bool isMMS = std::string( nodeAttachments[i][n]->Visual->GetFileExtension( 0 ) ) == ".MMS";
-                if ( isMMS ) {
-                    zCMorphMesh* mm = (zCMorphMesh*)nodeAttachments[i][n]->Visual;
-                    mm->GetTexAniState()->UpdateTexList();
+                if ( updateState ) {
+                    node->TexAniState.UpdateTexList();
+                    if ( isMMS ) {
+                        zCMorphMesh* mm = (zCMorphMesh*)nodeAttachments[i][n]->Visual;
+                        mm->GetTexAniState()->UpdateTexList();
+                    }
                 }
 
                 if ( distance < 1000 && isMMS ) {
@@ -1758,6 +1759,11 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance ) {
                         instanceInfo.World = *(XMFLOAT4X4*)&RendererState.TransformState.TransformWorld;
                         vi->VobConstantBuffer->UpdateBuffer( &instanceInfo );
                         vi->VobConstantBuffer->BindToVertexShader( 1 );
+
+                        if ( updateState ) {
+                            mm->AdvanceAnis();
+                            mm->CalcVertexPositions();
+                        }
 
                         // Only 0.35f of the fatness wanted by gothic. 
                         // They seem to compensate for that with the scaling.
@@ -1801,13 +1807,19 @@ void GothicAPI::DrawSkeletalGhosts() {
         RendererState.BlendState.SetDirty();
         RendererState.DepthState.SetDefault();
         RendererState.DepthState.SetDirty();
-
-        // Bind ghost pixel shader
-        g->SetActivePixelShader( "PS_Ghost" );
-        g->BindActivePixelShader();
     }
     while ( !GhostSkeletalVobs.empty() ) {
         auto const& GhostInfo = GhostSkeletalVobs.front();
+
+        // We need to do Z-prepass first
+        g->UnbindActivePS();
+        g->GetContext()->PSSetShader( nullptr, nullptr, 0 );
+        DrawSkeletalMeshVob( GhostInfo.second, GhostInfo.first );
+        RendererState.RendererInfo.FrameDrawnVobs--; // Don't calculate prepass as drawn vob
+
+        // Now actually draw mesh using ghost pixel shader
+        g->SetActivePixelShader( "PS_Ghost" );
+        g->BindActivePixelShader();
 
         // Update ghost alpha information
         GhostAlphaConstantBuffer gacb;
@@ -1818,7 +1830,7 @@ void GothicAPI::DrawSkeletalGhosts() {
         #endif
         g->GetActivePS()->GetConstantBuffer()[0]->UpdateBuffer( &gacb );
         g->GetActivePS()->GetConstantBuffer()[0]->BindToPixelShader( 0 );
-        DrawSkeletalMeshVob( GhostInfo.second, GhostInfo.first );
+        DrawSkeletalMeshVob( GhostInfo.second, GhostInfo.first, false );
 
         std::pop_heap( GhostSkeletalVobs.begin(), GhostSkeletalVobs.end(), CompareGhostDistance );
         GhostSkeletalVobs.pop_back();
@@ -3888,14 +3900,10 @@ void GothicAPI::DrawMorphMesh( zCMorphMesh* msh, float fatness ) {
     bbmax = DirectX::XMFLOAT3( -FLT_MAX, -FLT_MAX, -FLT_MAX );
 
     zCProgMeshProto* morphMesh = msh->GetMorphMesh();
-
     if ( !morphMesh )
         return;
 
     DirectX::XMFLOAT3* posList = (DirectX::XMFLOAT3*)morphMesh->GetPositionList()->Array;
-
-    msh->AdvanceAnis();
-    msh->CalcVertexPositions();
 
     // Construct unindexed mesh
     for ( int i = 0; i < morphMesh->GetNumSubmeshes(); i++ ) {

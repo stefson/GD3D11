@@ -80,6 +80,19 @@ void HookedFunctionInfo::InitHooks() {
 #endif
     original_Alg_Rotation3DNRad = (Alg_Rotation3DNRad)GothicMemoryLocations::Functions::Alg_Rotation3DNRad;
 
+//G1 patches
+#ifdef BUILD_GOTHIC_1_08k
+#ifdef BUILD_1_12F
+    LogInfo() << "Patching: Fix integer overflow crash";
+    PatchAddr( 0x00506B31, "\xEB" );
+#else
+    LogInfo() << "Patching: Fix integer overflow crash";
+    PatchAddr( 0x004F4024, "\xEB" );
+    PatchAddr( 0x004F43FC, "\xEB" );
+#endif
+#endif
+
+//G2 patches
 #ifdef BUILD_GOTHIC_2_6_fix
     zQuat::Hook();
     zMat4::Hook();
@@ -100,6 +113,10 @@ void HookedFunctionInfo::InitHooks() {
     PatchAddr( 0x005322A2, "\xE9\xF3\xC2\x13\x00\x90\x90" );
     PatchAddr( 0x0066E5BE, "\x81\x7C\xE4\x20\x00\x00\xC0\xFF\x0F\x84\x2A\x2B\xEC\xFF\x81\x7C\xE4\x20\x00\x00\xC0\x7F\x0F\x84\x1C\x2B\xEC\xFF\xE9\xC1\x2A\xEC\xFF" );
     PatchAddr( 0x0061E412, "\xE8\xA7\x01\x05\x00" );
+
+    LogInfo() << "Patching: Fix integer overflow crash";
+    PatchAddr( 0x00502F94, "\xEB" );
+    PatchAddr( 0x00503343, "\xEB" );
 
 #endif
     // HACK Workaround to fix debuglines in godmode
