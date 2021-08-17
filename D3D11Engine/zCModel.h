@@ -306,12 +306,13 @@ public:
 
     /** Fills a vector of (viewspace) bone-transformation matrices for this frame */
     void GetBoneTransforms( std::vector<DirectX::XMFLOAT4X4>* transforms, zCVob* vob = nullptr ) {
-        if ( !GetNodeList() )
+        zCArray<zCModelNodeInst*>* nodeList = GetNodeList();
+        if ( !nodeList )
             return;
 
-        transforms->reserve( GetNodeList()->NumInArray );
-        for ( int i = 0; i < GetNodeList()->NumInArray; i++ ) {
-            zCModelNodeInst* node = GetNodeList()->Array[i];
+        transforms->reserve( nodeList->NumInArray );
+        for ( int i = 0; i < nodeList->NumInArray; i++ ) {
+            zCModelNodeInst* node = nodeList->Array[i];
             zCModelNodeInst* parent = node->ParentNode;
 
             // Calculate transform for this node

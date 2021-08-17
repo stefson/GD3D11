@@ -341,7 +341,6 @@ protected:
 
     /** Temp-Arrays for storing data to be put in constant buffers */
     DirectX::XMFLOAT4X4 Temp2D3DXMatrix[2];
-    DirectX::XMFLOAT4X4 TempBonesMatrix[NUM_MAX_BONES];
     float2 Temp2Float2[2];
     std::unique_ptr<D3D11VertexBuffer> DynamicInstancingBuffer;
 

@@ -606,7 +606,7 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
 
         scd.SwapEffect = swapEffect;
         scd.Flags = scflags;
-        scd.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        scd.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
         scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_SHADER_INPUT;
         scd.SampleDesc.Count = 1;
         scd.SampleDesc.Quality = 0;
@@ -636,11 +636,11 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
         LogInfo() << "Resizing swapchain  (Format: DXGI_FORMAT_R8G8B8A8_UNORM)";
         if ( dxgi_1_3 ) {
             //if (FAILED(SwapChain2->SetSourceSize(bbres.x, bbres.y))) { //crashes when scd.Scaling = DXGI_SCALING_STRETCH is not set;
-            if ( FAILED( SwapChain2->ResizeBuffers( 0, bbres.x, bbres.y, DXGI_FORMAT_R8G8B8A8_UNORM, scflags ) ) ) {
+            if ( FAILED( SwapChain2->ResizeBuffers( 0, bbres.x, bbres.y, DXGI_FORMAT_B8G8R8A8_UNORM, scflags ) ) ) {
                 LogError() << "Failed to resize swapchain!";
                 return XR_FAILED;
             }
-        } else if ( FAILED( SwapChain->ResizeBuffers( 0, bbres.x, bbres.y, DXGI_FORMAT_R8G8B8A8_UNORM, scflags ) ) ) {
+        } else if ( FAILED( SwapChain->ResizeBuffers( 0, bbres.x, bbres.y, DXGI_FORMAT_B8G8R8A8_UNORM, scflags ) ) ) {
             LogError() << "Failed to resize swapchain!";
             return XR_FAILED;
         }
@@ -785,7 +785,7 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
     Engine::GAPI->EnterResourceCriticalSection();
     Microsoft::WRL::ComPtr<ID3D11CommandList> dc_cl;
 
-    GetDeferredMediaContext1()->FinishCommandList( true, dc_cl.GetAddressOf() );
+    GetDeferredMediaContext1()->FinishCommandList( false, dc_cl.GetAddressOf() );
 
     // Copy list of textures we are operating on
     Engine::GAPI->MoveLoadedTexturesToProcessedList();
@@ -901,7 +901,7 @@ D3D11GraphicsEngine::GetDisplayModeList( std::vector<DisplayModeInfo>* modeList,
     HRESULT hr;
     UINT numModes = 0;
     std::unique_ptr<DXGI_MODE_DESC1[]> displayModes = nullptr;
-    const DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    const DXGI_FORMAT format = DXGI_FORMAT_B8G8R8A8_UNORM;
     Microsoft::WRL::ComPtr<IDXGIOutput> output11;
     Microsoft::WRL::ComPtr<IDXGIOutput1> output;
 
@@ -978,7 +978,7 @@ XRESULT D3D11GraphicsEngine::Present() {
 
     ActivePS->Apply();
 
-    GammaCorrectConstantBuffer gcb = {};
+    GammaCorrectConstantBuffer gcb;
     gcb.G_Gamma = Engine::GAPI->GetGammaValue();
     gcb.G_Brightness = Engine::GAPI->GetBrightnessValue();
     gcb.G_TextureSize = GetResolution();
@@ -1363,15 +1363,12 @@ XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh( SkeletalVobInfo* vi,
     ActiveVS->GetConstantBuffer()[1]->BindToVertexShader( 1 );
 
     // Copy bones
-    memcpy( TempBonesMatrix, &transforms[0], sizeof( XMFLOAT4X4 ) * std::min( transforms.size(), sizeof( TempBonesMatrix ) / sizeof( TempBonesMatrix[0] ) ) );
-    ActiveVS->GetConstantBuffer()[2]->UpdateBuffer( TempBonesMatrix );
+    ActiveVS->GetConstantBuffer()[2]->UpdateBuffer( &transforms[0], sizeof( XMFLOAT4X4 ) * std::min<UINT>( transforms.size(), NUM_MAX_BONES ) );
     ActiveVS->GetConstantBuffer()[2]->BindToVertexShader( 2 );
 
-    if ( transforms.size() >=
-        sizeof( TempBonesMatrix ) / sizeof( TempBonesMatrix[0] ) ) {
+    if ( transforms.size() >= NUM_MAX_BONES ) {
         LogWarn() << "SkeletalMesh has more than "
-            << sizeof( TempBonesMatrix ) / sizeof( TempBonesMatrix[0] )
-            << " bones! (" << transforms.size() << ")Up this limit!";
+            << NUM_MAX_BONES << " bones! (" << transforms.size() << ")Up this limit!";
     }
 
     ActiveVS->Apply();
@@ -1410,7 +1407,7 @@ XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh( SkeletalVobInfo* vi,
                     if ( tex->CacheIn( 0.6f ) == zRES_CACHED_IN )
                         tex->Bind( 0 );
                     else
-                        return XR_SUCCESS;
+                        continue;
 
                     MaterialInfo* info = Engine::GAPI->GetMaterialInfoFrom( tex );
                     if ( !info->Constantbuffer )
@@ -1884,7 +1881,7 @@ void D3D11GraphicsEngine::SetupVS_ExConstantBuffer() {
     auto& view = Engine::GAPI->GetRendererState().TransformState.TransformView;
     auto& proj = Engine::GAPI->GetProjectionMatrix();
 
-    VS_ExConstantBuffer_PerFrame cb = {};
+    VS_ExConstantBuffer_PerFrame cb;
     cb.View = view;
     cb.Projection = proj;
     XMStoreFloat4x4( &cb.ViewProj, XMMatrixMultiply( XMLoadFloat4x4( &proj ), XMLoadFloat4x4( &view ) ) );
@@ -2124,8 +2121,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
     Engine::GAPI->CollectVisibleSections( renderList );
 
     MeshInfo* meshInfo = Engine::GAPI->GetWrappedWorldMesh();
-    DrawVertexBufferIndexedUINT( meshInfo->MeshVertexBuffer,
-        meshInfo->MeshIndexBuffer, 0, 0 );
+    DrawVertexBufferIndexedUINT( meshInfo->MeshVertexBuffer, meshInfo->MeshIndexBuffer, 0, 0 );
 
     static std::vector<std::pair<MeshKey, WorldMeshInfo*>> meshList;
     auto CompareMesh = []( std::pair<MeshKey, WorldMeshInfo*>& a, std::pair<MeshKey, WorldMeshInfo*>& b ) -> bool { return a.first.Texture < b.first.Texture; };
@@ -2139,7 +2135,12 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
             if ( worldMesh.first.Material ) {
                 zCTexture* aniTex = worldMesh.first.Material->GetTexture();
 
-                if ( !aniTex ) continue;
+                if ( !aniTex ) {
+                    aniTex = worldMesh.first.Material->GetTextureSingle();
+                    if ( !aniTex ) {
+                        continue;
+                    }
+                }
 
                 if ( aniTex->CacheIn( 0.6f ) != zRES_CACHED_IN ) {
                     continue;
@@ -2176,9 +2177,10 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
         GetContext()->PSSetShader( nullptr, nullptr, 0 );
 
         for ( auto const& mesh : meshList ) {
-            if ( !mesh.first.Material->GetAniTexture() ) continue;
+            zCTexture* texture;
+            if ( ( texture = mesh.first.Material->GetAniTexture() ) == nullptr ) continue;
 
-            if ( mesh.first.Material->GetAniTexture()->HasAlphaChannel() )
+            if ( texture->HasAlphaChannel() )
                 continue;  // Don't pre-render stuff with alpha channel
 
             if ( mesh.first.Info->MaterialType == MaterialInfo::MT_Water )
@@ -2187,8 +2189,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
             if ( mesh.second->TesselationSettings.buffer.VT_TesselationFactor > 0.0f )
                 continue;  // Don't pre-render tesselated surfaces
 
-            DrawVertexBufferIndexedUINT( nullptr, nullptr, mesh.second->Indices.size(),
-                mesh.second->BaseIndexLocation );
+            DrawVertexBufferIndexedUINT( nullptr, nullptr, mesh.second->Indices.size(), mesh.second->BaseIndexLocation );
         }
     }
 
@@ -2293,9 +2294,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
             ActiveVS->Apply();
 
             // Bind wrapped mesh again
-            DrawVertexBufferIndexedUINT(
-                Engine::GAPI->GetWrappedWorldMesh()->MeshVertexBuffer,
-                Engine::GAPI->GetWrappedWorldMesh()->MeshIndexBuffer, 0, 0 );
+            DrawVertexBufferIndexedUINT( meshInfo->MeshVertexBuffer, meshInfo->MeshIndexBuffer, 0, 0 );
         }
 
         if ( Engine::GAPI->GetRendererState().RendererSettings.DrawWorldMesh > 2 ) {
@@ -2623,7 +2622,7 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
     DepthStencilBufferCopy->BindToPixelShader( GetContext().Get(), 2 );
 
     // Fill refraction info CB and bind it
-    RefractionInfoConstantBuffer ricb = {};
+    RefractionInfoConstantBuffer ricb;
     ricb.RI_Projection = Engine::GAPI->GetProjectionMatrix();
     ricb.RI_ViewportSize = float2( Resolution.x, Resolution.y );
     ricb.RI_Time = Engine::GAPI->GetTimeSeconds();
@@ -2699,7 +2698,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround(
     ActiveVS->GetConstantBuffer()[1]->BindToVertexShader( 1 );
 
     // Update and bind buffer of PS
-    PerObjectState ocb = {};
+    PerObjectState ocb;
     ocb.OS_AmbientColor = float3( 1, 1, 1 );
     ActivePS->GetConstantBuffer()[3]->UpdateBuffer( &ocb );
     ActivePS->GetConstantBuffer()[3]->BindToPixelShader( 3 );
@@ -2727,8 +2726,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround(
 
     if ( Engine::GAPI->GetRendererState().RendererSettings.DrawWorldMesh ) {
         // Bind wrapped mesh vertex buffers
-        DrawVertexBufferIndexedUINT(
-            Engine::GAPI->GetWrappedWorldMesh()->MeshVertexBuffer,
+        DrawVertexBufferIndexedUINT( Engine::GAPI->GetWrappedWorldMesh()->MeshVertexBuffer,
             Engine::GAPI->GetWrappedWorldMesh()->MeshIndexBuffer, 0, 0 );
 
         ActiveVS->GetConstantBuffer()[1]->UpdateBuffer( &XMMatrixIdentity() );
@@ -2765,9 +2763,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround(
                 }
 
                 // Draw from wrapped mesh
-                DrawVertexBufferIndexedUINT(
-                    Engine::GAPI->GetWrappedWorldMesh()->MeshVertexBuffer,
-                    Engine::GAPI->GetWrappedWorldMesh()->MeshIndexBuffer,
+                DrawVertexBufferIndexedUINT( nullptr, nullptr,
                     meshInfoByKey->second->Indices.size(), meshInfoByKey->second->BaseIndexLocation );
             }
 
@@ -2814,9 +2810,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround(
                                 }
 
                                 // Draw from wrapped mesh
-                                DrawVertexBufferIndexedUINT(
-                                    Engine::GAPI->GetWrappedWorldMesh()->MeshVertexBuffer,
-                                    Engine::GAPI->GetWrappedWorldMesh()->MeshIndexBuffer,
+                                DrawVertexBufferIndexedUINT( nullptr, nullptr,
                                     meshInfoByKey->second->Indices.size(), meshInfoByKey->second->BaseIndexLocation );
                             }
                         }
@@ -3035,7 +3029,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround( FXMVECTOR position,
     ActiveVS->GetConstantBuffer()[1]->BindToVertexShader( 1 );
 
     // Update and bind buffer of PS
-    PerObjectState ocb = {};
+    PerObjectState ocb;
     ocb.OS_AmbientColor = float3( 1, 1, 1 );
     ActivePS->GetConstantBuffer()[3]->UpdateBuffer( &ocb );
     ActivePS->GetConstantBuffer()[3]->BindToPixelShader( 3 );
@@ -3109,9 +3103,7 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround( FXMVECTOR position,
                             }
 
                             // Draw from wrapped mesh
-                            DrawVertexBufferIndexedUINT(
-                                Engine::GAPI->GetWrappedWorldMesh()->MeshVertexBuffer,
-                                Engine::GAPI->GetWrappedWorldMesh()->MeshIndexBuffer,
+                            DrawVertexBufferIndexedUINT( nullptr, nullptr,
                                 it.second->Indices.size(), it.second->BaseIndexLocation );
                         }
                     }
@@ -3282,11 +3274,6 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
         Engine::GAPI->GetRendererState().RasterizerState.Wireframe = true;
     }
 
-    // Vobs need this
-    Engine::GAPI->GetRendererState().RasterizerState.FrontCounterClockwise =
-        false;
-    Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
-
     // Init drawcalls
     SetupVS_ExMeshDrawCall();
     SetupVS_ExConstantBuffer();
@@ -3372,13 +3359,23 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 
             bool doReset = true;  // Don't reset alpha-vobs here
             for ( auto const& itt : staticMeshVisual.second->MeshesByTexture ) {
-                std::vector<MeshInfo*>& mlist =
-                    staticMeshVisual.second->MeshesByTexture[itt.first];
+                const std::vector<MeshInfo*>& mlist = itt.second;
                 if ( mlist.empty() ) continue;
+                {
+                    // Check for alphablending on vob mesh
+                    bool blendAdd = itt.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_ADD;
+                    bool blendBlend = itt.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_BLEND;
+                    if ( !doReset || blendAdd || blendBlend ) {
+                        MeshVisualInfo* info = staticMeshVisual.second;
+                        for ( MeshInfo* mesh : mlist ) {
+                            AlphaMeshes.emplace_back(
+                                std::make_pair( itt.first, std::make_pair( info, mesh ) ) );
+                        }
 
-                // Bind buffers
-                DrawVertexBufferIndexed( staticMeshVisual.second->FullMesh->MeshVertexBuffer,
-                    staticMeshVisual.second->FullMesh->MeshIndexBuffer, 0 );
+                        doReset = false;
+                        continue;
+                    }
+                }
 
                 for ( unsigned int i = 0; i < mlist.size(); i++ ) {
                     zCTexture* tx = itt.first.Material->GetAniTexture();
@@ -3422,23 +3419,7 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 
 #endif
                     } else {
-                        // Check for alphablending on world mesh
-                        bool blendAdd = itt.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_ADD;
-                        bool blendBlend = itt.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_BLEND;
-                        // TODO: TODO: if one part of the mesh uses blending, all do.
-                        if ( !doReset || blendAdd || blendBlend ) {
-                            MeshVisualInfo* info = staticMeshVisual.second;
-                            MeshInfo* mesh = mlist[i];
-
-                            AlphaMeshes.emplace_back(
-                                std::make_pair( itt.first, std::make_pair( info, mesh ) ) );
-
-                            doReset = false;
-                            continue;
-                        }
-
                         // Bind texture
-
                         if ( tx->CacheIn( 0.6f ) == zRES_CACHED_IN ) {
                             MyDirectDrawSurface7* surface = tx->GetSurface();
                             ID3D11ShaderResourceView* srv[3];
@@ -3483,7 +3464,6 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 
                             info->Constantbuffer->BindToPixelShader( 2 );
                         }
-
                     }
 
                     if ( tesselationEnabled && !mi->IndicesPNAEN.empty() &&
@@ -3528,9 +3508,12 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 
     // Draw mobs
     if ( Engine::GAPI->GetRendererState().RendererSettings.DrawMobs ) {
-        for ( unsigned int i = 0; i < mobs.size(); i++ ) {
-            Engine::GAPI->DrawSkeletalMeshVob( mobs[i], FLT_MAX );
-            mobs[i]->VisibleInRenderPass = false;  // Reset this for the next frame
+        // Mobs use zengine functions for binding textures so let's reset zengine texture state
+        Engine::GAPI->ResetRenderStates();
+
+        for ( SkeletalVobInfo* mob : mobs ) {
+            Engine::GAPI->DrawSkeletalMeshVob( mob, FLT_MAX );
+            mob->VisibleInRenderPass = false;  // Reset this for the next frame
         }
     }
 
@@ -3567,10 +3550,6 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 
     SetActivePixelShader( "PS_Simple" );
     SetActiveVertexShader( "VS_ExInstancedObj" );
-
-    Engine::GAPI->GetRendererState().RasterizerState.FrontCounterClockwise =
-        true;
-    Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
 
     SetupVS_ExMeshDrawCall();
     SetupVS_ExConstantBuffer();
@@ -4354,7 +4333,7 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
     ActivePS->GetConstantBuffer()[0]->UpdateBuffer( &scb );
     ActivePS->GetConstantBuffer()[0]->BindToPixelShader( 0 );
 
-    PFXVS_ConstantBuffer vscb = {};
+    PFXVS_ConstantBuffer vscb;
     vscb.PFXVS_InvProj = scb.SQ_InvProj;
     ActiveVS->GetConstantBuffer()[0]->UpdateBuffer( &vscb );
     ActiveVS->GetConstantBuffer()[0]->BindToVertexShader( 0 );
@@ -4775,7 +4754,7 @@ XRESULT D3D11GraphicsEngine::DrawOcean( GOcean* ocean ) {
 
     // DistortionTexture->BindToPixelShader(0);
 
-    RefractionInfoConstantBuffer ricb = {};
+    RefractionInfoConstantBuffer ricb;
     ricb.RI_Projection = Engine::GAPI->GetProjectionMatrix();
     ricb.RI_ViewportSize = float2( Resolution.x, Resolution.y );
     ricb.RI_Time = Engine::GAPI->GetTimeSeconds();
@@ -4900,7 +4879,7 @@ void D3D11GraphicsEngine::GetBackbufferData( byte** data, int& pixelsize ) {
     SetActivePixelShader( "PS_PFX_GammaCorrectInv" );
     ActivePS->Apply();
 
-    GammaCorrectConstantBuffer gcb = {};
+    GammaCorrectConstantBuffer gcb;
     gcb.G_Gamma = Engine::GAPI->GetGammaValue();
     gcb.G_Brightness = Engine::GAPI->GetBrightnessValue();
     gcb.G_TextureSize = GetResolution();
@@ -5196,7 +5175,7 @@ void D3D11GraphicsEngine::DrawUnderwaterEffects() {
     SetDefaultStates();
     UpdateRenderStates();
 
-    RefractionInfoConstantBuffer ricb = {};
+    RefractionInfoConstantBuffer ricb;
     ricb.RI_Projection = Engine::GAPI->GetProjectionMatrix();
     ricb.RI_ViewportSize = float2( Resolution.x, Resolution.y );
     ricb.RI_Time = Engine::GAPI->GetTimeSeconds();
@@ -5582,6 +5561,7 @@ namespace UI::zFont {
         if ( camera ) farZ = camera->GetNearPlane() + 1.0f;
         else                       farZ = 1.0f;
 
+        vertices.resize( strLen * 6 );
         for ( size_t i = 0; i < strLen; ++i ) {
             const unsigned char& c = str[i];
 
@@ -5589,8 +5569,7 @@ namespace UI::zFont {
             auto botRight = font->fontuv2[c];
             auto widthPx = float( font->width[c] ) * scale;
 
-            vertices.resize( vertices.size() + 6 );
-            ExVertexStruct* vertex = &vertices[vertices.size() - 6];
+            ExVertexStruct* vertex = &vertices[i * 6];
 
             const float widthf = float( widthPx );
             const float heightf = float( font->height ) * scale;
@@ -5614,10 +5593,8 @@ namespace UI::zFont {
             const float minv = topLeft.pos.y + texelHalfH;
             const float maxv = texelHalfH + botRight.pos.y;
 
-            vertex[0] = vertex[1] = vertex[2] = vertex[3] = vertex[4] = vertex[5] = {};
-
             for ( size_t j = 0; j < 6; j++ ) {
-                vertex[j].Normal = { 1,0,0 };
+                vertex[j].Normal = { 1, 0, 0 };
                 vertex[j].TexCoord2 = { 0, 1 };
                 vertex[j].Position.z = farZ;
                 vertex[j].Color = fontColor.dword;

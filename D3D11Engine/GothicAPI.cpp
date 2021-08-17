@@ -1483,11 +1483,7 @@ void GothicAPI::OnAddVob( zCVob* vob, zCWorld* world ) {
         world = oCGame::GetGame()->_zCSession_world;
 
     if ( strcmp( className, "zCPolyStrip" ) == 0 ) {
-        zCPolyStrip* polyStrip = (zCPolyStrip*)(vob->GetVisual());
-        PolyStripVisuals.insert( polyStrip );
-        if ( polyStrip ) {
-            polyStrip->GetInstanceData()->material->GetAniTexture()->PrecacheTexAniFrames( 0.3f );
-        }
+        PolyStripVisuals.insert( (zCPolyStrip*)(vob->GetVisual()) );
     }
 
     for ( unsigned int i = 0; i < extv.size(); i++ ) {
@@ -1778,11 +1774,13 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance, bool u
 
                 // Go through all materials registered here
                 for ( auto const& itm : nodeAttachments[i][n]->Meshes ) {
-                    if ( itm.first && itm.first->GetAniTexture() ) { // TODO: Crash here!
-                        if ( itm.first->GetAniTexture()->CacheIn( 0.6f ) == zRES_CACHED_IN ) {
-                            itm.first->GetAniTexture()->Bind( 0 );
-                        } else
+                    zCTexture* texture;
+                    if ( itm.first && (texture = itm.first->GetAniTexture()) != nullptr ) { // TODO: Crash here!
+                        if ( texture->CacheIn( 0.6f ) == zRES_CACHED_IN ) {
+                            texture->Bind( 0 );
+                        } else {
                             continue;
+                        }
                     }
 
                     // Go through all meshes using that material
@@ -1933,7 +1931,6 @@ void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameDa
 
             if ( p->PolyStrip ) {
                 PolyStripVisuals.insert( p->PolyStrip );
-                p->PolyStrip->GetInstanceData()->material->GetAniTexture()->PrecacheTexAniFrames( 0.3f );
             };
 
             // Generate instance info

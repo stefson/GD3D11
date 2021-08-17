@@ -96,9 +96,6 @@ struct MeshInfo {
         MeshIndexBuffer = nullptr;
         BaseIndexLocation = 0;
         MeshIndexBufferPNAEN = nullptr;
-
-        WrappedVB = nullptr;
-        WrappedIB = nullptr;
     }
 
     virtual ~MeshInfo();
@@ -115,11 +112,6 @@ struct MeshInfo {
     std::vector<VERTEX_INDEX> IndicesPNAEN;
     std::vector<ExVertexStruct> VerticesPNAEN;
     unsigned int BaseIndexLocation;
-
-    unsigned int VertexBufferOffset;
-    unsigned int IndexBufferOffset;
-    D3D11VertexBuffer* WrappedVB;
-    D3D11VertexBuffer* WrappedIB;
 };
 
 struct WorldMeshInfo : public MeshInfo {
