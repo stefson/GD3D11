@@ -78,8 +78,18 @@ public:
 
     /** Returns AniTexture */
     zCTexture* GetTexture() {
+        zCTexture* texture = GetTextureSingle();
+        if ( texture ) {
+            unsigned char flags = *(unsigned char*)(((char*)texture) + GothicMemoryLocations::zCTexture::Offset_Flags);
+            if ( flags & GothicMemoryLocations::zCTexture::Mask_FlagIsAnimated ) {
+                if ( zCTexture* tex = GetAniTexture() ) {
+                    return tex;
+                }
+            }
+        }
+        return texture;
         //return GetTextureSingle(); // TODO: GetAniTexture crashes sometimes
-        XCALL( GothicMemoryLocations::zCMaterial::GetAniTexture );
+        //XCALL( GothicMemoryLocations::zCMaterial::GetAniTexture );
     }
 
     /** Returns the color-mod of this material */

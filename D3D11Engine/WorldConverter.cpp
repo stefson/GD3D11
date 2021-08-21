@@ -725,7 +725,7 @@ HRESULT WorldConverter::ConvertWorldMesh( zCPolygon** polys, unsigned int numPol
     DWORD sStart = Toolbox::timeSinceStartMs();
 
     // Generate smooth normals
-    MeshModifier::ComputeSmoothNormals( wrappedVertices );
+    //MeshModifier::ComputeSmoothNormals( wrappedVertices );
 
     LogInfo() << "Process took " << Toolbox::timeSinceStartMs() - sStart << "ms";
 

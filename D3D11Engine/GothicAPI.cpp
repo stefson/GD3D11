@@ -2677,7 +2677,7 @@ void GothicAPI::CollectVisibleVobs( std::vector<VobInfo*>& vobs, std::vector<Vob
     // Add visible dynamically added vobs
     if ( Engine::GAPI->GetRendererState().RendererSettings.DrawVOBs ) {
         float dist;
-        for ( auto const& it : DynamicallyAddedVobs ) {
+        for ( VobInfo* it : DynamicallyAddedVobs ) {
             // Get distance to this vob
             XMStoreFloat( &dist, DirectX::XMVector3Length( camPos - it->Vob->GetPositionWorldXM() ) );
             // Draw, if in range
@@ -2685,6 +2685,11 @@ void GothicAPI::CollectVisibleVobs( std::vector<VobInfo*>& vobs, std::vector<Vob
 #ifdef BUILD_GOTHIC_1_08k
                 // TODO: This is sometimes nullptr, suggesting that the Vob is invalid. Why does this happen?
                 if ( !it->VobConstantBuffer ) {
+                    removeList.push_back( it );
+                    continue;
+                }
+
+                if ( it->Vob->GetHomeWorld() != oCGame::GetGame()->_zCSession_world ) {
                     removeList.push_back( it );
                     continue;
                 }
@@ -2707,9 +2712,9 @@ void GothicAPI::CollectVisibleVobs( std::vector<VobInfo*>& vobs, std::vector<Vob
 
 #ifdef BUILD_GOTHIC_1_08k
     // TODO: See above for info on this
-    for ( auto it = removeList.cbegin(); it != removeList.cend(); ++it ) {
-        RegisteredVobs.insert( (*it)->Vob ); // This vob isn't in this set anymore, but still in DynamicallyAddedVobs??
-        OnRemovedVob( (*it)->Vob, oCGame::GetGame()->_zCSession_world );
+    for ( VobInfo* vi : removeList ) {
+        RegisteredVobs.insert( vi->Vob ); // This vob isn't in this set anymore, but still in DynamicallyAddedVobs??
+        OnRemovedVob( vi->Vob, oCGame::GetGame()->_zCSession_world );
     }
 #endif
 }

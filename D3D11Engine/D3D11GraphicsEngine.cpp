@@ -1490,8 +1490,6 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
             << " bytes. Recreating buffer.";
 
         // Buffer too small, recreate it
-        DynamicInstancingBuffer = std::make_unique<D3D11VertexBuffer>();
-
         // Put in some little extra space (32) so we don't need to recreate this
         // every frame when approaching a field of stones or something.
         DynamicInstancingBuffer->Init(
@@ -2134,13 +2132,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
         for ( auto const& worldMesh : renderItem->WorldMeshes ) {
             if ( worldMesh.first.Material ) {
                 zCTexture* aniTex = worldMesh.first.Material->GetTexture();
-
-                if ( !aniTex ) {
-                    aniTex = worldMesh.first.Material->GetTextureSingle();
-                    if ( !aniTex ) {
-                        continue;
-                    }
-                }
+                if ( !aniTex )  continue;
 
                 if ( aniTex->CacheIn( 0.6f ) != zRES_CACHED_IN ) {
                     continue;
@@ -3136,19 +3128,16 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround( FXMVECTOR position,
             GetContext()->PSSetShader( nullptr, nullptr, 0 );
         }
 
-        D3D11_BUFFER_DESC desc;
-        DynamicInstancingBuffer->GetVertexBuffer()->GetDesc( &desc );
-
+        size_t ByteWidth = DynamicInstancingBuffer->GetSizeInBytes();
         byte* data;
         UINT size;
         UINT loc = 0;
         DynamicInstancingBuffer->Map( D3D11VertexBuffer::M_WRITE_DISCARD,
             (void**)&data, &size );
-
         for ( auto const& staticMeshVisual : staticMeshVisuals ) {
             if ( staticMeshVisual.second->Instances.empty() ) continue;
 
-            if ( (loc + staticMeshVisual.second->Instances.size()) * sizeof( VobInstanceInfo ) >= desc.ByteWidth )
+            if ( (loc + staticMeshVisual.second->Instances.size()) * sizeof( VobInstanceInfo ) >= ByteWidth )
                 break;  // Should never happen
 
             staticMeshVisual.second->StartInstanceNum = loc;
@@ -3300,17 +3289,15 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
 
     if ( Engine::GAPI->GetRendererState().RendererSettings.DrawVOBs ) {
         // Create instancebuffer for this frame
-        D3D11_BUFFER_DESC desc;
-        DynamicInstancingBuffer->GetVertexBuffer()->GetDesc( &desc );
+        size_t ByteWidth = DynamicInstancingBuffer->GetSizeInBytes();
 
-        if ( desc.ByteWidth < sizeof( VobInstanceInfo ) * vobs.size() ) {
+        if ( ByteWidth < sizeof( VobInstanceInfo ) * vobs.size() ) {
             if ( Engine::GAPI->GetRendererState().RendererSettings.EnableDebugLog )
-                LogInfo() << "Instancing buffer too small (" << desc.ByteWidth
+                LogInfo() << "Instancing buffer too small (" << ByteWidth
                 << "), need " << sizeof( VobInstanceInfo ) * vobs.size()
                 << " bytes. Recreating buffer.";
 
             // Buffer too small, recreate it
-            DynamicInstancingBuffer = std::make_unique<D3D11VertexBuffer>();
             DynamicInstancingBuffer->Init(
                 nullptr, sizeof( VobInstanceInfo ) * vobs.size(),
                 D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC,
@@ -3325,7 +3312,6 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
         UINT loc = 0;
         DynamicInstancingBuffer->Map( D3D11VertexBuffer::M_WRITE_DISCARD,
             (void**)&data, &size );
-
         for ( auto const& staticMeshVisual : staticMeshVisuals ) {
             staticMeshVisual.second->StartInstanceNum = loc;
             memcpy( data + loc * sizeof( VobInstanceInfo ), &staticMeshVisual.second->Instances[0],
@@ -4586,11 +4572,25 @@ void D3D11GraphicsEngine::DrawVobSingle( VobInfo* vob ) {
 
 /** Draws a multiple VOBs (used for inventory) */
 void D3D11GraphicsEngine::DrawVobsList( const std::list<VobInfo*>& vobs, zCCamera& camera ) {
+#if defined(BUILD_GOTHIC_1_08k) && !defined(BUILD_1_12F)
+    // System Pack Animated_Inventory workaround
+    for ( auto const& vob : vobs ) {
+        DirectX::XMMATRIX worldMatrix = XMLoadFloat4x4( vob->Vob->GetWorldMatrixPtr() );
+        const uint32_t mask = _mm_movemask_epi8( _mm_packs_epi32(
+            _mm_castps_si128( _mm_cmpord_ps( worldMatrix.r[0], worldMatrix.r[1] ) ),
+            _mm_castps_si128( _mm_cmpord_ps( worldMatrix.r[2], worldMatrix.r[3] ) ) ) );
+        if ( mask != 0xFFFF ) { // Check whether there are any NAN's in the mask
+            // Sometimes items position doesn't get initialized properly
+            // let's just call RotateForInventory to restart them
+            reinterpret_cast<void( __fastcall* )( zCVob*, int, int )>( 0x672560 )( vob->Vob, 0, 1 );
+            return;
+        }
+    }
+#endif
+
+    Engine::GAPI->SetViewTransformXM( XMLoadFloat4x4( &camera.GetTransformDX( zCCamera::ETransformType::TT_VIEW ) ) );
     GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
         DepthStencilBuffer->GetDepthStencilView().Get() );
-
-    XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
-    Engine::GAPI->SetViewTransformXM( view );
 
     SetActivePixelShader( "PS_Preview_Textured" );
     SetActiveVertexShader( "VS_Ex" );
@@ -4601,7 +4601,7 @@ void D3D11GraphicsEngine::DrawVobsList( const std::list<VobInfo*>& vobs, zCCamer
     for ( auto const& vob : vobs ) {
         ActiveVS->GetConstantBuffer()[1]->UpdateBuffer( vob->Vob->GetWorldMatrixPtr() );
         ActiveVS->GetConstantBuffer()[1]->BindToVertexShader( 1 );
-
+        
         for ( auto const& itm : vob->VisualInfo->Meshes ) {
             // Cache & bind texture
             zCTexture* texture;

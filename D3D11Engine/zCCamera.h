@@ -27,7 +27,6 @@ public:
     }
 
     const DirectX::XMFLOAT4X4& GetTransformDX( const ETransformType type ) {
-#ifdef BUILD_GOTHIC_2_6_fix
         switch ( type ) {
         case ETransformType::TT_WORLD:			return trafoWorld;		break;
         case ETransformType::TT_VIEW:			return trafoView;		break;
@@ -36,10 +35,6 @@ public:
         case ETransformType::TT_VIEW_INV:		return trafoViewInv;	break;
         default:						        return camMatrix;		break;
         };
-#else
-        // TODO: Check if zCCamera is same with G1
-        XCALL( GothicMemoryLocations::zCCamera::GetTransform );
-#endif
     }
 
     void SetTransform( const ETransformType type, const DirectX::XMFLOAT4X4& mat ) {
