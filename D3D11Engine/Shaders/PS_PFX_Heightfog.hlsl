@@ -45,7 +45,7 @@ float3 VSPositionFromDepth(float depth, float2 vTexCoord)
 
 float ComputeVolumetricFog(float3 cameraToWorldPos, float3 posOriginal)
 {	
-	float cVolFogHeightDensityAtViewer = exp( -HF_HeightFalloff * HF_CameraPosition.y );
+	float cVolFogHeightDensityAtViewer = exp( -HF_HeightFalloff );
 	
 	float lenOrig = length(posOriginal - HF_CameraPosition);
 	float len = length(cameraToWorldPos);

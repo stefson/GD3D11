@@ -4575,10 +4575,11 @@ void D3D11GraphicsEngine::DrawVobsList( const std::list<VobInfo*>& vobs, zCCamer
 #if defined(BUILD_GOTHIC_1_08k) && !defined(BUILD_1_12F)
     // System Pack Animated_Inventory workaround
     for ( auto const& vob : vobs ) {
-        DirectX::XMMATRIX worldMatrix = XMLoadFloat4x4( vob->Vob->GetWorldMatrixPtr() );
+        DirectX::XMMATRIX worldMatrix = vob->Vob->GetWorldMatrixXM();
         const uint32_t mask = _mm_movemask_epi8( _mm_packs_epi32(
             _mm_castps_si128( _mm_cmpord_ps( worldMatrix.r[0], worldMatrix.r[1] ) ),
-            _mm_castps_si128( _mm_cmpord_ps( worldMatrix.r[2], worldMatrix.r[3] ) ) ) );
+            _mm_castps_si128( _mm_cmpord_ps( worldMatrix.r[2], worldMatrix.r[3] ) )
+        ) );
         if ( mask != 0xFFFF ) { // Check whether there are any NAN's in the mask
             // Sometimes items position doesn't get initialized properly
             // let's just call RotateForInventory to restart them

@@ -256,9 +256,6 @@ public:
     }
 
     float GetModelFatness() {
-#ifdef BUILD_GOTHIC_1_08k
-        return 0.0f;
-#endif
         float fatness = *(float*)THISPTR_OFFSET( GothicMemoryLocations::zCModel::Offset_ModelFatness );
         // fix fatness value
         if ( fatness >= 2.0f )

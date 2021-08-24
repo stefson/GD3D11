@@ -1105,41 +1105,48 @@ bool GothicAPI::IsMaterialActive( zCMaterial* mat ) {
     return false;
 }
 
-
 /** Called when a vob moved */
 void GothicAPI::OnVobMoved( zCVob* vob ) {
-    auto it = VobMap.find( vob );
+    auto checkMatrix = []( DirectX::XMMATRIX& a, DirectX::XMMATRIX& b ) -> bool {
+        const uint32_t mask = _mm_movemask_epi8( _mm_packs_epi16(
+            _mm_packs_epi32 (
+            _mm_castps_si128( _mm_cmpeq_ps( a.r[0], b.r[0] ) ),
+            _mm_castps_si128( _mm_cmpeq_ps( a.r[1], b.r[1] ) ) ),
+            _mm_packs_epi32 (
+            _mm_castps_si128( _mm_cmpeq_ps( a.r[2], b.r[2] ) ),
+            _mm_castps_si128( _mm_cmpeq_ps( a.r[3], b.r[3] ) ) )
+        ) );
+        return (mask == 0xFFFF);
+    };
 
+    auto it = VobMap.find( vob );
     if ( it != VobMap.end() ) {
+        VobInfo* vi = it->second;
 #ifdef BUILD_GOTHIC_1_08k
         // Check if the transform changed, since G1 calls this function over and over again
-        if ( memcmp( &vob->GetWorldMatrixXM(), &XMLoadFloat4x4( &it->second->WorldMatrix ), sizeof( XMMATRIX ) ) == 0 ) {
+        if ( checkMatrix( vob->GetWorldMatrixXM(), XMLoadFloat4x4( &vi->WorldMatrix ) ) ) {
             // No actual change
             return;
         }
 #endif
 
-        if ( !it->second->ParentBSPNodes.empty() ) {
+        if ( !vi->ParentBSPNodes.empty() ) {
             // Move vob into the dynamic list, if not already done
-            MoveVobFromBspToDynamic( it->second );
+            MoveVobFromBspToDynamic( vi );
         }
 
-        XMStoreFloat3( &it->second->LastRenderPosition, it->second->Vob->GetPositionWorldXM() );
-        it->second->UpdateVobConstantBuffer();
-
+        vi->UpdateVobConstantBuffer();
         Engine::GAPI->GetRendererState().RendererInfo.FrameVobUpdates++;
     } else {
         auto sit = SkeletalVobMap.find( vob );
-
         if ( sit != SkeletalVobMap.end() ) {
-            if ( !(*sit).second || memcmp( &vob->GetWorldMatrixXM(), &XMLoadFloat4x4( &(*sit).second->WorldMatrix ), sizeof( XMMATRIX ) ) == 0 ) {
+            SkeletalVobInfo* vi = sit->second;
+            if ( vi->ParentBSPNodes.empty() || checkMatrix( vob->GetWorldMatrixXM(), XMLoadFloat4x4( &vi->WorldMatrix ) ) ) {
                 // No actual change
                 return;
             }
             // This is a mob, remove it from the bsp-cache and add to dynamic list
-            if ( !(*sit).second->ParentBSPNodes.empty() ) {
-                MoveVobFromBspToDynamic( (*sit).second );
-            }
+            MoveVobFromBspToDynamic( vi );
         }
     }
 }
@@ -1174,7 +1181,7 @@ void GothicAPI::OnVisualDeleted( zCVisual* visual ) {
         // Delete according to the type
         if ( ext == ".3DS" ) {
             // Clear the visual from all vobs (TODO: This may be slow!)
-            for ( std::unordered_map<zCVob*, VobInfo*>::iterator it = VobMap.begin(); it != VobMap.end();) {
+            for ( auto it = VobMap.begin(); it != VobMap.end();) {
                 if ( !it->second->VisualInfo ) { // This happens sometimes, so get rid of it
                     it = VobMap.erase( it );
                     continue;
@@ -2673,11 +2680,18 @@ void GothicAPI::CollectVisibleVobs( std::vector<VobInfo*>& vobs, std::vector<Vob
     const float vobSmallSize = Engine::GAPI->GetRendererState().RendererSettings.SmallVobSize;
 
     std::list<VobInfo*> removeList; // TODO: This should not be needed!
-
+    
     // Add visible dynamically added vobs
     if ( Engine::GAPI->GetRendererState().RendererSettings.DrawVOBs ) {
         float dist;
         for ( VobInfo* it : DynamicallyAddedVobs ) {
+#ifdef BUILD_GOTHIC_1_08k
+            // TODO: This should not be needed
+            if ( it->Vob->GetHomeWorld() != oCGame::GetGame()->_zCSession_world ) {
+                removeList.push_back( it );
+                continue;
+            }
+#endif
             // Get distance to this vob
             XMStoreFloat( &dist, DirectX::XMVector3Length( camPos - it->Vob->GetPositionWorldXM() ) );
             // Draw, if in range
@@ -2685,11 +2699,6 @@ void GothicAPI::CollectVisibleVobs( std::vector<VobInfo*>& vobs, std::vector<Vob
 #ifdef BUILD_GOTHIC_1_08k
                 // TODO: This is sometimes nullptr, suggesting that the Vob is invalid. Why does this happen?
                 if ( !it->VobConstantBuffer ) {
-                    removeList.push_back( it );
-                    continue;
-                }
-
-                if ( it->Vob->GetHomeWorld() != oCGame::GetGame()->_zCSession_world ) {
                     removeList.push_back( it );
                     continue;
                 }
@@ -2941,8 +2950,6 @@ void GothicAPI::CollectVisibleVobsHelper( BspInfo* base, zTBBox3D boxCell, int c
             std::vector<VobInfo*>& listB = base->SmallVobs;
             std::vector<VobInfo*>& listC = base->Vobs;
             std::vector<SkeletalVobInfo*>& listD = base->Mobs;
-            const std::vector<VobLightInfo*>& listL = base->Lights;
-            const std::vector<VobLightInfo*>& listL_Indoor = base->IndoorLights;
 
             // Concat the lists
             const float dist = Toolbox::ComputePointAABBDistance( camPos, base->OriginalNode->BBox3D.Min, base->OriginalNode->BBox3D.Max );
@@ -2968,53 +2975,54 @@ void GothicAPI::CollectVisibleVobsHelper( BspInfo* base, zTBBox3D boxCell, int c
                 if ( Engine::GAPI->GetRendererState().RendererSettings.DrawMobs && dist < vobOutdoorSmallDist ) {
                     CVVH_AddNotDrawnVobToList( mobs, listD, vobOutdoorDist );
                 }
-            }
 
-            if ( RendererState.RendererSettings.EnableDynamicLighting && insideFrustum ) {
-                // Add dynamic lights
-                float minDynamicUpdateLightRange = Engine::GAPI->GetRendererState().RendererSettings.MinLightShadowUpdateRange;
-                XMVECTOR playerPosition = Engine::GAPI->GetPlayerVob() != nullptr ? Engine::GAPI->GetPlayerVob()->GetPositionWorldXM() : XMVectorSet( FLT_MAX, FLT_MAX, FLT_MAX, 0 );
-                FXMVECTOR cameraPosition = Engine::GAPI->GetCameraPositionXM();
+                if ( RendererState.RendererSettings.EnableDynamicLighting && dist < visualFXDrawRadius ) {
+                    // Add dynamic lights
+                    float minDynamicUpdateLightRange = Engine::GAPI->GetRendererState().RendererSettings.MinLightShadowUpdateRange;
+                    XMVECTOR playerPosition = Engine::GAPI->GetPlayerVob() != nullptr ? Engine::GAPI->GetPlayerVob()->GetPositionWorldXM() : XMVectorSet( FLT_MAX, FLT_MAX, FLT_MAX, 0 );
+                    FXMVECTOR cameraPosition = Engine::GAPI->GetCameraPositionXM();
 
-                // Take cameraposition if we are freelooking
-                if ( zCCamera::IsFreeLookActive() ) {
-                    playerPosition = cameraPosition;
-                }
+                    // Take cameraposition if we are freelooking
+                    if ( zCCamera::IsFreeLookActive() ) {
+                        playerPosition = cameraPosition;
+                    }
 
-                for ( int i = 0; i < leaf->LightVobList.NumInArray; i++ ) {
-                    float lightCameraDist;
-                    XMStoreFloat( &lightCameraDist, DirectX::XMVector3Length( cameraPosition - leaf->LightVobList.Array[i]->GetPositionWorldXM() ) );
-                    if ( lightCameraDist + leaf->LightVobList.Array[i]->GetLightRange() < visualFXDrawRadius ) {
-                        zCVobLight* v = leaf->LightVobList.Array[i];
-                        VobLightInfo** vi = &VobLightMap[leaf->LightVobList.Array[i]];
+                    for ( int i = 0; i < leaf->LightVobList.NumInArray; i++ ) {
+                        zCVobLight* vob = leaf->LightVobList.Array[i];
 
-                        // Check if we already have this light
-                        if ( !*vi ) {
-                            // Add if not. This light must have been added during gameplay
-                            *vi = new VobLightInfo;
-                            (*vi)->Vob = leaf->LightVobList.Array[i];
+                        float lightCameraDist;
+                        XMStoreFloat( &lightCameraDist, DirectX::XMVector3Length( cameraPosition - vob->GetPositionWorldXM() ) );
+                        if ( lightCameraDist + vob->GetLightRange() < visualFXDrawRadius ) {
+                            // Check if we already have this light
+                            auto vit = VobLightMap.find( vob );
+                            if ( vit == VobLightMap.end() ) {
+                                // Add if not. This light must have been added during gameplay
+                                VobLightInfo* vi = new VobLightInfo;
+                                vi->Vob = vob;
+                                vit = VobLightMap.emplace( vob, vi ).first;
 
-                            // Create shadow-buffers for these lights since it was dynamically added to the world
-                            if ( RendererState.RendererSettings.EnablePointlightShadows >= GothicRendererSettings::PLS_STATIC_ONLY )
-                                Engine::GraphicsEngine->CreateShadowedPointLight( &(*vi)->LightShadowBuffers, *vi, true ); // Also flag as dynamic
-                        }
-
-                        if ( !(*vi)->VisibleInRenderPass && (*vi)->Vob->IsEnabled() /*&& (*vi)->Vob->GetShowVisual()*/ ) {
-                            (*vi)->VisibleInRenderPass = true;
-
-                            float lightPlayerDist;
-                            XMStoreFloat( &lightPlayerDist, DirectX::XMVector3Length( playerPosition - leaf->LightVobList.Array[i]->GetPositionWorldXM() ) );
-
-                            // Update the lights shadows if: Light is dynamic or full shadow-updates are set
-                            if ( RendererState.RendererSettings.EnablePointlightShadows >= GothicRendererSettings::PLS_FULL
-                                || (RendererState.RendererSettings.EnablePointlightShadows >= GothicRendererSettings::PLS_UPDATE_DYNAMIC && !(*vi)->Vob->IsStatic()) ) {
-                                // Now check for distances, etc
-                                if ( (*vi)->Vob->GetLightRange() > minDynamicUpdateLightRange
-                                    && lightPlayerDist < (*vi)->Vob->GetLightRange() * 1.5f )
-                                    (*vi)->UpdateShadows = true;
+                                // Create shadow-buffers for these lights since it was dynamically added to the world
+                                if ( RendererState.RendererSettings.EnablePointlightShadows >= GothicRendererSettings::PLS_STATIC_ONLY )
+                                    Engine::GraphicsEngine->CreateShadowedPointLight( &vi->LightShadowBuffers, vi, true ); // Also flag as dynamic
                             }
-                            // Render it
-                            lights.push_back( *vi );
+
+                            VobLightInfo* vi = vit->second;
+                            if ( !vi->VisibleInRenderPass && vi->Vob->IsEnabled() /*&& vi->Vob->GetShowVisual()*/ ) {
+                                vi->VisibleInRenderPass = true;
+
+                                // Update the lights shadows if: Light is dynamic or full shadow-updates are set
+                                if ( RendererState.RendererSettings.EnablePointlightShadows >= GothicRendererSettings::PLS_FULL
+                                    || (RendererState.RendererSettings.EnablePointlightShadows >= GothicRendererSettings::PLS_UPDATE_DYNAMIC && !vob->IsStatic()) ) {
+                                    // Now check for distances, etc
+                                    float lightPlayerDist;
+                                    XMStoreFloat( &lightPlayerDist, DirectX::XMVector3Length( playerPosition - leaf->LightVobList.Array[i]->GetPositionWorldXM() ) );
+                                    if ( vob->GetLightRange() > minDynamicUpdateLightRange && lightPlayerDist < vob->GetLightRange() * 1.5f )
+                                        vi->UpdateShadows = true;
+                                }
+
+                                // Render it
+                                lights.push_back( vi );
+                            }
                         }
                     }
                 }
@@ -3068,14 +3076,16 @@ void GothicAPI::BuildBspVobMapCacheHelper( zCBspBase* base ) {
         bvi.Back = nullptr;
 
         for ( int i = 0; i < leaf->LeafVobList.NumInArray; i++ ) {
-            // Get the vob info for this one
-            if ( VobMap.find( leaf->LeafVobList.Array[i] ) != VobMap.end() ) {
-                VobInfo* v = VobMap[leaf->LeafVobList.Array[i]];
+            zCVob* vob = leaf->LeafVobList.Array[i];
 
+            // Get the vob info for this one
+            auto vit = VobMap.find( vob );
+            if ( vit != VobMap.end() ) {
+                VobInfo* v = vit->second;
                 if ( v ) {
                     float vobSmallSize = Engine::GAPI->GetRendererState().RendererSettings.SmallVobSize;
 
-                    if ( v->Vob->IsIndoorVob() ) {
+                    if ( vob->IsIndoorVob() ) {
                         // Only add once
                         if ( std::find( bvi.IndoorVobs.begin(), bvi.IndoorVobs.end(), v ) == bvi.IndoorVobs.end() ) {
                             v->ParentBSPNodes.push_back( &bvi );
@@ -3099,9 +3109,9 @@ void GothicAPI::BuildBspVobMapCacheHelper( zCBspBase* base ) {
             }
 
             // Get mobs
-            if ( SkeletalVobMap.find( leaf->LeafVobList.Array[i] ) != SkeletalVobMap.end() ) {
-                SkeletalVobInfo* v = SkeletalVobMap[leaf->LeafVobList.Array[i]];
-
+            auto sit = SkeletalVobMap.find( vob );
+            if ( sit != SkeletalVobMap.end() ) {
+                SkeletalVobInfo* v = sit->second;
                 if ( v ) {
                     // Only add once
                     if ( std::find( bvi.Mobs.begin(), bvi.Mobs.end(), v ) == bvi.Mobs.end() ) {
@@ -3113,13 +3123,14 @@ void GothicAPI::BuildBspVobMapCacheHelper( zCBspBase* base ) {
         }
 
         for ( int i = 0; i < leaf->LightVobList.NumInArray; i++ ) {
-            // Add the light to the map if not already done
-            std::unordered_map<zCVobLight*, VobLightInfo*>::iterator vit = VobLightMap.find( leaf->LightVobList.Array[i] );
+            zCVobLight* vob = leaf->LightVobList.Array[i];
 
+            // Add the light to the map if not already done
+            auto vit = VobLightMap.find( vob );
             if ( vit == VobLightMap.end() ) {
                 VobLightInfo* vi = new VobLightInfo;
-                vi->Vob = leaf->LightVobList.Array[i];
-                VobLightMap[leaf->LightVobList.Array[i]] = vi;
+                vi->Vob = vob;
+                VobLightMap[vob] = vi;
 
                 float minDynamicUpdateLightRange = Engine::GAPI->GetRendererState().RendererSettings.MinLightShadowUpdateRange;
                 if ( RendererState.RendererSettings.EnablePointlightShadows >= GothicRendererSettings::PLS_STATIC_ONLY
@@ -3128,12 +3139,12 @@ void GothicAPI::BuildBspVobMapCacheHelper( zCBspBase* base ) {
                     Engine::GraphicsEngine->CreateShadowedPointLight( &vi->LightShadowBuffers, vi );
                 }
 
-                if ( (zCVob*)vi->Vob->IsIndoorVob() ) {
+                if ( vob->IsIndoorVob() ) {
                     vi->IsIndoorVob = true;
                 }
             }
 
-            VobLightInfo* vi = VobLightMap[leaf->LightVobList.Array[i]];
+            VobLightInfo* vi = VobLightMap[vob];
             if ( vi ) {
                 if ( !vi->IsIndoorVob ) {
                     // Only add once
@@ -3986,7 +3997,11 @@ void GothicAPI::LoadSectionInfos() {
 
 /** Returns if the given vob is registered in the world */
 SkeletalVobInfo* GothicAPI::GetSkeletalVobByVob( zCVob* vob ) {
-    return SkeletalVobMap[vob];
+    auto sit = SkeletalVobMap.find( vob );
+    if ( sit != SkeletalVobMap.end() ) {
+        return sit->second;
+    }
+    return nullptr;
 }
 
 /** Returns true if the given string can be found in the commandline */
