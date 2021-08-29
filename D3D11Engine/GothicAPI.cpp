@@ -1227,12 +1227,12 @@ void GothicAPI::OnVisualDeleted( zCVisual* visual ) {
                 }
             }
 
-            std::string mds = ((zCModel*)visual)->GetModelName().ToChar();
-
             std::string str = ((zCModel*)visual)->GetVisualName();
-
-            if ( str.empty() ) // Happens when the model has no skeletal-mesh
-                str = mds;
+            if ( str.empty() ) { // Happens when the model has no skeletal-mesh
+                zSTRING mds = ((zCModel*)visual)->GetModelName();
+                str = mds.ToChar();
+                mds.Delete();
+            }
 
             delete SkeletalMeshVisuals[str];
             SkeletalMeshVisuals.erase( str );
@@ -1595,12 +1595,12 @@ void GothicAPI::OnAddVob( zCVob* vob, zCWorld* world ) {
                 break;
             }
 
-            std::string mds = ((zCModel*)vob->GetVisual())->GetModelName().ToChar();
-
             std::string str = ((zCModel*)vob->GetVisual())->GetVisualName();
-
-            if ( str.empty() ) // Happens when the model has no skeletal-mesh
-                str = mds;
+            if ( str.empty() ) { // Happens when the model has no skeletal-mesh
+                zSTRING mds = ((zCModel*)vob->GetVisual())->GetModelName();
+                str = mds.ToChar();
+                mds.Delete();
+            }
 
             // TODO: HAMMEL_BODY seems to have fucked up bones, but only this model! Replace with usual sheep before I fix this
             if ( str == "HAMMEL_BODY" ) {
@@ -1650,20 +1650,19 @@ void GothicAPI::OnAddVob( zCVob* vob, zCWorld* world ) {
 
 /** Loads the data out of a zCModel */
 SkeletalMeshVisualInfo* GothicAPI::LoadzCModelData( zCModel* model ) {
-    std::string mds = model->GetModelName().ToChar();
     std::string str = model->GetVisualName();
-
-    if ( str.empty() ) // Happens when the model has no skeletal-mesh
-        str = mds;
+    if ( str.empty() ) { // Happens when the model has no skeletal-mesh
+        zSTRING mds = model->GetModelName();
+        str = mds.ToChar();
+        mds.Delete();
+    }
 
     SkeletalMeshVisualInfo* mi = SkeletalMeshVisuals[str];
-
     if ( !mi || mi->Meshes.empty() ) {
         // Load the new visual
         if ( !mi ) mi = new SkeletalMeshVisualInfo;
 
         WorldConverter::ExtractSkeletalMeshFromVob( model, mi );
-
         mi->Visual = model;
 
         SkeletalMeshVisuals[str] = mi;
@@ -4286,8 +4285,11 @@ BspInfo* GothicAPI::GetNewRootNode() {
 /** Prints a message to the screen for the given amount of time */
 void GothicAPI::PrintMessageTimed( const INT2& position, const std::string& strMessage, float time, DWORD color ) {
     zCView* view = oCGame::GetGame()->GetGameView();
-    if ( view )
-        view->PrintTimed( position.x, position.y, zSTRING( strMessage.c_str() ), time, &color );
+    if ( view ) {
+        zSTRING message( strMessage.c_str() );
+        view->PrintTimed( position.x, position.y, message, time, &color );
+        message.Delete();
+    }
 }
 
 /** Prints information about the mod to the screen for a couple of seconds */

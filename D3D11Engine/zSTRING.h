@@ -8,7 +8,7 @@ public:
         reinterpret_cast<void( __fastcall* )( zSTRING*, int, const char* )>( GothicMemoryLocations::zSTRING::ConstructorCharPtr )( this, 0, str );
     }
 
-    virtual ~zSTRING() {
+    void Delete() {
         reinterpret_cast<void( __fastcall* )( zSTRING* )>( GothicMemoryLocations::zSTRING::DestructorCharPtr )( this );
     }
 

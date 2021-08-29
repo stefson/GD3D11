@@ -78,7 +78,7 @@ typedef void( __thiscall* oCWorldEnableVob )(void*, zCVob*, zCVob*);
 typedef void( __thiscall* oCWorldRemoveVob )(void*, zCVob*);
 typedef void( __thiscall* oCWorldDisableVob )(void*, zCVob*);
 typedef void( __fastcall* oCWorldRemoveFromLists )(void*, zCVob*);
-typedef int( __thiscall* zCBinkPlayerOpenVideo )(void*, int a1, int a2, int a3, int a4, int a5);
+typedef int( __thiscall* zCBinkPlayerOpenVideo )(void*, class zSTRING);
 typedef int( __thiscall* zCModelPrototypeLoadModelASC )(void*, class zSTRING const&);
 typedef int( __thiscall* zCModelPrototypeReadMeshAndTreeMSB )(void*, int&, class zCFileBIN&);
 
@@ -168,7 +168,7 @@ struct HookedFunctionInfo {
     /** Single function for making the bink-player working again */
     /** Returns the pixelformat of a bink-surface */
     static long __fastcall hooked_zBinkPlayerGetPixelFormat( void* thisptr, void* unknwn, zTRndSurfaceDesc& desc );
-    static int __fastcall hooked_zBinkPlayerOpenVideo( void* thisptr, void* unknwn, int a1, int a2, int a3, int a4, int a5 );
+    static int __fastcall hooked_zBinkPlayerOpenVideo( void* thisptr, void* unknwn, zSTRING str );
     static void __fastcall hooked_zCActiveSndAutoCalcObstruction( void* thisptr, void* unknwn, int i );
 };
 

@@ -1061,7 +1061,8 @@ void WorldConverter::ExtractProgMeshProtoFromModel( zCModel* model, MeshVisualIn
     model->UpdateAttachedVobs();
     model->UpdateMeshLibTexAniState();
 
-    const char* visualName = model->GetModelName().ToChar();
+    zSTRING mds = model->GetModelName();
+    const char* visualName = mds.ToChar();
     zCArray<zCModelNodeInst*>* nodeList = model->GetNodeList();
     for ( int i = 0; i < nodeList->NumInArray; i++ ) {
         zCModelNodeInst* node = nodeList->Array[i];
@@ -1181,9 +1182,7 @@ void WorldConverter::ExtractProgMeshProtoFromModel( zCModel* model, MeshVisualIn
         // Propergate the offsets
         int i = 0;
         for ( auto const& it : meshInfos ) {
-            it->BaseIndexLocation = offsets[i];
-
-            i++;
+            it->BaseIndexLocation = offsets[i++];
         }
 
         MeshInfo* wmi = new MeshInfo;
@@ -1211,6 +1210,8 @@ void WorldConverter::ExtractProgMeshProtoFromModel( zCModel* model, MeshVisualIn
     // Create additional information
     if ( meshInfo->TesselationInfo.buffer.VT_TesselationFactor > 0.0f )
         meshInfo->CreatePNAENInfo( meshInfo->TesselationInfo.buffer.VT_DisplacementStrength > 0.0f );
+
+    mds.Delete();
 }
 
 /** Extracts a node-visual */
