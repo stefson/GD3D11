@@ -543,10 +543,10 @@ HRESULT WorldConverter::ConvertWorldMesh( zCPolygon** polys, unsigned int numPol
         INT2 section = GetSectionOfPos( avgPos );
         (*outSections)[section.x][section.y].WorldCoordinates = section;
 
-        if ( poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER ) {
+        //if ( poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER ) {
             //(*outSections)[section.x][section.y].OceanPoints.push_back(*poly->getVertices()[0]->Position.toXMFLOAT3());
             //continue;
-        }
+        //}
 
         XMFLOAT3& bbmin = (*outSections)[section.x][section.y].BoundingBox.Min;
         XMFLOAT3& bbmax = (*outSections)[section.x][section.y].BoundingBox.Max;
@@ -559,21 +559,26 @@ HRESULT WorldConverter::ConvertWorldMesh( zCPolygon** polys, unsigned int numPol
 
         // Extract poly vertices
         std::vector<ExVertexStruct> polyVertices;
+        polyVertices.reserve( poly->GetNumPolyVertices() );
         for ( int v = 0; v < poly->GetNumPolyVertices(); v++ ) {
-            ExVertexStruct t;
-            t.Position = poly->getVertices()[v]->Position;
-            t.TexCoord = poly->getFeatures()[v]->texCoord;
-            t.Normal = poly->getFeatures()[v]->normal;
-            t.Color = poly->getFeatures()[v]->lightStatic;
+            zCVertex* vertex = poly->getVertices()[v];
+            zCVertFeature* feature = poly->getFeatures()[v];
+
+            polyVertices.emplace_back();
+            ExVertexStruct& t = polyVertices.back();
+            t.Position = vertex->Position;
+            t.TexCoord = feature->texCoord;
+            t.Normal = feature->normal;
+            t.Color = feature->lightStatic;
 
             // Check bounding box
-            bbmin.x = bbmin.x > poly->getVertices()[v]->Position.x ? poly->getVertices()[v]->Position.x : bbmin.x;
-            bbmin.y = bbmin.y > poly->getVertices()[v]->Position.y ? poly->getVertices()[v]->Position.y : bbmin.y;
-            bbmin.z = bbmin.z > poly->getVertices()[v]->Position.z ? poly->getVertices()[v]->Position.z : bbmin.z;
+            bbmin.x = bbmin.x > vertex->Position.x ? vertex->Position.x : bbmin.x;
+            bbmin.y = bbmin.y > vertex->Position.y ? vertex->Position.y : bbmin.y;
+            bbmin.z = bbmin.z > vertex->Position.z ? vertex->Position.z : bbmin.z;
 
-            bbmax.x = bbmax.x < poly->getVertices()[v]->Position.x ? poly->getVertices()[v]->Position.x : bbmax.x;
-            bbmax.y = bbmax.y < poly->getVertices()[v]->Position.y ? poly->getVertices()[v]->Position.y : bbmax.y;
-            bbmax.z = bbmax.z < poly->getVertices()[v]->Position.z ? poly->getVertices()[v]->Position.z : bbmax.z;
+            bbmax.x = bbmax.x < vertex->Position.x ? vertex->Position.x : bbmax.x;
+            bbmax.y = bbmax.y < vertex->Position.y ? vertex->Position.y : bbmax.y;
+            bbmax.z = bbmax.z < vertex->Position.z ? vertex->Position.z : bbmax.z;
 
             if ( poly->GetLightmap() ) {
                 t.TexCoord2 = poly->GetLightmap()->GetLightmapUV( *t.Position.toXMFLOAT3() );
@@ -589,8 +594,6 @@ HRESULT WorldConverter::ConvertWorldMesh( zCPolygon** polys, unsigned int numPol
                     t.Color = 0xFFFFFFFF;
                 }
             }
-
-            polyVertices.emplace_back( t );
         }
 
         // Use the map to put the polygon to those using the same material
@@ -606,41 +609,35 @@ HRESULT WorldConverter::ConvertWorldMesh( zCPolygon** polys, unsigned int numPol
             key.Info = Engine::GAPI->GetMaterialInfoFrom( key.Texture );
             (*outSections)[section.x][section.y].WorldMeshes[key] = new WorldMeshInfo;
         }
-
-        std::vector<ExVertexStruct> finalVertices;
-        TriangleFanToList( &polyVertices[0], polyVertices.size(), &finalVertices );
-
-        /*
-        if (finalVertices.size() == 3) {
-            if (mat && mat->GetTexture()) {
-                if (strnicmp(mat->GetTexture()->GetNameWithoutExt().c_str(), "NW_Harbour_Stairs", strlen("NW_Harbour_Stairs")) == 0)
-                {
-                    ExVertexStruct vx[3];
-                    memcpy(vx, &finalVertices[0], sizeof(ExVertexStruct) * 3);
-                    finalVertices.clear();
-
-                    TesselateTriangle(vx, finalVertices, 5);
-                }
-            }
-        }
-        */
+        TriangleFanToList( &polyVertices[0], polyVertices.size(), &(*outSections)[section.x][section.y].WorldMeshes[key]->Vertices );
 
         //if (mat && mat->GetTexture())
         //	LogInfo() << "Got texture name: " << mat->GetTexture()->GetName();
 
-        if ( poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER // Check for water
-            && poly->GetMaterial()->GetAlphaFunc() != zMAT_ALPHA_FUNC_TEST ) // Fix foam on waterfalls
+        if ( mat && mat->GetMatGroup() == zMAT_GROUP_WATER // Check for water
+            && !mat->HasAlphaTest() ) // Fix foam on waterfalls
         {
+#ifdef BUILD_GOTHIC_1_08k
+            if ( key.Texture && key.Texture->HasAlphaChannel() ) { // Fix foam on waterfalls
+                // Give it alpha test since it contains alpha channel and most like is the foam
+                // Normal water surfaces shouldn't have alpha channel
+                mat->SetAlphaFunc( zMAT_ALPHA_FUNC_TEST );
+            } else {
+                // Give water surfaces a water-shader
+                MaterialInfo* info = Engine::GAPI->GetMaterialInfoFrom( key.Texture );
+                if ( info ) {
+                    info->PixelShader = "PS_Water";
+                    info->MaterialType = MaterialInfo::MT_Water;
+                }
+            }
+#else
             // Give water surfaces a water-shader
-            MaterialInfo* info = Engine::GAPI->GetMaterialInfoFrom( poly->GetMaterial()->GetTexture() );
+            MaterialInfo* info = Engine::GAPI->GetMaterialInfoFrom( key.Texture );
             if ( info ) {
                 info->PixelShader = "PS_Water";
                 info->MaterialType = MaterialInfo::MT_Water;
             }
-        }
-
-        for ( unsigned int v = 0; v < finalVertices.size(); v++ ) {
-            (*outSections)[section.x][section.y].WorldMeshes[key]->Vertices.emplace_back( finalVertices[v] );
+#endif
         }
     }
 
@@ -977,30 +974,33 @@ void WorldConverter::ExtractSkeletalMeshFromVob( zCModel* model, SkeletalMeshVis
             zCSubMesh* m = s->GetSubmesh( i );
 
             // Get indices
+            indices.reserve( m->TriList.NumInArray * 3 );
             for ( int t = 0; t < m->TriList.NumInArray; t++ ) {
-                indices.emplace_back( m->TriList.Array[t].wedge[2] );
-                indices.emplace_back( m->TriList.Array[t].wedge[1] );
-                indices.emplace_back( m->TriList.Array[t].wedge[0] );
+                zTPMTriangle& triangle = m->TriList.Array[t];
+                indices.emplace_back( triangle.wedge[2] );
+                indices.emplace_back( triangle.wedge[1] );
+                indices.emplace_back( triangle.wedge[0] );
             }
 
             // Get vertices
+            vertices.reserve( m->WedgeList.NumInArray );
+            bindPoseVertices.reserve( m->WedgeList.NumInArray );
             for ( int v = 0; v < m->WedgeList.NumInArray; v++ ) {
-                ExSkelVertexStruct vx;
-                vx = posList[m->WedgeList.Array[v].position];
-                vx.TexCoord = m->WedgeList.Array[v].texUV;
-                vx.Color = 0xFFFFFFFF;
-                vx.Normal = m->WedgeList.Array[v].normal;
+                zTPMWedge& wedge = m->WedgeList.Array[v];
+                vertices.push_back( posList[wedge.position] );
 
-                vertices.emplace_back( vx );
+                ExSkelVertexStruct& vx = vertices.back();
+                vx.Normal = wedge.normal;
+                vx.TexCoord = wedge.texUV;
+                vx.Color = 0xFFFFFFFF;
 
                 // Save vertexpos in bind pose, to run PNAEN on it
-                ExVertexStruct pvx;
-                pvx.Position = s->GetPositionList()->Array[m->WedgeList.Array[v].position];
-                pvx.TexCoord = vx.TexCoord;
+                bindPoseVertices.emplace_back();
+                ExVertexStruct& pvx = bindPoseVertices.back();
+                pvx.Position = s->GetPositionList()->Array[wedge.position];
                 pvx.Normal = vx.Normal;
+                pvx.TexCoord = vx.TexCoord;
                 pvx.Color = vx.Color;
-
-                bindPoseVertices.emplace_back( pvx );
             }
 
             zCMaterial* mat = s->GetSubmesh( i )->Material;
@@ -1049,129 +1049,168 @@ void WorldConverter::ExtractSkeletalMeshFromVob( zCModel* model, SkeletalMeshVis
         skeletalMeshInfo->CreatePNAENInfo( skeletalMeshInfo->TesselationInfo.buffer.VT_DisplacementStrength > 0.0f );
 }
 
-/** Extracts a skeletal mesh from a zCMeshSoftSkin */
-void WorldConverter::ExtractSkeletalMeshFromProto( zCModelMeshLib* model, SkeletalMeshVisualInfo* skeletalMeshInfo ) {
-    // This type has multiple skinned meshes inside
-    for ( int i = 0; i < model->GetMeshSoftSkinList()->NumInArray; i++ ) {
-        zCMeshSoftSkin* s = model->GetMeshSoftSkinList()->Array[i];
-        std::vector<ExSkelVertexStruct> posList;
+/** Extracts a zCProgMeshProto from a zCModel */
+void WorldConverter::ExtractProgMeshProtoFromModel( zCModel* model, MeshVisualInfo* meshInfo ) {
+    XMFLOAT3 bbmin = XMFLOAT3( FLT_MAX, FLT_MAX, FLT_MAX );
+    XMFLOAT3 bbmax = XMFLOAT3( -FLT_MAX, -FLT_MAX, -FLT_MAX );
 
-        // This stream is built as the following:
-        // 4byte int - Num of nodes
-        // sizeof(zTWeightEntry) - The entry
-        char* stream = s->GetVertWeightStream();
+    std::list<std::vector<ExVertexStruct>*> vertexBuffers;
+    std::list<std::vector<VERTEX_INDEX>*> indexBuffers;
+    std::list<MeshInfo*> meshInfos;
 
-        // Get bone weights for each vertex
-        for ( int i = 0; i < s->GetPositionList()->NumInArray; i++ ) {
-            // Get num of nodes
-            int numNodes = *(int*)stream;
-            stream += 4;
+    model->UpdateAttachedVobs();
+    model->UpdateMeshLibTexAniState();
 
-            ExSkelVertexStruct vx;
-            //vx.Position = s->GetPositionList()->Array[i];
-            vx.Color = 0xFFFFFFFF;
-            vx.Normal = float3( 0, 0, 0 );
-            ZeroMemory( vx.weights, sizeof( vx.weights ) );
-            ZeroMemory( vx.Position, sizeof( vx.Position ) );
-            ZeroMemory( vx.boneIndices, sizeof( vx.boneIndices ) );
+    const char* visualName = model->GetModelName().ToChar();
+    zCArray<zCModelNodeInst*>* nodeList = model->GetNodeList();
+    for ( int i = 0; i < nodeList->NumInArray; i++ ) {
+        zCModelNodeInst* node = nodeList->Array[i];
+        if ( !node->NodeVisual )
+            continue;
 
-            for ( int n = 0; n < numNodes; n++ ) {
-                // Get entry
-                zTWeightEntry weightEntry = *(zTWeightEntry*)stream;
-                stream += sizeof( zTWeightEntry );
+        const char* ext = node->NodeVisual->GetFileExtension( 0 );
 
-                // Get index and weight
-                if ( n < 4 ) {
-                    vx.weights[n] = weightEntry.Weight;
-                    vx.boneIndices[n] = weightEntry.NodeIndex;
-                    vx.Position[n] = weightEntry.VertexPosition;
-                }
-            }
+        bool isMMS = strcmp( ext, ".MMS" ) == 0;
+        if ( !isMMS && strcmp( ext, ".3DS" ) != 0 )
+            continue;
 
-            posList.emplace_back( vx );
+        zCProgMeshProto* visual = (zCProgMeshProto*)node->NodeVisual;
+        if ( isMMS ) {
+            visual = ((zCMorphMesh*)node->NodeVisual)->GetMorphMesh();
+        }
+        DirectX::XMFLOAT3* posList = (DirectX::XMFLOAT3*)visual->GetPositionList()->Array;
+
+        // Calculate transform for this node
+        zCModelNodeInst* parent = node->ParentNode;
+        if ( parent ) {
+            XMStoreFloat4x4( &node->TrafoObjToCam, XMLoadFloat4x4( &parent->TrafoObjToCam ) * XMLoadFloat4x4( &node->Trafo ) );
+        } else {
+            node->TrafoObjToCam = node->Trafo;
         }
 
-        // The rest is the same as a zCProgMeshProto, but with a different vertex type
-        for ( int i = 0; i < s->GetNumSubmeshes(); i++ ) {
-            std::vector<ExSkelVertexStruct> vertices;
-            std::vector<ExVertexStruct> bindPoseVertices;
+        for ( int i = 0; i < visual->GetNumSubmeshes(); i++ ) {
+            //std::vector<ExSkelVertexStruct> vertices;
+            std::vector<ExVertexStruct> vertices;
             std::vector<VERTEX_INDEX> indices;
             // Get the data out
-            zCSubMesh* m = s->GetSubmesh( i );
+            zCSubMesh* m = visual->GetSubmesh( i );
 
             // Get indices
+            indices.reserve( m->TriList.NumInArray * 3 );
             for ( int t = 0; t < m->TriList.NumInArray; t++ ) {
-                indices.emplace_back( m->TriList.Array[t].wedge[2] );
-                indices.emplace_back( m->TriList.Array[t].wedge[1] );
-                indices.emplace_back( m->TriList.Array[t].wedge[0] );
+                zTPMTriangle& triangle = m->TriList.Array[t];
+                indices.emplace_back( triangle.wedge[2] );
+                indices.emplace_back( triangle.wedge[1] );
+                indices.emplace_back( triangle.wedge[0] );
             }
 
             // Get vertices
+            vertices.reserve( m->WedgeList.NumInArray );
             for ( int v = 0; v < m->WedgeList.NumInArray; v++ ) {
-                ExSkelVertexStruct vx;
-                vx = posList[m->WedgeList.Array[v].position];
-                vx.TexCoord = m->WedgeList.Array[v].texUV;
+                zTPMWedge& wedge = m->WedgeList.Array[v];
+                vertices.emplace_back();
+
+                ExVertexStruct& vx = vertices.back();
+                XMStoreFloat3( vx.Position.toXMFLOAT3(), DirectX::XMVector3TransformCoord( XMLoadFloat3( &posList[wedge.position] ), XMMatrixTranspose( XMLoadFloat4x4( &node->TrafoObjToCam ) ) ) );
+                vx.TexCoord = wedge.texUV;
+                vx.Normal = wedge.normal;
                 vx.Color = 0xFFFFFFFF;
-                vx.Normal = m->WedgeList.Array[v].normal;
-
-                vertices.emplace_back( vx );
-
-                // Save vertexpos in bind pose, to run PNAEN on it
-                ExVertexStruct pvx;
-                pvx.Position = s->GetPositionList()->Array[m->WedgeList.Array[v].position];
-                pvx.TexCoord = vx.TexCoord;
-                pvx.Normal = vx.Normal;
-                pvx.Color = vx.Color;
-
-                bindPoseVertices.emplace_back( pvx );
             }
 
-            zCMaterial* mat = s->GetSubmesh( i )->Material;
+            // Create the buffers and sort the mesh into the structure
+            MeshInfo* mi = new MeshInfo;
 
-            SkeletalMeshInfo* mi = new SkeletalMeshInfo;
+            // Create the indexed mesh
+            if ( vertices.empty() ) {
+                LogWarn() << "Empty submesh (#" << i << ") on Visual " << visualName;
+                continue;
+            }
+
             mi->Vertices = vertices;
             mi->Indices = indices;
-            mi->visual = s;
 
             // Create the buffers
             Engine::GraphicsEngine->CreateVertexBuffer( &mi->MeshVertexBuffer );
             Engine::GraphicsEngine->CreateVertexBuffer( &mi->MeshIndexBuffer );
 
+            // Optimize faces
+            mi->MeshVertexBuffer->OptimizeFaces( &mi->Indices[0],
+                (byte*)&mi->Vertices[0],
+                mi->Indices.size(),
+                mi->Vertices.size(),
+                sizeof( ExVertexStruct ) );
+
+            // Then optimize vertices
+            mi->MeshVertexBuffer->OptimizeVertices( &mi->Indices[0],
+                (byte*)&mi->Vertices[0],
+                mi->Indices.size(),
+                mi->Vertices.size(),
+                sizeof( ExVertexStruct ) );
+
             // Init and fill it
-            mi->MeshVertexBuffer->Init( &mi->Vertices[0], mi->Vertices.size() * sizeof( ExSkelVertexStruct ), D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_IMMUTABLE );
+            mi->MeshVertexBuffer->Init( &mi->Vertices[0], mi->Vertices.size() * sizeof( ExVertexStruct ), D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_IMMUTABLE );
             mi->MeshIndexBuffer->Init( &mi->Indices[0], mi->Indices.size() * sizeof( VERTEX_INDEX ), D3D11VertexBuffer::B_INDEXBUFFER, D3D11VertexBuffer::U_IMMUTABLE );
 
+            Engine::GAPI->GetRendererState().RendererInfo.VOBVerticesDataSize += mi->Vertices.size() * sizeof( ExVertexStruct );
+            Engine::GAPI->GetRendererState().RendererInfo.VOBVerticesDataSize += mi->Indices.size() * sizeof( VERTEX_INDEX );
 
-            MeshInfo* bmi = new MeshInfo;
-            bmi->Indices = indices;
-            bmi->Vertices = bindPoseVertices;
+            zCMaterial* mat = m->Material;
+            meshInfo->Meshes[mat].emplace_back( mi );
 
-            Engine::GraphicsEngine->CreateVertexBuffer( &bmi->MeshVertexBuffer );
-            Engine::GraphicsEngine->CreateVertexBuffer( &bmi->MeshIndexBuffer );
+            MeshKey key;
+            key.Material = mat;
+            key.Texture = mat->GetTexture();
+            key.Info = Engine::GAPI->GetMaterialInfoFrom( key.Texture );
 
-            bmi->MeshVertexBuffer->Init( &bmi->Vertices[0], bmi->Vertices.size() * sizeof( ExVertexStruct ), D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_IMMUTABLE );
-            bmi->MeshIndexBuffer->Init( &bmi->Indices[0], bmi->Indices.size() * sizeof( VERTEX_INDEX ), D3D11VertexBuffer::B_INDEXBUFFER, D3D11VertexBuffer::U_IMMUTABLE );
+            meshInfo->MeshesByTexture[key].emplace_back( mi );
 
-
-
-            Engine::GAPI->GetRendererState().RendererInfo.SkeletalVerticesDataSize += mi->Vertices.size() * sizeof( ExVertexStruct );
-            Engine::GAPI->GetRendererState().RendererInfo.SkeletalVerticesDataSize += mi->Indices.size() * sizeof( VERTEX_INDEX );
-
-            skeletalMeshInfo->SkeletalMeshes[mat].emplace_back( mi );
-            skeletalMeshInfo->Meshes[mat].emplace_back( bmi );
+            vertexBuffers.emplace_back( &mi->Vertices );
+            indexBuffers.emplace_back( &mi->Indices );
+            meshInfos.emplace_back( mi );
         }
     }
 
-    static int s_NoMeshesNum = 0;
+    std::vector<ExVertexStruct> wrappedVertices;
+    std::vector<unsigned int> wrappedIndices;
+    std::vector<unsigned int> offsets;
 
-    skeletalMeshInfo->VisualName = model->GetVisualName();
+    if ( !vertexBuffers.empty() ) {
+        // Calculate fat vertexbuffer
+        WorldConverter::WrapVertexBuffers( vertexBuffers, indexBuffers, wrappedVertices, wrappedIndices, offsets );
+
+        // Propergate the offsets
+        int i = 0;
+        for ( auto const& it : meshInfos ) {
+            it->BaseIndexLocation = offsets[i];
+
+            i++;
+        }
+
+        MeshInfo* wmi = new MeshInfo;
+        Engine::GraphicsEngine->CreateVertexBuffer( &wmi->MeshVertexBuffer );
+        Engine::GraphicsEngine->CreateVertexBuffer( &wmi->MeshIndexBuffer );
+
+        // Init and fill them
+        wmi->MeshVertexBuffer->Init( &wrappedVertices[0], wrappedVertices.size() * sizeof( ExVertexStruct ), D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_IMMUTABLE );
+        wmi->MeshIndexBuffer->Init( &wrappedIndices[0], wrappedIndices.size() * sizeof( unsigned int ), D3D11VertexBuffer::B_INDEXBUFFER, D3D11VertexBuffer::U_IMMUTABLE );
+
+        meshInfo->FullMesh = wmi;
+    }
+
+    meshInfo->BBox.Min = bbmin;
+    meshInfo->BBox.Max = bbmax;
+    XMStoreFloat( &meshInfo->MeshSize, DirectX::XMVector3Length( (XMLoadFloat3( &bbmin ) - XMLoadFloat3( &bbmax )) ) );
+    XMStoreFloat3( &meshInfo->MidPoint, 0.5f * (XMLoadFloat3( &bbmin ) + XMLoadFloat3( &bbmax )) );
+
+    meshInfo->Visual = model;
+    meshInfo->VisualName = visualName;
 
     // Try to load saved settings for this mesh
-    skeletalMeshInfo->LoadMeshVisualInfo( skeletalMeshInfo->VisualName );
+    meshInfo->LoadMeshVisualInfo( meshInfo->VisualName );
 
     // Create additional information
-    if ( skeletalMeshInfo->TesselationInfo.buffer.VT_TesselationFactor > 0.0f )
-        skeletalMeshInfo->CreatePNAENInfo( skeletalMeshInfo->TesselationInfo.buffer.VT_DisplacementStrength > 0.0f );
+    if ( meshInfo->TesselationInfo.buffer.VT_TesselationFactor > 0.0f )
+        meshInfo->CreatePNAENInfo( meshInfo->TesselationInfo.buffer.VT_DisplacementStrength > 0.0f );
 }
 
 /** Extracts a node-visual */
@@ -1186,8 +1225,12 @@ void WorldConverter::ExtractNodeVisual( int index, zCModelNodeInst* node, std::m
     if ( node->NodeVisual ) {
         const char* ext = node->NodeVisual->GetFileExtension( 0 );
 
-        if ( strcmp( ext, ".3DS" ) == 0 ) {
+        bool isMMS = strcmp( ext, ".MMS" ) == 0;
+        if ( isMMS || strcmp( ext, ".3DS" ) == 0 ) {
             zCProgMeshProto* pm = (zCProgMeshProto*)node->NodeVisual;
+            if ( isMMS ) {
+                pm = ((zCMorphMesh*)node->NodeVisual)->GetMorphMesh();
+            }
 
             if ( pm->GetNumSubmeshes() == 0 ) {
                 return;
@@ -1196,24 +1239,14 @@ void WorldConverter::ExtractNodeVisual( int index, zCModelNodeInst* node, std::m
             MeshVisualInfo* mi = new MeshVisualInfo;
 
             Extract3DSMeshFromVisual2( pm, mi );
-
-
+            if ( isMMS ) {
+                mi->Visual = node->NodeVisual;
+            }
 
             attachments[index].emplace_back( mi );
-
-        } else if ( strcmp( ext, ".MMS" ) == 0 ) {
-            // These are zCMorphMeshes
-            zCProgMeshProto* pm = ((zCMorphMesh*)node->NodeVisual)->GetMorphMesh();
-
-            if ( pm->GetNumSubmeshes() == 0 ) {
-                return;
-            }
-
+        } else if ( strcmp( ext, ".MDS" ) == 0 || strcmp( ext, ".ASC" ) == 0 ) {
             MeshVisualInfo* mi = new MeshVisualInfo;
-
-            Extract3DSMeshFromVisual2( pm, mi );
-            mi->Visual = node->NodeVisual;
-
+            ExtractProgMeshProtoFromModel( (zCModel*)node->NodeVisual, mi );
             attachments[index].emplace_back( mi );
         }
     }
@@ -1360,29 +1393,30 @@ void WorldConverter::Extract3DSMeshFromVisual2( zCProgMeshProto* visual, MeshVis
 
     // Construct unindexed mesh
     for ( int i = 0; i < visual->GetNumSubmeshes(); i++ ) {
+        zCSubMesh* s = visual->GetSubmesh( i );
         std::vector<ExVertexStruct> vertices;
         std::vector<VERTEX_INDEX> indices;
 
         // Get vertices
-        for ( int t = 0; t < visual->GetSubmeshes()[i].TriList.NumInArray; t++ ) {
-            indices.emplace_back( visual->GetSubmeshes()[i].TriList.Array[t].wedge[2] );
-            indices.emplace_back( visual->GetSubmeshes()[i].TriList.Array[t].wedge[1] );
-            indices.emplace_back( visual->GetSubmeshes()[i].TriList.Array[t].wedge[0] );
+        indices.reserve( s->TriList.NumInArray * 3 );
+        for ( int t = 0; t < s->TriList.NumInArray; t++ ) {
+            zTPMTriangle& triangle = s->TriList.Array[t];
+            indices.emplace_back( triangle.wedge[2] );
+            indices.emplace_back( triangle.wedge[1] );
+            indices.emplace_back( triangle.wedge[0] );
         }
 
-        for ( int v = 0; v < visual->GetSubmeshes()[i].WedgeList.NumInArray; v++ ) {
-            ExVertexStruct vx;
-            vx.Position = posList[visual->GetSubmeshes()[i].WedgeList.Array[v].position];
-            vx.TexCoord = visual->GetSubmeshes()[i].WedgeList.Array[v].texUV;
-
+        vertices.reserve( s->WedgeList.NumInArray );
+        for ( int v = 0; v < s->WedgeList.NumInArray; v++ ) {
+            zTPMWedge& wedge = s->WedgeList.Array[v];
+            vertices.emplace_back();
+            ExVertexStruct& vx = vertices.back();
+            vx.Position = posList[wedge.position];
+            vx.Normal = wedge.normal;
+            vx.TexCoord = wedge.texUV;
+            vx.Color = 0xFFFFFFFF;
             //if (visual->GetSubmeshes()[i].Material)
             //	vx.Color = visual->GetSubmeshes()[i].Material->GetColor(); // Bake materialcolor into the mesh. This is ok for the most meshes.
-            //else
-            vx.Color = 0xFFFFFFFF;
-
-            vx.Normal = visual->GetSubmeshes()[i].WedgeList.Array[v].normal;
-
-            vertices.emplace_back( vx );
 
             // Check bounding box
             bbmin.x = bbmin.x > vx.Position.x ? vx.Position.x : bbmin.x;
@@ -1423,7 +1457,6 @@ void WorldConverter::Extract3DSMeshFromVisual2( zCProgMeshProto* visual, MeshVis
             mi->Indices.size(),
             mi->Vertices.size(),
             sizeof( ExVertexStruct ) );
-
 
         // Init and fill it
         mi->MeshVertexBuffer->Init( &mi->Vertices[0], mi->Vertices.size() * sizeof( ExVertexStruct ), D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_IMMUTABLE );
@@ -1473,8 +1506,6 @@ void WorldConverter::Extract3DSMeshFromVisual2( zCProgMeshProto* visual, MeshVis
 
         meshInfo->FullMesh = wmi;
     }
-
-
 
     meshInfo->BBox.Min = bbmin;
     meshInfo->BBox.Max = bbmax;
@@ -1795,25 +1826,24 @@ void WorldConverter::UpdateQuadMarkInfo( QuadMarkInfo* info, zCQuadMark* mark, c
 
         // Extract poly vertices
         std::vector<ExVertexStruct> polyVertices;
+        polyVertices.reserve( poly->GetNumPolyVertices() );
         for ( int v = 0; v < poly->GetNumPolyVertices(); v++ ) {
-            ExVertexStruct t;
-            t.Position = poly->getVertices()[v]->Position;
-            t.TexCoord = poly->getFeatures()[v]->texCoord;
-            t.Normal = poly->getFeatures()[v]->normal;
-            t.Color = poly->getFeatures()[v]->lightStatic;
+            zCVertex* vertex = poly->getVertices()[v];
+            zCVertFeature* feature = poly->getFeatures()[v];
+
+            polyVertices.emplace_back();
+            ExVertexStruct& t = polyVertices.back();
+            t.Position = vertex->Position;
+            t.TexCoord = feature->texCoord;
+            t.Normal = feature->normal;
+            t.Color = feature->lightStatic;
 
             t.TexCoord.x = std::min( 1.0f, std::max( 0.0f, t.TexCoord.x ) );
             t.TexCoord.y = std::min( 1.0f, std::max( 0.0f, t.TexCoord.y ) );
-
-            polyVertices.emplace_back( t );
         }
 
         // Make triangles
-        std::vector<ExVertexStruct> finalVertices;
-        TriangleFanToList( &polyVertices[0], polyVertices.size(), &finalVertices );
-
-        // Add to main vector
-        quadVertices.insert( quadVertices.end(), finalVertices.begin(), finalVertices.end() );
+        TriangleFanToList( &polyVertices[0], polyVertices.size(), &quadVertices );
     }
 
     if ( quadVertices.empty() )

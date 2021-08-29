@@ -1036,8 +1036,6 @@ void GothicAPI::GetVisibleParticleEffectsList( std::vector<zCVob*>& pfxList ) {
         float dist;
         for ( auto const& it : ParticleEffectVobs ) {
             XMStoreFloat( &dist, DirectX::XMVector3Length( it->GetPositionWorldXM() - camPos ) );
-            if ( dist > RendererState.RendererSettings.OutdoorSmallVobDrawRadius )
-                continue;
             if ( dist > RendererState.RendererSettings.VisualFXDrawRadius )
                 continue;
 
@@ -1183,6 +1181,7 @@ void GothicAPI::OnVisualDeleted( zCVisual* visual ) {
             // Clear the visual from all vobs (TODO: This may be slow!)
             for ( auto it = VobMap.begin(); it != VobMap.end();) {
                 if ( !it->second->VisualInfo ) { // This happens sometimes, so get rid of it
+                    delete it->second;
                     it = VobMap.erase( it );
                     continue;
                 }
@@ -1195,9 +1194,30 @@ void GothicAPI::OnVisualDeleted( zCVisual* visual ) {
 
             delete StaticMeshVisuals[(zCProgMeshProto*)visual];
             StaticMeshVisuals.erase( (zCProgMeshProto*)visual );
-
             break;
         } else if ( ext == ".MDS" || ext == ".ASC" ) {
+            // We can load some MDS/ASC models as inventory objects
+            zCProgMeshProto* pm = (zCProgMeshProto*)visual;
+            auto vit = StaticMeshVisuals.find( pm );
+            if ( vit != StaticMeshVisuals.end() ) {
+                // Clear the visual from all vobs (TODO: This may be slow!)
+                for ( auto it = VobMap.begin(); it != VobMap.end();) {
+                    if ( !it->second->VisualInfo ) { // This happens sometimes, so get rid of it
+                        delete it->second;
+                        it = VobMap.erase( it );
+                        continue;
+                    }
+
+                    if ( it->second->VisualInfo->Visual == pm ) {
+                        it->second->VisualInfo = nullptr;
+                    }
+                    ++it;
+                }
+
+                delete StaticMeshVisuals[pm];
+                StaticMeshVisuals.erase( pm );
+            }
+
             if ( ((zCModel*)visual)->GetMeshSoftSkinList()->NumInArray ) {
                 // Find vobs using this visual
                 for ( std::list<SkeletalVobInfo*>::iterator it = SkeletalMeshVobs.begin(); it != SkeletalMeshVobs.end(); ++it ) {
@@ -1332,8 +1352,16 @@ void GothicAPI::OnRemovedVob( zCVob* vob, zCWorld* world ) {
     VobLightInfo* li = VobLightMap[(zCVobLight*)vob];
 
     // Erase it from the particle-effect list
-    ParticleEffectVobs.remove( vob );
-    DecalVobs.remove( vob );
+    auto pit = std::find( ParticleEffectVobs.begin(), ParticleEffectVobs.end(), vob );
+    if ( pit != ParticleEffectVobs.end() ) {
+        *pit = ParticleEffectVobs.back();
+        ParticleEffectVobs.pop_back();
+    }
+    auto dit = std::find( DecalVobs.begin(), DecalVobs.end(), vob );
+    if ( dit != DecalVobs.end() ) {
+        *dit = DecalVobs.back();
+        DecalVobs.pop_back();
+    }
 
     // Erase it from the list of lights
     VobLightMap.erase( (zCVobLight*)vob );
@@ -1543,6 +1571,30 @@ void GothicAPI::OnAddVob( zCVob* vob, zCWorld* world ) {
             }
             break;
         } else if ( ext == ".MDS" || ext == ".ASC" ) {
+            // Some mods use MDS/ASC models for inventory
+            if ( world != oCGame::GetGame()->_zCSession_world ) {
+                // Cast to zCProgMeshProto only to make it work with StaticMeshVisuals
+                zCProgMeshProto* pm = (zCProgMeshProto*)vob->GetVisual();
+
+                if ( StaticMeshVisuals.count( pm ) == 0 ) {
+                    // Load the new visual
+                    MeshVisualInfo* mi = new MeshVisualInfo;
+                    WorldConverter::ExtractProgMeshProtoFromModel( (zCModel*)vob->GetVisual(), mi );
+                    StaticMeshVisuals[pm] = mi;
+                }
+
+                VobInfo* vi = new VobInfo;
+                vi->Vob = vob;
+                vi->VisualInfo = StaticMeshVisuals[pm];
+
+                // Add to map
+                VobsByVisual[vob->GetVisual()].push_back( vi );
+
+                // Must be inventory
+                Inventory->OnAddVob( vi, world );
+                break;
+            }
+
             std::string mds = ((zCModel*)vob->GetVisual())->GetModelName().ToChar();
 
             std::string str = ((zCModel*)vob->GetVisual())->GetVisualName();
@@ -1845,11 +1897,15 @@ void GothicAPI::DrawSkeletalGhosts() {
 /** Called when a particle system got removed */
 void GothicAPI::OnParticleFXDeleted( zCParticleFX* pfx ) {
     // Remove this from our list
-    for ( auto it = ParticleEffectVobs.begin(); it != ParticleEffectVobs.end();) {
-        if ( (*it)->GetVisual() == (zCVisual*)pfx ) {
-            it = ParticleEffectVobs.erase( it );
+    size_t i = 0, end = ParticleEffectVobs.size();
+    while ( i < end ) {
+        zCVob* pfxVob = ParticleEffectVobs[i];
+        if ( pfxVob->GetVisual() == (zCVisual*)pfx ) {
+            ParticleEffectVobs[i] = ParticleEffectVobs.back();
+            ParticleEffectVobs.pop_back();
+            --end;
         } else {
-            ++it;
+            ++i;
         }
     }
 }
@@ -3936,7 +3992,7 @@ void GothicAPI::DrawMorphMesh( zCMorphMesh* msh, float fatness ) {
                 vx.Normal = sub.WedgeList.Array[sub.TriList.Array[t].wedge[v]].normal;
 
                 // Do this on GPU probably?
-                XMStoreFloat3( reinterpret_cast<XMFLOAT3*>( &vx.Position ), XMVectorAdd( XMLoadFloat3( reinterpret_cast<const XMFLOAT3*>( &vx.Position ) ), XMLoadFloat3( reinterpret_cast<const XMFLOAT3*>(&vx.Normal) ) * XMVectorReplicate( fatness ) ) );
+                XMStoreFloat3( reinterpret_cast<XMFLOAT3*>( &vx.Position ), XMVectorAdd( XMLoadFloat3( reinterpret_cast<const XMFLOAT3*>( &vx.Position ) ), XMLoadFloat3( reinterpret_cast<const XMFLOAT3*>( &vx.Normal ) ) * XMVectorReplicate( fatness ) ) );
             }
         }
 

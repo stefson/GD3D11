@@ -256,16 +256,7 @@ public:
     }
 
     float GetModelFatness() {
-        float fatness = *(float*)THISPTR_OFFSET( GothicMemoryLocations::zCModel::Offset_ModelFatness );
-        // fix fatness value
-        if ( fatness >= 2.0f )
-            fatness = 0.50f;
-        else if ( fatness == 1.0f )
-            fatness = 0.0f;
-        else if ( fatness <= -1.0f )
-            fatness = -0.25f;
-
-        return fatness;
+        return *(float*)THISPTR_OFFSET( GothicMemoryLocations::zCModel::Offset_ModelFatness );
     }
 
     int GetDrawHandVisualsOnly() {

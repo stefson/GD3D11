@@ -171,8 +171,9 @@ long __fastcall HookedFunctionInfo::hooked_zBinkPlayerGetPixelFormat( void* this
     //Global::HookedFunctions.zBinkPlayerGetPixelFormat(thisptr, desc);
 }
 
-int __fastcall HookedFunctionInfo::hooked_zBinkPlayerOpenVideo( void* thisptr, void* unknwn, zSTRING str ) {
-    int r = HookedFunctions::OriginalFunctions.original_zCBinkPlayerOpenVideo( thisptr, str );
+// Using zSTRING directly here crashes because the class can't make proper copies but we don't need it anyway so let's do it the safe way
+int __fastcall HookedFunctionInfo::hooked_zBinkPlayerOpenVideo( void* thisptr, void* unknwn, int a1, int a2, int a3, int a4, int a5 ) {
+    int r = HookedFunctions::OriginalFunctions.original_zCBinkPlayerOpenVideo( thisptr, a1, a2, a3, a4, a5 );
 
     struct BinkInfo {
         unsigned int ResX;

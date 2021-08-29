@@ -63,8 +63,8 @@ public:
     /** Extracts a skeletal mesh from a zCModel */
     static void ExtractSkeletalMeshFromVob( zCModel* model, SkeletalMeshVisualInfo* skeletalMeshInfo );
 
-    /** Extracts a skeletal mesh from a zCMeshSoftSkin */
-    static void ExtractSkeletalMeshFromProto( zCModelMeshLib* model, SkeletalMeshVisualInfo* skeletalMeshInfo );
+    /** Extracts a zCProgMeshProto from a zCModel */
+    static void ExtractProgMeshProtoFromModel( zCModel* model, MeshVisualInfo* meshInfo );
 
 
     /** Extracts a node-visual */

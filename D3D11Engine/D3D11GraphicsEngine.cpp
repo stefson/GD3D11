@@ -2132,7 +2132,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
         for ( auto const& worldMesh : renderItem->WorldMeshes ) {
             if ( worldMesh.first.Material ) {
                 zCTexture* aniTex = worldMesh.first.Material->GetTexture();
-                if ( !aniTex )  continue;
+                if ( !aniTex ) continue;
 
                 if ( aniTex->CacheIn( 0.6f ) != zRES_CACHED_IN ) {
                     continue;

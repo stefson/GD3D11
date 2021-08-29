@@ -706,8 +706,8 @@ private:
     std::vector<std::pair<float, SkeletalVobInfo*>> GhostSkeletalVobs;
 
     /** List of Vobs having a zCParticleFX-Visual */
-    std::list<zCVob*> ParticleEffectVobs;
-    std::list<zCVob*> DecalVobs;
+    std::vector<zCVob*> ParticleEffectVobs;
+    std::vector<zCVob*> DecalVobs;
     std::unordered_map<zCVob*, std::string> tempParticleNames;
 
     /** Poly strip Visuals */
