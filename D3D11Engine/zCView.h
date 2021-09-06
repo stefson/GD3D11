@@ -129,7 +129,6 @@ public:
             //else                 { fontColor = thisptr->fontColor;}
 
             x = thisptr->pposx + thisptr->nax( text->posx );
-            // TODO: Remove additional addition if we get the correct char positioning
             y = thisptr->pposy + thisptr->nay( text->posy );
 
             if ( !thisptr->font ) continue;
