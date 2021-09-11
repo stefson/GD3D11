@@ -539,17 +539,19 @@ HRESULT WorldConverter::ConvertWorldMesh( zCPolygon** polys, unsigned int numPol
 
         // Calculate midpoint of this triange to get the section
         DirectX::XMFLOAT3 avgPos;
-        XMStoreFloat3( &avgPos, (XMLoadFloat3( &*poly->getVertices()[0]->Position.toXMFLOAT3() ) + XMLoadFloat3( &*poly->getVertices()[1]->Position.toXMFLOAT3() ) + XMLoadFloat3( &*poly->getVertices()[2]->Position.toXMFLOAT3() )) / 3.0f );
+        XMStoreFloat3( &avgPos, (XMLoadFloat3( poly->getVertices()[0]->Position.toXMFLOAT3() ) + XMLoadFloat3( poly->getVertices()[1]->Position.toXMFLOAT3() ) + XMLoadFloat3( poly->getVertices()[2]->Position.toXMFLOAT3() )) / 3.0f );
+ 
         INT2 section = GetSectionOfPos( avgPos );
-        (*outSections)[section.x][section.y].WorldCoordinates = section;
+        WorldMeshSectionInfo& sectionInfo = (*outSections)[section.x][section.y];
+        sectionInfo.WorldCoordinates = section;
 
         //if ( poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER ) {
-            //(*outSections)[section.x][section.y].OceanPoints.push_back(*poly->getVertices()[0]->Position.toXMFLOAT3());
+            //sectionInfo.OceanPoints.push_back(*poly->getVertices()[0]->Position.toXMFLOAT3());
             //continue;
         //}
 
-        XMFLOAT3& bbmin = (*outSections)[section.x][section.y].BoundingBox.Min;
-        XMFLOAT3& bbmax = (*outSections)[section.x][section.y].BoundingBox.Max;
+        XMFLOAT3& bbmin = sectionInfo.BoundingBox.Min;
+        XMFLOAT3& bbmax = sectionInfo.BoundingBox.Max;
 
         DWORD sectionColor = float4( (section.x % 2) + 0.5f, (section.x % 2) + 0.5f, 1, 1 ).ToDWORD();
 
@@ -605,11 +607,11 @@ HRESULT WorldConverter::ConvertWorldMesh( zCPolygon** polys, unsigned int numPol
 
         //key.Lightmap = poly->GetLightmap();
 
-        if ( (*outSections)[section.x][section.y].WorldMeshes.count( key ) == 0 ) {
+        if ( sectionInfo.WorldMeshes.count( key ) == 0 ) {
             key.Info = Engine::GAPI->GetMaterialInfoFrom( key.Texture );
-            (*outSections)[section.x][section.y].WorldMeshes[key] = new WorldMeshInfo;
+            sectionInfo.WorldMeshes[key] = new WorldMeshInfo;
         }
-        TriangleFanToList( &polyVertices[0], polyVertices.size(), &(*outSections)[section.x][section.y].WorldMeshes[key]->Vertices );
+        TriangleFanToList( &polyVertices[0], polyVertices.size(), &sectionInfo.WorldMeshes[key]->Vertices );
 
         //if (mat && mat->GetTexture())
         //	LogInfo() << "Got texture name: " << mat->GetTexture()->GetName();

@@ -103,7 +103,7 @@ public:
         zTResourceCacheState cacheState = GetCacheState();
         if ( cacheState == zRES_CACHED_IN ) {
             TouchTimeStamp();
-        } else if ( cacheState == zRES_CACHED_OUT || zCTextureCacheHack::ForceCacheIn ) {
+        } else/* if ( cacheState == zRES_CACHED_OUT || zCTextureCacheHack::ForceCacheIn )*/ {
             TouchTimeStampLocal();
             /*zCTextureCacheHack::NumNotCachedTexturesInFrame++;
 
@@ -121,7 +121,6 @@ public:
             }
 #endif
             Engine::GAPI->SetBoundTexture( 7, this ); // Index 7 is reserved for cacheIn
-            //TouchTimeStampLocal();
 
             // Cache the texture, overwrite priority if wanted.
             zCResourceManager::GetResourceManager()->CacheIn( this, zCTextureCacheHack::ForceCacheIn ? -1 : priority );

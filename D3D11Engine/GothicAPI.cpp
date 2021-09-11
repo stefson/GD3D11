@@ -386,7 +386,7 @@ void GothicAPI::SetEnableGothicInput( bool value ) {
             dInputKeyboard->Acquire();
     }
 
-#ifdef BUILD_GOTHIC_2_6_fix
+/*#ifdef BUILD_GOTHIC_2_6_fix
     // Kill the check for doing freelook only in fullscreen, since we force the game to run windowed internally
     const int flSize = GothicMemoryLocations::GlobalObjects::NOP_FreelookWindowedCheckEnd - GothicMemoryLocations::GlobalObjects::NOP_FreelookWindowedCheckStart;
 
@@ -401,7 +401,7 @@ void GothicAPI::SetEnableGothicInput( bool value ) {
         memcpy( &s_CheckInst[0], (void*)GothicMemoryLocations::GlobalObjects::NOP_FreelookWindowedCheckStart, flSize );
     }
 
-#endif
+#endif*/
 #endif
 
 }
@@ -1918,16 +1918,12 @@ void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameDa
     // Maybe create more emitters?
     fx->CheckDependentEmitter();
 
-    DirectX::XMFLOAT4X4 sw;
-    source->GetWorldMatrix( &sw );
-
     zTParticle* pfx = fx->GetFirstParticle();
     if ( pfx ) {
         // Get texture
         zCTexture* texture = nullptr;
         if ( zCParticleEmitter* emitter = fx->GetEmitter() ) {
-            texture = emitter->GetVisTexture();
-            if ( texture ) {
+            if ( (texture = emitter->GetVisTexture()) != nullptr ) {
                 // Check if it's loaded
                 if ( texture->CacheIn( 0.6f ) != zRES_CACHED_IN ) {
                     return;
@@ -2006,12 +2002,6 @@ void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameDa
             if ( alignment == zPARTICLE_ALIGNMENT_XY ) {
                 ii.drawMode = 2;
             } else if ( alignment == zPARTICLE_ALIGNMENT_VELOCITY || alignment == zPARTICLE_ALIGNMENT_VELOCITY_3D ) {
-                // Rotate velocity so it fits with the vob
-
-                XMFLOAT3 velocity;
-                XMStoreFloat3( &velocity, DirectX::XMVector3TransformNormal( XMVector3Normalize( XMLoadFloat3( &p->Vel ) ), XMMatrixTranspose( XMLoadFloat4x4( &sw ) ) ) );
-                ii.velocity = velocity;
-
                 ii.drawMode = 3;
             } // TODO: Y-Locked!
 
@@ -2027,7 +2017,7 @@ void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameDa
             if ( fx->GetEmitter()->GetVisTexAniIsLooping() != 2 ) { // 2 seems to be some magic case with sinus smoothing
                 color.w = std::min( p->Alpha, 255.0f ) / 255.0f;
             } else {
-                color.w = std::min( (zCParticleFX::SinSmooth( fabs( (p->Alpha - fx->GetEmitter()->GetVisAlphaStart()) * fx->GetEmitter()->GetAlphaDist() ) ) * p->Alpha) / 255.0f, 255.0f );
+                color.w = std::min( (zCParticleFX::SinSmooth( fabs( (p->Alpha - fx->GetEmitter()->GetVisAlphaStart()) * fx->GetEmitter()->GetAlphaDist() ) ) * p->Alpha) / 255.0f, 1.0f );
             }
 
             color.w = std::max( color.w, 0.0f );

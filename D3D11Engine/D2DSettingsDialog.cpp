@@ -137,7 +137,7 @@ XRESULT D2DSettingsDialog::InitControls() {
 	SV_Checkbox* godraysCheckbox = new SV_Checkbox( MainView, MainPanel );
 	godraysCheckbox->SetSize( D2D1::SizeF( 160, 20 ) );
     switch ( userLanguage ) {
-    case LANGUAGE_POLISH: godraysCheckbox->SetCaption( L"Promienie Boga" ); break;
+    case LANGUAGE_POLISH: godraysCheckbox->SetCaption( L"GodRays" ); break;
     default: godraysCheckbox->SetCaption( L"Enable GodRays" ); break;
     }
 	godraysCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.EnableGodRays );

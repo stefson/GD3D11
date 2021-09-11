@@ -160,6 +160,7 @@ class BaseDepthBufferState;
 struct GothicDepthBufferStateInfo : public GothicPipelineState {
     GothicDepthBufferStateInfo() {
         StructSize = sizeof( GothicDepthBufferStateInfo );
+        Padding[0] = Padding[1] = false;
     }
 
     /** Layed out for D3D11 */
@@ -186,6 +187,7 @@ struct GothicDepthBufferStateInfo : public GothicPipelineState {
     /** Depthbuffer settings */
     bool DepthBufferEnabled;
     bool DepthWriteEnabled;
+    bool Padding[2];
     ECompareFunc DepthBufferCompareFunc;
 
     /** Deletes all cached states */
@@ -224,6 +226,7 @@ class BaseBlendStateInfo;
 struct GothicBlendStateInfo : public GothicPipelineState {
     GothicBlendStateInfo() {
         StructSize = sizeof( GothicBlendStateInfo );
+        Padding = false;
     }
 
     /** Layed out for D3D11 */
@@ -292,6 +295,7 @@ struct GothicBlendStateInfo : public GothicPipelineState {
         BlendOpAlpha = BO_BLEND_OP_ADD;
         BlendEnabled = true;
         AlphaToCoverage = false;
+        ColorWritesEnabled = true;
     }
 
     /** Sets up modualte blending */
@@ -304,6 +308,7 @@ struct GothicBlendStateInfo : public GothicPipelineState {
         BlendOpAlpha = BO_BLEND_OP_ADD;
         BlendEnabled = true;
         AlphaToCoverage = false;
+        ColorWritesEnabled = true;
     }
 
     EBlendFunc SrcBlend;
@@ -315,6 +320,7 @@ struct GothicBlendStateInfo : public GothicPipelineState {
     bool BlendEnabled;
     bool AlphaToCoverage;
     bool ColorWritesEnabled;
+    bool Padding;
 
     /** Deletes all cached states */
     static void DeleteCachedObjects() {
@@ -365,6 +371,7 @@ class BaseRasterizerStateInfo;
 struct GothicRasterizerStateInfo : public GothicPipelineState {
     GothicRasterizerStateInfo() {
         StructSize = sizeof( GothicRasterizerStateInfo );
+        Padding = false;
     }
 
     /** Layed out for D3D11 */
@@ -386,8 +393,9 @@ struct GothicRasterizerStateInfo : public GothicPipelineState {
     ECullMode CullMode;
     bool FrontCounterClockwise;
     bool DepthClipEnable;
-    int ZBias;
     bool Wireframe;
+    bool Padding;
+    int ZBias;
 
     /** Deletes all cached states */
     static void DeleteCachedObjects() {

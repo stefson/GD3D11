@@ -40,6 +40,7 @@
 #define DEBUG_D3D11
 #endif
 
+#include "SteamOverlay.h"
 #include <dxgi1_6.h>
 
 namespace wrl = Microsoft::WRL;
@@ -451,6 +452,7 @@ XRESULT D3D11GraphicsEngine::Init() {
         DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, DXGI_FORMAT_UNKNOWN,
         DXGI_FORMAT_UNKNOWN, 1, 6 );
 
+    SteamOverlay::Init();
     return XR_SUCCESS;
 }
 
@@ -773,6 +775,7 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
 
     s_firstFrame = false;
 
+    SteamOverlay::Update();
 #ifdef BUILD_1_12F
     // Some shitty workaround for weird hidden window bug that happen on d3d11 renderer
     if ( !(GetWindowLongA( OutputWindow, GWL_STYLE ) & WS_VISIBLE) ) {
@@ -2007,9 +2010,8 @@ XRESULT D3D11GraphicsEngine::DrawMeshInfoListAlphablended(
     // Draw the list
     for ( auto const& it : list ) {
         int indicesNumMod = 1;
-        if ( it.first.Material->GetAniTexture() != nullptr ) {
-            MyDirectDrawSurface7* surface =
-                it.first.Material->GetAniTexture()->GetSurface();
+        if ( zCTexture* texture = it.first.Material->GetAniTexture() ) {
+            MyDirectDrawSurface7* surface = texture->GetSurface();
             ID3D11ShaderResourceView* srv[3];
 
             // Get diffuse and normalmap
@@ -2026,16 +2028,15 @@ XRESULT D3D11GraphicsEngine::DrawMeshInfoListAlphablended(
             GetContext()->PSSetShaderResources( 0, 3, srv );
 
             // Get the right shader for it
-
-            BindShaderForTexture( it.first.Material->GetAniTexture(), false,
-                it.first.Material->GetAlphaFunc() );
+            int alphaFunc = it.first.Material->GetAlphaFunc();
+            BindShaderForTexture( texture, false, alphaFunc );
 
             // Check for alphablending on world mesh
-            if ( lastAlphaFunc != it.first.Material->GetAlphaFunc() ) {
-                if ( it.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_BLEND )
+            if ( lastAlphaFunc != alphaFunc ) {
+                if ( alphaFunc == zMAT_ALPHA_FUNC_BLEND )
                     Engine::GAPI->GetRendererState().BlendState.SetAlphaBlending();
 
-                if ( it.first.Material->GetAlphaFunc() == zMAT_ALPHA_FUNC_ADD )
+                if ( alphaFunc == zMAT_ALPHA_FUNC_ADD )
                     Engine::GAPI->GetRendererState().BlendState.SetAdditiveBlending();
 
                 Engine::GAPI->GetRendererState().BlendState.SetDirty();
@@ -2044,7 +2045,7 @@ XRESULT D3D11GraphicsEngine::DrawMeshInfoListAlphablended(
                 Engine::GAPI->GetRendererState().DepthState.SetDirty();
 
                 UpdateRenderStates();
-                lastAlphaFunc = it.first.Material->GetAlphaFunc();
+                lastAlphaFunc = alphaFunc;
             }
 
             MaterialInfo* info = it.first.Info;
@@ -2053,7 +2054,7 @@ XRESULT D3D11GraphicsEngine::DrawMeshInfoListAlphablended(
             info->Constantbuffer->BindToPixelShader( 2 );
 
             // Don't let the game unload the texture after some time
-            it.first.Material->GetAniTexture()->CacheIn( 0.6f );
+            texture->CacheIn( 0.6f );
 
             // Draw the section-part
             DrawVertexBufferIndexedUINT( nullptr, nullptr, it.second->Indices.size(),
@@ -2134,13 +2135,13 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
                 zCTexture* aniTex = worldMesh.first.Material->GetTexture();
                 if ( !aniTex ) continue;
 
-                if ( aniTex->CacheIn( 0.6f ) != zRES_CACHED_IN ) {
-                    continue;
-                }
-
                 // Check surface type
                 if ( worldMesh.first.Info->MaterialType == MaterialInfo::MT_Water ) {
                     FrameWaterSurfaces[aniTex].push_back( worldMesh.second );
+                    continue;
+                }
+
+                if ( aniTex->CacheIn( 0.6f ) != zRES_CACHED_IN ) {
                     continue;
                 }
 
@@ -2233,7 +2234,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
             GetContext()->PSSetShaderResources( 0, 3, srv );
 
             // Get the right shader for it
-            BindShaderForTexture( mesh.first.Material->GetAniTexture(), false,
+            BindShaderForTexture( mesh.first.Texture, false,
                 mesh.first.Material->GetAlphaFunc() );
 
             if ( info ) {
@@ -2242,10 +2243,10 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
                 info->Constantbuffer->BindToPixelShader( 2 );
 
                 // Don't let the game unload the texture after some time
-                mesh.first.Material->GetAniTexture()->CacheIn( 0.6f );
+                //mesh.first.Texture->CacheIn( 0.6f );
                 boundInfo = info;
             }
-            bound = mesh.first.Material->GetAniTexture();
+            bound = mesh.first.Texture;
             // Bind normalmap to HDS
             if ( !mesh.second->IndicesPNAEN.empty() ) {
                 GetContext()->DSSetShaderResources( 0, 1, boundNormalmap.GetAddressOf() );
@@ -2628,10 +2629,9 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
     for ( auto const& it : FrameWaterSurfaces ) {
         if ( it.first ) {
             // Bind diffuse
-            if ( it.first->CacheIn( -1 ) ==
-                zRES_CACHED_IN )  // Force immediate cache in, because water is
-                                  // important!
-                it.first->Bind( 0 );
+            it.first->CacheIn( -1 );    // Force immediate cache in, because water
+                                        // is important!
+            it.first->Bind( 0 );
         }
         // Draw surfaces
         for ( auto const& mesh : it.second ) {
@@ -4074,8 +4074,17 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
     Engine::GAPI->SetCameraReplacementPtr( &cr );
 
     // Indoor worlds don't need shadowmaps for the world
+    static zTBspMode lastBspMode = zBSP_MODE_OUTDOOR;
     if ( Engine::GAPI->GetLoadedWorldInfo()->BspTree->GetBspTreeMode() == zBSP_MODE_OUTDOOR ) {
         RenderShadowmaps( WorldShadowCP, nullptr, true );
+        lastBspMode = zBSP_MODE_OUTDOOR;
+    } else if ( Engine::GAPI->GetRendererState().RendererSettings.EnableShadows ) {
+        // We need to clear shadowmap to avoid some glitches in indoor locations
+        // only need to do it once :)
+        if ( lastBspMode == zBSP_MODE_OUTDOOR ) {
+            GetContext()->ClearDepthStencilView( WorldShadowmap1->GetDepthStencilView().Get(), D3D11_CLEAR_DEPTH, 0.0f, 0 );
+            lastBspMode = zBSP_MODE_INDOOR;
+        }
     }
 
     SetDefaultStates();
@@ -4666,6 +4675,9 @@ LRESULT D3D11GraphicsEngine::OnWindowMessage( HWND hWnd, UINT msg, WPARAM wParam
             }
 
             UpdateClipCursor( hWnd );
+
+            // Sometimes Gothic doesn't aquire/release input so let's do it ourselves
+            Engine::GAPI->SetEnableGothicInput( m_isWindowActive );
         }
         break;
         case WM_WINDOWPOSCHANGED: UpdateClipCursor( hWnd ); break;
