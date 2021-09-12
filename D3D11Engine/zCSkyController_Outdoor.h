@@ -182,7 +182,12 @@ public:
 
         //float angle = GetMasterTime() * XM_2PI; // Get mastertime into rad, 0 and 12 are now at the horizon, 18 is in the sky
         //angle += XM_PIDIV2; // 12 is now in the sky, 18 horizon
-        float angle = ((GetMasterTime() * timeScale - 0.3f) * 1.25f + 0.5f) * XM_2PI;
+        float angle;
+        if ( timeScale <= -1 ) {
+            angle = 4.71375f;
+        } else {
+            angle = ((GetMasterTime() * timeScale - 0.3f) * 1.25f + 0.5f) * XM_2PI;
+        }
 
         constexpr XMVECTORF32 sunPos = { -60, 0, 100, 0 };
         XMFLOAT3 rotAxis = XMFLOAT3( 1, 0, 0 );
