@@ -123,6 +123,9 @@ XRESULT D2DSettingsDialog::InitControls() {
 	hbaoCheckbox->AlignUnder( numpadCheckbox, 5 );
 	hbaoCheckbox->SetPosition( D2D1::Point2F( 5, hbaoCheckbox->GetPosition().y ) );
 	hbaoCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.HbaoSettings.Enabled );
+    if ( FeatureLevel10Compatibility ) {
+        hbaoCheckbox->SetDisabled( true );
+    }
 
 	SV_Checkbox* vsyncCheckbox = new SV_Checkbox( MainView, MainPanel );
 	vsyncCheckbox->SetSize( D2D1::SizeF( 160, 20 ) );
@@ -155,6 +158,9 @@ XRESULT D2DSettingsDialog::InitControls() {
 	smaaCheckbox->AlignUnder( godraysCheckbox, 5 );
 	smaaCheckbox->SetPosition( D2D1::Point2F( 5, smaaCheckbox->GetPosition().y ) );
 	smaaCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.EnableSMAA );
+    if ( FeatureLevel10Compatibility ) {
+        smaaCheckbox->SetDisabled( true );
+    }
 
 	/*SV_Checkbox* tesselationCheckbox = new SV_Checkbox(MainView, MainPanel);
 	tesselationCheckbox->SetSize(D2D1::SizeF(160, 20));

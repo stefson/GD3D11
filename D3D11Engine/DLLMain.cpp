@@ -38,6 +38,7 @@ using WinMainFunc = decltype(&WinMain);
 WinMainFunc originalWinMain;
 #endif
 
+bool FeatureLevel10Compatibility = false;
 bool GMPModeActive = false;
 
 void SignalHandler( int signal ) {

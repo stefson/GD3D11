@@ -27,9 +27,10 @@
 #define stdext std
 #endif
 
-#define VERSION_NUMBER "17.7-dev22"
+#define VERSION_NUMBER "17.7-dev23"
 __declspec(selectany) const char* VERSION_NUMBER_STR = VERSION_NUMBER;
 
+extern bool FeatureLevel10Compatibility;
 extern bool GMPModeActive;
 
 /** D3D7-Call logging */

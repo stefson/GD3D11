@@ -82,7 +82,7 @@ XRESULT D3D11VShader::LoadShader( const char* vertexShader, int layout, const st
 
 
     // Compile shader
-    if ( FAILED( CompileShaderFromFile( vertexShader, "VSMain", "vs_5_0", vsBlob.GetAddressOf(), makros ) ) ) {
+    if ( FAILED( CompileShaderFromFile( vertexShader, "VSMain", "vs_4_0", vsBlob.GetAddressOf(), makros ) ) ) {
         return XR_FAILED;
     }
 

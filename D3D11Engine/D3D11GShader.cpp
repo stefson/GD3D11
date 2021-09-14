@@ -80,7 +80,7 @@ XRESULT D3D11GShader::LoadShader( const char* geometryShader, const std::vector<
 
     if ( !createStreamOutFromVS ) {
         // Compile shaders
-        if ( FAILED( CompileShaderFromFile( geometryShader, "GSMain", "gs_5_0", gsBlob.GetAddressOf(), makros ) ) ) {
+        if ( FAILED( CompileShaderFromFile( geometryShader, "GSMain", "gs_4_0", gsBlob.GetAddressOf(), makros ) ) ) {
             return XR_FAILED;
         }
 
@@ -88,7 +88,7 @@ XRESULT D3D11GShader::LoadShader( const char* geometryShader, const std::vector<
         LE( engine->GetDevice()->CreateGeometryShader( gsBlob->GetBufferPointer(), gsBlob->GetBufferSize(), nullptr, GeometryShader.GetAddressOf() ) );
     } else {
         // Compile vertexshader
-        if ( FAILED( CompileShaderFromFile( geometryShader, "VSMain", "vs_5_0", gsBlob.GetAddressOf(), makros ) ) ) {
+        if ( FAILED( CompileShaderFromFile( geometryShader, "VSMain", "vs_4_0", gsBlob.GetAddressOf(), makros ) ) ) {
             return XR_FAILED;
         }
 

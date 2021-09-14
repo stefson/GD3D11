@@ -208,10 +208,10 @@ XRESULT D3D11GraphicsEngine::Init() {
 
     if ( !haveAdapter ) {
         LogErrorBox() << "Couldn't find any suitable GPU on your device, so it can't run GD3D11!\n"
-            "It has to be at least Featurelevel 11.0 compatible, "
+            "It has to be at least Featurelevel 10.0 compatible, "
             "which requires at least:\n"
-            " *	Nvidia GeForce GTX4xx or higher\n"
-            " *	AMD Radeon 5xxx or higher\n\n"
+            " *	Nvidia GeForce 8xxx or higher\n"
+            " *	AMD Radeon HD 2xxx or higher\n\n"
             "The game will now close.";
         exit( 2 );
     }
@@ -225,15 +225,25 @@ XRESULT D3D11GraphicsEngine::Init() {
     DeviceDescription = deviceDescription;
     LogInfo() << "Rendering on: " << deviceDescription.c_str();
 
-    int flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
-
     D3D_FEATURE_LEVEL maxFeatureLevel = D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_9_1;
     if ( FAILED( hr = CheckD3D11FeatureLevel( &maxFeatureLevel ) ) ) {
         LogInfo() << "Could not determine D3D_FEATURE_LEVEL";
     } else {
         PrintD3DFeatureLevel( maxFeatureLevel );
     }
+    if ( maxFeatureLevel < D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_10_0 ) {
+        LogErrorBox() << "Your GPU (" << deviceDescription.c_str()
+            << ") does not support Direct3D 11, so it can't run GD3D11!\n"
+            "It has to be at least Featurelevel 10.0 compatible, "
+            "which requires at least:\n"
+            " *	Nvidia GeForce 8xxx or higher\n"
+            " *	AMD Radeon HD 2xxx or higher\n\n"
+            "The game will now close.";
+        exit( 2 );
+    }
+
     // Create D3D11-Device
+    int flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 #ifndef DEBUG_D3D11
     LE( D3D11CreateDevice( DXGIAdapter2.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, flags, &maxFeatureLevel, 1, D3D11_SDK_VERSION, Device11.GetAddressOf(), nullptr, Context11.GetAddressOf() ) );
 #else
@@ -242,19 +252,9 @@ XRESULT D3D11GraphicsEngine::Init() {
     Device11.As( &Device );
     Context11.As( &Context );
 
-    if ( hr == DXGI_ERROR_UNSUPPORTED ) {
-        LogErrorBox() << "Your GPU (" << deviceDescription.c_str()
-            << ") does not support Direct3D 11, so it can't run GD3D11!\n"
-            "It has to be at least Featurelevel 11.0 compatible, "
-            "which requires at least:\n"
-            " *	Nvidia GeForce GTX4xx or higher\n"
-            " *	AMD Radeon 5xxx or higher\n\n"
-            "The game will now close.";
-        exit( 2 );
-    }
-
     LE( GetDevice()->CreateDeferredContext1( 0, DeferredContext.GetAddressOf() ) );  // Used for multithreaded texture loading
 
+    FeatureLevel10Compatibility = (maxFeatureLevel < D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_11_0);
     LogInfo() << "Creating ShaderManager";
 
     ShaderManager = std::make_unique<D3D11ShaderManager>();
@@ -1702,6 +1702,14 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
     // return XR_SUCCESS;
     if ( PresentPending ) return XR_SUCCESS;
 
+    if ( FeatureLevel10Compatibility ) {
+        // Disable here what we can't draw in feature level 10 compatibility
+        Engine::GAPI->GetRendererState().RendererSettings.HbaoSettings.Enabled = false;
+        Engine::GAPI->GetRendererState().RendererSettings.EnableSMAA = false;
+        Engine::GAPI->GetRendererState().RendererSettings.EnableTesselation = false;
+        Engine::GAPI->GetRendererState().RendererSettings.AllowWorldMeshTesselation = false;
+    }
+
     D3D11_VIEWPORT vp;
     vp.TopLeftX = 0.0f;
     vp.TopLeftY = 0.0f;
@@ -2641,7 +2649,7 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
     }
 
     // Draw Ocean
-    if ( Engine::GAPI->GetOcean() ) Engine::GAPI->GetOcean()->Draw();
+    if ( !FeatureLevel10Compatibility && Engine::GAPI->GetOcean() ) Engine::GAPI->GetOcean()->Draw();
 
     GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
         DepthStencilBuffer->GetDepthStencilView().Get() );

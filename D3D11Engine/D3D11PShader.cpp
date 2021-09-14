@@ -82,7 +82,7 @@ XRESULT D3D11PShader::LoadShader( const char* pixelShader, const std::vector<D3D
     File = pixelShader;
 
     // Compile shaders
-    if ( FAILED( CompileShaderFromFile( pixelShader, "PSMain", "ps_5_0", psBlob.GetAddressOf(), makros ) ) ) {
+    if ( FAILED( CompileShaderFromFile( pixelShader, "PSMain", "ps_4_0", psBlob.GetAddressOf(), makros ) ) ) {
         return XR_FAILED;
     }
 

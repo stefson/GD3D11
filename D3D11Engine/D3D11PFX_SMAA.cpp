@@ -21,7 +21,6 @@ D3D11PFX_SMAA::D3D11PFX_SMAA( D3D11PfxRenderer* rnd ) : D3D11PFX_Effect( rnd ) {
 	Init();
 }
 
-
 D3D11PFX_SMAA::~D3D11PFX_SMAA() {
 	delete EdgesTex;
 	delete BlendTex;

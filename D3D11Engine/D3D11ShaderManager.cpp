@@ -255,20 +255,6 @@ XRESULT D3D11ShaderManager::Init() {
     Shaders.back().cBufferSizes.push_back( sizeof( DS_ScreenQuadConstantBuffer ) );
     Shaders.back().cBufferSizes.push_back( sizeof( AtmosphereConstantBuffer ) );
 
-    // UNUSED
-    //Shaders.push_back( ShaderInfo( "DefaultTess", "DefaultTess.hlsl", "hd" ) );
-    //Shaders.back().cBufferSizes.push_back( sizeof( DefaultHullShaderConstantBuffer ) );
-
-    Shaders.push_back( ShaderInfo( "OceanTess", "OceanTess.hlsl", "hd" ) );
-    Shaders.back().cBufferSizes.push_back( sizeof( DefaultHullShaderConstantBuffer ) );
-    Shaders.back().cBufferSizes.push_back( sizeof( OceanSettingsConstantBuffer ) );
-
-    Shaders.push_back( ShaderInfo( "PNAEN_Tesselation", "PNAEN_Tesselation.hlsl", "hd" ) );
-    Shaders.back().cBufferSizes.push_back( sizeof( PNAENConstantBuffer ) );
-
-    Shaders.push_back( ShaderInfo( "Water_Tesselation", "Water_Tesselation.hlsl", "hd" ) );
-    Shaders.back().cBufferSizes.push_back( sizeof( VisualTesselationSettings::Buffer ) );
-
     Shaders.push_back( ShaderInfo( "GS_Billboard", "GS_Billboard.hlsl", "g" ) );
     Shaders.back().cBufferSizes.push_back( sizeof( ParticleGSInfoConstantBuffer ) );
 
@@ -446,8 +432,21 @@ XRESULT D3D11ShaderManager::Init() {
     Shaders.back().cBufferSizes.push_back( sizeof( MaterialInfo::Buffer ) );
     Shaders.back().cBufferSizes.push_back( sizeof( PerObjectState ) );
 
+    if ( !FeatureLevel10Compatibility ) {
+        // UNUSED
+        //Shaders.push_back( ShaderInfo( "DefaultTess", "DefaultTess.hlsl", "hd" ) );
+        //Shaders.back().cBufferSizes.push_back( sizeof( DefaultHullShaderConstantBuffer ) );
 
+        Shaders.push_back( ShaderInfo( "OceanTess", "OceanTess.hlsl", "hd" ) );
+        Shaders.back().cBufferSizes.push_back( sizeof( DefaultHullShaderConstantBuffer ) );
+        Shaders.back().cBufferSizes.push_back( sizeof( OceanSettingsConstantBuffer ) );
 
+        Shaders.push_back( ShaderInfo( "PNAEN_Tesselation", "PNAEN_Tesselation.hlsl", "hd" ) );
+        Shaders.back().cBufferSizes.push_back( sizeof( PNAENConstantBuffer ) );
+
+        Shaders.push_back( ShaderInfo( "Water_Tesselation", "Water_Tesselation.hlsl", "hd" ) );
+        Shaders.back().cBufferSizes.push_back( sizeof( VisualTesselationSettings::Buffer ) );
+    }
 
     return XR_SUCCESS;
 }

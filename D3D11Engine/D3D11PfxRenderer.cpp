@@ -20,12 +20,14 @@ D3D11PfxRenderer::D3D11PfxRenderer() {
     FX_HeightFog = std::make_unique<D3D11PFX_HeightFog>( this );
     //FX_DistanceBlur = new D3D11PFX_DistanceBlur(this);
     FX_HDR = std::make_unique<D3D11PFX_HDR>( this );
-    FX_SMAA = std::make_unique<D3D11PFX_SMAA>( this );
-
     FX_GodRays = std::make_unique<D3D11PFX_GodRays>( this );
 
-    NvHBAO = std::make_unique<D3D11NVHBAO>();
-    NvHBAO->Init();
+    if ( !FeatureLevel10Compatibility ) {
+        FX_SMAA = std::make_unique<D3D11PFX_SMAA>( this );
+
+        NvHBAO = std::make_unique<D3D11NVHBAO>();
+        NvHBAO->Init();
+    }
 }
 
 
@@ -165,7 +167,9 @@ XRESULT D3D11PfxRenderer::OnResize( const INT2& newResolution ) {
     TempBufferDS4_1.reset( new RenderToTextureBuffer( engine->GetDevice(), newResolution.x / 4, newResolution.y / 4, bbufferFormat, nullptr ) );
     TempBufferDS4_2.reset( new RenderToTextureBuffer( engine->GetDevice(), newResolution.x / 4, newResolution.y / 4, bbufferFormat, nullptr ) );
 
-    FX_SMAA->OnResize( newResolution );
+    if ( !FeatureLevel10Compatibility ) {
+        FX_SMAA->OnResize( newResolution );
+    }
 
     return XR_SUCCESS;
 }
