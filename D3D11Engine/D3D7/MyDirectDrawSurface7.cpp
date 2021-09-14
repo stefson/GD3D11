@@ -380,6 +380,8 @@ HRESULT MyDirectDrawSurface7::Lock( LPRECT lpDestRect, LPDDSURFACEDESC2 lpDDSurf
     return S_OK;
 }
 
+#pragma warning(push)
+#pragma warning(disable: 6386)
 HRESULT MyDirectDrawSurface7::Unlock( LPRECT lpRect ) {
     DebugWriteTex( "IDirectDrawSurface7(%p)::Unlock()" );
 
@@ -506,7 +508,7 @@ HRESULT MyDirectDrawSurface7::Unlock( LPRECT lpRect ) {
 
     return S_OK;
 }
-
+#pragma warning(pop)
 
 HRESULT MyDirectDrawSurface7::ReleaseDC( HDC hDC ) {
     DebugWriteTex( "IDirectDrawSurface7(%p)::ReleaseDC()" );

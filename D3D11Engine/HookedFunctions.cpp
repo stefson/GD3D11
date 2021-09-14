@@ -118,6 +118,9 @@ void HookedFunctionInfo::InitHooks() {
     PatchAddr( 0x00502F94, "\xEB" );
     PatchAddr( 0x00503343, "\xEB" );
 
+    LogInfo() << "Patching: Texture size is lower than 32 - fix";
+    PatchAddr( 0x005F4E20, "\xC7\x05\xBC\xB3\x99\x00\x00\x40\x00\x00\xEB\x4D\x90\x90" );
+
 #endif
     // HACK Workaround to fix debuglines in godmode
 #if (defined BUILD_GOTHIC_2_6_fix)

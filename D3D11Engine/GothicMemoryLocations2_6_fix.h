@@ -422,7 +422,7 @@ struct GothicMemoryLocations {
     };
 
     struct zSTRING {
-        static const unsigned int ToChar = 0x004639D0;
+        static const unsigned int ToChar = 0x08;
         static const unsigned int ConstructorCharPtr = 0x004010C0;
         static const unsigned int DestructorCharPtr = 0x00401160;
     };

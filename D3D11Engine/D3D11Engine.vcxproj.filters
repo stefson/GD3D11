@@ -843,9 +843,6 @@
     <ClCompile Include="StackWalker.cpp">
       <Filter>Librarys\StackWalker</Filter>
     </ClCompile>
-    <ClCompile Include="oCNPC.cpp">
-      <Filter>ZenGin\Classes</Filter>
-    </ClCompile>
     <ClCompile Include="MeshModifier.cpp">
       <Filter>Engine\GAPI</Filter>
     </ClCompile>

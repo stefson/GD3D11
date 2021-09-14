@@ -3602,10 +3602,14 @@ XRESULT GothicAPI::LoadSuppressedTextures( const std::string& file ) {
             fread( &numChars, sizeof( numChars ), 1, f );
 
             // Read chars
-            char name[256];
-            memset( name, 0, 256 );
+            char name[256] = {};
             if ( numChars > 0 ) {
-                fread( name, numChars, 1, f );
+                if ( numChars > 255 ) {
+                    fread( name, 255, 1, f );
+                    fseek( f, static_cast<long>(numChars - 255), SEEK_CUR );
+                } else {
+                    fread( name, numChars, 1, f );
+                }
             }
 
             // Add to map

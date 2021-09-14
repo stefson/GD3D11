@@ -23,7 +23,7 @@ public:
 #ifdef BUILD_GOTHIC_1_08k
         return GetDecalSettings()->DecalMaterial->GetAlphaFunc() == zMAT_ALPHA_FUNC_TEST;
 #else
-        XCALL( GothicMemoryLocations::zCDecal::GetAlphaTestEnabled );
+        return reinterpret_cast<bool( __fastcall* )( zCDecal* )>( GothicMemoryLocations::zCDecal::GetAlphaTestEnabled )( this );
 #endif
     }
 };

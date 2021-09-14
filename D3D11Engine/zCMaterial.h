@@ -27,9 +27,6 @@ private:
 
 class zCMaterial {
 public:
-    zCMaterial();
-    ~zCMaterial();
-
     /** Hooks the functions of this Class */
     static void Hook() {
         XHook( HookedFunctions::OriginalFunctions.original_zCMaterialDestructor, GothicMemoryLocations::zCMaterial::Destructor, zCMaterial::Hooked_Destructor );
@@ -88,8 +85,6 @@ public:
             }
         }
         return texture;
-        //return GetTextureSingle(); // TODO: GetAniTexture crashes sometimes
-        //XCALL( GothicMemoryLocations::zCMaterial::GetAniTexture );
     }
 
     /** Returns the color-mod of this material */
@@ -104,7 +99,7 @@ public:
 
     /** Returns the current texture from GetAniTexture */
     zCTexture* GetAniTexture() {
-        XCALL( GothicMemoryLocations::zCMaterial::GetAniTexture );
+        return reinterpret_cast<zCTexture*( __fastcall* )( zCMaterial* )>( GothicMemoryLocations::zCMaterial::GetAniTexture )( this );
     }
 
     void BindTexture( int slot ) {

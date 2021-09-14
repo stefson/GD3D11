@@ -210,12 +210,12 @@ public:
     }
 
     void Render( zCCamera& camera ) {
-        XCALL( GothicMemoryLocations::zCWorld::Render );
+        reinterpret_cast<void( __fastcall* )( zCWorld*, int, zCCamera& )>( GothicMemoryLocations::zCWorld::Render )( this, 0, camera );
     }
 
     /*zCSkyController* GetActiveSkyController()
     {
-        XCALL(GothicMemoryLocations::zCWorld::GetActiveSkyController);
+        return reinterpret_cast<zCSkyController*( __fastcall* )( zCWorld* )>( GothicMemoryLocations::zCWorld::GetActiveSkyController )( this );
     }*/
 
     zCSkyController_Outdoor* GetSkyControllerOutdoor() {
@@ -227,6 +227,6 @@ public:
     }
 
     void RemoveVob( zCVob* vob ) {
-        XCALL( GothicMemoryLocations::zCWorld::RemoveVob );
+        reinterpret_cast<void( __fastcall* )( zCWorld*, int, zCVob* )>( GothicMemoryLocations::zCWorld::RemoveVob )( this, 0, vob );
     }
 };

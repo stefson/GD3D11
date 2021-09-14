@@ -229,7 +229,7 @@ void D3D11PFX_SMAA::OnResize( const INT2& size ) {
 	D3D_SHADER_MACRO HLSL = { "SMAA_HLSL_4_1", "1" };
 	Makros.push_back( HLSL );
 
-	const int QUALITY = 2;
+	int QUALITY = 2;
 	switch ( QUALITY ) {
 	case 0:
 	{

@@ -107,7 +107,8 @@ public:
 
     /** Updates the rain-weight and sound-effects */
     void ProcessRainFX() {
-        XCALL( GothicMemoryLocations::zCSkyController_Outdoor::ProcessRainFX );
+        reinterpret_cast<void( __fastcall* )( zCSkyController_Outdoor* )>
+            ( GothicMemoryLocations::zCSkyController_Outdoor::ProcessRainFX )( this );
     }
 
     /** Returns the rain-fx weight */
@@ -152,7 +153,8 @@ public:
     }
 
     int GetUnderwaterFX() {
-        XCALL( GothicMemoryLocations::zCSkyController_Outdoor::GetUnderwaterFX );
+        return reinterpret_cast<int( __fastcall* )( zCSkyController_Outdoor* )>
+            ( GothicMemoryLocations::zCSkyController_Outdoor::GetUnderwaterFX )( this );
     }
 
     DirectX::XMFLOAT3 GetOverrideColor() {
@@ -200,7 +202,8 @@ public:
     }
 
     void SetCameraLocationHint( int hint ) {
-        XCALL( GothicMemoryLocations::zCSkyController_Outdoor::SetCameraLocationHint );
+        reinterpret_cast<void( __fastcall* )( zCSkyController_Outdoor*, int, int )>
+            ( GothicMemoryLocations::zCSkyController_Outdoor::SetCameraLocationHint )( this, 0, hint );
     }
 
     /*zCSkyLayer* GetSkyLayers(int i)
@@ -231,7 +234,8 @@ public:
 
     /*void Init()
     {
-        XCALL(GothicMemoryLocations::zCSkyController_Outdoor::Init);
+        reinterpret_cast<void( __fastcall* )( zCSkyController_Outdoor* )>
+            ( GothicMemoryLocations::zCSkyController_Outdoor::Init )( this );
     }
 
     bool GetInitDone()
@@ -246,7 +250,8 @@ public:
 
     void Interpolate()
     {
-        XCALL(GothicMemoryLocations::zCSkyController_Outdoor::Interpolate);
+        reinterpret_cast<void( __fastcall* )( zCSkyController_Outdoor* )>
+            ( GothicMemoryLocations::zCSkyController_Outdoor::Interpolate )( this );
     }
 
     static zCSkyController_Outdoor* GetActiveSkyController()

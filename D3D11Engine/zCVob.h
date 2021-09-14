@@ -83,7 +83,7 @@ public:
     /** Returns the helper-visual for this class
         This actually uses a map to lookup the visual. Beware for performance-issues! */
     zCVisual* GetClassHelperVisual() {
-        XCALL( GothicMemoryLocations::zCVob::GetClassHelperVisual );
+        return reinterpret_cast<zCVisual*( __fastcall* )( zCVob* )>( GothicMemoryLocations::zCVob::GetClassHelperVisual )( this );
     }
 
     /** Returns the visual saved in this vob */
@@ -105,15 +105,13 @@ public:
     }
 #endif
 
-#ifdef BUILD_GOTHIC_1_08k
-    void _EndMovement() {
-        XCALL( GothicMemoryLocations::zCVob::EndMovement );
-    }
-#else
     void _EndMovement( int p = 1 ) {
-        XCALL( GothicMemoryLocations::zCVob::EndMovement );
-    }
+#ifdef BUILD_GOTHIC_1_08k
+        reinterpret_cast<void( __fastcall* )( zCVob* )>( GothicMemoryLocations::zCVob::EndMovement )( this );
+#else
+        reinterpret_cast<void( __fastcall* )( zCVob*, int, int )>( GothicMemoryLocations::zCVob::EndMovement )( this, 0, p );
 #endif
+    }
 
     /** Updates the vobs transforms */
     void EndMovement() {
@@ -122,7 +120,7 @@ public:
 
     /** Returns the visual saved in this vob */
     zCVisual* GetMainVisual() {
-        XCALL( GothicMemoryLocations::zCVob::GetVisual );
+        return reinterpret_cast<zCVisual*( __fastcall* )( zCVob* )>( GothicMemoryLocations::zCVob::GetVisual )( this );
     }
 
     /** Returns the name of this vob */
@@ -136,7 +134,6 @@ public:
         return DirectX::XMFLOAT3( *(float*)THISPTR_OFFSET( GothicMemoryLocations::zCVob::Offset_WorldPosX ),
             *(float*)THISPTR_OFFSET( GothicMemoryLocations::zCVob::Offset_WorldPosY ),
             *(float*)THISPTR_OFFSET( GothicMemoryLocations::zCVob::Offset_WorldPosZ ) );
-        //XCALL(GothicMemoryLocations::zCVob::GetPositionWorld);
     }
 
     /** Returns the world-position of this vob */
@@ -146,19 +143,20 @@ public:
             *(float*)THISPTR_OFFSET( GothicMemoryLocations::zCVob::Offset_WorldPosY ),
             *(float*)THISPTR_OFFSET( GothicMemoryLocations::zCVob::Offset_WorldPosZ ), 0 );
         return pos;
-        //XCALL(GothicMemoryLocations::zCVob::GetPositionWorld);
     }
 
     /** Sets this vobs position */
     void SetPositionWorld( const DirectX::XMFLOAT3& v ) {
 #ifdef BUILD_SPACER
-        XCALL( GothicMemoryLocations::zCVob::SetPositionWorld );
+        reinterpret_cast<void( __fastcall* )( zCVob*, int, const DirectX::XMFLOAT3& )>
+            ( GothicMemoryLocations::zCVob::SetPositionWorld )( this, 0, v );
 #endif
     }
     /** Sets this vobs position */
     void SetPositionWorldDX( const DirectX::XMFLOAT3& v ) {
 #ifdef BUILD_SPACER
-        XCALL( GothicMemoryLocations::zCVob::SetPositionWorld );
+        reinterpret_cast<void( __fastcall* )( zCVob*, int, const DirectX::XMFLOAT3& )>
+            ( GothicMemoryLocations::zCVob::SetPositionWorld )( this, 0, v );
 #endif
     }
     /** Sets this vobs position */
@@ -169,7 +167,9 @@ public:
 
     /** Returns the local bounding box */
     zTBBox3D GetBBoxLocal() {
-        XCALL( GothicMemoryLocations::zCVob::GetBBoxLocal );
+        zTBBox3D box;
+        reinterpret_cast<void( __fastcall* )( zCVob*, int, zTBBox3D& )>( GothicMemoryLocations::zCVob::GetBBoxLocal )( this, 0, box );
+        return box;
     }
 
     /** Returns a pointer to this vobs world-matrix */
@@ -212,7 +212,7 @@ public:
         return (flags & GothicMemoryLocations::zCVob::MASK_SkeepingMode);
     }
     void SetSleeping( int on ) {
-        XCALL( GothicMemoryLocations::zCVob::SetSleeping );
+        reinterpret_cast<void( __fastcall* )( zCVob*, int, int )>( GothicMemoryLocations::zCVob::SetSleeping )( this, 0, on );
     }
 
 #ifndef BUILD_SPACER_NET
@@ -292,13 +292,13 @@ protected:
     }
 
     zSTRING& __GetObjectName() {
-        XCALL( GothicMemoryLocations::zCObject::GetObjectName );
+        return reinterpret_cast<zSTRING&( __fastcall* )( zCVob* )>( GothicMemoryLocations::zCObject::GetObjectName )( this );
     }
 
 
     /*void DoFrameActivity()
     {
-        XCALL(GothicMemoryLocations::zCVob::DoFrameActivity);
+        reinterpret_cast<void( __fastcall* )( zCVob* )>( GothicMemoryLocations::zCVob::DoFrameActivity )( this );
     }*/
 
 

@@ -4,6 +4,9 @@
 
 class zSTRING {
 public:
+    zSTRING() {
+        reinterpret_cast<void( __fastcall* )( zSTRING*, int, const char* )>( GothicMemoryLocations::zSTRING::ConstructorCharPtr )( this, 0, "" );
+    }
     zSTRING( const char* str ) {
         reinterpret_cast<void( __fastcall* )( zSTRING*, int, const char* )>( GothicMemoryLocations::zSTRING::ConstructorCharPtr )( this, 0, str );
     }
@@ -13,7 +16,8 @@ public:
     }
 
     const char* ToChar() const {
-        XCALL( GothicMemoryLocations::zSTRING::ToChar );
+        const char* str = *reinterpret_cast<const char**>(reinterpret_cast<DWORD>(this) + GothicMemoryLocations::zSTRING::ToChar);
+        return (str ? str : "");
     }
 
     char data[20];

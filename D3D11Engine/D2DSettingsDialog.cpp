@@ -243,7 +243,7 @@ XRESULT D2DSettingsDialog::InitControls() {
 	fpsLimitSlider->SetDisplayValues( fpsValues );
 
 	// Fix the fps value
-	fpsLimitSlider->SetValue( Engine::GAPI->GetRendererState().RendererSettings.FpsLimit );
+	fpsLimitSlider->SetValue( static_cast<float>(Engine::GAPI->GetRendererState().RendererSettings.FpsLimit) );
 
 	// Next column
     SV_Label* textureQualityLabel = new SV_Label( MainView, MainPanel );
@@ -495,7 +495,7 @@ XRESULT D2DSettingsDialog::InitControls() {
 }
 
 void D2DSettingsDialog::FpsLimitSliderChanged( SV_Slider* sender, void* userdata ) {
-	int newValue = sender->GetValue();
+	int newValue = static_cast<int>(sender->GetValue());
 	Engine::GAPI->GetRendererState().RendererSettings.FpsLimit = newValue <= 25 ? 0 : newValue;
 }
 

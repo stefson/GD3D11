@@ -10,6 +10,7 @@
 #include <future>
 #include <list>
 #include <map>
+#include <array>
 #include <mmsystem.h>
 #include <set>
 #include <signal.h>

@@ -84,7 +84,7 @@ public:
 
     /*float GetGammaValue()
     {
-        XCALL(GothicMemoryLocations::zCRndD3D::Vid_GetGammaCorrection);
+        return reinterpret_cast<float( __fastcall* )( zCRndD3D* )>( GothicMemoryLocations::zCRndD3D::Vid_GetGammaCorrection )( this );
     }*/
 
     static zCRndD3D* GetRenderer() {

@@ -257,27 +257,13 @@ public:
 		return S_OK;
 	}
 
-	struct ModesEnumInfo {
-		LPDDENUMMODESCALLBACK2 originalFn;
-		LPVOID originalUserArg;
-	};
-
-	static HRESULT WINAPI EnumModesCallback2( LPDDSURFACEDESC2 lpDDSurfaceDesc, LPVOID lpContext ) {
-		LogInfo() << "RefreshRate: " << lpDDSurfaceDesc->dwRefreshRate;
-		LogInfo() << "\nWidth: " << lpDDSurfaceDesc->dwWidth;
-		LogInfo() << "\nHeight: " << lpDDSurfaceDesc->dwHeight;
-
-		/*FILE* f = fopen("system\\GD3D11\\data\\ModesEnum.bin", "ab");
-
-		fwrite(lpDDSurfaceDesc, sizeof(DDSURFACEDESC2), 1, f);
-
-		fclose(f);*/
-
-		return (*((ModesEnumInfo*)lpContext)->originalFn)(lpDDSurfaceDesc, ((ModesEnumInfo*)lpContext)->originalUserArg);
-	}
-
 	HRESULT STDMETHODCALLTYPE EnumDisplayModes( DWORD dwFlags, LPDDSURFACEDESC2 lpDDSurfaceDesc2, LPVOID lpContext, LPDDENUMMODESCALLBACK2 lpEnumModesCallback ) {
 		DebugWrite( "MyDirectDraw::EnumDisplayModes\n" );
+
+        struct ModesEnumInfo {
+            LPDDENUMMODESCALLBACK2 originalFn;
+            LPVOID originalUserArg;
+        };
 
 		ModesEnumInfo info;
 		info.originalFn = lpEnumModesCallback;

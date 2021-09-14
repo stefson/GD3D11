@@ -165,15 +165,17 @@ void EnableCrashingOnCrashes() {
     const DWORD EXCEPTION_SWALLOWING = 0x1;
 
     HMODULE kernel32 = LoadLibraryA( "kernel32.dll" );
-    tGetPolicy pGetPolicy = (tGetPolicy)GetProcAddress( kernel32,
-        "GetProcessUserModeExceptionPolicy" );
-    tSetPolicy pSetPolicy = (tSetPolicy)GetProcAddress( kernel32,
-        "SetProcessUserModeExceptionPolicy" );
-    if ( pGetPolicy && pSetPolicy ) {
-        DWORD dwFlags;
-        if ( pGetPolicy( &dwFlags ) ) {
-            // Turn off the filter
-            pSetPolicy( dwFlags & ~EXCEPTION_SWALLOWING );
+    if ( kernel32 ) {
+        tGetPolicy pGetPolicy = (tGetPolicy)GetProcAddress( kernel32,
+            "GetProcessUserModeExceptionPolicy" );
+        tSetPolicy pSetPolicy = (tSetPolicy)GetProcAddress( kernel32,
+            "SetProcessUserModeExceptionPolicy" );
+        if ( pGetPolicy && pSetPolicy ) {
+            DWORD dwFlags;
+            if ( pGetPolicy( &dwFlags ) ) {
+                // Turn off the filter
+                pSetPolicy( dwFlags & ~EXCEPTION_SWALLOWING );
+            }
         }
     }
 }

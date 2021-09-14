@@ -195,7 +195,8 @@ public:
 
     /** Creates an array of matrices for the bone transforms */
     void __fastcall RenderNodeList( zTRenderContext& renderContext, zCArray<DirectX::XMFLOAT4X4*>& boneTransforms, zCRenderLightContainer& lightContainer, int lightingMode = 0 ) {
-        XCALL( GothicMemoryLocations::zCModel::RenderNodeList );
+        reinterpret_cast<void( __fastcall* )( zCModel*, zTRenderContext&, zCArray<DirectX::XMFLOAT4X4*>&, zCRenderLightContainer&, int )>
+            ( GothicMemoryLocations::zCModel::RenderNodeList )( this, renderContext, boneTransforms, lightContainer, lightingMode );
     }
 
     /** Returns the current amount of active animations */
@@ -289,7 +290,7 @@ public:
 
     /* Updates the world matrices of the attached VOBs */
     void UpdateAttachedVobs() {
-        XCALL( GothicMemoryLocations::zCModel::UpdateAttachedVobs );
+        reinterpret_cast<void( __fastcall* )( zCModel* )>( GothicMemoryLocations::zCModel::UpdateAttachedVobs )( this );
     }
 
     /** Fills a vector of (viewspace) bone-transformation matrices for this frame */
@@ -323,7 +324,9 @@ public:
     }
 
     zSTRING GetModelName() {
-        XCALL( GothicMemoryLocations::zCModel::GetVisualName );
+        zSTRING str;
+        reinterpret_cast<void(__fastcall*)( zCModel*, int, zSTRING& )>( GothicMemoryLocations::zCModel::GetVisualName )( this, 0, str );
+        return str;
     }
 
 private:

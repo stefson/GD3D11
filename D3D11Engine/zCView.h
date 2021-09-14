@@ -9,18 +9,15 @@
 class zCViewDraw {
 public:
     static void Hook() {
-        XHook( HookedFunctions::OriginalFunctions.original_zCViewDrawGetScreen, GothicMemoryLocations::zCViewDraw::GetScreen, GetScreen );
+        //XHook( HookedFunctions::OriginalFunctions.original_zCViewDrawGetScreen, GothicMemoryLocations::zCViewDraw::GetScreen, GetScreen );
     }
     
     static zCViewDraw& GetScreen() {
-        hook_infunc
-            zCViewDraw& viewDraw = HookedFunctions::OriginalFunctions.original_zCViewDrawGetScreen();
-            return viewDraw;
-        hook_outfunc
+        return reinterpret_cast<zCViewDraw&( __fastcall* )( void )>( GothicMemoryLocations::zCViewDraw::GetScreen )();
     }
 
     void __fastcall SetVirtualSize(POINT& pt) {
-        XCALL( GothicMemoryLocations::zCViewDraw::SetVirtualSize );
+        reinterpret_cast<void( __fastcall* )( zCViewDraw*, POINT& )>( GothicMemoryLocations::zCViewDraw::SetVirtualSize )( this, pt );
     }
 };
 
@@ -96,7 +93,8 @@ public:
             || (thisptr == GetScreen()) ) {
             Engine::GraphicsEngine->DrawString(
                 s.ToChar(),
-                thisptr->pposx + thisptr->nax( x ), thisptr->pposy + thisptr->nay( y ),
+                static_cast<float>(thisptr->pposx + thisptr->nax( x )),
+                static_cast<float>(thisptr->pposy + thisptr->nay( y )),
                 thisptr->font, thisptr->fontColor );
         } else {
             // create a textview for later blitting
@@ -128,8 +126,8 @@ public:
             if ( text->colored ) { fontColor = text->color; }
             //else                 { fontColor = thisptr->fontColor;}
 
-            x = thisptr->pposx + thisptr->nax( text->posx );
-            y = thisptr->pposy + thisptr->nay( text->posy );
+            x = static_cast<float>(thisptr->pposx + thisptr->nax( text->posx ));
+            y = static_cast<float>(thisptr->pposy + thisptr->nay( text->posy ));
 
             if ( !thisptr->font ) continue;
 
@@ -142,6 +140,7 @@ public:
 
     /** Prints a message to the screen */
     void PrintTimed( int posX, int posY, const zSTRING& strMessage, float time = 3000.0f, DWORD* col = nullptr ) {
-        XCALL( GothicMemoryLocations::zCView::PrintTimed );
+        reinterpret_cast<void( __fastcall* )( zCView*, int, int, int, const zSTRING&, float, DWORD* )>
+            ( GothicMemoryLocations::zCView::PrintTimed )(this, 0, posX, posY, strMessage, time, col);
     }
 };
