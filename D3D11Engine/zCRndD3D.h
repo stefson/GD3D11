@@ -15,6 +15,18 @@ public:
 
         XHook( HookedFunctions::OriginalFunctions.original_zCRnd_D3D_DrawPoly, GothicMemoryLocations::zCRndD3D::DrawPoly, hooked_zCRndD3DDrawPoly );
         XHook( HookedFunctions::OriginalFunctions.original_zCRnd_D3D_DrawPolySimple, GothicMemoryLocations::zCRndD3D::DrawPolySimple, hooked_zCRndD3DDrawPolySimple );
+
+        XHook( GothicMemoryLocations::zCRndD3D::CacheInSurface, hooked_zCSurfaceCache_D3DCacheInSurface );
+        XHook( GothicMemoryLocations::zCRndD3D::CacheOutSurface, hooked_zCSurfaceCache_D3DCacheOutSurface );
+    }
+
+    /** Disable caching surfaces to let engine create new surfaces for every textures */
+    static int __fastcall hooked_zCSurfaceCache_D3DCacheInSurface( void* thisptr, void* _EDX, void* surface, void* slotindex ) {
+        return FALSE;
+    }
+
+    static void* __fastcall hooked_zCSurfaceCache_D3DCacheOutSurface( void* thisptr, void* _EDX, void* slotindex ) {
+        return nullptr;
     }
 
     /** Draws a straight line from xyz1 to xyz2 */

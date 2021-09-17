@@ -47,6 +47,8 @@ struct GothicMemoryLocations {
         static const unsigned int DrawLine = 0x00716B00;
         static const unsigned int DrawPoly = 0x00714B60;
         static const unsigned int DrawPolySimple = 0x007143F0;
+        static const unsigned int CacheInSurface = 0x0071A3E0;
+        static const unsigned int CacheOutSurface = 0x0071A7F0;
 
         static const unsigned int Offset_RenderState = 0x34;
         static const unsigned int Offset_BoundTexture = 0x80E38;

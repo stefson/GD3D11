@@ -536,16 +536,17 @@ void GothicAPI::OnGeometryLoaded( zCPolygon** polys, unsigned int numPolygons ) 
     ResetWorld();
     ResetMaterialInfo();
 
+    bool indoorLocation = (oCGame::GetGame()->_zCSession_world->GetBspTree()->GetBspTreeMode() == zBSP_MODE_INDOOR);
     std::string worldStr = "system\\GD3D11\\meshes\\WLD_" + LoadedWorldInfo->WorldName + ".obj";
     // Convert world to our own format
 #ifdef BUILD_GOTHIC_2_6_fix
-    WorldConverter::ConvertWorldMesh( polys, numPolygons, &WorldSections, LoadedWorldInfo.get(), &WrappedWorldMesh );
+    WorldConverter::ConvertWorldMesh( polys, numPolygons, &WorldSections, LoadedWorldInfo.get(), &WrappedWorldMesh, indoorLocation );
 #else
     if ( Toolbox::FileExists( worldStr ) ) {
         WorldConverter::LoadWorldMeshFromFile( worldStr, &WorldSections, LoadedWorldInfo.get(), &WrappedWorldMesh );
         LoadedWorldInfo->CustomWorldLoaded = true;
     } else {
-        WorldConverter::ConvertWorldMesh( polys, numPolygons, &WorldSections, LoadedWorldInfo.get(), &WrappedWorldMesh );
+        WorldConverter::ConvertWorldMesh( polys, numPolygons, &WorldSections, LoadedWorldInfo.get(), &WrappedWorldMesh, indoorLocation );
     }
 #endif
     LogInfo() << "Done extracting world!";
@@ -3114,6 +3115,7 @@ void GothicAPI::BuildBspVobMapCacheHelper( zCBspBase* base ) {
     BspInfo& bvi = BspLeafVobLists[base];
     bvi.OriginalNode = base;
 
+    bool outdoorLocation = (LoadedWorldInfo->BspTree->GetBspTreeMode() == zBSP_MODE_OUTDOOR);
     if ( base->IsLeaf() ) {
         zCBspLeaf* leaf = (zCBspLeaf*)base;
 
@@ -3130,7 +3132,8 @@ void GothicAPI::BuildBspVobMapCacheHelper( zCBspBase* base ) {
                 if ( v ) {
                     float vobSmallSize = Engine::GAPI->GetRendererState().RendererSettings.SmallVobSize;
 
-                    if ( vob->IsIndoorVob() ) {
+                    // Treat indoor vobs as indoor vobs only in outdoor locations
+                    if ( outdoorLocation && vob->IsIndoorVob() ) {
                         // Only add once
                         if ( std::find( bvi.IndoorVobs.begin(), bvi.IndoorVobs.end(), v ) == bvi.IndoorVobs.end() ) {
                             v->ParentBSPNodes.push_back( &bvi );
@@ -3187,31 +3190,6 @@ void GothicAPI::BuildBspVobMapCacheHelper( zCBspBase* base ) {
                 if ( vob->IsIndoorVob() ) {
                     vi->IsIndoorVob = true;
                 }
-            }
-
-            VobLightInfo* vi = VobLightMap[vob];
-            if ( vi ) {
-                if ( !vi->IsIndoorVob ) {
-                    // Only add once
-                    if ( std::find( bvi.Lights.begin(), bvi.Lights.end(), vi ) == bvi.Lights.end() ) {
-                        vi->ParentBSPNodes.push_back( &bvi );
-                        bvi.Lights.push_back( vi );
-                    }
-                } else {
-                    // Only add once
-                    if ( std::find( bvi.IndoorLights.begin(), bvi.IndoorLights.end(), vi ) == bvi.IndoorLights.end() ) {
-                        vi->ParentBSPNodes.push_back( &bvi );
-                        bvi.IndoorLights.push_back( vi );
-                    }
-                }
-
-#ifdef BUILD_SPACER
-                // Add lights to drawable voblist, so we can draw their helper-visuals when wanted
-                // Also, make sure they end up in the dynamic list, so their visuals don't stay in place
-                //VobInfo * v = VobMap[leaf->LightVobList.Array[i]];
-                //if (v)
-                //	MoveVobFromBspToDynamic(v);
-#endif
             }
         }
 

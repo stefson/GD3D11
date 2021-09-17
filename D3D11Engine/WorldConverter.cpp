@@ -524,7 +524,7 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN( zCPolygon** polys, unsigned int n
 }
 
 /** Converts the worldmesh into a more usable format */
-HRESULT WorldConverter::ConvertWorldMesh( zCPolygon** polys, unsigned int numPolygons, std::map<int, std::map<int, WorldMeshSectionInfo>>* outSections, WorldInfo* info, MeshInfo** outWrappedMesh ) {
+HRESULT WorldConverter::ConvertWorldMesh( zCPolygon** polys, unsigned int numPolygons, std::map<int, std::map<int, WorldMeshSectionInfo>>* outSections, WorldInfo* info, MeshInfo** outWrappedMesh, bool indoorLocation ) {
     // Go through every polygon and put it into its section
     for ( unsigned int i = 0; i < numPolygons; i++ ) {
         zCPolygon* poly = polys[i];
@@ -585,12 +585,14 @@ HRESULT WorldConverter::ConvertWorldMesh( zCPolygon** polys, unsigned int numPol
             if ( poly->GetLightmap() ) {
                 t.TexCoord2 = poly->GetLightmap()->GetLightmapUV( *t.Position.toXMFLOAT3() );
                 t.Color = DEFAULT_LIGHTMAP_POLY_COLOR;
+            } else if ( indoorLocation ) {
+                t.TexCoord2 = float2( 0.0f, 0.0f );
+                t.Color = DEFAULT_LIGHTMAP_POLY_COLOR;
             } else {
-                t.TexCoord2.x = 0.0f;
-                t.TexCoord2.y = 0.0f;
+                t.TexCoord2 = float2( 0.0f, 0.0f );
 
                 if ( poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER ) {
-                    t.Normal = float3( 0, 1, 0 ); // Get rid of ugly shadows on water
+                    t.Normal = float3( 0.0f, 1.0f, 0.0f ); // Get rid of ugly shadows on water
                     // Static light generated for water sucks and we can't use it to block the sun specular lighting
                     // so we'll limit ourselves to only block it in indoor locations
                     t.Color = 0xFFFFFFFF;
@@ -719,14 +721,6 @@ HRESULT WorldConverter::ConvertWorldMesh( zCPolygon** polys, unsigned int numPol
     MeshInfo* wmi = new MeshInfo();
     Engine::GraphicsEngine->CreateVertexBuffer( &wmi->MeshVertexBuffer );
     Engine::GraphicsEngine->CreateVertexBuffer( &wmi->MeshIndexBuffer );
-
-    LogInfo() << "Smoothing worldmesh normals...";
-    DWORD sStart = Toolbox::timeSinceStartMs();
-
-    // Generate smooth normals
-    //MeshModifier::ComputeSmoothNormals( wrappedVertices );
-
-    LogInfo() << "Process took " << Toolbox::timeSinceStartMs() - sStart << "ms";
 
     // Init and fill them
     wmi->MeshVertexBuffer->Init( &wrappedVertices[0], wrappedVertices.size() * sizeof( ExVertexStruct ), D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_IMMUTABLE );

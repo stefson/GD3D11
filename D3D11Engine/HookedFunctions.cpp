@@ -85,10 +85,16 @@ void HookedFunctionInfo::InitHooks() {
 #ifdef BUILD_1_12F
     LogInfo() << "Patching: Fix integer overflow crash";
     PatchAddr( 0x00506B31, "\xEB" );
+
+    LogInfo() << "Patching: Marking texture as cached-in after cache-out";
+    PatchAddr( 0x005E90BE, "\x90\x90" );
 #else
     LogInfo() << "Patching: Fix integer overflow crash";
     PatchAddr( 0x004F4024, "\xEB" );
     PatchAddr( 0x004F43FC, "\xEB" );
+
+    LogInfo() << "Patching: Marking texture as cached-in after cache-out";
+    PatchAddr( 0x005CA683, "\x90\x90" );
 #endif
 #endif
 
@@ -121,9 +127,10 @@ void HookedFunctionInfo::InitHooks() {
     LogInfo() << "Patching: Texture size is lower than 32 - fix";
     PatchAddr( 0x005F4E20, "\xC7\x05\xBC\xB3\x99\x00\x00\x40\x00\x00\xEB\x4D\x90\x90" );
 
-#endif
+    LogInfo() << "Patching: Marking texture as cached-in after cache-out";
+    PatchAddr( 0x005F5573, "\x90\x90" );
+
     // HACK Workaround to fix debuglines in godmode
-#if (defined BUILD_GOTHIC_2_6_fix)
     LogInfo() << "Patching: Godmode Debuglines";
     // oCMagFrontier::GetDistanceNewWorld
     PatchAddr( 0x00473f37, "\xBD\x00\x00\x00\x00" ); // replace MOV EBP, 0x1 with MOV EBP, 0x0

@@ -617,6 +617,15 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
 
         DXGI_SWAP_CHAIN_FULLSCREEN_DESC swapChainFSDesc = {};
 
+        // Get current refresh rate
+        {
+            DEVMODEA devMode;
+            if ( EnumDisplaySettingsA( nullptr, ENUM_CURRENT_SETTINGS, &devMode ) ) {
+                swapChainFSDesc.RefreshRate.Numerator = devMode.dmDisplayFrequency;
+                swapChainFSDesc.RefreshRate.Denominator = 1;
+            }
+        }
+
         if ( m_swapchainflip ) swapChainFSDesc.Windowed = true;
         else {
             bool windowed = Engine::GAPI->HasCommandlineParameter( "ZWINDOW" ) ||
@@ -710,7 +719,7 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
     HDRBackBuffer = std::make_unique<RenderToTextureBuffer>( GetDevice().Get(), Resolution.x, Resolution.y,
         (Engine::GAPI->GetRendererState().RendererSettings.CompressBackBuffer ? DXGI_FORMAT_R11G11B10_FLOAT : DXGI_FORMAT_R16G16B16A16_FLOAT) );
 
-    int s = Engine::GAPI->GetRendererState().RendererSettings.ShadowMapSize;
+    int s = std::min<int>( std::max<int>( Engine::GAPI->GetRendererState().RendererSettings.ShadowMapSize, 512 ), (FeatureLevel10Compatibility ? 8192 : 16384) );
     WorldShadowmap1 = std::make_unique<RenderToDepthStencilBuffer>(
         GetDevice().Get(), s, s, DXGI_FORMAT_R16_TYPELESS, nullptr, DXGI_FORMAT_D16_UNORM,
         DXGI_FORMAT_R16_UNORM );
@@ -811,6 +820,8 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
     int s = Engine::GAPI->GetRendererState().RendererSettings.ShadowMapSize;
 
     if ( WorldShadowmap1->GetSizeX() != s ) {
+        s = std::min<int>(std::max<int>(s, 512), (FeatureLevel10Compatibility ? 8192 : 16384));
+
         int old = WorldShadowmap1->GetSizeX();
         LogInfo() << "Shadowmapresolution changed to: " << s << "x" << s;
         WorldShadowmap1 = std::make_unique<RenderToDepthStencilBuffer>(
@@ -821,6 +832,8 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
 
         Engine::GAPI->GetRendererState().RendererSettings.WorldShadowRangeScale =
             Toolbox::GetRecommendedWorldShadowRangeScaleForSize( s );
+
+        Engine::GAPI->GetRendererState().RendererSettings.ShadowMapSize = s;
     }
 
     // Force the mode

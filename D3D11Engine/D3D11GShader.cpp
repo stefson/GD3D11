@@ -124,7 +124,8 @@ XRESULT D3D11GShader::LoadShader( const char* geometryShader, const std::vector<
         }
 
         // Create the shader from a vertexshader
-        engine->GetDevice()->CreateGeometryShaderWithStreamOutput( gsBlob->GetBufferPointer(), gsBlob->GetBufferSize(), soDec, numSoDecElements, &stride, 1, D3D11_SO_NO_RASTERIZED_STREAM, nullptr, GeometryShader.GetAddressOf() );
+        LE( engine->GetDevice()->CreateGeometryShaderWithStreamOutput( gsBlob->GetBufferPointer(), gsBlob->GetBufferSize(), soDec, numSoDecElements, &stride, 1,
+            (FeatureLevel10Compatibility ? 0 : D3D11_SO_NO_RASTERIZED_STREAM), nullptr, GeometryShader.GetAddressOf() ) );
     }
 
     SetDebugName( GeometryShader.Get(), geometryShader );

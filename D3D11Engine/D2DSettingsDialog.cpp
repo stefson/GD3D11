@@ -367,7 +367,11 @@ XRESULT D2DSettingsDialog::InitControls() {
     shadowmapSizeSlider->SetPositionAndSize( D2D1::Point2F( 10, 22 ), D2D1::SizeF( 150, 15 ) );
     shadowmapSizeSlider->AlignUnder( shadowmapSizeLabel, 5 );
     shadowmapSizeSlider->SetSliderChangedCallback( ShadowQualitySliderChanged, this );
-    shadowmapSizeSlider->SetDisplayValues( { "0", "512", "1024", "2048", "4096", "8192", "16384" } );
+    if ( FeatureLevel10Compatibility ) {
+        shadowmapSizeSlider->SetDisplayValues( { "0", "512", "1024", "2048", "4096", "8192" } );
+    } else {
+        shadowmapSizeSlider->SetDisplayValues( { "0", "512", "1024", "2048", "4096", "8192", "16384" } );
+    }
     shadowmapSizeSlider->SetIsIntegralSlider( true );
     shadowmapSizeSlider->SetMinMax( 1.0f, 6.0f );
 
