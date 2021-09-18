@@ -10,6 +10,15 @@ FakeDirectDrawSurface7::FakeDirectDrawSurface7() {
     Data = nullptr;
 }
 
+FakeDirectDrawSurface7::~FakeDirectDrawSurface7() {
+    // Release mip-map chain first
+    for ( LPDIRECTDRAWSURFACE7 mipmap : AttachedSurfaces ) {
+        mipmap->Release();
+    }
+
+    delete[] Data;
+}
+
 void FakeDirectDrawSurface7::InitFakeSurface( const DDSURFACEDESC2* desc, MyDirectDrawSurface7* Resource, int mipLevel ) {
     OriginalDesc = *desc;
     this->Resource = Resource;
@@ -33,7 +42,6 @@ ULONG FakeDirectDrawSurface7::Release() {
     RefCount--;
 
     if ( RefCount == 0 ) {
-        delete [] Data;
         delete this;
         return 0;
     }

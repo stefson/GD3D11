@@ -33,6 +33,11 @@ MyDirectDrawSurface7::MyDirectDrawSurface7() {
 MyDirectDrawSurface7::~MyDirectDrawSurface7() {
     Engine::GAPI->RemoveSurface( this );
 
+    // Release mip-map chain first
+    for ( LPDIRECTDRAWSURFACE7 mipmap : attachedSurfaces ) {
+        mipmap->Release();
+    }
+
     // Sometimes gothic doesn't unlock a surface or this is a movie-buffer
     delete[] LockedData;
 

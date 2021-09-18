@@ -225,7 +225,6 @@ public:
 			FakeDirectDrawSurface7* lastMip = nullptr;
 			int level = 1;
 			while ( desc.dwMipMapCount > 1 ) {
-
 				FakeDirectDrawSurface7* mip = new FakeDirectDrawSurface7;
 				desc.dwMipMapCount--;
 				//desc.dwHeight /= 2;
@@ -241,8 +240,6 @@ public:
 				lastMip = mip;
 				level++;
 			}
-
-
 		}
 
 		*lplpDDSurface = mySurface;
