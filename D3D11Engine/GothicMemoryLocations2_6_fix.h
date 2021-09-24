@@ -72,12 +72,6 @@ struct GothicMemoryLocations {
         static const unsigned int Offset_BoundTexture = 0x82E50;
     };
 
-    struct zERROR {
-        // Start/End for problematic SendMessage-Broadcast which causes the game to conflict with other applications
-        static const unsigned int BroadcastStart = 0x0044C5D5;
-        static const unsigned int BroadcastEnd = 0x0044C5E4;
-    };
-
     struct oCGame {
         static const unsigned int EnterWorld = 0x006C96F0;
         static const unsigned int TestKeys = 0x006FD560;
@@ -435,6 +429,10 @@ struct GothicMemoryLocations {
         static const unsigned int Offset_AlphaFunc = 0x74;
         static const unsigned int Offset_MatGroup = 0x40;
         static const unsigned int Offset_TexAniCtrl = 0x4C;
+
+        static const unsigned int Offset_Flags = 0x70;
+        static const unsigned int Offset_TexAniMapDelta = 0x94;
+        static const unsigned int Mask_FlagTexAniMap = 0x4;
 
         static const unsigned int InitValues = 0x00564260;
         static const unsigned int Constructor = 0x00563E00;

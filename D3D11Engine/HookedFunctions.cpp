@@ -36,9 +36,6 @@
 void HookedFunctionInfo::InitHooks() {
     LogInfo() << "Initializing hooks";
 
-    DWORD dwProtect;
-    VirtualProtect( (void*)GothicMemoryLocations::zCWorld::Render, 0x255, PAGE_EXECUTE_READWRITE, &dwProtect );
-
     oCGame::Hook();
     zCBspTree::Hook();
     zCWorld::Hook();
@@ -89,6 +86,28 @@ void HookedFunctionInfo::InitHooks() {
     LogInfo() << "Patching: Marking texture as cached-in after cache-out";
     PatchAddr( 0x005E90BE, "\x90\x90" );
 #else
+    LogInfo() << "Patching: BroadCast fix";
+    {
+        char* zSPYwnd[5];
+        DWORD zSPY = reinterpret_cast<DWORD>(FindWindowA( nullptr, "[zSpy]" ));
+        memcpy( zSPYwnd, &zSPY, 4 );
+        PatchAddr( 0x00447F5A, zSPYwnd );
+        PatchAddr( 0x00449280, zSPYwnd );
+        PatchAddr( 0x004480AF, zSPYwnd );
+    }
+
+    LogInfo() << "Patching: LOW_FPS_NaN_check";
+    PatchAddr( 0x007CF732, "\x81\x3B\x00\x00\xC0\xFF\x0F\x84\x3B\xFF\xD4\xFF\x81\x3B\x00\x00\xC0\x7F\x0F\x84\x2F\xFF\xD4\xFF\xD9\x03\x8D\x44\x8C\x1C\xE9\x33\xFF\xD4\xFF" );
+    PatchAddr( 0x0051F682, "\xE9\xAB\x00\x2B\x00\x90" );
+    PatchAddr( 0x007CF755, "\x81\x7C\xE4\x20\x00\x00\xC0\xFF\x0F\x84\x43\xF0\xD4\xFF\x81\x7C\xE4\x20\x00\x00\xC0\x7F\x0F\x84\x35\xF0\xD4\xFF\xE9\xDA\xEF\xD4\xFF" );
+    PatchAddr( 0x005F0EAA, "\xE8\xA6\xE8\x1D\x00" );
+
+    LogInfo() << "Patching: Fix Morph Mesh animation glitch at 60hz";
+    PatchAddr( 0x0074086D, "\xD9\x05\xEC\xF1\x8C\x00\xD8\x05\x10\x11\x7D\x00\xE9\x4B\x66\xE4\xFF" );
+    PatchAddr( 0x00586EC3, "\xE9\xA5\x99\x1B\x00\x90" );
+    PatchAddr( 0x0074087E, "\xD9\x05\xEC\xF1\x8C\x00\xD8\x05\x10\x11\x7D\x00\xE9\x6A\x66\xE4\xFF" );
+    PatchAddr( 0x00586EF3, "\xE9\x86\x99\x1B\x00\x90" );
+
     LogInfo() << "Patching: Fix integer overflow crash";
     PatchAddr( 0x004F4024, "\xEB" );
     PatchAddr( 0x004F43FC, "\xEB" );
@@ -103,10 +122,20 @@ void HookedFunctionInfo::InitHooks() {
     zQuat::Hook();
     zMat4::Hook();
 
+    LogInfo() << "Patching: BroadCast fix";
+    {
+        char* zSPYwnd[5];
+        DWORD zSPY = reinterpret_cast<DWORD>(FindWindowA( nullptr, "[zSpy]" ));
+        memcpy( zSPYwnd, &zSPY, 4 );
+        PatchAddr( 0x0044C5DA, zSPYwnd );
+        PatchAddr( 0x0044D9A0, zSPYwnd );
+        PatchAddr( 0x0044C72F, zSPYwnd );
+    }
+
     // Workaround to fix disappearing ui elements under certain circumstances
     // e.g. praying at Beliar statue, screen blend causing dialog boxes to disappear.
     LogInfo() << "Patching: Overriding zCVobScreenFX::OnTick() if (blend.visible) -> if (false)";
-    PatchAddr( 0x61808Fu, "\x90\xE9" );
+    PatchAddr( 0x0061808F, "\x90\xE9" );
 
     LogInfo() << "Patching: Interupt gamestart sound";
     PatchAddr( 0x004DB89F, "\x00" );

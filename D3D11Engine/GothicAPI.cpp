@@ -314,6 +314,14 @@ bool GothicAPI::IsCameraIndoor() {
     return oCGame::GetGame()->_zCSession_camVob->GetGroundPoly()->GetLightmap() != nullptr;
 }
 
+/** Returns total time */
+float GothicAPI::GetTotalTime() {
+    if ( zCTimer::GetTimer() )
+        return zCTimer::GetTimer()->totalTimeFloat;
+
+    return 0.0f;
+}
+
 /** Returns global time */
 float GothicAPI::GetTimeSeconds() {
 #ifdef BUILD_GOTHIC_1_08k
@@ -3227,23 +3235,6 @@ void GothicAPI::CleanBSPNodes() {
 /** Returns the new node from tha base node */
 BspInfo* GothicAPI::GetNewBspNode( zCBspBase* base ) {
     return &BspLeafVobLists[base];
-}
-
-/** Disables a problematic method which causes the game to conflict with other applications on startup */
-void GothicAPI::DisableErrorMessageBroadcast() {
-#ifndef BUILD_SPACER
-#ifndef BUILD_GOTHIC_1_08k
-    LogInfo() << "Disabling global message broadcast";
-
-    // Unlock the memory region
-    DWORD dwProtect;
-    unsigned int size = GothicMemoryLocations::zERROR::BroadcastEnd - GothicMemoryLocations::zERROR::BroadcastStart;
-    VirtualProtect( (void*)GothicMemoryLocations::zERROR::BroadcastStart, size, PAGE_EXECUTE_READWRITE, &dwProtect );
-
-    // NOP it
-    REPLACE_RANGE( GothicMemoryLocations::zERROR::BroadcastStart, GothicMemoryLocations::zERROR::BroadcastEnd - 1, INST_NOP );
-#endif
-#endif
 }
 
 /** Sets/Gets the far-plane */

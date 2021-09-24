@@ -11,7 +11,7 @@ cbuffer Matrices_PerFrame : register( b0 )
 
 cbuffer Matrices_PerInstances : register( b1 )
 {
-	matrix M_World;
+	float2 M_TextureAniMap;
 };
 
 
@@ -46,14 +46,14 @@ VS_OUTPUT VSMain( VS_INPUT Input )
 	
 	//Input.vPosition = float3(-Input.vPosition.x, Input.vPosition.y, -Input.vPosition.z);
 	
-	float3 positionWorld = mul(float4(Input.vPosition,1), M_World).xyz;
+	float3 positionWorld = Input.vPosition;
+	float2 texAniMap = float2( M_TextureAniMap.x - floor(M_TextureAniMap.x), M_TextureAniMap.y - floor(M_TextureAniMap.y) );
 	
 	//Output.vPosition = float4(Input.vPosition, 1);
 	Output.vPosition = mul( float4(positionWorld,1), M_ViewProj);
-	Output.vTexcoord2 = Input.vTex2;
-	Output.vTexcoord = Input.vTex1;
+	Output.vTexcoord = Input.vTex1 + texAniMap;
 	Output.vDiffuse  = Input.vDiffuse;
-	Output.vNormalWS = mul(Input.vNormal, (float3x3)M_World);
+	Output.vNormalWS = Input.vNormal;
 	Output.vWorldPosition = positionWorld;
 	Output.vTexcoord2.x = mul(float4(positionWorld,1), M_View).z;
 	Output.vTexcoord2.y = length(mul(float4(positionWorld,1), M_View));

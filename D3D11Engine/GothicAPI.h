@@ -415,6 +415,9 @@ public:
     /** Returns true, if the game was paused */
     bool IsGamePaused();
 
+    /** Returns total time */
+    float GetTotalTime();
+
     /** Returns the current frame time */
     float GetFrameTimeSec();
 
@@ -456,9 +459,6 @@ public:
 
     /** Returns our bsp-root-node */
     BspInfo* GetNewRootNode();
-
-    /** Disables a problematic method which causes the game to conflict with other applications on startup */
-    static void DisableErrorMessageBroadcast();
 
     /** Sets/Gets the far-plane */
     void SetFarPlane( float value );

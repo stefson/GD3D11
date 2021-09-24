@@ -139,5 +139,13 @@ public:
         int f = GetAlphaFunc();
         return f == zMAT_ALPHA_FUNC_TEST || f == zMAT_ALPHA_FUNC_BLEND_TEST;
     }
+
+    bool HasTexAniMap() {
+        return (*(unsigned char*)THISPTR_OFFSET( GothicMemoryLocations::zCMaterial::Offset_AlphaFunc )) & GothicMemoryLocations::zCMaterial::Mask_FlagTexAniMap;
+    }
+
+    DirectX::XMFLOAT2 GetTexAniMapDelta() {
+        return *(DirectX::XMFLOAT2*)THISPTR_OFFSET( GothicMemoryLocations::zCMaterial::Offset_TexAniMapDelta );
+    }
 };
 

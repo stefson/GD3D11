@@ -714,7 +714,7 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
         GetDevice().Get(), Resolution.x, Resolution.y, DXGI_FORMAT_R16G16B16A16_FLOAT );
 
     GBuffer0_Diffuse = std::make_unique<RenderToTextureBuffer>(
-        GetDevice().Get(), Resolution.x, Resolution.y, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB );
+        GetDevice().Get(), Resolution.x, Resolution.y, DXGI_FORMAT_R8G8B8A8_UNORM );
 
     HDRBackBuffer = std::make_unique<RenderToTextureBuffer>( GetDevice().Get(), Resolution.x, Resolution.y,
         (Engine::GAPI->GetRendererState().RendererSettings.CompressBackBuffer ? DXGI_FORMAT_R11G11B10_FLOAT : DXGI_FORMAT_R16G16B16A16_FLOAT) );
@@ -2158,7 +2158,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
 
                 // Check surface type
                 if ( worldMesh.first.Info->MaterialType == MaterialInfo::MT_Water ) {
-                    FrameWaterSurfaces[aniTex].push_back( worldMesh.second );
+                    FrameWaterSurfaces[worldMesh.first.Material].push_back( worldMesh.second );
                     continue;
                 }
 
@@ -2448,7 +2448,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMeshW( bool noTextures ) {
 
             // Check surface type
             if ( info->MaterialType == MaterialInfo::MT_Water ) {
-                FrameWaterSurfaces[textureInfo.first] = textureInfo.second.second;
+                //FrameWaterSurfaces[textureInfo.first] = textureInfo.second.second;
                 textureInfo.second.second.resize( 0 );
                 continue;
             }
@@ -2648,14 +2648,26 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
     // Bind reflection cube
     GetContext()->PSSetShaderResources( 3, 1, ReflectionCube.GetAddressOf() );
     for ( auto const& it : FrameWaterSurfaces ) {
-        if ( it.first ) {
+        if ( zCTexture* texture = it.first->GetTexture() ) {
             // Bind diffuse
-            it.first->CacheIn( -1 );    // Force immediate cache in, because water
+            texture->CacheIn( -1 );    // Force immediate cache in, because water
                                         // is important!
-            it.first->Bind( 0 );
+            texture->Bind( 0 );
         }
         // Draw surfaces
         for ( auto const& mesh : it.second ) {
+            if ( it.first->HasTexAniMap() ) {
+                float time = Engine::GAPI->GetTotalTime();
+                DirectX::XMFLOAT2 texAniMap = it.first->GetTexAniMapDelta();
+                float textureAniMap[2] = { texAniMap.x * time, texAniMap.y * time };
+                ActiveVS->GetConstantBuffer()[1]->UpdateBuffer( &textureAniMap, 8 );
+                ActiveVS->GetConstantBuffer()[1]->BindToVertexShader( 1 );
+            } else {
+                float textureAniMap[2] = {};
+                ActiveVS->GetConstantBuffer()[1]->UpdateBuffer( &textureAniMap, 8 );
+                ActiveVS->GetConstantBuffer()[1]->BindToVertexShader( 1 );
+            }
+
             DrawVertexBufferIndexedUINT( nullptr, nullptr,
                 mesh->Indices.size(), mesh->BaseIndexLocation );
         }
@@ -2663,6 +2675,10 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
 
     // Draw Ocean
     if ( !FeatureLevel10Compatibility && Engine::GAPI->GetOcean() ) Engine::GAPI->GetOcean()->Draw();
+
+    // Unbind temporary backbuffer copy
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
+    GetContext()->PSSetShaderResources( 5, 1, srv.GetAddressOf() );
 
     GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
         DepthStencilBuffer->GetDepthStencilView().Get() );

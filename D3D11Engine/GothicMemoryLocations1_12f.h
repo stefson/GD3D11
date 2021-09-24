@@ -240,6 +240,10 @@ struct GothicMemoryLocations {
         static const unsigned int Offset_MatGroup = 0x40;
         static const unsigned int Offset_TexAniCtrl = 0x4C;
 
+        static const unsigned int Offset_Flags = 0x6C;
+        static const unsigned int Offset_TexAniMapDelta = 0x7C;
+        static const unsigned int Mask_FlagTexAniMap = 0x4;
+
         static const unsigned int InitValues = 0x00565790;
         static const unsigned int Constructor = 0x00565370;
         static const unsigned int Destructor = 0x005655E0;

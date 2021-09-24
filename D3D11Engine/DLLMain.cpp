@@ -247,8 +247,6 @@ BOOL WINAPI DllMain( HINSTANCE hInst, DWORD reason, LPVOID ) {
             // Create GothicAPI here to make all hooks work
             Engine::CreateGothicAPI();
 
-            GothicAPI::DisableErrorMessageBroadcast();
-
             EnableCrashingOnCrashes();
             //SetUnhandledExceptionFilter(MyUnhandledExceptionFilter);
         }
