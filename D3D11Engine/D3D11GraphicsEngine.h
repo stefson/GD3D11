@@ -228,6 +228,9 @@ public:
         bool noNPCs = false,
         std::list<VobInfo*>* renderedVobs = nullptr, std::list<SkeletalVobInfo*>* renderedMobs = nullptr, std::map<MeshKey, WorldMeshInfo*, cmpMeshKey>* worldMeshCache = nullptr );
 
+    /** Update morph mesh visual */
+    void UpdateMorphMeshVisual();
+
     /** Draws the static vobs instanced */
     XRESULT DrawVOBsInstanced();
 

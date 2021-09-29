@@ -222,9 +222,19 @@ XRESULT D2DSettingsDialog::InitControls() {
     compressBackBufferCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.CompressBackBuffer );
     compressBackBufferCheckbox->SetCheckedChangedCallback( CompressBackBufferCheckedChanged, this );
 
+    SV_Checkbox* animateStaticModelsCheckbox = new SV_Checkbox( MainView, MainPanel );
+    animateStaticModelsCheckbox->SetSize( D2D1::SizeF( 160, 20 ) );
+    switch ( userLanguage ) {
+    case LANGUAGE_POLISH: animateStaticModelsCheckbox->SetCaption( L"Animuj Statyczne Voby" ); break;
+    default: animateStaticModelsCheckbox->SetCaption( L"Animate Static Vobs" ); break;
+    }
+    animateStaticModelsCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.AnimateStaticVobs );
+    animateStaticModelsCheckbox->AlignUnder( compressBackBufferCheckbox, 5 );
+    animateStaticModelsCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.AnimateStaticVobs );
+
 	SV_Label* fpsLimitLabel = new SV_Label( MainView, MainPanel );
 	fpsLimitLabel->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 150, 12 ) );
-	fpsLimitLabel->AlignUnder( compressBackBufferCheckbox, 10 );
+	fpsLimitLabel->AlignUnder( animateStaticModelsCheckbox, 10 );
     switch ( userLanguage ) {
     case LANGUAGE_POLISH: fpsLimitLabel->SetCaption( L"Limit Klatek(FPS):" ); break;
     default: fpsLimitLabel->SetCaption( L"Framerate Limit:" ); break;

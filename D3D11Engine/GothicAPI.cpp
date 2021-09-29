@@ -1546,6 +1546,9 @@ void GothicAPI::OnAddVob( zCVob* vob, zCWorld* world ) {
 
                 // Load the new visual
                 MeshVisualInfo* mi = new MeshVisualInfo;
+                if ( ext == ".MMS" )
+                    mi->MorphMeshVisual = (void*)vob->GetVisual();
+
                 WorldConverter::Extract3DSMeshFromVisual2( pm, mi );
                 StaticMeshVisuals[pm] = mi;
             }
@@ -3671,6 +3674,7 @@ XRESULT GothicAPI::SaveMenuSettings( const std::string& file ) {
     WritePrivateProfileStringA( "General", "EnableInactiveFpsLock", std::to_string( s.EnableInactiveFpsLock ? TRUE : FALSE ).c_str(), ini.c_str() );
     WritePrivateProfileStringA( "General", "MultiThreadResourceManager", std::to_string( s.MTResoureceManager ? TRUE : FALSE ).c_str(), ini.c_str() );
     WritePrivateProfileStringA( "General", "CompressBackBuffer", std::to_string( s.CompressBackBuffer ? TRUE : FALSE ).c_str(), ini.c_str() );
+    WritePrivateProfileStringA( "General", "AnimateStaticVobs", std::to_string( s.AnimateStaticVobs ? TRUE : FALSE ).c_str(), ini.c_str() );
 
     /*
     * Draw-distance is saved on a per World basis using SaveRendererWorldSettings
@@ -3757,6 +3761,7 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
     s.EnableInactiveFpsLock = GetPrivateProfileBoolA( "General", "EnableInactiveFpsLock", defaultRendererSettings.EnableInactiveFpsLock, ini );
     s.MTResoureceManager = GetPrivateProfileBoolA( "General", "MultiThreadResourceManager", defaultRendererSettings.MTResoureceManager, ini );
     s.CompressBackBuffer = GetPrivateProfileBoolA( "General", "CompressBackBuffer", defaultRendererSettings.CompressBackBuffer, ini );
+    s.AnimateStaticVobs = GetPrivateProfileBoolA( "General", "AnimateStaticVobs", defaultRendererSettings.AnimateStaticVobs, ini );
 
     /*
     * Draw-distance is Loaded on a per World basis using LoadRendererWorldSettings

@@ -3264,6 +3264,18 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround( FXMVECTOR position,
     Engine::GAPI->GetRendererState().BlendState.SetDirty();
 }
 
+/** Update morph mesh visual */
+void D3D11GraphicsEngine::UpdateMorphMeshVisual() {
+    const std::unordered_map<zCProgMeshProto*, MeshVisualInfo*>& staticMeshVisuals =
+        Engine::GAPI->GetStaticMeshVisuals();
+
+    for ( auto const& staticMeshVisual : staticMeshVisuals ) {
+        if ( !staticMeshVisual.second->MorphMeshVisual ) continue;
+        if ( staticMeshVisual.second->Instances.empty() ) continue;
+        WorldConverter::UpdateMorphMeshVisual( staticMeshVisual.second->MorphMeshVisual, staticMeshVisual.second );
+    }
+}
+
 /** Draws the static vobs instanced */
 XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
     START_TIMING();
@@ -3318,6 +3330,9 @@ XRESULT D3D11GraphicsEngine::DrawVOBsInstanced() {
                 vobs.empty()) ) {
             Engine::GAPI->CollectVisibleVobs( vobs, lights, mobs );
         }
+    }
+    if ( Engine::GAPI->GetRendererState().RendererSettings.AnimateStaticVobs ) {
+        UpdateMorphMeshVisual();
     }
 
     // Need to collect alpha-meshes to render them laterdy

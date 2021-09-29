@@ -1375,7 +1375,44 @@ void WorldConverter::Extract3DSMeshFromVisual2PNAEN( zCProgMeshProto* visual, Me
     meshInfo->Visual = visual;
 }
 
+/** Updates a Morph-Mesh visual */
+void WorldConverter::UpdateMorphMeshVisual( void* v, MeshVisualInfo* meshInfo ) {
+    zCMorphMesh* visual = (zCMorphMesh*)v;
+    visual->GetTexAniState()->UpdateTexList();
+    visual->AdvanceAnis();
+    visual->CalcVertexPositions();
 
+    zCProgMeshProto* morphMesh = visual->GetMorphMesh();
+    if ( !morphMesh )
+        return;
+
+    DirectX::XMFLOAT3* posList = (DirectX::XMFLOAT3*)morphMesh->GetPositionList()->Array;
+    for ( int i = 0; i < morphMesh->GetNumSubmeshes(); i++ ) {
+        std::vector<ExVertexStruct> vertices;
+
+        zCSubMesh* s = morphMesh->GetSubmesh( i );
+        vertices.reserve( s->WedgeList.NumInArray );
+        for ( int v = 0; v < s->WedgeList.NumInArray; v++ ) {
+            zTPMWedge& wedge = s->WedgeList.Array[v];
+            vertices.emplace_back();
+            ExVertexStruct& vx = vertices.back();
+            vx.Position = posList[wedge.position];
+            vx.Normal = wedge.normal;
+            vx.TexCoord = wedge.texUV;
+            vx.Color = 0xFFFFFFFF;
+        }
+
+        for ( auto const& it : meshInfo->Meshes ) {
+            const std::vector<MeshInfo*>& mlist = it.second;
+            for ( unsigned int x = 0; x < mlist.size(); x++ ) {
+                MeshInfo* mi = mlist[x];
+                if ( mi->MeshIndex == i ) {
+                    mi->MeshVertexBuffer->UpdateBuffer( &vertices[0], vertices.size() * sizeof( ExVertexStruct ) );
+                }
+            }
+        }
+    }
+}
 
 /** Extracts a 3DS-Mesh from a zCVisual */
 void WorldConverter::Extract3DSMeshFromVisual2( zCProgMeshProto* visual, MeshVisualInfo* meshInfo ) {
@@ -1436,27 +1473,36 @@ void WorldConverter::Extract3DSMeshFromVisual2( zCProgMeshProto* visual, MeshVis
 
         mi->Vertices = vertices;
         mi->Indices = indices;
+        mi->MeshIndex = i;
 
         // Create the buffers
         Engine::GraphicsEngine->CreateVertexBuffer( &mi->MeshVertexBuffer );
         Engine::GraphicsEngine->CreateVertexBuffer( &mi->MeshIndexBuffer );
 
-        // Optimize faces
-        mi->MeshVertexBuffer->OptimizeFaces( &mi->Indices[0],
-            (byte*)&mi->Vertices[0],
-            mi->Indices.size(),
-            mi->Vertices.size(),
-            sizeof( ExVertexStruct ) );
+        if ( meshInfo->MorphMeshVisual ) {
+            // We need to keep original indices so that we can reuse them(we can't optimize them)
+            // Use dynamic buffer since we'll reupload it every frame we see this visual
 
-        // Then optimize vertices
-        mi->MeshVertexBuffer->OptimizeVertices( &mi->Indices[0],
-            (byte*)&mi->Vertices[0],
-            mi->Indices.size(),
-            mi->Vertices.size(),
-            sizeof( ExVertexStruct ) );
+            // Init and fill it
+            mi->MeshVertexBuffer->Init( &mi->Vertices[0], mi->Vertices.size() * sizeof( ExVertexStruct ), D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_DYNAMIC, D3D11VertexBuffer::CA_WRITE );
+        } else {
+            // Optimize faces
+            mi->MeshVertexBuffer->OptimizeFaces( &mi->Indices[0],
+                (byte*)&mi->Vertices[0],
+                mi->Indices.size(),
+                mi->Vertices.size(),
+                sizeof( ExVertexStruct ) );
 
-        // Init and fill it
-        mi->MeshVertexBuffer->Init( &mi->Vertices[0], mi->Vertices.size() * sizeof( ExVertexStruct ), D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_IMMUTABLE );
+            // Then optimize vertices
+            mi->MeshVertexBuffer->OptimizeVertices( &mi->Indices[0],
+                (byte*)&mi->Vertices[0],
+                mi->Indices.size(),
+                mi->Vertices.size(),
+                sizeof( ExVertexStruct ) );
+
+            // Init and fill it
+            mi->MeshVertexBuffer->Init( &mi->Vertices[0], mi->Vertices.size() * sizeof( ExVertexStruct ), D3D11VertexBuffer::B_VERTEXBUFFER, D3D11VertexBuffer::U_IMMUTABLE );
+        }
         mi->MeshIndexBuffer->Init( &mi->Indices[0], mi->Indices.size() * sizeof( VERTEX_INDEX ), D3D11VertexBuffer::B_INDEXBUFFER, D3D11VertexBuffer::U_IMMUTABLE );
 
         Engine::GAPI->GetRendererState().RendererInfo.VOBVerticesDataSize += mi->Vertices.size() * sizeof( ExVertexStruct );

@@ -60,6 +60,9 @@ public:
     static void Extract3DSMeshFromVisual2( zCProgMeshProto* visual, MeshVisualInfo* meshInfo );
     static void Extract3DSMeshFromVisual2PNAEN( zCProgMeshProto* visual, MeshVisualInfo* meshInfo );
 
+    /** Updates a Morph-Mesh visual */
+    static void UpdateMorphMeshVisual( void* visual, MeshVisualInfo* meshInfo );
+
     /** Extracts a skeletal mesh from a zCModel */
     static void ExtractSkeletalMeshFromVob( zCModel* model, SkeletalMeshVisualInfo* skeletalMeshInfo );
 

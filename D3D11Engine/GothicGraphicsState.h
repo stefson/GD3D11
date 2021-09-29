@@ -640,6 +640,7 @@ struct GothicRendererSettings {
         EnableInactiveFpsLock = true;
         MTResoureceManager = false;
         CompressBackBuffer = false;
+        AnimateStaticVobs = true;
         RunInSpacerNet = false;
     }
 
@@ -782,6 +783,7 @@ struct GothicRendererSettings {
     bool EnableInactiveFpsLock;
     bool MTResoureceManager;
     bool CompressBackBuffer;
+    bool AnimateStaticVobs;
     bool RunInSpacerNet;
 };
 

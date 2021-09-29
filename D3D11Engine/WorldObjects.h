@@ -95,6 +95,7 @@ struct MeshInfo {
         MeshVertexBuffer = nullptr;
         MeshIndexBuffer = nullptr;
         BaseIndexLocation = 0;
+        MeshIndex = -1;
         MeshIndexBufferPNAEN = nullptr;
     }
 
@@ -112,6 +113,7 @@ struct MeshInfo {
     std::vector<VERTEX_INDEX> IndicesPNAEN;
     std::vector<ExVertexStruct> VerticesPNAEN;
     unsigned int BaseIndexLocation;
+    unsigned int MeshIndex;
 };
 
 struct WorldMeshInfo : public MeshInfo {
@@ -224,6 +226,7 @@ class zCTexture;
 struct MeshVisualInfo : public BaseVisualInfo {
     MeshVisualInfo() {
         Visual = nullptr;
+        MorphMeshVisual = nullptr;
         UnloadedSomething = false;
         StartInstanceNum = 0;
         FullMesh = nullptr;
@@ -255,6 +258,7 @@ struct MeshVisualInfo : public BaseVisualInfo {
 
     /** This is true if we can't actually render something on this. TODO: Try to fix this! */
     bool UnloadedSomething;
+    void* MorphMeshVisual;
 };
 
 /** Holds the converted mesh of a VOB */
