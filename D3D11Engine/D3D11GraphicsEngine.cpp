@@ -401,18 +401,6 @@ XRESULT D3D11GraphicsEngine::Init() {
         << "Failed to load file: system\\GD3D11\\Textures\\SkyCubemap2.dds";
 
     // Init quad buffers
-    CreateVertexBuffer( &QuadVertexBuffer );
-    QuadVertexBuffer->Init( nullptr, 6 * sizeof( ExVertexStruct ),
-        D3D11VertexBuffer::EBindFlags::B_VERTEXBUFFER,
-        D3D11VertexBuffer::EUsageFlags::U_DYNAMIC,
-        D3D11VertexBuffer::CA_WRITE );
-
-    CreateVertexBuffer( &QuadIndexBuffer );
-    QuadIndexBuffer->Init( nullptr, 6 * sizeof( VERTEX_INDEX ),
-        D3D11VertexBuffer::EBindFlags::B_INDEXBUFFER,
-        D3D11VertexBuffer::EUsageFlags::U_DYNAMIC,
-        D3D11VertexBuffer::CA_WRITE );
-
     ExVertexStruct vx[6];
     ZeroMemory( vx, sizeof( vx ) );
 
@@ -441,10 +429,16 @@ XRESULT D3D11GraphicsEngine::Init() {
     vx[4].Color = 0xFFFFFFFF;
     vx[5].Color = 0xFFFFFFFF;
 
-    QuadVertexBuffer->UpdateBuffer( vx );
+    CreateVertexBuffer( &QuadVertexBuffer );
+    QuadVertexBuffer->Init( vx, 6 * sizeof( ExVertexStruct ),
+        D3D11VertexBuffer::EBindFlags::B_VERTEXBUFFER,
+        D3D11VertexBuffer::EUsageFlags::U_IMMUTABLE );
 
     VERTEX_INDEX indices[] = { 0, 1, 2, 3, 4, 5 };
-    QuadIndexBuffer->UpdateBuffer( indices, sizeof( indices ) );
+    CreateVertexBuffer( &QuadIndexBuffer );
+    QuadIndexBuffer->Init( indices, sizeof( indices ),
+        D3D11VertexBuffer::EBindFlags::B_INDEXBUFFER,
+        D3D11VertexBuffer::EUsageFlags::U_IMMUTABLE );
 
     // Create dummy rendertarget for shadowcubes
     DummyShadowCubemapTexture = std::make_unique<RenderToTextureBuffer>(
