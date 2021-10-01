@@ -268,54 +268,6 @@ void D3D11PointLight::OnRenderLight() {
     DepthCubemap->BindToPixelShader( ((D3D11GraphicsEngineBase*)Engine::GraphicsEngine)->GetContext().Get(), 3 );
 }
 
-/** Debug-draws the cubemap to the screen */
-void D3D11PointLight::DebugDrawCubeMap() {
-    if ( !InitDone )
-        return;
-
-    D3D11GraphicsEngineBase* engineBase = (D3D11GraphicsEngineBase*)Engine::GraphicsEngine;
-    D3D11GraphicsEngine* engine = (D3D11GraphicsEngine*)engineBase; // TODO: Remove and use newer system!
-
-    const int previewSize = POINTLIGHT_SHADOWMAP_SIZE;
-    const int previewDownscale = 4;
-
-    for ( int i = 0; i < 6; i++ ) {
-        INT2 pPosition;
-        int stride = (previewSize / previewDownscale);
-        if ( i == 1 ) // x-
-        {
-            pPosition.x = 0;
-            pPosition.y = stride;
-        } else if ( i == 3 ) // y-
-        {
-            pPosition.x = stride;
-            pPosition.y = stride;
-        } else if ( i == 0 ) // x+
-        {
-            pPosition.x = stride * 2;
-            pPosition.y = stride;
-        } else if ( i == 2 ) // y+
-        {
-            pPosition.x = stride * 3;
-            pPosition.y = stride;
-        } else if ( i == 5 ) // z-
-        {
-            pPosition.x = stride;
-            pPosition.y = 0;
-        } else if ( i == 4 ) // z+
-        {
-            pPosition.x = stride;
-            pPosition.y = stride * 2;
-        }
-
-        INT2 pSize = INT2( previewSize / previewDownscale, previewSize / previewDownscale );
-
-        Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv = engine->GetDummyCubeRT()->GetSRVCubemapFace( i ).Get();
-        engine->GetContext()->PSSetShaderResources( 0, 1, srv.GetAddressOf() );
-        Engine::GraphicsEngine->DrawQuad( pPosition, pSize );
-    }
-}
-
 /** Called when a vob got removed from the world */
 void D3D11PointLight::OnVobRemovedFromWorld( BaseVobInfo* vob ) {
     // Wait for cache initialization to finish first
