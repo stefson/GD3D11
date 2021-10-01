@@ -1546,8 +1546,10 @@ void GothicAPI::OnAddVob( zCVob* vob, zCWorld* world ) {
 
                 // Load the new visual
                 MeshVisualInfo* mi = new MeshVisualInfo;
-                if ( ext == ".MMS" )
+                if ( ext == ".MMS" ) {
                     mi->MorphMeshVisual = (void*)vob->GetVisual();
+                    zCObject_AddRef( mi->MorphMeshVisual );
+                }
 
                 WorldConverter::Extract3DSMeshFromVisual2( pm, mi );
                 StaticMeshVisuals[pm] = mi;
@@ -1971,7 +1973,7 @@ void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameDa
             kill = pfx;
             if ( kill && (kill->LifeSpan < *fx->GetPrivateTotalTime()) ) {
                 if ( kill->PolyStrip )
-                    kill->PolyStrip->Release(); // TODO: MEMLEAK RIGHT HERE!
+                    zCObject_Release( kill->PolyStrip ); // TODO: MEMLEAK RIGHT HERE!
 
                 pfx = kill->Next;
                 fx->SetFirstParticle( pfx );
@@ -1989,7 +1991,7 @@ void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameDa
                 kill = p->Next;
                 if ( kill && (kill->LifeSpan < *fx->GetPrivateTotalTime()) ) {
                     if ( kill->PolyStrip )
-                        kill->PolyStrip->Release();
+                        zCObject_Release( kill->PolyStrip );
 
                     p->Next = kill->Next;
                     kill->Next = *(zTParticle**)GothicMemoryLocations::GlobalObjects::s_globFreePart;

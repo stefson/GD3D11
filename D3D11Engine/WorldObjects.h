@@ -233,6 +233,9 @@ struct MeshVisualInfo : public BaseVisualInfo {
     }
 
     ~MeshVisualInfo() {
+        if ( MorphMeshVisual ) {
+            zCObject_Release( MorphMeshVisual );
+        }
         delete FullMesh;
     }
 

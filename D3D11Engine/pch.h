@@ -43,6 +43,10 @@ extern bool GMPModeActive;
 #define SAFE_DELETE(x) delete x; x = nullptr;
 //#define V(x) x
 
+/** zCObject Managing */
+void zCObject_AddRef( void* o );
+void zCObject_Release( void* o );
+
 /** Writes a string of the D3D7-Call log */
 void DebugWrite_i( LPCSTR lpDebugMessage, void* thisptr );
 
