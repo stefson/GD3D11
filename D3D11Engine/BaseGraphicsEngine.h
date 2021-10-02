@@ -17,7 +17,6 @@ class zFont;
 struct DisplayModeInfo {
     DWORD Height;
     DWORD Width;
-    DWORD Bpp;
 };
 
 enum RenderStage {

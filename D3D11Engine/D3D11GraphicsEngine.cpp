@@ -937,7 +937,6 @@ D3D11GraphicsEngine::GetDisplayModeList( std::vector<DisplayModeInfo>* modeList,
         DisplayModeInfo info;
         info.Height = displayModes[i].Height;
         info.Width = displayModes[i].Width;
-        info.Bpp = 32;
         // TODO: find out what is causing issues, this has issues with exclusive fullscreen
         //if (info.Width > (unsigned long)desktop.right ||
         //	info.Height > (unsigned long)desktop.bottom)
@@ -959,7 +958,6 @@ D3D11GraphicsEngine::GetDisplayModeList( std::vector<DisplayModeInfo>* modeList,
             DisplayModeInfo info;
             info.Height = ssBase.Height * i;
             info.Width = ssBase.Width * i;
-            info.Bpp = 32;
 
             modeList->push_back( info );
             i++;

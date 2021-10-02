@@ -257,25 +257,45 @@ public:
 	HRESULT STDMETHODCALLTYPE EnumDisplayModes( DWORD dwFlags, LPDDSURFACEDESC2 lpDDSurfaceDesc2, LPVOID lpContext, LPDDENUMMODESCALLBACK2 lpEnumModesCallback ) {
 		DebugWrite( "MyDirectDraw::EnumDisplayModes\n" );
 
-        struct ModesEnumInfo {
-            LPDDENUMMODESCALLBACK2 originalFn;
-            LPVOID originalUserArg;
-        };
-
-		ModesEnumInfo info;
-		info.originalFn = lpEnumModesCallback;
-		info.originalUserArg = lpContext;
-
 		std::vector<DisplayModeInfo> modes;
 		Engine::GraphicsEngine->GetDisplayModeList( &modes );
 
-		for ( unsigned int i = 0; i < modes.size(); i++ ) {
+        // Gothic expects 640x480 and 800x600 resolutions to be available
+        // otherwise it results in D3DXERR_CAPSNOTSUPPORTED error
+        // if this device don't have those resolutions report them anyway
+
+        bool have640x480 = false, have800x600 = false;
+        for ( DisplayModeInfo& mode : modes ) {
+            if ( mode.Width == 640 && mode.Height == 480 )
+                have640x480 = true;
+            if ( mode.Width == 800 && mode.Height == 600 )
+                have800x600 = true;
+        }
+
+        if ( !have800x600 ) {
+            DisplayModeInfo enfo;
+            enfo.Width = 800;
+            enfo.Height = 600;
+            modes.insert( modes.begin(), enfo );
+        }
+        if ( !have640x480 ) {
+            DisplayModeInfo enfo;
+            enfo.Width = 640;
+            enfo.Height = 480;
+            modes.insert( modes.begin(), enfo );
+        }
+
+		for ( DisplayModeInfo& mode : modes ) {
 			DDSURFACEDESC2 desc;
 			ZeroMemory( &desc, sizeof( desc ) );
 
-			desc.dwHeight = modes[i].Height;
-			desc.dwWidth = modes[i].Width;
-			desc.ddpfPixelFormat.dwRGBBitCount = modes[i].Bpp;
+            desc.dwSize = sizeof( DDSURFACEDESC2 );
+            desc.dwWidth = mode.Width;
+			desc.dwHeight = mode.Height;
+			desc.ddpfPixelFormat.dwRGBBitCount = 32;
+            if ( dwFlags & DDEDM_REFRESHRATES ) {
+                desc.dwRefreshRate = 60;
+            }
 
 			(*lpEnumModesCallback)(&desc, lpContext);
 		}
