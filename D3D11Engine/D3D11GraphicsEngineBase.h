@@ -201,7 +201,6 @@ public:
     /** Returns the Device/Context */
     const Microsoft::WRL::ComPtr<ID3D11Device1>& GetDevice() { return Device; }
     const Microsoft::WRL::ComPtr<ID3D11DeviceContext1>& GetContext() { return Context; }
-    const Microsoft::WRL::ComPtr<ID3D11DeviceContext1>& GetDeferredMediaContext1() { return DeferredContext; }
 
     /** Pixel Shader functions */
     void UnbindActivePS() { ActivePS = nullptr; }
@@ -248,7 +247,6 @@ protected:
     Microsoft::WRL::ComPtr<ID3D11DeviceContext> Context11;
     Microsoft::WRL::ComPtr<ID3D11Device1> Device;
     Microsoft::WRL::ComPtr<ID3D11DeviceContext1> Context;
-    Microsoft::WRL::ComPtr<ID3D11DeviceContext1> DeferredContext;
 
     /** Swapchain and resources */
     Microsoft::WRL::ComPtr<IDXGISwapChain1> SwapChain;

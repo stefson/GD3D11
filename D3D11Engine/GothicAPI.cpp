@@ -127,8 +127,6 @@ GothicAPI::GothicAPI() {
 
     MainThreadID = GetCurrentThreadId();
 
-    PendingMovieFrame = nullptr;
-
     _canRain = false;
 }
 
@@ -3871,14 +3869,6 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
     return XR_SUCCESS;
 }
 
-void GothicAPI::SetPendingMovieFrame( D3D11Texture* frame ) {
-    PendingMovieFrame = frame;
-}
-
-D3D11Texture* GothicAPI::GetPendingMovieFrame() {
-    return PendingMovieFrame;
-}
-
 /** Returns the main-thread id */
 DWORD GothicAPI::GetMainThreadID() {
     return MainThreadID;
@@ -3902,15 +3892,24 @@ POINT GothicAPI::GetCursorPosition() {
     return p;
 }
 
-/** Clears the array of this frame loaded textures */
-void GothicAPI::ClearFrameLoadedTextures() {
+/** Adds a staging texture to the list of the staging textures for this frame */
+void GothicAPI::AddStagingTexture( UINT mip, ID3D11Texture2D* stagingTexture, ID3D11Texture2D* texture ) {
     Engine::GAPI->EnterResourceCriticalSection();
-    FrameLoadedTextures.clear();
+    FrameStagingTextures.emplace_back( std::make_pair( mip, stagingTexture ), texture );
+    Engine::GAPI->LeaveResourceCriticalSection();
+}
+
+/** Adds a mip map generation deferred command */
+void GothicAPI::AddMipMapGeneration( D3D11Texture* texture ) {
+    Engine::GAPI->EnterResourceCriticalSection();
+    FrameMipMapGenerations.push_back( texture );
     Engine::GAPI->LeaveResourceCriticalSection();
 }
 
 /** Adds a texture to the list of the loaded textures for this frame */
 void GothicAPI::AddFrameLoadedTexture( MyDirectDrawSurface7* srf ) {
+    srf->AddRef();
+
     Engine::GAPI->EnterResourceCriticalSection();
     FrameLoadedTextures.push_back( srf );
     Engine::GAPI->LeaveResourceCriticalSection();
@@ -3918,17 +3917,12 @@ void GothicAPI::AddFrameLoadedTexture( MyDirectDrawSurface7* srf ) {
 
 /** Sets loaded textures of this frame ready */
 void GothicAPI::SetFrameProcessedTexturesReady() {
-    for ( unsigned int i = 0; i < FrameProcessedTextures.size(); i++ ) {
-        if ( FrameProcessedTextures[i]->MipMapsInQueue() ) // Only set ready when all mips are ready as well
-            FrameProcessedTextures[i]->SetReady( true );
+    for ( MyDirectDrawSurface7* srf : FrameLoadedTextures ) {
+        srf->SetReady( true );
+        srf->Release();
     }
 
-    FrameProcessedTextures.clear();
-}
-
-/** Copys the frame loaded textures to the processed list */
-void GothicAPI::MoveLoadedTexturesToProcessedList() {
-    FrameProcessedTextures = FrameLoadedTextures;
+    FrameLoadedTextures.clear();
 }
 
 /** Draws a morphmesh */

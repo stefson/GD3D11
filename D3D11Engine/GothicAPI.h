@@ -579,10 +579,6 @@ public:
     /** Saves vegetation to a file */
     XRESULT LoadVegetation( const std::string& file );
 
-    /** Sets/Gets the pending movie frame */
-    void SetPendingMovieFrame( D3D11Texture* frame );
-    D3D11Texture* GetPendingMovieFrame();
-
     /** Returns the main-thread id */
     DWORD GetMainThreadID();
 
@@ -601,17 +597,23 @@ public:
     /** Loads the users settings from the menu */
     XRESULT LoadMenuSettings( const std::string& file );
 
-    /** Clears the array of this frame loaded textures */
-    void ClearFrameLoadedTextures();
+    /** Adds a staging texture to the list of the staging textures for this frame */
+    void AddStagingTexture( UINT mip, ID3D11Texture2D* stagingTexture, ID3D11Texture2D* texture );
+
+    /** Gets a list of the staging textures for this frame */
+    std::list<std::pair<std::pair<UINT, ID3D11Texture2D*>, ID3D11Texture2D*>>& GetStagingTextures() {return FrameStagingTextures;}
+
+    /** Adds a mip map generation deferred command */
+    void AddMipMapGeneration( D3D11Texture* texture );
+
+    /** Gets a list of the mip map generation commands for this frame */
+    std::list<D3D11Texture*>& GetMipMapGeneration() {return FrameMipMapGenerations;}
 
     /** Adds a texture to the list of the loaded textures for this frame */
     void AddFrameLoadedTexture( MyDirectDrawSurface7* srf );
 
     /** Sets loaded textures of this frame ready */
     void SetFrameProcessedTexturesReady();
-
-    /** Copys the frame loaded textures to the processed list */
-    void MoveLoadedTexturesToProcessedList();
 
     /** Returns if the given vob is registered in the world */
     SkeletalVobInfo* GetSkeletalVobByVob( zCVob* vob );
@@ -788,15 +790,13 @@ private:
     /** Current camera, stored to find out about camera switches */
     zCCamera* CurrentCamera;
 
-    /** Currently pending movie frame */
-    D3D11Texture* PendingMovieFrame;
-
     /** The id of the main thread */
     DWORD MainThreadID;
 
     /** Textures loaded this frame */
-    std::vector<MyDirectDrawSurface7*> FrameLoadedTextures;
-    std::vector<MyDirectDrawSurface7*> FrameProcessedTextures;
+    std::list<std::pair<std::pair<UINT, ID3D11Texture2D*>, ID3D11Texture2D*>> FrameStagingTextures;
+    std::list<D3D11Texture*> FrameMipMapGenerations;
+    std::list<MyDirectDrawSurface7*> FrameLoadedTextures;
 
     /** Quad marks loaded in the world */
     stdext::unordered_map<zCQuadMark*, QuadMarkInfo> QuadMarks;

@@ -18,8 +18,6 @@ MyDirectDrawSurface7::MyDirectDrawSurface7() {
     GothicTexture = nullptr;
     IsReady = false;
     TextureType = ETextureType::TX_UNDEF;
-
-    QueuedMipMaps = 0;
     LockType = 0;
 
     // Check for test-bind mode to figure out what zCTexture-Object we are associated with
@@ -372,7 +370,6 @@ HRESULT MyDirectDrawSurface7::Lock( LPRECT lpDestRect, LPDDSURFACEDESC2 lpDDSurf
         // don't deallocate the memory after unlock, since only the changing parts in videos will get updated
         if ( !LockedData )
             LockedData = new unsigned char[EngineTexture->GetSizeInBytes( 0 ) / divisor];
-
     } else {
         // Allocate some temporary data
         delete[] LockedData;
@@ -434,21 +431,15 @@ HRESULT MyDirectDrawSurface7::Unlock( LPRECT lpRect ) {
 
         if ( Engine::GAPI->GetMainThreadID() != GetCurrentThreadId() ) {
             EngineTexture->UpdateDataDeferred( dst, 0 );
+            EngineTexture->GenerateMipMapsDeferred();
             Engine::GAPI->AddFrameLoadedTexture( this );
         } else {
             EngineTexture->UpdateData( dst, 0 );
-            Engine::GAPI->AddFrameLoadedTexture( this );
+            EngineTexture->GenerateMipMaps();
             SetReady( true ); // No need to load other stuff to get this ready
         }
 
         delete[] dst;
-
-        EngineTexture->GenerateMipMaps();
-
-        // We don't actuall load mipmaps for this type, so set this
-        // so that it says the texture is fully loaded
-        QueuedMipMaps = OriginalSurfaceDesc.dwMipMapCount - 1;
-
     } else {
         if ( bpp == 24 ) {
             // This is a movie frame, draw it to the sceen
@@ -477,7 +468,6 @@ HRESULT MyDirectDrawSurface7::Unlock( LPRECT lpRect ) {
             // select the smaller one
             float scale = std::min( scaleX, scaleY ) * 0.75f;
 
-
             // I am honestly not sure how this is correct, but after an hour of fiddeling this works fine. You probably don't want to touch it.
             float tlx = -engineRes.x * scale + (float)engineRes.x;
             float tly = -engineRes.y * scale + (float)engineRes.y;
@@ -499,7 +489,6 @@ HRESULT MyDirectDrawSurface7::Unlock( LPRECT lpRect ) {
                 Engine::GAPI->AddFrameLoadedTexture( this );
             } else {
                 EngineTexture->UpdateData( LockedData, 0 );
-                Engine::GAPI->AddFrameLoadedTexture( this );
                 SetReady( true ); // No need to load other stuff to get this ready
             }
         }
@@ -701,14 +690,4 @@ HRESULT MyDirectDrawSurface7::GetLOD( LPDWORD dwLOD ) {
 /** Returns the name of this surface */
 const std::string& MyDirectDrawSurface7::GetTextureName() {
     return TextureName;
-}
-
-/** Returns whether the mip-maps were put into the command queue or not */
-bool MyDirectDrawSurface7::MipMapsInQueue() {
-    return OriginalSurfaceDesc.dwMipMapCount == QueuedMipMaps + 1;
-}
-
-/** Adds one to the queued mipmap count */
-void MyDirectDrawSurface7::IncreaseQueuedMipMapCount() {
-    QueuedMipMaps++;
 }

@@ -252,8 +252,6 @@ XRESULT D3D11GraphicsEngine::Init() {
     Device11.As( &Device );
     Context11.As( &Context );
 
-    LE( GetDevice()->CreateDeferredContext1( 0, DeferredContext.GetAddressOf() ) );  // Used for multithreaded texture loading
-
     FeatureLevel10Compatibility = (maxFeatureLevel < D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_11_0);
     LogInfo() << "Creating ShaderManager";
 
@@ -786,22 +784,27 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
     }
 #endif
 
-    // Enter the critical section for safety while executing the deferred command
-    // list
+    // Manage deferred texture loads here
+    // We don't need counting loaded mip maps because
+    // gothic unlocks all mip maps only when loading is successful
+    // this means we can't have half-loaded textures
     Engine::GAPI->EnterResourceCriticalSection();
-    Microsoft::WRL::ComPtr<ID3D11CommandList> dc_cl;
 
-    GetDeferredMediaContext1()->FinishCommandList( false, dc_cl.GetAddressOf() );
-
-    // Copy list of textures we are operating on
-    Engine::GAPI->MoveLoadedTexturesToProcessedList();
-    Engine::GAPI->ClearFrameLoadedTextures();
-
-    Engine::GAPI->LeaveResourceCriticalSection();
-    if ( dc_cl.Get() ) {
-        // LogInfo() << "Executing command list";
-        GetContext()->ExecuteCommandList( dc_cl.Get(), true );
+    auto& stagingTextures = Engine::GAPI->GetStagingTextures();
+    for ( auto& it : stagingTextures ) {
+        GetContext()->CopySubresourceRegion( it.second, it.first.first, 0, 0, 0, it.first.second, 0, nullptr );
+        it.first.second->Release();
     }
+    stagingTextures.clear();
+
+    auto& mipMaps = Engine::GAPI->GetMipMapGeneration();
+    for ( D3D11Texture* texture : mipMaps ) {
+        texture->GenerateMipMaps();
+    }
+    mipMaps.clear();
+
+    Engine::GAPI->SetFrameProcessedTexturesReady();
+    Engine::GAPI->LeaveResourceCriticalSection();
 
     // Check for editorpanel
     if ( !UIView ) {
@@ -863,10 +866,6 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
 /** Called when the game ended it's frame */
 XRESULT D3D11GraphicsEngine::OnEndFrame() {
     Present();
-
-    // At least Present should have flushed the pipeline, so these textures should
-    // be ready by now
-    Engine::GAPI->SetFrameProcessedTexturesReady();
 
     Engine::GAPI->GetRendererState().RendererInfo.Timing.StopTotal();
     m_FrameLimiter->Wait();
@@ -1001,14 +1000,6 @@ XRESULT D3D11GraphicsEngine::Present() {
 
     GetContext()->OMSetRenderTargets( 1, BackbufferRTV.GetAddressOf(), nullptr );
 
-    // Check for movie-frame
-    if ( Engine::GAPI->GetPendingMovieFrame() ) {
-        Engine::GAPI->GetPendingMovieFrame()->BindToPixelShader( 0 );
-        DrawQuad( INT2( 0, 0 ), GetBackbufferResolution() );
-
-        Engine::GAPI->SetPendingMovieFrame( nullptr );
-    }
-
     SetDefaultStates();
     UpdateRenderStates();
     Engine::AntTweakBar->Draw();
@@ -1021,7 +1012,6 @@ XRESULT D3D11GraphicsEngine::Present() {
 
     bool vsync = Engine::GAPI->GetRendererState().RendererSettings.EnableVSync;
 
-    Engine::GAPI->EnterResourceCriticalSection();
     HRESULT hr;
     if ( dxgi_1_3 ) {
         if ( m_flipWithTearing ) {
@@ -1071,7 +1061,6 @@ XRESULT D3D11GraphicsEngine::Present() {
             LogWarnBox() << "Device Removed! (Unknown reason)";
         }
     }
-    Engine::GAPI->LeaveResourceCriticalSection();
 
     PresentPending = false;
 
