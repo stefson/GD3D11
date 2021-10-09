@@ -555,6 +555,7 @@ HRESULT WorldConverter::ConvertWorldMesh( zCPolygon** polys, unsigned int numPol
 
         DWORD sectionColor = float4( (section.x % 2) + 0.5f, (section.x % 2) + 0.5f, 1, 1 ).ToDWORD();
 
+        zCMaterial* mat = poly->GetMaterial();
         if ( poly->GetNumPolyVertices() < 3 ) {
             LogWarn() << "Poly with less than 3 vertices!";
         }
@@ -591,18 +592,25 @@ HRESULT WorldConverter::ConvertWorldMesh( zCPolygon** polys, unsigned int numPol
             } else {
                 t.TexCoord2 = float2( 0.0f, 0.0f );
 
-                if ( poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER ) {
+                if ( mat && mat->GetMatGroup() == zMAT_GROUP_WATER ) {
                     t.Normal = float3( 0.0f, 1.0f, 0.0f ); // Get rid of ugly shadows on water
                     // Static light generated for water sucks and we can't use it to block the sun specular lighting
                     // so we'll limit ourselves to only block it in indoor locations
                     t.Color = 0xFFFFFFFF;
                 }
             }
+
+            if ( mat && mat->GetMatGroup() == zMAT_GROUP_WATER ) {
+                if ( mat->HasTexAniMap() ) {
+                    t.TexCoord2 = mat->GetTexAniMapDelta();
+                } else {
+                    t.TexCoord2 = float2( 0.0f, 0.0f );
+                }
+            }
         }
 
         // Use the map to put the polygon to those using the same material
 
-        zCMaterial* mat = poly->GetMaterial();
         MeshKey key;
         key.Texture = mat != nullptr ? mat->GetTexture() : nullptr;
         key.Material = mat;

@@ -10,17 +10,9 @@
 
 using namespace DirectX;
 
-D3D11Texture::D3D11Texture() {
-    // Insert into state-map
-    ID = D3D11ObjectIDs::Counters.TextureCounter++;
-
-    D3D11ObjectIDs::TextureByID[ID] = this;
-}
+D3D11Texture::D3D11Texture() {}
 
 D3D11Texture::~D3D11Texture() {
-    // Remove from state map
-    Toolbox::EraseByElement( D3D11ObjectIDs::TextureByID, this );
-
     Thumbnail.Reset();
     Texture.Reset();
     ShaderResourceView.Reset();

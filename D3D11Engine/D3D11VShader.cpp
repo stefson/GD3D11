@@ -9,16 +9,9 @@
 
 using namespace DirectX;
 
-D3D11VShader::D3D11VShader() {
-
-    // Insert into state-map
-    ID = D3D11ObjectIdManager::AddVShader( this );
-}
+D3D11VShader::D3D11VShader() {}
 
 D3D11VShader::~D3D11VShader() {
-    // Remove from state map
-    D3D11ObjectIdManager::EraseVShader( this );
-
     for ( unsigned int i = 0; i < ConstantBuffers.size(); i++ ) {
         delete ConstantBuffers[i];
     }
@@ -78,7 +71,6 @@ XRESULT D3D11VShader::LoadShader( const char* vertexShader, int layout, const st
 
     if ( Engine::GAPI->GetRendererState().RendererSettings.EnableDebugLog )
         LogInfo() << "Compilling vertex shader: " << vertexShader;
-    File = vertexShader;
 
 
     // Compile shader

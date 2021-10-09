@@ -2139,7 +2139,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
 
                 // Check surface type
                 if ( worldMesh.first.Info->MaterialType == MaterialInfo::MT_Water ) {
-                    FrameWaterSurfaces[worldMesh.first.Material].push_back( worldMesh.second );
+                    FrameWaterSurfaces[aniTex].push_back( worldMesh.second );
                     continue;
                 }
 
@@ -2429,7 +2429,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMeshW( bool noTextures ) {
 
             // Check surface type
             if ( info->MaterialType == MaterialInfo::MT_Water ) {
-                //FrameWaterSurfaces[textureInfo.first] = textureInfo.second.second;
+                FrameWaterSurfaces[textureInfo.first] = textureInfo.second.second;
                 textureInfo.second.second.resize( 0 );
                 continue;
             }
@@ -2580,7 +2580,8 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
     SetupVS_ExMeshDrawCall();
     SetupVS_ExConstantBuffer();
 
-    ActiveVS->GetConstantBuffer()[1]->UpdateBuffer( &XMMatrixIdentity() );
+    float totalTime = Engine::GAPI->GetTotalTime();
+    ActiveVS->GetConstantBuffer()[1]->UpdateBuffer( &totalTime, 4 );
     ActiveVS->GetConstantBuffer()[1]->BindToVertexShader( 1 );
 
     // Do Z-prepass on the water to make sure only the visible pixels will get drawn instead of multiple layers of water
@@ -2629,26 +2630,14 @@ void D3D11GraphicsEngine::DrawWaterSurfaces() {
     // Bind reflection cube
     GetContext()->PSSetShaderResources( 3, 1, ReflectionCube.GetAddressOf() );
     for ( auto const& it : FrameWaterSurfaces ) {
-        if ( zCTexture* texture = it.first->GetTexture() ) {
-            // Bind diffuse
-            texture->CacheIn( -1 );    // Force immediate cache in, because water
-                                        // is important!
-            texture->Bind( 0 );
-        }
+        // Bind diffuse
+        zCTexture* texture = it.first;
+        texture->CacheIn( -1 );    // Force immediate cache in, because water
+                                   // is important!
+        texture->Bind( 0 );
+
         // Draw surfaces
         for ( auto const& mesh : it.second ) {
-            if ( it.first->HasTexAniMap() ) {
-                float time = Engine::GAPI->GetTotalTime();
-                DirectX::XMFLOAT2 texAniMap = it.first->GetTexAniMapDelta();
-                float textureAniMap[2] = { texAniMap.x * time, texAniMap.y * time };
-                ActiveVS->GetConstantBuffer()[1]->UpdateBuffer( &textureAniMap, 8 );
-                ActiveVS->GetConstantBuffer()[1]->BindToVertexShader( 1 );
-            } else {
-                float textureAniMap[2] = {};
-                ActiveVS->GetConstantBuffer()[1]->UpdateBuffer( &textureAniMap, 8 );
-                ActiveVS->GetConstantBuffer()[1]->BindToVertexShader( 1 );
-            }
-
             DrawVertexBufferIndexedUINT( nullptr, nullptr,
                 mesh->Indices.size(), mesh->BaseIndexLocation );
         }
