@@ -170,6 +170,8 @@ struct HookedFunctionInfo {
     static long __fastcall hooked_zBinkPlayerGetPixelFormat( void* thisptr, void* unknwn, zTRndSurfaceDesc& desc );
     static int __fastcall hooked_zBinkPlayerOpenVideo( void* thisptr, void* unknwn, zSTRING str );
     static void __fastcall hooked_zCActiveSndAutoCalcObstruction( void* thisptr, void* unknwn, int i );
+
+    static int __cdecl hooked_GetNumDevices();
 };
 
 namespace HookedFunctions {

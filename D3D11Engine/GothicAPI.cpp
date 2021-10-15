@@ -368,13 +368,18 @@ void GothicAPI::SetEnableGothicInput( bool value ) {
     if ( oCGame::GetPlayer() ) oCGame::GetPlayer()->SetSleeping( value ? 0 : 1 );
     if ( oCGame::GetGame() && oCGame::GetGame()->_zCSession_camVob ) oCGame::GetGame()->_zCSession_camVob->SetSleeping( value ? 0 : 1 );
 
-    if ( !value )
-        disableCounter++;
+    if ( !value ) {
+        if ( disableCounter++ > 0 )
+            return;
+    }
 
 #ifndef BUILD_SPACER
     // zMouse, false
     input->SetDeviceEnabled( 2, value ? 1 : 0 );
     input->SetDeviceEnabled( 1, value ? 1 : 0 );
+
+    // Sometimes without this cursor aren't visible(it is only here as precaution)
+    ShowCursor( value ? FALSE : TRUE );
 
     IDirectInputDevice7A* dInputMouse = *(IDirectInputDevice7A**)GothicMemoryLocations::GlobalObjects::DInput7DeviceMouse;
     IDirectInputDevice7A* dInputKeyboard = *(IDirectInputDevice7A**)GothicMemoryLocations::GlobalObjects::DInput7DeviceKeyboard;
@@ -1791,11 +1796,11 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance, bool u
 
         if ( nodeAttachments.find( i ) != nodeAttachments.end() ) {
             // Go through all attachments this node has
-            for ( unsigned int n = 0; n < nodeAttachments[i].size(); n++ ) {
+            for ( MeshVisualInfo* mvi : nodeAttachments[i] ) {
                 XMMATRIX curTransform = XMLoadFloat4x4( &transforms[i] );
                 SetWorldViewTransform( world * curTransform, view );
 
-                if ( !nodeAttachments[i][n]->Visual ) {
+                if ( !mvi->Visual ) {
                     LogWarn() << "Attachment without visual on model: " << model->GetVisualName();
                     continue;
                 }
@@ -1808,17 +1813,17 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance, bool u
                 }
 
                 // Update animated textures
-                bool isMMS = std::string( nodeAttachments[i][n]->Visual->GetFileExtension( 0 ) ) == ".MMS";
+                bool isMMS = std::string( mvi->Visual->GetFileExtension( 0 ) ) == ".MMS";
                 if ( updateState ) {
                     node->TexAniState.UpdateTexList();
                     if ( isMMS ) {
-                        zCMorphMesh* mm = (zCMorphMesh*)nodeAttachments[i][n]->Visual;
+                        zCMorphMesh* mm = (zCMorphMesh*)mvi->Visual;
                         mm->GetTexAniState()->UpdateTexList();
                     }
                 }
 
                 if ( distance < 1000 && isMMS ) {
-                    zCMorphMesh* mm = (zCMorphMesh*)nodeAttachments[i][n]->Visual;
+                    zCMorphMesh* mm = (zCMorphMesh*)mvi->Visual;
                     // Only draw this as a morphmesh when rendering the main scene or when rendering as ghost
                     if ( g->GetRenderingStage() == DES_MAIN || g->GetRenderingStage() == DES_GHOST ) {
                         // Update constantbuffer
@@ -1833,7 +1838,7 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance, bool u
 
                         // Only 0.35f of the fatness wanted by gothic. 
                         // They seem to compensate for that with the scaling.
-                        DrawMorphMesh( mm, fatness * 0.35f );
+                        DrawMorphMesh( mm, fatness * 0.35f, mvi->Meshes );
                         continue;
                     }
                 }
@@ -1843,7 +1848,7 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance, bool u
                 vi->VobConstantBuffer->BindToVertexShader( 1 );
 
                 // Go through all materials registered here
-                for ( auto const& itm : nodeAttachments[i][n]->Meshes ) {
+                for ( auto const& itm : mvi->Meshes ) {
                     zCTexture* texture;
                     if ( itm.first && (texture = itm.first->GetAniTexture()) != nullptr ) { // TODO: Crash here!
                         if ( texture->CacheIn( 0.6f ) == zRES_CACHED_IN ) {
@@ -2585,8 +2590,10 @@ LRESULT GothicAPI::OnWindowMessage( HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
                 Engine::AntTweakBar->SetActive( !Engine::AntTweakBar->GetActive() );
                 SetEnableGothicInput( !Engine::AntTweakBar->GetActive() );
             } else {
-                Engine::AntTweakBar->SetActive( false );
-                SetEnableGothicInput( true );
+                if ( Engine::AntTweakBar->GetActive() ) {
+                    Engine::AntTweakBar->SetActive( false );
+                    SetEnableGothicInput( true );
+                }
                 Engine::GraphicsEngine->OnUIEvent( BaseGraphicsEngine::EUIEvent::UI_OpenSettings );
             }
             break;
@@ -3926,7 +3933,7 @@ void GothicAPI::SetFrameProcessedTexturesReady() {
 }
 
 /** Draws a morphmesh */
-void GothicAPI::DrawMorphMesh( zCMorphMesh* msh, float fatness ) {
+void GothicAPI::DrawMorphMesh( zCMorphMesh* msh, float fatness, std::map<zCMaterial*, std::vector<MeshInfo*>>& meshes ) {
     DirectX::XMFLOAT3 bbmin, bbmax;
     bbmin = DirectX::XMFLOAT3( FLT_MAX, FLT_MAX, FLT_MAX );
     bbmax = DirectX::XMFLOAT3( -FLT_MAX, -FLT_MAX, -FLT_MAX );
@@ -3936,31 +3943,35 @@ void GothicAPI::DrawMorphMesh( zCMorphMesh* msh, float fatness ) {
         return;
 
     DirectX::XMFLOAT3* posList = (DirectX::XMFLOAT3*)morphMesh->GetPositionList()->Array;
-
-    // Construct unindexed mesh
     for ( int i = 0; i < morphMesh->GetNumSubmeshes(); i++ ) {
         std::vector<ExVertexStruct> vertices;
 
-        zCSubMesh& sub = morphMesh->GetSubmeshes()[i];
-        vertices.reserve( sub.TriList.NumInArray * 3 );
+        zCSubMesh* s = morphMesh->GetSubmesh( i );
+        vertices.reserve( s->WedgeList.NumInArray );
+        for ( int v = 0; v < s->WedgeList.NumInArray; v++ ) {
+            zTPMWedge& wedge = s->WedgeList.Array[v];
+            vertices.emplace_back();
+            ExVertexStruct& vx = vertices.back();
+            vx.Position = posList[wedge.position];
+            vx.Normal = wedge.normal;
+            vx.TexCoord = wedge.texUV;
+            vx.Color = 0xFFFFFFFF;
 
-        // Get vertices
-        for ( int t = 0; t < sub.TriList.NumInArray; t++ ) {
-            for ( int v = 3; --v >= 0; ) {
-                vertices.emplace_back();
-                ExVertexStruct& vx = vertices.back();
-                vx.Position = posList[sub.WedgeList.Array[sub.TriList.Array[t].wedge[v]].position];
-                vx.TexCoord = sub.WedgeList.Array[sub.TriList.Array[t].wedge[v]].texUV;
-                vx.Color = 0xFFFFFFFF;
-                vx.Normal = sub.WedgeList.Array[sub.TriList.Array[t].wedge[v]].normal;
-
-                // Do this on GPU probably?
-                XMStoreFloat3( reinterpret_cast<XMFLOAT3*>( &vx.Position ), XMVectorAdd( XMLoadFloat3( reinterpret_cast<const XMFLOAT3*>( &vx.Position ) ), XMLoadFloat3( reinterpret_cast<const XMFLOAT3*>( &vx.Normal ) ) * XMVectorReplicate( fatness ) ) );
-            }
+            // Do this on GPU probably?
+            XMStoreFloat3( reinterpret_cast<XMFLOAT3*>( &vx.Position ), XMVectorAdd( XMLoadFloat3( reinterpret_cast<const XMFLOAT3*>( &vx.Position ) ), XMLoadFloat3( reinterpret_cast<const XMFLOAT3*>( &vx.Normal ) ) * XMVectorReplicate( fatness ) ) );
         }
 
-        sub.Material->BindTexture( 0 );
-        Engine::GraphicsEngine->DrawVertexArrayMM( &vertices[0], vertices.size() );
+        s->Material->BindTexture( 0 );
+        for ( auto const& it : meshes ) {
+            for ( MeshInfo* mi : it.second ) {
+                if ( mi->MeshIndex == i ) {
+                    mi->MeshVertexBuffer->UpdateBuffer( &vertices[0], vertices.size() * sizeof( ExVertexStruct ) );
+                    Engine::GraphicsEngine->DrawVertexBufferIndexed( mi->MeshVertexBuffer, mi->MeshIndexBuffer, mi->Indices.size() );
+                    goto Out_Of_Nested_Loop;
+                }
+            }
+        }
+        Out_Of_Nested_Loop:;
     }
 }
 

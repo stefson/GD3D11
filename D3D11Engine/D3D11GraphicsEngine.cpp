@@ -1102,7 +1102,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexBuffer( D3D11VertexBuffer* vb, unsigned i
     GetContext()->Draw( numVertices, 0 );
 
     Engine::GAPI->GetRendererState().RendererInfo.FrameDrawnTriangles +=
-        numVertices;
+        numVertices / 3;
 
     return XR_SUCCESS;
 }
@@ -1161,7 +1161,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferIndexedUINT(
         GetContext()->IASetVertexBuffers( 0, 1, vb->GetVertexBuffer().GetAddressOf(), &uStride, &offset );
         GetContext()->IASetIndexBuffer( ((D3D11VertexBuffer*)ib)->GetVertexBuffer().Get(),
             DXGI_FORMAT_R32_UINT, 0 );
-}
+    }
 
     if ( numIndices ) {
         // Draw the mesh
@@ -1232,7 +1232,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexArray( ExVertexStruct* vertices,
     GetContext()->Draw( numVertices, startVertex );
 
     Engine::GAPI->GetRendererState().RendererInfo.FrameDrawnTriangles +=
-        numVertices;
+        numVertices / 3;
 
     return XR_SUCCESS;
 }
@@ -1264,7 +1264,7 @@ XRESULT D3D11GraphicsEngine::DrawVertexArrayMM( ExVertexStruct* vertices,
     GetContext()->Draw( numVertices, startVertex );
 
     Engine::GAPI->GetRendererState().RendererInfo.FrameDrawnTriangles +=
-        numVertices;
+        numVertices / 3;
 
     return XR_SUCCESS;
 }
@@ -1305,7 +1305,7 @@ XRESULT D3D11GraphicsEngine::DrawIndexedVertexArray( ExVertexStruct* vertices,
     GetContext()->DrawIndexed( numIndices, 0, 0 );
 
     Engine::GAPI->GetRendererState().RendererInfo.FrameDrawnTriangles +=
-        numVertices;
+        numVertices / 3;
 
     return XR_SUCCESS;
 }
@@ -1329,7 +1329,8 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferFF( D3D11VertexBuffer* vb,
     // Draw the mesh
     GetContext()->Draw( numVertices, startVertex );
 
-    Engine::GAPI->GetRendererState().RendererInfo.FrameDrawnTriangles += numVertices;
+    Engine::GAPI->GetRendererState().RendererInfo.FrameDrawnTriangles +=
+        numVertices / 3;
 
     return XR_SUCCESS;
 }
@@ -4697,9 +4698,6 @@ LRESULT D3D11GraphicsEngine::OnWindowMessage( HWND hWnd, UINT msg, WPARAM wParam
             }
 
             UpdateClipCursor( hWnd );
-
-            // Sometimes Gothic doesn't aquire/release input so let's do it ourselves
-            Engine::GAPI->SetEnableGothicInput( m_isWindowActive );
         }
         break;
         case WM_WINDOWPOSCHANGED: UpdateClipCursor( hWnd ); break;

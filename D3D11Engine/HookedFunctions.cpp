@@ -83,7 +83,7 @@ void HookedFunctionInfo::InitHooks() {
     LogInfo() << "Patching: Fix integer overflow crash";
     PatchAddr( 0x00506B31, "\xEB" );
 
-    LogInfo() << "Patching: Marking texture as cached-in after cache-out";
+    LogInfo() << "Patching: Marking texture as cached-in after cache-out - fix";
     PatchAddr( 0x005E90BE, "\x90\x90" );
 #else
     LogInfo() << "Patching: BroadCast fix";
@@ -112,8 +112,33 @@ void HookedFunctionInfo::InitHooks() {
     PatchAddr( 0x004F4024, "\xEB" );
     PatchAddr( 0x004F43FC, "\xEB" );
 
-    LogInfo() << "Patching: Marking texture as cached-in after cache-out";
+    LogInfo() << "Patching: Marking texture as cached-in after cache-out - fix";
     PatchAddr( 0x005CA683, "\x90\x90" );
+
+    LogInfo() << "Patching: Improve loading times by disabling some unnecessary features";
+    PatchAddr( 0x0055848A, "\xE9\xE2\x01\x00\x00\x90" );
+    PatchAddr( 0x005F7F7C, "\x1F" );
+    PatchAddr( 0x005F8D40, "\x1F" );
+    PatchAddr( 0x00525BC4, "\xEB" );
+    PatchAddr( 0x0051E425, "\x90\x90" );
+    PatchAddr( 0x0051E5B5, "\xEB\x22" );
+    PatchAddr( 0x0051E62A, "\x8D\x24\x24\x8B\x4A\x30\x8B\x04\xA9\x8B\x48\x40\x83\xC0\x38\x85\xC9\x74\x28\x33\xF6\x85\xC9\x7E\x22\x8B\x18\x8B\xFB\x8D\x1B\x39\x17\x74\x0A\x46\x83\xC7\x04\x3B\xF1\x7C\xF4\xEB\x0E\x49\x3B\xF1\x89\x48\x08\x74\x06\x8B\x04\x8B\x89\x04\xB3\x8B\x42\x38\x45\x3B\xE8\x7C\xC0\xEB\x65\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90" );
+
+    // Show DirectX11 as currently used graphic device
+    {
+        PatchAddr( 0x0071F8DF, "\x55\x56\xBE\x00\x00\x00\x00\x90\x90\x90\x90" );
+        PatchAddr( 0x0071F8EC, "\x83\xFE\x01" );
+        PatchAddr( 0x0071F9EC, "\x81\xC6\x18\xE7\x8D\x00" );
+        PatchAddr( 0x0071FA01, "\x90\x90" );
+
+        PatchAddr( 0x0071F5D9, "\xB8\x01\x00\x00\x00\xC3\x90" );
+        PatchAddr( 0x0071F5E9, "\xB8\x01\x00\x00\x00\xC3\x90" );
+
+        PatchAddr( 0x0042BB0D, "\xE8\xC7\x3A\x2F\x00\x90" );
+        PatchAddr( 0x0042BBE1, "\xE8\x03\x3A\x2F\x00\x90" );
+
+        XHook( 0x0071F5D9, HookedFunctionInfo::hooked_GetNumDevices );
+    }
 #endif
 #endif
 
@@ -156,8 +181,41 @@ void HookedFunctionInfo::InitHooks() {
     LogInfo() << "Patching: Texture size is lower than 32 - fix";
     PatchAddr( 0x005F4E20, "\xC7\x05\xBC\xB3\x99\x00\x00\x40\x00\x00\xEB\x4D\x90\x90" );
 
-    LogInfo() << "Patching: Marking texture as cached-in after cache-out";
+    LogInfo() << "Patching: Marking texture as cached-in after cache-out - fix";
     PatchAddr( 0x005F5573, "\x90\x90" );
+
+    LogInfo() << "Patching: Fix dynamic lights huge impact on FPS in some locations";
+    PatchAddr( 0x006092C4, "\xE9\x45\x02\x00\x00\x90" );
+    PatchAddr( 0x00609544, "\xE9\x25\x02\x00\x00\x90" );
+
+#ifndef BUILD_SPACER_NET
+    LogInfo() << "Patching: Improve loading times by disabling some unnecessary features";
+    PatchAddr( 0x00571256, "\xE9\xC6\x02\x00\x00\x90" );
+    PatchAddr( 0x006C8748, "\x90\x90\x90\x90\x90\x90" );
+    PatchAddr( 0x00530D75, "\x90\x90" );
+    PatchAddr( 0x006265AE, "\x1F" );
+    PatchAddr( 0x006274E6, "\x1F" );
+    PatchAddr( 0x005396C9, "\xEB" );
+    PatchAddr( 0x00530F05, "\xEB\x22" );
+    PatchAddr( 0x00530F7A, "\x8D\xA4\x24\x00\x00\x00\x00\x8B\x4A\x30\x8B\x04\xA9\x8B\x48\x40\x83\xC0\x38\x85\xC0\x74\x28\x33\xF6\x85\xC9\x7E\x22\x8B\x18\x8B\xFB\x8D\x1B\x39\x17\x74\x0A\x46\x83\xC7\x04\x3B\xF1\x7C\xF4\xEB\x0E\x49\x3B\xF1\x89\x48\x08\x74\x06\x8B\x04\x8B\x89\x04\xB3\x8B\x42\x38\x45\x3B\xE8\x7C\xC0\xEB\x61\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90" );
+#endif
+
+    // Show DirectX11 as currently used graphic device
+    {
+        PatchAddr( 0x006581AD, "\x57\xBD\x00\x00\x00\x00\x90" );
+        PatchAddr( 0x006581B8, "\x83\xFD\x01\x90\x90\x90\x90" );
+        PatchAddr( 0x00658302, "\x81\xC5\x30\x4C\x9A\x00" );
+        PatchAddr( 0x00658321, "\x8B\xFD" );
+        PatchAddr( 0x00658329, "\x55" );
+
+        PatchAddr( 0x00657EA9, "\xB8\x01\x00\x00\x00\xC3\x90" );
+        PatchAddr( 0x00657EB9, "\xB8\x01\x00\x00\x00\xC3\x90" );
+
+        PatchAddr( 0x0042DF1F, "\xE8\x85\x9F\x22\x00\x90" );
+        PatchAddr( 0x0042E000, "\xE8\xB4\x9E\x22\x00\x90" );
+
+        XHook( 0x00657EA9, HookedFunctionInfo::hooked_GetNumDevices );
+    }
 
     // HACK Workaround to fix debuglines in godmode
     LogInfo() << "Patching: Godmode Debuglines";
@@ -228,4 +286,10 @@ int __fastcall HookedFunctionInfo::hooked_zBinkPlayerOpenVideo( void* thisptr, v
     }
 
     return r;
+}
+
+int __cdecl HookedFunctionInfo::hooked_GetNumDevices()
+{
+    Engine::GraphicsEngine->OnUIEvent( BaseGraphicsEngine::EUIEvent::UI_OpenSettings );
+    return 1;
 }

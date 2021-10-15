@@ -1242,6 +1242,10 @@ void WorldConverter::ExtractNodeVisual( int index, zCModelNodeInst* node, std::m
             }
 
             MeshVisualInfo* mi = new MeshVisualInfo;
+            if ( isMMS ) {
+                mi->MorphMeshVisual = (void*)node->NodeVisual;
+                zCObject_AddRef( mi->MorphMeshVisual );
+            }
 
             Extract3DSMeshFromVisual2( pm, mi );
             if ( isMMS ) {
@@ -1411,14 +1415,14 @@ void WorldConverter::UpdateMorphMeshVisual( void* v, MeshVisualInfo* meshInfo ) 
         }
 
         for ( auto const& it : meshInfo->Meshes ) {
-            const std::vector<MeshInfo*>& mlist = it.second;
-            for ( unsigned int x = 0; x < mlist.size(); x++ ) {
-                MeshInfo* mi = mlist[x];
+            for ( MeshInfo* mi : it.second ) {
                 if ( mi->MeshIndex == i ) {
                     mi->MeshVertexBuffer->UpdateBuffer( &vertices[0], vertices.size() * sizeof( ExVertexStruct ) );
+                    goto Out_Of_Nested_Loop;
                 }
             }
         }
+        Out_Of_Nested_Loop:;
     }
 }
 

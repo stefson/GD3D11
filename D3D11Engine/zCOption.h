@@ -150,6 +150,8 @@ public:
             return 10000;
         } else if ( _stricmp( var, "zSndCacheSizeMaxBytes" ) == 0 ) {
             return 40000000;
+        } else if ( _stricmp( var, "zVidDevice" ) == 0 ) {
+            return 0;
         }
 
         return HookedFunctions::OriginalFunctions.original_zCOptionReadInt( thisptr, section, var, def );
