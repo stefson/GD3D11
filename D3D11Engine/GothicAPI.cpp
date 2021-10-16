@@ -2583,10 +2583,13 @@ LRESULT GothicAPI::OnWindowMessage( HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
                 LogInfo() << ss.str();
             }
             break;
-        }
+       
 #endif
         case VK_F11:
             if ( ( GetAsyncKeyState( VK_CONTROL ) & 0x8000 ) && !GMPModeActive ) {
+                if ( reinterpret_cast<D3D11GraphicsEngine*>(Engine::GraphicsEngine)->HasSettingsWindow() )
+                    Engine::GraphicsEngine->OnUIEvent( BaseGraphicsEngine::EUIEvent::UI_OpenSettings );
+
                 Engine::AntTweakBar->SetActive( !Engine::AntTweakBar->GetActive() );
                 SetEnableGothicInput( !Engine::AntTweakBar->GetActive() );
             } else {
@@ -2596,6 +2599,15 @@ LRESULT GothicAPI::OnWindowMessage( HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
                 }
                 Engine::GraphicsEngine->OnUIEvent( BaseGraphicsEngine::EUIEvent::UI_OpenSettings );
             }
+            break;
+
+        case VK_ESCAPE:
+            if ( Engine::AntTweakBar->GetActive() ) {
+                Engine::AntTweakBar->SetActive( false );
+                SetEnableGothicInput( true );
+            }
+            if ( reinterpret_cast<D3D11GraphicsEngine*>(Engine::GraphicsEngine)->HasSettingsWindow() )
+                Engine::GraphicsEngine->OnUIEvent( BaseGraphicsEngine::EUIEvent::UI_OpenSettings );
             break;
 
         case VK_NUMPAD1:

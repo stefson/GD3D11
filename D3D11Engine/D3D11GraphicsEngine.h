@@ -308,6 +308,9 @@ public:
     /** Returns the UI-View */
     D2DView* GetUIView() { return UIView.get(); }
 
+    /** Returns the settings window availability */
+    bool HasSettingsWindow();
+
     /** Creates the main UI-View */
     void CreateMainUIView();
 

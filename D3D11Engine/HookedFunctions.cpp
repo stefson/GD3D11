@@ -116,6 +116,7 @@ void HookedFunctionInfo::InitHooks() {
     PatchAddr( 0x005CA683, "\x90\x90" );
 
     LogInfo() << "Patching: Improve loading times by disabling some unnecessary features";
+    PatchAddr( 0x005A4FE0, "\xC3\x90\x90" );
     PatchAddr( 0x0055848A, "\xE9\xE2\x01\x00\x00\x90" );
     PatchAddr( 0x005F7F7C, "\x1F" );
     PatchAddr( 0x005F8D40, "\x1F" );
@@ -123,6 +124,15 @@ void HookedFunctionInfo::InitHooks() {
     PatchAddr( 0x0051E425, "\x90\x90" );
     PatchAddr( 0x0051E5B5, "\xEB\x22" );
     PatchAddr( 0x0051E62A, "\x8D\x24\x24\x8B\x4A\x30\x8B\x04\xA9\x8B\x48\x40\x83\xC0\x38\x85\xC9\x74\x28\x33\xF6\x85\xC9\x7E\x22\x8B\x18\x8B\xFB\x8D\x1B\x39\x17\x74\x0A\x46\x83\xC7\x04\x3B\xF1\x7C\xF4\xEB\x0E\x49\x3B\xF1\x89\x48\x08\x74\x06\x8B\x04\x8B\x89\x04\xB3\x8B\x42\x38\x45\x3B\xE8\x7C\xC0\xEB\x65\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90" );
+
+    LogInfo() << "Patching: Show correct tris on toggle frame";
+    {
+        char* trisHndl[5];
+        DWORD trisHandle = reinterpret_cast<DWORD>(&Engine::GAPI->GetRendererState().RendererInfo.FrameDrawnTriangles);
+        memcpy( trisHndl, &trisHandle, 4 );
+        PatchAddr( 0x0063DA2E, "\xA1\xD0\x5E\x8C\x00\x90\x90\x90\x90\x90\x90" );
+        PatchAddr( 0x0063DA2F, trisHndl );
+    }
 
     // Show DirectX11 as currently used graphic device
     {
@@ -190,6 +200,7 @@ void HookedFunctionInfo::InitHooks() {
 
 #ifndef BUILD_SPACER_NET
     LogInfo() << "Patching: Improve loading times by disabling some unnecessary features";
+    PatchAddr( 0x005C6E30, "\xC3\x90\x90\x90\x90\x90" );
     PatchAddr( 0x00571256, "\xE9\xC6\x02\x00\x00\x90" );
     PatchAddr( 0x006C8748, "\x90\x90\x90\x90\x90\x90" );
     PatchAddr( 0x00530D75, "\x90\x90" );
@@ -199,6 +210,15 @@ void HookedFunctionInfo::InitHooks() {
     PatchAddr( 0x00530F05, "\xEB\x22" );
     PatchAddr( 0x00530F7A, "\x8D\xA4\x24\x00\x00\x00\x00\x8B\x4A\x30\x8B\x04\xA9\x8B\x48\x40\x83\xC0\x38\x85\xC0\x74\x28\x33\xF6\x85\xC9\x7E\x22\x8B\x18\x8B\xFB\x8D\x1B\x39\x17\x74\x0A\x46\x83\xC7\x04\x3B\xF1\x7C\xF4\xEB\x0E\x49\x3B\xF1\x89\x48\x08\x74\x06\x8B\x04\x8B\x89\x04\xB3\x8B\x42\x38\x45\x3B\xE8\x7C\xC0\xEB\x61\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90" );
 #endif
+
+    LogInfo() << "Patching: Show correct tris on toggle frame";
+    {
+        char* trisHndl[5];
+        DWORD trisHandle = reinterpret_cast<DWORD>(&Engine::GAPI->GetRendererState().RendererInfo.FrameDrawnTriangles);
+        memcpy( trisHndl, &trisHandle, 4 );
+        PatchAddr( 0x006C80F2, "\x36\x8B\x3D\x08\x2F\x98\x00" );
+        PatchAddr( 0x006C80F5, trisHndl );
+    }
 
     // Show DirectX11 as currently used graphic device
     {

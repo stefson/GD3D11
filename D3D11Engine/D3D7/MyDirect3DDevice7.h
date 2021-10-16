@@ -118,9 +118,6 @@ public:
 		FakeDeviceDesc.dwVertexProcessingCaps = (D3DVTXPCAPS_TEXGEN|D3DVTXPCAPS_MATERIALSOURCE7|D3DVTXPCAPS_DIRECTIONALLIGHTS|D3DVTXPCAPS_POSITIONALLIGHTS|D3DVTXPCAPS_LOCALVIEWER);
 	}
 
-	~MyDirect3DDevice7() {
-	}
-
 	/*** IUnknown methods ***/
 	HRESULT STDMETHODCALLTYPE QueryInterface( REFIID riid, void** ppvObj ) {
 		DebugWrite( "MyDirect3DDevice7::QueryInterface" );

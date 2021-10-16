@@ -1464,6 +1464,9 @@ XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh( SkeletalVobInfo* vi,
 
             // Draw the mesh
             GetContext()->DrawIndexed( numIndices, 0, 0 );
+
+            Engine::GAPI->GetRendererState().RendererInfo.FrameDrawnTriangles +=
+                numIndices / 3;
         }
     }
 
@@ -1541,6 +1544,9 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
     // Draw the batch
     GetContext()->DrawIndexedInstanced( numIndices, numInstances, 0, 0, 0 );
 
+    Engine::GAPI->GetRendererState().RendererInfo.FrameDrawnTriangles +=
+        (numIndices / 3) * numInstances;
+
     return XR_SUCCESS;
 }
 
@@ -1574,6 +1580,9 @@ XRESULT D3D11GraphicsEngine::DrawInstanced(
     // Draw the batch
     GetContext()->DrawIndexedInstanced( numIndices, numInstances, indexOffset, 0,
         startInstanceNum );
+
+    Engine::GAPI->GetRendererState().RendererInfo.FrameDrawnTriangles +=
+        (numIndices / 3) * numInstances;
 
     Engine::GAPI->GetRendererState().RendererInfo.FrameDrawnVobs++;
 
@@ -5224,6 +5233,12 @@ void D3D11GraphicsEngine::DrawUnderwaterEffects() {
 
     PfxRenderer->BlurTexture( HDRBackBuffer.get(), false, 0.10f, UNDERWATER_COLOR_MOD,
         "PS_PFX_UnderwaterFinal" );
+}
+
+/** Returns the settings window availability */
+bool D3D11GraphicsEngine::HasSettingsWindow()
+{
+    return (UIView && !UIView->GetSettingsDialog()->IsHidden());
 }
 
 /** Creates the main UI-View */

@@ -239,13 +239,13 @@ BOOL WINAPI DllMain( HINSTANCE hInst, DWORD reason, LPVOID ) {
             // Check for right version
             VersionCheck::CheckExecutable();
             CheckPlatformSupport();
-            HookedFunctions::OriginalFunctions.InitHooks();
 
             Engine::GAPI = nullptr;
             Engine::GraphicsEngine = nullptr;
 
             // Create GothicAPI here to make all hooks work
             Engine::CreateGothicAPI();
+            HookedFunctions::OriginalFunctions.InitHooks();
 
             EnableCrashingOnCrashes();
             //SetUnhandledExceptionFilter(MyUnhandledExceptionFilter);
