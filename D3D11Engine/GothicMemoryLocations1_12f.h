@@ -142,10 +142,11 @@ struct GothicMemoryLocations {
         static const unsigned int DoFrameActivity = 0x005F6BE0;
         static const unsigned int GetBBoxLocal = 0x0060E470;
         static const unsigned int Offset_HomeWorld = 0x0A8;
+        static const unsigned int Offset_Type = 0x0A0;
 
         static const unsigned int Offset_Flags = 0xE4;
         static const unsigned int MASK_ShowVisual = 0x1;
-        static const unsigned int Offset_CameraAlignment = 0x110;
+        static const unsigned int Offset_CameraAlignment = 0xF0;
         static const unsigned int SHIFTLR_CameraAlignment = 0x1E;
 
         static const unsigned int Destructor = 0x005F2490;
@@ -248,6 +249,7 @@ struct GothicMemoryLocations {
         static const unsigned int Constructor = 0x00565370;
         static const unsigned int Destructor = 0x005655E0;
         static const unsigned int GetAniTexture = 0x00751320;
+        static const unsigned int AdvanceAni = 0x00566ED0;
 
     };
 
@@ -259,6 +261,9 @@ struct GothicMemoryLocations {
         static const unsigned int zCTex_D3DInsertTexture = 0x00759E90;
         static const unsigned int LoadResourceData = 0x005E9020;
         static const unsigned int Offset_CacheState = 0x4C;
+        static const unsigned int Offset_NextFrame = 0x58;
+        static const unsigned int Offset_ActAniFrame = 0x70;
+        static const unsigned int Offset_AniFrames = 0x7C;
         static const unsigned int Mask_CacheState = 3;
 
         static const unsigned int Offset_Flags = 0x88;
@@ -317,7 +322,6 @@ struct GothicMemoryLocations {
     };
 
     struct oCWorld {
-        static const unsigned int InsertVobInWorld = 0x0070EC40;
         static const unsigned int EnableVob = 0x0070EC50;
         static const unsigned int DisableVob = 0x0070ED90;
         static const unsigned int RemoveFromLists = 0x0070F2B0;

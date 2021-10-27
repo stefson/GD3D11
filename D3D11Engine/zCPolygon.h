@@ -123,5 +123,9 @@ public:
         return *(zCLightmap**)(((char*)this) + GothicMemoryLocations::zCPolygon::Offset_Lightmap);
     }
 
+    void SetLightmap( zCLightmap* lightmap ) {
+        *(zCLightmap**)(((char*)this) + GothicMemoryLocations::zCPolygon::Offset_Lightmap) = lightmap;
+    }
+
     char data[56];
 };

@@ -726,6 +726,12 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
 
 /** Called when the game wants to render a new frame */
 XRESULT D3D11GraphicsEngine::OnBeginFrame() {
+    if ( !m_isWindowActive && GetForegroundWindow() == OutputWindow ) {
+        // Just in case to check if somehow we didn't get informed the window got activated
+        m_isWindowActive = true;
+        UpdateClipCursor( OutputWindow );
+    }
+
     Engine::GAPI->GetRendererState().RendererInfo.Timing.StartTotal();
     if ( !m_isWindowActive && Engine::GAPI->GetRendererState().RendererSettings.EnableInactiveFpsLock ) {
         m_FrameLimiter->SetLimit( 20 );
@@ -1400,8 +1406,8 @@ XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh( SkeletalVobInfo* vi,
     for ( auto const& itm : dynamic_cast<SkeletalMeshVisualInfo*>(vi->VisualInfo)->SkeletalMeshes ) {
         for ( auto& mesh : itm.second ) {
             if ( zCMaterial* mat = itm.first ) {
-                if ( ActivePS && mat->GetTexture() ) {
-                    zCTexture* tex = mat->GetAniTexture();
+                zCTexture* tex;
+                if ( ActivePS && (tex = mat->GetAniTexture()) != nullptr ) {
                     if ( tex->CacheIn( 0.6f ) == zRES_CACHED_IN )
                         tex->Bind( 0 );
                     else
@@ -2183,7 +2189,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
 
         for ( auto const& mesh : meshList ) {
             zCTexture* texture;
-            if ( ( texture = mesh.first.Material->GetAniTexture() ) == nullptr ) continue;
+            if ( ( texture = mesh.first.Texture ) == nullptr ) continue;
 
             if ( texture->HasAlphaChannel() )
                 continue;  // Don't pre-render stuff with alpha channel
@@ -3697,9 +3703,8 @@ XRESULT D3D11GraphicsEngine::DrawPolyStrips( bool noTextures ) {
     ActivePS->GetConstantBuffer()[2]->BindToPixelShader( 2 );
 
     for ( auto it = polyStripInfos.begin(); it != polyStripInfos.end(); it++ ) {
-
         zCMaterial* mat = it->second.material;
-        zCTexture* tx = mat->GetAniTexture();
+        zCTexture* tx = it->first;
 
         const std::vector<ExVertexStruct>& vertices = it->second.vertices;
 
@@ -3720,7 +3725,7 @@ XRESULT D3D11GraphicsEngine::DrawPolyStrips( bool noTextures ) {
             MyDirectDrawSurface7* surface = tx->GetSurface();
             ID3D11ShaderResourceView* srv[3];
 
-            BindShaderForTexture( mat->GetAniTexture(), false, mat->GetAlphaFunc() );
+            BindShaderForTexture( tx, false, mat->GetAlphaFunc() );
 
             // Get diffuse and normalmap
             srv[0] = surface->GetEngineTexture()->GetShaderResourceView().Get();
@@ -5090,29 +5095,24 @@ void D3D11GraphicsEngine::DrawDecalList( const std::vector<zCVob*>& decals,
                 -d->GetDecalSettings()->DecalSize.y * 2, 1 ) );
 
         if ( alignment == zVISUAL_CAM_ALIGN_YAW ) {
-            // Rotate the FX towards the camera
-            // TODO: some candle flames (and other pfx?) are invisible / very thin when done this way.
-
             XMFLOAT3 decalPos = decals[i]->GetPositionWorld();
-            float angle = atan2( decalPos.x - camPos.x, decalPos.z - camPos.z ) * 180 * XM_1DIVPI;
-            world *= XMMatrixTranspose( XMMatrixRotationY( XMConvertToRadians( angle ) ) );
+            float angle = atan2( decalPos.x - camPos.x, decalPos.z - camPos.z );
+            XMMATRIX rotationVector = XMMatrixTranspose( XMMatrixRotationY( angle ) );
+            //world *= rotationVector;
+
+            // We only need to change rotation vectors - maintain old W-coordinates
+            XMStoreFloat3( reinterpret_cast<XMFLOAT3*>(&world.r[0]), rotationVector.r[0] );
+            XMStoreFloat3( reinterpret_cast<XMFLOAT3*>(&world.r[1]), rotationVector.r[1] );
+            XMStoreFloat3( reinterpret_cast<XMFLOAT3*>(&world.r[2]), rotationVector.r[2] );
+        } else if ( alignment == zVISUAL_CAM_ALIGN_FULL ) {
+            XMFLOAT3 decalPos = decals[i]->GetPositionWorld();
+            world = XMMatrixIdentity();
+            reinterpret_cast<XMFLOAT4*>(&world.r[0])->w = decalPos.x;
+            reinterpret_cast<XMFLOAT4*>(&world.r[1])->w = decalPos.y;
+            reinterpret_cast<XMFLOAT4*>(&world.r[2])->w = decalPos.z;
         }
 
-        XMMATRIX mat = view * world;
-
-        // E.g battle focus borders
-        if ( alignment == zVISUAL_CAM_ALIGN_FULL ) {
-            for ( int x = 0; x < 3; x++ ) {
-                for ( int y = 0; y < 3; y++ ) {
-                    if ( x == y )
-                        mat.r[x].m128_f32[y] = 1.0f;
-                    else
-                        mat.r[x].m128_f32[y] = 0.0f;
-                }
-            }
-        }
-
-        mat = mat * offset * scale;
+        XMMATRIX mat = view * world * offset * scale;
 
         ParticleInstanceInfo ii;
         ii.scale = float2( 50, 50 );

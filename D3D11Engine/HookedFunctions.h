@@ -172,6 +172,7 @@ struct HookedFunctionInfo {
     static void __fastcall hooked_zCActiveSndAutoCalcObstruction( void* thisptr, void* unknwn, int i );
 
     static int __cdecl hooked_GetNumDevices();
+    static void __fastcall hooked_SetLightmap( void* polygonPtr );
 };
 
 namespace HookedFunctions {

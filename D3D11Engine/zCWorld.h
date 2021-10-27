@@ -26,10 +26,6 @@ public:
         //XHook(HookedFunctions::OriginalFunctions.original_zCWorldDisposeWorld, GothicMemoryLocations::zCWorld::DisposeWorld, zCWorld::hooked_zCWorldDisposeWorld);
         XHook( HookedFunctions::OriginalFunctions.original_zCWorldDisposeVobs, GothicMemoryLocations::zCWorld::DisposeVobs, zCWorld::hooked_zCWorldDisposeVobs );
 
-#ifdef BUILD_GOTHIC_1_08k
-        XHook( HookedFunctions::OriginalFunctions.original_oCWorldInsertVobInWorld, GothicMemoryLocations::oCWorld::InsertVobInWorld, zCWorld::hooked_InsertVobInWorld );
-#endif
-
         XHook( HookedFunctions::OriginalFunctions.original_oCWorldRemoveFromLists, GothicMemoryLocations::oCWorld::RemoveFromLists, zCWorld::hooked_oCWorldRemoveFromLists );
         XHook( HookedFunctions::OriginalFunctions.original_oCWorldEnableVob, GothicMemoryLocations::oCWorld::EnableVob, zCWorld::hooked_oCWorldEnableVob );
         XHook( HookedFunctions::OriginalFunctions.original_oCWorldDisableVob, GothicMemoryLocations::oCWorld::DisableVob, zCWorld::hooked_oCWorldDisableVob );
@@ -114,17 +110,6 @@ public:
 
         //Engine::GAPI->OnWorldLoaded();
         //hook_outfunc
-    }
-
-    static void __fastcall hooked_InsertVobInWorld( void* thisptr, void* unknwn, zCVob* vob ) {
-        hook_infunc
-            HookedFunctions::OriginalFunctions.original_oCWorldInsertVobInWorld( thisptr, vob );
-        if ( vob->GetVisual() ) {
-            //LogInfo() << vob->GetVisual()->GetFileExtension(0);
-            //Engine::GAPI->OnAddVob(vob); 
-            Engine::GAPI->OnAddVob( vob, (zCWorld*)thisptr );
-        }
-        hook_outfunc
     }
 
     static void __fastcall hooked_VobAddedToWorld( void* thisptr, void* unknwn, zCVob* vob ) {

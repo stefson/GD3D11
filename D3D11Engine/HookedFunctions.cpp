@@ -114,7 +114,7 @@ void HookedFunctionInfo::InitHooks() {
 
     LogInfo() << "Patching: Marking texture as cached-in after cache-out - fix";
     PatchAddr( 0x005CA683, "\x90\x90" );
-
+    
     LogInfo() << "Patching: Improve loading times by disabling some unnecessary features";
     PatchAddr( 0x005A4FE0, "\xC3\x90\x90" );
     PatchAddr( 0x0055848A, "\xE9\xE2\x01\x00\x00\x90" );
@@ -124,6 +124,16 @@ void HookedFunctionInfo::InitHooks() {
     PatchAddr( 0x0051E425, "\x90\x90" );
     PatchAddr( 0x0051E5B5, "\xEB\x22" );
     PatchAddr( 0x0051E62A, "\x8D\x24\x24\x8B\x4A\x30\x8B\x04\xA9\x8B\x48\x40\x83\xC0\x38\x85\xC9\x74\x28\x33\xF6\x85\xC9\x7E\x22\x8B\x18\x8B\xFB\x8D\x1B\x39\x17\x74\x0A\x46\x83\xC7\x04\x3B\xF1\x7C\xF4\xEB\x0E\x49\x3B\xF1\x89\x48\x08\x74\x06\x8B\x04\x8B\x89\x04\xB3\x8B\x42\x38\x45\x3B\xE8\x7C\xC0\xEB\x65\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90" );
+    
+    // Skip loading lightmaps and make general purpose lightmap to be able to detect indoor vobs
+    {
+        PatchAddr( 0x00525C56, "\xEB\xCF\x90" );
+        PatchAddr( 0x0055787E, "\xE9\x5E\x0B\x00\x00" );
+        PatchAddr( 0x00557A11, "\xE9\xCB\x09\x00\x00" );
+        PatchAddr( 0x005582C9, "\x8B\xCB\xE8\xA6\xEF\xFF\xFF\xEB\x2E\x90\x90" );
+        PatchAddr( 0x00557276, "\xE9\x00\x00\x00\x00" );
+        XHook( 0x00557276, HookedFunctionInfo::hooked_SetLightmap );
+    }
 
     LogInfo() << "Patching: Show correct tris on toggle frame";
     {
@@ -209,6 +219,16 @@ void HookedFunctionInfo::InitHooks() {
     PatchAddr( 0x005396C9, "\xEB" );
     PatchAddr( 0x00530F05, "\xEB\x22" );
     PatchAddr( 0x00530F7A, "\x8D\xA4\x24\x00\x00\x00\x00\x8B\x4A\x30\x8B\x04\xA9\x8B\x48\x40\x83\xC0\x38\x85\xC0\x74\x28\x33\xF6\x85\xC9\x7E\x22\x8B\x18\x8B\xFB\x8D\x1B\x39\x17\x74\x0A\x46\x83\xC7\x04\x3B\xF1\x7C\xF4\xEB\x0E\x49\x3B\xF1\x89\x48\x08\x74\x06\x8B\x04\x8B\x89\x04\xB3\x8B\x42\x38\x45\x3B\xE8\x7C\xC0\xEB\x61\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90" );
+
+    // Skip loading lightmaps and make general purpose lightmap to be able to detect indoor vobs
+    {
+        PatchAddr( 0x00539757, "\xEB\xCF\x90" );
+        PatchAddr( 0x00570746, "\xE9\x62\x0A\x00\x00" );
+        PatchAddr( 0x005708AC, "\xE9\xFC\x08\x00\x00" );
+        PatchAddr( 0x00571098, "\x8B\xCB\xE8\x13\x58\xFF\xFF\xEB\x2E\x90\x90" );
+        PatchAddr( 0x005668B2, "\xE9\x00\x00\x00\x00" );
+        XHook( 0x005668B2, HookedFunctionInfo::hooked_SetLightmap );
+    }
 #endif
 
     LogInfo() << "Patching: Show correct tris on toggle frame";
@@ -312,4 +332,26 @@ int __cdecl HookedFunctionInfo::hooked_GetNumDevices()
 {
     Engine::GraphicsEngine->OnUIEvent( BaseGraphicsEngine::EUIEvent::UI_OpenSettings );
     return 1;
+}
+
+void __fastcall HookedFunctionInfo::hooked_SetLightmap( void* polygonPtr )
+{
+    static zCLightmap* lightmap = nullptr;
+    if ( !lightmap ) {
+        #ifdef BUILD_GOTHIC_1_08k
+        DWORD alloc_lightmap = reinterpret_cast<DWORD( __cdecl* )( DWORD )>( 0x54EBE0 )( 0x4C ); // malloc memory
+        reinterpret_cast<void( __cdecl* )( DWORD, DWORD )>( 0x75A250 )( alloc_lightmap, 0x8CF070 ); // inform zengine object created
+        reinterpret_cast<void( __fastcall* )( DWORD )>( 0x5CDD70 )( alloc_lightmap ); // call the constructor
+        #else
+        DWORD alloc_lightmap = reinterpret_cast<DWORD( __cdecl* )( DWORD )>( 0x565F50 )( 0x4C ); // malloc memory
+        reinterpret_cast<void( __cdecl* )( DWORD, DWORD )>( 0x5AAEB0 )( alloc_lightmap, 0x99B250 ); // inform zengine object created
+        reinterpret_cast<void( __fastcall* )( DWORD )>( 0x5F8EA0 )( alloc_lightmap ); // call the constructor
+        #endif
+
+        lightmap = reinterpret_cast<zCLightmap*>(alloc_lightmap);
+    }
+
+    zCPolygon* polygon = reinterpret_cast<zCPolygon*>(polygonPtr);
+    polygon->SetLightmap( lightmap );
+    zCObject_AddRef( lightmap ); // Make sure it won't get deleted
 }

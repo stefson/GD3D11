@@ -1132,13 +1132,10 @@ void GothicAPI::OnVobMoved( zCVob* vob ) {
     auto it = VobMap.find( vob );
     if ( it != VobMap.end() ) {
         VobInfo* vi = it->second;
-#ifdef BUILD_GOTHIC_1_08k
-        // Check if the transform changed, since G1 calls this function over and over again
         if ( checkMatrix( vob->GetWorldMatrixXM(), XMLoadFloat4x4( &vi->WorldMatrix ) ) ) {
             // No actual change
             return;
         }
-#endif
 
         if ( !vi->ParentBSPNodes.empty() ) {
             // Move vob into the dynamic list, if not already done
@@ -1280,13 +1277,11 @@ void GothicAPI::OnVisualDeleted( zCVisual* visual ) {
 void GothicAPI::DrawMeshInfo( zCMaterial* mat, MeshInfo* msh ) {
     // Check for material and bind the texture if it exists
     if ( mat ) {
-        if ( mat->GetTexture() ) {
-            // Setup alphatest //TODO: This has to be done earlier!
-            if ( mat->GetAlphaFunc() == zRND_ALPHA_FUNC_TEST )
-                RendererState.GraphicsState.FF_GSwitches |= GSWITCH_ALPHAREF;
-            else
-                RendererState.GraphicsState.FF_GSwitches &= ~GSWITCH_ALPHAREF;
-        }
+        // Setup alphatest //TODO: This has to be done earlier!
+        if ( mat->GetAlphaFunc() == zRND_ALPHA_FUNC_TEST )
+            RendererState.GraphicsState.FF_GSwitches |= GSWITCH_ALPHAREF;
+        else
+            RendererState.GraphicsState.FF_GSwitches &= ~GSWITCH_ALPHAREF;
     }
 
     if ( !msh->MeshIndexBuffer ) {
@@ -1732,9 +1727,11 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance, bool u
     std::vector<XMFLOAT4X4> transforms;
     model->GetBoneTransforms( &transforms, vi->Vob );
 
-    // Update attachments
-    model->UpdateAttachedVobs();
-    model->UpdateMeshLibTexAniState();
+    if ( updateState ) {
+        // Update attachments
+        model->UpdateAttachedVobs();
+        model->UpdateMeshLibTexAniState();
+    }
 
     if ( !((SkeletalMeshVisualInfo*)vi->VisualInfo)->SkeletalMeshes.empty() ) {
         Engine::GraphicsEngine->DrawSkeletalMesh( vi, transforms, fatness );
@@ -2761,13 +2758,6 @@ void GothicAPI::CollectVisibleVobs( std::vector<VobInfo*>& vobs, std::vector<Vob
     if ( Engine::GAPI->GetRendererState().RendererSettings.DrawVOBs ) {
         float dist;
         for ( VobInfo* it : DynamicallyAddedVobs ) {
-#ifdef BUILD_GOTHIC_1_08k
-            // TODO: This should not be needed
-            if ( it->Vob->GetHomeWorld() != oCGame::GetGame()->_zCSession_world ) {
-                removeList.push_back( it );
-                continue;
-            }
-#endif
             // Get distance to this vob
             XMStoreFloat( &dist, DirectX::XMVector3Length( camPos - it->Vob->GetPositionWorldXM() ) );
             // Draw, if in range

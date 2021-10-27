@@ -7,6 +7,22 @@
 #include "zCPolygon.h"
 #include "zSTRING.h"
 
+enum EVobType {
+    zVOB_TYPE_NORMAL,
+    zVOB_TYPE_LIGHT,
+    zVOB_TYPE_SOUND,
+    zVOB_TYPE_LEVEL_COMPONENT,
+    zVOB_TYPE_SPOT,
+    zVOB_TYPE_CAMERA,
+    zVOB_TYPE_STARTPOINT,
+    zVOB_TYPE_WAYPOINT,
+    zVOB_TYPE_MARKER,
+    zVOB_TYPE_SEPARATOR = 127,
+    zVOB_TYPE_MOB,
+    zVOB_TYPE_ITEM,
+    zVOB_TYPE_NSC
+};
+
 enum EVisualCamAlignType {
     zVISUAL_CAM_ALIGN_NONE = 0,
     zVISUAL_CAM_ALIGN_YAW = 1,
@@ -26,27 +42,37 @@ public:
 
         XHook( HookedFunctions::OriginalFunctions.original_zCVobEndMovement, GothicMemoryLocations::zCVob::EndMovement, zCVob::Hooked_EndMovement );
     }
-
+    
     /** Called when this vob got it's world-matrix changed */
 #ifdef BUILD_GOTHIC_1_08k
     static void __fastcall Hooked_EndMovement( void* thisptr, void* unknwn ) {
         hook_infunc
 
-            HookedFunctions::OriginalFunctions.original_zCVobEndMovement( thisptr );
+        bool vobHasMoved = false;
+        if ( (*reinterpret_cast<unsigned char*>(reinterpret_cast<DWORD>(thisptr) + 0xE8) & 0x03) && reinterpret_cast<zCVob*>(thisptr)->GetHomeWorld() ) {
+            vobHasMoved = (*reinterpret_cast<unsigned char*>(*reinterpret_cast<DWORD*>(reinterpret_cast<DWORD>(thisptr) + 0xFC) + 0x88) & 0x03);
+        }
 
-        if ( Engine::GAPI )
-            Engine::GAPI->OnVobMoved( (zCVob*)thisptr );
+        HookedFunctions::OriginalFunctions.original_zCVobEndMovement( thisptr );
+
+        if ( Engine::GAPI && vobHasMoved )
+                Engine::GAPI->OnVobMoved( (zCVob*)thisptr );
 
         hook_outfunc
     }
 #else
-    static void __fastcall Hooked_EndMovement( void* thisptr, void* unknwn, int transformChanged ) // G2 has one parameter more
+    static void __fastcall Hooked_EndMovement( void* thisptr, void* unknwn, int transformChanged_hint ) // G2 has one parameter more
     {
         hook_infunc
 
-            HookedFunctions::OriginalFunctions.original_zCVobEndMovement( thisptr, transformChanged );
+        bool vobHasMoved = false;
+        if ( (*reinterpret_cast<unsigned char*>(reinterpret_cast<DWORD>(thisptr) + 0x108) & 0x03) && reinterpret_cast<zCVob*>(thisptr)->GetHomeWorld() ) {
+            vobHasMoved = (*reinterpret_cast<unsigned char*>(*reinterpret_cast<DWORD*>(reinterpret_cast<DWORD>(thisptr) + 0x11C) + 0x88) & 0x03);
+        }
 
-        if ( Engine::GAPI && transformChanged )
+        HookedFunctions::OriginalFunctions.original_zCVobEndMovement( thisptr, transformChanged_hint );
+
+        if ( Engine::GAPI && vobHasMoved && transformChanged_hint )
             Engine::GAPI->OnVobMoved( (zCVob*)thisptr );
 
         hook_outfunc
@@ -257,6 +283,11 @@ public:
         return (flags & GothicMemoryLocations::zCVob::MASK_ShowVisual) != 0;
     }
 
+    /** Vob type */
+    EVobType GetVobType() {
+        return *(EVobType*)THISPTR_OFFSET( GothicMemoryLocations::zCVob::Offset_Type );
+    }
+
     /** Alignemt to the camera */
     EVisualCamAlignType GetAlignment() {
         unsigned int flags = *(unsigned int*)THISPTR_OFFSET( GothicMemoryLocations::zCVob::Offset_CameraAlignment );
@@ -269,7 +300,7 @@ public:
 
         return (EVisualCamAlignType)flags;
     }
-
+    
     /** Checks the inheritance chain and casts to T* if possible. Returns nullptr otherwise */
     template<class T>
     T* As() {

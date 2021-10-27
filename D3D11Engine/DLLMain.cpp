@@ -27,7 +27,6 @@ extern "C" {
 }
 
 static HINSTANCE hLThis = 0;
-static HINSTANCE hDDRAW = 0;
 
 static HRESULT( WINAPI* DirectDrawCreateEx_t )(GUID FAR* lpGuid, LPVOID* lplpDD, REFIID  iid, IUnknown FAR* pUnkOuter);
 typedef void (WINAPI* DirectDrawSimple)();
@@ -288,7 +287,7 @@ BOOL WINAPI DllMain( HINSTANCE hInst, DWORD reason, LPVOID ) {
         Engine::OnShutDown();
 
         CoUninitialize();
-        FreeLibrary( hDDRAW );
+        FreeLibrary( ddraw.dll );
 
         LogInfo() << "DDRAW Proxy DLL signing off.\n";
     }

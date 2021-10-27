@@ -345,6 +345,7 @@ struct GothicMemoryLocations {
         static const unsigned int GetBBoxLocal = 0x0061B1F0;
         static const unsigned int Offset_HomeWorld = 0x0B8;
         static const unsigned int Offset_GroundPoly = 0x0BC;
+        static const unsigned int Offset_Type = 0xB0;
         static const unsigned int Offset_Flags = 0x104;
         static const unsigned int MASK_ShowVisual = 0x1;
         static const unsigned int Offset_CameraAlignment = 0x110;
@@ -438,6 +439,7 @@ struct GothicMemoryLocations {
         static const unsigned int Constructor = 0x00563E00;
         static const unsigned int Destructor = 0x00564070;
         static const unsigned int GetAniTexture = 0x0064BA20;
+        static const unsigned int AdvanceAni = 0x00565D50;
 
     };
 
@@ -446,6 +448,9 @@ struct GothicMemoryLocations {
         static const unsigned int LoadResourceData = 0x005F54D0;
         static const unsigned int GetName = 0x005A9CD0;
         static const unsigned int Offset_CacheState = 0x4C;
+        static const unsigned int Offset_NextFrame = 0x58;
+        static const unsigned int Offset_ActAniFrame = 0x70;
+        static const unsigned int Offset_AniFrames = 0x7C;
         static const unsigned int Mask_CacheState = 3;
 
         static const unsigned int Offset_Flags = 0x88;
@@ -473,7 +478,6 @@ struct GothicMemoryLocations {
     };
 
     struct oCWorld {
-        //static const unsigned int InsertVobInWorld = 0x006D7120;
         static const unsigned int EnableVob = 0x00780340;
         static const unsigned int DisableVob = 0x00780460;
         static const unsigned int RemoveFromLists = 0x00780990;
@@ -482,7 +486,6 @@ struct GothicMemoryLocations {
 
     struct zCWorld {
         static const unsigned int Render = 0x00621700;
-        static const unsigned int InsertVobInWorld = 0x00780330;
         static const unsigned int VobAddedToWorld = 0x00624830;
         static const unsigned int Call_Render_zCBspTreeRender = 0x00621830;
         static const unsigned int Offset_GlobalVobTree = 0x24;

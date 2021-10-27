@@ -442,7 +442,6 @@ struct GothicMemoryLocations {
     };
 
     struct oCWorld {
-        //static const unsigned int InsertVobInWorld = 0x006D7120;
         static const unsigned int EnableVob = 0x005D9920;
         static const unsigned int DisableVob = 0x005D9A40;
         static const unsigned int RemoveFromLists = 0x005D9F70;
@@ -450,7 +449,6 @@ struct GothicMemoryLocations {
 
     struct zCWorld {
         static const unsigned int Render = 0x007AC5F0;
-        static const unsigned int InsertVobInWorld = 0x005D9910;
         static const unsigned int VobAddedToWorld = 0x007AF6C0;
         //static const unsigned int Call_Render_zCBspTreeRender = 0x00621830;
         static const unsigned int Offset_GlobalVobTree = 0x24;
