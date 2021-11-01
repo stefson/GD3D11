@@ -311,6 +311,19 @@ struct GothicBlendStateInfo : public GothicPipelineState {
         ColorWritesEnabled = true;
     }
 
+    /** Sets up modualte blending */
+    void SetModulate2Blending() {
+        SrcBlend = BF_DEST_COLOR;
+        DestBlend = BF_SRC_COLOR;
+        BlendOp = BO_BLEND_OP_ADD;
+        SrcBlendAlpha = BF_ONE;
+        DestBlendAlpha = BF_ZERO;
+        BlendOpAlpha = BO_BLEND_OP_ADD;
+        BlendEnabled = true;
+        AlphaToCoverage = false;
+        ColorWritesEnabled = true;
+    }
+
     EBlendFunc SrcBlend;
     EBlendFunc DestBlend;
     EBlendOp BlendOp;

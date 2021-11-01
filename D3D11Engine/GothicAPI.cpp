@@ -547,7 +547,7 @@ void GothicAPI::OnGeometryLoaded( zCPolygon** polys, unsigned int numPolygons ) 
     ResetWorld();
     ResetMaterialInfo();
 
-    bool indoorLocation = (oCGame::GetGame()->_zCSession_world->GetBspTree()->GetBspTreeMode() == zBSP_MODE_INDOOR);
+    bool indoorLocation = (LoadedWorldInfo->BspTree->GetBspTreeMode() == zBSP_MODE_INDOOR);
     std::string worldStr = "system\\GD3D11\\meshes\\WLD_" + LoadedWorldInfo->WorldName + ".obj";
     // Convert world to our own format
 #ifdef BUILD_GOTHIC_2_6_fix
@@ -4183,7 +4183,7 @@ void GothicAPI::CreatezCPolygonsForSections() {
                     it->first.Material->HasAlphaTest() )
                     continue;
 
-                it->first.Material->SetAlphaFunc( zMAT_ALPHA_FUNC_FUNC_NONE );
+                it->first.Material->SetAlphaFunc( zMAT_ALPHA_FUNC_NONE );
 
                 WorldConverter::ConvertExVerticesTozCPolygons( it->second->Vertices, it->second->Indices, it->first.Material, section.SectionPolygons );
             }

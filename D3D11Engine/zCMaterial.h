@@ -9,10 +9,13 @@
 const int zMAT_GROUP_WATER = 5;
 const int zMAT_GROUP_SNOW = 6;
 
-const int zMAT_ALPHA_FUNC_FUNC_MAT_DEFAULT = 0;
-const int zMAT_ALPHA_FUNC_FUNC_NONE = 1;
+const int zMAT_ALPHA_FUNC_MAT_DEFAULT = 0;
+const int zMAT_ALPHA_FUNC_NONE = 1;
 const int zMAT_ALPHA_FUNC_BLEND = 2;
 const int zMAT_ALPHA_FUNC_ADD = 3;
+const int zMAT_ALPHA_FUNC_SUB = 4;
+const int zMAT_ALPHA_FUNC_MUL = 5;
+const int zMAT_ALPHA_FUNC_MUL2 = 6;
 const int zMAT_ALPHA_FUNC_TEST = 7;
 const int zMAT_ALPHA_FUNC_BLEND_TEST = 8;
 
@@ -108,11 +111,8 @@ public:
                 if ( animationFrames <= 0 )
                     return texture;
 
-                int activeAnimationFrame = ((int*)(((char*)texture) + GothicMemoryLocations::zCTexture::Offset_ActAniFrame))[animationChannel];
-                if ( animationFrames <= 0 )
-                    return texture;
-
                 zCTexture* tex = texture;
+                int activeAnimationFrame = ((int*)(((char*)texture) + GothicMemoryLocations::zCTexture::Offset_ActAniFrame))[animationChannel];
                 for ( int i = 0; i < activeAnimationFrame; ++i ) {
                     zCTexture* activeAnimationFrame = ((zCTexture**)(((char*)tex) + GothicMemoryLocations::zCTexture::Offset_NextFrame))[animationChannel];
                     if ( !activeAnimationFrame )

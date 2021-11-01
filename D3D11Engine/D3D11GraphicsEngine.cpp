@@ -2171,7 +2171,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
                 }
 
                 // Check for alphablending
-                if (worldMesh.first.Material->GetAlphaFunc() > zMAT_ALPHA_FUNC_FUNC_NONE &&
+                if (worldMesh.first.Material->GetAlphaFunc() > zMAT_ALPHA_FUNC_NONE &&
                     worldMesh.first.Material->GetAlphaFunc() != zMAT_ALPHA_FUNC_TEST) {
                     FrameTransparencyMeshes.push_back(worldMesh);
                 } else {
@@ -2287,7 +2287,7 @@ XRESULT D3D11GraphicsEngine::DrawWorldMesh( bool noTextures ) {
             boundInfo->TextureTesselationSettings.buffer.VT_TesselationFactor >
             0.0f &&
             !mesh.second->IndicesPNAEN.empty() &&
-            mesh.first.Material->GetAlphaFunc() <= zMAT_ALPHA_FUNC_FUNC_NONE &&
+            mesh.first.Material->GetAlphaFunc() <= zMAT_ALPHA_FUNC_NONE &&
             !bound->HasAlphaChannel() )  // Only allow tesselation for materials
                                         // without alphablending
         {
@@ -2879,9 +2879,9 @@ void XM_CALLCONV D3D11GraphicsEngine::DrawWorldAround(
             // Draw the vob
             for ( auto const& materialMesh : vobInfo->VisualInfo->Meshes ) {
                 if ( materialMesh.first && materialMesh.first->GetTexture() ) {
-                    if ( materialMesh.first->GetAlphaFunc() != zMAT_ALPHA_FUNC_FUNC_NONE ||
+                    if ( materialMesh.first->GetAlphaFunc() != zMAT_ALPHA_FUNC_NONE ||
                         materialMesh.first->GetAlphaFunc() !=
-                        zMAT_ALPHA_FUNC_FUNC_MAT_DEFAULT ) {
+                        zMAT_ALPHA_FUNC_MAT_DEFAULT ) {
                         if ( materialMesh.first->GetTexture()->CacheIn( 0.6f ) == zRES_CACHED_IN ) {
                             materialMesh.first->GetTexture()->Bind( 0 );
                         }
@@ -3816,9 +3816,17 @@ XRESULT D3D11GraphicsEngine::DrawSky() {
         Engine::GAPI->GetRendererState().DepthState.SetDirty();
         UpdateRenderStates();
 
+        #if defined(BUILD_GOTHIC_1_08k) && !defined(BUILD_1_12F)
+        // Draw sky first
+        reinterpret_cast<void( __fastcall* )( zCSkyController_Outdoor* )>( 0x5C0900 )( Engine::GAPI->GetLoadedWorldInfo()->MainWorld->GetSkyControllerOutdoor() );
+
+        // Draw barrier second
+        reinterpret_cast<void( __fastcall* )( zCSkyController_Outdoor* )>( 0x632140 )( Engine::GAPI->GetLoadedWorldInfo()->MainWorld->GetSkyControllerOutdoor() );
+        #else
         Engine::GAPI->GetLoadedWorldInfo()
             ->MainWorld->GetSkyControllerOutdoor()
             ->RenderSkyPre();
+        #endif
         Engine::GAPI->SetFarPlane(
             Engine::GAPI->GetRendererState().RendererSettings.SectionDrawRadius *
             WORLD_SECTION_SIZE );
@@ -3892,6 +3900,21 @@ XRESULT D3D11GraphicsEngine::DrawSky() {
     }
 
     if ( sky->GetSkyDome() ) sky->GetSkyDome()->DrawMesh();
+
+    #if defined(BUILD_GOTHIC_1_08k) && !defined(BUILD_1_12F)
+    {
+        SetDefaultStates();
+        Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled = false;
+        Engine::GAPI->GetRendererState().DepthState.SetDirty();
+        UpdateRenderStates();
+
+        // Draw barrier after sky
+        reinterpret_cast<void( __fastcall* )( zCSkyController_Outdoor* )>( 0x632140 )( Engine::GAPI->GetLoadedWorldInfo()->MainWorld->GetSkyControllerOutdoor() );
+        Engine::GAPI->SetFarPlane(
+            Engine::GAPI->GetRendererState().RendererSettings.SectionDrawRadius *
+            WORLD_SECTION_SIZE );
+    }
+    #endif
 
     return XR_SUCCESS;
 }
@@ -4975,7 +4998,7 @@ void D3D11GraphicsEngine::GetBackbufferData( byte** data, int& pixelsize ) {
     } else {
         LogInfo() << "Thumbnail failed";
     }
-
+    
     pixelsize = 4;
     *data = d;
 }
@@ -5024,18 +5047,16 @@ void D3D11GraphicsEngine::DrawDecalList( const std::vector<zCVob*>& decals,
     Engine::GAPI->GetRendererState().RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
     Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
 
-    Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled = false;
-    Engine::GAPI->GetRendererState().DepthState.SetDirty();
-
     XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
     Engine::GAPI->SetViewTransformXM( view );  // Update view transform
 
     // Set up alpha
     if ( !lighting ) {
         SetActivePixelShader( "PS_Simple" );
-        Engine::GAPI->GetRendererState().BlendState.SetAdditiveBlending();
+        Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled = false;
+        Engine::GAPI->GetRendererState().DepthState.SetDirty();
     } else {
-        SetActivePixelShader( "PS_DiffuseAlphaTest" );
+        SetActivePixelShader( "PS_World" );
     }
 
     SetActiveVertexShader( "VS_Decal" );
@@ -5056,30 +5077,32 @@ void D3D11GraphicsEngine::DrawDecalList( const std::vector<zCVob*>& decals,
             continue;  // Only allow no alpha or alpha test
 
         if ( !lighting ) {
-            switch ( d->GetDecalSettings()->DecalMaterial->GetAlphaFunc() ) {
+            int alphaFunc = d->GetDecalSettings()->DecalMaterial->GetAlphaFunc();
+            switch ( alphaFunc ) {
             case zMAT_ALPHA_FUNC_BLEND:
-                Engine::GAPI->GetRendererState().BlendState.SetDefault();
-                Engine::GAPI->GetRendererState().BlendState.BlendEnabled = true;
+                Engine::GAPI->GetRendererState().BlendState.SetAlphaBlending();
                 break;
 
             case zMAT_ALPHA_FUNC_ADD:
                 Engine::GAPI->GetRendererState().BlendState.SetAdditiveBlending();
                 break;
 
-                /*case zRND_ALPHA_FUNC_MUL:
-                        Engine::GAPI->GetRendererState().BlendState.SetModulateBlending();
-                        break;*/
-                        // TODO: TODO: Implement modulate
+            case zMAT_ALPHA_FUNC_MUL:
+                Engine::GAPI->GetRendererState().BlendState.SetModulateBlending();
+                break;
+
+            case zMAT_ALPHA_FUNC_MUL2:
+                Engine::GAPI->GetRendererState().BlendState.SetModulate2Blending();
+                break;
 
             default:
                 continue;
             }
 
-            if ( lastAlphaFunc !=
-                d->GetDecalSettings()->DecalMaterial->GetAlphaFunc() ) {
+            if ( lastAlphaFunc != alphaFunc ) {
                 Engine::GAPI->GetRendererState().BlendState.SetDirty();
                 UpdateRenderStates();
-                lastAlphaFunc = d->GetDecalSettings()->DecalMaterial->GetAlphaFunc();
+                lastAlphaFunc = alphaFunc;
             }
         }
 
@@ -5180,15 +5203,18 @@ void D3D11GraphicsEngine::DrawQuadMarks() {
                 Engine::GAPI->GetRendererState().BlendState.SetAlphaBlending();
                 break;
 
-            case zMAT_ALPHA_FUNC_FUNC_NONE:
+            case zMAT_ALPHA_FUNC_NONE:
             case zMAT_ALPHA_FUNC_TEST:
                 Engine::GAPI->GetRendererState().BlendState.SetDefault();
                 break;
 
-                /*case zRND_ALPHA_FUNC_MUL:
-                        Engine::GAPI->GetRendererState().BlendState.SetModulateBlending();
-                        break;*/
-                        // TODO: TODO: Implement modulate
+            case zMAT_ALPHA_FUNC_MUL:
+                Engine::GAPI->GetRendererState().BlendState.SetModulateBlending();
+                break;
+
+            case zMAT_ALPHA_FUNC_MUL2:
+                Engine::GAPI->GetRendererState().BlendState.SetModulate2Blending();
+                break;
 
             default:
                 continue;

@@ -114,7 +114,7 @@ void HookedFunctionInfo::InitHooks() {
 
     LogInfo() << "Patching: Marking texture as cached-in after cache-out - fix";
     PatchAddr( 0x005CA683, "\x90\x90" );
-    
+
     LogInfo() << "Patching: Improve loading times by disabling some unnecessary features";
     PatchAddr( 0x005A4FE0, "\xC3\x90\x90" );
     PatchAddr( 0x0055848A, "\xE9\xE2\x01\x00\x00\x90" );
@@ -143,6 +143,9 @@ void HookedFunctionInfo::InitHooks() {
         PatchAddr( 0x0063DA2E, "\xA1\xD0\x5E\x8C\x00\x90\x90\x90\x90\x90\x90" );
         PatchAddr( 0x0063DA2F, trisHndl );
     }
+
+    LogInfo() << "Patching: Decouple barrier from sky";
+    PatchAddr( 0x00632146, "\x90\x90\x90\x90\x90" );
 
     // Show DirectX11 as currently used graphic device
     {
