@@ -1255,7 +1255,7 @@ void GothicAPI::OnVisualDeleted( zCVisual* visual ) {
 
     // Clear
     if ( _canClearVobsByVisual ) {
-        std::list<BaseVobInfo*>& list = VobsByVisual[visual];
+        std::list<BaseVobInfo*> list = VobsByVisual[visual];
         for ( auto const& it : list ) {
             OnRemovedVob( it->Vob, LoadedWorldInfo->MainWorld );
         }
@@ -1263,7 +1263,7 @@ void GothicAPI::OnVisualDeleted( zCVisual* visual ) {
             if ( RendererState.RendererSettings.EnableDebugLog )
                 LogInfo() << std::string( className ) << " had " + std::to_string( list.size() ) << " vobs";
 
-            list.clear();
+            VobsByVisual[visual].clear();
             VobsByVisual.erase( visual );
         }
     } else {
