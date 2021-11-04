@@ -268,6 +268,17 @@ public:
 #endif
     }
 
+    int GetMainPrototypeReferences() {
+        zCArray<zCModelPrototype*>* prototypes = GetModelProtoList();
+        if ( prototypes->NumInArray > 0 ) {
+            zCModelPrototype* prototype = prototypes->Array[0];
+            if ( prototype ) {
+                return *reinterpret_cast<DWORD*>(reinterpret_cast<DWORD>(prototype) + 0x08); // Get reference counter
+            }
+        }
+        return 2; // Allow leakage because it is only container for 3DS models(mob) - better than crash
+    }
+
     zCArray<zCModelNodeInst*>* GetNodeList() {
         return (zCArray<zCModelNodeInst*>*)THISPTR_OFFSET( GothicMemoryLocations::zCModel::Offset_NodeList );
     }

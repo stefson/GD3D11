@@ -1227,33 +1227,44 @@ void GothicAPI::OnVisualDeleted( zCVisual* visual ) {
                 StaticMeshVisuals.erase( pm );
             }
 
-            if ( ((zCModel*)visual)->GetMeshSoftSkinList()->NumInArray ) {
-                // Find vobs using this visual
-                for ( std::list<SkeletalVobInfo*>::iterator it = SkeletalMeshVobs.begin(); it != SkeletalMeshVobs.end(); ++it ) {
-                    if ( (*it)->VisualInfo && ((zCModel*)(*it)->VisualInfo->Visual)->GetMeshSoftSkinList()->Array[0] == ((zCModel*)visual)->GetMeshSoftSkinList()->Array[0] ) {
-                        (*it)->VisualInfo = nullptr;
+            zCModel* zmodel = (zCModel*)visual;
+            if ( zmodel->GetMainPrototypeReferences() <= 1 ) { // Check if it is the last reference in prototype so that we can delete this visual
+                std::string str = zmodel->GetVisualName();
+                if ( str.empty() ) { // Happens when the model has no skeletal-mesh
+                    zSTRING mds = zmodel->GetModelName();
+                    str = mds.ToChar();
+                    mds.Delete();
+                }
+
+                auto it = SkeletalMeshVisuals.find( str );
+                if ( it != SkeletalMeshVisuals.end() ) {
+                    // Find vobs using this visual
+                    for ( std::list<SkeletalVobInfo*>::iterator sit = SkeletalMeshVobs.begin(); sit != SkeletalMeshVobs.end(); ++sit ) {
+                        if ( (*sit)->VisualInfo == it->second ) {
+                            (*sit)->VisualInfo = nullptr;
+                        }
                     }
                 }
-            }
 
-            std::string str = ((zCModel*)visual)->GetVisualName();
-            if ( str.empty() ) { // Happens when the model has no skeletal-mesh
-                zSTRING mds = ((zCModel*)visual)->GetModelName();
-                str = mds.ToChar();
-                mds.Delete();
+                delete SkeletalMeshVisuals[str];
+                SkeletalMeshVisuals.erase( str );
             }
-
-            delete SkeletalMeshVisuals[str];
-            SkeletalMeshVisuals.erase( str );
             break;
         }
     }
 
-    // Add to map
-    std::list<BaseVobInfo*> list = VobsByVisual[visual];
+    // Clear
     if ( _canClearVobsByVisual ) {
+        std::list<BaseVobInfo*>& list = VobsByVisual[visual];
         for ( auto const& it : list ) {
             OnRemovedVob( it->Vob, LoadedWorldInfo->MainWorld );
+        }
+        if ( list.size() > 0 ) {
+            if ( RendererState.RendererSettings.EnableDebugLog )
+                LogInfo() << std::string( className ) << " had " + std::to_string( list.size() ) << " vobs";
+
+            list.clear();
+            VobsByVisual.erase( visual );
         }
     } else {
         // TODO: #8 - Figure out why exactly we don't get notified that a VOB is re-added after being removed.
@@ -1266,11 +1277,6 @@ void GothicAPI::OnVisualDeleted( zCVisual* visual ) {
                 OnRemovedVob(it->Vob, LoadedWorldInfo->MainWorld);
             }
         }*/
-    }
-    if ( list.size() > 0 ) {
-        if ( RendererState.RendererSettings.EnableDebugLog )
-            LogInfo() << std::string( className ) << " had " + std::to_string( list.size() ) << " vobs";
-        VobsByVisual[visual].clear();
     }
 }
 /** Draws a MeshInfo */
