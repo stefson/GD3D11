@@ -1341,9 +1341,49 @@ XRESULT D3D11GraphicsEngine::DrawVertexBufferFF( D3D11VertexBuffer* vb,
     return XR_SUCCESS;
 }
 
+/** Sets up texture with normalmap and fxmap for rendering */
+bool D3D11GraphicsEngine::BindTextureNRFX( zCTexture* tex, bool bindShader ) {
+    if ( tex->CacheIn( 0.6f ) == zRES_CACHED_IN )
+        tex->Bind( 0 );
+    else
+        return false;
+
+    MaterialInfo* info = Engine::GAPI->GetMaterialInfoFrom( tex );
+    if ( !info->Constantbuffer )
+        info->UpdateConstantbuffer();
+
+    if ( info->buffer.SpecularIntensity != 0.05f ) {
+        info->buffer.SpecularIntensity = 0.05f;
+        info->UpdateConstantbuffer();
+    }
+
+    info->Constantbuffer->BindToPixelShader( 2 );
+
+    // Bind a default normalmap in case the scene is wet and we currently have none
+    if ( !tex->GetSurface()->GetNormalmap() ) {
+        // Modify the strength of that default normalmap for the material info
+        if ( info->buffer.NormalmapStrength != DEFAULT_NORMALMAP_STRENGTH ) {
+            info->buffer.NormalmapStrength = DEFAULT_NORMALMAP_STRENGTH;
+            info->UpdateConstantbuffer();
+        }
+
+        DistortionTexture->BindToPixelShader( 1 );
+    }
+
+    if ( D3D11Texture* fxmap = tex->GetSurface()->GetFxMap() ) {
+        fxmap->BindToPixelShader( 2 );
+    }
+
+    // Select shader
+    if ( bindShader ) {
+        BindShaderForTexture( tex );
+    }
+    return true;
+}
+
 /** Draws a skeletal mesh */
 XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh( SkeletalVobInfo* vi,
-    const std::vector<XMFLOAT4X4>& transforms, float fatness ) {
+    const std::vector<XMFLOAT4X4>& transforms, float4 color, float fatness ) {
     if ( GetRenderingStage() == DES_SHADOWMAP_CUBE ) {
         SetActiveVertexShader( "VS_ExSkeletalCube" );
     } else {
@@ -1361,6 +1401,7 @@ XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh( SkeletalVobInfo* vi,
 
     VS_ExConstantBuffer_PerInstanceSkeletal cb2;
     cb2.World = world;
+    cb2.PI_ModelColor = color;
     cb2.PI_ModelFatness = fatness;
 
     ActiveVS->GetConstantBuffer()[1]->UpdateBuffer( &cb2 );
@@ -1408,38 +1449,8 @@ XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh( SkeletalVobInfo* vi,
             if ( zCMaterial* mat = itm.first ) {
                 zCTexture* tex;
                 if ( ActivePS && (tex = mat->GetAniTexture()) != nullptr ) {
-                    if ( tex->CacheIn( 0.6f ) == zRES_CACHED_IN )
-                        tex->Bind( 0 );
-                    else
+                    if ( !BindTextureNRFX( tex, (RenderingStage != DES_GHOST) ) )
                         continue;
-
-                    MaterialInfo* info = Engine::GAPI->GetMaterialInfoFrom( tex );
-                    if ( !info->Constantbuffer )
-                        info->UpdateConstantbuffer();
-
-                    if ( info->buffer.SpecularIntensity != 0.05f ) {
-                        info->buffer.SpecularIntensity = 0.05f;
-                        info->UpdateConstantbuffer();
-                    }
-
-                    info->Constantbuffer->BindToPixelShader( 2 );
-
-                    // Bind a default normalmap in case the scene is wet and we currently have none
-                    if ( !tex->GetSurface()->GetNormalmap() ) {
-                        // Modify the strength of that default normalmap for the material info
-                        if ( info->buffer.NormalmapStrength /* * Engine::GAPI->GetSceneWetness()*/
-                            != DEFAULT_NORMALMAP_STRENGTH ) {
-                            info->buffer.NormalmapStrength = DEFAULT_NORMALMAP_STRENGTH;
-                            info->UpdateConstantbuffer();
-                        }
-
-                        DistortionTexture->BindToPixelShader( 1 );
-                    }
-
-                    // Select shader - ghosts have their own pixel shader
-                    if ( RenderingStage != DES_GHOST ) {
-                        BindShaderForTexture( tex );
-                    }
                 }
             }
 

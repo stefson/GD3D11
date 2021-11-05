@@ -14,6 +14,7 @@ cbuffer Matrices_PerFrame : register( b0 )
 cbuffer Matrices_PerInstances : register( b1 )
 {
 	matrix M_World;
+	float4 PI_ModelColor;
 	float PI_ModelFatness;
 	float3 PI_Pad1;
 };
@@ -72,7 +73,7 @@ VS_OUTPUT VSMain( VS_INPUT Input )
 	Output.vPosition = mul(float4(positionWorld,1), M_ViewProj);
 	Output.vTexcoord2 = Input.vTex1;
 	Output.vTexcoord = Input.vTex1;
-	Output.vDiffuse  = Input.vDiffuse;
+	Output.vDiffuse  = PI_ModelColor;
 	Output.vNormalVS = mul(normal, (float3x3)mul(M_World, M_View));
 	Output.vViewPosition = mul(float4(positionWorld,1),M_View).xyz;
 	//Output.vWorldPosition = positionWorld;

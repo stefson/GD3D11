@@ -264,7 +264,7 @@ public:
     void DrawInventory( zCWorld* world, zCCamera& camera );
 
     /** Draws a morphmesh */
-    void DrawMorphMesh( zCMorphMesh* msh, float fatness, std::map<zCMaterial*, std::vector<MeshInfo*>>& meshes );
+    void DrawMorphMesh( zCMorphMesh* msh, std::map<zCMaterial*, std::vector<MeshInfo*>>& meshes );
 
     /** Locks the resource CriticalSection */
     void EnterResourceCriticalSection();

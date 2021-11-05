@@ -127,7 +127,6 @@ void HookedFunctionInfo::InitHooks() {
     
     // Skip loading lightmaps and make general purpose lightmap to be able to detect indoor vobs
     {
-        PatchAddr( 0x00525C56, "\xEB\xCF\x90" );
         PatchAddr( 0x0055787E, "\xE9\x5E\x0B\x00\x00" );
         PatchAddr( 0x00557A11, "\xE9\xCB\x09\x00\x00" );
         PatchAddr( 0x005582C9, "\x8B\xCB\xE8\xA6\xEF\xFF\xFF\xEB\x2E\x90\x90" );
@@ -225,7 +224,6 @@ void HookedFunctionInfo::InitHooks() {
 
     // Skip loading lightmaps and make general purpose lightmap to be able to detect indoor vobs
     {
-        PatchAddr( 0x00539757, "\xEB\xCF\x90" );
         PatchAddr( 0x00570746, "\xE9\x62\x0A\x00\x00" );
         PatchAddr( 0x005708AC, "\xE9\xFC\x08\x00\x00" );
         PatchAddr( 0x00571098, "\x8B\xCB\xE8\x13\x58\xFF\xFF\xEB\x2E\x90\x90" );

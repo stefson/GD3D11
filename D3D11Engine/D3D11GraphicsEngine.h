@@ -129,8 +129,11 @@ public:
     /** Sets up everything for a PNAEN-Mesh */
     void Setup_PNAEN( EPNAENRenderMode mode = PNAEN_Default );
 
+    /** Sets up texture with normalmap and fxmap for rendering */
+    bool BindTextureNRFX( zCTexture* tex, bool bindShader );
+
     /** Draws a skeletal mesh */
-    virtual XRESULT DrawSkeletalMesh( SkeletalVobInfo* vi, const std::vector<DirectX::XMFLOAT4X4>& transforms, float fatness = 1.0f ) override;
+    virtual XRESULT DrawSkeletalMesh( SkeletalVobInfo* vi, const std::vector<DirectX::XMFLOAT4X4>& transforms, float4 color, float fatness = 1.0f ) override;
 
     /** Draws a vertexarray, non-indexed */
     virtual XRESULT DrawVertexArray( ExVertexStruct* vertices, unsigned int numVertices, unsigned int startVertex = 0, unsigned int stride = sizeof( ExVertexStruct ) ) override;

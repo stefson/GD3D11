@@ -35,6 +35,14 @@ XRESULT D3D11ShaderManager::Init() {
     Shaders.back().cBufferSizes.push_back( sizeof( VS_ExConstantBuffer_PerFrame ) );
     Shaders.back().cBufferSizes.push_back( sizeof( VS_ExConstantBuffer_PerInstance ) );
 
+    Shaders.push_back( ShaderInfo( "VS_ExMode", "VS_ExNode.hlsl", "v", 1 ) );
+    Shaders.back().cBufferSizes.push_back( sizeof( VS_ExConstantBuffer_PerFrame ) );
+    Shaders.back().cBufferSizes.push_back( sizeof( VS_ExConstantBuffer_PerInstanceNode ) );
+
+    Shaders.push_back( ShaderInfo( "VS_ExNodeCube", "VS_ExNodeCube.hlsl", "v", 1 ) );
+    Shaders.back().cBufferSizes.push_back( sizeof( VS_ExConstantBuffer_PerFrame ) );
+    Shaders.back().cBufferSizes.push_back( sizeof( VS_ExConstantBuffer_PerInstanceNode ) );
+
     Shaders.push_back( ShaderInfo( "VS_PNAEN", "VS_PNAEN.hlsl", "v", 1 ) );
     Shaders.back().cBufferSizes.push_back( sizeof( VS_ExConstantBuffer_PerFrame ) );
     Shaders.back().cBufferSizes.push_back( sizeof( VS_ExConstantBuffer_PerInstance ) );

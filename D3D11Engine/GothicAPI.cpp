@@ -29,6 +29,7 @@
 #include "zCBspTree.h"
 #include "BaseLineRenderer.h"
 #include "D3D11PShader.h"
+#include "D3D11VShader.h"
 #include "D3D7\MyDirect3DDevice7.h"
 #include "GVegetationBox.h"
 #include "oCNPC.h"
@@ -1239,9 +1240,9 @@ void GothicAPI::OnVisualDeleted( zCVisual* visual ) {
                 auto it = SkeletalMeshVisuals.find( str );
                 if ( it != SkeletalMeshVisuals.end() ) {
                     // Find vobs using this visual
-                    for ( std::list<SkeletalVobInfo*>::iterator sit = SkeletalMeshVobs.begin(); sit != SkeletalMeshVobs.end(); ++sit ) {
-                        if ( (*sit)->VisualInfo == it->second ) {
-                            (*sit)->VisualInfo = nullptr;
+                    for ( SkeletalVobInfo* vobInfo : SkeletalMeshVobs ) {
+                        if ( vobInfo->VisualInfo == it->second ) {
+                            vobInfo->VisualInfo = nullptr;
                         }
                     }
                 }
@@ -1394,21 +1395,24 @@ void GothicAPI::OnRemovedVob( zCVob* vob, zCWorld* world ) {
             if ( vi ) {
                 for ( std::vector<VobInfo*>::iterator bit = node->IndoorVobs.begin(); bit != node->IndoorVobs.end(); ++bit ) {
                     if ( (*bit) == vi ) {
-                        node->IndoorVobs.erase( bit );
+                        (*bit) = node->IndoorVobs.back();
+                        node->IndoorVobs.pop_back();
                         break;
                     }
                 }
 
                 for ( std::vector<VobInfo*>::iterator bit = node->Vobs.begin(); bit != node->Vobs.end(); ++bit ) {
                     if ( (*bit) == vi ) {
-                        node->Vobs.erase( bit );
+                        (*bit) = node->Vobs.back();
+                        node->Vobs.pop_back();
                         break;
                     }
                 }
 
                 for ( std::vector<VobInfo*>::iterator bit = node->SmallVobs.begin(); bit != node->SmallVobs.end(); ++bit ) {
                     if ( (*bit) == vi ) {
-                        node->SmallVobs.erase( bit );
+                        (*bit) = node->SmallVobs.back();
+                        node->SmallVobs.pop_back();
                         break;
                     }
                 }
@@ -1417,14 +1421,16 @@ void GothicAPI::OnRemovedVob( zCVob* vob, zCWorld* world ) {
             if ( li && nodes ) {
                 for ( std::vector<VobLightInfo*>::iterator bit = node->Lights.begin(); bit != node->Lights.end(); ++bit ) {
                     if ( (*bit)->Vob == (zCVobLight*)vob ) {
-                        node->Lights.erase( bit );
+                        (*bit) = node->Lights.back();
+                        node->Lights.pop_back();
                         break;
                     }
                 }
 
                 for ( std::vector<VobLightInfo*>::iterator bit = node->IndoorLights.begin(); bit != node->IndoorLights.end(); ++bit ) {
                     if ( (*bit)->Vob == (zCVobLight*)vob ) {
-                        node->IndoorLights.erase( bit );
+                        (*bit) = node->IndoorLights.back();
+                        node->IndoorLights.pop_back();
                         break;
                     }
                 }
@@ -1433,7 +1439,8 @@ void GothicAPI::OnRemovedVob( zCVob* vob, zCWorld* world ) {
             if ( svi && nodes ) {
                 for ( std::vector<SkeletalVobInfo*>::iterator bit = node->Mobs.begin(); bit != node->Mobs.end(); ++bit ) {
                     if ( (*bit)->Vob == (zCVobLight*)vob ) {
-                        node->Mobs.erase( bit );
+                        (*bit) = node->Mobs.back();
+                        node->Mobs.pop_back();
                         break;
                     }
                 }
@@ -1718,6 +1725,15 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance, bool u
     if ( model->GetDrawHandVisualsOnly() )
         return; // Not supported yet
 
+    float4 modelColor;
+    if ( vi->Vob->IsIndoorVob() ) {
+        // All lightmapped polys have this color, so just use it
+        modelColor = DEFAULT_LIGHTMAP_POLY_COLOR;
+    } else {
+        // Get the color of the first found feature of the ground poly
+        modelColor = vi->Vob->GetGroundPoly() ? vi->Vob->GetGroundPoly()->getFeatures()[0]->lightStatic : 0xFFFFFFFF;
+    }
+
     XMMATRIX scale = XMMatrixScalingFromVector( model->GetModelScaleXM() );
 
     XMMATRIX world = vi->Vob->GetWorldMatrixXM() * scale;
@@ -1740,24 +1756,17 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance, bool u
     }
 
     if ( !((SkeletalMeshVisualInfo*)vi->VisualInfo)->SkeletalMeshes.empty() ) {
-        Engine::GraphicsEngine->DrawSkeletalMesh( vi, transforms, fatness );
+        Engine::GraphicsEngine->DrawSkeletalMesh( vi, transforms, modelColor, fatness );
     }
 
     if ( g->GetRenderingStage() == DES_SHADOWMAP_CUBE )
-        g->SetActiveVertexShader( "VS_ExCube" );
-    else {
-        g->SetActiveVertexShader( "VS_Ex" );
-    }
+        g->SetActiveVertexShader( "VS_ExNodeCube" );
+    else
+        g->SetActiveVertexShader( "VS_ExMode" );
 
     // Set up instance info
-    VS_ExConstantBuffer_PerInstance instanceInfo;
-    if ( vi->Vob->IsIndoorVob() ) {
-        // All lightmapped polys have this color, so just use it
-        instanceInfo.Color = DEFAULT_LIGHTMAP_POLY_COLOR;
-    } else {
-        // Get the color of the first found feature of the ground poly
-        instanceInfo.Color = vi->Vob->GetGroundPoly() ? vi->Vob->GetGroundPoly()->getFeatures()[0]->lightStatic : 0xFFFFFFFF;
-    }
+    VS_ExConstantBuffer_PerInstanceNode instanceInfo;
+    instanceInfo.Color = modelColor;
 
     // Init the constantbuffer if not already done
     if ( !vi->VobConstantBuffer )
@@ -1825,40 +1834,39 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance, bool u
                     }
                 }
 
+                auto& VShader = g->GetActiveVS();
                 if ( distance < 1000 && isMMS ) {
                     zCMorphMesh* mm = (zCMorphMesh*)mvi->Visual;
                     // Only draw this as a morphmesh when rendering the main scene or when rendering as ghost
                     if ( g->GetRenderingStage() == DES_MAIN || g->GetRenderingStage() == DES_GHOST ) {
                         // Update constantbuffer
+                        instanceInfo.Fatness = std::max<float>( 0.f, fatness * 0.35f );
+                        instanceInfo.Scaling = fatness * 0.02f + 1.f;
                         instanceInfo.World = *(XMFLOAT4X4*)&RendererState.TransformState.TransformWorld;
-                        vi->VobConstantBuffer->UpdateBuffer( &instanceInfo );
-                        vi->VobConstantBuffer->BindToVertexShader( 1 );
+                        VShader->GetConstantBuffer()[1]->UpdateBuffer( &instanceInfo );
+                        VShader->GetConstantBuffer()[1]->BindToVertexShader( 1 );
 
                         if ( updateState ) {
                             mm->AdvanceAnis();
                             mm->CalcVertexPositions();
                         }
-
-                        // Only 0.35f of the fatness wanted by gothic. 
-                        // They seem to compensate for that with the scaling.
-                        DrawMorphMesh( mm, fatness * 0.35f, mvi->Meshes );
+                        DrawMorphMesh( mm, mvi->Meshes );
                         continue;
                     }
                 }
 
+                instanceInfo.Fatness = 0.f;
+                instanceInfo.Scaling = 1.f;
                 instanceInfo.World = *(XMFLOAT4X4*)&RendererState.TransformState.TransformWorld;
-                vi->VobConstantBuffer->UpdateBuffer( &instanceInfo );
-                vi->VobConstantBuffer->BindToVertexShader( 1 );
+                VShader->GetConstantBuffer()[1]->UpdateBuffer( &instanceInfo );
+                VShader->GetConstantBuffer()[1]->BindToVertexShader( 1 );
 
                 // Go through all materials registered here
                 for ( auto const& itm : mvi->Meshes ) {
                     zCTexture* texture;
                     if ( itm.first && (texture = itm.first->GetAniTexture()) != nullptr ) { // TODO: Crash here!
-                        if ( texture->CacheIn( 0.6f ) == zRES_CACHED_IN ) {
-                            texture->Bind( 0 );
-                        } else {
+                        if ( !g->BindTextureNRFX( texture, (g->GetRenderingStage() == DES_MAIN) ) )
                             continue;
-                        }
                     }
 
                     // Go through all meshes using that material
@@ -2834,7 +2842,8 @@ void GothicAPI::MoveVobFromBspToDynamic( SkeletalVobInfo* vob ) {
         // Remove from possible lists
         for ( std::vector<SkeletalVobInfo*>::iterator it = node->Mobs.begin(); it != node->Mobs.end(); ++it ) {
             if ( (*it) == vob ) {
-                node->Mobs.erase( it );
+                (*it) = node->Mobs.back();
+                node->Mobs.pop_back();
                 break;
             }
         }
@@ -2854,26 +2863,28 @@ void GothicAPI::MoveVobFromBspToDynamic( VobInfo* vob ) {
         // Remove from possible lists
         for ( std::vector<VobInfo*>::iterator it = node->IndoorVobs.begin(); it != node->IndoorVobs.end(); ++it ) {
             if ( (*it) == vob ) {
-                node->IndoorVobs.erase( it );
+                (*it) = node->IndoorVobs.back();
+                node->IndoorVobs.pop_back();
                 break;
             }
         }
 
         for ( std::vector<VobInfo*>::iterator it = node->SmallVobs.begin(); it != node->SmallVobs.end(); ++it ) {
             if ( (*it) == vob ) {
-                node->SmallVobs.erase( it );
+                (*it) = node->SmallVobs.back();
+                node->SmallVobs.pop_back();
                 break;
             }
         }
 
         for ( std::vector<VobInfo*>::iterator it = node->Vobs.begin(); it != node->Vobs.end(); ++it ) {
             if ( (*it) == vob ) {
-                node->Vobs.erase( it );
+                (*it) = node->Vobs.back();
+                node->Vobs.pop_back();
                 break;
             }
         }
     }
-
     vob->ParentBSPNodes.clear();
 
     // Add to dynamic vob list
@@ -3941,7 +3952,7 @@ void GothicAPI::SetFrameProcessedTexturesReady() {
 }
 
 /** Draws a morphmesh */
-void GothicAPI::DrawMorphMesh( zCMorphMesh* msh, float fatness, std::map<zCMaterial*, std::vector<MeshInfo*>>& meshes ) {
+void GothicAPI::DrawMorphMesh( zCMorphMesh* msh, std::map<zCMaterial*, std::vector<MeshInfo*>>& meshes ) {
     DirectX::XMFLOAT3 bbmin, bbmax;
     bbmin = DirectX::XMFLOAT3( FLT_MAX, FLT_MAX, FLT_MAX );
     bbmax = DirectX::XMFLOAT3( -FLT_MAX, -FLT_MAX, -FLT_MAX );
@@ -3964,12 +3975,14 @@ void GothicAPI::DrawMorphMesh( zCMorphMesh* msh, float fatness, std::map<zCMater
             vx.Normal = wedge.normal;
             vx.TexCoord = wedge.texUV;
             vx.Color = 0xFFFFFFFF;
-
-            // Do this on GPU probably?
-            XMStoreFloat3( reinterpret_cast<XMFLOAT3*>( &vx.Position ), XMVectorAdd( XMLoadFloat3( reinterpret_cast<const XMFLOAT3*>( &vx.Position ) ), XMLoadFloat3( reinterpret_cast<const XMFLOAT3*>( &vx.Normal ) ) * XMVectorReplicate( fatness ) ) );
         }
 
-        s->Material->BindTexture( 0 );
+        if ( zCTexture* texture = s->Material->GetAniTexture() ) {
+            D3D11GraphicsEngine* g = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
+            if ( !g->BindTextureNRFX( texture, (g->GetRenderingStage() == DES_MAIN) ) )
+                continue;
+        }
+
         for ( auto const& it : meshes ) {
             for ( MeshInfo* mi : it.second ) {
                 if ( mi->MeshIndex == i ) {

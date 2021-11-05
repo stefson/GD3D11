@@ -99,6 +99,7 @@ public:
     /** Pixel Shader functions */
     void UnbindActivePS() { ActivePS = nullptr; }
     std::shared_ptr<D3D11PShader>& GetActivePS() { return ActivePS; }
+    std::shared_ptr<D3D11VShader>& GetActiveVS() { return ActiveVS; }
 
     /** Returns the current resolution */
     virtual INT2 GetResolution() { return Resolution; }

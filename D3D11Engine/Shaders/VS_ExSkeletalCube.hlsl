@@ -14,6 +14,7 @@ cbuffer Matrices_PerFrame : register( b0 )
 cbuffer Matrices_PerInstances : register( b1 )
 {
 	matrix M_World;
+	float4 PI_ModelColor;
 	float PI_ModelFatness;
 	float3 PI_Pad1;
 };
@@ -71,7 +72,7 @@ VS_OUTPUT VSMain( VS_INPUT Input )
 	Output.vWorldPosition = positionWorld;
 	Output.vTexcoord2 = Input.vTex1;
 	Output.vTexcoord = Input.vTex1;
-	Output.vDiffuse  = Input.vDiffuse;
+	Output.vDiffuse  = PI_ModelColor;
 	Output.vNormalWS = mul(normal, (float3x3)M_World);
 
 	

@@ -273,7 +273,7 @@ public:
         if ( prototypes->NumInArray > 0 ) {
             zCModelPrototype* prototype = prototypes->Array[0];
             if ( prototype ) {
-                return *reinterpret_cast<DWORD*>(reinterpret_cast<DWORD>(prototype) + 0x08); // Get reference counter
+                return *reinterpret_cast<int*>(reinterpret_cast<DWORD>(prototype) + 0x08); // Get reference counter
             }
         }
         return 2; // Allow leakage because it is only container for 3DS models(mob) - better than crash
