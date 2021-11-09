@@ -858,6 +858,8 @@ struct GothicRendererInfo {
     GothicRendererInfo() {
         VOBVerticesDataSize = 0;
         SkeletalVerticesDataSize = 0;
+        FirstVideoFrame = 0;
+        FixBink = 0;
         PlayingMovieResolution = INT2( 0, 0 );
         Reset();
     }
@@ -917,7 +919,9 @@ struct GothicRendererInfo {
     unsigned int VOBVerticesDataSize;
     unsigned int SkeletalVerticesDataSize;
 
-    /** Resolution of the currently playing video, only valid when a movie plays! */
+    /** Bink Video specific variables */
+    int FirstVideoFrame;
+    int FixBink;
     INT2 PlayingMovieResolution;
 };
 

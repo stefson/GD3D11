@@ -169,6 +169,7 @@ bool GetPrivateProfileBoolA(
 
 /** Called when the game starts */
 void GothicAPI::OnGameStart() {
+    LoadFixBinkValue();
     LoadMenuSettings( MENU_SETTINGS_FILE );
 
     LogInfo() << "Running with Commandline: " << zCOption::GetOptions()->GetCommandline();
@@ -1834,14 +1835,22 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance, bool u
                     }
                 }
 
+                if ( isMMS ) {
+                    // Only 0.35f of the fatness wanted by gothic.
+                    // They seem to compensate for that with the scaling.
+                    instanceInfo.Fatness = std::max<float>( 0.f, fatness * 0.35f );
+                    instanceInfo.Scaling = fatness * 0.02f + 1.f;
+                } else {
+                    instanceInfo.Fatness = 0.f;
+                    instanceInfo.Scaling = 1.f;
+                }
+
                 auto& VShader = g->GetActiveVS();
                 if ( distance < 1000 && isMMS ) {
                     zCMorphMesh* mm = (zCMorphMesh*)mvi->Visual;
                     // Only draw this as a morphmesh when rendering the main scene or when rendering as ghost
                     if ( g->GetRenderingStage() == DES_MAIN || g->GetRenderingStage() == DES_GHOST ) {
                         // Update constantbuffer
-                        instanceInfo.Fatness = std::max<float>( 0.f, fatness * 0.35f );
-                        instanceInfo.Scaling = fatness * 0.02f + 1.f;
                         instanceInfo.World = *(XMFLOAT4X4*)&RendererState.TransformState.TransformWorld;
                         VShader->GetConstantBuffer()[1]->UpdateBuffer( &instanceInfo );
                         VShader->GetConstantBuffer()[1]->BindToVertexShader( 1 );
@@ -1855,8 +1864,6 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance, bool u
                     }
                 }
 
-                instanceInfo.Fatness = 0.f;
-                instanceInfo.Scaling = 1.f;
                 instanceInfo.World = *(XMFLOAT4X4*)&RendererState.TransformState.TransformWorld;
                 VShader->GetConstantBuffer()[1]->UpdateBuffer( &instanceInfo );
                 VShader->GetConstantBuffer()[1]->BindToVertexShader( 1 );
@@ -3675,6 +3682,38 @@ XRESULT GothicAPI::LoadVegetation( const std::string& file ) {
     fclose( f );
 
     return XR_SUCCESS;
+}
+
+/** Loads the FixBink value from SystemPack.ini */
+void GothicAPI::LoadFixBinkValue() {
+    TCHAR NPath[MAX_PATH];
+    // Returns Gothic directory.
+    int len = GetCurrentDirectory( MAX_PATH, NPath );
+    // Get path to Gothic.Ini
+    auto ini = std::string( NPath, len ).append( "\\system\\SystemPack.ini" );
+
+    if ( !Toolbox::FileExists( ini ) ) {
+        return;
+    }
+
+    std::string FixBinkValue = GetPrivateProfileStringA( "DEBUG", "FixBink", "", ini );
+    if ( FixBinkValue == "1" || _stricmp( FixBinkValue.c_str(), "true" ) == 0 ) {
+        RendererState.RendererInfo.FixBink = 1;
+    }
+}
+
+/** Saves the window resolution to Gothic.ini */
+void GothicAPI::SaveWindowResolution() {
+    TCHAR NPath[MAX_PATH];
+    // Returns Gothic directory.
+    int len = GetCurrentDirectory( MAX_PATH, NPath );
+    // Get path to Gothic.Ini
+    auto ini = std::string( NPath, len ).append( "\\system\\Gothic.ini" );
+
+    auto res = Engine::GraphicsEngine->GetResolution();
+    WritePrivateProfileStringA( "GAME", "scaleVideos", "1", ini.c_str() );
+    WritePrivateProfileStringA( "VIDEO", "zVidResFullscreenX", std::to_string( res.x ).c_str(), ini.c_str() );
+    WritePrivateProfileStringA( "VIDEO", "zVidResFullscreenY", std::to_string( res.y ).c_str(), ini.c_str() );
 }
 
 /** Saves the users settings from the menu */

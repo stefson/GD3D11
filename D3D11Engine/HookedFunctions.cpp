@@ -294,22 +294,23 @@ long __stdcall HookedFunctionInfo::hooked_zCExceptionHandlerUnhandledExceptionFi
 
 /** Returns the pixelformat of a bink-surface */
 long __fastcall HookedFunctionInfo::hooked_zBinkPlayerGetPixelFormat( void* thisptr, void* unknwn, zTRndSurfaceDesc& desc ) {
-    int* cd = (int*)&desc;
+    // Return values seems to be:
+    // 3 - bgra
+    // 4 - rgba
+    
+    // Union/Systempack FixBink seems to work only with bgra format
+    if ( Engine::GAPI->GetRendererState().RendererInfo.FixBink )
+        return 3;
 
-    // Resolution is at pos [2] and [3]
-    //cd[2] = Engine::GraphicsEngine->GetResolution().x;
-    //cd[3] = Engine::GraphicsEngine->GetResolution().y;
-
-    /*for(int i=0;i<0x7C;i++)
-    {
-    cd[i] = i;
-    }*/
-
-    return 4; // 4 satisfies gothic enough to play the video
-    //Global::HookedFunctions.zBinkPlayerGetPixelFormat(thisptr, desc);
+    // Use rgba format with disabled FixBink because for some reason there seem to be some ugly graphical glitches
+    return 4;
 }
 
 int __fastcall HookedFunctionInfo::hooked_zBinkPlayerOpenVideo( void* thisptr, void* unknwn, zSTRING str ) {
+    // Need to save window resolution before starting video
+    // Union/Systempack reads these values from Gothic.ini when opening video
+    Engine::GAPI->SaveWindowResolution();
+    Engine::GAPI->GetRendererState().RendererInfo.FirstVideoFrame = 1;
     int r = HookedFunctions::OriginalFunctions.original_zCBinkPlayerOpenVideo( thisptr, str );
 
     struct BinkInfo {
@@ -321,7 +322,6 @@ int __fastcall HookedFunctionInfo::hooked_zBinkPlayerOpenVideo( void* thisptr, v
     // Grab the resolution
     // This structure stores width and height as first two parameters, as ints.
     BinkInfo* res = *(BinkInfo**)(((char*)thisptr) + (GothicMemoryLocations::zCBinkPlayer::Offset_VideoHandle));
-
     if ( res ) {
         Engine::GAPI->GetRendererState().RendererInfo.PlayingMovieResolution = INT2( res->ResX, res->ResY );
     }
@@ -329,14 +329,12 @@ int __fastcall HookedFunctionInfo::hooked_zBinkPlayerOpenVideo( void* thisptr, v
     return r;
 }
 
-int __cdecl HookedFunctionInfo::hooked_GetNumDevices()
-{
+int __cdecl HookedFunctionInfo::hooked_GetNumDevices() {
     Engine::GraphicsEngine->OnUIEvent( BaseGraphicsEngine::EUIEvent::UI_OpenSettings );
     return 1;
 }
 
-void __fastcall HookedFunctionInfo::hooked_SetLightmap( void* polygonPtr )
-{
+void __fastcall HookedFunctionInfo::hooked_SetLightmap( void* polygonPtr ) {
     static zCLightmap* lightmap = nullptr;
     if ( !lightmap ) {
         #ifdef BUILD_GOTHIC_1_08k
