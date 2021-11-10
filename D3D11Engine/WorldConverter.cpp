@@ -976,6 +976,7 @@ void WorldConverter::ExtractSkeletalMeshFromVob( zCModel* model, SkeletalMeshVis
             std::vector<VERTEX_INDEX> indices;
             // Get the data out
             zCSubMesh* m = s->GetSubmesh( i );
+            zCArrayAdapt<float3>* nr = s->GetNormalsList();
 
             // Get indices
             indices.reserve( m->TriList.NumInArray * 3 );
@@ -994,7 +995,12 @@ void WorldConverter::ExtractSkeletalMeshFromVob( zCModel* model, SkeletalMeshVis
                 vertices.push_back( posList[wedge.position] );
 
                 ExSkelVertexStruct& vx = vertices.back();
-                vx.Normal = wedge.normal;
+                int normalPosition = static_cast<int>(wedge.position);
+                if ( normalPosition < nr->NumInArray )
+                    vx.Normal = nr->Array[normalPosition];
+                else
+                    vx.Normal = wedge.normal;
+
                 vx.TexCoord = wedge.texUV;
                 vx.Color = 0xFFFFFFFF;
 

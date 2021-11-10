@@ -59,12 +59,11 @@ VS_OUTPUT VSMain( VS_INPUT Input )
 	position += Input.Weights.z * mul(float4(Input.vPosition[2], 1), BT_Transforms[Input.BoneIndices.z]).xyz;
 	position += Input.Weights.w * mul(float4(Input.vPosition[3], 1), BT_Transforms[Input.BoneIndices.w]).xyz;
 	
-	float3 n = float3(0, 0, 0);
-	n += Input.Weights.x * mul(Input.vNormal, (float3x3)BT_Transforms[0]);
-	n += Input.Weights.y * mul(Input.vNormal, (float3x3)BT_Transforms[0]);
-	n += Input.Weights.z * mul(Input.vNormal, (float3x3)BT_Transforms[0]);
-	n += Input.Weights.w * mul(Input.vNormal, (float3x3)BT_Transforms[0]);
-	float3 normal = float3(n.z, n.y, -n.x);
+	float3 normal = float3(0, 0, 0);
+	normal += Input.Weights.x * mul(Input.vNormal, (float3x3)BT_Transforms[Input.BoneIndices.x]);
+	normal += Input.Weights.y * mul(Input.vNormal, (float3x3)BT_Transforms[Input.BoneIndices.y]);
+	normal += Input.Weights.z * mul(Input.vNormal, (float3x3)BT_Transforms[Input.BoneIndices.z]);
+	normal += Input.Weights.w * mul(Input.vNormal, (float3x3)BT_Transforms[Input.BoneIndices.w]);
 	
 	float3 positionWorld = mul(float4(position + PI_ModelFatness * normal,1), M_World).xyz;
 	
