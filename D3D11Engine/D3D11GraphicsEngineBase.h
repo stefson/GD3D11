@@ -146,7 +146,11 @@ protected:
     /** Swapchain and resources */
     Microsoft::WRL::ComPtr<IDXGISwapChain1> SwapChain;
     Microsoft::WRL::ComPtr<IDXGISwapChain2> SwapChain2;
+    Microsoft::WRL::ComPtr<IDXGISwapChain3> SwapChain3;
+    Microsoft::WRL::ComPtr<IDXGISwapChain4> SwapChain4;
     bool dxgi_1_3 = false;
+    bool dxgi_1_4 = false;
+    bool dxgi_1_5 = false;
     std::unique_ptr<RenderToTextureBuffer> Backbuffer;
     std::unique_ptr<RenderToDepthStencilBuffer> DepthStencilBuffer;
     std::unique_ptr<RenderToTextureBuffer> HDRBackBuffer;

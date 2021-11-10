@@ -3760,6 +3760,7 @@ XRESULT GothicAPI::SaveMenuSettings( const std::string& file ) {
     WritePrivateProfileStringA( "Display", "Brightness", std::to_string( s.BrightnessValue ).c_str(), ini.c_str() );
     WritePrivateProfileStringA( "Display", "DisplayFlip", std::to_string( s.DisplayFlip ? TRUE : FALSE ).c_str(), ini.c_str() );
     WritePrivateProfileStringA( "Display", "LowLatency", std::to_string( s.LowLatency ? TRUE : FALSE ).c_str(), ini.c_str() );
+    WritePrivateProfileStringA( "Display", "HDR_Monitor", std::to_string( s.HDR_Monitor ? TRUE : FALSE ).c_str(), ini.c_str() );
 
     WritePrivateProfileStringA( "Display", "StretchWindow", std::to_string( s.StretchWindow ? TRUE : FALSE ).c_str(), ini.c_str() );
     WritePrivateProfileStringA( "Display", "UIScale", std::to_string( s.GothicUIScale ).c_str(), ini.c_str() );
@@ -3867,6 +3868,7 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
     s.BrightnessValue = GetPrivateProfileFloatA( "Display", "Brightness", 1.0f, ini.c_str() );
     s.DisplayFlip = GetPrivateProfileBoolA( "Display", "DisplayFlip", false, ini.c_str() );
     s.LowLatency = GetPrivateProfileBoolA( "Display", "LowLatency", false, ini.c_str() );
+    s.HDR_Monitor = GetPrivateProfileBoolA( "Display", "HDR_Monitor", false, ini.c_str() );
     s.StretchWindow = GetPrivateProfileBoolA( "Display", "StretchWindow", false, ini.c_str() );
     s.GothicUIScale = GetPrivateProfileFloatA( "Display", "UIScale", 1.0f, ini.c_str() );
 

@@ -80,6 +80,7 @@ D3D11GraphicsEngine::D3D11GraphicsEngine() {
     m_FrameLimiter = std::make_unique<FpsLimiter>();
     m_LastFrameLimit = 0;
     m_flipWithTearing = false;
+    m_HDR = false;
     m_isWindowActive = true;
 
     // Match the resolution with the current desktop resolution
@@ -487,7 +488,13 @@ DXGI_FORMAT D3D11GraphicsEngine::GetBackBufferFormat() {
 XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
     HRESULT hr;
 
-    if ( dxgi_1_3 ) {
+    if ( dxgi_1_5 ) {
+        if ( memcmp( &Resolution, &newSize, sizeof( newSize ) ) == 0 && SwapChain4.Get() )
+            return XR_SUCCESS;  // Don't resize if we don't have to
+    } else if ( dxgi_1_4 ) {
+        if ( memcmp( &Resolution, &newSize, sizeof( newSize ) ) == 0 && SwapChain3.Get() )
+            return XR_SUCCESS;  // Don't resize if we don't have to
+    } else if ( dxgi_1_3 ) {
         if ( memcmp( &Resolution, &newSize, sizeof( newSize ) ) == 0 && SwapChain2.Get() )
             return XR_SUCCESS;  // Don't resize if we don't have to
     } else {
@@ -506,7 +513,11 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
 
 #ifndef BUILD_SPACER
     BOOL isFullscreen = 0;
-    if ( dxgi_1_3 ) {
+    if ( dxgi_1_5 ) {
+        if ( SwapChain4.Get() ) LE( SwapChain4->GetFullscreenState( &isFullscreen, nullptr ) );
+    } else if ( dxgi_1_4 ) {
+        if ( SwapChain3.Get() ) LE( SwapChain3->GetFullscreenState( &isFullscreen, nullptr ) );
+    } else if ( dxgi_1_3 ) {
         if ( SwapChain2.Get() ) LE( SwapChain2->GetFullscreenState( &isFullscreen, nullptr ) );
     } else {
         if ( SwapChain.Get() ) LE( SwapChain->GetFullscreenState( &isFullscreen, nullptr ) );
@@ -546,26 +557,41 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
 
         Microsoft::WRL::ComPtr<IDXGIDevice2> pDXGIDevice;
         Microsoft::WRL::ComPtr<IDXGIDevice3> pDXGIDevice3;
+        Microsoft::WRL::ComPtr<IDXGIDevice4> pDXGIDevice4;
         Microsoft::WRL::ComPtr<IDXGIAdapter> adapter11;
         Microsoft::WRL::ComPtr<IDXGIAdapter2> adapter;
+        Microsoft::WRL::ComPtr<IDXGIAdapter3> adapter3;
         Microsoft::WRL::ComPtr<IDXGIFactory2> factory2;
+        Microsoft::WRL::ComPtr<IDXGIFactory4> factory4;
 
-        if ( SUCCEEDED( Device.As( &pDXGIDevice3 ) ) ) dxgi_1_3 = true;
+        if ( SUCCEEDED( Device.As( &pDXGIDevice4 ) ) ) dxgi_1_5 = true;
+        else if ( SUCCEEDED( Device.As( &pDXGIDevice3 ) ) ) dxgi_1_3 = true;
         else LE( Device.As( &pDXGIDevice ) );
 
-        if ( dxgi_1_3 ) {
+        if ( dxgi_1_5 ) {
+            LE( pDXGIDevice4->GetAdapter( &adapter11 ) );
+            LogInfo() << "Device: DXGI 1.5";
+        } else if ( dxgi_1_3 ) {
             LE( pDXGIDevice3->GetAdapter( &adapter11 ) );
             LogInfo() << "Device: DXGI 1.3";
-        } else LE( pDXGIDevice->GetAdapter( &adapter11 ) );
+        } else {
+            LE( pDXGIDevice->GetAdapter( &adapter11 ) );
+            LogInfo() << "Device: DXGI 1.2";
+        }
 
         LE( adapter11.As( &adapter ) );
         LE( adapter->GetParent( IID_PPV_ARGS( &factory2 ) ) );
+
+        if ( SUCCEEDED( factory2.As( &factory4 ) ) ) {
+            LE( adapter11.As( &adapter3 ) );
+            LE( adapter3->GetParent( IID_PPV_ARGS( &factory4 ) ) );
+            dxgi_1_4 = true;
+        }
 
         DXGI_SWAP_EFFECT swapEffect = DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_DISCARD;
 
         DXGI_SWAP_CHAIN_DESC1 scd = {};
         if ( m_swapchainflip ) {
-            Microsoft::WRL::ComPtr<IDXGIFactory4> factory4;
             Microsoft::WRL::ComPtr<IDXGIFactory5> factory5;
 
             if ( SUCCEEDED( factory2.As( &factory5 ) ) ) {
@@ -575,7 +601,7 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
                     m_swapchainflip = m_flipWithTearing;
                 }
             }
-            if ( SUCCEEDED( factory2.As( &factory4 ) ) ) {
+            if ( dxgi_1_4 ) {
                 swapEffect = DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_FLIP_DISCARD;
             } else {
                 swapEffect = DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
@@ -596,7 +622,7 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
         } else scd.BufferCount = 1;
 
         m_lowlatency = Engine::GAPI->GetRendererState().RendererSettings.LowLatency;
-        if ( m_lowlatency && dxgi_1_3 ) scflags |= DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+        if ( m_lowlatency && (dxgi_1_3 || dxgi_1_5) && (swapEffect > 1) ) scflags |= DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT; else m_lowlatency = 0;
 
         scd.SwapEffect = swapEffect;
         scd.Flags = scflags;
@@ -637,7 +663,19 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
         XLE( Engine::AntTweakBar->Init() );
     } else {
         LogInfo() << "Resizing swapchain  (Format: DXGI_FORMAT_R8G8B8A8_UNORM)";
-        if ( dxgi_1_3 ) {
+        if ( dxgi_1_5 ) {
+            //if (FAILED(SwapChain4->SetSourceSize(bbres.x, bbres.y))) { //crashes when scd.Scaling = DXGI_SCALING_STRETCH is not set;
+            if ( FAILED( SwapChain4->ResizeBuffers( 0, bbres.x, bbres.y, DXGI_FORMAT_B8G8R8A8_UNORM, scflags ) ) ) {
+                LogError() << "Failed to resize swapchain!";
+                return XR_FAILED;
+            }
+        } else if ( dxgi_1_4 ) {
+            //if (FAILED(SwapChain3->SetSourceSize(bbres.x, bbres.y))) { //crashes when scd.Scaling = DXGI_SCALING_STRETCH is not set;
+            if ( FAILED( SwapChain3->ResizeBuffers( 0, bbres.x, bbres.y, DXGI_FORMAT_B8G8R8A8_UNORM, scflags ) ) ) {
+                LogError() << "Failed to resize swapchain!";
+                return XR_FAILED;
+            }
+        } else if ( dxgi_1_3 ) {
             //if (FAILED(SwapChain2->SetSourceSize(bbres.x, bbres.y))) { //crashes when scd.Scaling = DXGI_SCALING_STRETCH is not set;
             if ( FAILED( SwapChain2->ResizeBuffers( 0, bbres.x, bbres.y, DXGI_FORMAT_B8G8R8A8_UNORM, scflags ) ) ) {
                 LogError() << "Failed to resize swapchain!";
@@ -652,7 +690,33 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
     // Successfully resized swapchain, re-get buffers
     wrl::ComPtr<ID3D11Texture2D> backbuffer;
     // Successfully resized swapchain, re-get buffers
-    if ( dxgi_1_3 ) {
+    if ( dxgi_1_5 ) {
+        LE( SwapChain.As( &SwapChain4 ) );
+        LogInfo() << "SwapChain: DXGI 1.5";
+        if ( m_lowlatency ) {
+            HANDLE frameLatencyWaitableObject = SwapChain4->GetFrameLatencyWaitableObject();
+            WaitForSingleObjectEx( frameLatencyWaitableObject, INFINITE, true );
+            LogInfo() << "SwapChain Mode: DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT";
+        }
+        m_HDR = Engine::GAPI->GetRendererState().RendererSettings.HDR_Monitor;
+        if ( m_HDR && m_swapchainflip ) {
+            UpdateColorSpace_SwapChain4();
+        }
+        SwapChain4->GetBuffer( 0, __uuidof(ID3D11Texture2D), &backbuffer );
+    } else if ( dxgi_1_4 ) {
+        LE( SwapChain.As( &SwapChain3 ) );
+        LogInfo() << "SwapChain: DXGI 1.4";
+        if ( m_lowlatency ) {
+            HANDLE frameLatencyWaitableObject = SwapChain3->GetFrameLatencyWaitableObject();
+            WaitForSingleObjectEx( frameLatencyWaitableObject, INFINITE, true );
+            LogInfo() << "SwapChain Mode: DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT";
+        }
+        m_HDR = Engine::GAPI->GetRendererState().RendererSettings.HDR_Monitor;
+        if ( m_HDR && m_swapchainflip ) {
+            UpdateColorSpace_SwapChain3();
+        }
+        SwapChain3->GetBuffer( 0, __uuidof(ID3D11Texture2D), &backbuffer );
+    } else if ( dxgi_1_3 ) {
         LE( SwapChain.As( &SwapChain2 ) );
         LogInfo() << "SwapChain: DXGI 1.3";
         if ( m_lowlatency ) {
@@ -1019,7 +1083,19 @@ XRESULT D3D11GraphicsEngine::Present() {
     bool vsync = Engine::GAPI->GetRendererState().RendererSettings.EnableVSync;
 
     HRESULT hr;
-    if ( dxgi_1_3 ) {
+    if ( dxgi_1_5 ) {
+        if ( m_flipWithTearing ) {
+            hr = SwapChain4->Present( vsync ? 1 : 0, vsync ? 0 : DXGI_PRESENT_ALLOW_TEARING );
+        } else {
+            hr = SwapChain4->Present( vsync ? 1 : 0, 0 );
+        }
+    } else if ( dxgi_1_4 ) {
+        if ( m_flipWithTearing ) {
+            hr = SwapChain3->Present( vsync ? 1 : 0, vsync ? 0 : DXGI_PRESENT_ALLOW_TEARING );
+        } else {
+            hr = SwapChain3->Present( vsync ? 1 : 0, 0 );
+        }
+    } else if ( dxgi_1_3 ) {
         if ( m_flipWithTearing ) {
             hr = SwapChain2->Present( vsync ? 1 : 0, vsync ? 0 : DXGI_PRESENT_ALLOW_TEARING );
         } else {
@@ -1989,6 +2065,99 @@ void D3D11GraphicsEngine::TestDrawWorldMesh() {
                     mesh.second[i]->BaseIndexLocation );
             }
         }
+    }
+}
+
+// Sets the color space for the swap chain in order to handle HDR output.
+void D3D11GraphicsEngine::UpdateColorSpace_SwapChain3()
+{
+    DXGI_COLOR_SPACE_TYPE colorSpace = DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709;
+
+    bool isDisplayHDR10 = false;
+
+    Microsoft::WRL::ComPtr<IDXGIOutput> output;
+    if ( SUCCEEDED( SwapChain3->GetContainingOutput( output.GetAddressOf() ) ) ) {
+        Microsoft::WRL::ComPtr<IDXGIOutput6> output6;
+        if ( SUCCEEDED( output.As( &output6 ) ) ) {
+            DXGI_OUTPUT_DESC1 desc;
+            output6->GetDesc1( &desc );
+            if ( desc.ColorSpace == DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020 ) {
+                // Display output is HDR10.
+                isDisplayHDR10 = true;
+            }
+        }
+    }
+
+    if ( isDisplayHDR10 ) {
+        switch ( GetBackBufferFormat() ) {
+        case DXGI_FORMAT_R11G11B10_FLOAT: //origial DXGI_FORMAT_R10G10B10A2_UNORM
+            // The application creates the HDR10 signal.
+            colorSpace = DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020;
+            break;
+
+        case DXGI_FORMAT_R16G16B16A16_FLOAT:
+            // The system creates the HDR10 signal; application uses linear values.
+            colorSpace = DXGI_COLOR_SPACE_RGB_FULL_G10_NONE_P709;
+            break;
+
+        default:
+            break;
+        }
+    }
+
+    //m_colorSpace = colorSpace; //only used when access from other function required
+
+    UINT colorSpaceSupport = 0;
+    if ( SUCCEEDED( SwapChain3->CheckColorSpaceSupport( colorSpace, &colorSpaceSupport ) )
+        && (colorSpaceSupport & DXGI_SWAP_CHAIN_COLOR_SPACE_SUPPORT_FLAG_PRESENT) ) {
+        SwapChain3->SetColorSpace1( colorSpace );
+        LogInfo() << "Using HDR Monitor ColorSpace";
+    }
+}
+
+void D3D11GraphicsEngine::UpdateColorSpace_SwapChain4()
+{
+    DXGI_COLOR_SPACE_TYPE colorSpace = DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709;
+
+    bool isDisplayHDR10 = false;
+
+    Microsoft::WRL::ComPtr<IDXGIOutput> output;
+    if ( SUCCEEDED( SwapChain4->GetContainingOutput( output.GetAddressOf() ) ) ) {
+        Microsoft::WRL::ComPtr<IDXGIOutput6> output6;
+        if ( SUCCEEDED( output.As( &output6 ) ) ) {
+            DXGI_OUTPUT_DESC1 desc;
+            output6->GetDesc1( &desc );
+            if ( desc.ColorSpace == DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020 ) {
+                // Display output is HDR10.
+                isDisplayHDR10 = true;
+            }
+        }
+    }
+
+    if ( isDisplayHDR10 ) {
+        switch ( GetBackBufferFormat() ) {
+        case DXGI_FORMAT_R11G11B10_FLOAT: //origial DXGI_FORMAT_R10G10B10A2_UNORM
+            // The application creates the HDR10 signal.
+            colorSpace = DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020;
+            break;
+
+        case DXGI_FORMAT_R16G16B16A16_FLOAT:
+            // The system creates the HDR10 signal; application uses linear values.
+            colorSpace = DXGI_COLOR_SPACE_RGB_FULL_G10_NONE_P709;
+            break;
+
+        default:
+            break;
+        }
+    }
+
+    //m_colorSpace = colorSpace; //only used when access from other function required
+
+    UINT colorSpaceSupport = 0;
+    if ( SUCCEEDED( SwapChain4->CheckColorSpaceSupport( colorSpace, &colorSpaceSupport ) )
+        && (colorSpaceSupport & DXGI_SWAP_CHAIN_COLOR_SPACE_SUPPORT_FLAG_PRESENT) ) {
+        SwapChain4->SetColorSpace1( colorSpace );
+        LogInfo() << "Using HDR Monitor ColorSpace";
     }
 }
 

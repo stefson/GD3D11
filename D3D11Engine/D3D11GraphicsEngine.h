@@ -120,6 +120,14 @@ public:
     /** Puts the current world matrix into a CB and binds it to the given slot */
     void SetupPerInstanceConstantBuffer( int slot = 1 );
 
+    /**Colorspace for HDR-Monitors on Windows 10 */
+    /** HDR Support */
+    //DXGI_COLOR_SPACE_TYPE   m_colorSpace; //only used when access from other function required
+    //DXGI_COLOR_SPACE_TYPE   GetColorSpace() const noexcept { return m_colorSpace; } //only used when access from other function required
+
+    void UpdateColorSpace_SwapChain3();
+    void UpdateColorSpace_SwapChain4();
+
     enum EPNAENRenderMode {
         PNAEN_Default,
         PNAEN_Instanced,
@@ -409,6 +417,7 @@ protected:
     bool m_flipWithTearing;
     bool m_swapchainflip;
     bool m_lowlatency;
+    bool m_HDR;
     int m_previousFpsLimit;
     bool m_isWindowActive;
 };
