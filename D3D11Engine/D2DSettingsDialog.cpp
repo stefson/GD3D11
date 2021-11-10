@@ -181,26 +181,28 @@ XRESULT D2DSettingsDialog::InitControls() {
 	hdrCheckbox->SetPosition( D2D1::Point2F( 5, hdrCheckbox->GetPosition().y ) );
 	hdrCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.EnableHDR );
 
+    InitialSettings.EnableShadows = Engine::GAPI->GetRendererState().RendererSettings.EnableShadows;
 	SV_Checkbox* shadowsCheckbox = new SV_Checkbox( MainView, MainPanel );
 	shadowsCheckbox->SetSize( D2D1::SizeF( 160, 20 ) );
     switch ( userLanguage ) {
     case LANGUAGE_POLISH: shadowsCheckbox->SetCaption( L"Cienie [*]" ); break;
     default: shadowsCheckbox->SetCaption( L"Enable Shadows [*]" ); break;
     }
-	shadowsCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.EnableShadows );
+	shadowsCheckbox->SetDataToUpdate( &InitialSettings.EnableShadows );
 	shadowsCheckbox->AlignUnder( hdrCheckbox, 5 );
 	shadowsCheckbox->SetPosition( D2D1::Point2F( 5, shadowsCheckbox->GetPosition().y ) );
-	shadowsCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.EnableShadows );
+	shadowsCheckbox->SetChecked( InitialSettings.EnableShadows );
 
+    InitialSettings.EnableSoftShadows = Engine::GAPI->GetRendererState().RendererSettings.EnableSoftShadows;
 	SV_Checkbox* filterShadowsCheckbox = new SV_Checkbox( MainView, MainPanel );
 	filterShadowsCheckbox->SetSize( D2D1::SizeF( 160, 20 ) );
     switch ( userLanguage ) {
     case LANGUAGE_POLISH: filterShadowsCheckbox->SetCaption( L"Filtrowanie Cieni [*]" ); break;
     default: filterShadowsCheckbox->SetCaption( L"Shadow Filtering [*]" ); break;
     }
-	filterShadowsCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.EnableSoftShadows );
+	filterShadowsCheckbox->SetDataToUpdate( &InitialSettings.EnableSoftShadows );
 	filterShadowsCheckbox->AlignUnder( shadowsCheckbox, 5 );
-	filterShadowsCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.EnableSoftShadows );
+	filterShadowsCheckbox->SetChecked( InitialSettings.EnableSoftShadows );
 
     //SV_Checkbox* multiThreadResourceManagerCheckbox = new SV_Checkbox( MainView, MainPanel );
     //multiThreadResourceManagerCheckbox->SetSize( D2D1::SizeF( 160, 40 ) );
@@ -590,12 +592,14 @@ void D2DSettingsDialog::ApplyButtonPressed( SV_Button* sender, void* userdata ) 
 
 	// Check for shader reload
 	if ( d->InitialSettings.EnableShadows != settings.EnableShadows || d->InitialSettings.EnableSoftShadows != settings.EnableSoftShadows ) {
+        settings.EnableShadows = d->InitialSettings.EnableShadows;
+        settings.EnableSoftShadows = d->InitialSettings.EnableSoftShadows;
 		Engine::GraphicsEngine->ReloadShaders();
 	}
 
     // Check for texture quality change
-    if ( d->TextureQuality != Engine::GAPI->GetRendererState().RendererSettings.textureMaxSize ) {
-        Engine::GAPI->GetRendererState().RendererSettings.textureMaxSize = d->TextureQuality;
+    if ( d->TextureQuality != settings.textureMaxSize ) {
+        settings.textureMaxSize = d->TextureQuality;
         Engine::GAPI->UpdateTextureMaxSize();
     }
 
@@ -629,7 +633,7 @@ bool D2DSettingsDialog::NeedsApply() {
 
 /** Called when the settings got re-opened */
 void D2DSettingsDialog::OnOpenedSettings() {
-	InitialSettings = Engine::GAPI->GetRendererState().RendererSettings;
+	//InitialSettings = Engine::GAPI->GetRendererState().RendererSettings;
 }
 
 /** Sets if this control is hidden */
