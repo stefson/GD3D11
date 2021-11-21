@@ -904,10 +904,15 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
     }
 
     // Force the mode
-    zCView::SetMode(
-        static_cast<int>(Resolution.x / Engine::GAPI->GetRendererState().RendererSettings.GothicUIScale),
-        static_cast<int>(Resolution.y / Engine::GAPI->GetRendererState().RendererSettings.GothicUIScale),
-        32 );
+    static float lastUIScale = 0.f;
+    if ( lastUIScale != Engine::GAPI->GetRendererState().RendererSettings.GothicUIScale ) {
+        lastUIScale = Engine::GAPI->GetRendererState().RendererSettings.GothicUIScale;
+        zCView::SetMode(
+            static_cast<int>(Resolution.x / lastUIScale),
+            static_cast<int>(Resolution.y / lastUIScale),
+            32 );
+        zCViewDraw::GetScreen().SetVirtualSize( POINT{ 8192, 8192 } );
+    }
 
     // Notify the shader manager
     ShaderManager->OnFrameStart();
@@ -4883,8 +4888,8 @@ void D3D11GraphicsEngine::UpdateClipCursor( HWND hWnd )
     static RECT last_clipped_rect;
     if ( m_isWindowActive ) {
         GetClientRect( hWnd, &rect );
-        ClientToScreen( hWnd, reinterpret_cast<LPPOINT*>(&rect)[0] );
-        ClientToScreen( hWnd, reinterpret_cast<LPPOINT*>(&rect)[1] );
+        ClientToScreen( hWnd, reinterpret_cast<LPPOINT>(&rect) + 0 );
+        ClientToScreen( hWnd, reinterpret_cast<LPPOINT>(&rect) + 1 );
         if ( ClipCursor( &rect ) ) {
             last_clipped_rect = rect;
         }

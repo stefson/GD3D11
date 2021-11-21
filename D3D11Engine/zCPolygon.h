@@ -119,6 +119,12 @@ public:
         *(zCMaterial**)(((char*)this) + GothicMemoryLocations::zCPolygon::Offset_Material) = material;
     }
 
+    float3 GetLightStatAtPos(float3& position) {
+        float3 colorStat;
+        reinterpret_cast<void( __fastcall* )( zCPolygon*, DWORD, float3&, float3& )>( GothicMemoryLocations::zCPolygon::GetLightStatAtPos )( this, 0, colorStat, position );
+        return colorStat;
+    }
+
     zCLightmap* GetLightmap() const {
         return *(zCLightmap**)(((char*)this) + GothicMemoryLocations::zCPolygon::Offset_Lightmap);
     }

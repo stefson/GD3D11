@@ -14,6 +14,10 @@ public:
             ( GothicMemoryLocations::zCInput::SetDeviceEnabled )( this, 0, dev, i );
     }
 
+    void ClearKeyBuffer() {
+        reinterpret_cast<void( __fastcall* )( zCInput* )>( GothicMemoryLocations::zCInput::ClearKeyBuffer )( this );
+    }
+
     inline static zCInput* GetInput() {
         return *(zCInput**)GothicMemoryLocations::GlobalObjects::zCInput;
     };

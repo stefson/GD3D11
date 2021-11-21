@@ -505,6 +505,28 @@ XRESULT D2DSettingsDialog::InitControls() {
 	contrastSlider->SetMinMax( 0.1f, 2.0f );
 	contrastSlider->SetValue( Engine::GAPI->GetRendererState().RendererSettings.GammaValue );
 
+    SV_Checkbox* rainCheckbox = new SV_Checkbox( MainView, MainPanel );
+    rainCheckbox->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 160, 20 ) );
+    rainCheckbox->AlignUnder( contrastSlider, 65 );
+    switch ( userLanguage ) {
+    case LANGUAGE_POLISH: rainCheckbox->SetCaption( L"W³¹cz Deszcz" ); break;
+    default: rainCheckbox->SetCaption( L"Enable Rain" ); break;
+    }
+    rainCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.EnableRain );
+    rainCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.EnableRain );
+    rainCheckbox->SetPosition( D2D1::Point2F( 170 + 160, rainCheckbox->GetPosition().y ) );
+
+    SV_Checkbox* rainEffectsCheckbox = new SV_Checkbox( MainView, MainPanel );
+    rainEffectsCheckbox->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 160, 20 ) );
+    rainEffectsCheckbox->AlignUnder( rainCheckbox, 5 );
+    switch ( userLanguage ) {
+    case LANGUAGE_POLISH: rainEffectsCheckbox->SetCaption( L"W³¹cz Efekty Deszczu" ); break;
+    default: rainEffectsCheckbox->SetCaption( L"Enable Rain Effects" ); break;
+    }
+    rainEffectsCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.EnableRainEffects );
+    rainEffectsCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.EnableRainEffects );
+    rainEffectsCheckbox->SetPosition( D2D1::Point2F( 170 + 160, rainEffectsCheckbox->GetPosition().y ) );
+
 	// Advanced settings label
 	SV_Label* advancedSettingsLabel = new SV_Label( MainView, MainPanel );
 	advancedSettingsLabel->SetPositionAndSize( D2D1::Point2F( 5, GetSize().height - 5 - 12 ), D2D1::SizeF( 300, 12 ) );

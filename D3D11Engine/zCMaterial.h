@@ -148,16 +148,11 @@ public:
     }
 
     int GetAlphaFunc() {
-        return (*(int*)THISPTR_OFFSET( GothicMemoryLocations::zCMaterial::Offset_AlphaFunc )) & 0xFF;
+        return static_cast<int>(*(unsigned char*)THISPTR_OFFSET( GothicMemoryLocations::zCMaterial::Offset_AlphaFunc ));
     }
 
     void SetAlphaFunc( int func ) {
-        int f = (*(int*)THISPTR_OFFSET( GothicMemoryLocations::zCMaterial::Offset_AlphaFunc ));
-        f &= ~0xFF;
-
-        f |= func;
-
-        (*(int*)THISPTR_OFFSET( GothicMemoryLocations::zCMaterial::Offset_AlphaFunc )) = f;
+        *(unsigned char*)THISPTR_OFFSET( GothicMemoryLocations::zCMaterial::Offset_AlphaFunc ) = static_cast<unsigned char>(func);
     }
 
     int GetMatGroup() {

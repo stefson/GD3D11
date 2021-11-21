@@ -179,6 +179,7 @@ struct GothicMemoryLocations {
     struct zCInput {
         static const unsigned int GetDeviceEnabled = 0x004C8760;
         static const unsigned int SetDeviceEnabled = 0x004C8710;
+        static const unsigned int ClearKeyBuffer = 0x004C8AE0;
     };
 
     struct zCVisual {
@@ -216,6 +217,7 @@ struct GothicMemoryLocations {
         static const unsigned int Offset_Material = 0x18;
         static const unsigned int Offset_Lightmap = 0x1C;
 
+        static const unsigned int GetLightStatAtPos = 0x00597950;
         static const unsigned int AllocVerts = 0x00599840;
         static const unsigned int CalcNormal = 0x00596540;
 

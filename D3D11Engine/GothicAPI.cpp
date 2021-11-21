@@ -46,7 +46,7 @@
 using namespace DirectX;
 
 // Duration how long the scene will stay wet, in MS
-const DWORD SCENE_WETNESS_DURATION_MS = 60 * 2 * 1000;
+const DWORD SCENE_WETNESS_DURATION_MS = 30 * 1000;
 
 // Draw ghost from back to front of our camera
 auto CompareGhostDistance = []( std::pair<float, SkeletalVobInfo*>& a, std::pair<float, SkeletalVobInfo*>& b ) -> bool { return a.first < b.first; };
@@ -262,36 +262,61 @@ void GothicAPI::OnWorldUpdate() {
     RendererState.RendererInfo.FPS = GetFramesPerSecond();
     RendererState.GraphicsState.FF_Time = GetTimeSeconds();
 
-    if ( zCCamera::GetCamera() ) {
-        RendererState.RendererInfo.FarPlane = zCCamera::GetCamera()->GetFarPlane();
-        RendererState.RendererInfo.NearPlane = zCCamera::GetCamera()->GetNearPlane();
+    if ( zCCamera* camera = zCCamera::GetCamera() ) {
+        RendererState.RendererInfo.FarPlane = camera->GetFarPlane();
+        RendererState.RendererInfo.NearPlane = camera->GetNearPlane();
 
         //zCCamera::GetCamera()->Activate();
-        SetViewTransform( zCCamera::GetCamera()->GetTransformDX( zCCamera::ETransformType::TT_VIEW ), false );
+        SetViewTransform( camera->GetTransformDX( zCCamera::ETransformType::TT_VIEW ), false );
     }
 
     // Apply the hints for the sound system to fix voices in indoor locations being quiet
-    // This was originally done in zCBspTree::Render 
+    // This was originally done in zCBspTree::Render
+    zCWorld* world = oCGame::GetGame()->_zCSession_world;
     if ( !GMPModeActive ) {
         if ( IsCameraIndoor() ) {
             // Set mode to 2, which means we are indoors, but can see the outside
             if ( zCSoundSystem::GetSoundSystem() )
                 zCSoundSystem::GetSoundSystem()->SetGlobalReverbPreset( 2, 0.6f );
 
-            if ( oCGame::GetGame()->_zCSession_world && oCGame::GetGame()->_zCSession_world->GetSkyControllerOutdoor() )
-                oCGame::GetGame()->_zCSession_world->GetSkyControllerOutdoor()->SetCameraLocationHint( 1 );
+            if ( world && world->GetSkyControllerOutdoor() )
+                world->GetSkyControllerOutdoor()->SetCameraLocationHint( 1 );
         } else {
             // Set mode to 0, which is the default
             if ( zCSoundSystem::GetSoundSystem() )
                 zCSoundSystem::GetSoundSystem()->SetGlobalReverbPreset( 0, 0.0f );
 
-            if ( oCGame::GetGame()->_zCSession_world && oCGame::GetGame()->_zCSession_world->GetSkyControllerOutdoor() )
-                oCGame::GetGame()->_zCSession_world->GetSkyControllerOutdoor()->SetCameraLocationHint( 0 );
+            if ( world && world->GetSkyControllerOutdoor() )
+                world->GetSkyControllerOutdoor()->SetCameraLocationHint( 0 );
         }
     }
+
     // Do rain-effects
-    if ( oCGame::GetGame()->_zCSession_world && oCGame::GetGame()->_zCSession_world->GetSkyControllerOutdoor() && _canRain )
-        oCGame::GetGame()->_zCSession_world->GetSkyControllerOutdoor()->ProcessRainFX();
+    if ( world && world->GetSkyControllerOutdoor() && _canRain ) {
+        if( !RendererState.RendererSettings.EnableRain ) {
+            #ifdef BUILD_GOTHIC_1_08k
+            #ifdef BUILD_1_12F
+            int skyEffects = *reinterpret_cast<int*>(0x887EDC);
+            *reinterpret_cast<int*>(0x887EDC) = 0;
+            world->GetSkyControllerOutdoor()->ProcessRainFX();
+            *reinterpret_cast<int*>(0x887EDC) = skyEffects;
+            #else
+            int skyEffects = *reinterpret_cast<int*>(0x8422A0);
+            *reinterpret_cast<int*>(0x8422A0) = 0;
+            world->GetSkyControllerOutdoor()->ProcessRainFX();
+            *reinterpret_cast<int*>(0x8422A0) = skyEffects;
+            #endif
+            #endif
+            #ifdef BUILD_GOTHIC_2_6_fix
+            int skyEffects = *reinterpret_cast<int*>(0x8A5DB0);
+            *reinterpret_cast<int*>(0x8A5DB0) = 0;
+            world->GetSkyControllerOutdoor()->ProcessRainFX();
+            *reinterpret_cast<int*>(0x8A5DB0) = skyEffects;
+            #endif
+        } else {
+            world->GetSkyControllerOutdoor()->ProcessRainFX();
+        }
+    }
 
     if ( !_canRain ) {
         _canRain = true;
@@ -379,6 +404,9 @@ void GothicAPI::SetEnableGothicInput( bool value ) {
     // zMouse, false
     input->SetDeviceEnabled( 2, value ? 1 : 0 );
     input->SetDeviceEnabled( 1, value ? 1 : 0 );
+
+    // ClearKeyBuffer - when using GD3D11 settings some keys will remain as pressed unless we do this
+    input->ClearKeyBuffer();
 
     // Sometimes without this cursor aren't visible(it is only here as precaution)
     ShowCursor( value ? FALSE : TRUE );
@@ -1727,12 +1755,27 @@ void GothicAPI::DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance, bool u
         return; // Not supported yet
 
     float4 modelColor;
-    if ( vi->Vob->IsIndoorVob() ) {
-        // All lightmapped polys have this color, so just use it
-        modelColor = DEFAULT_LIGHTMAP_POLY_COLOR;
+    if ( Engine::GAPI->GetRendererState().RendererSettings.EnableShadows ) {
+        // Let shadows do the work
+        modelColor = 0xFFFFFFFF;
     } else {
-        // Get the color of the first found feature of the ground poly
-        modelColor = vi->Vob->GetGroundPoly() ? vi->Vob->GetGroundPoly()->getFeatures()[0]->lightStatic : 0xFFFFFFFF;
+        if ( vi->Vob->IsIndoorVob() ) {
+            // All lightmapped polys have this color, so just use it
+            modelColor = DEFAULT_LIGHTMAP_POLY_COLOR;
+        } else {
+            // Get the color from vob position of the ground poly
+            if ( zCPolygon* polygon = vi->Vob->GetGroundPoly() ) {
+                static const float inv255f = (1.0f / 255.0f);
+                float3 vobPos = vi->Vob->GetPositionWorld();
+                float3 polyLightStat = polygon->GetLightStatAtPos( vobPos );
+                modelColor.x = polyLightStat.z * inv255f;
+                modelColor.y = polyLightStat.y * inv255f;
+                modelColor.z = polyLightStat.x * inv255f;
+                modelColor.w = 1.f;
+            } else {
+                modelColor = 0xFFFFFFFF;
+            }
+        }
     }
 
     XMMATRIX scale = XMMatrixScalingFromVector( model->GetModelScaleXM() );

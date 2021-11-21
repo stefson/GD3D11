@@ -620,6 +620,9 @@ struct GothicRendererSettings {
         RainFogColor = DirectX::XMFLOAT3( 0.28f, 0.28f, 0.28f );
         RainFogDensity = 0.00500f;
 
+        EnableRain = true;
+        EnableRainEffects = true;
+
         GodRayDecay = 0.97f;
         GodRayWeight = 0.85f;
         GodRayDensity = 0.70f;
@@ -640,12 +643,8 @@ struct GothicRendererSettings {
         EnableDebugLog = true;
         EnableCustomFontRendering = false;
 
-#ifdef BUILD_GOTHIC_1_08k
         ForceFOV = false;
-#else
-        ForceFOV = true;
-#endif
-        
+
         StretchWindow = true;
         SmoothShadowCameraUpdate = true;
         DisplayFlip = false;
@@ -782,6 +781,9 @@ struct GothicRendererSettings {
     float RainSunLightStrength;
     DirectX::XMFLOAT3 RainFogColor;
     float RainFogDensity;
+
+    bool EnableRain;
+    bool EnableRainEffects;
 
     bool AllowNormalmaps;
 
