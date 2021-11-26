@@ -265,25 +265,34 @@ public:
         // otherwise it results in D3DXERR_CAPSNOTSUPPORTED error
         // if this device don't have those resolutions report them anyway
 
-        bool have640x480 = false, have800x600 = false;
+        INT2 currentResolution = Engine::GraphicsEngine->GetResolution( );
+        bool have640x480 = false, have800x600 = false, haveCurrentResolution = false;
         for ( DisplayModeInfo& mode : modes ) {
             if ( mode.Width == 640 && mode.Height == 480 )
                 have640x480 = true;
             if ( mode.Width == 800 && mode.Height == 600 )
                 have800x600 = true;
+            if ( mode.Width == static_cast<DWORD>(currentResolution.x) && mode.Height == static_cast<DWORD>(currentResolution.y) )
+                haveCurrentResolution = true;
         }
 
+        if ( !haveCurrentResolution ) {
+            DisplayModeInfo info;
+            info.Width = static_cast<DWORD>(currentResolution.x);
+            info.Height = static_cast<DWORD>(currentResolution.y);
+            modes.insert( modes.begin(), info );
+        }
         if ( !have800x600 ) {
-            DisplayModeInfo enfo;
-            enfo.Width = 800;
-            enfo.Height = 600;
-            modes.insert( modes.begin(), enfo );
+            DisplayModeInfo info;
+            info.Width = 800;
+            info.Height = 600;
+            modes.insert( modes.begin(), info );
         }
         if ( !have640x480 ) {
-            DisplayModeInfo enfo;
-            enfo.Width = 640;
-            enfo.Height = 480;
-            modes.insert( modes.begin(), enfo );
+            DisplayModeInfo info;
+            info.Width = 640;
+            info.Height = 480;
+            modes.insert( modes.begin(), info );
         }
 
 		for ( DisplayModeInfo& mode : modes ) {

@@ -46,10 +46,6 @@
 namespace wrl = Microsoft::WRL;
 using namespace DirectX;
 
-const int RES_UPSCALE = 1;
-const INT2 DEFAULT_RESOLUTION = INT2( 1920 * RES_UPSCALE, 1080 * RES_UPSCALE );
-// const int WORLD_SHADOWMAP_SIZE = 1024;
-
 const int NUM_UNLOADEDTEXCOUNT_FORCE_LOAD_TEXTURES = 100;
 
 const float DEFAULT_NORMALMAP_STRENGTH = 0.10f;
@@ -63,12 +59,12 @@ const int NUM_MIN_FRAME_SHADOW_UPDATES =
 const int MAX_IMPORTANT_LIGHT_UPDATES = 1;
 
 D3D11GraphicsEngine::D3D11GraphicsEngine() {
-    Resolution = DEFAULT_RESOLUTION;
     DebugPointlight = nullptr;
     OutputWindow = nullptr;
     ActiveHDS = nullptr;
     ActivePS = nullptr;
     InverseUnitSphereMesh = nullptr;
+    frameLatencyWaitableObject = nullptr;
 
     Effects = std::make_unique<D3D11Effect>();
     RenderingStage = DES_MAIN;
@@ -81,11 +77,14 @@ D3D11GraphicsEngine::D3D11GraphicsEngine() {
     m_LastFrameLimit = 0;
     m_flipWithTearing = false;
     m_HDR = false;
+    m_lowlatency = false;
     m_isWindowActive = true;
 
     // Match the resolution with the current desktop resolution
     Resolution =
         Engine::GAPI->GetRendererState().RendererSettings.LoadedResolution;
+    CachedRefreshRate.Numerator = 0;
+    CachedRefreshRate.Denominator = 0;
 }
 
 D3D11GraphicsEngine::~D3D11GraphicsEngine() {
@@ -254,8 +253,9 @@ XRESULT D3D11GraphicsEngine::Init() {
     Context11.As( &Context );
 
     FeatureLevel10Compatibility = (maxFeatureLevel < D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_11_0);
-    LogInfo() << "Creating ShaderManager";
+    FetchDisplayModeList();
 
+    LogInfo() << "Creating ShaderManager";
     ShaderManager = std::make_unique<D3D11ShaderManager>();
     ShaderManager->Init();
     ShaderManager->LoadShaders();
@@ -484,6 +484,34 @@ DXGI_FORMAT D3D11GraphicsEngine::GetBackBufferFormat() {
     return (Engine::GAPI->GetRendererState().RendererSettings.CompressBackBuffer ? DXGI_FORMAT_R11G11B10_FLOAT : DXGI_FORMAT_R16G16B16A16_FLOAT);
 }
 
+/** Get Window Mode */
+int D3D11GraphicsEngine::GetWindowMode() {
+    if ( SwapChain.Get() ) {
+        BOOL isFullscreen = 0;
+        if ( dxgi_1_5 ) {
+            if ( SwapChain4.Get() ) SwapChain4->GetFullscreenState( &isFullscreen, nullptr );
+        } else if ( dxgi_1_4 ) {
+            if ( SwapChain3.Get() ) SwapChain3->GetFullscreenState( &isFullscreen, nullptr );
+        } else if ( dxgi_1_3 ) {
+            if ( SwapChain2.Get() ) SwapChain2->GetFullscreenState( &isFullscreen, nullptr );
+        } else {
+            if ( SwapChain.Get() ) SwapChain->GetFullscreenState( &isFullscreen, nullptr );
+        }
+        if ( isFullscreen ) {
+            return WINDOW_MODE_FULLSCREEN_EXCLUSIVE;
+        }
+    }
+
+    if ( m_swapchainflip ) {
+        if ( m_lowlatency ) {
+            return WINDOW_MODE_FULLSCREEN_LOWLATENCY;
+        } else {
+            return WINDOW_MODE_FULLSCREEN_BORDERLESS;
+        }
+    }
+    return WINDOW_MODE_WINDOWED;
+}
+
 /** Called on window resize/resolution change */
 XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
     HRESULT hr;
@@ -505,9 +533,13 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
     Resolution = newSize;
     INT2 bbres = GetBackbufferResolution();
     
-    zCView::SetMode(
-        static_cast<int>((float)Resolution.x / Engine::GAPI->GetRendererState().RendererSettings.GothicUIScale),
-        static_cast<int>((float)Resolution.y / Engine::GAPI->GetRendererState().RendererSettings.GothicUIScale),
+    zCView::SetWindowMode(
+        Resolution.x,
+        Resolution.y,
+        32 );
+    zCView::SetVirtualMode(
+        static_cast<int>(Resolution.x / Engine::GAPI->GetRendererState().RendererSettings.GothicUIScale),
+        static_cast<int>(Resolution.y / Engine::GAPI->GetRendererState().RendererSettings.GothicUIScale),
         32 );
     zCViewDraw::GetScreen().SetVirtualSize( POINT{ 8192, 8192 } );
 
@@ -522,7 +554,23 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
     } else {
         if ( SwapChain.Get() ) LE( SwapChain->GetFullscreenState( &isFullscreen, nullptr ) );
     }
-    if ( isFullscreen || Engine::GAPI->GetRendererState().RendererSettings.StretchWindow ) {
+    if ( isFullscreen ) {
+        DXGI_MODE_DESC newMode = {};
+        newMode.Width = newSize.x;
+        newMode.Height = newSize.y;
+        newMode.RefreshRate.Numerator = CachedRefreshRate.Numerator;
+        newMode.RefreshRate.Denominator = CachedRefreshRate.Denominator;
+        newMode.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+        if ( dxgi_1_5 ) {
+            SwapChain4->ResizeTarget( &newMode );
+        } else if ( dxgi_1_4 ) {
+            SwapChain3->ResizeTarget( &newMode );
+        } else if ( dxgi_1_3 ) {
+            SwapChain2->ResizeTarget( &newMode );
+        } else {
+            SwapChain->ResizeTarget( &newMode );
+        }
+    } else if ( Engine::GAPI->GetRendererState().RendererSettings.StretchWindow ) {
         RECT desktopRect;
         GetClientRect( GetDesktopWindow(), &desktopRect );
         SetWindowPos( OutputWindow, nullptr, 0, 0, desktopRect.right, desktopRect.bottom, 0 );
@@ -543,10 +591,12 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
 
     if ( UIView ) UIView->PrepareResize();
 
-    UINT scflags = m_flipWithTearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
+    UINT scflags = m_flipWithTearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+    if ( m_lowlatency ) {
+        scflags |= DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+    }
 
     if ( !SwapChain.Get() ) {
-
         static std::map<DXGI_SWAP_EFFECT, std::string> swapEffectMap = {
             {DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_DISCARD, "DXGI_SWAP_EFFECT_DISCARD"},
             {DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL, "DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL"},
@@ -554,6 +604,15 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
         };
 
         m_swapchainflip = Engine::GAPI->GetRendererState().RendererSettings.DisplayFlip;
+        if ( m_swapchainflip ) {
+            LONG lStyle = GetWindowLongA( OutputWindow, GWL_STYLE );
+            lStyle &= ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU);
+            SetWindowLongA( OutputWindow, GWL_STYLE, lStyle );
+
+            LONG lExStyle = GetWindowLongA( OutputWindow, GWL_EXSTYLE );
+            lExStyle &= ~(WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE);
+            SetWindowLongA( OutputWindow, GWL_EXSTYLE, lExStyle );
+        }
 
         Microsoft::WRL::ComPtr<IDXGIDevice2> pDXGIDevice;
         Microsoft::WRL::ComPtr<IDXGIDevice3> pDXGIDevice3;
@@ -598,7 +657,6 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
                 BOOL allowTearing = FALSE;
                 if ( factory5.Get() && SUCCEEDED( factory5->CheckFeatureSupport( DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof( allowTearing ) ) ) ) {
                     m_flipWithTearing = allowTearing != 0;
-                    m_swapchainflip = m_flipWithTearing;
                 }
             }
             if ( dxgi_1_4 ) {
@@ -619,10 +677,16 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
         if ( m_swapchainflip ) {
             scd.BufferCount = 2;
             if ( m_flipWithTearing ) scflags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
-        } else scd.BufferCount = 1;
+        } else {
+            scd.BufferCount = 1;
+        }
 
         m_lowlatency = Engine::GAPI->GetRendererState().RendererSettings.LowLatency;
-        if ( m_lowlatency && (dxgi_1_3 || dxgi_1_5) && (swapEffect > 1) ) scflags |= DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT; else m_lowlatency = 0;
+        if ( m_lowlatency && (dxgi_1_3 || dxgi_1_5) && (swapEffect > 1) ) {
+            scflags |= DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+        } else {
+            m_lowlatency = false;
+        }
 
         scd.SwapEffect = swapEffect;
         scd.Flags = scflags;
@@ -633,31 +697,32 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
         scd.Height = bbres.y;
         scd.Width = bbres.x;
 
-        DXGI_SWAP_CHAIN_FULLSCREEN_DESC swapChainFSDesc = {};
-
-        // Get current refresh rate
-        {
-            DEVMODEA devMode;
-            if ( EnumDisplaySettingsA( nullptr, ENUM_CURRENT_SETTINGS, &devMode ) ) {
-                swapChainFSDesc.RefreshRate.Numerator = devMode.dmDisplayFrequency;
-                swapChainFSDesc.RefreshRate.Denominator = 1;
-            }
-        }
-
-        if ( m_swapchainflip ) swapChainFSDesc.Windowed = true;
-        else {
-            bool windowed = Engine::GAPI->HasCommandlineParameter( "ZWINDOW" ) ||
-                Engine::GAPI->GetIntParamFromConfig( "zStartupWindowed" );
-            swapChainFSDesc.Windowed = windowed;
-        }
-
-        LE( factory2->CreateSwapChainForHwnd( GetDevice().Get(), OutputWindow, &scd, &swapChainFSDesc, nullptr, SwapChain.GetAddressOf() ) );
+        LE( factory2->CreateSwapChainForHwnd( GetDevice().Get(), OutputWindow, &scd, nullptr, nullptr, SwapChain.GetAddressOf() ) );
         if ( !SwapChain.Get() ) {
             LogError() << "Failed to create Swapchain! Program will now exit!";
             exit( 0 );
         }
 
-        if ( m_swapchainflip ) LE( factory2->MakeWindowAssociation( OutputWindow, DXGI_MWA_NO_WINDOW_CHANGES ) );
+        if ( m_swapchainflip ) {
+            LE( factory2->MakeWindowAssociation( OutputWindow, DXGI_MWA_NO_WINDOW_CHANGES ) );
+        } else {
+            // Perform fullscreen transition
+            // According to microsoft guide it is the best practice
+            // because the swapchain is created in accordance to desktop resolution
+            // and we can have different resolution in fullscreen exclusive
+            bool windowed = Engine::GAPI->HasCommandlineParameter( "ZWINDOW" ) ||
+                Engine::GAPI->GetIntParamFromConfig( "zStartupWindowed" );
+            if ( !windowed ) {
+                DXGI_MODE_DESC newMode = {};
+                newMode.Width = newSize.x;
+                newMode.Height = newSize.y;
+                newMode.RefreshRate.Numerator = CachedRefreshRate.Numerator;
+                newMode.RefreshRate.Denominator = CachedRefreshRate.Denominator;
+                newMode.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+                SwapChain->ResizeTarget( &newMode );
+                SwapChain->SetFullscreenState( true, nullptr );
+            }
+        }
 
         // Need to init AntTweakBar now that we have a working swapchain
         XLE( Engine::AntTweakBar->Init() );
@@ -689,12 +754,11 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
 
     // Successfully resized swapchain, re-get buffers
     wrl::ComPtr<ID3D11Texture2D> backbuffer;
-    // Successfully resized swapchain, re-get buffers
     if ( dxgi_1_5 ) {
         LE( SwapChain.As( &SwapChain4 ) );
         LogInfo() << "SwapChain: DXGI 1.5";
-        if ( m_lowlatency ) {
-            HANDLE frameLatencyWaitableObject = SwapChain4->GetFrameLatencyWaitableObject();
+        if ( m_lowlatency && !frameLatencyWaitableObject ) {
+            frameLatencyWaitableObject = SwapChain4->GetFrameLatencyWaitableObject();
             WaitForSingleObjectEx( frameLatencyWaitableObject, INFINITE, true );
             LogInfo() << "SwapChain Mode: DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT";
         }
@@ -706,8 +770,8 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
     } else if ( dxgi_1_4 ) {
         LE( SwapChain.As( &SwapChain3 ) );
         LogInfo() << "SwapChain: DXGI 1.4";
-        if ( m_lowlatency ) {
-            HANDLE frameLatencyWaitableObject = SwapChain3->GetFrameLatencyWaitableObject();
+        if ( m_lowlatency && !frameLatencyWaitableObject ) {
+            frameLatencyWaitableObject = SwapChain3->GetFrameLatencyWaitableObject();
             WaitForSingleObjectEx( frameLatencyWaitableObject, INFINITE, true );
             LogInfo() << "SwapChain Mode: DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT";
         }
@@ -719,8 +783,8 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
     } else if ( dxgi_1_3 ) {
         LE( SwapChain.As( &SwapChain2 ) );
         LogInfo() << "SwapChain: DXGI 1.3";
-        if ( m_lowlatency ) {
-            HANDLE frameLatencyWaitableObject = SwapChain2->GetFrameLatencyWaitableObject();
+        if ( m_lowlatency && !frameLatencyWaitableObject ) {
+            frameLatencyWaitableObject = SwapChain2->GetFrameLatencyWaitableObject();
             WaitForSingleObjectEx( frameLatencyWaitableObject, INFINITE, true );
             LogInfo() << "SwapChain Mode: DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT";
         }
@@ -790,12 +854,6 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
 
 /** Called when the game wants to render a new frame */
 XRESULT D3D11GraphicsEngine::OnBeginFrame() {
-    if ( !m_isWindowActive && GetForegroundWindow() == OutputWindow ) {
-        // Just in case to check if somehow we didn't get informed the window got activated
-        m_isWindowActive = true;
-        UpdateClipCursor( OutputWindow );
-    }
-
     Engine::GAPI->GetRendererState().RendererInfo.Timing.StartTotal();
     if ( !m_isWindowActive && Engine::GAPI->GetRendererState().RendererSettings.EnableInactiveFpsLock ) {
         m_FrameLimiter->SetLimit( 20 );
@@ -905,17 +963,23 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
 
     // Force the mode
     static float lastUIScale = 0.f;
-    if ( lastUIScale != Engine::GAPI->GetRendererState().RendererSettings.GothicUIScale ) {
+    if ( lastUIScale != Engine::GAPI->GetRendererState().RendererSettings.GothicUIScale || 1.f != Engine::GAPI->GetRendererState().RendererSettings.GothicUIScale ) {
         lastUIScale = Engine::GAPI->GetRendererState().RendererSettings.GothicUIScale;
-        zCView::SetMode(
+        zCView::SetVirtualMode(
             static_cast<int>(Resolution.x / lastUIScale),
             static_cast<int>(Resolution.y / lastUIScale),
             32 );
-        zCViewDraw::GetScreen().SetVirtualSize( POINT{ 8192, 8192 } );
     }
 
     // Notify the shader manager
     ShaderManager->OnFrameStart();
+
+    // Enable blending, in case some modifications need it
+    // and the ResetRenderStates won't be enough
+    Engine::GAPI->GetRendererState().BlendState.SetDefault();
+    Engine::GAPI->GetRendererState().BlendState.BlendEnabled = true;
+    Engine::GAPI->GetRendererState().BlendState.SetDirty();
+    UpdateRenderStates();
 
     // Bind HDR Back Buffer
     GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(), DepthStencilBuffer->GetDepthStencilView().Get() );
@@ -978,11 +1042,82 @@ XRESULT D3D11GraphicsEngine::CreateConstantBuffer( D3D11ConstantBuffer** outCB,
     return XR_SUCCESS;
 }
 
+/** Fetches a list of available display modes */
+XRESULT D3D11GraphicsEngine::FetchDisplayModeList() {
+    if ( !DXGIAdapter2 ) {
+        CachedDisplayModes.emplace_back( Resolution.x, Resolution.y );
+        return XR_FAILED;
+    }
+
+    Microsoft::WRL::ComPtr<IDXGIOutput> output11;
+    Microsoft::WRL::ComPtr<IDXGIOutput1> output;
+
+    DXGIAdapter2->EnumOutputs( 0, output11.GetAddressOf() );
+    HRESULT hr = output11->QueryInterface( __uuidof(IDXGIOutput1), (void**)output.GetAddressOf() );
+    if ( !output.Get() || FAILED( hr ) ) {
+        CachedDisplayModes.emplace_back( Resolution.x, Resolution.y );
+        return XR_FAILED;
+    }
+
+    UINT numModes = 0;
+    hr = output->GetDisplayModeList1( DXGI_FORMAT_R8G8B8A8_UNORM, 0, &numModes, nullptr );
+    if ( FAILED( hr ) ) {
+        CachedDisplayModes.emplace_back( Resolution.x, Resolution.y );
+        return XR_FAILED;
+    }
+
+    std::unique_ptr<DXGI_MODE_DESC1[]> displayModes = std::make_unique<DXGI_MODE_DESC1[]>( numModes );
+    hr = output->GetDisplayModeList1( DXGI_FORMAT_R8G8B8A8_UNORM, 0, &numModes, displayModes.get() );
+    if ( FAILED( hr ) ) {
+        CachedDisplayModes.emplace_back( Resolution.x, Resolution.y );
+        return XR_FAILED;
+    }
+
+    DEVMODEA devMode;
+    DWORD currentRefreshRate = 0;
+    if ( EnumDisplaySettingsA( nullptr, ENUM_CURRENT_SETTINGS, &devMode ) ) {
+        currentRefreshRate = devMode.dmDisplayFrequency;
+    }
+
+    for ( UINT i = 0; i < numModes; i++ ) 	{
+        DXGI_MODE_DESC1& displayMode = displayModes[i];
+        if ( static_cast<UINT>(Resolution.x) == displayMode.Width && static_cast<UINT>(Resolution.y) == displayMode.Height ) {
+            DWORD displayRefreshRate = static_cast<DWORD>(displayMode.RefreshRate.Numerator / displayMode.RefreshRate.Denominator);
+            if ( (displayRefreshRate - 2) >= currentRefreshRate && (displayRefreshRate + 2) <= currentRefreshRate ) {
+                CachedRefreshRate.Numerator = displayMode.RefreshRate.Numerator;
+                CachedRefreshRate.Denominator = displayMode.RefreshRate.Denominator;
+            }
+        }
+
+        DisplayModeInfo info( static_cast<int>(displayMode.Width), static_cast<int>(displayMode.Height) );
+        auto it = std::find_if( CachedDisplayModes.begin(), CachedDisplayModes.end(), 
+            [&info]( DisplayModeInfo& a ) { return (a.Width == info.Width && a.Height == info.Height); } );
+        if ( it == CachedDisplayModes.end() ) {
+            CachedDisplayModes.push_back(info);
+        }
+    }
+    CachedDisplayModes.shrink_to_fit();
+    return XR_SUCCESS;
+}
+
 /** Returns a list of available display modes */
 XRESULT
 D3D11GraphicsEngine::GetDisplayModeList( std::vector<DisplayModeInfo>* modeList,
     bool includeSuperSampling ) {
-    HRESULT hr;
+    for ( DisplayModeInfo& mode : CachedDisplayModes ) {
+        modeList->push_back( mode );
+    }
+    if ( includeSuperSampling ) {
+        // Put supersampling resolutions in, up to just below 8k
+        int i = 2;
+        DisplayModeInfo ssBase = modeList->back();
+        while ( ssBase.Width * i < 8192 && ssBase.Height * i < 8192 ) {
+            DisplayModeInfo info( static_cast<int>(ssBase.Width * i), static_cast<int>(ssBase.Height * i) );
+            modeList->push_back( info );
+            ++i;
+        }
+    }
+    /*HRESULT hr;
     UINT numModes = 0;
     std::unique_ptr<DXGI_MODE_DESC1[]> displayModes = nullptr;
     const DXGI_FORMAT format = DXGI_FORMAT_B8G8R8A8_UNORM;
@@ -1036,7 +1171,7 @@ D3D11GraphicsEngine::GetDisplayModeList( std::vector<DisplayModeInfo>* modeList,
             modeList->push_back( info );
             i++;
         }
-    }
+    }*/
 
     return XR_SUCCESS;
 }
@@ -1147,6 +1282,8 @@ XRESULT D3D11GraphicsEngine::Present() {
         default:
             LogWarnBox() << "Device Removed! (Unknown reason)";
         }
+    } else if ( hr == S_OK && frameLatencyWaitableObject ) {
+        WaitForSingleObjectEx( frameLatencyWaitableObject, INFINITE, true );
     }
 
     PresentPending = false;
@@ -1960,7 +2097,12 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
     GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
         nullptr );
 
+    // Enable blending, in case some modifications need it
+    // and the ResetRenderStates won't be enough
     SetDefaultStates();
+    Engine::GAPI->GetRendererState().BlendState.SetDefault();
+    Engine::GAPI->GetRendererState().BlendState.BlendEnabled = true;
+    Engine::GAPI->GetRendererState().BlendState.SetDirty();
     UpdateRenderStates();
 
     // Save screenshot if wanted

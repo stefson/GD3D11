@@ -53,7 +53,6 @@ typedef int( __thiscall* zCOptionReadInt )(void*, zSTRING const&, char const*, i
 typedef int( __thiscall* zCOptionReadBool )(void*, zSTRING const&, char const*, int);
 typedef unsigned long( __thiscall* zCOptionReadDWORD )(void*, zSTRING const&, char const*, unsigned long);
 typedef zCViewDraw&(__cdecl* zCViewDrawGetScreen)(void);
-typedef void( __cdecl* zCViewSetMode )(int, int, int, HWND*);
 typedef int( __thiscall* zCViewFontSize )(void*, const zSTRING&);
 typedef void( __thiscall* zCViewBlitText )(void*);
 typedef void( __thiscall* zCViewPrint )(void*, int, int, const zSTRING&);
@@ -118,7 +117,6 @@ struct HookedFunctionInfo {
     zCOptionReadBool original_zCOptionReadBool;
     zCOptionReadDWORD original_zCOptionReadDWORD;
     zCViewDrawGetScreen original_zCViewDrawGetScreen;
-    zCViewSetMode original_zCViewSetMode;
     zCViewFontSize original_zCViewFontSize;
     zCViewBlitText original_zCViewBlit;
     zCViewBlitText original_zCViewBlitText;

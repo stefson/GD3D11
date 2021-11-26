@@ -29,11 +29,9 @@ public:
         zCViewDraw::Hook();
         DWORD dwProtect;
 
-        HookedFunctions::OriginalFunctions.original_zCViewSetMode = (zCViewSetMode)GothicMemoryLocations::zCView::SetMode;
-
         VirtualProtect( (void*)GothicMemoryLocations::zCView::SetMode, 0x1B9, PAGE_EXECUTE_READWRITE, &dwProtect ); // zCView::SetMode
 
-        // Replace the actual mode-change in zCView::SetMode. Only do the UI-Changes.
+        // Replace the actual mode-change in zCView::SetVirtualMode. Only do the UI-Changes.
         REPLACE_RANGE( GothicMemoryLocations::zCView::REPL_SetMode_ModechangeStart, GothicMemoryLocations::zCView::REPL_SetMode_ModechangeEnd - 1, INST_NOP );
 
 #if BUILD_GOTHIC_2_6_fix
@@ -44,10 +42,14 @@ public:
 #endif
     }
 
-    static void SetMode( int x, int y, int bpp, HWND* window = nullptr ) {
-        hook_infunc
-            HookedFunctions::OriginalFunctions.original_zCViewSetMode( x, y, bpp, window );
-        hook_outfunc
+    static void SetWindowMode( int x, int y, int bpp ) {
+        reinterpret_cast<void( __fastcall* )( DWORD, DWORD, int, int, int, void* )>
+            ( GothicMemoryLocations::zCView::Vid_SetMode )( *reinterpret_cast<DWORD*>(GothicMemoryLocations::GlobalObjects::zRenderer), 0, x, y, bpp, nullptr );
+    }
+
+    static void SetVirtualMode( int x, int y, int bpp ) {
+        reinterpret_cast<void(__cdecl*)( int, int, int, void* )>
+            ( GothicMemoryLocations::zCView::SetMode )( x, y, bpp, nullptr );
     }
 
 #if BUILD_GOTHIC_2_6_fix

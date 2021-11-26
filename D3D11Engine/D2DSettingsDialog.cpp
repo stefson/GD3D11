@@ -9,6 +9,8 @@
 #include "SV_Panel.h"
 #include "SV_Slider.h"
 
+#include "D3D11GraphicsEngine.h"
+
 #include <locale>
 
 Languages getUserLanguage() {
@@ -21,7 +23,7 @@ Languages getUserLanguage() {
 }
 
 D2DSettingsDialog::D2DSettingsDialog( D2DView* view, D2DSubView* parent ) : D2DDialog( view, parent ) {
-	SetPositionCentered( D2D1::Point2F( view->GetRenderTarget()->GetSize().width / 2, view->GetRenderTarget()->GetSize().height / 2 ), D2D1::SizeF( 500, 340 ) );
+	SetPositionCentered( D2D1::Point2F( view->GetRenderTarget()->GetSize().width / 2, view->GetRenderTarget()->GetSize().height / 2 ), D2D1::SizeF( 520, 382 ) );
 
 	// Get display modes
 	// TODO: reenable-superresolution, workaround: Nvidia DSR/AMD VSR
@@ -91,6 +93,23 @@ XRESULT D2DSettingsDialog::InitControls() {
 	resolutionSlider->SetDisplayValues( resStrings );
 	resolutionSlider->SetValue( (float)ResolutionSetting );
 
+    SV_Label* modeLabel = new SV_Label( MainView, MainPanel );
+    modeLabel->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 150, 12 ) );
+    modeLabel->AlignUnder( resolutionSlider, 5 );
+    switch ( userLanguage ) {
+    case LANGUAGE_POLISH: modeLabel->SetCaption( L"Tryb [**]:" ); break;
+    default: modeLabel->SetCaption( L"Mode [**]:" ); break;
+    }
+
+    modeSlider = new SV_Slider( MainView, MainPanel );
+    modeSlider->SetPositionAndSize( D2D1::Point2F( 10, 22 ), D2D1::SizeF( 150, 15 ) );
+    modeSlider->AlignUnder( modeLabel, 5 );
+    modeSlider->SetSliderChangedCallback( ModeSliderChanged, this );
+    modeSlider->SetIsIntegralSlider( true );
+    modeSlider->SetMinMax( 1.0f, 4.0f );
+    modeSlider->SetDisplayValues( { "0", "Fullscreen Exclusive", "Fullscreen Borderless", "Fullscreen Lowlatency", "Windowed" } );
+    modeSlider->SetValue( 1.0f );
+
 	SV_Checkbox* normalmapsCheckbox = new SV_Checkbox( MainView, MainPanel );
 	normalmapsCheckbox->SetSize( D2D1::SizeF( 160, 20 ) );
     switch ( userLanguage ) {
@@ -98,7 +117,7 @@ XRESULT D2DSettingsDialog::InitControls() {
     default: normalmapsCheckbox->SetCaption( L"Enable Normalmaps" ); break;
     }
 	normalmapsCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.AllowNormalmaps );
-	normalmapsCheckbox->AlignUnder( resolutionSlider, 10 );
+	normalmapsCheckbox->AlignUnder( modeSlider, 10 );
 	normalmapsCheckbox->SetPosition( D2D1::Point2F( 5, normalmapsCheckbox->GetPosition().y ) );
 	normalmapsCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.AllowNormalmaps );
 
@@ -267,7 +286,7 @@ XRESULT D2DSettingsDialog::InitControls() {
     SV_Label* textureQualityLabel = new SV_Label( MainView, MainPanel );
     textureQualityLabel->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 150, 12 ) );
     textureQualityLabel->AlignUnder( Header, 5 );
-    textureQualityLabel->SetPosition( D2D1::Point2F( 170, textureQualityLabel->GetPosition().y ) );
+    textureQualityLabel->SetPosition( D2D1::Point2F( 180, textureQualityLabel->GetPosition().y ) );
     switch ( userLanguage ) {
     case LANGUAGE_POLISH: textureQualityLabel->SetCaption( L"Jakoœæ Textur [*]:" ); break;
     default: textureQualityLabel->SetCaption( L"Texture Quality [*]:" ); break;
@@ -429,7 +448,7 @@ XRESULT D2DSettingsDialog::InitControls() {
     }
 	fovOverrideCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.ForceFOV );
 	fovOverrideCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.ForceFOV );
-	fovOverrideCheckbox->SetPosition( D2D1::Point2F( 170 + 160 + 10, fovOverrideCheckbox->GetPosition().y ) );
+	fovOverrideCheckbox->SetPosition( D2D1::Point2F( 170 + 160 + 30, fovOverrideCheckbox->GetPosition().y ) );
 
 	SV_Label* horizFOVLabel = new SV_Label( MainView, MainPanel );
 	horizFOVLabel->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 150, 12 ) );
@@ -438,7 +457,7 @@ XRESULT D2DSettingsDialog::InitControls() {
     case LANGUAGE_POLISH: horizFOVLabel->SetCaption( L"Poziome Widzenie:" ); break;
     default: horizFOVLabel->SetCaption( L"Horizontal FOV:" ); break;
     }
-	horizFOVLabel->SetPosition( D2D1::Point2F( 170 + 160 + 10, horizFOVLabel->GetPosition().y ) );
+	horizFOVLabel->SetPosition( D2D1::Point2F( 170 + 160 + 30, horizFOVLabel->GetPosition().y ) );
 
 	SV_Slider* horizFOVSlider = new SV_Slider( MainView, MainPanel );
 	horizFOVSlider->SetPositionAndSize( D2D1::Point2F( 10, 22 ), D2D1::SizeF( 150, 15 ) );
@@ -514,7 +533,7 @@ XRESULT D2DSettingsDialog::InitControls() {
     }
     rainCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.EnableRain );
     rainCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.EnableRain );
-    rainCheckbox->SetPosition( D2D1::Point2F( 170 + 160, rainCheckbox->GetPosition().y ) );
+    rainCheckbox->SetPosition( D2D1::Point2F( 170 + 160 + 20, rainCheckbox->GetPosition().y ) );
 
     SV_Checkbox* rainEffectsCheckbox = new SV_Checkbox( MainView, MainPanel );
     rainEffectsCheckbox->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 160, 20 ) );
@@ -525,7 +544,15 @@ XRESULT D2DSettingsDialog::InitControls() {
     }
     rainEffectsCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.EnableRainEffects );
     rainEffectsCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.EnableRainEffects );
-    rainEffectsCheckbox->SetPosition( D2D1::Point2F( 170 + 160, rainEffectsCheckbox->GetPosition().y ) );
+    rainEffectsCheckbox->SetPosition( D2D1::Point2F( 170 + 160 + 20, rainEffectsCheckbox->GetPosition().y ) );
+
+    // Mode changing label
+    SV_Label* modeChangingLabel = new SV_Label( MainView, MainPanel );
+    modeChangingLabel->SetPositionAndSize( D2D1::Point2F( 5, GetSize().height - 5 - 30 ), D2D1::SizeF( 320, 12 ) );
+    switch ( userLanguage ) {
+    case LANGUAGE_POLISH: modeChangingLabel->SetCaption( L"[**] -> Musisz zrestartowaæ grê ¿eby zmiany zadzia³a³y" ); break;
+    default: modeChangingLabel->SetCaption( L"[**] -> You must restart game for the changes to take effect" ); break;
+    }
 
 	// Advanced settings label
 	SV_Label* advancedSettingsLabel = new SV_Label( MainView, MainPanel );
@@ -595,6 +622,13 @@ void D2DSettingsDialog::ResolutionSliderChanged( SV_Slider* sender, void* userda
 	d->ResolutionSetting = val;
 }
 
+void D2DSettingsDialog::ModeSliderChanged( SV_Slider* sender, void* userdata ) {
+    D2DSettingsDialog* d = (D2DSettingsDialog*)userdata;
+
+    int val = (int)(sender->GetValue() + 0.5f);
+    d->CurrentWindowMode = val;
+}
+
 /** Close button */
 void D2DSettingsDialog::CloseButtonPressed( SV_Button* sender, void* userdata ) {
 	D2DSettingsDialog* d = (D2DSettingsDialog*)userdata;
@@ -625,12 +659,18 @@ void D2DSettingsDialog::ApplyButtonPressed( SV_Button* sender, void* userdata ) 
         Engine::GAPI->UpdateTextureMaxSize();
     }
 
+    // Check for mode change
+    if ( d->CurrentWindowMode != d->ActiveWindowMode ) {
+        d->ActiveWindowMode = d->CurrentWindowMode;
+        settings.ChangeWindowPreset = d->ActiveWindowMode;
+    }
+
 	// Check for resolution change
 	if ( d->Resolutions[d->ResolutionSetting].Width != Engine::GraphicsEngine->GetResolution().x || d->Resolutions[d->ResolutionSetting].Height != Engine::GraphicsEngine->GetResolution().y ) {
 		Engine::GraphicsEngine->OnResize( INT2(d->Resolutions[d->ResolutionSetting].Width, d->Resolutions[d->ResolutionSetting].Height) );
         // reposition the window at the center, 
         // or we might not be able to see it 
-        d->SetPositionCentered( D2D1::Point2F( d->MainView->GetRenderTarget()->GetSize().width / 2, d->MainView->GetRenderTarget()->GetSize().height / 2 ), D2D1::SizeF( 500, 340 ) );
+        d->SetPositionCentered( D2D1::Point2F( d->MainView->GetRenderTarget()->GetSize().width / 2, d->MainView->GetRenderTarget()->GetSize().height / 2 ), D2D1::SizeF( 520, 382 ) );
 	}
 	Engine::GAPI->SaveRendererWorldSettings( settings );
 	Engine::GAPI->SaveMenuSettings( MENU_SETTINGS_FILE );
@@ -656,6 +696,11 @@ bool D2DSettingsDialog::NeedsApply() {
 /** Called when the settings got re-opened */
 void D2DSettingsDialog::OnOpenedSettings() {
 	//InitialSettings = Engine::GAPI->GetRendererState().RendererSettings;
+
+    D3D11GraphicsEngine* engine = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
+    CurrentWindowMode = engine->GetWindowMode();
+    ActiveWindowMode = CurrentWindowMode;
+    modeSlider->SetValue( static_cast<float>(CurrentWindowMode) );
 }
 
 /** Sets if this control is hidden */

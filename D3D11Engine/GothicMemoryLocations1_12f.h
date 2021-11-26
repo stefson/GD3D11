@@ -58,6 +58,7 @@ struct GothicMemoryLocations {
         static const unsigned int ReadInt = 0x004645B0;
         static const unsigned int ReadBool = 0x00464330;
         static const unsigned int ReadDWORD = 0x004646C0;
+        static const unsigned int WriteString = 0x00463FB0;
         static const unsigned int Offset_CommandLine = 0x284;
     };
 
@@ -366,6 +367,7 @@ struct GothicMemoryLocations {
 
     struct zCView {
         static const unsigned int SetMode = 0x0073C950;
+        static const unsigned int Vid_SetMode = 0x005CB910;
         static const unsigned int REPL_SetMode_ModechangeStart = 0x0073C979;
         static const unsigned int REPL_SetMode_ModechangeEnd = 0x0073C988;
         static const unsigned int PrintTimed = 0x007385A0;

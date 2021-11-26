@@ -62,6 +62,9 @@ public:
     /** Get BackBuffer Format */
     DXGI_FORMAT GetBackBufferFormat();
 
+    /** Get Window Mode */
+    int GetWindowMode();
+
     /** Called on window resize/resolution change */
     virtual XRESULT OnResize( INT2 newSize ) override;
 
@@ -85,6 +88,9 @@ public:
 
     /** Creates a constantbuffer object (Not registered inside) */
     virtual XRESULT CreateConstantBuffer( D3D11ConstantBuffer** outCB, void* data, int size );
+
+    /** Fetches a list of available display modes */
+    XRESULT FetchDisplayModeList();
 
     /** Returns a list of available display modes */
     virtual XRESULT GetDisplayModeList( std::vector<DisplayModeInfo>* modeList, bool includeSuperSampling = false );
@@ -410,6 +416,13 @@ protected:
     std::unique_ptr<D3D11VertexBuffer> TempMorphedMeshSmallVertexBuffer;
     std::unique_ptr<D3D11VertexBuffer> TempMorphedMeshBigVertexBuffer;
     std::unique_ptr<D3D11VertexBuffer> TempHUDVertexBuffer;
+
+    /** Cached display modes */
+    std::vector<DisplayModeInfo> CachedDisplayModes;
+    DXGI_RATIONAL CachedRefreshRate;
+
+    /** Low latency object handle */
+    HANDLE frameLatencyWaitableObject;
 
     /** If true, we will save a screenshot after the next frame */
     bool SaveScreenshotNextFrame;

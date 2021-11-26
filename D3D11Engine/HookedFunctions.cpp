@@ -134,6 +134,9 @@ void HookedFunctionInfo::InitHooks() {
         XHook( 0x00557276, HookedFunctionInfo::hooked_SetLightmap );
     }
 
+    LogInfo() << "Patching: Fix using settings in freelook mode";
+    PatchAddr( 0x00478FE2, "\x0F\x84\x9A\x00\x00\x00" );
+
     LogInfo() << "Patching: Show correct tris on toggle frame";
     {
         char* trisHndl[5];
@@ -230,6 +233,9 @@ void HookedFunctionInfo::InitHooks() {
         PatchAddr( 0x005668B2, "\xE9\x00\x00\x00\x00" );
         XHook( 0x005668B2, HookedFunctionInfo::hooked_SetLightmap );
     }
+
+    LogInfo() << "Patching: Fix using settings in freelook mode";
+    PatchAddr( 0x004806C2, "\x0F\x84\x9A\x00\x00\x00" );
 #endif
 
     LogInfo() << "Patching: Show correct tris on toggle frame";

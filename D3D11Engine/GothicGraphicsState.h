@@ -645,6 +645,7 @@ struct GothicRendererSettings {
 
         ForceFOV = false;
 
+        ChangeWindowPreset = 0;
         StretchWindow = true;
         SmoothShadowCameraUpdate = true;
         DisplayFlip = false;
@@ -796,6 +797,7 @@ struct GothicRendererSettings {
     bool LowLatency;
     bool HDR_Monitor;
     bool StretchWindow;
+    int ChangeWindowPreset;
     bool SmoothShadowCameraUpdate;
     bool EnableInactiveFpsLock;
     bool MTResoureceManager;

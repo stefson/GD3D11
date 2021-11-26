@@ -15,6 +15,9 @@ struct VobLightInfo;
 class zFont;
 
 struct DisplayModeInfo {
+    DisplayModeInfo() {}
+    DisplayModeInfo( int w, int h ) : Width(static_cast<DWORD>(w)), Height(static_cast<DWORD>(h)) {}
+
     DWORD Height;
     DWORD Width;
 };
@@ -22,6 +25,13 @@ struct DisplayModeInfo {
 enum RenderStage {
     STAGE_DRAW_WORLD = 0,
     STAGE_DRAW_SKELETAL = 1,
+};
+
+enum WindowModes {
+    WINDOW_MODE_FULLSCREEN_EXCLUSIVE = 1,
+    WINDOW_MODE_FULLSCREEN_BORDERLESS = 2,
+    WINDOW_MODE_FULLSCREEN_LOWLATENCY = 3,
+    WINDOW_MODE_WINDOWED = 4,
 };
 
 struct ViewportInfo {

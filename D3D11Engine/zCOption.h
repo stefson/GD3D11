@@ -188,6 +188,10 @@ public:
         return i;
     }
 
+    void WriteString( zSTRING const& section, char const* var, zSTRING def ) {
+        reinterpret_cast<void( __thiscall* )( zCOption*, zSTRING const&, const char*, zSTRING, int )>( GothicMemoryLocations::zCOption::WriteString )( this, section, var, def, 0 );
+    }
+
     static zCOption* GetOptions() { return *(zCOption**)GothicMemoryLocations::GlobalObjects::zCOption; }
 private:
     std::string GetCommandLineNormalized() {

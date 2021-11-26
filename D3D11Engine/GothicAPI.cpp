@@ -314,7 +314,25 @@ void GothicAPI::OnWorldUpdate() {
             *reinterpret_cast<int*>(0x8A5DB0) = skyEffects;
             #endif
         } else {
+            #ifdef BUILD_GOTHIC_1_08k
+            #ifdef BUILD_1_12F
+            int skyEffects = *reinterpret_cast<int*>(0x887EDC);
+            *reinterpret_cast<int*>(0x887EDC) = 1;
             world->GetSkyControllerOutdoor()->ProcessRainFX();
+            *reinterpret_cast<int*>(0x887EDC) = skyEffects;
+            #else
+            int skyEffects = *reinterpret_cast<int*>(0x8422A0);
+            *reinterpret_cast<int*>(0x8422A0) = 1;
+            world->GetSkyControllerOutdoor()->ProcessRainFX();
+            *reinterpret_cast<int*>(0x8422A0) = skyEffects;
+            #endif
+            #endif
+            #ifdef BUILD_GOTHIC_2_6_fix
+            int skyEffects = *reinterpret_cast<int*>(0x8A5DB0);
+            *reinterpret_cast<int*>(0x8A5DB0) = 1;
+            world->GetSkyControllerOutdoor()->ProcessRainFX();
+            *reinterpret_cast<int*>(0x8A5DB0) = skyEffects;
+            #endif
         }
     }
 
@@ -722,9 +740,9 @@ void GothicAPI::LoadRendererWorldSettings( GothicRendererSettings& s ) {
         return;
     }
 
-    s.FogHeight = GetPrivateProfileFloatA( "Fog", "Height", s.FogHeight, ini.c_str() );
-    s.FogHeightFalloff = GetPrivateProfileFloatA( "Fog", "HeightFalloff", s.FogHeightFalloff, ini.c_str() );
-    s.FogGlobalDensity = GetPrivateProfileFloatA( "Fog", "GlobalDensity", s.FogGlobalDensity, ini.c_str() );
+    s.FogHeight = GetPrivateProfileFloatA( "Fog", "Height", s.FogHeight, ini );
+    s.FogHeightFalloff = GetPrivateProfileFloatA( "Fog", "HeightFalloff", s.FogHeightFalloff, ini );
+    s.FogGlobalDensity = GetPrivateProfileFloatA( "Fog", "GlobalDensity", s.FogGlobalDensity, ini );
 
     s.SunLightColor = float3::FromColor(
         GetPrivateProfileIntA( "Atmoshpere", "SunLightColorR", (int)(s.SunLightColor.x * 255.0f), ini.c_str() ),
@@ -739,10 +757,10 @@ void GothicAPI::LoadRendererWorldSettings( GothicRendererSettings& s ) {
     );
 
     if ( !GMPModeActive ) {
-        s.VisualFXDrawRadius = GetPrivateProfileFloatA( "General", "VisualFXDrawRadius", s.VisualFXDrawRadius, ini.c_str() );
-        s.OutdoorVobDrawRadius = GetPrivateProfileFloatA( "General", "OutdoorVobDrawRadius", s.OutdoorVobDrawRadius, ini.c_str() );
-        s.OutdoorSmallVobDrawRadius = GetPrivateProfileFloatA( "General", "OutdoorSmallVobDrawRadius", s.OutdoorSmallVobDrawRadius, ini.c_str() );
-        s.SectionDrawRadius = GetPrivateProfileFloatA( "General", "SectionDrawRadius", s.SectionDrawRadius, ini.c_str() );
+        s.VisualFXDrawRadius = GetPrivateProfileFloatA( "General", "VisualFXDrawRadius", s.VisualFXDrawRadius, ini );
+        s.OutdoorVobDrawRadius = GetPrivateProfileFloatA( "General", "OutdoorVobDrawRadius", s.OutdoorVobDrawRadius, ini );
+        s.OutdoorSmallVobDrawRadius = GetPrivateProfileFloatA( "General", "OutdoorSmallVobDrawRadius", s.OutdoorSmallVobDrawRadius, ini );
+        s.SectionDrawRadius = GetPrivateProfileFloatA( "General", "SectionDrawRadius", s.SectionDrawRadius, ini );
     }
 
     s.ReplaceSunDirection = GetPrivateProfileBoolA( "Atmoshpere", "ReplaceSunDirection", s.ReplaceSunDirection, ini );
@@ -750,9 +768,9 @@ void GothicAPI::LoadRendererWorldSettings( GothicRendererSettings& s ) {
     AtmosphereSettings& aS = GetSky()->GetAtmoshpereSettings();
 
     aS.LightDirection = DirectX::XMFLOAT3(
-        GetPrivateProfileFloatA( "Atmoshpere", "LightDirectionX", aS.LightDirection.x, ini.c_str() ),
-        GetPrivateProfileFloatA( "Atmoshpere", "LightDirectionY", aS.LightDirection.y, ini.c_str() ),
-        GetPrivateProfileFloatA( "Atmoshpere", "LightDirectionZ", aS.LightDirection.z, ini.c_str() )
+        GetPrivateProfileFloatA( "Atmoshpere", "LightDirectionX", aS.LightDirection.x, ini ),
+        GetPrivateProfileFloatA( "Atmoshpere", "LightDirectionY", aS.LightDirection.y, ini ),
+        GetPrivateProfileFloatA( "Atmoshpere", "LightDirectionZ", aS.LightDirection.z, ini )
     );
 }
 
@@ -3770,6 +3788,7 @@ XRESULT GothicAPI::SaveMenuSettings( const std::string& file ) {
     LogInfo() << "Saving menu settings to " << ini;
     GothicRendererSettings& s = RendererState.RendererSettings;
 
+    WritePrivateProfileStringA( "General", "ChangeToMode", std::to_string( s.ChangeWindowPreset ).c_str(), ini.c_str() );
     WritePrivateProfileStringA( "General", "AtmosphericScattering", std::to_string( s.AtmosphericScattering ? TRUE : FALSE ).c_str(), ini.c_str() );
     WritePrivateProfileStringA( "General", "EnableFog", std::to_string( s.DrawFog ? TRUE : FALSE ).c_str(), ini.c_str() );
     WritePrivateProfileStringA( "General", "EnableHDR", std::to_string( s.EnableHDR ? TRUE : FALSE ).c_str(), ini.c_str() );
@@ -3858,9 +3877,10 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
 
     GothicRendererSettings& s = RendererState.RendererSettings;
 
-    s.DrawFog = GetPrivateProfileBoolA( "General", "EnableFog", true, ini.c_str() );
-    s.AtmosphericScattering = GetPrivateProfileBoolA( "General", "AtmosphericScattering", true, ini.c_str() );
-    s.EnableHDR = GetPrivateProfileBoolA( "General", "EnableHDR", false, ini.c_str() );
+    s.ChangeWindowPreset = GetPrivateProfileIntA( "General", "ChangeToMode", 0, ini.c_str() );
+    s.DrawFog = GetPrivateProfileBoolA( "General", "EnableFog", true, ini );
+    s.AtmosphericScattering = GetPrivateProfileBoolA( "General", "AtmosphericScattering", true, ini );
+    s.EnableHDR = GetPrivateProfileBoolA( "General", "EnableHDR", false, ini );
     s.HDRToneMap = GothicRendererSettings::E_HDRToneMap( GetPrivateProfileIntA( "General", "HDRToneMap", 4, ini.c_str() ) );
     s.EnableDebugLog = GetPrivateProfileBoolA( "General", "EnableDebugLog", defaultRendererSettings.EnableDebugLog, ini );
     s.EnableAutoupdates = GetPrivateProfileBoolA( "General", "EnableAutoupdates", defaultRendererSettings.EnableAutoupdates, ini );
@@ -3893,9 +3913,9 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
     s.EnableSoftShadows = GetPrivateProfileBoolA( "Shadows", "EnableSoftShadows", defaultRendererSettings.EnableSoftShadows, ini );
     s.ShadowMapSize = GetPrivateProfileIntA( "Shadows", "ShadowMapSize", defaultRendererSettings.ShadowMapSize, ini.c_str() );
     s.EnablePointlightShadows = GothicRendererSettings::EPointLightShadowMode( GetPrivateProfileIntA( "Shadows", "PointlightShadows", GothicRendererSettings::EPointLightShadowMode::PLS_STATIC_ONLY, ini.c_str() ) );
-    s.WorldShadowRangeScale = GetPrivateProfileFloatA( "Shadows", "WorldShadowRangeScale", 1.0f, ini.c_str() );
+    s.WorldShadowRangeScale = GetPrivateProfileFloatA( "Shadows", "WorldShadowRangeScale", 1.0f, ini );
     s.EnableDynamicLighting = GetPrivateProfileBoolA( "Shadows", "EnableDynamicLighting", defaultRendererSettings.EnableDynamicLighting, ini );
-    s.SmoothShadowCameraUpdate = GetPrivateProfileBoolA( "Shadows", "SmoothCameraUpdate", defaultRendererSettings.SmoothShadowCameraUpdate, ini.c_str() );
+    s.SmoothShadowCameraUpdate = GetPrivateProfileBoolA( "Shadows", "SmoothCameraUpdate", defaultRendererSettings.SmoothShadowCameraUpdate, ini );
 
     INT2 res = {};
     RECT desktopRect;
@@ -3907,26 +3927,26 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
     s.ForceFOV = GetPrivateProfileBoolA( "Display", "ForceFOV", defaultRendererSettings.ForceFOV, ini );
     s.FOVHoriz = GetPrivateProfileIntA( "Display", "FOVHoriz", 90, ini.c_str() );
     s.FOVVert = GetPrivateProfileIntA( "Display", "FOVVert", 90, ini.c_str() );
-    s.GammaValue = GetPrivateProfileFloatA( "Display", "Gamma", 1.0f, ini.c_str() );
-    s.BrightnessValue = GetPrivateProfileFloatA( "Display", "Brightness", 1.0f, ini.c_str() );
-    s.DisplayFlip = GetPrivateProfileBoolA( "Display", "DisplayFlip", false, ini.c_str() );
-    s.LowLatency = GetPrivateProfileBoolA( "Display", "LowLatency", false, ini.c_str() );
-    s.HDR_Monitor = GetPrivateProfileBoolA( "Display", "HDR_Monitor", false, ini.c_str() );
-    s.StretchWindow = GetPrivateProfileBoolA( "Display", "StretchWindow", false, ini.c_str() );
-    s.GothicUIScale = GetPrivateProfileFloatA( "Display", "UIScale", 1.0f, ini.c_str() );
+    s.GammaValue = GetPrivateProfileFloatA( "Display", "Gamma", 1.0f, ini );
+    s.BrightnessValue = GetPrivateProfileFloatA( "Display", "Brightness", 1.0f, ini );
+    s.DisplayFlip = GetPrivateProfileBoolA( "Display", "DisplayFlip", false, ini );
+    s.LowLatency = GetPrivateProfileBoolA( "Display", "LowLatency", false, ini );
+    s.HDR_Monitor = GetPrivateProfileBoolA( "Display", "HDR_Monitor", false, ini );
+    s.StretchWindow = GetPrivateProfileBoolA( "Display", "StretchWindow", false, ini );
+    s.GothicUIScale = GetPrivateProfileFloatA( "Display", "UIScale", 1.0f, ini );
 
     s.EnableSMAA = GetPrivateProfileBoolA( "SMAA", "Enabled", false, ini );
-    s.SharpenFactor = GetPrivateProfileFloatA( "SMAA", "SharpenFactor", 0.30f, ini.c_str() );
+    s.SharpenFactor = GetPrivateProfileFloatA( "SMAA", "SharpenFactor", 0.30f, ini );
 
     s.AllowWorldMeshTesselation = GetPrivateProfileBoolA( "Tesselation", "AllowWorldMeshTesselation", false, ini );
     s.EnableTesselation = GetPrivateProfileBoolA( "Tesselation", "EnableTesselation", false, ini );
 
     HBAOSettings defaultHBAOSettings;
     s.HbaoSettings.Enabled = GetPrivateProfileBoolA( "HBAO", "Enabled", defaultHBAOSettings.Enabled, ini );
-    s.HbaoSettings.Bias = GetPrivateProfileFloatA( "HBAO", "Bias", defaultHBAOSettings.Bias, ini.c_str() );
-    s.HbaoSettings.Radius = GetPrivateProfileFloatA( "HBAO", "Radius", defaultHBAOSettings.Radius, ini.c_str() );
-    s.HbaoSettings.PowerExponent = GetPrivateProfileFloatA( "HBAO", "PowerExponent", defaultHBAOSettings.PowerExponent, ini.c_str() );
-    s.HbaoSettings.BlurSharpness = GetPrivateProfileFloatA( "HBAO", "BlurSharpness", defaultHBAOSettings.BlurSharpness, ini.c_str() );
+    s.HbaoSettings.Bias = GetPrivateProfileFloatA( "HBAO", "Bias", defaultHBAOSettings.Bias, ini );
+    s.HbaoSettings.Radius = GetPrivateProfileFloatA( "HBAO", "Radius", defaultHBAOSettings.Radius, ini );
+    s.HbaoSettings.PowerExponent = GetPrivateProfileFloatA( "HBAO", "PowerExponent", defaultHBAOSettings.PowerExponent, ini );
+    s.HbaoSettings.BlurSharpness = GetPrivateProfileFloatA( "HBAO", "BlurSharpness", defaultHBAOSettings.BlurSharpness, ini );
     //s.HbaoSettings.EnableDualLayerAO = GetPrivateProfileIntA( "HBAO", "EnableDualLayerAO", defaultHBAOSettings.EnableDualLayerAO, ini.c_str() );
     s.HbaoSettings.EnableBlur = GetPrivateProfileBoolA( "HBAO", "EnableBlur", defaultHBAOSettings.EnableBlur, ini );
     s.HbaoSettings.SsaoBlurRadius = GetPrivateProfileIntA( "HBAO", "SsaoBlurRadius", defaultHBAOSettings.SsaoBlurRadius, ini.c_str() );
@@ -3938,12 +3958,12 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
     s.WorldShadowRangeScale = Toolbox::GetRecommendedWorldShadowRangeScaleForSize( s.ShadowMapSize );
 
     // Fix the resolution if the players maximum resolution got lower
-    RECT r;
+    /*RECT r;
     GetClientRect( GetDesktopWindow(), &r );
     if ( res.x > r.right || res.y > r.bottom ) {
         LogInfo() << "Reducing resolution from (" << res.x << ", " << res.y << " to (" << r.right << ", " << r.bottom << ") because users desktop resolution got lowered";
         res = INT2( r.right, r.bottom );
-    }
+    }*/
 
     s.LoadedResolution = res;
 
@@ -3974,6 +3994,43 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
     } else {
         Engine::GAPI->SetGameName( "Original" );
         LogInfo() << "-> Game: Original";
+    }
+
+    if ( s.ChangeWindowPreset ) {
+        WritePrivateProfileStringA( "General", "ChangeToMode", "0", ini.c_str() );
+        switch ( s.ChangeWindowPreset ) {
+            case WINDOW_MODE_FULLSCREEN_EXCLUSIVE: {
+                s.DisplayFlip = false;
+                zSTRING section( "VIDEO" ); zSTRING defValue( "0" );
+                zCOption::GetOptions()->WriteString( section, "zStartupWindowed", defValue );
+                WritePrivateProfileStringA( "Display", "DisplayFlip", "0", ini.c_str() );
+                WritePrivateProfileStringA( "Display", "LowLatency", "0", ini.c_str() );
+                break;
+            }
+            case WINDOW_MODE_FULLSCREEN_BORDERLESS: {
+                s.DisplayFlip = true;
+                s.LowLatency = false;
+                WritePrivateProfileStringA( "Display", "DisplayFlip", "1", ini.c_str() );
+                WritePrivateProfileStringA( "Display", "LowLatency", "0", ini.c_str() );
+                break;
+            }
+            case WINDOW_MODE_FULLSCREEN_LOWLATENCY: {
+                s.DisplayFlip = true;
+                s.LowLatency = true;
+                WritePrivateProfileStringA( "Display", "DisplayFlip", "1", ini.c_str() );
+                WritePrivateProfileStringA( "Display", "LowLatency", "1", ini.c_str() );
+                break;
+            }
+            case WINDOW_MODE_WINDOWED: {
+                s.DisplayFlip = false;
+                zSTRING section( "VIDEO" ); zSTRING defValue( "1" );
+                zCOption::GetOptions()->WriteString( section, "zStartupWindowed", defValue );
+                WritePrivateProfileStringA( "Display", "DisplayFlip", "0", ini.c_str() );
+                WritePrivateProfileStringA( "Display", "LowLatency", "0", ini.c_str() );
+                break;
+            }
+        }
+        s.ChangeWindowPreset = 0;
     }
 
     return XR_SUCCESS;
