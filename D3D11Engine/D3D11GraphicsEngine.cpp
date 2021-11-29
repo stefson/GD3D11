@@ -4914,24 +4914,12 @@ void XM_CALLCONV D3D11GraphicsEngine::RenderShadowCube(
         Engine::GAPI->GetRendererState().BlendState.SetDirty();
     }
 
-    // Dont render shadows from the sun when it isn't on the sky
-    if ( Engine::GAPI->GetRendererState().RendererSettings.DrawShadowGeometry &&
-        Engine::GAPI->GetRendererState().RendererSettings.EnableShadows ) {
-        GetContext()->ClearDepthStencilView( face.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0 );
+    // Always render shadowcube when dynamic shadows are enabled
+    GetContext()->ClearDepthStencilView( face.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0 );
 
-        // Draw the world mesh without textures
-        DrawWorldAround( position, range, cullFront, indoor, noNPCs, renderedVobs,
-            renderedMobs, worldMeshCache );
-    } else {
-        if ( Engine::GAPI->GetSky()->GetAtmoshpereSettings().LightDirection.y <= 0 ) {
-            GetContext()->ClearDepthStencilView( face.Get(), D3D11_CLEAR_DEPTH, 0.0f,
-                0 );  // Always shadow in the night
-        } else {
-            GetContext()->ClearDepthStencilView(
-                face.Get(), D3D11_CLEAR_DEPTH, 1.0f,
-                0 );  // Clear shadowmap when shadows not enabled
-        }
-    }
+    // Draw the world mesh without textures
+    DrawWorldAround( position, range, cullFront, indoor, noNPCs, renderedVobs,
+        renderedMobs, worldMeshCache );
 
     // Restore state
     SetRenderingStage( oldStage );
