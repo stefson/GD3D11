@@ -149,6 +149,9 @@ public:
     /** Draws a skeletal mesh */
     virtual XRESULT DrawSkeletalMesh( SkeletalVobInfo* vi, const std::vector<DirectX::XMFLOAT4X4>& transforms, float4 color, float fatness = 1.0f ) override;
 
+    /** Draws a screen fade effects */
+    virtual XRESULT DrawScreenFade( void* camera ) override;
+
     /** Draws a vertexarray, non-indexed */
     virtual XRESULT DrawVertexArray( ExVertexStruct* vertices, unsigned int numVertices, unsigned int startVertex = 0, unsigned int stride = sizeof( ExVertexStruct ) ) override;
     virtual XRESULT DrawVertexArrayMM( ExVertexStruct* vertices, unsigned int numVertices, unsigned int startVertex = 0, unsigned int stride = sizeof( ExVertexStruct ) ) override;

@@ -117,6 +117,9 @@ public:
     /** Returns the graphics-device this is running on */
     virtual std::string GetGraphicsDeviceName() = 0;
 
+    /** Draws a screen fade effects */
+    virtual XRESULT DrawScreenFade( void* camera ) { return XR_SUCCESS; };
+
     /** Draws a vertexarray, used for rendering gothics UI */
     virtual XRESULT DrawVertexArray( ExVertexStruct* vertices, unsigned int numVertices, unsigned int startVertex = 0, unsigned int stride = sizeof( ExVertexStruct ) ) = 0;
     virtual XRESULT DrawVertexArrayMM( ExVertexStruct* vertices, unsigned int numVertices, unsigned int startVertex = 0, unsigned int stride = sizeof( ExVertexStruct ) ) = 0;

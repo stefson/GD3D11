@@ -89,6 +89,42 @@ public:
             ( GothicMemoryLocations::zCCamera::SetFarPlane )( this, 0, value );
     }
 
+    bool HasScreenFadeEnabled() {
+        return (*(int*)((char*)this + GothicMemoryLocations::zCCamera::Offset_ScreenFadeEnabled)) != 0;
+    }
+
+    void ResetScreenFadeEnabled() {
+        *(int*)((char*)this + GothicMemoryLocations::zCCamera::Offset_ScreenFadeEnabled) = 0;
+    }
+
+    bool HasCinemaScopeEnabled() {
+        return (*(int*)((char*)this + GothicMemoryLocations::zCCamera::Offset_CinemaScopeEnabled)) != 0;
+    }
+
+    void ResetCinemaScopeEnabled() {
+        *(int*)((char*)this + GothicMemoryLocations::zCCamera::Offset_CinemaScopeEnabled) = 0;
+    }
+
+    zColor GetScreenFadeColor() {
+        return *(zColor*)((char*)this + GothicMemoryLocations::zCCamera::Offset_ScreenFadeColor);
+    }
+
+    zColor GetCinemaScopeColor() {
+        return *(zColor*)((char*)this + GothicMemoryLocations::zCCamera::Offset_CinemaScopeColor);
+    }
+
+    int GetScreenFadeBlendFunc() {
+#ifdef BUILD_GOTHIC_2_6_fix
+        return static_cast<int>(*(BYTE*)((char*)this + GothicMemoryLocations::zCCamera::Offset_ScreenFadeBlendFunc));
+#else
+        return zRND_ALPHA_FUNC_BLEND;
+#endif
+    }
+
+    DWORD GetPolyMaterial() {
+        return *(DWORD*)((char*)this + GothicMemoryLocations::zCCamera::Offset_PolyMaterial);
+    }
+
     /*void GetCameraPosition(DirectX::XMFLOAT3& v)
     {
         reinterpret_cast<void( __fastcall* )( zCCamera*, int, DirectX::XMFLOAT3& )>

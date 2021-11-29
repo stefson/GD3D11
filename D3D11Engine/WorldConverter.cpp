@@ -523,6 +523,17 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN( zCPolygon** polys, unsigned int n
     return XR_SUCCESS;
 }
 
+bool AdditionalCheckWaterFall(zCTexture* texture)
+{
+    std::string textureName = texture->GetNameWithoutExt();
+    std::transform( textureName.begin(), textureName.end(), textureName.begin(), toupper );
+    if ( textureName.find( "FALL" ) != std::string::npos && (textureName.find( "SURFACE" ) != std::string::npos || textureName.find( "STONE" ) != std::string::npos) ) {
+        // Let's make it work at least with og waterfall foam
+        return true;
+    }
+    return false;
+}
+
 /** Converts the worldmesh into a more usable format */
 HRESULT WorldConverter::ConvertWorldMesh( zCPolygon** polys, unsigned int numPolygons, std::map<int, std::map<int, WorldMeshSectionInfo>>* outSections, WorldInfo* info, MeshInfo** outWrappedMesh, bool indoorLocation ) {
     // Go through every polygon and put it into its section
@@ -630,7 +641,7 @@ HRESULT WorldConverter::ConvertWorldMesh( zCPolygon** polys, unsigned int numPol
             && !mat->HasAlphaTest() ) // Fix foam on waterfalls
         {
 #ifdef BUILD_GOTHIC_1_08k
-            if ( key.Texture && key.Texture->HasAlphaChannel() ) { // Fix foam on waterfalls
+            if ( key.Texture && key.Texture->HasAlphaChannel() && AdditionalCheckWaterFall( key.Texture ) ) { // Fix foam on waterfalls
                 // Give it alpha test since it contains alpha channel and most like is the foam
                 // Normal water surfaces shouldn't have alpha channel
                 mat->SetAlphaFunc( zMAT_ALPHA_FUNC_TEST );

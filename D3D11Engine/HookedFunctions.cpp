@@ -85,6 +85,10 @@ void HookedFunctionInfo::InitHooks() {
 
     LogInfo() << "Patching: Marking texture as cached-in after cache-out - fix";
     PatchAddr( 0x005E90BE, "\x90\x90" );
+
+    LogInfo() << "Patching: Disable dx7 window transitions";
+    PatchAddr( 0x0075CA7B, "\x90\x90" );
+    PatchAddr( 0x0074DAD0, "\x90\x90" );
 #else
     LogInfo() << "Patching: BroadCast fix";
     {
@@ -137,6 +141,10 @@ void HookedFunctionInfo::InitHooks() {
     LogInfo() << "Patching: Fix using settings in freelook mode";
     PatchAddr( 0x00478FE2, "\x0F\x84\x9A\x00\x00\x00" );
 
+    LogInfo() << "Patching: Disable dx7 window transitions";
+    PatchAddr( 0x0072018B, "\x90\x90" );
+    PatchAddr( 0x00711F70, "\x90\x90" );
+
     LogInfo() << "Patching: Show correct tris on toggle frame";
     {
         char* trisHndl[5];
@@ -181,11 +189,6 @@ void HookedFunctionInfo::InitHooks() {
         PatchAddr( 0x0044D9A0, zSPYwnd );
         PatchAddr( 0x0044C72F, zSPYwnd );
     }
-
-    // Workaround to fix disappearing ui elements under certain circumstances
-    // e.g. praying at Beliar statue, screen blend causing dialog boxes to disappear.
-    LogInfo() << "Patching: Overriding zCVobScreenFX::OnTick() if (blend.visible) -> if (false)";
-    PatchAddr( 0x0061808F, "\x90\xE9" );
 
     LogInfo() << "Patching: Interupt gamestart sound";
     PatchAddr( 0x004DB89F, "\x00" );
@@ -237,6 +240,10 @@ void HookedFunctionInfo::InitHooks() {
     LogInfo() << "Patching: Fix using settings in freelook mode";
     PatchAddr( 0x004806C2, "\x0F\x84\x9A\x00\x00\x00" );
 #endif
+
+    LogInfo() << "Patching: Disable dx7 window transitions";
+    PatchAddr( 0x00658BCB, "\x90\x90" );
+    PatchAddr( 0x006483A2, "\x90\x90" );
 
     LogInfo() << "Patching: Show correct tris on toggle frame";
     {

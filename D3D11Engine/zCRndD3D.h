@@ -18,6 +18,9 @@ public:
 
         XHook( GothicMemoryLocations::zCRndD3D::CacheInSurface, hooked_zCSurfaceCache_D3DCacheInSurface );
         XHook( GothicMemoryLocations::zCRndD3D::CacheOutSurface, hooked_zCSurfaceCache_D3DCacheOutSurface );
+
+        XHook( GothicMemoryLocations::zCRndD3D::RenderScreenFade, hooked_zCCameraRenderScreenFade );
+        XHook( GothicMemoryLocations::zCRndD3D::RenderCinemaScope, hooked_zCCameraRenderCinemaScope );
     }
 
     /** Disable caching surfaces to let engine create new surfaces for every textures */
@@ -84,6 +87,14 @@ public:
             HookedFunctions::OriginalFunctions.original_zCRnd_D3D_DrawPolySimple( thisptr, texture, zTRndSimpleVertex, iVal );
 
         hook_outfunc
+    }
+
+    static void __fastcall hooked_zCCameraRenderScreenFade( void* thisptr ) {
+        Engine::GraphicsEngine->DrawScreenFade( thisptr );
+    }
+
+    static void __fastcall hooked_zCCameraRenderCinemaScope( void* thisptr ) {
+        // Do nothing here
     }
 
     void ResetRenderState() {

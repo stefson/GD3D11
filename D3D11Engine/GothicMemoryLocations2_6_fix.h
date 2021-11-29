@@ -69,6 +69,9 @@ struct GothicMemoryLocations {
         static const unsigned int CacheOutSurface = 0x00652F40;
         static const unsigned int Vid_GetGammaCorrection = 0x00659610;
 
+        static const unsigned int RenderScreenFade = 0x0054BC40;
+        static const unsigned int RenderCinemaScope = 0x0054BD30;
+
         static const unsigned int Offset_RenderState = 0x38;
         static const unsigned int Offset_BoundTexture = 0x82E50;
     };
@@ -320,6 +323,12 @@ struct GothicMemoryLocations {
         static const unsigned int Activate = 0x0054A700;
         static const unsigned int Offset_NearPlane = 0x900;
         static const unsigned int Offset_FarPlane = 0x8FC;
+        static const unsigned int Offset_ScreenFadeEnabled = 0x8C0;
+        static const unsigned int Offset_ScreenFadeColor = 0x8C4;
+        static const unsigned int Offset_ScreenFadeBlendFunc = 0x8E0;
+        static const unsigned int Offset_CinemaScopeEnabled = 0x8E4;
+        static const unsigned int Offset_CinemaScopeColor = 0x8E8;
+        static const unsigned int Offset_PolyMaterial = 0x8BC;
         static const unsigned int SetFarPlane = 0x0054B200;
         static const unsigned int BBox3DInFrustum = 0x0054B410;
         static const unsigned int Var_FreeLook = 0x008CE42C;

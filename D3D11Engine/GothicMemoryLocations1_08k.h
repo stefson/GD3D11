@@ -50,6 +50,9 @@ struct GothicMemoryLocations {
         static const unsigned int CacheInSurface = 0x0071A3E0;
         static const unsigned int CacheOutSurface = 0x0071A7F0;
 
+        static const unsigned int RenderScreenFade = 0x005376F0;
+        static const unsigned int RenderCinemaScope = 0x005377B0;
+
         static const unsigned int Offset_RenderState = 0x34;
         static const unsigned int Offset_BoundTexture = 0x80E38;
     };
@@ -143,8 +146,13 @@ struct GothicMemoryLocations {
         static const unsigned int SetFOV = 0x00536720;
         static const unsigned int GetFOV_f2 = 0x005366B0;
 
-        static const unsigned int Offset_FarPlane = 2272;
-        static const unsigned int Offset_NearPlane = 2276;
+        static const unsigned int Offset_FarPlane = 0x8E0;
+        static const unsigned int Offset_NearPlane = 0x8E4;
+        static const unsigned int Offset_ScreenFadeEnabled = 0x8C0;
+        static const unsigned int Offset_ScreenFadeColor = 0x8C4;
+        static const unsigned int Offset_CinemaScopeEnabled = 0x8C8;
+        static const unsigned int Offset_CinemaScopeColor = 0x8CC;
+        static const unsigned int Offset_PolyMaterial = 0x8BC;
     };
 
     struct zCVob {

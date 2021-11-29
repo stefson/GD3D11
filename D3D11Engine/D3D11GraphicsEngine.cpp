@@ -451,23 +451,25 @@ XRESULT D3D11GraphicsEngine::Init() {
 
 /** Called when the game created its window */
 XRESULT D3D11GraphicsEngine::SetWindow( HWND hWnd ) {
-    LogInfo() << "Creating swapchain";
-    OutputWindow = hWnd;
+    if ( !OutputWindow ) {
+        LogInfo() << "Creating swapchain";
+        OutputWindow = hWnd;
 
-    const INT2 res = Resolution;
+        const INT2 res = Resolution;
 
 #ifdef BUILD_SPACER
-    RECT r;
-    GetClientRect( hWnd, &r );
+        RECT r;
+        GetClientRect( hWnd, &r );
 
-    res.x = r.right;
-    res.y = r.bottom;
+        res.x = r.right;
+        res.y = r.bottom;
 #endif
-    if ( res.x != 0 && res.y != 0 ) OnResize( res );
+        if ( res.x != 0 && res.y != 0 ) OnResize( res );
 
-    // We need to update clip cursor here because we hook the window too late to receive proper window message
-    m_isWindowActive = (GetForegroundWindow() == hWnd);
-    UpdateClipCursor( hWnd );
+        // We need to update clip cursor here because we hook the window too late to receive proper window message
+        m_isWindowActive = (GetForegroundWindow() == hWnd);
+        UpdateClipCursor( hWnd );
+    }
 
     return XR_SUCCESS;
 }
@@ -1426,6 +1428,124 @@ XRESULT D3D11GraphicsEngine::BindViewportInformation( const std::string& shader,
         ps->GetConstantBuffer()[slot]->BindToVertexShader( slot );
     }
 
+    return XR_SUCCESS;
+}
+
+/** Draws a screen fade effects */
+XRESULT D3D11GraphicsEngine::DrawScreenFade( void* c ) {
+    zCCamera* camera = reinterpret_cast<zCCamera*>(c);
+
+    bool ResetStates = false;
+    if ( camera->HasCinemaScopeEnabled() ) {
+        camera->ResetCinemaScopeEnabled();
+        ResetStates = true;
+
+        zColor cinemaScopeColor = camera->GetCinemaScopeColor();
+
+        // Default states
+        SetDefaultStates();
+        Engine::GAPI->GetRendererState().BlendState.SetAlphaBlending();
+        Engine::GAPI->GetRendererState().BlendState.SetDirty();
+        Engine::GAPI->GetRendererState().DepthState.DepthBufferCompareFunc = GothicDepthBufferStateInfo::CF_COMPARISON_ALWAYS;
+        Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled = false;
+        Engine::GAPI->GetRendererState().DepthState.SetDirty();
+
+        SetActivePixelShader( "PS_PFX_CinemaScope" );
+        ActivePS->Apply();
+
+        SetActiveVertexShader( "VS_CinemaScope" );
+        ActiveVS->Apply();
+
+        GhostAlphaConstantBuffer colorBuffer;
+        colorBuffer.GA_Alpha = cinemaScopeColor.bgra.alpha / 255.f;
+        colorBuffer.GA_Pad.x = cinemaScopeColor.bgra.r / 255.f;
+        colorBuffer.GA_Pad.y = cinemaScopeColor.bgra.g / 255.f;
+        colorBuffer.GA_Pad.z = cinemaScopeColor.bgra.b / 255.f;
+        ActivePS->GetConstantBuffer()[0]->UpdateBuffer( &colorBuffer );
+        ActivePS->GetConstantBuffer()[0]->BindToPixelShader( 0 );
+
+        UpdateRenderStates();
+        GetContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+        GetContext()->Draw( 12, 0 );
+    }
+
+    if ( camera->HasScreenFadeEnabled() ) {
+        camera->ResetScreenFadeEnabled();
+        ResetStates = true;
+
+        bool haveTexture = true;
+        zCMaterial* material = reinterpret_cast<zCMaterial*>(camera->GetPolyMaterial());
+        if ( zCTexture* texture = material->GetAniTexture() ) {
+            if ( texture->CacheIn( 0.6f ) == zRES_CACHED_IN )
+                texture->Bind( 0 );
+            else
+                goto Continue_ResetState;
+        }
+        else
+            haveTexture = false;
+
+        zColor screenFadeColor = camera->GetScreenFadeColor();
+
+        // Default states
+        SetDefaultStates();
+        switch ( camera->GetScreenFadeBlendFunc() ) {
+            case zRND_ALPHA_FUNC_BLEND:
+            case zRND_ALPHA_FUNC_BLEND_TEST:
+            case zRND_ALPHA_FUNC_SUB: {
+                Engine::GAPI->GetRendererState().BlendState.SetAlphaBlending();
+                Engine::GAPI->GetRendererState().BlendState.SetDirty();
+                break;
+            }
+            case zRND_ALPHA_FUNC_ADD: {
+                Engine::GAPI->GetRendererState().BlendState.SetAdditiveBlending();
+                Engine::GAPI->GetRendererState().BlendState.SetDirty();
+                break;
+            }
+            case zRND_ALPHA_FUNC_MUL: {
+                Engine::GAPI->GetRendererState().BlendState.SetModulateBlending();
+                Engine::GAPI->GetRendererState().BlendState.SetDirty();
+                break;
+            }
+            case zRND_ALPHA_FUNC_MUL2: {
+                Engine::GAPI->GetRendererState().BlendState.SetModulate2Blending();
+                Engine::GAPI->GetRendererState().BlendState.SetDirty();
+                break;
+            }
+        }
+        Engine::GAPI->GetRendererState().DepthState.DepthBufferCompareFunc = GothicDepthBufferStateInfo::CF_COMPARISON_ALWAYS;
+        Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled = false;
+        Engine::GAPI->GetRendererState().DepthState.SetDirty();
+
+        if ( haveTexture )
+            SetActivePixelShader( "PS_PFX_Alpha_Blend" );
+        else
+            SetActivePixelShader( "PS_PFX_CinemaScope" );
+
+        ActivePS->Apply();
+
+        SetActiveVertexShader( "VS_PFX" );
+        ActiveVS->Apply();
+
+        GhostAlphaConstantBuffer colorBuffer;
+        colorBuffer.GA_Alpha = screenFadeColor.bgra.alpha / 255.f;
+        colorBuffer.GA_Pad.x = screenFadeColor.bgra.r / 255.f;
+        colorBuffer.GA_Pad.y = screenFadeColor.bgra.g / 255.f;
+        colorBuffer.GA_Pad.z = screenFadeColor.bgra.b / 255.f;
+        ActivePS->GetConstantBuffer()[0]->UpdateBuffer( &colorBuffer );
+        ActivePS->GetConstantBuffer()[0]->BindToPixelShader( 0 );
+
+        PfxRenderer->DrawFullScreenQuad();
+    }
+
+    Continue_ResetState:
+    if ( ResetStates ) {
+        // Enable blending, in case some modifications need it
+        SetDefaultStates();
+        Engine::GAPI->GetRendererState().BlendState.SetDefault();
+        Engine::GAPI->GetRendererState().BlendState.BlendEnabled = true;
+        Engine::GAPI->GetRendererState().BlendState.SetDirty();
+        UpdateRenderStates();
+    }
     return XR_SUCCESS;
 }
 
