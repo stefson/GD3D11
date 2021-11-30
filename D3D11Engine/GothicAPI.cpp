@@ -3826,6 +3826,8 @@ XRESULT GothicAPI::SaveMenuSettings( const std::string& file ) {
 
     WritePrivateProfileStringA( "Display", "StretchWindow", std::to_string( s.StretchWindow ? TRUE : FALSE ).c_str(), ini.c_str() );
     WritePrivateProfileStringA( "Display", "UIScale", std::to_string( s.GothicUIScale ).c_str(), ini.c_str() );
+    WritePrivateProfileStringA( "Display", "Rain", std::to_string( s.EnableRain ? TRUE : FALSE ).c_str(), ini.c_str() );
+    WritePrivateProfileStringA( "Display", "RainEffects", std::to_string( s.EnableRainEffects ? TRUE : FALSE ).c_str(), ini.c_str() );
 
     WritePrivateProfileStringA( "Shadows", "EnableShadows", std::to_string( s.EnableShadows ? TRUE : FALSE ).c_str(), ini.c_str() );
     WritePrivateProfileStringA( "Shadows", "EnableSoftShadows", std::to_string( s.EnableSoftShadows ? TRUE : FALSE ).c_str(), ini.c_str() );
@@ -3934,6 +3936,8 @@ XRESULT GothicAPI::LoadMenuSettings( const std::string& file ) {
     s.HDR_Monitor = GetPrivateProfileBoolA( "Display", "HDR_Monitor", false, ini );
     s.StretchWindow = GetPrivateProfileBoolA( "Display", "StretchWindow", false, ini );
     s.GothicUIScale = GetPrivateProfileFloatA( "Display", "UIScale", 1.0f, ini );
+    s.EnableRain = GetPrivateProfileBoolA( "Display", "Rain", true, ini );
+    s.EnableRainEffects = GetPrivateProfileBoolA( "Display", "RainEffects", true, ini );
 
     s.EnableSMAA = GetPrivateProfileBoolA( "SMAA", "Enabled", false, ini );
     s.SharpenFactor = GetPrivateProfileFloatA( "SMAA", "SharpenFactor", 0.30f, ini );
