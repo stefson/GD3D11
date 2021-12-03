@@ -955,7 +955,6 @@ void WorldConverter::ExtractSkeletalMeshFromVob( zCModel* model, SkeletalMeshVis
 
             ExSkelVertexStruct vx;
             //vx.Position = s->GetPositionList()->Array[i];
-            vx.Color = 0xFFFFFFFF;
             vx.Normal = float3( 0, 0, 0 );
             ZeroMemory( vx.weights, sizeof( vx.weights ) );
             ZeroMemory( vx.Position, sizeof( vx.Position ) );
@@ -971,9 +970,11 @@ void WorldConverter::ExtractSkeletalMeshFromVob( zCModel* model, SkeletalMeshVis
 
                 // Get index and weight
                 if ( n < 4 ) {
-                    vx.weights[n] = weightEntry.Weight;
+                    vx.weights[n] = quantizeHalfFloat( weightEntry.Weight );
                     vx.boneIndices[n] = weightEntry.NodeIndex;
-                    vx.Position[n] = weightEntry.VertexPosition;
+                    vx.Position[n][0] = quantizeHalfFloat( weightEntry.VertexPosition.x );
+                    vx.Position[n][1] = quantizeHalfFloat( weightEntry.VertexPosition.y );
+                    vx.Position[n][2] = quantizeHalfFloat( weightEntry.VertexPosition.z );
                 }
             }
 
@@ -1007,13 +1008,14 @@ void WorldConverter::ExtractSkeletalMeshFromVob( zCModel* model, SkeletalMeshVis
 
                 ExSkelVertexStruct& vx = vertices.back();
                 int normalPosition = static_cast<int>(wedge.position);
-                if ( normalPosition < nr->NumInArray )
+                if ( normalPosition < nr->NumInArray ) {
                     vx.Normal = nr->Array[normalPosition];
-                else
+                } else {
                     vx.Normal = wedge.normal;
+                }
 
+                vx.BindPoseNormal = wedge.normal;
                 vx.TexCoord = wedge.texUV;
-                vx.Color = 0xFFFFFFFF;
 
                 // Save vertexpos in bind pose, to run PNAEN on it
                 bindPoseVertices.emplace_back();
@@ -1021,7 +1023,7 @@ void WorldConverter::ExtractSkeletalMeshFromVob( zCModel* model, SkeletalMeshVis
                 pvx.Position = s->GetPositionList()->Array[wedge.position];
                 pvx.Normal = vx.Normal;
                 pvx.TexCoord = vx.TexCoord;
-                pvx.Color = vx.Color;
+                pvx.Color = 0xFFFFFFFF;
             }
 
             zCMaterial* mat = s->GetSubmesh( i )->Material;
@@ -1695,42 +1697,6 @@ void WorldConverter::IndexVertices( ExVertexStruct* input, unsigned int numInput
     // Notice that the vertices in the set are not sorted by the index
     // so you'll have to rearrange them like this:
     outVertices.clear();
-    outVertices.resize( vertices.size() );
-    for ( auto const& it : vertices )
-        outVertices[it.second] = it.first;
-}
-
-struct CmpClassSkel // class comparing vertices in the set
-{
-    bool operator() ( const std::pair<ExSkelVertexStruct, int>& p1, const std::pair<ExSkelVertexStruct, int>& p2 ) const {
-        for ( int i = 0; i < 4; i++ ) {
-            if ( fabs( p1.first.Position[i].x - p2.first.Position[i].x ) > eps ) return p1.first.Position[i].x < p2.first.Position[i].x;
-            if ( fabs( p1.first.Position[i].y - p2.first.Position[i].y ) > eps ) return p1.first.Position[i].y < p2.first.Position[i].y;
-            if ( fabs( p1.first.Position[i].z - p2.first.Position[i].z ) > eps ) return p1.first.Position[i].z < p2.first.Position[i].z;
-        }
-
-        if ( fabs( p1.first.TexCoord.x - p2.first.TexCoord.x ) > eps ) return p1.first.TexCoord.x < p2.first.TexCoord.x;
-        if ( fabs( p1.first.TexCoord.y - p2.first.TexCoord.y ) > eps ) return p1.first.TexCoord.y < p2.first.TexCoord.y;
-
-        return false;
-    }
-};
-
-void WorldConverter::IndexVertices( ExSkelVertexStruct* input, unsigned int numInputVertices, std::vector<ExSkelVertexStruct>& outVertices, std::vector<VERTEX_INDEX>& outIndices ) {
-    std::set<std::pair<ExSkelVertexStruct, int>, CmpClassSkel> vertices;
-    int index = 0;
-
-    for ( unsigned int i = 0; i < numInputVertices; i++ ) {
-        std::set<std::pair<ExSkelVertexStruct, int>>::iterator it = vertices.find( std::make_pair( input[i], 0/*this value doesn't matter*/ ) );
-        if ( it != vertices.end() ) outIndices.emplace_back( it->second );
-        else {
-            vertices.insert( std::make_pair( input[i], index ) );
-            outIndices.emplace_back( index++ );
-        }
-    }
-
-    // Notice that the vertices in the set are not sorted by the index
-    // so you'll have to rearrange them like this:
     outVertices.resize( vertices.size() );
     for ( auto const& it : vertices )
         outVertices[it.second] = it.first;

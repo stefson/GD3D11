@@ -29,10 +29,10 @@ cbuffer BoneTransforms : register( b2 )
 //--------------------------------------------------------------------------------------
 struct VS_INPUT
 {
-	float3 vPosition[4]	: POSITION;
+	float4 vPosition[4]	: POSITION;
 	float3 vNormal		: NORMAL;
-	float2 vTex1		: TEXCOORD0;
-	float4 vDiffuse		: DIFFUSE;
+	float3 vBindPoseNormal		: TEXCOORD0;
+	float2 vTex1		: TEXCOORD1;
 	uint4 BoneIndices : BONEIDS;
 	float4 Weights 	: WEIGHTS;
 };
@@ -54,10 +54,10 @@ VS_OUTPUT VSMain( VS_INPUT Input )
 	VS_OUTPUT Output;
 	
 	float3 position = float3(0, 0, 0);
-	position += Input.Weights.x * mul(float4(Input.vPosition[0], 1), BT_Transforms[Input.BoneIndices.x]).xyz;
-	position += Input.Weights.y * mul(float4(Input.vPosition[1], 1), BT_Transforms[Input.BoneIndices.y]).xyz;
-	position += Input.Weights.z * mul(float4(Input.vPosition[2], 1), BT_Transforms[Input.BoneIndices.z]).xyz;
-	position += Input.Weights.w * mul(float4(Input.vPosition[3], 1), BT_Transforms[Input.BoneIndices.w]).xyz;
+	position += Input.Weights.x * mul(float4(Input.vPosition[0].xyz, 1), BT_Transforms[Input.BoneIndices.x]).xyz;
+	position += Input.Weights.y * mul(float4(Input.vPosition[1].xyz, 1), BT_Transforms[Input.BoneIndices.y]).xyz;
+	position += Input.Weights.z * mul(float4(Input.vPosition[2].xyz, 1), BT_Transforms[Input.BoneIndices.z]).xyz;
+	position += Input.Weights.w * mul(float4(Input.vPosition[3].xyz, 1), BT_Transforms[Input.BoneIndices.w]).xyz;
 	
 	float3 normal = float3(0, 0, 0);
 	normal += Input.Weights.x * mul(Input.vNormal, (float3x3)BT_Transforms[Input.BoneIndices.x]);
@@ -72,7 +72,7 @@ VS_OUTPUT VSMain( VS_INPUT Input )
 	Output.vTexcoord2 = Input.vTex1;
 	Output.vTexcoord = Input.vTex1;
 	Output.vDiffuse  = PI_ModelColor;
-	Output.vNormalWS = mul(normal, (float3x3)M_World);
+	Output.vNormalWS = mul(Input.vBindPoseNormal, (float3x3)M_World);
 
 	
 	return Output;

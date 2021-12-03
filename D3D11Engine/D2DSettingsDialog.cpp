@@ -544,7 +544,16 @@ XRESULT D2DSettingsDialog::InitControls() {
     }
     rainEffectsCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.EnableRainEffects );
     rainEffectsCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.EnableRainEffects );
-    rainEffectsCheckbox->SetPosition( D2D1::Point2F( 170 + 160 + 20, rainEffectsCheckbox->GetPosition().y ) );
+
+    SV_Checkbox* lightCheckbox = new SV_Checkbox( MainView, MainPanel );
+    lightCheckbox->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 160, 20 ) );
+    lightCheckbox->AlignUnder( rainEffectsCheckbox, 15 );
+    switch ( userLanguage ) {
+    case LANGUAGE_POLISH: lightCheckbox->SetCaption( L"Ogranicz Natê¿enie Œwiat³a" ); break;
+    default: lightCheckbox->SetCaption( L"Limit Light Intesity" ); break;
+    }
+    lightCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.LimitLightIntesity );
+    lightCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.LimitLightIntesity );
 
     // Mode changing label
     SV_Label* modeChangingLabel = new SV_Label( MainView, MainPanel );

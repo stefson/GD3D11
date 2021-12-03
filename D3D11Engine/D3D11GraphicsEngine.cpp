@@ -976,11 +976,10 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
     // Notify the shader manager
     ShaderManager->OnFrameStart();
 
-    // Enable blending, in case some modifications need it
-    // and the ResetRenderStates won't be enough
-    Engine::GAPI->GetRendererState().BlendState.SetDefault();
-    Engine::GAPI->GetRendererState().BlendState.BlendEnabled = true;
-    Engine::GAPI->GetRendererState().BlendState.SetDirty();
+    // Disable culling for ui rendering(Sprite from LeGo needs it since it use CCW instead of CW order)
+    SetDefaultStates();
+    Engine::GAPI->GetRendererState().RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
+    Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
     UpdateRenderStates();
 
     // Bind HDR Back Buffer
@@ -1539,11 +1538,10 @@ XRESULT D3D11GraphicsEngine::DrawScreenFade( void* c ) {
 
     Continue_ResetState:
     if ( ResetStates ) {
-        // Enable blending, in case some modifications need it
+        // Disable culling for ui rendering(Sprite from LeGo needs it since it use CCW instead of CW order)
         SetDefaultStates();
-        Engine::GAPI->GetRendererState().BlendState.SetDefault();
-        Engine::GAPI->GetRendererState().BlendState.BlendEnabled = true;
-        Engine::GAPI->GetRendererState().BlendState.SetDirty();
+        Engine::GAPI->GetRendererState().RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
+        Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
         UpdateRenderStates();
     }
     return XR_SUCCESS;
@@ -2217,12 +2215,10 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
     GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
         nullptr );
 
-    // Enable blending, in case some modifications need it
-    // and the ResetRenderStates won't be enough
+    // Disable culling for ui rendering(Sprite from LeGo needs it since it use CCW instead of CW order)
     SetDefaultStates();
-    Engine::GAPI->GetRendererState().BlendState.SetDefault();
-    Engine::GAPI->GetRendererState().BlendState.BlendEnabled = true;
-    Engine::GAPI->GetRendererState().BlendState.SetDirty();
+    Engine::GAPI->GetRendererState().RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
+    Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
     UpdateRenderStates();
 
     // Save screenshot if wanted
@@ -4621,6 +4617,9 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
         WORLD_SECTION_SIZE );
 
     Engine::GAPI->GetRendererState().BlendState.SetAdditiveBlending();
+    if ( Engine::GAPI->GetRendererState().RendererSettings.LimitLightIntesity ) {
+        Engine::GAPI->GetRendererState().BlendState.BlendOp = GothicBlendStateInfo::BO_BLEND_OP_MAX;
+    }
     Engine::GAPI->GetRendererState().BlendState.SetDirty();
 
     Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled = false;
@@ -4757,6 +4756,9 @@ XRESULT D3D11GraphicsEngine::DrawLighting( std::vector<VobLightInfo*>& lights ) 
 
         Engine::GAPI->GetRendererState().RendererInfo.FrameDrawnLights++;
     }
+
+    Engine::GAPI->GetRendererState().BlendState.BlendOp = GothicBlendStateInfo::BO_BLEND_OP_ADD;
+    Engine::GAPI->GetRendererState().BlendState.SetDirty();
 
     Engine::GAPI->GetRendererState().DepthState.DepthBufferCompareFunc = GothicDepthBufferStateInfo::CF_COMPARISON_ALWAYS;
     Engine::GAPI->GetRendererState().DepthState.SetDirty();

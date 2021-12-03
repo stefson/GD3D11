@@ -27,7 +27,7 @@
 #define stdext std
 #endif
 
-#define VERSION_NUMBER "17.7-dev32"
+#define VERSION_NUMBER "17.7-dev33"
 __declspec(selectany) const char* VERSION_NUMBER_STR = VERSION_NUMBER;
 
 extern bool FeatureLevel10Compatibility;
@@ -53,4 +53,17 @@ void DebugWrite_i( LPCSTR lpDebugMessage, void* thisptr );
 /** Computes the size in bytes of the given FVF */
 int ComputeFVFSize( DWORD fvf );
 
+inline unsigned short quantizeHalfFloat( float v )
+{
+    union { float f; unsigned int ui; } u = { v };
+    unsigned int ui = u.ui;
 
+    int s = (ui >> 16) & 0x8000;
+    int em = ui & 0x7fffffff;
+
+    int h = (em - (112 << 23) + (1 << 12)) >> 13;
+    h = (em < (113 << 23)) ? 0 : h;
+    h = (em >= (143 << 23)) ? 0x7c00 : h;
+    h = (em > ( 255 << 23 )) ? 0x7e00 : h;
+    return (unsigned short)(s | h);
+}

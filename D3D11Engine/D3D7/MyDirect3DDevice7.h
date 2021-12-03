@@ -741,12 +741,6 @@ public:
 				exv[i].Color = rhw[i].color;
 			}
 
-            if ( Engine::GAPI->GetRendererState().RasterizerState.FrontCounterClockwise ) {
-                // Some mods can change winding order
-                Engine::GAPI->GetRendererState().RasterizerState.FrontCounterClockwise = false;
-                Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
-            }
-
 			Engine::GraphicsEngine->SetActiveVertexShader( "VS_TransformedEx" );
 			Engine::GraphicsEngine->BindViewportInformation( "VS_TransformedEx", 0 );
 			break;

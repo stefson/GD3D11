@@ -637,6 +637,7 @@ struct GothicRendererSettings {
         GothicUIScale = 1.0f;
         //DisableEverything();
 
+        LimitLightIntesity = false;
         AllowNormalmaps = true;
 
         AllowNumpadKeys = false;
@@ -786,6 +787,7 @@ struct GothicRendererSettings {
     bool EnableRain;
     bool EnableRainEffects;
 
+    bool LimitLightIntesity;
     bool AllowNormalmaps;
 
     bool AllowNumpadKeys;
