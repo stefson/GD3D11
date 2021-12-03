@@ -1,15 +1,14 @@
 /*
----------------------------------------------------------------------------
 Open Asset Import Library (assimp)
----------------------------------------------------------------------------
+----------------------------------------------------------------------
 
 Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
-with or without modification, are permitted provided that the following
-conditions are met:
+with or without modification, are permitted provided that the
+following conditions are met:
 
 * Redistributions of source code must retain the above
   copyright notice, this list of conditions and the
@@ -36,34 +35,22 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
----------------------------------------------------------------------------
+
+----------------------------------------------------------------------
 */
 
-/** @file commonMetaData.h
- *  @brief Defines a set of common scene metadata keys.
+/** @file ColladaMetaData.h
+ * Declares common metadata constants used by Collada files
  */
 #pragma once
-#ifndef AI_COMMONMETADATA_H_INC
-#define AI_COMMONMETADATA_H_INC
+#ifndef AI_COLLADAMETADATA_H_INC
+#define AI_COLLADAMETADATA_H_INC
 
 #ifdef __GNUC__
 #pragma GCC system_header
 #endif
 
-/// Scene metadata holding the name of the importer which loaded the source asset.
-/// This is always present if the scene was created from an imported asset.
-#define AI_METADATA_SOURCE_FORMAT "SourceAsset_Format"
-
-/// Scene metadata holding the version of the source asset as a string, if available.
-/// Not all formats add this metadata.
-#define AI_METADATA_SOURCE_FORMAT_VERSION "SourceAsset_FormatVersion"
-
-/// Scene metadata holding the name of the software which generated the source asset, if available.
-/// Not all formats add this metadata.
-#define AI_METADATA_SOURCE_GENERATOR "SourceAsset_Generator"
-
-/// Scene metadata holding the source asset copyright statement, if available.
-/// Not all formats add this metadata.
-#define AI_METADATA_SOURCE_COPYRIGHT "SourceAsset_Copyright"
+#define AI_METADATA_COLLADA_ID "Collada_id"
+#define AI_METADATA_COLLADA_SID "Collada_sid"
 
 #endif
