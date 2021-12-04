@@ -5041,6 +5041,10 @@ void D3D11GraphicsEngine::DrawVobSingle( VobInfo* vob ) {
     GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
         DepthStencilBuffer->GetDepthStencilView().Get() );
 
+    // Set backface culling
+    Engine::GAPI->GetRendererState().RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_BACK;
+    Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
+
     XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
     Engine::GAPI->SetViewTransformXM( view );
 
@@ -5074,6 +5078,10 @@ void D3D11GraphicsEngine::DrawVobSingle( VobInfo* vob ) {
     }
 
     GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(), nullptr );
+
+    // Disable culling again
+    Engine::GAPI->GetRendererState().RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
+    Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
 }
 
 /** Draws a multiple VOBs (used for inventory) */
@@ -5098,6 +5106,10 @@ void D3D11GraphicsEngine::DrawVobsList( const std::list<VobInfo*>& vobs, zCCamer
     Engine::GAPI->SetViewTransformXM( XMLoadFloat4x4( &camera.GetTransformDX( zCCamera::ETransformType::TT_VIEW ) ) );
     GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
         DepthStencilBuffer->GetDepthStencilView().Get() );
+
+    // Set backface culling
+    Engine::GAPI->GetRendererState().RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_BACK;
+    Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
 
     SetActivePixelShader( "PS_Preview_Textured" );
     SetActiveVertexShader( "VS_Ex" );
@@ -5131,6 +5143,10 @@ void D3D11GraphicsEngine::DrawVobsList( const std::list<VobInfo*>& vobs, zCCamer
     }
 
     GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(), nullptr );
+
+    // Disable culling again
+    Engine::GAPI->GetRendererState().RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
+    Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
 }
 
 /** Update clipping cursor onto window */
