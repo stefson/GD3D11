@@ -455,6 +455,22 @@ XRESULT D3D11GraphicsEngine::SetWindow( HWND hWnd ) {
         LogInfo() << "Creating swapchain";
         OutputWindow = hWnd;
 
+        // Force activate the window on startup
+        {
+            HWND hCurWnd = GetForegroundWindow();
+            DWORD dwMyID = GetCurrentThreadId();
+            DWORD dwCurID = GetWindowThreadProcessId( hCurWnd, NULL );
+            m_isWindowActive = true;
+
+            AttachThreadInput( dwCurID, dwMyID, TRUE );
+            SetWindowPos( hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE );
+            SetWindowPos( hWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_SHOWWINDOW | SWP_NOSIZE | SWP_NOMOVE );
+            SetForegroundWindow( hWnd );
+            SetFocus( hWnd );
+            SetActiveWindow( hWnd );
+            AttachThreadInput( dwCurID, dwMyID, FALSE );
+        }
+
         const INT2 res = Resolution;
 
 #ifdef BUILD_SPACER
@@ -467,8 +483,10 @@ XRESULT D3D11GraphicsEngine::SetWindow( HWND hWnd ) {
         if ( res.x != 0 && res.y != 0 ) OnResize( res );
 
         // We need to update clip cursor here because we hook the window too late to receive proper window message
-        m_isWindowActive = (GetForegroundWindow() == hWnd);
         UpdateClipCursor( hWnd );
+
+        // Force hide mouse cursor
+        while ( ShowCursor( false ) >= 0 );
     }
 
     return XR_SUCCESS;
@@ -575,13 +593,13 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
     } else if ( Engine::GAPI->GetRendererState().RendererSettings.StretchWindow ) {
         RECT desktopRect;
         GetClientRect( GetDesktopWindow(), &desktopRect );
-        SetWindowPos( OutputWindow, nullptr, 0, 0, desktopRect.right, desktopRect.bottom, 0 );
+        SetWindowPos( OutputWindow, nullptr, 0, 0, desktopRect.right, desktopRect.bottom, SWP_SHOWWINDOW );
     } else {
         RECT rect;
         if ( GetWindowRect( OutputWindow, &rect ) ) {
-            SetWindowPos( OutputWindow, nullptr, rect.left, rect.top, bbres.x, bbres.y, 0 );
+            SetWindowPos( OutputWindow, nullptr, rect.left, rect.top, bbres.x, bbres.y, SWP_SHOWWINDOW );
         } else {
-            SetWindowPos( OutputWindow, nullptr, 0, 0, bbres.x, bbres.y, 0 );
+            SetWindowPos( OutputWindow, nullptr, 0, 0, bbres.x, bbres.y, SWP_SHOWWINDOW );
         }
     }
 #endif

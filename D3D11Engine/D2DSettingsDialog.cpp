@@ -550,7 +550,7 @@ XRESULT D2DSettingsDialog::InitControls() {
     lightCheckbox->AlignUnder( rainEffectsCheckbox, 15 );
     switch ( userLanguage ) {
     case LANGUAGE_POLISH: lightCheckbox->SetCaption( L"Ogranicz Natê¿enie Œwiat³a" ); break;
-    default: lightCheckbox->SetCaption( L"Limit Light Intesity" ); break;
+    default: lightCheckbox->SetCaption( L"Limit Light Intensity" ); break;
     }
     lightCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.LimitLightIntesity );
     lightCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.LimitLightIntesity );

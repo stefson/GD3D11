@@ -427,7 +427,11 @@ void GothicAPI::SetEnableGothicInput( bool value ) {
     input->ClearKeyBuffer();
 
     // Sometimes without this cursor aren't visible(it is only here as precaution)
-    ShowCursor( value ? FALSE : TRUE );
+    if ( value ) {
+        while ( ShowCursor( false ) >= 0 );
+    } else {
+        while ( ShowCursor( true ) < 0 );
+    }
 
     IDirectInputDevice7A* dInputMouse = *(IDirectInputDevice7A**)GothicMemoryLocations::GlobalObjects::DInput7DeviceMouse;
     IDirectInputDevice7A* dInputKeyboard = *(IDirectInputDevice7A**)GothicMemoryLocations::GlobalObjects::DInput7DeviceKeyboard;

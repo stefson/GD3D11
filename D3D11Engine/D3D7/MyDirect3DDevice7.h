@@ -267,7 +267,7 @@ public:
 		case D3DRENDERSTATE_ALPHATESTENABLE: state.GraphicsState.SetGraphicsSwitch( GSWITCH_ALPHAREF, Value != 0 );	break;
 		case D3DRENDERSTATE_SRCBLEND: state.BlendState.SrcBlend = static_cast<GothicBlendStateInfo::EBlendFunc>(Value); state.BlendState.SetDirty(); break;
 		case D3DRENDERSTATE_DESTBLEND: state.BlendState.DestBlend = static_cast<GothicBlendStateInfo::EBlendFunc>(Value); state.BlendState.SetDirty(); break;
-		case D3DRENDERSTATE_CULLMODE: state.RasterizerState.CullMode = static_cast<GothicRasterizerStateInfo::ECullMode>(Value); state.RasterizerState.SetDirty(); break;
+		//case D3DRENDERSTATE_CULLMODE: state.RasterizerState.CullMode = static_cast<GothicRasterizerStateInfo::ECullMode>(Value); state.RasterizerState.SetDirty(); break;
 		case D3DRENDERSTATE_ZFUNC: state.DepthState.DepthBufferCompareFunc = static_cast<GothicDepthBufferStateInfo::ECompareFunc>(Value); state.DepthState.SetDirty(); break;
 		case D3DRENDERSTATE_ALPHAREF: state.GraphicsState.FF_AlphaRef = static_cast<float>(Value) / 255.0f; break; // Ref for masked
 		case D3DRENDERSTATE_ALPHABLENDENABLE: state.BlendState.BlendEnabled = Value != 0; state.BlendState.SetDirty(); break;
