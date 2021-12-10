@@ -207,6 +207,9 @@ public:
     /** Handles an UI-Event */
     virtual void OnUIEvent( EUIEvent uiEvent ) {}
 
+    /** Draws particle meshes */
+    virtual void DrawFrameParticleMeshes( std::unordered_map<zCVob*, MeshVisualInfo*>& progMeshes ) {}
+
     /** Draws particle effects */
     virtual void DrawFrameParticles( std::map<zCTexture*, std::vector<ParticleInstanceInfo>>& particles, std::map<zCTexture*, ParticleRenderInfo>& info ) {}
 

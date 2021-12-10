@@ -147,6 +147,7 @@ public:
     bool BindTextureNRFX( zCTexture* tex, bool bindShader );
 
     /** Draws a skeletal mesh */
+    XRESULT DrawSkeletalVertexNormals( SkeletalVobInfo* vi, const std::vector<DirectX::XMFLOAT4X4>& transforms, float4 color, float fatness = 1.0f );
     virtual XRESULT DrawSkeletalMesh( SkeletalVobInfo* vi, const std::vector<DirectX::XMFLOAT4X4>& transforms, float4 color, float fatness = 1.0f ) override;
 
     /** Draws a screen fade effects */
@@ -180,6 +181,7 @@ public:
 
     /** Draws quadmarks in a simple way */
     void DrawQuadMarks();
+    void DrawMQuadMarks();
 
     /** Draws the ocean */
     XRESULT DrawOcean( GOcean* ocean );
@@ -322,6 +324,9 @@ public:
     /** Copies the depth stencil buffer to DepthStencilBufferCopy */
     void CopyDepthStencil();
 
+    /** Draws particle meshes */
+    void DrawFrameParticleMeshes( std::unordered_map<zCVob*, MeshVisualInfo*>& progMeshes );
+
     /** Draws particle effects */
     void DrawFrameParticles( std::map<zCTexture*, std::vector<ParticleInstanceInfo>>& particles, std::map<zCTexture*, ParticleRenderInfo>& info );
 
@@ -384,6 +389,9 @@ protected:
     /** Shadowing */
     std::unique_ptr<RenderToDepthStencilBuffer> WorldShadowmap1;
     std::vector<VobInfo*> RenderedVobs;
+
+    /** Modulate Quad Marks */
+    std::vector<std::pair<zCQuadMark*, const QuadMarkInfo*>> MulQuadMarks;
 
     /** The current rendering stage */
     D3D11ENGINE_RENDER_STAGE RenderingStage;

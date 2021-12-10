@@ -122,8 +122,11 @@ struct GothicMemoryLocations {
         static const unsigned int Offset_VisIsQuadPoly = 0x190;
         static const unsigned int Offset_VisTexture = 0x2DC;
         static const unsigned int Offset_VisAlignment = 0x2E4;
-
         static const unsigned int Offset_VisAlphaBlendFunc = 0x308;
+
+        static const unsigned int Offset_VisShpRender = 0xBC;
+        static const unsigned int Offset_VisShpType = 0x258;
+        static const unsigned int Offset_VisShpMesh = 0x26C;
     };
 
     struct zCStaticPfxList {

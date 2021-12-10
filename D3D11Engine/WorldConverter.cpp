@@ -142,7 +142,7 @@ XRESULT WorldConverter::LoadWorldMeshFromFile( const std::string& file, std::map
         zCMaterial* mat = Engine::GAPI->GetMaterialByTextureName( textures[m] );
         MeshKey key;
         key.Material = mat;
-        key.Texture = mat != nullptr ? mat->GetTexture() : nullptr;
+        key.Texture = mat != nullptr ? mat->GetTextureSingle() : nullptr;
 
         // Save missing textures
         if ( !mat ) {
@@ -150,7 +150,7 @@ XRESULT WorldConverter::LoadWorldMeshFromFile( const std::string& file, std::map
         } else {
             if ( mat->GetMatGroup() == zMAT_GROUP_WATER ) {
                 // Give water surfaces a water-shader
-                MaterialInfo* info = Engine::GAPI->GetMaterialInfoFrom( mat->GetTexture() );
+                MaterialInfo* info = Engine::GAPI->GetMaterialInfoFrom( mat->GetTextureSingle() );
                 if ( info ) {
                     info->PixelShader = "PS_Water";
                     info->MaterialType = MaterialInfo::MT_Water;
@@ -396,7 +396,7 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN( zCPolygon** polys, unsigned int n
 
         zCMaterial* mat = poly->GetMaterial();
         MeshKey key;
-        key.Texture = mat != nullptr ? mat->GetTexture() : nullptr;
+        key.Texture = mat != nullptr ? mat->GetTextureSingle() : nullptr;
         key.Material = mat;
 
         //key.Lightmap = poly->GetLightmap();
@@ -415,7 +415,7 @@ HRESULT WorldConverter::ConvertWorldMeshPNAEN( zCPolygon** polys, unsigned int n
 
         if ( poly->GetMaterial() && poly->GetMaterial()->GetMatGroup() == zMAT_GROUP_WATER ) {
             // Give water surfaces a water-shader
-            MaterialInfo* polyInfo = Engine::GAPI->GetMaterialInfoFrom( poly->GetMaterial()->GetTexture() );
+            MaterialInfo* polyInfo = Engine::GAPI->GetMaterialInfoFrom( poly->GetMaterial()->GetTextureSingle() );
             if ( polyInfo ) {
                 polyInfo->PixelShader = "PS_Water";
                 polyInfo->MaterialType = MaterialInfo::MT_Water;
@@ -623,7 +623,7 @@ HRESULT WorldConverter::ConvertWorldMesh( zCPolygon** polys, unsigned int numPol
         // Use the map to put the polygon to those using the same material
 
         MeshKey key;
-        key.Texture = mat != nullptr ? mat->GetTexture() : nullptr;
+        key.Texture = mat != nullptr ? mat->GetTextureSingle() : nullptr;
         key.Material = mat;
 
         //key.Lightmap = poly->GetLightmap();
@@ -1183,7 +1183,7 @@ void WorldConverter::ExtractProgMeshProtoFromModel( zCModel* model, MeshVisualIn
 
             MeshKey key;
             key.Material = mat;
-            key.Texture = mat->GetTexture();
+            key.Texture = mat->GetTextureSingle();
             key.Info = Engine::GAPI->GetMaterialInfoFrom( key.Texture );
 
             meshInfo->MeshesByTexture[key].emplace_back( mi );
@@ -1235,6 +1235,55 @@ void WorldConverter::ExtractProgMeshProtoFromModel( zCModel* model, MeshVisualIn
         meshInfo->CreatePNAENInfo( meshInfo->TesselationInfo.buffer.VT_DisplacementStrength > 0.0f );
 
     mds.Delete();
+}
+
+/** Extracts a zCProgMeshProto from a zCMesh */
+void WorldConverter::ExtractProgMeshProtoFromMesh( zCMesh* mesh, MeshVisualInfo* meshInfo ) {
+    zCPolygon** polys = mesh->GetPolygons();
+    int numPolys = mesh->GetNumPolygons();
+    zCMaterial* mat = (numPolys > 0 ? polys[0]->GetMaterial() : nullptr);
+
+    std::vector<ExVertexStruct> vertices;
+    std::vector<VERTEX_INDEX> indices;
+    for ( int i = 0; i < numPolys; i++ ) {
+        zCPolygon* poly = polys[i];
+
+        // Extract poly vertices
+        std::vector<ExVertexStruct> polyVertices;
+        polyVertices.reserve( poly->GetNumPolyVertices() );
+        for ( int v = 0; v < poly->GetNumPolyVertices(); v++ ) {
+            zCVertex* vertex = poly->getVertices()[v];
+            zCVertFeature* feature = poly->getFeatures()[v];
+
+            polyVertices.emplace_back();
+            ExVertexStruct& t = polyVertices.back();
+            t.Position = vertex->Position;
+            t.TexCoord = feature->texCoord;
+            t.Normal = feature->normal;
+            t.Color = feature->lightStatic;
+        }
+
+        // Make triangles
+        TriangleFanToList( &polyVertices[0], polyVertices.size(), &vertices );
+    }
+    for ( VERTEX_INDEX i = 0; i < static_cast<VERTEX_INDEX>(vertices.size()); ++i ) {
+        indices.push_back( i );
+    }
+
+    MeshInfo* mi = new MeshInfo;
+    mi->Vertices = vertices;
+    mi->Indices = indices;
+
+    // Create the buffers
+    Engine::GraphicsEngine->CreateVertexBuffer( &mi->MeshVertexBuffer );
+    Engine::GraphicsEngine->CreateVertexBuffer( &mi->MeshIndexBuffer );
+
+    // Init and fill it
+    mi->MeshVertexBuffer->Init( &vertices[0], vertices.size() * sizeof( ExVertexStruct ) );
+    mi->MeshIndexBuffer->Init( &indices[0], indices.size() * sizeof( VERTEX_INDEX ), D3D11VertexBuffer::B_INDEXBUFFER );
+
+    meshInfo->Meshes[mat].emplace_back( mi );
+    meshInfo->Visual = reinterpret_cast<zCVisual*>(mesh);
 }
 
 /** Extracts a node-visual */
@@ -1353,7 +1402,7 @@ void WorldConverter::Extract3DSMeshFromVisual2PNAEN( zCProgMeshProto* visual, Me
 
         MeshKey key;
         key.Material = mat;
-        key.Texture = mat->GetTexture();
+        key.Texture = mat->GetTextureSingle();
         key.Info = Engine::GAPI->GetMaterialInfoFrom( key.Texture );
 
         // ** PNAEN **
@@ -1544,7 +1593,7 @@ void WorldConverter::Extract3DSMeshFromVisual2( zCProgMeshProto* visual, MeshVis
 
         MeshKey key;
         key.Material = mat;
-        key.Texture = mat->GetTexture();
+        key.Texture = mat->GetTextureSingle();
         key.Info = Engine::GAPI->GetMaterialInfoFrom( key.Texture );
 
         meshInfo->MeshesByTexture[key].emplace_back( mi );
@@ -1855,6 +1904,7 @@ void WorldConverter::CacheMesh( const std::map<std::string, std::vector<std::pai
 void WorldConverter::UpdateQuadMarkInfo( QuadMarkInfo* info, zCQuadMark* mark, const float3& position ) {
     zCMesh* mesh = mark->GetQuadMesh();
 
+    zCMaterial* mat = mark->GetMaterial();
     zCPolygon** polys = mesh->GetPolygons();
     int numPolys = mesh->GetNumPolygons();
 
@@ -1874,7 +1924,10 @@ void WorldConverter::UpdateQuadMarkInfo( QuadMarkInfo* info, zCQuadMark* mark, c
             t.Position = vertex->Position;
             t.TexCoord = feature->texCoord;
             t.Normal = feature->normal;
-            t.Color = feature->lightStatic;
+            if ( mat && (mat->GetAlphaFunc() == zMAT_ALPHA_FUNC_MUL || mat->GetAlphaFunc() == zMAT_ALPHA_FUNC_MUL2) )
+                t.Color = 0xFFFFFFFF;
+            else
+                t.Color = feature->lightStatic;
 
             t.TexCoord.x = std::min( 1.0f, std::max( 0.0f, t.TexCoord.x ) );
             t.TexCoord.y = std::min( 1.0f, std::max( 0.0f, t.TexCoord.y ) );

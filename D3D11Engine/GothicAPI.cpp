@@ -551,6 +551,10 @@ void GothicAPI::ResetVobs() {
     ResetVegetation();
 
     // Clear helper-lists
+    for ( zCVob* vob : ParticleEffectVobs ) {
+        DestroyParticleEffect( vob );
+    }
+
     ParticleEffectVobs.clear();
     RegisteredVobs.clear();
     BspLeafVobLists.clear();
@@ -966,6 +970,8 @@ void GothicAPI::DrawWorldMeshNaive() {
             }
 
             DrawSkeletalMeshVob( vobInfo, dist );
+            if( RendererState.RendererSettings.ShowSkeletalVertexNormals )
+                VNSkeletalVobs.emplace_back( vobInfo );
         }
     }
     STOP_TIMING( GothicRendererTiming::TT_SkeletalMeshes );
@@ -994,6 +1000,7 @@ void GothicAPI::DrawParticlesSimple() {
             }
         }
 
+        Engine::GraphicsEngine->DrawFrameParticleMeshes( ParticleEffectProgMeshes );
         Engine::GraphicsEngine->DrawFrameParticles( FrameParticles, FrameParticleInfo );
     }
 }
@@ -1419,6 +1426,7 @@ void GothicAPI::OnRemovedVob( zCVob* vob, zCWorld* world ) {
     // Erase it from the particle-effect list
     auto pit = std::find( ParticleEffectVobs.begin(), ParticleEffectVobs.end(), vob );
     if ( pit != ParticleEffectVobs.end() ) {
+        DestroyParticleEffect( *pit );
         *pit = ParticleEffectVobs.back();
         ParticleEffectVobs.pop_back();
     }
@@ -1993,6 +2001,47 @@ void GothicAPI::DrawSkeletalGhosts() {
     }
 }
 
+void GothicAPI::DrawSkeletalVN() {
+    while ( !VNSkeletalVobs.empty() ) {
+        SkeletalVobInfo* vi = VNSkeletalVobs.back();
+
+        RendererState.RasterizerState.SetDefault();
+        RendererState.RasterizerState.SetDirty();
+        RendererState.BlendState.SetAlphaBlending();
+        RendererState.BlendState.SetDirty();
+        RendererState.DepthState.SetDefault();
+        RendererState.DepthState.SetDirty();
+
+        D3D11GraphicsEngine* g = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
+
+        zCModel* model = (zCModel*)vi->Vob->GetVisual();
+        SkeletalMeshVisualInfo* visual = ((SkeletalMeshVisualInfo*)vi->VisualInfo);
+
+        if ( model && vi->VisualInfo ) {
+            XMMATRIX scale = XMMatrixScalingFromVector( model->GetModelScaleXM() );
+
+            XMMATRIX world = vi->Vob->GetWorldMatrixXM() * scale;
+
+            zCCamera::GetCamera()->SetTransformXM( zCCamera::TT_WORLD, world );
+
+            XMMATRIX view = GetViewMatrixXM();
+            SetWorldViewTransform( world, view );
+
+            float fatness = model->GetModelFatness();
+
+            // Get the bone transforms
+            std::vector<XMFLOAT4X4> transforms;
+            model->GetBoneTransforms( &transforms, vi->Vob );
+
+            if ( !((SkeletalMeshVisualInfo*)vi->VisualInfo)->SkeletalMeshes.empty() ) {
+                g->DrawSkeletalVertexNormals( vi, transforms, 0xFFFFFF, fatness );
+            }
+        }
+
+        VNSkeletalVobs.pop_back();
+    }
+}
+
 /** Called when a particle system got removed */
 void GothicAPI::OnParticleFXDeleted( zCParticleFX* pfx ) {
     // Remove this from our list
@@ -2000,6 +2049,7 @@ void GothicAPI::OnParticleFXDeleted( zCParticleFX* pfx ) {
     while ( i < end ) {
         zCVob* pfxVob = ParticleEffectVobs[i];
         if ( pfxVob->GetVisual() == (zCVisual*)pfx ) {
+            DestroyParticleEffect( ParticleEffectVobs[i] );
             ParticleEffectVobs[i] = ParticleEffectVobs.back();
             ParticleEffectVobs.pop_back();
             --end;
@@ -2023,6 +2073,9 @@ void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameDa
         // Get texture
         zCTexture* texture = nullptr;
         if ( zCParticleEmitter* emitter = fx->GetEmitter() ) {
+            if ( emitter->GetVisShpType() == 5 && ParticleEffectProgMeshes.find(source) == ParticleEffectProgMeshes.end() ) {
+                AddParticleEffect( source );
+            }
             if ( (texture = emitter->GetVisTexture()) != nullptr ) {
                 // Check if it's loaded
                 if ( texture->CacheIn( 0.6f ) != zRES_CACHED_IN ) {
@@ -2042,7 +2095,11 @@ void GothicAPI::DrawParticleFX( zCVob* source, zCParticleFX* fx, ParticleFrameDa
             inf.BlendMode = zRND_ALPHA_FUNC_ADD;
             break;
 
-        case zRND_ALPHA_FUNC_BLEND:
+        case zRND_ALPHA_FUNC_MUL:
+            inf.BlendState.SetModulateBlending();
+            inf.BlendMode = zRND_ALPHA_FUNC_MUL;
+            break;
+
         default:
             inf.BlendState.SetAlphaBlending();
             inf.BlendMode = zRND_ALPHA_FUNC_BLEND;
@@ -4144,6 +4201,38 @@ void GothicAPI::DrawMorphMesh( zCMorphMesh* msh, std::map<zCMaterial*, std::vect
             }
         }
         Out_Of_Nested_Loop:;
+    }
+}
+
+/** Add particle effect */
+void GothicAPI::AddParticleEffect( zCVob* vob ) {
+    if ( zCParticleFX* particle = reinterpret_cast<zCParticleFX*>(vob->GetVisual()) ) {
+        if ( zCParticleEmitter* emitter = particle->GetEmitter() ) {
+            if ( emitter->GetVisShpType() == 5 ) {
+                if ( zCModel* model = emitter->GetVisShpModel() ) {
+                    MeshVisualInfo* mi = new MeshVisualInfo;
+                    WorldConverter::ExtractProgMeshProtoFromModel( model, mi );
+                    ParticleEffectProgMeshes[vob] = mi;
+                } else if ( zCProgMeshProto* progMesh = emitter->GetVisShpProgMesh() ) {
+                    MeshVisualInfo* mi = new MeshVisualInfo;
+                    WorldConverter::Extract3DSMeshFromVisual2( progMesh, mi );
+                    ParticleEffectProgMeshes[vob] = mi;
+                } else if ( zCMesh* mesh = emitter->GetVisShpMesh() ) {
+                    MeshVisualInfo* mi = new MeshVisualInfo;
+                    WorldConverter::ExtractProgMeshProtoFromMesh( mesh, mi );
+                    ParticleEffectProgMeshes[vob] = mi;
+                }
+            }
+        }
+    }
+}
+
+/** Destroy particle effect */
+void GothicAPI::DestroyParticleEffect( zCVob* vob ) {
+    auto it = ParticleEffectProgMeshes.find(vob);
+    if ( it != ParticleEffectProgMeshes.end() ) {
+        delete it->second;
+        ParticleEffectProgMeshes.erase( it );
     }
 }
 

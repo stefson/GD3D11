@@ -16,6 +16,7 @@ enum EZParticleAlignment {
 class zSTRING;
 class zCPolyStrip;
 class zCMesh;
+class zCProgMeshProto;
 
 struct zTParticle {
     zTParticle* Next;
@@ -60,9 +61,15 @@ public:
         return *(int*)THISPTR_OFFSET( GothicMemoryLocations::zCParticleEmitter::Offset_VisAlignment );
     }
 
+    int GetVisShpRender() {
+        return *(int*)THISPTR_OFFSET( GothicMemoryLocations::zCParticleEmitter::Offset_VisShpRender );
+    }
+
+    int GetVisShpType() {
+        return *(int*)THISPTR_OFFSET( GothicMemoryLocations::zCParticleEmitter::Offset_VisShpType );
+    }
+
 #ifndef BUILD_GOTHIC_1_08k
-
-
     int GetVisTexAniIsLooping() {
         return *(int*)THISPTR_OFFSET( GothicMemoryLocations::zCParticleEmitter::Offset_VisTexAniIsLooping );
     }
@@ -75,8 +82,17 @@ public:
         return *(float*)THISPTR_OFFSET( GothicMemoryLocations::zCParticleEmitter::Offset_AlphaDist );
     }
 
+    zCMesh* GetVisShpMesh() {
+        return *(zCMesh**)THISPTR_OFFSET( GothicMemoryLocations::zCParticleEmitter::Offset_VisShpMesh );
+    }
 
+    zCProgMeshProto* GetVisShpProgMesh() {
+        return *(zCProgMeshProto**)THISPTR_OFFSET( GothicMemoryLocations::zCParticleEmitter::Offset_VisShpProgMesh );
+    }
 
+    zCModel* GetVisShpModel() {
+        return *(zCModel**)THISPTR_OFFSET( GothicMemoryLocations::zCParticleEmitter::Offset_VisShpModel );
+    }
 #else
     int GetVisTexAniIsLooping() {
         return 0;
@@ -88,6 +104,18 @@ public:
 
     float GetVisAlphaStart() {
         return 0;
+    }
+
+    zCMesh* GetVisShpMesh() {
+        return *(zCMesh**)THISPTR_OFFSET( GothicMemoryLocations::zCParticleEmitter::Offset_VisShpMesh );
+    }
+
+    zCProgMeshProto* GetVisShpProgMesh() {
+        return nullptr;
+    }
+
+    zCModel* GetVisShpModel() {
+        return nullptr;
     }
 #endif
 };

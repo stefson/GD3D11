@@ -259,6 +259,7 @@ public:
     /** Draws a skeletal mesh-vob */
     void DrawSkeletalMeshVob( SkeletalVobInfo* vi, float distance, bool updateState = true );
     void DrawSkeletalGhosts();
+    void DrawSkeletalVN();
 
     /** Draws the inventory */
     void DrawInventory( zCWorld* world, zCCamera& camera );
@@ -320,6 +321,12 @@ public:
 
     /** Debugging */
     void DrawTriangle( float3 pos );
+
+    /** Add particle effect */
+    void AddParticleEffect( zCVob* vob );
+
+    /** Destroy particle effect */
+    void DestroyParticleEffect( zCVob* vob );
 
     /** Removes the given quadmark */
     void RemoveQuadMark( zCQuadMark* mark );
@@ -712,11 +719,15 @@ private:
     std::list<SkeletalVobInfo*> SkeletalMeshVobs;
     std::list<SkeletalVobInfo*> AnimatedSkeletalVobs;
     std::vector<std::pair<float, SkeletalVobInfo*>> GhostSkeletalVobs;
+    std::vector<SkeletalVobInfo*> VNSkeletalVobs;
 
     /** List of Vobs having a zCParticleFX-Visual */
     std::vector<zCVob*> ParticleEffectVobs;
     std::vector<zCVob*> DecalVobs;
     std::unordered_map<zCVob*, std::string> tempParticleNames;
+
+    /** List of Meshes derived from a zCParticleFX-Visual */
+    std::unordered_map<zCVob*, MeshVisualInfo*> ParticleEffectProgMeshes;
 
     /** Poly strip Visuals */
     std::set<zCPolyStrip*> PolyStripVisuals;

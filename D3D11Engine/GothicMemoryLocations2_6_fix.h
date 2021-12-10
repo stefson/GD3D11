@@ -163,6 +163,11 @@ struct GothicMemoryLocations {
         static const unsigned int Offset_VisTexAniIsLooping = 0x198;
         static const unsigned int Offset_VisIsQuadPoly = 0x190;
 
+        static const unsigned int Offset_VisShpRender = 0xBC;
+        static const unsigned int Offset_VisShpType = 0x28C;
+        static const unsigned int Offset_VisShpMesh = 0x2A4;
+        static const unsigned int Offset_VisShpProgMesh = 0x2A8;
+        static const unsigned int Offset_VisShpModel = 0x2AC;
     };
 
     struct zCMesh {

@@ -69,6 +69,9 @@ public:
     /** Extracts a zCProgMeshProto from a zCModel */
     static void ExtractProgMeshProtoFromModel( zCModel* model, MeshVisualInfo* meshInfo );
 
+    /** Extracts a zCProgMeshProto from a zCMesh */
+    static void ExtractProgMeshProtoFromMesh( zCMesh* mesh, MeshVisualInfo* meshInfo );
+
 
     /** Extracts a node-visual */
     static void ExtractNodeVisual( int index, zCModelNodeInst* node, std::map<int, std::vector<MeshVisualInfo*>>& attachments );

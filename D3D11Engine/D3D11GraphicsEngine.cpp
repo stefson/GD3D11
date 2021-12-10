@@ -19,6 +19,7 @@
 #include "GOcean.h"
 #include "GSky.h"
 #include "RenderToTextureBuffer.h"
+#include "zCParticleFX.h"
 #include "zCDecal.h"
 #include "zCMaterial.h"
 #include "zCQuadMark.h"
@@ -874,6 +875,12 @@ XRESULT D3D11GraphicsEngine::OnResize( INT2 newSize ) {
 
 /** Called when the game wants to render a new frame */
 XRESULT D3D11GraphicsEngine::OnBeginFrame() {
+    if ( !m_isWindowActive && GetForegroundWindow() == OutputWindow ) {
+        // Just in case to check if somehow we didn't get informed the window got activated
+        m_isWindowActive = true;
+        UpdateClipCursor( OutputWindow );
+    }
+
     Engine::GAPI->GetRendererState().RendererInfo.Timing.StartTotal();
     if ( !m_isWindowActive && Engine::GAPI->GetRendererState().RendererSettings.EnableInactiveFpsLock ) {
         m_FrameLimiter->SetLimit( 20 );
@@ -1001,7 +1008,7 @@ XRESULT D3D11GraphicsEngine::OnBeginFrame() {
     UpdateRenderStates();
 
     // Bind HDR Back Buffer
-    GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(), DepthStencilBuffer->GetDepthStencilView().Get() );
+    GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(), nullptr );
 
     // Reset Render States for HUD
     Engine::GAPI->ResetRenderStates();
@@ -1735,6 +1742,73 @@ bool D3D11GraphicsEngine::BindTextureNRFX( zCTexture* tex, bool bindShader ) {
     return true;
 }
 
+XRESULT  D3D11GraphicsEngine::DrawSkeletalVertexNormals( SkeletalVobInfo* vi,
+    const std::vector<XMFLOAT4X4>& transforms, float4 color, float fatness ) {
+    std::shared_ptr<D3D11GShader> gshader = ShaderManager->GetGShader( "GS_VertexNormals" );
+    gshader->Apply();
+
+    SetActiveVertexShader( "VS_ExSkeletalVN" );
+    SetActivePixelShader( "PS_Simple" );
+
+    InfiniteRangeConstantBuffer->BindToPixelShader( 3 );
+
+    const auto& world = Engine::GAPI->GetRendererState().TransformState.TransformWorld;
+
+    SetupVS_ExMeshDrawCall();
+    SetupVS_ExConstantBuffer();
+
+    GetContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+
+    VS_ExConstantBuffer_PerInstanceSkeletal cb2;
+    cb2.World = world;
+    cb2.PI_ModelColor = color;
+    cb2.PI_ModelFatness = fatness;
+
+    ActiveVS->GetConstantBuffer()[1]->UpdateBuffer( &cb2 );
+    ActiveVS->GetConstantBuffer()[1]->BindToVertexShader( 1 );
+    ActiveVS->GetConstantBuffer()[1]->BindToGeometryShader( 1 );
+
+    // Copy bones
+    ActiveVS->GetConstantBuffer()[2]->UpdateBuffer( &transforms[0], sizeof( XMFLOAT4X4 ) * std::min<UINT>( transforms.size(), NUM_MAX_BONES ) );
+    ActiveVS->GetConstantBuffer()[2]->BindToVertexShader( 2 );
+
+    if ( transforms.size() >= NUM_MAX_BONES ) {
+        LogWarn() << "SkeletalMesh has more than "
+            << NUM_MAX_BONES << " bones! (" << transforms.size() << ")Up this limit!";
+    }
+
+    for ( auto const& itm : dynamic_cast<SkeletalMeshVisualInfo*>(vi->VisualInfo)->SkeletalMeshes ) {
+        for ( auto& mesh : itm.second ) {
+            WhiteTexture->BindToPixelShader( 0 );
+
+            D3D11VertexBuffer* vb = mesh->MeshVertexBuffer;
+            D3D11VertexBuffer* ib = mesh->MeshIndexBuffer;
+            unsigned int numIndices = mesh->Indices.size();
+
+            UINT offset = 0;
+            UINT uStride = sizeof( ExSkelVertexStruct );
+            GetContext()->IASetVertexBuffers( 0, 1, vb->GetVertexBuffer().GetAddressOf(), &uStride, &offset );
+
+            if ( sizeof( VERTEX_INDEX ) == sizeof( unsigned short ) ) {
+                GetContext()->IASetIndexBuffer( ib->GetVertexBuffer().Get(),
+                    DXGI_FORMAT_R16_UINT, 0 );
+            } else {
+                GetContext()->IASetIndexBuffer( ib->GetVertexBuffer().Get(),
+                    DXGI_FORMAT_R32_UINT, 0 );
+            }
+
+            // Draw the mesh
+            GetContext()->DrawIndexed( numIndices, 0, 0 );
+
+            Engine::GAPI->GetRendererState().RendererInfo.FrameDrawnTriangles +=
+                numIndices / 3;
+        }
+    }
+
+    GetContext()->GSSetShader( nullptr, nullptr, 0 );
+    return XR_SUCCESS;
+}
+
 /** Draws a skeletal mesh */
 XRESULT  D3D11GraphicsEngine::DrawSkeletalMesh( SkeletalVobInfo* vi,
     const std::vector<XMFLOAT4X4>& transforms, float4 color, float fatness ) {
@@ -2160,6 +2234,7 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
     SetRenderingStage( DES_GHOST );
     Engine::GAPI->DrawSkeletalGhosts();
     SetRenderingStage( oldStage );
+    Engine::GAPI->DrawSkeletalVN();
 
     if ( Engine::GAPI->GetRendererState().RendererSettings.DrawFog &&
         Engine::GAPI->GetLoadedWorldInfo()->BspTree->GetBspTreeMode() ==
@@ -2177,9 +2252,10 @@ XRESULT D3D11GraphicsEngine::OnStartWorldRendering() {
     if ( Engine::GAPI->GetRendererState().RendererSettings.DrawParticleEffects ) {
         std::vector<zCVob*> decals;
         Engine::GAPI->GetVisibleDecalList( decals );
-
         // Draw stuff like candle-flames
         DrawDecalList( decals, false );
+
+        DrawMQuadMarks();
     }
 
     // TODO: TODO: GodRays need the GBuffer1 from the scene, but Particles need to
@@ -5631,15 +5707,16 @@ void D3D11GraphicsEngine::DrawDecalList( const std::vector<zCVob*>& decals,
 
 /** Draws quadmarks in a simple way */
 void D3D11GraphicsEngine::DrawQuadMarks() {
-    FXMVECTOR camPos = Engine::GAPI->GetCameraPositionXM();
     const stdext::unordered_map<zCQuadMark*, QuadMarkInfo>& quadMarks =
         Engine::GAPI->GetQuadMarks();
+    if ( quadMarks.empty() ) return;
 
     SetActiveVertexShader( "VS_Ex" );
     SetActivePixelShader( "PS_World" );
 
     SetDefaultStates();
 
+    FXMVECTOR camPos = Engine::GAPI->GetCameraPositionXM();
     XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
     Engine::GAPI->SetViewTransformXM( view );  // Update view transform
 
@@ -5652,7 +5729,7 @@ void D3D11GraphicsEngine::DrawQuadMarks() {
     SetupVS_ExMeshDrawCall();
     SetupVS_ExConstantBuffer();
 
-    int alphaFunc = 0;
+    int alphaFunc = zMAT_ALPHA_FUNC_NONE;
     for ( auto const& it : quadMarks ) {
         if ( !it.first->GetConnectedVob() ) continue;
 
@@ -5680,6 +5757,59 @@ void D3D11GraphicsEngine::DrawQuadMarks() {
                 break;
 
             case zMAT_ALPHA_FUNC_MUL:
+                MulQuadMarks.emplace_back( it.first, &it.second );
+                continue;
+
+            case zMAT_ALPHA_FUNC_MUL2:
+                MulQuadMarks.emplace_back( it.first, &it.second );
+                continue;
+
+            default:
+                continue;
+            }
+
+            alphaFunc = mat->GetAlphaFunc();
+
+            Engine::GAPI->GetRendererState().BlendState.SetDirty();
+            UpdateRenderStates();
+        }
+
+        Engine::GAPI->SetWorldTransformXM( it.first->GetConnectedVob()->GetWorldMatrixXM() );
+        SetupVS_ExPerInstanceConstantBuffer();
+
+        DrawVertexBuffer( it.second.Mesh, it.second.NumVertices );
+    }
+}
+
+void D3D11GraphicsEngine::DrawMQuadMarks() {
+    if ( MulQuadMarks.empty() ) return;
+
+    SetActiveVertexShader( "VS_Ex" );
+    SetActivePixelShader( "PS_Simple" );
+
+    SetDefaultStates();
+
+    FXMVECTOR camPos = Engine::GAPI->GetCameraPositionXM();
+    XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
+    Engine::GAPI->SetViewTransformXM( view );  // Update view transform
+
+    Engine::GAPI->GetRendererState().RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
+    Engine::GAPI->GetRendererState().RasterizerState.SetDirty();
+    Engine::GAPI->GetRendererState().DepthState.DepthWriteEnabled = false;
+    Engine::GAPI->GetRendererState().DepthState.SetDirty();
+
+    SetupVS_ExMeshDrawCall();
+    SetupVS_ExConstantBuffer();
+
+    int alphaFunc = 0;
+    for ( auto const& it : MulQuadMarks ) {
+        zCMaterial* mat = it.first->GetMaterial();
+        if ( mat ) mat->BindTexture( 0 );
+
+        if ( alphaFunc != mat->GetAlphaFunc() ) {
+            // Change alpha-func
+            switch ( mat->GetAlphaFunc() ) {
+            case zMAT_ALPHA_FUNC_MUL:
                 Engine::GAPI->GetRendererState().BlendState.SetModulateBlending();
                 break;
 
@@ -5700,8 +5830,9 @@ void D3D11GraphicsEngine::DrawQuadMarks() {
         Engine::GAPI->SetWorldTransformXM( it.first->GetConnectedVob()->GetWorldMatrixXM() );
         SetupVS_ExPerInstanceConstantBuffer();
 
-        DrawVertexBuffer( it.second.Mesh, it.second.NumVertices );
+        DrawVertexBuffer( it.second->Mesh, it.second->NumVertices );
     }
+    MulQuadMarks.clear();
 }
 
 /** Copies the depth stencil buffer to DepthStencilBufferCopy */
@@ -5809,10 +5940,107 @@ void D3D11GraphicsEngine::Setup_PNAEN( EPNAENRenderMode mode ) {
         D3D11_PRIMITIVE_TOPOLOGY_18_CONTROL_POINT_PATCHLIST );
 }
 
+/** Draws particle meshes */
+void D3D11GraphicsEngine::DrawFrameParticleMeshes( std::unordered_map<zCVob*, MeshVisualInfo*>& progMeshes ) {
+    if ( progMeshes.empty() ) return;
+    SetDefaultStates();
+
+    SetActivePixelShader( "PS_Simple" );
+    SetActiveVertexShader( "VS_Ex" );
+
+    GothicRendererState& state = Engine::GAPI->GetRendererState();
+    state.DepthState.DepthWriteEnabled = false;
+    state.DepthState.SetDirty();
+
+    XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
+    Engine::GAPI->SetViewTransformXM( view );
+
+    SetupVS_ExMeshDrawCall();
+    SetupVS_ExConstantBuffer();
+
+    FXMVECTOR camPos = Engine::GAPI->GetCameraPositionXM();
+    int lastBlend = zRND_ALPHA_FUNC_NONE;
+    for ( auto const& it : progMeshes ) {
+        float dist;
+        XMStoreFloat( &dist, DirectX::XMVector3Length( it.first->GetPositionWorldXM() - camPos ) );
+        if ( dist > state.RendererSettings.VisualFXDrawRadius )
+            continue;
+
+        if ( zCParticleFX* particle = reinterpret_cast<zCParticleFX*>(it.first->GetVisual()) ) {
+            if ( zCParticleEmitter* emitter = particle->GetEmitter() ) {
+                int renderType = emitter->GetVisShpRender();
+                if ( !renderType || emitter->GetVisShpType() != 5 )
+                    continue;
+
+                int currentBlend = zRND_ALPHA_FUNC_NONE;
+                if ( renderType == 2 ) {
+                    currentBlend = zRND_ALPHA_FUNC_ADD;
+                } else if ( renderType == 3 ) {
+                    currentBlend = zRND_ALPHA_FUNC_MUL;
+                } else if ( renderType == 4 ) {
+                    currentBlend = zRND_ALPHA_FUNC_BLEND;
+                }
+
+                if ( lastBlend != currentBlend ) {
+                    switch ( currentBlend ) {
+                        case zRND_ALPHA_FUNC_ADD: {
+                            state.BlendState.SetAdditiveBlending();
+                            state.BlendState.SetDirty();
+                        } break;
+                        case zRND_ALPHA_FUNC_MUL: {
+                            state.BlendState.SetModulateBlending();
+                            state.BlendState.SetDirty();
+                        } break;
+                        case zRND_ALPHA_FUNC_BLEND: {
+                            state.BlendState.SetAlphaBlending();
+                            state.BlendState.SetDirty();
+                        } break;
+                        default: {
+                            state.BlendState.SetDefault();
+                            state.BlendState.SetDirty();
+                        } break;
+                    }
+
+                    lastBlend = currentBlend;
+                    UpdateRenderStates();
+                }
+            } else {
+                continue;
+            }
+        } else {
+            continue;
+        }
+
+        ActiveVS->GetConstantBuffer()[1]->UpdateBuffer( it.first->GetWorldMatrixPtr() );
+        ActiveVS->GetConstantBuffer()[1]->BindToVertexShader( 1 );
+
+        for ( auto const& itm : it.second->Meshes ) {
+            // Cache & bind texture
+            zCTexture* texture;
+            if ( itm.first && (texture = itm.first->GetTexture()) != nullptr ) {
+                if ( texture->CacheIn( 0.6f ) == zRES_CACHED_IN ) {
+                    texture->Bind( 0 );
+                } else {
+                    continue;
+                }
+            } else {
+                continue;
+            }
+            for ( auto const& itm2nd : itm.second ) {
+                // Draw instances
+                DrawVertexBufferIndexed(
+                    itm2nd->MeshVertexBuffer, itm2nd->MeshIndexBuffer,
+                    itm2nd->Indices.size() );
+            }
+        }
+    }
+}
+
 /** Draws particle effects */
 void D3D11GraphicsEngine::DrawFrameParticles(
     std::map<zCTexture*, std::vector<ParticleInstanceInfo>>& particles,
     std::map<zCTexture*, ParticleRenderInfo>& info ) {
+    if ( particles.empty() ) return;
     SetDefaultStates();
 
     XMMATRIX view = Engine::GAPI->GetViewMatrixXM();
@@ -5824,8 +6052,6 @@ void D3D11GraphicsEngine::DrawFrameParticles(
     GetContext()->ClearRenderTargetView( GBuffer0_Diffuse->GetRenderTargetView().Get(), (float*)&float4( 0, 0, 0, 0 ) );
     GetContext()->ClearRenderTargetView( GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView().Get(), (float*)&float4( 0, 0, 0, 0 ) );
 
-    auto distPS = ShaderManager->GetPShader( "PS_ParticleDistortion" );
-
     RefractionInfoConstantBuffer ricb = {};
     ricb.RI_Projection = Engine::GAPI->GetProjectionMatrix();
     ricb.RI_ViewportSize = float2( Resolution.x, Resolution.y );
@@ -5833,8 +6059,10 @@ void D3D11GraphicsEngine::DrawFrameParticles(
     ricb.RI_CameraPosition = Engine::GAPI->GetCameraPosition();
     ricb.RI_Far = Engine::GAPI->GetFarPlane();
 
-    distPS->GetConstantBuffer()[0]->UpdateBuffer( &ricb );
-    distPS->GetConstantBuffer()[0]->BindToPixelShader( 0 );
+    SetActivePixelShader( "PS_ParticleDistortion" );
+    ActivePS->Apply();
+    ActivePS->GetConstantBuffer()[0]->UpdateBuffer( &ricb );
+    ActivePS->GetConstantBuffer()[0]->BindToPixelShader( 0 );
 
     GothicRendererState& state = Engine::GAPI->GetRendererState();
 
@@ -5847,38 +6075,22 @@ void D3D11GraphicsEngine::DrawFrameParticles(
     state.RasterizerState.CullMode = GothicRasterizerStateInfo::CM_CULL_NONE;
     state.RasterizerState.SetDirty();
 
-    std::vector<std::tuple<zCTexture*, ParticleRenderInfo*,
-        std::vector<ParticleInstanceInfo>* >>
-        pvec;
+    std::vector<std::tuple<zCTexture*, ParticleRenderInfo*, std::vector<ParticleInstanceInfo>*>> pvecAdd;
+    std::vector<std::tuple<zCTexture*, ParticleRenderInfo*, std::vector<ParticleInstanceInfo>*>> pvecRest;
     for ( auto&& textureParticle : particles ) {
         if ( textureParticle.second.empty() ) continue;
 
-        pvec.push_back( std::make_tuple( textureParticle.first, &info[textureParticle.first], &textureParticle.second ) );
+        ParticleRenderInfo* ri = &info[textureParticle.first];
+        if( ri->BlendMode == zRND_ALPHA_FUNC_ADD )
+            pvecAdd.push_back( std::make_tuple( textureParticle.first, ri, &textureParticle.second ) );
+        else
+            pvecRest.push_back( std::make_tuple( textureParticle.first, ri, &textureParticle.second ) );
     }
-
-    struct cmp {
-        static bool cmppt(
-            const std::tuple<zCTexture*, ParticleRenderInfo*,
-            std::vector<ParticleInstanceInfo>*>& a,
-            const std::tuple<zCTexture*, ParticleRenderInfo*,
-            std::vector<ParticleInstanceInfo>*>& b ) {
-            // Sort additive before blend
-            return std::get<1>( a )->BlendMode > std::get<1>( b )->BlendMode;
-        }
-    };
-
-    // Sort additive before blend
-    std::sort( pvec.begin(), pvec.end(), cmp::cmppt );
-
-    SetActivePixelShader( "PS_ParticleDistortion" );
-    ActivePS->Apply();
 
     ID3D11RenderTargetView* rtv[] = {
         GBuffer0_Diffuse->GetRenderTargetView().Get(),
         GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView().Get() };
     GetContext()->OMSetRenderTargets( 2, rtv, DepthStencilBuffer->GetDepthStencilView().Get() );
-
-    int lastBlendMode = -1;
 
     // Bind view/proj
     SetupVS_ExConstantBuffer();
@@ -5899,7 +6111,36 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 
     UpdateRenderStates();
 
-    for ( auto const& textureParticleRenderInfo : pvec ) {
+    for ( auto const& textureParticleRenderInfo : pvecAdd ) {
+        zCTexture* tx = std::get<0>( textureParticleRenderInfo );
+        ParticleRenderInfo& partInfo = *std::get<1>( textureParticleRenderInfo );
+        std::vector<ParticleInstanceInfo>& instances = *std::get<2>( textureParticleRenderInfo );
+
+        if ( instances.empty() ) continue;
+
+        if ( tx ) {
+            // Bind it
+            if ( tx->CacheIn( 0.6f ) == zRES_CACHED_IN )
+                tx->Bind( 0 );
+            else
+                continue;
+        }
+
+        // Push data for the particles to the GPU
+        EnsureTempVertexBufferSize( TempParticlesVertexBuffer, sizeof( ParticleInstanceInfo ) * instances.size() );
+        TempParticlesVertexBuffer->UpdateBuffer( &instances[0], sizeof( ParticleInstanceInfo ) * instances.size() );
+        DrawVertexBuffer( TempParticlesVertexBuffer.get(), instances.size(), sizeof( ParticleInstanceInfo ) );
+    }
+
+    // Set usual rendering for everything else. Alphablending mostly.
+    SetActivePixelShader( "PS_Simple" );
+    PS_Simple->Apply();
+
+    GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
+        DepthStencilBuffer->GetDepthStencilView().Get() );
+
+    int lastBlendMode = -1;
+    for ( auto const& textureParticleRenderInfo : pvecRest ) {
         zCTexture* tx = std::get<0>( textureParticleRenderInfo );
         ParticleRenderInfo& partInfo = *std::get<1>( textureParticleRenderInfo );
         std::vector<ParticleInstanceInfo>& instances = *std::get<2>( textureParticleRenderInfo );
@@ -5923,25 +6164,7 @@ void D3D11GraphicsEngine::DrawFrameParticles(
             state.BlendState.SetDirty();
 
             lastBlendMode = partInfo.BlendMode;
-
-            if ( partInfo.BlendMode == zRND_ALPHA_FUNC_ADD ) {
-                // Set Distortion-Rendering for additive blending
-                SetActivePixelShader( "PS_ParticleDistortion" );
-                ActivePS->Apply();
-
-                ID3D11RenderTargetView* rtv[] = {
-                    GBuffer0_Diffuse->GetRenderTargetView().Get(),
-                    GBuffer1_Normals_SpecIntens_SpecPower->GetRenderTargetView().Get() };
-                GetContext()->OMSetRenderTargets( 2, rtv,
-                    DepthStencilBuffer->GetDepthStencilView().Get() );
-            } else {
-                // Set usual rendering for everything else. Alphablending mostly.
-                SetActivePixelShader( "PS_Simple" );
-                PS_Simple->Apply();
-
-                GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
-                    DepthStencilBuffer->GetDepthStencilView().Get() );
-            }
+            UpdateRenderStates();
         }
 
         // Push data for the particles to the GPU
@@ -5952,10 +6175,6 @@ void D3D11GraphicsEngine::DrawFrameParticles(
 
     GetContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
     GetContext()->GSSetShader( nullptr, nullptr, 0 );
-
-    // Set usual rendertarget again
-    GetContext()->OMSetRenderTargets( 1, HDRBackBuffer->GetRenderTargetView().GetAddressOf(),
-        DepthStencilBuffer->GetDepthStencilView().Get() );
 
     state.BlendState.SetDefault();
     state.BlendState.SetDirty();

@@ -530,6 +530,7 @@ struct GothicRendererSettings {
         HDRToneMap = E_HDRToneMap::ToneMap_Simple;
         ReplaceSunDirection = false;
         AtmosphericScattering = true; // Use original sky
+        ShowSkeletalVertexNormals = false;
         EnableDynamicLighting = true;
 
         FastShadows = false;
@@ -702,6 +703,7 @@ struct GothicRendererSettings {
     bool FastShadows;
     bool ReplaceSunDirection;
     bool AtmosphericScattering;
+    bool ShowSkeletalVertexNormals;
     bool EnableDynamicLighting;
     bool WireframeWorld;
     bool WireframeVobs;
