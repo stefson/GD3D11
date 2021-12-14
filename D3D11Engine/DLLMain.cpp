@@ -27,7 +27,6 @@ extern "C" {
 }
 
 static HINSTANCE hLThis = 0;
-static HINSTANCE hDDRAW = 0;
 
 static HRESULT( WINAPI* DirectDrawCreateEx_t )(GUID FAR* lpGuid, LPVOID* lplpDD, REFIID  iid, IUnknown FAR* pUnkOuter);
 typedef void (WINAPI* DirectDrawSimple)();
@@ -38,6 +37,7 @@ using WinMainFunc = decltype(&WinMain);
 WinMainFunc originalWinMain;
 #endif
 
+bool FeatureLevel10Compatibility = false;
 bool GMPModeActive = false;
 
 void SignalHandler( int signal ) {
@@ -165,15 +165,17 @@ void EnableCrashingOnCrashes() {
     const DWORD EXCEPTION_SWALLOWING = 0x1;
 
     HMODULE kernel32 = LoadLibraryA( "kernel32.dll" );
-    tGetPolicy pGetPolicy = (tGetPolicy)GetProcAddress( kernel32,
-        "GetProcessUserModeExceptionPolicy" );
-    tSetPolicy pSetPolicy = (tSetPolicy)GetProcAddress( kernel32,
-        "SetProcessUserModeExceptionPolicy" );
-    if ( pGetPolicy && pSetPolicy ) {
-        DWORD dwFlags;
-        if ( pGetPolicy( &dwFlags ) ) {
-            // Turn off the filter
-            pSetPolicy( dwFlags & ~EXCEPTION_SWALLOWING );
+    if ( kernel32 ) {
+        tGetPolicy pGetPolicy = (tGetPolicy)GetProcAddress( kernel32,
+            "GetProcessUserModeExceptionPolicy" );
+        tSetPolicy pSetPolicy = (tSetPolicy)GetProcAddress( kernel32,
+            "SetProcessUserModeExceptionPolicy" );
+        if ( pGetPolicy && pSetPolicy ) {
+            DWORD dwFlags;
+            if ( pGetPolicy( &dwFlags ) ) {
+                // Turn off the filter
+                pSetPolicy( dwFlags & ~EXCEPTION_SWALLOWING );
+            }
         }
     }
 }
@@ -236,15 +238,13 @@ BOOL WINAPI DllMain( HINSTANCE hInst, DWORD reason, LPVOID ) {
             // Check for right version
             VersionCheck::CheckExecutable();
             CheckPlatformSupport();
-            HookedFunctions::OriginalFunctions.InitHooks();
 
             Engine::GAPI = nullptr;
             Engine::GraphicsEngine = nullptr;
 
             // Create GothicAPI here to make all hooks work
             Engine::CreateGothicAPI();
-
-            GothicAPI::DisableErrorMessageBroadcast();
+            HookedFunctions::OriginalFunctions.InitHooks();
 
             EnableCrashingOnCrashes();
             //SetUnhandledExceptionFilter(MyUnhandledExceptionFilter);
@@ -287,7 +287,7 @@ BOOL WINAPI DllMain( HINSTANCE hInst, DWORD reason, LPVOID ) {
         Engine::OnShutDown();
 
         CoUninitialize();
-        FreeLibrary( hDDRAW );
+        FreeLibrary( ddraw.dll );
 
         LogInfo() << "DDRAW Proxy DLL signing off.\n";
     }

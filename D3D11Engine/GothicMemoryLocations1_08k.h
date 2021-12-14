@@ -47,6 +47,11 @@ struct GothicMemoryLocations {
         static const unsigned int DrawLine = 0x00716B00;
         static const unsigned int DrawPoly = 0x00714B60;
         static const unsigned int DrawPolySimple = 0x007143F0;
+        static const unsigned int CacheInSurface = 0x0071A3E0;
+        static const unsigned int CacheOutSurface = 0x0071A7F0;
+
+        static const unsigned int RenderScreenFade = 0x005376F0;
+        static const unsigned int RenderCinemaScope = 0x005377B0;
 
         static const unsigned int Offset_RenderState = 0x34;
         static const unsigned int Offset_BoundTexture = 0x80E38;
@@ -56,6 +61,7 @@ struct GothicMemoryLocations {
         static const unsigned int ReadInt = 0x0045CDB0;
         static const unsigned int ReadBool = 0x0045CB80;
         static const unsigned int ReadDWORD = 0x0045CEA0;
+        static const unsigned int WriteString = 0x0045C9F0;
         static const unsigned int Offset_CommandLine = 0x284;
     };
 
@@ -116,8 +122,11 @@ struct GothicMemoryLocations {
         static const unsigned int Offset_VisIsQuadPoly = 0x190;
         static const unsigned int Offset_VisTexture = 0x2DC;
         static const unsigned int Offset_VisAlignment = 0x2E4;
-
         static const unsigned int Offset_VisAlphaBlendFunc = 0x308;
+
+        static const unsigned int Offset_VisShpRender = 0xBC;
+        static const unsigned int Offset_VisShpType = 0x258;
+        static const unsigned int Offset_VisShpMesh = 0x26C;
     };
 
     struct zCStaticPfxList {
@@ -140,8 +149,13 @@ struct GothicMemoryLocations {
         static const unsigned int SetFOV = 0x00536720;
         static const unsigned int GetFOV_f2 = 0x005366B0;
 
-        static const unsigned int Offset_FarPlane = 2272;
-        static const unsigned int Offset_NearPlane = 2276;
+        static const unsigned int Offset_FarPlane = 0x8E0;
+        static const unsigned int Offset_NearPlane = 0x8E4;
+        static const unsigned int Offset_ScreenFadeEnabled = 0x8C0;
+        static const unsigned int Offset_ScreenFadeColor = 0x8C4;
+        static const unsigned int Offset_CinemaScopeEnabled = 0x8C8;
+        static const unsigned int Offset_CinemaScopeColor = 0x8CC;
+        static const unsigned int Offset_PolyMaterial = 0x8BC;
     };
 
     struct zCVob {
@@ -154,10 +168,11 @@ struct GothicMemoryLocations {
         static const unsigned int DoFrameActivity = 0x006DCC80;
         static const unsigned int GetBBoxLocal = 0x005EDCF0;
         static const unsigned int Offset_HomeWorld = 0x0A8;
+        static const unsigned int Offset_Type = 0x0A0;
 
         static const unsigned int Offset_Flags = 0xE4;
         static const unsigned int MASK_ShowVisual = 0x1;
-        static const unsigned int Offset_CameraAlignment = 0x110;
+        static const unsigned int Offset_CameraAlignment = 0xF0;
         static const unsigned int SHIFTLR_CameraAlignment = 0x1E;
 
         static const unsigned int Destructor = 0x005D32A0;
@@ -176,6 +191,7 @@ struct GothicMemoryLocations {
     struct zCInput {
         static const unsigned int GetDeviceEnabled = 0x004C8760;
         static const unsigned int SetDeviceEnabled = 0x004C8710;
+        static const unsigned int ClearKeyBuffer = 0x004C8AE0;
     };
 
     struct zCVisual {
@@ -213,6 +229,7 @@ struct GothicMemoryLocations {
         static const unsigned int Offset_Material = 0x18;
         static const unsigned int Offset_Lightmap = 0x1C;
 
+        static const unsigned int GetLightStatAtPos = 0x00597950;
         static const unsigned int AllocVerts = 0x00599840;
         static const unsigned int CalcNormal = 0x00596540;
 
@@ -232,7 +249,7 @@ struct GothicMemoryLocations {
     };
 
     struct zSTRING {
-        static const unsigned int ToChar = 0x0045E2E0;
+        static const unsigned int ToChar = 0x08;
         static const unsigned int ConstructorCharPtr = 0x004013A0;
         static const unsigned int DestructorCharPtr = 0x00401260;
     };
@@ -252,10 +269,15 @@ struct GothicMemoryLocations {
         static const unsigned int Offset_MatGroup = 0x40;
         static const unsigned int Offset_TexAniCtrl = 0x4C;
 
+        static const unsigned int Offset_Flags = 0x6C;
+        static const unsigned int Offset_TexAniMapDelta = 0x7C;
+        static const unsigned int Mask_FlagTexAniMap = 0x4;
+
         static const unsigned int InitValues = 0x0054D3C0;
         static const unsigned int Constructor = 0x0054CFC0;
         static const unsigned int Destructor = 0x0054D230;
         static const unsigned int GetAniTexture = 0x007154C0;
+        static const unsigned int AdvanceAni = 0x0054E9C0;
 
     };
 
@@ -268,9 +290,10 @@ struct GothicMemoryLocations {
         static const unsigned int zCTex_D3DInsertTexture = 0x0071D7D0;
         static const unsigned int LoadResourceData = 0x005CA5E0;
         static const unsigned int Offset_CacheState = 0x4C;
+        static const unsigned int Offset_NextFrame = 0x58;
+        static const unsigned int Offset_ActAniFrame = 0x70;
+        static const unsigned int Offset_AniFrames = 0x7C;
         static const unsigned int Mask_CacheState = 3;
-        //static const unsigned int GetName = 0x0059AF90;
-        //static const unsigned int GetAniTexture = 0x005DA9B0;
 
         static const unsigned int Offset_Flags = 0x88;
         static const unsigned int Mask_FlagHasAlpha = 0x1;
@@ -310,7 +333,7 @@ struct GothicMemoryLocations {
 
     struct zCProgMeshProto {
         static const unsigned int Offset_PositionList = 0x34;
-        static const unsigned int Offset_NormalsList = 0x38;
+        static const unsigned int Offset_NormalsList = 0x3C;
         static const unsigned int Offset_Submeshes = 0xA4;
         static const unsigned int Offset_NumSubmeshes = 0xA8;
     };
@@ -330,7 +353,6 @@ struct GothicMemoryLocations {
     };
 
     struct oCWorld {
-        static const unsigned int InsertVobInWorld = 0x006D7120;
         static const unsigned int EnableVob = 0x006D7130;
         static const unsigned int DisableVob = 0x006D7250;
         static const unsigned int RemoveFromLists = 0x006D7750;
@@ -373,6 +395,7 @@ struct GothicMemoryLocations {
 
     struct zCView {
         static const unsigned int SetMode = 0x00702180;
+        static const unsigned int Vid_SetMode = 0x005AE970;
         static const unsigned int REPL_SetMode_ModechangeStart = 0x007021A9;
         static const unsigned int REPL_SetMode_ModechangeEnd = 0x0007021B8;
         static const unsigned int PrintTimed = 0x006FE1A0;

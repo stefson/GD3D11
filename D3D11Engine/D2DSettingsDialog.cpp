@@ -9,6 +9,8 @@
 #include "SV_Panel.h"
 #include "SV_Slider.h"
 
+#include "D3D11GraphicsEngine.h"
+
 #include <locale>
 
 Languages getUserLanguage() {
@@ -21,7 +23,7 @@ Languages getUserLanguage() {
 }
 
 D2DSettingsDialog::D2DSettingsDialog( D2DView* view, D2DSubView* parent ) : D2DDialog( view, parent ) {
-	SetPositionCentered( D2D1::Point2F( view->GetRenderTarget()->GetSize().width / 2, view->GetRenderTarget()->GetSize().height / 2 ), D2D1::SizeF( 500, 340 ) );
+	SetPositionCentered( D2D1::Point2F( view->GetRenderTarget()->GetSize().width / 2, view->GetRenderTarget()->GetSize().height / 2 ), D2D1::SizeF( 520, 382 ) );
 
 	// Get display modes
 	// TODO: reenable-superresolution, workaround: Nvidia DSR/AMD VSR
@@ -91,6 +93,23 @@ XRESULT D2DSettingsDialog::InitControls() {
 	resolutionSlider->SetDisplayValues( resStrings );
 	resolutionSlider->SetValue( (float)ResolutionSetting );
 
+    SV_Label* modeLabel = new SV_Label( MainView, MainPanel );
+    modeLabel->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 150, 12 ) );
+    modeLabel->AlignUnder( resolutionSlider, 5 );
+    switch ( userLanguage ) {
+    case LANGUAGE_POLISH: modeLabel->SetCaption( L"Tryb [**]:" ); break;
+    default: modeLabel->SetCaption( L"Mode [**]:" ); break;
+    }
+
+    modeSlider = new SV_Slider( MainView, MainPanel );
+    modeSlider->SetPositionAndSize( D2D1::Point2F( 10, 22 ), D2D1::SizeF( 150, 15 ) );
+    modeSlider->AlignUnder( modeLabel, 5 );
+    modeSlider->SetSliderChangedCallback( ModeSliderChanged, this );
+    modeSlider->SetIsIntegralSlider( true );
+    modeSlider->SetMinMax( 1.0f, 4.0f );
+    modeSlider->SetDisplayValues( { "0", "Fullscreen Exclusive", "Fullscreen Borderless", "Fullscreen Lowlatency", "Windowed" } );
+    modeSlider->SetValue( 1.0f );
+
 	SV_Checkbox* normalmapsCheckbox = new SV_Checkbox( MainView, MainPanel );
 	normalmapsCheckbox->SetSize( D2D1::SizeF( 160, 20 ) );
     switch ( userLanguage ) {
@@ -98,7 +117,7 @@ XRESULT D2DSettingsDialog::InitControls() {
     default: normalmapsCheckbox->SetCaption( L"Enable Normalmaps" ); break;
     }
 	normalmapsCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.AllowNormalmaps );
-	normalmapsCheckbox->AlignUnder( resolutionSlider, 10 );
+	normalmapsCheckbox->AlignUnder( modeSlider, 10 );
 	normalmapsCheckbox->SetPosition( D2D1::Point2F( 5, normalmapsCheckbox->GetPosition().y ) );
 	normalmapsCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.AllowNormalmaps );
 
@@ -123,6 +142,9 @@ XRESULT D2DSettingsDialog::InitControls() {
 	hbaoCheckbox->AlignUnder( numpadCheckbox, 5 );
 	hbaoCheckbox->SetPosition( D2D1::Point2F( 5, hbaoCheckbox->GetPosition().y ) );
 	hbaoCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.HbaoSettings.Enabled );
+    if ( FeatureLevel10Compatibility ) {
+        hbaoCheckbox->SetDisabled( true );
+    }
 
 	SV_Checkbox* vsyncCheckbox = new SV_Checkbox( MainView, MainPanel );
 	vsyncCheckbox->SetSize( D2D1::SizeF( 160, 20 ) );
@@ -137,7 +159,7 @@ XRESULT D2DSettingsDialog::InitControls() {
 	SV_Checkbox* godraysCheckbox = new SV_Checkbox( MainView, MainPanel );
 	godraysCheckbox->SetSize( D2D1::SizeF( 160, 20 ) );
     switch ( userLanguage ) {
-    case LANGUAGE_POLISH: godraysCheckbox->SetCaption( L"Promienie Boga" ); break;
+    case LANGUAGE_POLISH: godraysCheckbox->SetCaption( L"GodRays" ); break;
     default: godraysCheckbox->SetCaption( L"Enable GodRays" ); break;
     }
 	godraysCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.EnableGodRays );
@@ -155,6 +177,9 @@ XRESULT D2DSettingsDialog::InitControls() {
 	smaaCheckbox->AlignUnder( godraysCheckbox, 5 );
 	smaaCheckbox->SetPosition( D2D1::Point2F( 5, smaaCheckbox->GetPosition().y ) );
 	smaaCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.EnableSMAA );
+    if ( FeatureLevel10Compatibility ) {
+        smaaCheckbox->SetDisabled( true );
+    }
 
 	/*SV_Checkbox* tesselationCheckbox = new SV_Checkbox(MainView, MainPanel);
 	tesselationCheckbox->SetSize(D2D1::SizeF(160, 20));
@@ -175,26 +200,28 @@ XRESULT D2DSettingsDialog::InitControls() {
 	hdrCheckbox->SetPosition( D2D1::Point2F( 5, hdrCheckbox->GetPosition().y ) );
 	hdrCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.EnableHDR );
 
+    InitialSettings.EnableShadows = Engine::GAPI->GetRendererState().RendererSettings.EnableShadows;
 	SV_Checkbox* shadowsCheckbox = new SV_Checkbox( MainView, MainPanel );
 	shadowsCheckbox->SetSize( D2D1::SizeF( 160, 20 ) );
     switch ( userLanguage ) {
     case LANGUAGE_POLISH: shadowsCheckbox->SetCaption( L"Cienie [*]" ); break;
     default: shadowsCheckbox->SetCaption( L"Enable Shadows [*]" ); break;
     }
-	shadowsCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.EnableShadows );
+	shadowsCheckbox->SetDataToUpdate( &InitialSettings.EnableShadows );
 	shadowsCheckbox->AlignUnder( hdrCheckbox, 5 );
 	shadowsCheckbox->SetPosition( D2D1::Point2F( 5, shadowsCheckbox->GetPosition().y ) );
-	shadowsCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.EnableShadows );
+	shadowsCheckbox->SetChecked( InitialSettings.EnableShadows );
 
+    InitialSettings.EnableSoftShadows = Engine::GAPI->GetRendererState().RendererSettings.EnableSoftShadows;
 	SV_Checkbox* filterShadowsCheckbox = new SV_Checkbox( MainView, MainPanel );
 	filterShadowsCheckbox->SetSize( D2D1::SizeF( 160, 20 ) );
     switch ( userLanguage ) {
     case LANGUAGE_POLISH: filterShadowsCheckbox->SetCaption( L"Filtrowanie Cieni [*]" ); break;
     default: filterShadowsCheckbox->SetCaption( L"Shadow Filtering [*]" ); break;
     }
-	filterShadowsCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.EnableSoftShadows );
+	filterShadowsCheckbox->SetDataToUpdate( &InitialSettings.EnableSoftShadows );
 	filterShadowsCheckbox->AlignUnder( shadowsCheckbox, 5 );
-	filterShadowsCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.EnableSoftShadows );
+	filterShadowsCheckbox->SetChecked( InitialSettings.EnableSoftShadows );
 
     //SV_Checkbox* multiThreadResourceManagerCheckbox = new SV_Checkbox( MainView, MainPanel );
     //multiThreadResourceManagerCheckbox->SetSize( D2D1::SizeF( 160, 40 ) );
@@ -216,9 +243,19 @@ XRESULT D2DSettingsDialog::InitControls() {
     compressBackBufferCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.CompressBackBuffer );
     compressBackBufferCheckbox->SetCheckedChangedCallback( CompressBackBufferCheckedChanged, this );
 
+    SV_Checkbox* animateStaticModelsCheckbox = new SV_Checkbox( MainView, MainPanel );
+    animateStaticModelsCheckbox->SetSize( D2D1::SizeF( 160, 20 ) );
+    switch ( userLanguage ) {
+    case LANGUAGE_POLISH: animateStaticModelsCheckbox->SetCaption( L"Animuj Statyczne Voby" ); break;
+    default: animateStaticModelsCheckbox->SetCaption( L"Animate Static Vobs" ); break;
+    }
+    animateStaticModelsCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.AnimateStaticVobs );
+    animateStaticModelsCheckbox->AlignUnder( compressBackBufferCheckbox, 5 );
+    animateStaticModelsCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.AnimateStaticVobs );
+
 	SV_Label* fpsLimitLabel = new SV_Label( MainView, MainPanel );
 	fpsLimitLabel->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 150, 12 ) );
-	fpsLimitLabel->AlignUnder( compressBackBufferCheckbox, 10 );
+	fpsLimitLabel->AlignUnder( animateStaticModelsCheckbox, 10 );
     switch ( userLanguage ) {
     case LANGUAGE_POLISH: fpsLimitLabel->SetCaption( L"Limit Klatek(FPS):" ); break;
     default: fpsLimitLabel->SetCaption( L"Framerate Limit:" ); break;
@@ -243,13 +280,13 @@ XRESULT D2DSettingsDialog::InitControls() {
 	fpsLimitSlider->SetDisplayValues( fpsValues );
 
 	// Fix the fps value
-	fpsLimitSlider->SetValue( Engine::GAPI->GetRendererState().RendererSettings.FpsLimit );
+	fpsLimitSlider->SetValue( static_cast<float>(Engine::GAPI->GetRendererState().RendererSettings.FpsLimit) );
 
 	// Next column
     SV_Label* textureQualityLabel = new SV_Label( MainView, MainPanel );
     textureQualityLabel->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 150, 12 ) );
     textureQualityLabel->AlignUnder( Header, 5 );
-    textureQualityLabel->SetPosition( D2D1::Point2F( 170, textureQualityLabel->GetPosition().y ) );
+    textureQualityLabel->SetPosition( D2D1::Point2F( 180, textureQualityLabel->GetPosition().y ) );
     switch ( userLanguage ) {
     case LANGUAGE_POLISH: textureQualityLabel->SetCaption( L"Jakoœæ Textur [*]:" ); break;
     default: textureQualityLabel->SetCaption( L"Texture Quality [*]:" ); break;
@@ -361,7 +398,11 @@ XRESULT D2DSettingsDialog::InitControls() {
     shadowmapSizeSlider->SetPositionAndSize( D2D1::Point2F( 10, 22 ), D2D1::SizeF( 150, 15 ) );
     shadowmapSizeSlider->AlignUnder( shadowmapSizeLabel, 5 );
     shadowmapSizeSlider->SetSliderChangedCallback( ShadowQualitySliderChanged, this );
-    shadowmapSizeSlider->SetDisplayValues( { "0", "512", "1024", "2048", "4096", "8192", "16384" } );
+    if ( FeatureLevel10Compatibility ) {
+        shadowmapSizeSlider->SetDisplayValues( { "0", "512", "1024", "2048", "4096", "8192" } );
+    } else {
+        shadowmapSizeSlider->SetDisplayValues( { "0", "512", "1024", "2048", "4096", "8192", "16384" } );
+    }
     shadowmapSizeSlider->SetIsIntegralSlider( true );
     shadowmapSizeSlider->SetMinMax( 1.0f, 6.0f );
 
@@ -407,7 +448,7 @@ XRESULT D2DSettingsDialog::InitControls() {
     }
 	fovOverrideCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.ForceFOV );
 	fovOverrideCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.ForceFOV );
-	fovOverrideCheckbox->SetPosition( D2D1::Point2F( 170 + 160 + 10, fovOverrideCheckbox->GetPosition().y ) );
+	fovOverrideCheckbox->SetPosition( D2D1::Point2F( 170 + 160 + 30, fovOverrideCheckbox->GetPosition().y ) );
 
 	SV_Label* horizFOVLabel = new SV_Label( MainView, MainPanel );
 	horizFOVLabel->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 150, 12 ) );
@@ -416,7 +457,7 @@ XRESULT D2DSettingsDialog::InitControls() {
     case LANGUAGE_POLISH: horizFOVLabel->SetCaption( L"Poziome Widzenie:" ); break;
     default: horizFOVLabel->SetCaption( L"Horizontal FOV:" ); break;
     }
-	horizFOVLabel->SetPosition( D2D1::Point2F( 170 + 160 + 10, horizFOVLabel->GetPosition().y ) );
+	horizFOVLabel->SetPosition( D2D1::Point2F( 170 + 160 + 30, horizFOVLabel->GetPosition().y ) );
 
 	SV_Slider* horizFOVSlider = new SV_Slider( MainView, MainPanel );
 	horizFOVSlider->SetPositionAndSize( D2D1::Point2F( 10, 22 ), D2D1::SizeF( 150, 15 ) );
@@ -483,6 +524,45 @@ XRESULT D2DSettingsDialog::InitControls() {
 	contrastSlider->SetMinMax( 0.1f, 2.0f );
 	contrastSlider->SetValue( Engine::GAPI->GetRendererState().RendererSettings.GammaValue );
 
+    SV_Checkbox* rainCheckbox = new SV_Checkbox( MainView, MainPanel );
+    rainCheckbox->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 160, 20 ) );
+    rainCheckbox->AlignUnder( contrastSlider, 65 );
+    switch ( userLanguage ) {
+    case LANGUAGE_POLISH: rainCheckbox->SetCaption( L"W³¹cz Deszcz" ); break;
+    default: rainCheckbox->SetCaption( L"Enable Rain" ); break;
+    }
+    rainCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.EnableRain );
+    rainCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.EnableRain );
+    rainCheckbox->SetPosition( D2D1::Point2F( 170 + 160 + 20, rainCheckbox->GetPosition().y ) );
+
+    SV_Checkbox* rainEffectsCheckbox = new SV_Checkbox( MainView, MainPanel );
+    rainEffectsCheckbox->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 160, 20 ) );
+    rainEffectsCheckbox->AlignUnder( rainCheckbox, 5 );
+    switch ( userLanguage ) {
+    case LANGUAGE_POLISH: rainEffectsCheckbox->SetCaption( L"W³¹cz Efekty Deszczu" ); break;
+    default: rainEffectsCheckbox->SetCaption( L"Enable Rain Effects" ); break;
+    }
+    rainEffectsCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.EnableRainEffects );
+    rainEffectsCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.EnableRainEffects );
+
+    SV_Checkbox* lightCheckbox = new SV_Checkbox( MainView, MainPanel );
+    lightCheckbox->SetPositionAndSize( D2D1::Point2F( 10, 10 ), D2D1::SizeF( 160, 20 ) );
+    lightCheckbox->AlignUnder( rainEffectsCheckbox, 15 );
+    switch ( userLanguage ) {
+    case LANGUAGE_POLISH: lightCheckbox->SetCaption( L"Ogranicz Natê¿enie Œwiat³a" ); break;
+    default: lightCheckbox->SetCaption( L"Limit Light Intensity" ); break;
+    }
+    lightCheckbox->SetDataToUpdate( &Engine::GAPI->GetRendererState().RendererSettings.LimitLightIntesity );
+    lightCheckbox->SetChecked( Engine::GAPI->GetRendererState().RendererSettings.LimitLightIntesity );
+
+    // Mode changing label
+    SV_Label* modeChangingLabel = new SV_Label( MainView, MainPanel );
+    modeChangingLabel->SetPositionAndSize( D2D1::Point2F( 5, GetSize().height - 5 - 30 ), D2D1::SizeF( 320, 12 ) );
+    switch ( userLanguage ) {
+    case LANGUAGE_POLISH: modeChangingLabel->SetCaption( L"[**] -> Musisz zrestartowaæ grê ¿eby zmiany zadzia³a³y" ); break;
+    default: modeChangingLabel->SetCaption( L"[**] -> You must restart game for the changes to take effect" ); break;
+    }
+
 	// Advanced settings label
 	SV_Label* advancedSettingsLabel = new SV_Label( MainView, MainPanel );
 	advancedSettingsLabel->SetPositionAndSize( D2D1::Point2F( 5, GetSize().height - 5 - 12 ), D2D1::SizeF( 300, 12 ) );
@@ -495,7 +575,7 @@ XRESULT D2DSettingsDialog::InitControls() {
 }
 
 void D2DSettingsDialog::FpsLimitSliderChanged( SV_Slider* sender, void* userdata ) {
-	int newValue = sender->GetValue();
+	int newValue = static_cast<int>(sender->GetValue());
 	Engine::GAPI->GetRendererState().RendererSettings.FpsLimit = newValue <= 25 ? 0 : newValue;
 }
 
@@ -551,6 +631,13 @@ void D2DSettingsDialog::ResolutionSliderChanged( SV_Slider* sender, void* userda
 	d->ResolutionSetting = val;
 }
 
+void D2DSettingsDialog::ModeSliderChanged( SV_Slider* sender, void* userdata ) {
+    D2DSettingsDialog* d = (D2DSettingsDialog*)userdata;
+
+    int val = (int)(sender->GetValue() + 0.5f);
+    d->CurrentWindowMode = val;
+}
+
 /** Close button */
 void D2DSettingsDialog::CloseButtonPressed( SV_Button* sender, void* userdata ) {
 	D2DSettingsDialog* d = (D2DSettingsDialog*)userdata;
@@ -570,13 +657,21 @@ void D2DSettingsDialog::ApplyButtonPressed( SV_Button* sender, void* userdata ) 
 
 	// Check for shader reload
 	if ( d->InitialSettings.EnableShadows != settings.EnableShadows || d->InitialSettings.EnableSoftShadows != settings.EnableSoftShadows ) {
+        settings.EnableShadows = d->InitialSettings.EnableShadows;
+        settings.EnableSoftShadows = d->InitialSettings.EnableSoftShadows;
 		Engine::GraphicsEngine->ReloadShaders();
 	}
 
     // Check for texture quality change
-    if ( d->TextureQuality != Engine::GAPI->GetRendererState().RendererSettings.textureMaxSize ) {
-        Engine::GAPI->GetRendererState().RendererSettings.textureMaxSize = d->TextureQuality;
+    if ( d->TextureQuality != settings.textureMaxSize ) {
+        settings.textureMaxSize = d->TextureQuality;
         Engine::GAPI->UpdateTextureMaxSize();
+    }
+
+    // Check for mode change
+    if ( d->CurrentWindowMode != d->ActiveWindowMode ) {
+        d->ActiveWindowMode = d->CurrentWindowMode;
+        settings.ChangeWindowPreset = d->ActiveWindowMode;
     }
 
 	// Check for resolution change
@@ -584,7 +679,7 @@ void D2DSettingsDialog::ApplyButtonPressed( SV_Button* sender, void* userdata ) 
 		Engine::GraphicsEngine->OnResize( INT2(d->Resolutions[d->ResolutionSetting].Width, d->Resolutions[d->ResolutionSetting].Height) );
         // reposition the window at the center, 
         // or we might not be able to see it 
-        d->SetPositionCentered( D2D1::Point2F( d->MainView->GetRenderTarget()->GetSize().width / 2, d->MainView->GetRenderTarget()->GetSize().height / 2 ), D2D1::SizeF( 500, 340 ) );
+        d->SetPositionCentered( D2D1::Point2F( d->MainView->GetRenderTarget()->GetSize().width / 2, d->MainView->GetRenderTarget()->GetSize().height / 2 ), D2D1::SizeF( 520, 382 ) );
 	}
 	Engine::GAPI->SaveRendererWorldSettings( settings );
 	Engine::GAPI->SaveMenuSettings( MENU_SETTINGS_FILE );
@@ -609,7 +704,12 @@ bool D2DSettingsDialog::NeedsApply() {
 
 /** Called when the settings got re-opened */
 void D2DSettingsDialog::OnOpenedSettings() {
-	InitialSettings = Engine::GAPI->GetRendererState().RendererSettings;
+	//InitialSettings = Engine::GAPI->GetRendererState().RendererSettings;
+
+    D3D11GraphicsEngine* engine = (D3D11GraphicsEngine*)Engine::GraphicsEngine;
+    CurrentWindowMode = engine->GetWindowMode();
+    ActiveWindowMode = CurrentWindowMode;
+    modeSlider->SetValue( static_cast<float>(CurrentWindowMode) );
 }
 
 /** Sets if this control is hidden */

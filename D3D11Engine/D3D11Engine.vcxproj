@@ -717,6 +717,7 @@ copy "$(OutDir)$(TargetName).pdb" "$(G1_SYSTEM_PATH)\ddraw.pdb"</Command>
     <ClInclude Include="oCSpawnManager.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="BaseShadowedPointLight.h" />
+    <ClInclude Include="SteamOverlay.h" />
     <ClInclude Include="SV_GMeshInfoView.h" />
     <ClInclude Include="StackWalker.h" />
     <ClInclude Include="SV_Border.h" />
@@ -884,7 +885,6 @@ copy "$(OutDir)$(TargetName).pdb" "$(G1_SYSTEM_PATH)\ddraw.pdb"</Command>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt_Spacer|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt_G1|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="oCNPC.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Spacer_NET|Win32'">Create</PrecompiledHeader>
@@ -906,6 +906,7 @@ copy "$(OutDir)$(TargetName).pdb" "$(G1_SYSTEM_PATH)\ddraw.pdb"</Command>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release_NoOpt_G1|Win32'">pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="BaseShadowedPointLight.cpp" />
+    <ClCompile Include="SteamOverlay.cpp" />
     <ClCompile Include="SV_GMeshInfoView.cpp" />
     <ClCompile Include="StackWalker.cpp" />
     <ClCompile Include="SV_Border.cpp" />

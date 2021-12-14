@@ -38,7 +38,8 @@ public:
     }
 
     zTResourceCacheState CacheIn( zCTexture* res, float priority ) {
-        XCALL( GothicMemoryLocations::zCResourceManager::CacheIn );
+        return reinterpret_cast<zTResourceCacheState( __fastcall* )( zCResourceManager*, int, zCTexture*, float )>
+            ( GothicMemoryLocations::zCResourceManager::CacheIn )( this, 0, res, priority );
     }
 
     static std::mutex& GetResourceManagerMutex() {
@@ -47,11 +48,13 @@ public:
     }
 
     void PurgeCaches( unsigned int classDef ) {
-        XCALL( GothicMemoryLocations::zCResourceManager::PurgeCaches );
+        reinterpret_cast<void( __fastcall* )( zCResourceManager*, int, unsigned int )>
+            ( GothicMemoryLocations::zCResourceManager::PurgeCaches )( this, 0, classDef );
     }
 
     void SetThreadingEnabled( bool enabled ) {
-        XCALL( GothicMemoryLocations::zCResourceManager::SetThreadingEnabled );
+        reinterpret_cast<void( __fastcall* )( zCResourceManager*, int, bool )>
+            ( GothicMemoryLocations::zCResourceManager::SetThreadingEnabled )( this, 0, enabled );
     }
 
     static zCResourceManager* GetResourceManager() { return *(zCResourceManager**)GothicMemoryLocations::GlobalObjects::zCResourceManager; }

@@ -44,6 +44,7 @@ protected:
     static void TextureQualitySliderChanged( SV_Slider* sender, void* userdata );
     static void ShadowQualitySliderChanged( SV_Slider* sender, void* userdata );
     static void ResolutionSliderChanged( SV_Slider* sender, void* userdata );
+    static void ModeSliderChanged( SV_Slider* sender, void* userdata );
     static void FpsLimitSliderChanged( SV_Slider* sender, void* userdata );
     /** Close button */
     static void CloseButtonPressed( SV_Button* sender, void* userdata );
@@ -59,6 +60,9 @@ protected:
     /** Current resolution setting */
     int TextureQuality;
     int ResolutionSetting;
+    int CurrentWindowMode;
+    int ActiveWindowMode;
     std::vector<DisplayModeInfo> Resolutions;
     FovOverrideCheckedChangedState* CheckedChangedState;
+    SV_Slider* modeSlider;
 };

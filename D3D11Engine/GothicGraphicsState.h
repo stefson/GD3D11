@@ -160,6 +160,7 @@ class BaseDepthBufferState;
 struct GothicDepthBufferStateInfo : public GothicPipelineState {
     GothicDepthBufferStateInfo() {
         StructSize = sizeof( GothicDepthBufferStateInfo );
+        Padding[0] = Padding[1] = false;
     }
 
     /** Layed out for D3D11 */
@@ -186,6 +187,7 @@ struct GothicDepthBufferStateInfo : public GothicPipelineState {
     /** Depthbuffer settings */
     bool DepthBufferEnabled;
     bool DepthWriteEnabled;
+    bool Padding[2];
     ECompareFunc DepthBufferCompareFunc;
 
     /** Deletes all cached states */
@@ -224,6 +226,7 @@ class BaseBlendStateInfo;
 struct GothicBlendStateInfo : public GothicPipelineState {
     GothicBlendStateInfo() {
         StructSize = sizeof( GothicBlendStateInfo );
+        Padding = false;
     }
 
     /** Layed out for D3D11 */
@@ -292,6 +295,7 @@ struct GothicBlendStateInfo : public GothicPipelineState {
         BlendOpAlpha = BO_BLEND_OP_ADD;
         BlendEnabled = true;
         AlphaToCoverage = false;
+        ColorWritesEnabled = true;
     }
 
     /** Sets up modualte blending */
@@ -304,6 +308,20 @@ struct GothicBlendStateInfo : public GothicPipelineState {
         BlendOpAlpha = BO_BLEND_OP_ADD;
         BlendEnabled = true;
         AlphaToCoverage = false;
+        ColorWritesEnabled = true;
+    }
+
+    /** Sets up modualte blending */
+    void SetModulate2Blending() {
+        SrcBlend = BF_DEST_COLOR;
+        DestBlend = BF_SRC_COLOR;
+        BlendOp = BO_BLEND_OP_ADD;
+        SrcBlendAlpha = BF_ONE;
+        DestBlendAlpha = BF_ZERO;
+        BlendOpAlpha = BO_BLEND_OP_ADD;
+        BlendEnabled = true;
+        AlphaToCoverage = false;
+        ColorWritesEnabled = true;
     }
 
     EBlendFunc SrcBlend;
@@ -315,6 +333,7 @@ struct GothicBlendStateInfo : public GothicPipelineState {
     bool BlendEnabled;
     bool AlphaToCoverage;
     bool ColorWritesEnabled;
+    bool Padding;
 
     /** Deletes all cached states */
     static void DeleteCachedObjects() {
@@ -365,6 +384,7 @@ class BaseRasterizerStateInfo;
 struct GothicRasterizerStateInfo : public GothicPipelineState {
     GothicRasterizerStateInfo() {
         StructSize = sizeof( GothicRasterizerStateInfo );
+        Padding = false;
     }
 
     /** Layed out for D3D11 */
@@ -386,8 +406,9 @@ struct GothicRasterizerStateInfo : public GothicPipelineState {
     ECullMode CullMode;
     bool FrontCounterClockwise;
     bool DepthClipEnable;
-    int ZBias;
     bool Wireframe;
+    bool Padding;
+    int ZBias;
 
     /** Deletes all cached states */
     static void DeleteCachedObjects() {
@@ -509,6 +530,7 @@ struct GothicRendererSettings {
         HDRToneMap = E_HDRToneMap::ToneMap_Simple;
         ReplaceSunDirection = false;
         AtmosphericScattering = true; // Use original sky
+        ShowSkeletalVertexNormals = false;
         EnableDynamicLighting = true;
 
         FastShadows = false;
@@ -599,6 +621,9 @@ struct GothicRendererSettings {
         RainFogColor = DirectX::XMFLOAT3( 0.28f, 0.28f, 0.28f );
         RainFogDensity = 0.00500f;
 
+        EnableRain = true;
+        EnableRainEffects = true;
+
         GodRayDecay = 0.97f;
         GodRayWeight = 0.85f;
         GodRayDensity = 0.70f;
@@ -613,25 +638,25 @@ struct GothicRendererSettings {
         GothicUIScale = 1.0f;
         //DisableEverything();
 
+        LimitLightIntesity = false;
         AllowNormalmaps = true;
 
         AllowNumpadKeys = false;
         EnableDebugLog = true;
         EnableCustomFontRendering = false;
 
-#ifdef BUILD_GOTHIC_1_08k
         ForceFOV = false;
-#else
-        ForceFOV = true;
-#endif
-        
+
+        ChangeWindowPreset = 0;
         StretchWindow = true;
         SmoothShadowCameraUpdate = true;
         DisplayFlip = false;
         LowLatency = false;
+        HDR_Monitor = false;
         EnableInactiveFpsLock = true;
         MTResoureceManager = false;
         CompressBackBuffer = false;
+        AnimateStaticVobs = true;
         RunInSpacerNet = false;
     }
 
@@ -678,6 +703,7 @@ struct GothicRendererSettings {
     bool FastShadows;
     bool ReplaceSunDirection;
     bool AtmosphericScattering;
+    bool ShowSkeletalVertexNormals;
     bool EnableDynamicLighting;
     bool WireframeWorld;
     bool WireframeVobs;
@@ -760,6 +786,10 @@ struct GothicRendererSettings {
     DirectX::XMFLOAT3 RainFogColor;
     float RainFogDensity;
 
+    bool EnableRain;
+    bool EnableRainEffects;
+
+    bool LimitLightIntesity;
     bool AllowNormalmaps;
 
     bool AllowNumpadKeys;
@@ -769,11 +799,14 @@ struct GothicRendererSettings {
     bool ForceFOV;
     bool DisplayFlip;
     bool LowLatency;
+    bool HDR_Monitor;
     bool StretchWindow;
+    int ChangeWindowPreset;
     bool SmoothShadowCameraUpdate;
     bool EnableInactiveFpsLock;
     bool MTResoureceManager;
     bool CompressBackBuffer;
+    bool AnimateStaticVobs;
     bool RunInSpacerNet;
 };
 
@@ -835,6 +868,8 @@ struct GothicRendererInfo {
     GothicRendererInfo() {
         VOBVerticesDataSize = 0;
         SkeletalVerticesDataSize = 0;
+        FirstVideoFrame = 0;
+        FixBink = 0;
         PlayingMovieResolution = INT2( 0, 0 );
         Reset();
     }
@@ -894,7 +929,9 @@ struct GothicRendererInfo {
     unsigned int VOBVerticesDataSize;
     unsigned int SkeletalVerticesDataSize;
 
-    /** Resolution of the currently playing video, only valid when a movie plays! */
+    /** Bink Video specific variables */
+    int FirstVideoFrame;
+    int FixBink;
     INT2 PlayingMovieResolution;
 };
 
