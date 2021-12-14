@@ -15,7 +15,8 @@ jobs:
     strategy:
       matrix:
        include:
-         - output_dir: GD3D11-#VERSION#
+         - configuration: Spacer_NET
+           output_dir: Gothic2-GD3D11-#VERSION#_SpacerNET
 
     steps:
     - uses: actions/checkout@v2
@@ -36,32 +37,21 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: nuget restore .
 
-    - name: Build all configurations and Launcher
+    - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: |
-        msbuild /p:Configuration=Release_AVX .
-        msbuild /p:Configuration=Release_G1_AVX .
-        msbuild /p:Configuration=Release .
-        msbuild /p:Configuration=Release_G1 .
-        msbuild /p:Configuration=Spacer_NET .
-        msbuild /p:Configuration=Launcher .
+      run: msbuild /p:Configuration=${{matrix.configuration}} .
 
     - name: Create distribution zip
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
         mkdir "${{env.RELEASE_DIR}}\GD3D11\shaders\CSFFT"
-        mkdir "${{env.RELEASE_DIR}}\GD3D11\Bin"
         Xcopy "D3D11Engine\Shaders\*" "${{env.RELEASE_DIR}}\GD3D11\shaders" /s
         copy "D3D11Engine\CSFFT\*.hlsl" "${{env.RELEASE_DIR}}\GD3D11\shaders\CSFFT"
         Xcopy "blobs\data" "${{env.RELEASE_DIR}}\GD3D11\data\" /s
         Xcopy "blobs\Meshes" "${{env.RELEASE_DIR}}\GD3D11\Meshes\" /s
         Xcopy "blobs\Textures" "${{env.RELEASE_DIR}}\GD3D11\Textures\" /s
         Xcopy "blobs\libs\*" "${{env.RELEASE_DIR}}\" /s
-        copy "Release_AVX\ddraw.dll" "${{env.RELEASE_DIR}}\GD3D11\Bin\g2a_avx2.dll"
-        copy "Release\ddraw.dll" "${{env.RELEASE_DIR}}\GD3D11\Bin\g2a.dll"
-        copy "Release_G1_AVX\ddraw.dll" "${{env.RELEASE_DIR}}\GD3D11\Bin\g1_avx.dll"
-        copy "Release_G1\ddraw.dll" "${{env.RELEASE_DIR}}\GD3D11\Bin\g1.dll"
-        copy "Launcher\ddraw.dll" "${{env.RELEASE_DIR}}\"
+        copy "${{matrix.configuration}}\ddraw.dll" "${{env.RELEASE_DIR}}"
         cd "${{env.RELEASE_DIR}}"
         7z a -tzip "..\${{env.RELEASE_DIR}}.zip" -r
 
