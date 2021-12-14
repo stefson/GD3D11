@@ -1,4 +1,4 @@
-name: Release
+name: Release Spacer_NET
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
     - name: Set tag and directory name env
       run: |
         $tagName = $Env:GITHUB_REF -replace 'refs/tags/', ''
-        $dirName = "GD3D11-${tagName}"
+        $dirName = "Gothic2-GD3D11-${tagName}_SpacerNET"
         echo "Tag: ${tagName}"
         echo "Directory: ${dirName}"
         echo "RELEASE_VERSION=${tagName}" >> $Env:GITHUB_ENV
@@ -32,42 +32,21 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: nuget restore .
 
-    - name: Build G2 NotR AVX
+    - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: msbuild /p:Configuration=Release_AVX .
-
-    - name: Build G1 AVX
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: msbuild /p:Configuration=Release_G1_AVX .
-
-    - name: Build G2 NotR
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: msbuild /p:Configuration=Release .
-
-    - name: Build G1
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: msbuild /p:Configuration=Release_G1 .
-
-    - name: Build Launcher
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: |
-        msbuild /p:Configuration=Launcher .
+      run: msbuild /p:Configuration=Spacer_NET .
 
     - name: Create distribution zip
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
         mkdir "${{env.RELEASE_DIR}}\GD3D11\shaders\CSFFT"
-        mkdir "${{env.RELEASE_DIR}}\GD3D11\Bin"
         Xcopy "D3D11Engine\Shaders\*" "${{env.RELEASE_DIR}}\GD3D11\shaders" /s
         copy "D3D11Engine\CSFFT\*.hlsl" "${{env.RELEASE_DIR}}\GD3D11\shaders\CSFFT"
+        Xcopy "blobs\data" "${{env.RELEASE_DIR}}\GD3D11\data\" /s
         Xcopy "blobs\Meshes" "${{env.RELEASE_DIR}}\GD3D11\Meshes\" /s
         Xcopy "blobs\Textures" "${{env.RELEASE_DIR}}\GD3D11\Textures\" /s
         Xcopy "blobs\libs\*" "${{env.RELEASE_DIR}}\" /s
-        copy "Release_AVX\ddraw.dll" "${{env.RELEASE_DIR}}\GD3D11\Bin\g2a_avx2.dll"
-        copy "Release\ddraw.dll" "${{env.RELEASE_DIR}}\GD3D11\Bin\g2a.dll"
-        copy "Release_G1_AVX\ddraw.dll" "${{env.RELEASE_DIR}}\GD3D11\Bin\g1_avx.dll"
-        copy "Release_G1\ddraw.dll" "${{env.RELEASE_DIR}}\GD3D11\Bin\g1.dll"
-        copy "Launcher\ddraw.dll" "${{env.RELEASE_DIR}}\"
+        copy "Spacer_NET\ddraw.dll" "${{env.RELEASE_DIR}}"
         cd "${{env.RELEASE_DIR}}"
         7z a -tzip "..\${{env.RELEASE_DIR}}.zip" -r
 
