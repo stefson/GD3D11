@@ -7,7 +7,7 @@ And now, that they can actually use their power to render, we not only get a big
 
 ## Bugs & Problems
 
-If you have problems with building GD3D11 after following these instructions or experience bugs/problems with GD3D11 itself, open an issue on this GitHub page or post in the D3D11 thread on ["World of Gothic" (WOG)](http://forum.worldofplayers.de/forum/forums/104-Editing).  
+If you have problems with building GD3D11 after following these instructions or experience bugs/problems with GD3D11 itself, open an issue on this GitHub page or post in the D3D11 thread on ["World of Gothic" (WOG)](http://forum.worldofplayers.de/forum/forums/104-Editing).
 But first take a look at the [KNOWN ISSUES](./known_issues.md)
 
 ## Building
@@ -23,12 +23,16 @@ Building the mod is currently only possible with windows, but should be easy to 
 - Set environment variables "G2_SYSTEM_PATH" and/or "G1_SYSTEM_PATH", which should point to the "system"-folders of the games.
 - Download & install the latest release version of the mod into your game from the latest [WOG](http://forum.worldofplayers.de/forum/forums/104-Editing) D3D11 thread.
 
-To build GD3D11, open its solution file (.sln) with Visual Studio. It will the load all required projects. There are multiple build targets, one for release and one for developing / testing, for both games each:
+To build GD3D11, open its solution file (.sln) with Visual Studio. It will the load all required projects. There are multiple build targets, one for release and one for developing / testing, for both games each, with and without AVX optimization:
 
 * Gothic 2 Release: "Release"
+* Gothic 2 Release+AVX: "Release_AVX"
 * Gothic 1 Release: "Release_G1"
+* Gothic 1 Release+AVX: "Release_G1_AVX"
 * Gothic 2 Develop: "Release_NoOpt"
 * Gothic 1 Develop: "Release_NoOpt_G1"
+* Gothic 1 Sequel: "Release_G1_12f"
+* Spacer.Net Vobtool: "Space_Net"
 
 (Note: A real "debug" build is not possible, since mixing debug- and release-DLLs is not allowed, but for the Develop targets optimization is turned off, which makes it possible to use the debugger from Visual Studio with the built DLL when using a Develop target.)
 
@@ -69,3 +73,4 @@ So its very easy to build any version back to 13.0, just make sure to switch to 
 ### License
 
 - HBAO+ is licensed under [GameWorks Binary SDK EULA](https://developer.nvidia.com/gameworks-sdk-eula)
+
